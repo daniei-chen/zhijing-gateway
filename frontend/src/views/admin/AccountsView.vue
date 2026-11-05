@@ -726,6 +726,9 @@ const autoRefreshIntervalSeconds = ref<(typeof autoRefreshIntervals)[number]>(30
 const autoRefreshCountdown = ref(0)
 const autoRefreshETag = ref<string | null>(null)
 const autoRefreshFetching = ref(false)
+let disposed = false
+let autoRefreshVersion = 0
+let autoRefreshController: AbortController | null = null
 const AUTO_REFRESH_SILENT_WINDOW_MS = 15000
 const autoRefreshSilentUntil = ref(0)
 const hasPendingListSync = ref(false)
@@ -804,7 +807,7 @@ const flushQueuedUsageBatch = async () => {
   pendingUsageBatchIds.clear()
   queuedUsageBatchForce = false
 
-  if (accountIDs.length === 0) return
+  if (disposed || accountIDs.length === 0) return
 
   const requestTokensByAccount = accountIDs.reduce<Record<string, number>>((acc, accountID) => {
     acc[String(accountID)] = usageBatchRequestTokenByAccountId.value[String(accountID)] ?? 0
@@ -813,6 +816,7 @@ const flushQueuedUsageBatch = async () => {
 
   try {
     const result = await adminAPI.accounts.getBatchUsage(accountIDs, force)
+    if (disposed) return
 
     const usageMap = result.usage ?? {}
     const errorMap = result.errors ?? {}
@@ -841,6 +845,7 @@ const flushQueuedUsageBatch = async () => {
     usageBatchErrorByAccountId.value = nextErrors
     usageBatchLoadingByAccountId.value = nextLoading
   } catch (error) {
+    if (disposed) return
     const nextErrors = { ...usageBatchErrorByAccountId.value }
     const nextLoading = { ...usageBatchLoadingByAccountId.value }
     for (const accountID of accountIDs) {
@@ -858,6 +863,7 @@ const flushQueuedUsageBatch = async () => {
 }
 
 const queueBatchedUsage = (account: Account, options?: { force?: boolean }) => {
+  if (disposed) return
   if (!isDesktopViewport.value) return
   if (!accountSupportsBatchUsage(account)) return
 
@@ -895,6 +901,7 @@ const queueBatchedUsage = (account: Account, options?: { force?: boolean }) => {
 }
 
 const refreshTodayStatsBatch = async () => {
+  if (disposed) return
   // Why this checks both columns:
   // - today_stats column shows dedicated today's metrics.
   // - usage column also embeds today's stats for Key/Bedrock rows.
@@ -1175,6 +1182,10 @@ useSwipeSelect(accountTableRef, {
 }, swipeVirtualContext)
 
 const resetAutoRefreshCache = () => {
+  autoRefreshVersion += 1
+  autoRefreshController?.abort()
+  autoRefreshController = null
+  autoRefreshFetching.value = false
   autoRefreshETag.value = null
   upstreamBillingRateETag.value = null
 }
@@ -1479,14 +1490,22 @@ const mergeAccountsIncrementally = (nextRows: Account[]) => {
 }
 
 const refreshAccountsIncrementally = async () => {
-  if (autoRefreshFetching.value) return
+  if (disposed || autoRefreshFetching.value) return
   syncAccountListDerivedParams()
+  const requestVersion = ++autoRefreshVersion
+  const requestController = new AbortController()
+  autoRefreshController = requestController
+  const requestContextKey = JSON.stringify([pagination.page, pagination.page_size, toRaw(params)])
+  const ownsRefresh = () => !disposed && !requestController.signal.aborted
+    && requestVersion === autoRefreshVersion
+    && !loading.value
+    && requestContextKey === JSON.stringify([pagination.page, pagination.page_size, toRaw(params)])
   autoRefreshFetching.value = true
   try {
     const result = await adminAPI.accounts.listWithEtag(
       pagination.page,
       pagination.page_size,
-      toRaw(params) as {
+      { ...toRaw(params) } as {
         platform?: string
         type?: string
         status?: string
@@ -1497,9 +1516,12 @@ const refreshAccountsIncrementally = async () => {
         sort_order?: AccountSortOrder
 
       },
-      { etag: autoRefreshETag.value }
+      { etag: autoRefreshETag.value, signal: requestController.signal }
     )
 
+    // The automatic request is independent of the table loader. A filter,
+    // sort, manual refresh or unmount must invalidate both request paths.
+    if (!ownsRefresh()) return
     if (result.etag) {
       autoRefreshETag.value = result.etag
     }
@@ -1513,9 +1535,12 @@ const refreshAccountsIncrementally = async () => {
 
     await refreshTodayStatsBatch()
   } catch (error) {
-    console.error('Auto refresh failed:', error)
+    if (ownsRefresh()) console.error('Auto refresh failed:', error)
   } finally {
-    autoRefreshFetching.value = false
+    if (autoRefreshController === requestController) {
+      autoRefreshController = null
+      autoRefreshFetching.value = false
+    }
   }
 }
 
@@ -2580,6 +2605,7 @@ onMounted(async () => {
     adminAPI.proxies.getAll(),
     adminAPI.groups.getAll()
   ])
+  if (disposed) return
   if (proxiesResult.status === 'fulfilled') {
     proxies.value = proxiesResult.value
   } else {
@@ -2603,6 +2629,9 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
+  disposed = true
+  resetAutoRefreshCache()
+  todayStatsReqSeq.value += 1
   upstreamBillingRateAbortController?.abort()
   if (usageBatchFlushTimer !== null) {
     clearTimeout(usageBatchFlushTimer)

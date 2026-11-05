@@ -1,0 +1,115 @@
+
+ RUN  v2.1.9 baseline/frontend
+
+ ❯ src/views/user/__tests__/StripePopupView.lifecycle.spec.ts (4 tests | 3 failed) 114ms
+   × Stripe payment popup ownership > accepts initialization only from its opener with valid string credentials 62ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "pk_synthetic",
+    ]
+
+
+Number of calls: 1
+
+   × Stripe payment popup ownership > does not initiate payment after unmount during SDK loading 12ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "pi_synthetic_secret",
+      Object {
+        "payment_method_options": Object {
+          "wechat_pay": Object {
+            "client": "web",
+          },
+        },
+      },
+    ]
+
+
+Number of calls: 1
+
+   × Stripe payment popup ownership > uses one shared-client order request at a time and stops after session replacement 26ms
+     → expected "spy" to be called 1 times, but got 0 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/views/user/__tests__/StripePopupView.lifecycle.spec.ts > Stripe payment popup ownership > accepts initialization only from its opener with valid string credentials
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "pk_synthetic",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/user/__tests__/StripePopupView.lifecycle.spec.ts:66:34
+     64|     initialize(opener, { clientSecret: { unexpected: true } })
+     65|     await settle()
+     66|     expect(mocks.loadStripe).not.toHaveBeenCalled()
+       |                                  ^
+     67|     initialize()
+     68|     await settle()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/views/user/__tests__/StripePopupView.lifecycle.spec.ts > Stripe payment popup ownership > does not initiate payment after unmount during SDK loading
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "pi_synthetic_secret",
+      Object {
+        "payment_method_options": Object {
+          "wechat_pay": Object {
+            "client": "web",
+          },
+        },
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/user/__tests__/StripePopupView.lifecycle.spec.ts:82:47
+     80|     finishSDK({ confirmWechatPayPayment: mocks.confirmWechatPayPayment…
+     81|     await settle()
+     82|     expect(mocks.confirmWechatPayPayment).not.toHaveBeenCalled()
+       |                                               ^
+     83|     expect(mocks.getOrder).not.toHaveBeenCalled()
+     84|     expect(vi.getTimerCount()).toBe(0)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ FAIL  src/views/user/__tests__/StripePopupView.lifecycle.spec.ts > Stripe payment popup ownership > uses one shared-client order request at a time and stops after session replacement
+AssertionError: expected "spy" to be called 1 times, but got 0 times
+ ❯ src/views/user/__tests__/StripePopupView.lifecycle.spec.ts:94:28
+     92|     await settle()
+     93|     await vi.advanceTimersByTimeAsync(12000)
+     94|     expect(mocks.getOrder).toHaveBeenCalledTimes(1)
+       |                            ^
+     95|     expect(mocks.getOrder).toHaveBeenCalledWith(42)
+     96|     mocks.sessionCurrent = false
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed | 1 passed (4)
+   Start at  19:46:50
+   Duration  1.22s (transform 182ms, setup 77ms, collect 173ms, tests 114ms, environment 360ms, prepare 74ms)

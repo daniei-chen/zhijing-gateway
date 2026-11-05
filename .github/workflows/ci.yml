@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   frontend:
     runs-on: ubuntu-latest
@@ -20,6 +24,8 @@ jobs:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           persist-credentials: false
+      - name: Verify release integrity and reviewed source changes
+        run: python3 -m unittest discover -s tools/tests -v
       - uses: pnpm/action-setup@f40ffcd9367d9f12939873eb1018b921a783ffaa # v4
         with:
           version: 9.15.9
@@ -31,8 +37,10 @@ jobs:
           cache-dependency-path: frontend/pnpm-lock.yaml
       - name: Install the locked frontend dependencies
         run: pnpm --dir frontend install --frozen-lockfile
+      - name: Verify explicit runtime audit approvals
+        run: node --test tools/tests/test_ops_contract.mjs
       - name: Run all frontend regressions
-        run: pnpm --dir frontend test:run --maxWorkers=4 --minWorkers=1
+        run: pnpm --dir frontend test:run --maxWorkers=4
       - name: Build the static frontend
         run: pnpm --dir frontend build
       - name: Verify reviewed compatibility boundaries

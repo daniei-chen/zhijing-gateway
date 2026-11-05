@@ -1,0 +1,12 @@
+{
+  "checked_at": "2026-11-05T19:25:15+08:00",
+  "protected_files": 227,
+  "optional_contract_extensions": 1,
+  "approved_security_files": 13,
+  "reviewed_audit_files": 15,
+  "runtime_documents": 2,
+  "routes": 68,
+  "built_files": 314,
+  "qa_code_in_build": false,
+  "static_frontend_build": true
+}

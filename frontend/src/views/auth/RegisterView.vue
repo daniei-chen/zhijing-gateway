@@ -387,6 +387,8 @@ import {
   validateInvitationCode
 } from '@/api/auth'
 import { buildAuthErrorMessage } from '@/utils/authError'
+import { assertAuthSession, captureAuthSession } from '@/api/authSession'
+import { saveRegistrationDraft } from '@/utils/registrationDraft'
 import { extractApiErrorCode, extractI18nErrorMessage } from '@/utils/apiError'
 import {
   formatRegistrationEmailSuffixWhitelistForMessage,
@@ -409,6 +411,7 @@ const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 const appStore = useAppStore()
+let disposed = false
 
 // ==================== State ====================
 
@@ -563,6 +566,7 @@ onMounted(async () => {
 
   try {
     const settings = await getPublicSettings()
+    if (disposed) return
     registrationEnabled.value = settings.registration_enabled
     emailVerifyEnabled.value = settings.email_verify_enabled
     promoCodeEnabled.value = settings.promo_code_enabled
@@ -617,6 +621,9 @@ watch(
 )
 
 onUnmounted(() => {
+  disposed = true
+  formData.password = ''
+  confirmPassword.value = ''
   if (promoValidateTimeout) {
     clearTimeout(promoValidateTimeout)
   }
@@ -863,7 +870,7 @@ async function acquireActionProof(): Promise<boolean> {
 }
 
 async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
-  if (registrationActionDisabled.value) return
+  if (disposed || registrationActionDisabled.value) return
 
   if (!actionCaptchaEnabled.value) {
     window.location.href = buildOAuthLoginStartURL(request)
@@ -872,8 +879,10 @@ async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
 
   isLoading.value = true
   try {
+    const expected = captureAuthSession()
     const proof = await turnstileRef.value?.verifyAction()
-    if (!proof) return
+    if (!proof || disposed) return
+    assertAuthSession(expected)
 
     const result = await startOAuthLogin(
       request,
@@ -884,6 +893,8 @@ async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
           }
         : { turnstile_token: proof.token }
     )
+    if (disposed) return
+    assertAuthSession(expected)
     window.location.href = result.authorize_url
   } catch (error: unknown) {
     errorMessage.value = extractI18nErrorMessage(
@@ -994,6 +1005,7 @@ function validateForm(): boolean {
 // ==================== Form Handlers ====================
 
 async function handleRegister(): Promise<void> {
+  if (disposed || isLoading.value) return
   // Clear previous error
   errorMessage.value = ''
 
@@ -1002,51 +1014,54 @@ async function handleRegister(): Promise<void> {
     return
   }
 
-  // Check promo code validation status
-  if (formData.promo_code.trim()) {
-    // If promo code is being validated, wait
-    if (promoValidating.value) {
-      errorMessage.value = t('auth.promoCodeValidating')
-      return
-    }
-    // If promo code is invalid, block submission
-    if (promoValidation.invalid) {
-      errorMessage.value = t('auth.promoCodeInvalidCannotRegister')
-      return
-    }
-  }
-
-  // Check invitation code validation status (if enabled and code provided)
-  if (invitationCodeEnabled.value) {
-    // If still validating, wait
-    if (invitationValidating.value) {
-      errorMessage.value = t('auth.invitationCodeValidating')
-      return
-    }
-    // If invitation code is invalid, block submission
-    if (invitationValidation.invalid) {
-      errorMessage.value = t('auth.invitationCodeInvalidCannotRegister')
-      return
-    }
-    // If invitation code is required but not validated yet
-    if (formData.invitation_code.trim() && !invitationValidation.valid) {
-      errorMessage.value = t('auth.invitationCodeValidating')
-      // Trigger validation
-      await validateInvitationCodeDebounced(formData.invitation_code.trim())
-      if (!invitationValidation.valid) {
-        errorMessage.value = t('auth.invitationCodeInvalidCannotRegister')
-        return
-      }
-    }
-  }
-
-  if (!(await acquireActionProof())) {
-    return
-  }
-
   isLoading.value = true
 
   try {
+    const expected = captureAuthSession()
+    // Check promo code validation status
+    if (formData.promo_code.trim()) {
+      // If promo code is being validated, wait
+      if (promoValidating.value) {
+        errorMessage.value = t('auth.promoCodeValidating')
+        return
+      }
+      // If promo code is invalid, block submission
+      if (promoValidation.invalid) {
+        errorMessage.value = t('auth.promoCodeInvalidCannotRegister')
+        return
+      }
+    }
+
+    // Check invitation code validation status (if enabled and code provided)
+    if (invitationCodeEnabled.value) {
+      // If still validating, wait
+      if (invitationValidating.value) {
+        errorMessage.value = t('auth.invitationCodeValidating')
+        return
+      }
+      // If invitation code is invalid, block submission
+      if (invitationValidation.invalid) {
+        errorMessage.value = t('auth.invitationCodeInvalidCannotRegister')
+        return
+      }
+      // If invitation code is required but not validated yet
+      if (formData.invitation_code.trim() && !invitationValidation.valid) {
+        errorMessage.value = t('auth.invitationCodeValidating')
+        // Trigger validation
+        await validateInvitationCodeDebounced(formData.invitation_code.trim())
+        if (disposed) return
+        if (!invitationValidation.valid) {
+          errorMessage.value = t('auth.invitationCodeInvalidCannotRegister')
+          return
+        }
+      }
+    }
+
+    if (!(await acquireActionProof()) || disposed) {
+      return
+    }
+
+    assertAuthSession(expected)
     const affCode = formData.aff_code.trim() || loadAffiliateReferralCode()
     if (affCode) {
       formData.aff_code = affCode
@@ -1054,10 +1069,9 @@ async function handleRegister(): Promise<void> {
 
     // If email verification is enabled, redirect to verification page
     if (emailVerifyEnabled.value) {
-      // Store registration data in sessionStorage
-      sessionStorage.setItem(
-        'register_data',
-        JSON.stringify({
+      // Keep the password only in a one-use memory draft for this SPA navigation.
+      // Refreshing the verification page intentionally requires re-entering it.
+      saveRegistrationDraft({
           email: formData.email,
           password: formData.password,
           turnstile_token:
@@ -1067,8 +1081,7 @@ async function handleRegister(): Promise<void> {
           promo_code: formData.promo_code || undefined,
           invitation_code: formData.invitation_code || undefined,
           ...(affCode ? { aff_code: affCode } : {})
-        })
-      )
+      }, expected)
 
       // Navigate to email verification page
       await router.push('/email-verify')
@@ -1087,6 +1100,7 @@ async function handleRegister(): Promise<void> {
       invitation_code: formData.invitation_code || undefined,
       ...(affCode ? { aff_code: affCode } : {})
     })
+    if (disposed) return
     clearAffiliateReferralCode()
 
     // Show success toast

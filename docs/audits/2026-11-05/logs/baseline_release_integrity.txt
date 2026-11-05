@@ -1,0 +1,124 @@
+test_package_rebuilds_dist_and_excludes_ignored_integration_secrets (test_release_integrity.PackageProvenanceTests.test_package_rebuilds_dist_and_excludes_ignored_integration_secrets) ... FAIL
+test_optimized_python_still_checks_patch_digest (test_release_integrity.PatchVerificationTests.test_optimized_python_still_checks_patch_digest) ... FAIL
+test_checksums_cannot_be_empty_or_omit_an_archive (test_release_integrity.ReleaseVerificationTests.test_checksums_cannot_be_empty_or_omit_an_archive) ...
+  test_checksums_cannot_be_empty_or_omit_an_archive (test_release_integrity.ReleaseVerificationTests.test_checksums_cannot_be_empty_or_omit_an_archive) (checksums='') ... FAIL
+  test_checksums_cannot_be_empty_or_omit_an_archive (test_release_integrity.ReleaseVerificationTests.test_checksums_cannot_be_empty_or_omit_an_archive) (checksums='6f8243c0df05999cfc38bf5270317c8c0a084664fe546db52abfa6cacea9dd8a  BUILD-MANIFEST.json\n') ... FAIL
+test_duplicate_zip_entries_are_rejected (test_release_integrity.ReleaseVerificationTests.test_duplicate_zip_entries_are_rejected) ... FAIL
+test_optimized_python_still_rejects_a_tampered_asset (test_release_integrity.ReleaseVerificationTests.test_optimized_python_still_rejects_a_tampered_asset) ... FAIL
+test_path_traversal_in_either_archive_is_rejected (test_release_integrity.ReleaseVerificationTests.test_path_traversal_in_either_archive_is_rejected) ...
+  test_path_traversal_in_either_archive_is_rejected (test_release_integrity.ReleaseVerificationTests.test_path_traversal_in_either_archive_is_rejected) (archive='zhijing-gateway-v0.0.2-frontend.zip') ... FAIL
+  test_path_traversal_in_either_archive_is_rejected (test_release_integrity.ReleaseVerificationTests.test_path_traversal_in_either_archive_is_rejected) (archive='zhijing-gateway-v0.0.2-diagnostics-source.zip') ... FAIL
+test_symlink_zip_entry_is_rejected (test_release_integrity.ReleaseVerificationTests.test_symlink_zip_entry_is_rejected) ... FAIL
+test_unlisted_release_files_are_rejected (test_release_integrity.ReleaseVerificationTests.test_unlisted_release_files_are_rejected) ... FAIL
+test_valid_release_is_accepted_in_both_python_modes (test_release_integrity.ReleaseVerificationTests.test_valid_release_is_accepted_in_both_python_modes) ... ok
+
+======================================================================
+FAIL: test_package_rebuilds_dist_and_excludes_ignored_integration_secrets (test_release_integrity.PackageProvenanceTests.test_package_rebuilds_dist_and_excludes_ignored_integration_secrets)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 178, in test_package_rebuilds_dist_and_excludes_ignored_integration_secrets
+    self.assertEqual(archive.read('dist/index.html'), b'fresh build from reviewed source')
+AssertionError: b'stale ignored dist' != b'fresh build from reviewed source'
+
+======================================================================
+FAIL: test_optimized_python_still_checks_patch_digest (test_release_integrity.PatchVerificationTests.test_optimized_python_still_checks_patch_digest)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 140, in test_optimized_python_still_checks_patch_digest
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+AssertionError: 0 == 0 : {"artifact_verified": true, "source_files": 17, "backend_compiled_in_ci": false}
+
+
+======================================================================
+FAIL: test_checksums_cannot_be_empty_or_omit_an_archive (test_release_integrity.ReleaseVerificationTests.test_checksums_cannot_be_empty_or_omit_an_archive) (checksums='')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 86, in test_checksums_cannot_be_empty_or_omit_an_archive
+    self.assert_rejected()
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 72, in assert_rejected
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+AssertionError: 0 == 0 : {"version": "0.0.2", "archives_verified": true, "static_files": 1, "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "production_deployed": false}
+
+
+======================================================================
+FAIL: test_checksums_cannot_be_empty_or_omit_an_archive (test_release_integrity.ReleaseVerificationTests.test_checksums_cannot_be_empty_or_omit_an_archive) (checksums='6f8243c0df05999cfc38bf5270317c8c0a084664fe546db52abfa6cacea9dd8a  BUILD-MANIFEST.json\n')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 86, in test_checksums_cannot_be_empty_or_omit_an_archive
+    self.assert_rejected()
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 72, in assert_rejected
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+AssertionError: 0 == 0 : {"version": "0.0.2", "archives_verified": true, "static_files": 1, "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "production_deployed": false}
+
+
+======================================================================
+FAIL: test_duplicate_zip_entries_are_rejected (test_release_integrity.ReleaseVerificationTests.test_duplicate_zip_entries_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 101, in test_duplicate_zip_entries_are_rejected
+    self.assert_rejected()
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 72, in assert_rejected
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+AssertionError: 0 == 0 : {"version": "0.0.2", "archives_verified": true, "static_files": 1, "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "production_deployed": false}
+
+
+======================================================================
+FAIL: test_optimized_python_still_rejects_a_tampered_asset (test_release_integrity.ReleaseVerificationTests.test_optimized_python_still_rejects_a_tampered_asset)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 92, in test_optimized_python_still_rejects_a_tampered_asset
+    self.assert_rejected(optimized=True)
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 72, in assert_rejected
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+AssertionError: 0 == 0 : {"version": "0.0.2", "archives_verified": true, "static_files": 1, "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "production_deployed": false}
+
+
+======================================================================
+FAIL: test_path_traversal_in_either_archive_is_rejected (test_release_integrity.ReleaseVerificationTests.test_path_traversal_in_either_archive_is_rejected) (archive='zhijing-gateway-v0.0.2-frontend.zip')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 109, in test_path_traversal_in_either_archive_is_rejected
+    self.assert_rejected()
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 72, in assert_rejected
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+AssertionError: 0 == 0 : {"version": "0.0.2", "archives_verified": true, "static_files": 1, "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "production_deployed": false}
+
+
+======================================================================
+FAIL: test_path_traversal_in_either_archive_is_rejected (test_release_integrity.ReleaseVerificationTests.test_path_traversal_in_either_archive_is_rejected) (archive='zhijing-gateway-v0.0.2-diagnostics-source.zip')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 109, in test_path_traversal_in_either_archive_is_rejected
+    self.assert_rejected()
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 72, in assert_rejected
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+AssertionError: 0 == 0 : {"version": "0.0.2", "archives_verified": true, "static_files": 1, "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "production_deployed": false}
+
+
+======================================================================
+FAIL: test_symlink_zip_entry_is_rejected (test_release_integrity.ReleaseVerificationTests.test_symlink_zip_entry_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 125, in test_symlink_zip_entry_is_rejected
+    self.assert_rejected()
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 72, in assert_rejected
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+AssertionError: 0 == 0 : {"version": "0.0.2", "archives_verified": true, "static_files": 1, "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "production_deployed": false}
+
+
+======================================================================
+FAIL: test_unlisted_release_files_are_rejected (test_release_integrity.ReleaseVerificationTests.test_unlisted_release_files_are_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 116, in test_unlisted_release_files_are_rejected
+    self.assert_rejected()
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_release_integrity.py", line 72, in assert_rejected
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+AssertionError: 0 == 0 : {"version": "0.0.2", "archives_verified": true, "static_files": 1, "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "production_deployed": false}
+
+
+----------------------------------------------------------------------
+Ran 9 tests in 2.133s
+
+FAILED (failures=10)
+{"version": "0.0.2", "static_files": 1, "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "assets": ["zhijing-gateway-v0.0.2-frontend.zip", "zhijing-gateway-v0.0.2-diagnostics-source.zip", "BUILD-MANIFEST.json", "SHA256SUMS.txt"], "production_deployed": false}

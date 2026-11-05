@@ -29,12 +29,12 @@ export default defineConfig({
         'src/main.ts'
       ],
       thresholds: {
-        global: {
-          statements: 80,
-          branches: 80,
-          functions: 80,
-          lines: 80
-        }
+        // Vitest treats nested keys as file globs. A nested `global` object
+        // matches no source files and silently bypasses the intended gate.
+        statements: 80,
+        branches: 80,
+        functions: 80,
+        lines: 80
       }
     }
   }

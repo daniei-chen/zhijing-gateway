@@ -281,18 +281,30 @@ async function handleGenericPay() {
 }
 
 let pollTimer: ReturnType<typeof setInterval> | null = null
+let pollInFlight = false
 
 function startPolling() {
   const orderId = Number(route.query.order_id)
-  if (!orderId || disposed) return
+  if (!orderId || disposed || pollTimer !== null) return
   pollTimer = setInterval(async () => {
-    const o = await paymentStore.pollOrderStatus(orderId)
-    if (!o) return
-    if (o.status === 'COMPLETED' || o.status === 'PAID') {
-      if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
-      stripeSuccess.value = true
-      wechatQrUrl.value = ''
-      scheduleClose()
+    if (disposed || pollInFlight) return
+    pollInFlight = true
+    try {
+      const o = await paymentStore.pollOrderStatus(orderId)
+      if (!o || disposed || pollTimer === null) return
+      if (o.status === 'COMPLETED' || o.status === 'PAID') {
+        clearInterval(pollTimer)
+        pollTimer = null
+        stripeSuccess.value = true
+        wechatQrUrl.value = ''
+        scheduleClose()
+      } else if (o.status === 'EXPIRED' || o.status === 'CANCELLED' || o.status === 'FAILED') {
+        clearInterval(pollTimer)
+        pollTimer = null
+        stripeError.value = t('payment.result.failed')
+      }
+    } finally {
+      pollInFlight = false
     }
   }, 3000)
 }

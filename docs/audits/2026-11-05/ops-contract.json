@@ -1,0 +1,10 @@
+{
+  "verified": true,
+  "files": 1,
+  "optional_types_only": false,
+  "types_only": false,
+  "runtime_changed": true,
+  "reviewed_runtime_changes": [
+    "frontend/src/api/admin/ops.ts"
+  ]
+}

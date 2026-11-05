@@ -23,12 +23,16 @@ export function buildEmbeddedUrl(
   if (!baseUrl) return baseUrl
   try {
     const url = new URL(baseUrl)
-    if (!['http:', 'https:'].includes(url.protocol)) return ''
+    if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return ''
     // Original login credentials must never be an iframe/new-window contract.
     for (const key of [...url.searchParams.keys()]) {
       if (CREDENTIAL_QUERY_KEYS.has(key.toLowerCase())) url.searchParams.delete(key)
     }
-    if (/(?:^|[?&])(?:token|auth_token|access_token|refresh_token|authorization)=/i.test(url.hash.slice(1))) return ''
+    const fragment = url.hash.slice(1)
+    const fragmentQueries = [fragment, fragment.slice(fragment.indexOf('?') + 1)]
+    // URLSearchParams decodes percent-encoded keys just as the embedded page does.
+    if (fragmentQueries.some(query => [...new URLSearchParams(query).keys()]
+      .some(key => CREDENTIAL_QUERY_KEYS.has(key.toLowerCase())))) return ''
     if (userId) {
       url.searchParams.set(EMBEDDED_USER_ID_QUERY_KEY, String(userId))
     }
@@ -46,7 +50,7 @@ export function buildEmbeddedUrl(
     }
     return url.toString()
   } catch {
-    return baseUrl
+    return ''
   }
 }
 

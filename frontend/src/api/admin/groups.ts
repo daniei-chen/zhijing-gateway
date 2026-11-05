@@ -203,8 +203,9 @@ export async function duplicate(id: number): Promise<AdminGroup> {
   })
 
   if (scope) {
-    duplicateOperationKeys.delete(scope.key)
-    storeDuplicateOperationKey(scope.key, null)
+    // A late completion must not erase a newer operation's retry identity.
+    if (duplicateOperationKeys.get(scope.key) === idempotencyKey) duplicateOperationKeys.delete(scope.key)
+    if (getStoredDuplicateOperationKey(scope.key) === idempotencyKey) storeDuplicateOperationKey(scope.key, null)
   }
   return data
 }

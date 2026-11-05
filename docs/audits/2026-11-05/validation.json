@@ -1,0 +1,261 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-11-05T11:41:52.879525+00:00",
+  "release": "v0.0.2",
+  "release_commit": "c690c0dbb84b627dedabf85d7f0178fda28bb510",
+  "source_baseline": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+  "conclusion": "Reviewable fix candidate; not a complete frontend/backend security certification or a production performance claim.",
+  "original_tests": {
+    "files": 392,
+    "passed": 3139,
+    "failed": 0
+  },
+  "candidate_tests": {
+    "files": 409,
+    "passed": 3245,
+    "failed": 0,
+    "new_test_count": 106,
+    "command": "corepack pnpm@9.15.9 exec vitest run --coverage --coverage.reporter=text-summary --coverage.reporter=json-summary --maxWorkers=4 --reporter=json",
+    "cwd": "frontend",
+    "process_exit_code": 1,
+    "exit_reason": "All assertions passed; all four 80% global coverage thresholds were not met."
+  },
+  "coverage": {
+    "threshold_percent": 80,
+    "passed": false,
+    "summary": {
+      "lines": {
+        "total": 49885,
+        "covered": 33475,
+        "skipped": 0,
+        "pct": 67.1
+      },
+      "statements": {
+        "total": 55114,
+        "covered": 35920,
+        "skipped": 0,
+        "pct": 65.17
+      },
+      "functions": {
+        "total": 11675,
+        "covered": 6058,
+        "skipped": 0,
+        "pct": 51.88
+      },
+      "branches": {
+        "total": 42040,
+        "covered": 23036,
+        "skipped": 0,
+        "pct": 54.79
+      },
+      "branchesTrue": {
+        "total": 0,
+        "covered": 0,
+        "skipped": 0,
+        "pct": 100
+      }
+    }
+  },
+  "lint": {
+    "files": 994,
+    "errors": 0,
+    "warnings": 0
+  },
+  "typecheck": {
+    "command": "corepack pnpm@9.15.9 run typecheck",
+    "passed": true
+  },
+  "python_regressions": {
+    "tests": 20,
+    "passed": 20
+  },
+  "node_contract_regressions": {
+    "tests": 3,
+    "passed": 3
+  },
+  "known_dependency_advisories": {
+    "before": {
+      "info": 0,
+      "low": 4,
+      "moderate": 37,
+      "high": 35,
+      "critical": 3
+    },
+    "after_all": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0
+    },
+    "after_production": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0
+    },
+    "scope_note": "Registry scan as of this audit; no proof of zero unknown vulnerabilities."
+  },
+  "browser": {
+    "environment": "isolated synthetic fixtures; external browser traffic blocked",
+    "checks": [
+      {
+        "name": "desktop login layout",
+        "viewport": 1440,
+        "document": 1440,
+        "passed": true
+      },
+      {
+        "name": "synthetic administrator login reaches the administrator dashboard",
+        "passed": true
+      },
+      {
+        "name": "cross-tab member replacement removes the old administrator route",
+        "passed": true,
+        "resulting_path": "/dashboard"
+      },
+      {
+        "name": "320px member dashboard layout",
+        "viewport": 320,
+        "document": 320,
+        "passed": true
+      },
+      {
+        "name": "registration SPA handoff preserves verification form without persisting its password",
+        "passed": true
+      },
+      {
+        "name": "390px email verification layout",
+        "viewport": 390,
+        "document": 390,
+        "passed": true
+      },
+      {
+        "name": "verification reload cannot recover the old password and shows expiration",
+        "passed": true,
+        "synthetic_verification_requests": 1
+      },
+      {
+        "name": "320px light login layout with reduced motion",
+        "viewport": 320,
+        "document": 320,
+        "passed": true
+      },
+      {
+        "name": "320px dark login layout with reduced motion",
+        "viewport": 320,
+        "document": 320,
+        "passed": true
+      }
+    ],
+    "page_errors": [],
+    "blocked_external_requests": 0,
+    "browser": "153.0.8010.0",
+    "success": true
+  },
+  "frontend_structure": {
+    "files": 990,
+    "productionFiles": 579,
+    "lines": 276048,
+    "parseErrors": []
+  },
+  "frontend_contract": {
+    "checked_at": "2026-11-05T19:25:15+08:00",
+    "protected_files": 227,
+    "optional_contract_extensions": 1,
+    "approved_security_files": 13,
+    "reviewed_audit_files": 15,
+    "runtime_documents": 2,
+    "routes": 68,
+    "built_files": 314,
+    "qa_code_in_build": false,
+    "static_frontend_build": true
+  },
+  "ops_contract": {
+    "verified": true,
+    "files": 1,
+    "optional_types_only": false,
+    "types_only": false,
+    "runtime_changed": true,
+    "reviewed_runtime_changes": [
+      "frontend/src/api/admin/ops.ts"
+    ]
+  },
+  "published_release_assets": {
+    "github_digests_match": true,
+    "checksum_entries_match": true,
+    "current_verifier_exit_code": 0,
+    "static_files": 310,
+    "evidence": "published-release-verification.json"
+  },
+  "auth_cpu_microbenchmark": {
+    "evidence": "auth-cpu-benchmark-final.json",
+    "results": {
+      "baseline": {
+        "milliseconds": [
+          569.9881620000001,
+          552.265234,
+          563.8431700000001,
+          508.88356999999996,
+          491.8951560000005,
+          504.683043,
+          479.4616409999999
+        ],
+        "median_total_ms": 508.88356999999996,
+        "median_microseconds_per_capture": 50.88835699999999
+      },
+      "candidate": {
+        "milliseconds": [
+          36.35871099999986,
+          37.77976600000011,
+          34.666815999999926,
+          33.61470499999996,
+          34.754633999999896,
+          36.8503810000002,
+          34.027132999999594
+        ],
+        "median_total_ms": 34.754633999999896,
+        "median_microseconds_per_capture": 3.4754633999999895
+      }
+    },
+    "ratio": 14.64217893936105,
+    "is_network_or_gateway_latency_measurement": false
+  },
+  "production_build": {
+    "passed": true,
+    "vite": "6.4.5",
+    "input_files_verified": 733,
+    "artifact_files": 314
+  },
+  "backend_patch": {
+    "artifact_integrity_passed": true,
+    "files": 17,
+    "complete_backend_available": false,
+    "go_tests_executed": false,
+    "gateway_load_test_executed": false
+  },
+  "review_scope": {
+    "baseline_tracked_files": 1182,
+    "candidate_inventory_files": 1212,
+    "review_levels": {
+      "inventory_only": 189,
+      "manual_complete": 76,
+      "manual_targeted": 67,
+      "automated_only": 880
+    },
+    "changed_or_new_files": 79,
+    "scope": "Every original tracked file plus candidate implementation/test/tooling additions; generated audit documents, ignored dependencies and build outputs are excluded from this non-recursive inventory.",
+    "limits": "Manual targeted review is not whole-file reading; automated checks and coverage do not establish correctness or absence of vulnerabilities."
+  },
+  "confirmed_baseline_behavior_failures": {
+    "auth": 22,
+    "frontend_lifecycle_and_polling": 35,
+    "account_stream_and_websocket": 18,
+    "admin_export": 4,
+    "duplicate_operation_keys": 7,
+    "total_frontend_scenarios": 86,
+    "note": "Counts are failing scenarios, not distinct vulnerabilities; duplicate-operation original-source probes used the current Vitest 4 driver."
+  },
+  "deployment_performed": false
+}

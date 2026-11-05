@@ -244,6 +244,28 @@ describe('StripePaymentView', () => {
     expect(vi.getTimerCount()).toBe(0)
   })
 
+  it('does not overlap slow status polls and stops polling a failed order', async () => {
+    vi.useFakeTimers()
+    routeState.query.method = 'wechat_pay'
+    stripeInstance.confirmWechatPayPayment.mockResolvedValueOnce({ paymentIntent: {
+      status: 'requires_action', next_action: { wechat_pay_display_qr_code: { image_data_url: 'data:image/png;base64,test' } }
+    } })
+    let finishPoll!: (value: PaymentOrder) => void
+    paymentStore.pollOrderStatus.mockReturnValueOnce(new Promise(resolve => { finishPoll = resolve }))
+    const wrapper = mountView()
+    await flushPromises()
+    await flushPromises()
+    await vi.advanceTimersByTimeAsync(12000)
+    expect(paymentStore.pollOrderStatus).toHaveBeenCalledTimes(1)
+    finishPoll(orderFactory({ status: 'EXPIRED' }))
+    await flushPromises()
+    await vi.advanceTimersByTimeAsync(6000)
+    expect(paymentStore.pollOrderStatus).toHaveBeenCalledTimes(1)
+    expect(wrapper.text()).toContain('payment.result.failed')
+    expect(routerPush).not.toHaveBeenCalled()
+    expect(vi.getTimerCount()).toBe(0)
+  })
+
   it('本地恢复快照未记录币种时使用订单接口返回的 Stripe 币种展示金额', async () => {
     writeSnapshot({ currency: '' })
     getOrder.mockResolvedValue({

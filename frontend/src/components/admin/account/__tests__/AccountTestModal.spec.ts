@@ -1,6 +1,7 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import AccountTestModal from '../AccountTestModal.vue'
+import { adoptDocumentAuthSession, replaceAuthSession } from '@/api/authSession'
 
 const { getAvailableModels, copyToClipboard } = vi.hoisted(() => ({
   getAvailableModels: vi.fn(),
@@ -51,6 +52,8 @@ function createStreamResponse(lines: string[]) {
     ok: true,
     body: {
       getReader: () => ({
+          cancel: vi.fn().mockResolvedValue(undefined),
+          releaseLock: vi.fn(),
         read: vi.fn().mockImplementation(async () => {
           if (index < chunks.length) {
             return { done: false, value: chunks[index++] }
@@ -97,15 +100,8 @@ describe('AccountTestModal', () => {
       { id: 'gemini-3.1-flash-image', display_name: 'Gemini 3.1 Flash Image' }
     ])
     copyToClipboard.mockReset()
-    Object.defineProperty(globalThis, 'localStorage', {
-      value: {
-        getItem: vi.fn((key: string) => (key === 'auth_token' ? 'test-token' : null)),
-        setItem: vi.fn(),
-        removeItem: vi.fn(),
-        clear: vi.fn()
-      },
-      configurable: true
-    })
+    replaceAuthSession({ accessToken: 'test-token', user: { id: 101 } })
+    adoptDocumentAuthSession()
     global.fetch = vi.fn().mockResolvedValue(
       createStreamResponse([
         'data: {"type":"test_start","model":"gemini-2.5-flash-image"}\n',

@@ -12,7 +12,8 @@
  *   }
  *   // template: <TotpStepUpDialog :controller="stepUp" />
  */
-import { ref } from 'vue'
+import { getCurrentScope, onScopeDispose, ref } from 'vue'
+import { assertAuthSession, captureAuthSession, trackAuthRequest } from '@/api/authSession'
 
 /** Error codes the backend uses to signal step-up state. */
 const STEP_UP_REQUIRED = 'STEP_UP_REQUIRED'
@@ -69,9 +70,11 @@ export function useStepUp() {
   const blockedReason = ref<string>('')
   let resolver: ((ok: boolean) => void) | null = null
   let pendingPrompt: Promise<boolean> | null = null
+  let disposed = false
 
   /** Open the TOTP dialog and resolve true once a grant is obtained. */
   function prompt(): Promise<boolean> {
+    if (disposed) return Promise.resolve(false)
     if (pendingPrompt) return pendingPrompt
     visible.value = true
     pendingPrompt = new Promise<boolean>((resolve) => {
@@ -94,6 +97,13 @@ export function useStepUp() {
     pendingPrompt = null
   }
 
+  if (getCurrentScope()) {
+    onScopeDispose(() => {
+      disposed = true
+      onCancel()
+    })
+  }
+
   /**
    * Run a sensitive action. On STEP_UP_REQUIRED, prompt for a TOTP code and
    * retry once. STEP_UP_TOTP_NOT_ENABLED / admin-api-key errors are surfaced
@@ -102,22 +112,41 @@ export function useStepUp() {
    * distinguish "user changed their mind" from real failures.
    */
   async function run<T>(action: () => Promise<T>): Promise<T> {
+    if (disposed) throw new StepUpCancelledError()
+    const session = captureAuthSession()
+    const untrack = trackAuthRequest(session, onCancel)
+    const assertActive = () => {
+      if (disposed) throw new StepUpCancelledError()
+      assertAuthSession(session)
+    }
     try {
-      return await action()
-    } catch (err) {
-      if (isStepUpBlocked(err)) {
-        blockedReason.value = markerOf(err)
-        throw err
+      try {
+        assertActive()
+        const result = await action()
+        assertActive()
+        return result
+      } catch (err) {
+        assertActive()
+        if (isStepUpBlocked(err)) {
+          blockedReason.value = markerOf(err)
+          throw err
+        }
+        if (!isStepUpRequired(err)) {
+          throw err
+        }
+        const ok = await prompt()
+        if (!ok) {
+          throw new StepUpCancelledError()
+        }
+        // A prompt can span logout, re-login or leaving the page. Never retry
+        // the old sensitive action with the new session's credentials.
+        assertActive()
+        const result = await action()
+        assertActive()
+        return result
       }
-      if (!isStepUpRequired(err)) {
-        throw err
-      }
-      const ok = await prompt()
-      if (!ok) {
-        throw new StepUpCancelledError()
-      }
-      // Retry once now that the session holds a step-up grant.
-      return await action()
+    } finally {
+      untrack()
     }
   }
 

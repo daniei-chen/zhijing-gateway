@@ -1,0 +1,158 @@
+[
+  {
+    "name": "baseline_release_integrity",
+    "cwd": "${AUDIT_WORKSPACE}/zhijing-audit-baseline",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools/tests",
+      "-p",
+      "test_release_integrity.py",
+      "-v"
+    ],
+    "exit_code": 1,
+    "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/baseline_release_integrity.log",
+    "source_baseline": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+    "vitest_driver": null
+  },
+  {
+    "name": "baseline_preview_http",
+    "cwd": "${AUDIT_WORKSPACE}/zhijing-audit-baseline",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools/tests",
+      "-p",
+      "test_preview_http.py",
+      "-v"
+    ],
+    "exit_code": 1,
+    "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/baseline_preview_http.log",
+    "source_baseline": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+    "vitest_driver": null
+  },
+  {
+    "name": "baseline_optimized_contract",
+    "cwd": "${AUDIT_WORKSPACE}/zhijing-audit-baseline",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools/tests",
+      "-p",
+      "test_frontend_contract.py",
+      "-k",
+      "optimized_python",
+      "-v"
+    ],
+    "exit_code": 1,
+    "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/baseline_optimized_contract.log",
+    "source_baseline": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+    "vitest_driver": null
+  },
+  {
+    "name": "baseline_duplicate_operations",
+    "cwd": "${AUDIT_WORKSPACE}/zhijing-audit-baseline/frontend",
+    "command": [
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "src/api/__tests__/admin.accounts.duplicate.spec.ts",
+      "src/api/__tests__/admin.groups.duplicate.spec.ts",
+      "src/api/__tests__/admin.channelMonitor.duplicate.spec.ts",
+      "src/api/__tests__/admin.duplicateConcurrency.spec.ts",
+      "--maxWorkers=1"
+    ],
+    "exit_code": 1,
+    "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/baseline_duplicate_operations.log",
+    "source_baseline": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+    "vitest_driver": "4.1.12"
+  },
+  {
+    "name": "fixed_python_regressions",
+    "cwd": "${AUDIT_WORKSPACE}/zhijing-gateway",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-m",
+      "unittest",
+      "discover",
+      "-s",
+      "tools/tests",
+      "-v"
+    ],
+    "exit_code": 0,
+    "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/fixed_python_regressions.log",
+    "source_baseline": "working audit candidate",
+    "vitest_driver": null
+  },
+  {
+    "name": "fixed_ops_contract",
+    "cwd": "${AUDIT_WORKSPACE}/zhijing-gateway",
+    "command": [
+      "node",
+      "--test",
+      "tools/tests/test_ops_contract.mjs"
+    ],
+    "exit_code": 0,
+    "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/fixed_ops_contract.log",
+    "source_baseline": "working audit candidate",
+    "vitest_driver": null
+  },
+  {
+    "name": "fixed_duplicate_operations",
+    "cwd": "frontend",
+    "command": [
+      "node",
+      "node_modules/vitest/vitest.mjs",
+      "run",
+      "src/api/__tests__/admin.accounts.duplicate.spec.ts",
+      "src/api/__tests__/admin.groups.duplicate.spec.ts",
+      "src/api/__tests__/admin.channelMonitor.duplicate.spec.ts",
+      "src/api/__tests__/admin.duplicateConcurrency.spec.ts",
+      "--maxWorkers=1"
+    ],
+    "exit_code": 0,
+    "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/fixed_duplicate_operations.log",
+    "source_baseline": "working audit candidate",
+    "vitest_driver": "4.1.12"
+  },
+  {
+    "name": "fixed_targeted_lint",
+    "cwd": "frontend",
+    "command": [
+      "node",
+      "node_modules/eslint/bin/eslint.js",
+      "src/api/admin/accounts.ts",
+      "src/api/admin/groups.ts",
+      "src/api/admin/channelMonitor.ts",
+      "src/api/__tests__/admin.accounts.duplicate.spec.ts",
+      "src/api/__tests__/admin.duplicateConcurrency.spec.ts"
+    ],
+    "exit_code": 0,
+    "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/fixed_targeted_lint.log",
+    "source_baseline": "working audit candidate",
+    "vitest_driver": null
+  },
+  {
+    "name": "fixed_patch_integrity_optimized",
+    "cwd": "${AUDIT_WORKSPACE}/zhijing-gateway",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "-O",
+      "integrations/sub2api/check_patch.py",
+      "--artifact-only"
+    ],
+    "exit_code": 0,
+    "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/fixed_patch_integrity_optimized.log",
+    "source_baseline": "working audit candidate",
+    "vitest_driver": null
+  }
+]

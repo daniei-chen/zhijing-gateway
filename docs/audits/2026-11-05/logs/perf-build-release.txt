@@ -1,0 +1,220 @@
+vite v5.4.21 building for production...
+(node:5) [DEP0190] DeprecationWarning: Passing args to a child process with shell option true can lead to security vulnerabilities, as the arguments are not escaped, only concatenated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+transforming...
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ 1125 modules transformed.
+rendering chunks...
+[plugin:vite:reporter] [plugin vite:reporter]
+(!) baseline/frontend/src/stores/app.ts is dynamically imported by baseline/frontend/src/i18n/index.ts but also statically imported by baseline/frontend/src/components/account/BulkEditAccountModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/account/CreateAccountModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/account/EditAccountModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/account/HeaderOverrideJsonTools.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/account/ModelWhitelistSelector.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/account/OllamaCloudUsageSettings.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/account/ReAuthAccountModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/account/SyncFromCrsModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/account/TempUnschedStatusModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/ErrorPassthroughRulesModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/TLSFingerprintProfilesModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/account/ImportDataModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/account/ReAuthAccountModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/account/ScheduledTestsPanel.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/announcements/AnnouncementReadStatusDialog.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/group/GroupRPMOverridesModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/group/GroupRateMultipliersModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/monitor/MonitorFormDialog.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/monitor/MonitorTemplateApplyPickerDialog.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/monitor/MonitorTemplateManagerDialog.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/proxy/ImportDataModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/usage/UsageCleanupDialog.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/usage/UsageTable.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/user/BulkEditUserModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/user/GroupReplaceModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/user/UserAllowedGroupsModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/user/UserApiKeysModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/user/UserBalanceModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/user/UserCreateModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/user/UserEditModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/admin/user/UserPlatformQuotaModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/channels/AvailableChannelsTable.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/common/AnnouncementBell.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/common/GroupBadge.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/common/GroupOptionItem.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/common/Toast.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/keys/BulkEditKeysModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/modelPlaza/PlazaGroupSection.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/modelPlaza/PlazaNavBar.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/payment/SubscriptionPlanCard.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/user/MonitorDetailDialog.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/user/UserAttributesConfigModal.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/user/profile/ProfileBalanceNotifyCard.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/user/profile/ProfilePasswordForm.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/user/subscriptions/SubscriptionMembershipCard.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/composables/useAccountOAuth.ts, baseline/frontend/src/composables/useAntigravityOAuth.ts, baseline/frontend/src/composables/useClipboard.ts, baseline/frontend/src/composables/useGeminiOAuth.ts, baseline/frontend/src/composables/useGrokOAuth.ts, baseline/frontend/src/composables/useOpenAIOAuth.ts, baseline/frontend/src/features/channel-monitor-v2/MonitorSettingsPanel.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/features/prompt-audit/PromptAuditView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/main.ts, baseline/frontend/src/router/index.ts, baseline/frontend/src/stores/index.ts, baseline/frontend/src/utils/featureFlags.ts, baseline/frontend/src/views/ModelPlazaView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/AccountsView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/AnnouncementsView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/ChannelMonitorView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/ChannelsView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/DashboardView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/GroupsView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/PromoCodesView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/ProxiesView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/RedeemView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/RiskControlView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/SubscriptionsView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/UsageView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/UsersView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/affiliates/AdminAffiliateRecordsTable.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/affiliates/AffiliateOfflineWithdrawDialog.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/ops/components/OpsAlertEventsCard.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/ops/components/OpsAlertRulesCard.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/ops/components/OpsSettingsDialog.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/orders/AdminOrdersView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/orders/AdminPaymentDashboardView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/orders/AdminPaymentPlansView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/orders/PlanEditDialog.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/public/LegalDocumentView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/AffiliateView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/AvailableChannelsView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/BatchImageGuideView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/ChannelStatusV1View.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/ChannelStatusV2View.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/KeysView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/MCPView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/ProfileView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/RedeemView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/SubscriptionsView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/UsageView.vue?vue&type=script&setup=true&lang.ts, dynamic import will not move module into another chunk.
+
+[plugin:vite:reporter] [plugin vite:reporter]
+(!) baseline/frontend/src/stores/auth.ts is dynamically imported by baseline/frontend/src/i18n/index.ts but also statically imported by baseline/frontend/src/components/layout/AppLayout.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/modelPlaza/ModelPlazaContent.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/modelPlaza/PlazaNavBar.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/user/profile/ProfileBalanceNotifyCard.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/composables/useBatchImageAccess.ts, baseline/frontend/src/composables/useOnboardingTour.ts, baseline/frontend/src/router/index.ts, baseline/frontend/src/stores/index.ts, baseline/frontend/src/views/ModelPlazaView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/AccountsView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/admin/GroupsView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/auth/MCPOAuthAuthorizeView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/AffiliateView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/ChannelStatusV2View.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/ChannelStatusView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/CustomPageView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/DashboardView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/PaymentResultView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/PaymentView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/ProfileView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/RedeemView.vue?vue&type=script&setup=true&lang.ts, dynamic import will not move module into another chunk.
+
+[plugin:vite:reporter] [plugin vite:reporter]
+(!) baseline/frontend/src/stores/adminSettings.ts is dynamically imported by baseline/frontend/src/i18n/index.ts but also statically imported by baseline/frontend/src/components/layout/AppHeader.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/router/index.ts, baseline/frontend/src/stores/index.ts, baseline/frontend/src/views/admin/SettingsView.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/views/user/CustomPageView.vue?vue&type=script&setup=true&lang.ts, dynamic import will not move module into another chunk.
+
+[plugin:vite:reporter] [plugin vite:reporter]
+(!) baseline/frontend/src/router/title.ts is dynamically imported by baseline/frontend/src/i18n/index.ts but also statically imported by baseline/frontend/src/App.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/components/layout/AppHeader.vue?vue&type=script&setup=true&lang.ts, baseline/frontend/src/router/index.ts, dynamic import will not move module into another chunk.
+
+[plugin:vite:reporter] [plugin vite:reporter]
+(!) baseline/frontend/src/router/index.ts is dynamically imported by baseline/frontend/src/i18n/index.ts but also statically imported by baseline/frontend/src/main.ts, dynamic import will not move module into another chunk.
+
+computing gzip size...
+../../perf-build-release/index.html                                                                               1.05 kB │ gzip:   0.46 kB
+../../perf-build-release/.vite/manifest.json                                                                     86.29 kB │ gzip:   8.00 kB
+../../perf-build-release/app-assets/GroupOptionItem-EDVK0Prz.css                                                  0.07 kB │ gzip:   0.09 kB
+../../perf-build-release/app-assets/Pagination-DjbnyH-F.css                                                       0.11 kB │ gzip:   0.12 kB
+../../perf-build-release/app-assets/RegisterView-Bp4lCdk3.css                                                     0.20 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/EmailVerifyView-CCbXb7Sd.css                                                  0.20 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/LinuxDoCallbackView-DQ7xRnW6.css                                              0.20 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/WechatCallbackView-BRJlNRB0.css                                               0.20 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/DingTalkCallbackView-2-yiQGEP.css                                             0.20 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/OidcCallbackView-Buxp4n1p.css                                                 0.20 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/PendingOAuthCreateAccountForm-BCeYCja5.css                                    0.20 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/ForgotPasswordView-D5q6IfTR.css                                               0.20 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/ResetPasswordView-Bthzu-nm.css                                                0.20 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/RedeemView-Cha5mdbR.css                                                       0.20 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/UsersView-MqRRHQdy.css                                                        0.21 kB │ gzip:   0.13 kB
+../../perf-build-release/app-assets/LocaleSwitcher-D_RVO6EU.css                                                   0.23 kB │ gzip:   0.15 kB
+../../perf-build-release/app-assets/ModelWhitelistSelector-BR3Adxor.css                                           0.25 kB │ gzip:   0.20 kB
+../../perf-build-release/app-assets/LoadingSpinner-DT-rtrW_.css                                                   0.27 kB │ gzip:   0.19 kB
+../../perf-build-release/app-assets/GroupsView-Iph2G4D1.css                                                       0.41 kB │ gzip:   0.15 kB
+../../perf-build-release/app-assets/PricingEntryCard-BYJIfL54.css                                                 0.43 kB │ gzip:   0.22 kB
+../../perf-build-release/app-assets/LoginAgreementPrompt-DhEkaHwn.css                                             0.51 kB │ gzip:   0.18 kB
+../../perf-build-release/app-assets/LoginView-wkAzy2x7.css                                                        0.52 kB │ gzip:   0.29 kB
+../../perf-build-release/app-assets/OpsErrorLogTable-BVqgkDTr.css                                                 0.54 kB │ gzip:   0.30 kB
+../../perf-build-release/app-assets/BatchImageGuideView-CNZQvX8c.css                                              0.66 kB │ gzip:   0.29 kB
+../../perf-build-release/app-assets/AccountsView-lPfNdhwy.css                                                     1.07 kB │ gzip:   0.45 kB
+../../perf-build-release/app-assets/SubscriptionsView-DV1iBkgK.css                                                1.22 kB │ gzip:   0.45 kB
+../../perf-build-release/app-assets/CaptchaChallenge-BmkiKxf7.css                                                 1.40 kB │ gzip:   0.48 kB
+../../perf-build-release/app-assets/ChannelsView-DqW_jv3g.css                                                     1.44 kB │ gzip:   0.46 kB
+../../perf-build-release/app-assets/KeyUsageView-DUJT76vw.css                                                     1.47 kB │ gzip:   0.56 kB
+../../perf-build-release/app-assets/OpsDashboard-BkSQ_qNy.css                                                     2.29 kB │ gzip:   0.81 kB
+../../perf-build-release/app-assets/HomeView-Dagk0jRk.css                                                         2.36 kB │ gzip:   0.87 kB
+../../perf-build-release/app-assets/TablePageLayout-DVwGjhCM.css                                                  3.09 kB │ gzip:   0.78 kB
+../../perf-build-release/app-assets/DataTable-1zqnC8rM.css                                                        3.24 kB │ gzip:   0.77 kB
+../../perf-build-release/app-assets/vendor-misc-DB0Q8XAf.css                                                      3.94 kB │ gzip:   1.10 kB
+../../perf-build-release/app-assets/LegalDocumentView-DK8ha_U7.css                                                4.88 kB │ gzip:   0.87 kB
+../../perf-build-release/app-assets/ModelPlazaView-HsHdRfTD.css                                                   5.04 kB │ gzip:   1.03 kB
+../../perf-build-release/app-assets/ZhijingLoginLayout-C0gCeWBu.css                                               5.43 kB │ gzip:   1.40 kB
+../../perf-build-release/app-assets/SettingsView-ChTq2m1Z.css                                                     6.16 kB │ gzip:   1.57 kB
+../../perf-build-release/app-assets/ChannelStatusView-CduHUfO1.css                                                7.94 kB │ gzip:   1.86 kB
+../../perf-build-release/app-assets/TokenUsageTrend-Vx_cdw61.css                                                  8.86 kB │ gzip:   1.41 kB
+../../perf-build-release/app-assets/ProxySelector-COOCx_Xq.css                                                    9.03 kB │ gzip:   1.42 kB
+../../perf-build-release/app-assets/Select-Bnydgqmr.css                                                           9.70 kB │ gzip:   1.52 kB
+../../perf-build-release/app-assets/AppHeader-BLmoxDe9.css                                                        9.99 kB │ gzip:   1.99 kB
+../../perf-build-release/app-assets/CustomPageView-ag6y1_xq.css                                                  11.48 kB │ gzip:   2.09 kB
+../../perf-build-release/app-assets/SubscriptionsView-CTF-nNdP.css                                               11.92 kB │ gzip:   2.58 kB
+../../perf-build-release/app-assets/index-B_iuTQLN.css                                                          431.84 kB │ gzip:  64.00 kB
+../../perf-build-release/app-assets/zhijing-z-DIW96NAL.js                                                         0.05 kB │ gzip:   0.07 kB
+../../perf-build-release/app-assets/maskApiKey-ClKV8GuA.js                                                        0.11 kB │ gzip:   0.11 kB
+../../perf-build-release/app-assets/zhijingPalette-CRCmkR-p.js                                                    0.15 kB │ gzip:   0.13 kB
+../../perf-build-release/app-assets/stableObjectKey-DullU5Fx.js                                                   0.15 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/channel-SyyoV7lJ.js                                                           0.15 kB │ gzip:   0.14 kB
+../../perf-build-release/app-assets/groups-8nhIFqG5.js                                                            0.25 kB │ gzip:   0.18 kB
+../../perf-build-release/app-assets/authError-Ch9RozGZ.js                                                         0.26 kB │ gzip:   0.17 kB
+../../perf-build-release/app-assets/peak-rate-qZGUWdry.js                                                         0.28 kB │ gzip:   0.21 kB
+../../perf-build-release/app-assets/platforms-uhXoHWRa.js                                                         0.29 kB │ gzip:   0.23 kB
+../../perf-build-release/app-assets/AuthLayout.vue_vue_type_script_setup_true_lang-DGOTra3K.js                    0.46 kB │ gzip:   0.33 kB
+../../perf-build-release/app-assets/mcp-BgFEX3wp.js                                                               0.49 kB │ gzip:   0.26 kB
+../../perf-build-release/app-assets/useWorkspaceAppearance-IwYz9p8w.js                                            0.55 kB │ gzip:   0.33 kB
+../../perf-build-release/app-assets/device-t-pUTerl.js                                                            0.67 kB │ gzip:   0.42 kB
+../../perf-build-release/app-assets/pricing-0z6xY1WL.js                                                           0.73 kB │ gzip:   0.35 kB
+../../perf-build-release/app-assets/totp-BNcEbwE-.js                                                              0.73 kB │ gzip:   0.29 kB
+../../perf-build-release/app-assets/WorkspaceLoadError.vue_vue_type_script_setup_true_lang-BH-mMnGV.js            0.75 kB │ gzip:   0.58 kB
+../../perf-build-release/app-assets/index-l4sgBwFE.js                                                             0.75 kB │ gzip:   0.40 kB
+../../perf-build-release/app-assets/currency-DpW1WrYL.js                                                          0.77 kB │ gzip:   0.49 kB
+../../perf-build-release/app-assets/LoadingSpinner-pc5kvMU_.js                                                    0.83 kB │ gzip:   0.51 kB
+../../perf-build-release/app-assets/payment-C7vPMBOT.js                                                           0.90 kB │ gzip:   0.36 kB
+../../perf-build-release/app-assets/SearchInput.vue_vue_type_script_setup_true_lang-DCylzWJm.js                   0.91 kB │ gzip:   0.54 kB
+../../perf-build-release/app-assets/Toggle.vue_vue_type_script_setup_true_lang-DzK4SmRK.js                        0.92 kB │ gzip:   0.53 kB
+../../perf-build-release/app-assets/useClipboard-CFxBZvRH.js                                                      0.92 kB │ gzip:   0.57 kB
+../../perf-build-release/app-assets/AdminAffiliateInvitesView-BfRBMPft.js                                         0.95 kB │ gzip:   0.51 kB
+../../perf-build-release/app-assets/AdminAffiliateRebatesView-DwpfNZ1u.js                                         0.95 kB │ gzip:   0.51 kB
+../../perf-build-release/app-assets/AdminAffiliateTransfersView-K01CZ96W.js                                       0.96 kB │ gzip:   0.51 kB
+../../perf-build-release/app-assets/useTableSelection-Ahk4XL3Q.js                                                 0.99 kB │ gzip:   0.47 kB
+../../perf-build-release/app-assets/payment-Ca5Fk6eB.js                                                           1.18 kB │ gzip:   0.59 kB
+../../perf-build-release/app-assets/oauthAffiliate-CrlUwkd1.js                                                    1.20 kB │ gzip:   0.50 kB
+../../perf-build-release/app-assets/usePersistedPageSize-x0WpaIWh.js                                              1.21 kB │ gzip:   0.58 kB
+../../perf-build-release/app-assets/apiError-zX02PgX9.js                                                          1.21 kB │ gzip:   0.57 kB
+../../perf-build-release/app-assets/ConfirmDialog.vue_vue_type_script_setup_true_lang-5Gk_2lKn.js                 1.54 kB │ gzip:   0.75 kB
+../../perf-build-release/app-assets/registrationEmailPolicy-BIuq-4e8.js                                           1.58 kB │ gzip:   0.71 kB
+../../perf-build-release/app-assets/TablePageLayout-Dp-fxumx.js                                                   1.59 kB │ gzip:   0.74 kB
+../../perf-build-release/app-assets/EmptyState.vue_vue_type_script_setup_true_lang-dBVwGpw5.js                    1.71 kB │ gzip:   0.93 kB
+../../perf-build-release/app-assets/paymentUx-DAEiek0q.js                                                         1.81 kB │ gzip:   0.75 kB
+../../perf-build-release/app-assets/usage-qDYuiKSz.js                                                             1.88 kB │ gzip:   0.62 kB
+../../perf-build-release/app-assets/user-9HvA_x98.js                                                              2.06 kB │ gzip:   0.87 kB
+../../perf-build-release/app-assets/OrderStatusBadge.vue_vue_type_script_setup_true_lang-BotHaD8V.js              2.14 kB │ gzip:   0.68 kB
+../../perf-build-release/app-assets/LocaleSwitcher-DXhcf-n7.js                                                    2.29 kB │ gzip:   1.17 kB
+../../perf-build-release/app-assets/NotFoundView-DDufLJSd.js                                                      2.51 kB │ gzip:   1.28 kB
+../../perf-build-release/app-assets/WechatPaymentCallbackView-CCuuPhOV.js                                         2.56 kB │ gzip:   1.29 kB
+../../perf-build-release/app-assets/OrderTable.vue_vue_type_script_setup_true_lang-DlzuLWla.js                    2.85 kB │ gzip:   1.18 kB
+../../perf-build-release/app-assets/DingTalkEmailCompletionView-CiyEqvUN.js                                       2.97 kB │ gzip:   1.48 kB
+../../perf-build-release/app-assets/rechargeBonus-Cjpd3isk.js                                                     2.99 kB │ gzip:   1.14 kB
+../../perf-build-release/app-assets/wxpay-UHDvuORB.js                                                             2.99 kB │ gzip:   1.29 kB
+../../perf-build-release/app-assets/HelpTooltip.vue_vue_type_script_setup_true_lang-Cy3-STOy.js                   3.19 kB │ gzip:   1.46 kB
+../../perf-build-release/app-assets/vendor-stripe-DSy-tJeT.js                                                     3.31 kB │ gzip:   1.52 kB
+../../perf-build-release/app-assets/GroupOptionItem-CiCbkUDI.js                                                   3.32 kB │ gzip:   1.49 kB
+../../perf-build-release/app-assets/ZhijingLoginLayout-Ca-6i_n-.js                                                3.45 kB │ gzip:   2.06 kB
+../../perf-build-release/app-assets/GroupSelector.vue_vue_type_script_setup_true_lang-Cvi4mdS8.js                 3.70 kB │ gzip:   1.63 kB
+../../perf-build-release/app-assets/AirwallexPaymentView-B9LtE96t.js                                              3.72 kB │ gzip:   1.78 kB
+../../perf-build-release/app-assets/providerConfig-BiMVXo-X.js                                                    3.73 kB │ gzip:   1.27 kB
+../../perf-build-release/app-assets/StripePopupView-B0KlO-uj.js                                                   4.24 kB │ gzip:   1.90 kB
+../../perf-build-release/app-assets/paymentFlow-cys_N5rS.js                                                       4.39 kB │ gzip:   1.55 kB
+../../perf-build-release/app-assets/UsageProgressBar.vue_vue_type_script_setup_true_lang-BiJkXOe5.js              4.44 kB │ gzip:   1.67 kB
+../../perf-build-release/app-assets/PaymentQRCodeView-nnz5Oh-f.js                                                 4.81 kB │ gzip:   2.17 kB
+../../perf-build-release/app-assets/useStepUp-DtSzDtS8.js                                                         5.33 kB │ gzip:   2.51 kB
+../../perf-build-release/app-assets/LegalDocumentView-gscxptKw.js                                                 5.49 kB │ gzip:   2.20 kB
+../../perf-build-release/app-assets/Pagination-B5XYMtNs.js                                                        5.81 kB │ gzip:   2.02 kB
+../../perf-build-release/app-assets/GroupBadge.vue_vue_type_script_setup_true_lang-C2LWwRnZ.js                    5.85 kB │ gzip:   1.87 kB
+../../perf-build-release/app-assets/ProxySelector-CQ8wt4Qd.js                                                     6.00 kB │ gzip:   2.35 kB
+../../perf-build-release/app-assets/UserOrdersView-CCIlaUfW.js                                                    6.37 kB │ gzip:   2.39 kB
+../../perf-build-release/app-assets/PendingOAuthCreateAccountForm-DyOBnvwK.js                                     6.45 kB │ gzip:   2.35 kB
+../../perf-build-release/app-assets/ForgotPasswordView-CN9Bv478.js                                                6.51 kB │ gzip:   2.70 kB
+../../perf-build-release/app-assets/errorBadges-CVgLgGDI.js                                                       7.50 kB │ gzip:   2.96 kB
+../../perf-build-release/app-assets/MCPView-4Rjlkdl0.js                                                           7.77 kB │ gzip:   2.81 kB
+../../perf-build-release/app-assets/ResetPasswordView-BjgRQ-AX.js                                                 7.78 kB │ gzip:   2.65 kB
+../../perf-build-release/app-assets/EndpointDistributionChart.vue_vue_type_script_setup_true_lang-DCRCakm1.js     7.80 kB │ gzip:   2.67 kB
+../../perf-build-release/app-assets/MCPOAuthAuthorizeView-CQZfpeoi.js                                             7.95 kB │ gzip:   2.95 kB
+../../perf-build-release/app-assets/Select-DXROXICb.js                                                            8.05 kB │ gzip:   3.14 kB
+../../perf-build-release/app-assets/AffiliateView-BtCrhWCx.js                                                     8.42 kB │ gzip:   2.66 kB
+../../perf-build-release/app-assets/OAuthCallbackView-B-KdT7HW.js                                                 8.60 kB │ gzip:   2.94 kB
+../../perf-build-release/app-assets/UserBalanceHistoryModal.vue_vue_type_script_setup_true_lang-B29O0lId.js       9.11 kB │ gzip:   3.21 kB
+../../perf-build-release/app-assets/AdminPaymentDashboardView-DYhpJPkE.js                                         9.69 kB │ gzip:   3.18 kB
+../../perf-build-release/app-assets/StripePaymentView-CPFFK1zP.js                                                 9.92 kB │ gzip:   4.03 kB
+../../perf-build-release/app-assets/CustomPageView-DicDdjov.js                                                   10.03 kB │ gzip:   4.41 kB
+../../perf-build-release/app-assets/ModelTagInput.vue_vue_type_script_setup_true_lang-Bp3h22jj.js                10.04 kB │ gzip:   3.69 kB
+../../perf-build-release/app-assets/PaymentResultView-pJm-5e4u.js                                                10.10 kB │ gzip:   3.23 kB
+../../perf-build-release/app-assets/platformColors-Dd3s_EBB.js                                                   10.25 kB │ gzip:   2.03 kB
+../../perf-build-release/app-assets/SubscriptionsView-CyIvCcsT.js                                                10.37 kB │ gzip:   3.83 kB
+../../perf-build-release/app-assets/CaptchaChallenge.vue_vue_type_script_setup_true_lang-DH9Kj3Gn.js             10.79 kB │ gzip:   4.14 kB
+../../perf-build-release/app-assets/TokenUsageTrend.vue_vue_type_script_setup_true_lang-Jo5j1ymn.js              13.18 kB │ gzip:   4.78 kB
+../../perf-build-release/app-assets/EmailVerifyView-Vh8yiyB8.js                                                  13.19 kB │ gzip:   4.63 kB
+../../perf-build-release/app-assets/RedeemView-BKJOUDaN.js                                                       13.28 kB │ gzip:   4.53 kB
+../../perf-build-release/app-assets/PluginsView-L6xqTzib.js                                                      14.59 kB │ gzip:   4.67 kB
+../../perf-build-release/app-assets/ModelDistributionChart.vue_vue_type_script_setup_true_lang-CYVX23it.js       14.66 kB │ gzip:   4.10 kB
+../../perf-build-release/app-assets/LinuxDoCallbackView-CYXR79RP.js                                              14.71 kB │ gzip:   4.48 kB
+../../perf-build-release/app-assets/OidcCallbackView-fr_2FzhF.js                                                 14.89 kB │ gzip:   4.54 kB
+../../perf-build-release/app-assets/DingTalkCallbackView-BoQ9p2Vh.js                                             15.21 kB │ gzip:   4.61 kB
+../../perf-build-release/app-assets/AdminPaymentPlansView-BPiKSUKe.js                                            15.54 kB │ gzip:   4.82 kB
+../../perf-build-release/app-assets/SetupWizardView-DQKXQMBr.js                                                  15.80 kB │ gzip:   3.93 kB
+../../perf-build-release/app-assets/LoginAgreementPrompt-CdWkXRGD.js                                             16.20 kB │ gzip:   5.69 kB
+../../perf-build-release/app-assets/DataTable-CycQmh_1.js                                                        16.31 kB │ gzip:   5.74 kB
+../../perf-build-release/app-assets/PromoCodesView-BDklKC_5.js                                                   16.58 kB │ gzip:   4.87 kB
+../../perf-build-release/app-assets/AuditLogView-DkeCTISD.js                                                     18.09 kB │ gzip:   5.27 kB
+../../perf-build-release/app-assets/DashboardView-_46Fi5ZB.js                                                    18.12 kB │ gzip:   5.84 kB
+../../perf-build-release/app-assets/PlatformIcon.vue_vue_type_script_setup_true_lang-Dr1JJGl2.js                 18.90 kB │ gzip:   7.53 kB
+../../perf-build-release/app-assets/WechatCallbackView-CEEhMkVL.js                                               19.03 kB │ gzip:   5.50 kB
+../../perf-build-release/app-assets/proxyExpiry-DEo1igzi.js                                                      19.43 kB │ gzip:   6.56 kB
+../../perf-build-release/app-assets/LoginView-qHnk1H2a.js                                                        19.72 kB │ gzip:   7.23 kB
+../../perf-build-release/app-assets/HomeView-WO4XQ0_X.js                                                         20.32 kB │ gzip:   5.06 kB
+../../perf-build-release/app-assets/AdminAffiliateRecordsTable.vue_vue_type_script_setup_true_lang-DzCymyZL.js   20.58 kB │ gzip:   6.28 kB
+../../perf-build-release/app-assets/AvailableChannelsView-BCKH1yjK.js                                            20.95 kB │ gzip:   5.67 kB
+../../perf-build-release/app-assets/AdminOrdersView-DfY67CWX.js                                                  21.47 kB │ gzip:   5.84 kB
+../../perf-build-release/app-assets/RegisterView-BI4t4Co8.js                                                     21.48 kB │ gzip:   6.23 kB
+../../perf-build-release/app-assets/channelMonitorV2-DaFA_qWV.js                                                 24.64 kB │ gzip:   9.37 kB
+../../perf-build-release/app-assets/AnnouncementsView-QLWpv2Jz.js                                                26.89 kB │ gzip:   7.38 kB
+../../perf-build-release/app-assets/RedeemView-BoYIu6Bi.js                                                       27.03 kB │ gzip:   7.59 kB
+../../perf-build-release/app-assets/PricingEntryCard-CtcTNihC.js                                                 27.80 kB │ gzip:   6.24 kB
+../../perf-build-release/app-assets/OpsErrorLogTable.vue_vue_type_script_setup_true_lang-zaNiSRIJ.js             31.06 kB │ gzip:   8.70 kB
+../../perf-build-release/app-assets/ProfileView-D7dZDPfy.js                                                      31.13 kB │ gzip:   9.00 kB
+../../perf-build-release/app-assets/ModelPlazaView-dKcTE_8E.js                                                   31.21 kB │ gzip:   8.20 kB
+../../perf-build-release/app-assets/UsageView-EtR1GM7z.js                                                        31.38 kB │ gzip:   9.83 kB
+../../perf-build-release/app-assets/KeyUsageView-5v_c6NpB.js                                                     31.66 kB │ gzip:   8.32 kB
+../../perf-build-release/app-assets/DashboardView-BvoW5g1i.js                                                    31.92 kB │ gzip:   9.73 kB
+../../perf-build-release/app-assets/ChannelsView-CPGFjHL8.js                                                     41.40 kB │ gzip:  10.74 kB
+../../perf-build-release/app-assets/GroupDistributionChart.vue_vue_type_script_setup_true_lang-C_4PPfNG.js       48.86 kB │ gzip:  12.30 kB
+../../perf-build-release/app-assets/SubscriptionsView-Co5cwteY.js                                                49.13 kB │ gzip:  13.31 kB
+../../perf-build-release/app-assets/UsageView-BTGnJDwO.js                                                        51.05 kB │ gzip:  14.78 kB
+../../perf-build-release/app-assets/ProxiesView-BnQbqGrh.js                                                      51.78 kB │ gzip:  13.78 kB
+../../perf-build-release/app-assets/vendor-i18n-cY70av7B.js                                                      56.99 kB │ gzip:  19.20 kB
+../../perf-build-release/app-assets/PaymentView-DqmWCfS-.js                                                      63.20 kB │ gzip:  18.84 kB
+../../perf-build-release/app-assets/BatchImageGuideView-DkYbPpx9.js                                              68.41 kB │ gzip:  21.90 kB
+../../perf-build-release/app-assets/PromptAuditView-CQuJnlyM.js                                                  68.77 kB │ gzip:  17.15 kB
+../../perf-build-release/app-assets/ModelWhitelistSelector.vue_vue_type_script_setup_true_lang-BCfV6saZ.js       72.04 kB │ gzip:  23.30 kB
+../../perf-build-release/app-assets/ChannelStatusView-DLb39WSa.js                                                78.02 kB │ gzip:  22.52 kB
+../../perf-build-release/app-assets/ChannelMonitorView-OhNY9GNz.js                                               78.03 kB │ gzip:  19.46 kB
+../../perf-build-release/app-assets/RiskControlView-DczJLes1.js                                                  88.10 kB │ gzip:  19.46 kB
+../../perf-build-release/app-assets/UsersView-B-C19nDK.js                                                       111.96 kB │ gzip:  28.34 kB
+../../perf-build-release/app-assets/KeysView-Dyw8tl36.js                                                        113.16 kB │ gzip:  30.50 kB
+../../perf-build-release/app-assets/vendor-vue-DJQ-D4Ek.js                                                      114.30 kB │ gzip:  44.42 kB
+../../perf-build-release/app-assets/AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js                   116.14 kB │ gzip:  34.05 kB
+../../perf-build-release/app-assets/vendor-chart-BchnUoOD.js                                                    178.34 kB │ gzip:  61.36 kB
+../../perf-build-release/app-assets/index-CT74q1ON.js                                                           199.29 kB │ gzip:  61.07 kB
+../../perf-build-release/app-assets/GroupsView-cKKSvOIL.js                                                      218.12 kB │ gzip:  45.15 kB
+../../perf-build-release/app-assets/OpsDashboard-BbifKsi8.js                                                    224.70 kB │ gzip:  48.78 kB
+../../perf-build-release/app-assets/index-Djdmzfdh.js                                                           275.01 kB │ gzip: 145.02 kB
+../../perf-build-release/app-assets/vendor-misc-BBAVm09x.js                                                     280.57 kB │ gzip:  95.90 kB
+../../perf-build-release/app-assets/vendor-ui-CP-ddnDN.js                                                       436.48 kB │ gzip: 146.48 kB
+../../perf-build-release/app-assets/SettingsView-CPBss4RU.js                                                    437.74 kB │ gzip:  87.90 kB
+../../perf-build-release/app-assets/index-CDqNL0_y.js                                                           445.43 kB │ gzip: 135.90 kB
+../../perf-build-release/app-assets/AccountsView-BdASsCSv.js                                                    855.29 kB │ gzip: 178.36 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 47.38s

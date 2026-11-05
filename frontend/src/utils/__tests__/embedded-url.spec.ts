@@ -73,8 +73,16 @@ describe('embedded-url', () => {
     expect(buildEmbeddedUrl('https://example.test/docs#guide')).toContain('#guide')
   })
 
-  it('returns original string for invalid url input', () => {
-    expect(buildEmbeddedUrl('not a url', 1, 'token')).toBe('not a url')
+  it.each([
+    'not a url',
+    '//example.test/embed?access_token=SYNTHETIC',
+    '/embed?access_token=SYNTHETIC',
+    'https://user:SYNTHETIC@example.test/embed',
+    'https://example.test/embed#%61ccess_token=SYNTHETIC',
+    'https://example.test/embed#access_token=SYNTHETIC?next=checkout',
+    'https://example.test/embed#/checkout?%72efresh_token=SYNTHETIC',
+  ])('rejects unvalidated or credential-bearing embedded URL %s', base => {
+    expect(buildEmbeddedUrl(base, 1, 'SYNTHETIC-LOGIN')).toBe('')
   })
 
   it('detects dark mode from document root class', () => {

@@ -2,6 +2,7 @@ import { defineConfig, loadEnv, Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import checker from 'vite-plugin-checker'
 import { resolve } from 'path'
+import { serializePublicSettings } from './build/serializePublicSettings'
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (character) => ({
@@ -64,7 +65,7 @@ function injectPublicSettings(backendUrl: string): Plugin {
           if (response.ok) {
             const data = await response.json()
             if (data.code === 0 && data.data) {
-              const script = `<script>window.__APP_CONFIG__=${JSON.stringify(data.data)};</script>`
+              const script = `<script>window.__APP_CONFIG__=${serializePublicSettings(data.data)};</script>`
               return injectBranding(html, data.data).replace('</head>', `${script}\n</head>`)
             }
           }
@@ -124,8 +125,18 @@ export default defineConfig(({ mode }) => {
               return 'vendor-vue'
             }
 
-            // UI 工具库（较大，单独分离）
-            if (id.includes('/@vueuse/') || id.includes('/xlsx/')) {
+            // Keep optional export/payment features outside chunks imported by
+            // the app shell. Grouping them with VueUse or miscellaneous shared
+            // helpers makes a dynamic import download eagerly on every route.
+            if (id.includes('/xlsx/')) {
+              return 'vendor-xlsx'
+            }
+            if (id.includes('/@airwallex/')) {
+              return 'vendor-airwallex'
+            }
+
+            // Shared UI utilities.
+            if (id.includes('/@vueuse/')) {
               return 'vendor-ui'
             }
 

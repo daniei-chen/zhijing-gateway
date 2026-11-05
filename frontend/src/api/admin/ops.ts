@@ -6,6 +6,7 @@
 
 import { apiClient, buildGatewayUrl } from '../client'
 import type { PaginatedResponse } from '@/types'
+import { captureRequestAuthSession, isAuthSessionCurrent, trackAuthRequest } from '../authSession'
 
 export type OpsQueryMode = 'auto' | 'raw' | 'preagg'
 
@@ -528,111 +529,124 @@ export const OPS_WS_CLOSE_CODES = {
 const OPS_WS_BASE_PROTOCOL = 'sub2api-admin'
 
 export function subscribeQPS(onMessage: (data: any) => void, options: SubscribeQPSOptions = {}): () => void {
+  const session = captureRequestAuthSession()
   let ws: WebSocket | null = null
   let reconnectAttempts = 0
-  const maxReconnectAttempts = Number.isFinite(options.maxReconnectAttempts as number)
-    ? (options.maxReconnectAttempts as number)
+  const maxReconnectAttempts = Number.isFinite(options.maxReconnectAttempts)
+    ? Math.max(0, Math.floor(options.maxReconnectAttempts!))
     : Infinity
-  const baseDelayMs = options.reconnectBaseDelayMs ?? 1000
-  const maxDelayMs = options.reconnectMaxDelayMs ?? 30000
+  const baseDelayMs = Math.max(0, options.reconnectBaseDelayMs ?? 1000)
+  const maxDelayMs = Math.max(baseDelayMs, options.reconnectMaxDelayMs ?? 30000)
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null
   let shouldReconnect = true
-  let isConnecting = false
   let hasConnectedOnce = false
   let lastMessageAt = 0
   const staleTimeoutMs = options.staleTimeoutMs ?? 120_000
   const staleCheckIntervalMs = options.staleCheckIntervalMs ?? 30_000
   let staleTimer: ReturnType<typeof setInterval> | null = null
+  let untrack = () => {}
 
-  const setStatus = (status: OpsWSStatus) => {
-    options.onStatusChange?.(status)
-  }
-
+  const setStatus = (status: OpsWSStatus) => options.onStatusChange?.(status)
   const clearReconnectTimer = () => {
-    if (reconnectTimer) {
-      clearTimeout(reconnectTimer)
-      reconnectTimer = null
-    }
+    if (reconnectTimer !== null) clearTimeout(reconnectTimer)
+    reconnectTimer = null
+  }
+  const clearStaleTimer = () => {
+    if (staleTimer !== null) clearInterval(staleTimer)
+    staleTimer = null
   }
 
-  const clearStaleTimer = () => {
-    if (staleTimer) {
-      clearInterval(staleTimer)
-      staleTimer = null
+  const stop = () => {
+    if (!shouldReconnect) return
+    shouldReconnect = false
+    clearReconnectTimer()
+    clearStaleTimer()
+    window.removeEventListener('online', handleOnline)
+    window.removeEventListener('offline', handleOffline)
+    untrack()
+    const socket = ws
+    ws = null
+    if (socket) {
+      socket.onopen = socket.onmessage = socket.onerror = socket.onclose = null
+      socket.close()
     }
+    setStatus('closed')
+  }
+
+  const isCurrent = () => {
+    if (!shouldReconnect) return false
+    if (!isAuthSessionCurrent(session)) { stop(); return false }
+    return true
   }
 
   const startStaleTimer = () => {
     clearStaleTimer()
-    if (!staleTimeoutMs || staleTimeoutMs <= 0) return
+    if (staleTimeoutMs <= 0) return
     staleTimer = setInterval(() => {
-      if (!shouldReconnect) return
-      if (!ws || ws.readyState !== WebSocket.OPEN) return
-      if (!lastMessageAt) return
-      const ageMs = Date.now() - lastMessageAt
-      if (ageMs > staleTimeoutMs) {
-        // Treat as a half-open connection; closing triggers the normal reconnect path.
-        ws.close()
-      }
-    }, staleCheckIntervalMs)
+      if (!isCurrent() || !ws || ws.readyState !== WebSocket.OPEN) return
+      if (Date.now() - lastMessageAt > staleTimeoutMs) ws.close()
+    }, Math.max(1, staleCheckIntervalMs))
   }
 
   const scheduleReconnect = () => {
-    if (!shouldReconnect) return
-    if (hasConnectedOnce && reconnectAttempts >= maxReconnectAttempts) return
-
-    // If we're offline, wait for the browser to come back online.
-    if (typeof navigator !== 'undefined' && 'onLine' in navigator && !navigator.onLine) {
+    if (!isCurrent()) return
+    // Count retries even if the initial handshake never succeeded. The old
+    // hasConnectedOnce guard bypassed maxReconnectAttempts on initial failures.
+    if (reconnectAttempts >= maxReconnectAttempts) { stop(); return }
+    if (typeof navigator !== 'undefined' && !navigator.onLine) {
       setStatus('offline')
       return
     }
-
-    const expDelay = baseDelayMs * Math.pow(2, reconnectAttempts)
-    const delay = Math.min(expDelay, maxDelayMs)
-    const jitter = Math.floor(Math.random() * 250)
+    const delay = Math.min(baseDelayMs * 2 ** Math.min(reconnectAttempts, 30), maxDelayMs)
+      + Math.floor(Math.random() * 250)
     clearReconnectTimer()
+    setStatus('reconnecting')
     reconnectTimer = setTimeout(() => {
+      reconnectTimer = null
       reconnectAttempts++
       connect()
-    }, delay + jitter)
-    options.onReconnectScheduled?.({ attempt: reconnectAttempts + 1, delayMs: delay + jitter })
+    }, delay)
+    options.onReconnectScheduled?.({ attempt: reconnectAttempts + 1, delayMs: delay })
   }
 
-  const handleOnline = () => {
-    if (!shouldReconnect) return
-    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return
+  function handleOnline() {
+    if (!isCurrent() || (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING))) return
+    if (reconnectAttempts >= maxReconnectAttempts) { stop(); return }
+    clearReconnectTimer()
+    reconnectAttempts++
     connect()
   }
-
-  const handleOffline = () => {
-    setStatus('offline')
+  function handleOffline() {
+    clearReconnectTimer()
+    if (isCurrent()) setStatus('offline')
   }
 
   const connect = () => {
-    if (!shouldReconnect) return
-    if (isConnecting) return
-    if (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)) return
-    if (hasConnectedOnce && reconnectAttempts >= maxReconnectAttempts) return
-
-    isConnecting = true
+    if (!isCurrent() || (ws && (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING))) return
     setStatus(hasConnectedOnce ? 'reconnecting' : 'connecting')
-    const wsBaseUrl = options.wsBaseUrl || import.meta.env.VITE_WS_BASE_URL
-    const wsURL = wsBaseUrl
-      ? new URL(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${wsBaseUrl}/api/v1/admin/ops/ws/qps`)
-      : new URL(buildGatewayUrl('/api/v1/admin/ops/ws/qps').replace(/^http/, 'ws'))
+    let socket: WebSocket
+    try {
+      const wsBaseUrl = options.wsBaseUrl || import.meta.env.VITE_WS_BASE_URL
+      const wsURL = wsBaseUrl
+        ? new URL(`${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${wsBaseUrl}/api/v1/admin/ops/ws/qps`)
+        : new URL(buildGatewayUrl('/api/v1/admin/ops/ws/qps').replace(/^http/, 'ws'))
+      // Re-read only rotated credentials from the original session. A replaced
+      // account must never be adopted by an old reconnect callback.
+      const rawToken = String(options.token ?? localStorage.getItem('auth_token') ?? '').trim()
+      if (!isCurrent()) return
+      const protocols = [OPS_WS_BASE_PROTOCOL]
+      if (rawToken) protocols.push(`jwt.${rawToken}`)
+      socket = new WebSocket(wsURL.toString(), protocols)
+      ws = socket
+    } catch {
+      options.onError?.(new Event('error'))
+      scheduleReconnect()
+      return
+    }
 
-    // Do NOT put admin JWT in the URL query string (it can leak via access logs, proxies, etc).
-    // Browsers cannot set Authorization headers for WebSockets, so we pass the token via
-    // Sec-WebSocket-Protocol (subprotocol list): ["sub2api-admin", "jwt.<token>"].
-    const rawToken = String(options.token ?? localStorage.getItem('auth_token') ?? '').trim()
-    const protocols: string[] = [OPS_WS_BASE_PROTOCOL]
-    if (rawToken) protocols.push(`jwt.${rawToken}`)
-
-    ws = new WebSocket(wsURL.toString(), protocols)
-
-    ws.onopen = () => {
+    socket.onopen = () => {
+      if (ws !== socket || !isCurrent()) return
       reconnectAttempts = 0
-      isConnecting = false
       hasConnectedOnce = true
       clearReconnectTimer()
       lastMessageAt = Date.now()
@@ -640,55 +654,35 @@ export function subscribeQPS(onMessage: (data: any) => void, options: SubscribeQ
       setStatus('connected')
       options.onOpen?.()
     }
-
-    ws.onmessage = (e) => {
-      try {
-        const data = JSON.parse(e.data)
-        lastMessageAt = Date.now()
-        onMessage(data)
-      } catch (err) {
-        console.warn('[OpsWS] Failed to parse message:', err)
-      }
+    socket.onmessage = (event) => {
+      if (ws !== socket || !isCurrent()) return
+      let data: unknown
+      try { data = JSON.parse(event.data) } catch { return }
+      lastMessageAt = Date.now()
+      onMessage(data)
     }
-
-    ws.onerror = (error) => {
-      console.error('[OpsWS] Connection error:', error)
-      options.onError?.(error)
+    socket.onerror = (event) => {
+      if (ws === socket && isCurrent()) options.onError?.(event)
     }
-
-    ws.onclose = (event) => {
-      isConnecting = false
-      options.onClose?.(event)
-      clearStaleTimer()
+    socket.onclose = (event) => {
+      if (ws !== socket || !isCurrent()) return
       ws = null
-
-      // If the server explicitly tells us to stop reconnecting, honor it.
-      if (event && typeof event.code === 'number' && event.code === OPS_WS_CLOSE_CODES.REALTIME_DISABLED) {
-        shouldReconnect = false
-        clearReconnectTimer()
-        setStatus('closed')
+      clearStaleTimer()
+      options.onClose?.(event)
+      if (event.code === OPS_WS_CLOSE_CODES.REALTIME_DISABLED) {
+        stop()
         options.onFatalClose?.(event)
         return
       }
-
       scheduleReconnect()
     }
   }
 
+  untrack = trackAuthRequest(session, stop)
   window.addEventListener('online', handleOnline)
   window.addEventListener('offline', handleOffline)
   connect()
-
-  return () => {
-    shouldReconnect = false
-    window.removeEventListener('online', handleOnline)
-    window.removeEventListener('offline', handleOffline)
-    clearReconnectTimer()
-    clearStaleTimer()
-    if (ws) ws.close()
-    ws = null
-    setStatus('closed')
-  }
+  return stop
 }
 
 export type OpsSeverity = string

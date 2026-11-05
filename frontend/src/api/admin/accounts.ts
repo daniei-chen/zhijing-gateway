@@ -194,42 +194,66 @@ export async function create(accountData: CreateAccountRequest): Promise<Account
  * @param id - Source account ID
  * @returns Newly created account
  */
-const duplicateOperationKeys = new Map<number, string>()
+const duplicateOperationKeys = new Map<string, string>()
 
-function duplicateOperationStorageKey(id: number): string {
-  return `sub2api:admin:account-duplicate:${id}`
+interface DuplicateOperationScope {
+  adminID: string
+  key: string
 }
 
-function getStoredDuplicateOperationKey(id: number): string | null {
+function duplicateOperationScope(id: number): DuplicateOperationScope | null {
   try {
-    return globalThis.sessionStorage?.getItem(duplicateOperationStorageKey(id)) ?? null
+    const rawUser = globalThis.localStorage?.getItem('auth_user')
+    if (!rawUser) return null
+    const user: unknown = JSON.parse(rawUser)
+    if (!user || typeof user !== 'object') return null
+    const adminID = (user as { id?: unknown }).id
+    if (typeof adminID !== 'number' || !Number.isSafeInteger(adminID) || adminID <= 0) return null
+    return { adminID: String(adminID), key: `sub2api:admin:account-duplicate:${adminID}:${id}` }
   } catch {
     return null
   }
 }
 
-function storeDuplicateOperationKey(id: number, key: string | null): void {
+function getStoredDuplicateOperationKey(storageKey: string): string | null {
   try {
-    if (key) globalThis.sessionStorage?.setItem(duplicateOperationStorageKey(id), key)
-    else globalThis.sessionStorage?.removeItem(duplicateOperationStorageKey(id))
+    return globalThis.sessionStorage?.getItem(storageKey) ?? null
+  } catch {
+    return null
+  }
+}
+
+function storeDuplicateOperationKey(storageKey: string, key: string | null): void {
+  try {
+    if (key) globalThis.sessionStorage?.setItem(storageKey, key)
+    else globalThis.sessionStorage?.removeItem(storageKey)
   } catch {
     // In-memory retry protection still works when browser storage is unavailable.
   }
 }
 
 export async function duplicate(id: number): Promise<Account> {
-  let idempotencyKey = duplicateOperationKeys.get(id) ?? getStoredDuplicateOperationKey(id)
+  const scope = duplicateOperationScope(id)
+  let idempotencyKey = scope
+    ? duplicateOperationKeys.get(scope.key) ?? getStoredDuplicateOperationKey(scope.key)
+    : null
   if (!idempotencyKey) {
     const requestID = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
-    idempotencyKey = `account-duplicate-${id}-${requestID}`
+    idempotencyKey = `account-duplicate-${scope?.adminID ?? 'unknown-admin'}-${id}-${requestID}`
   }
-  duplicateOperationKeys.set(id, idempotencyKey)
-  storeDuplicateOperationKey(id, idempotencyKey)
+  if (scope) {
+    duplicateOperationKeys.set(scope.key, idempotencyKey)
+    storeDuplicateOperationKey(scope.key, idempotencyKey)
+  }
   const { data } = await apiClient.post<Account>(`/admin/accounts/${id}/duplicate`, undefined, {
     headers: { 'Idempotency-Key': idempotencyKey }
   })
-  duplicateOperationKeys.delete(id)
-  storeDuplicateOperationKey(id, null)
+  if (scope) {
+    // A concurrent caller can finish late after a new operation has started.
+    // Clear only the key captured by this request, in each cache independently.
+    if (duplicateOperationKeys.get(scope.key) === idempotencyKey) duplicateOperationKeys.delete(scope.key)
+    if (getStoredDuplicateOperationKey(scope.key) === idempotencyKey) storeDuplicateOperationKey(scope.key, null)
+  }
   return data
 }
 

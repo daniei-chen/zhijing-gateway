@@ -1,0 +1,692 @@
+{
+  "agent": "backend_release",
+  "baseline_commit": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+  "latest_release": "v0.0.2",
+  "original_assigned_scope": {
+    "files": 15,
+    "lines": 2080,
+    "coverage": "all 15 public files read completely; full private backend absent"
+  },
+  "code_frozen": true,
+  "reviewed_files": [
+    {
+      "path": ".github/workflows/ci.yml",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 43,
+      "baseline_sha256": "8e48c7a9806596f62eda4e429958844ee98c89a8a07bc2304907809f97250a0c",
+      "candidate_sha256": "4b5394a75c22028b1ff4268bb1a0e28e39643e08e8c670f8b1e9846d4878eadf",
+      "findings": [
+        "REL-04"
+      ],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "integrations/sub2api/INTEGRATION-MANIFEST.json",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 116,
+      "baseline_sha256": "605dd651ffa60e77756e01c2b67de9bdd2d7ce0f576bb405859004e52314b2f1",
+      "candidate_sha256": "605dd651ffa60e77756e01c2b67de9bdd2d7ce0f576bb405859004e52314b2f1",
+      "findings": [],
+      "validation": "artifact_integrity_only; no complete backend compilation"
+    },
+    {
+      "path": "integrations/sub2api/README.zh-CN.md",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 32,
+      "baseline_sha256": "2d8176fe4604d0da295d3732b4d325f1f559b0d2ce90d071d7c4260c0c305824",
+      "candidate_sha256": "2d8176fe4604d0da295d3732b4d325f1f559b0d2ce90d071d7c4260c0c305824",
+      "findings": [],
+      "validation": "artifact_integrity_only; no complete backend compilation"
+    },
+    {
+      "path": "integrations/sub2api/check_patch.py",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 58,
+      "baseline_sha256": "f09b5fba55adc7728a0d9002f64bac15b18fdb63fd63b0df2ff23db5dc82aeaa",
+      "candidate_sha256": "e14dc2ed312d43d013f13c86c71d3d42f51642bca0b7c1ded41b97531300681a",
+      "findings": [
+        "REL-01",
+        "REL-02"
+      ],
+      "validation": "artifact_integrity_only; no complete backend compilation"
+    },
+    {
+      "path": "integrations/sub2api/v0.0.2-diagnostics.patch",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 948,
+      "baseline_sha256": "0c91c51befeaa9892d2490af313b52f844f31499ad3f6e4def121388e671d1f1",
+      "candidate_sha256": "0c91c51befeaa9892d2490af313b52f844f31499ad3f6e4def121388e671d1f1",
+      "findings": [
+        "BACK-01",
+        "BACK-PERF-01"
+      ],
+      "validation": "artifact_integrity_only; no complete backend compilation"
+    },
+    {
+      "path": "qa/admin_fixtures.py",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 134,
+      "baseline_sha256": "b7999c996d9f9a2aee7b18cd0335f27813d9af35a9941389f6a771767eff32dc",
+      "candidate_sha256": "b7999c996d9f9a2aee7b18cd0335f27813d9af35a9941389f6a771767eff32dc",
+      "findings": [],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "qa/diagnostic_fixtures.py",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 111,
+      "baseline_sha256": "cf28ba9085a051ce6e5173380b5be628a2fc11b314ccc2754eb4164bb41b25e0",
+      "candidate_sha256": "cf28ba9085a051ce6e5173380b5be628a2fc11b314ccc2754eb4164bb41b25e0",
+      "findings": [],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "qa/fixtures.py",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 93,
+      "baseline_sha256": "fdd5621ceb8e6ce1d94f3d90f88a3dd82c4fc4b04ee8041bef7a7804ae95c614",
+      "candidate_sha256": "fdd5621ceb8e6ce1d94f3d90f88a3dd82c4fc4b04ee8041bef7a7804ae95c614",
+      "findings": [],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "qa/preview_server.py",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 303,
+      "baseline_sha256": "e9150909901834568beb4ab96ac3ab047a4ce011f2b71b462cb69924146fe8a9",
+      "candidate_sha256": "cf973fc19fc5dca64f8b309b19e29b2edf27aead3ab43ca462cfe4ca840d410a",
+      "findings": [
+        "QA-01"
+      ],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "tools/package_release.py",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 72,
+      "baseline_sha256": "87e6e6cf1bac662a3e4afe2409484b00fa9786ec4e7f7ae1eb4f4088c51dd1cd",
+      "candidate_sha256": "20f8b3e32ae8b305261a2053e165d0fddbef51fba7019dd8749f66a160e843c5",
+      "findings": [
+        "REL-01",
+        "REL-03"
+      ],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "tools/record_v002_contract.mjs",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 19,
+      "baseline_sha256": "b70c908305fba0866dc9f3928b633704ff89552da9665854ba62f945a7b332bd",
+      "candidate_sha256": "b70c908305fba0866dc9f3928b633704ff89552da9665854ba62f945a7b332bd",
+      "findings": [],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "tools/record_v002_security.py",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 41,
+      "baseline_sha256": "d51f0662e47d08363d0678815df8b6947320e24b4a1ef9e508a94ec060567493",
+      "candidate_sha256": "d51f0662e47d08363d0678815df8b6947320e24b4a1ef9e508a94ec060567493",
+      "findings": [],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "tools/verify_frontend.py",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 52,
+      "baseline_sha256": "7d776efa8dd22acbf22b1fb05ea25f5383bb9a657ffc42be04a3645ccabe130e",
+      "candidate_sha256": "219d043f4adf0e270dd8e69fea8283f54edbf4de510e2cb547e2ab7fe55121a2",
+      "findings": [
+        "REL-01",
+        "REL-04"
+      ],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "tools/verify_ops_contract.mjs",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 20,
+      "baseline_sha256": "7451f9458e894c19f2e318eec4f909b497b9d90e0063981810c8262fc717e4e7",
+      "candidate_sha256": "313266821ed2f29d412d9fcad4104c0373f2fe29f2084c8b65b248d527125154",
+      "findings": [
+        "REL-04"
+      ],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "tools/verify_release.py",
+      "review_depth": "manual_complete_public_file",
+      "baseline_lines": 38,
+      "baseline_sha256": "6e297c1f9b763709f62afc78b9b93046f12f0c39b4cb2c70d6760af2fc998cab",
+      "candidate_sha256": "32970c5d48f34fbdfa5bd5ca8dae693318372a4cbb3c2e7c497792bb21932a0b",
+      "findings": [
+        "REL-01",
+        "REL-02"
+      ],
+      "validation": "Python/Node regression probes and targeted inspections; see commands.json"
+    },
+    {
+      "path": "tools/audit_backend_history.py",
+      "review_depth": "manual_complete_and_exact_source_extraction_verified",
+      "candidate_sha256": "1224954f635bb08454e7558cc15b80544f5c1f5ad4e03bc3c7488ac42c8fa822",
+      "findings": [
+        "BACK-01",
+        "BACK-PERF-01"
+      ]
+    },
+    {
+      "path": "qa/history_audit/history_test.go",
+      "review_depth": "manual_complete; authored but not compiled or executed (Go unavailable)",
+      "candidate_sha256": "c20e343fd863d84c71701532b41ffc3d07ed60cc492dc37e24ca4c125b1caa45",
+      "findings": [
+        "BACK-01",
+        "BACK-PERF-01"
+      ]
+    },
+    {
+      "path": "tools/tests/test_release_integrity.py",
+      "review_depth": "manual_complete_and_executed",
+      "candidate_sha256": "c893bf586c1c1ed1c0e4c9a07256ba552a5b2f8b840ca9451510a01a95b55adc",
+      "findings": [
+        "REL-01",
+        "REL-02",
+        "REL-03"
+      ]
+    },
+    {
+      "path": "tools/tests/test_frontend_contract.py",
+      "review_depth": "manual_complete_and_executed",
+      "candidate_sha256": "8727d736f5861d53275b5a524aa9d1836098ed0257f9be4d3a3b37648cfab0c8",
+      "findings": [
+        "REL-01",
+        "REL-04"
+      ]
+    },
+    {
+      "path": "tools/tests/test_ops_contract.mjs",
+      "review_depth": "manual_complete_and_executed",
+      "candidate_sha256": "d901143de2fdd99516511431b06111548360c688aad2a7090a42524f33241cc3",
+      "findings": [
+        "REL-04"
+      ]
+    },
+    {
+      "path": "tools/tests/test_preview_http.py",
+      "review_depth": "manual_complete_and_executed",
+      "candidate_sha256": "2b96a897caac09fc85147c1297a2c832c213ac448d825d8849dadb8512ee4d4e",
+      "findings": [
+        "QA-01"
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/accounts.ts",
+      "review_depth": "targeted_duplicate_function_and_storage_scope_review; other portions assigned to root",
+      "candidate_sha256": "11bd939d7f738530187310ba7f4f9f839f528cefd54b1e590d7b34f76d95046f",
+      "findings": [
+        "DUP-01",
+        "DUP-02"
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/groups.ts",
+      "review_depth": "targeted_duplicate_function_and_storage_scope_review; other portions assigned to root",
+      "candidate_sha256": "bc3e32e6abc5728adfc86ec1702be1eb397c277d7fbf45033c276341d72e52b3",
+      "findings": [
+        "DUP-02"
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/channelMonitor.ts",
+      "review_depth": "targeted_duplicate_function_and_storage_scope_review; other portions assigned to root",
+      "candidate_sha256": "32e73847fb7b31166a2aed51fa4303b7930695d098bfd3197fc949767c22d355",
+      "findings": [
+        "DUP-02"
+      ]
+    },
+    {
+      "path": "frontend/src/api/__tests__/admin.accounts.duplicate.spec.ts",
+      "review_depth": "manual_complete_and_executed",
+      "candidate_sha256": "5a4704d7cd324bc9c03f61af7e352f85fd3599cdb7342b2c1bbaf90519e807e8",
+      "findings": [
+        "DUP-01",
+        "DUP-02"
+      ]
+    },
+    {
+      "path": "frontend/src/api/__tests__/admin.groups.duplicate.spec.ts",
+      "review_depth": "manual_complete_and_executed",
+      "candidate_sha256": "365df10958bbc5410ce542a15ac246f9b5c87a1c2496ff819f5116a66a96e392",
+      "findings": [
+        "DUP-02"
+      ]
+    },
+    {
+      "path": "frontend/src/api/__tests__/admin.channelMonitor.duplicate.spec.ts",
+      "review_depth": "manual_complete_and_executed",
+      "candidate_sha256": "67b571beb833c4831ea2f9774dc28f6c40aea7cc158f52438e84a9c9f8781731",
+      "findings": [
+        "DUP-02"
+      ]
+    },
+    {
+      "path": "frontend/src/api/__tests__/admin.duplicateConcurrency.spec.ts",
+      "review_depth": "manual_complete_and_executed",
+      "candidate_sha256": "5bbcce8ac97f8d11ed52c4370d9208ea673fab42336eee9c0dd706a81d26bace",
+      "findings": [
+        "DUP-01",
+        "DUP-02"
+      ]
+    },
+    {
+      "path": "frontend/src/api/accountTestStream.ts",
+      "review_depth": "independent_complete_candidate_review; test execution belongs to root",
+      "candidate_sha256": "798ec0aa4067430eaeae0b02045d24be1771739423525f0e84aacd8f260636cd",
+      "findings": [
+        "CROSS-01"
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/ops.ts",
+      "review_depth": "independent_targeted_subscribeQPS_candidate_review; test execution belongs to root",
+      "candidate_sha256": "5833407aacae43d8f549b14c5cd954897dd69aab04e23315049eb3a3b775ed3a",
+      "findings": []
+    },
+    {
+      "path": "frontend/src/views/admin/UsageView.vue",
+      "review_depth": "independent_targeted_exportToExcel_candidate_review; test execution belongs to root",
+      "candidate_sha256": "88732ecf5d18a4e5d46fedf3096285143e8247ce25bf045feda062cde76150c5",
+      "findings": [
+        "CROSS-02"
+      ]
+    },
+    {
+      "path": "frontend/src/components/account/AccountTestModal.vue",
+      "review_depth": "independent_changed_hunks_and_stream_callsite_review",
+      "candidate_sha256": "a74a02d9f6f03e38492d8377739391e142865af657b37f419a6256793d103a4a",
+      "findings": [
+        "CROSS-01"
+      ]
+    },
+    {
+      "path": "frontend/src/components/admin/account/AccountTestModal.vue",
+      "review_depth": "independent_changed_hunks_and_stream_callsite_review",
+      "candidate_sha256": "9858d485190a77896e57baabe355d3639ed8cb9e0ad43b9577c8fc9b83e110de",
+      "findings": [
+        "CROSS-01"
+      ]
+    },
+    {
+      "path": "frontend/src/components/account/__tests__/AccountTestModal.session.spec.ts",
+      "review_depth": "independent_complete_candidate_review; execution belongs to root",
+      "candidate_sha256": "c116fe2f086b54dba29dc08a9f10ec6c2824b0b03ac916418a59b9ec8ebfff13",
+      "findings": [
+        "CROSS-01"
+      ]
+    },
+    {
+      "path": "frontend/src/api/__tests__/admin.ops.websocket.spec.ts",
+      "review_depth": "independent_complete_candidate_review; execution belongs to root",
+      "candidate_sha256": "3f607b108cfefc72a592a71967dabf5c73b5fcb438e3276c0d7d1529eeaca13d",
+      "findings": []
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/UsageView.spec.ts",
+      "review_depth": "independent_export_regression_review; execution belongs to root",
+      "candidate_sha256": "e220008c96c0ee1a8ecc67475669a13bf99bb127b7028a948aba28419f6ccfb6",
+      "findings": [
+        "CROSS-02"
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "REL-01",
+      "severity": "P2",
+      "status": "fixed",
+      "title": "Python optimization disabled critical source and release checks",
+      "evidence": "Validation used assert in four tools; -O accepted a wrong patch digest, modified protected source and a tampered archive asset.",
+      "fix": "Explicit require/ValueError checks run under both regular Python and -O/PYTHONOPTIMIZE.",
+      "paths": [
+        "tools/verify_frontend.py",
+        "tools/verify_release.py",
+        "tools/package_release.py",
+        "integrations/sub2api/check_patch.py"
+      ],
+      "validation": [
+        "baseline_release_integrity",
+        "baseline_optimized_contract",
+        "fixed_python_regressions",
+        "fixed_patch_integrity_optimized"
+      ]
+    },
+    {
+      "id": "REL-02",
+      "severity": "P2",
+      "status": "fixed",
+      "title": "Release verification accepted missing checksums and unsafe ZIP members",
+      "evidence": "An empty/incomplete SHA256SUMS, duplicate entries, ../ paths, symlink entries and extra integration .env were reported as archives_verified=true.",
+      "fix": "Exact required checksum set, safe unique regular ZIP entries, manifest/source checks, explicit archive file sets and bounded decompression; patch destination checks include both header names and git numstat destinations.",
+      "paths": [
+        "tools/verify_release.py",
+        "integrations/sub2api/check_patch.py"
+      ],
+      "validation": [
+        "baseline_release_integrity",
+        "fixed_python_regressions"
+      ]
+    },
+    {
+      "id": "REL-03",
+      "severity": "P1 (conditional local secret exposure) / P2 (provenance)",
+      "status": "fixed",
+      "title": "Packaging could include ignored secrets and label stale dist as the current commit",
+      "evidence": "package_release iterated every regular integration file, including ignored .env, and never rebuilt ignored dist before assigning source_commit=HEAD. Synthetic tests reproduced both conditions.",
+      "fix": "Explicit integration inputs, reject symlinked inputs, pin toolchain, frozen install/tests/fresh build before packaging, verify final archives, and record checks actually executed instead of old validation counts.",
+      "paths": [
+        "tools/package_release.py"
+      ],
+      "validation": [
+        "baseline_release_integrity",
+        "fixed_python_regressions"
+      ],
+      "limitation": "Full real frontend packaging not executed by this agent; no published release or production deployment was changed."
+    },
+    {
+      "id": "REL-04",
+      "severity": "P2 process integrity",
+      "status": "fixed",
+      "title": "Candidate security/runtime fixes needed explicit review evidence without overwriting v0.0.2",
+      "fix": "Add strict optional audit delta schema and anchored before/after chain; reject unknown paths/fields/duplicates/empty evidence. Ops validator reports runtime_changed=true and types_only=false for approved runtime changes. CI executes Python and Node checker regressions.",
+      "paths": [
+        "tools/verify_frontend.py",
+        "tools/verify_ops_contract.mjs",
+        ".github/workflows/ci.yml"
+      ],
+      "validation": [
+        "fixed_python_regressions",
+        "fixed_ops_contract"
+      ]
+    },
+    {
+      "id": "QA-01",
+      "severity": "P3 (loopback synthetic service only)",
+      "status": "fixed",
+      "title": "Malformed preview HTTP requests could read unbounded bodies or crash handler threads",
+      "evidence": "Negative Content-Length reached read(-1); nonnumeric/duplicate framing, non-object JSON, oversize bodies and invalid pagination were not rejected at the boundary.",
+      "fix": "Unsigned bounded Content-Length, reject ambiguous framing, 16KiB cap, read timeout, object JSON validation and client errors for invalid query inputs; synthetic login remains supported.",
+      "paths": [
+        "qa/preview_server.py"
+      ],
+      "validation": [
+        "baseline_preview_http",
+        "fixed_python_regressions"
+      ]
+    },
+    {
+      "id": "DUP-01",
+      "severity": "P2 retry reliability; no server authorization claim",
+      "status": "fixed",
+      "title": "Account duplicate retry keys were shared across administrators",
+      "evidence": "Account operation cache/sessionStorage used account ID alone, unlike groups and monitors. A second administrator reused the first administrator's failed-operation key.",
+      "fix": "Use admin ID plus account ID for caches and key prefix; no persistence for an unparseable identity; do not adopt legacy ownerless keys.",
+      "paths": [
+        "frontend/src/api/admin/accounts.ts"
+      ],
+      "validation": [
+        "baseline_duplicate_operations",
+        "fixed_duplicate_operations",
+        "fixed_targeted_lint"
+      ],
+      "limitation": "Server idempotency scope is unavailable. Old ownerless ambiguous operations cannot safely be assigned to a user during upgrade; check server state before reissuing a formerly ambiguous operation."
+    },
+    {
+      "id": "DUP-02",
+      "severity": "P2 retry reliability",
+      "status": "fixed",
+      "title": "Late duplicate success erased a newer operation retry key",
+      "evidence": "Two calls share key A; the first completes, a new operation starts with B, then the older late success unconditionally deletes B. A failed B retry receives a new key and may repeat the operation.",
+      "fix": "Memory and sessionStorage delete independently only if each still contains this request's captured key; preserve keys on ambiguous failure.",
+      "paths": [
+        "frontend/src/api/admin/accounts.ts",
+        "frontend/src/api/admin/groups.ts",
+        "frontend/src/api/admin/channelMonitor.ts"
+      ],
+      "validation": [
+        "baseline_duplicate_operations",
+        "fixed_duplicate_operations",
+        "fixed_targeted_lint"
+      ]
+    },
+    {
+      "id": "BACK-01",
+      "severity": "P2 diagnostic attribution only",
+      "status": "open; static proof, Go execution unavailable",
+      "title": "Reused request ID after intervening eviction can attach a new sample to an old persisted row",
+      "evidence": "History capacity=1: Publish reused(10), Publish other(20) evicts reused and its index, Publish reused(999) sees no collision. Lookup(reused, oldCreatedAt) within +/-5min returns 999. Isolation by user/API key remains; this is not a billing or cross-tenant claim.",
+      "paths": [
+        "integrations/sub2api/v0.0.2-diagnostics.patch"
+      ],
+      "patch_lines": "230-409 (history.go new-file hunk)",
+      "repro": "python3 tools/audit_backend_history.py --go /path/to/go --mode test --race",
+      "expected": "The no-misattribution probe should fail against the unchanged released helper. It has not been compiled or run here.",
+      "next_step": "Use a persisted per-request-instance correlation identifier or a bounded fail-closed ambiguity strategy with a clear eviction policy, then verify against the matching complete backend. Do not silently replace historical release patch/manifests."
+    },
+    {
+      "id": "BACK-PERF-01",
+      "severity": "P3 unmeasured engineering concern",
+      "status": "open; benchmark authored, not executed",
+      "title": "History Lookup serializes hash/copy work under a global mutex",
+      "evidence": "Lookup hashes an unbounded identifier while holding h.mu and copies all metrics before unlocking. Publish validates ID length but Lookup does not. Complete backend reachability of oversized persisted identifiers is not established.",
+      "paths": [
+        "integrations/sub2api/v0.0.2-diagnostics.patch"
+      ],
+      "repro": "python3 tools/audit_backend_history.py --go /path/to/go --mode benchmark",
+      "next_step": "Validate/normalize/hash before locking and copy immutable result outside the lock after Go race/bench validation; do not claim measured gateway latency or TPS from this source inspection."
+    },
+    {
+      "id": "CROSS-01",
+      "severity": "P2 candidate lifecycle issue",
+      "status": "fixed by root following independent review",
+      "title": "Account test terminal event needed to stop without waiting for EOF",
+      "evidence": "Initial candidate only marked terminal and could hold reader/pending work if upstream remained open.",
+      "fix": "Root now returns at terminal, ignores later same-chunk records, releases/cancels in finally, and incrementally scans unfinished records. Independent final review found no new slicing/terminal defect."
+    },
+    {
+      "id": "CROSS-02",
+      "severity": "P2 candidate session-bound export issue",
+      "status": "fixed by root following independent review",
+      "title": "Export needed a final session check after potentially long XLSX serialization",
+      "evidence": "Checking active before synchronous XLSX.write leaves a cross-tab session-change window before saveAs.",
+      "fix": "Root stages bytes, rechecks active, then downloads. Scalar filter/query snapshot, page checks and abort/untrack lifecycle independently reviewed."
+    }
+  ],
+  "validation_results": [
+    {
+      "name": "baseline_release_integrity",
+      "cwd": "${AUDIT_WORKSPACE}/zhijing-audit-baseline",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-p",
+        "test_release_integrity.py",
+        "-v"
+      ],
+      "exit_code": 1,
+      "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/baseline_release_integrity.log",
+      "source_baseline": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+      "vitest_driver": null
+    },
+    {
+      "name": "baseline_preview_http",
+      "cwd": "${AUDIT_WORKSPACE}/zhijing-audit-baseline",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-p",
+        "test_preview_http.py",
+        "-v"
+      ],
+      "exit_code": 1,
+      "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/baseline_preview_http.log",
+      "source_baseline": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+      "vitest_driver": null
+    },
+    {
+      "name": "baseline_optimized_contract",
+      "cwd": "${AUDIT_WORKSPACE}/zhijing-audit-baseline",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-p",
+        "test_frontend_contract.py",
+        "-k",
+        "optimized_python",
+        "-v"
+      ],
+      "exit_code": 1,
+      "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/baseline_optimized_contract.log",
+      "source_baseline": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+      "vitest_driver": null
+    },
+    {
+      "name": "baseline_duplicate_operations",
+      "cwd": "${AUDIT_WORKSPACE}/zhijing-audit-baseline/frontend",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/api/__tests__/admin.accounts.duplicate.spec.ts",
+        "src/api/__tests__/admin.groups.duplicate.spec.ts",
+        "src/api/__tests__/admin.channelMonitor.duplicate.spec.ts",
+        "src/api/__tests__/admin.duplicateConcurrency.spec.ts",
+        "--maxWorkers=1"
+      ],
+      "exit_code": 1,
+      "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/baseline_duplicate_operations.log",
+      "source_baseline": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+      "vitest_driver": "4.1.12"
+    },
+    {
+      "name": "fixed_python_regressions",
+      "cwd": "${AUDIT_WORKSPACE}/zhijing-gateway",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tools/tests",
+        "-v"
+      ],
+      "exit_code": 0,
+      "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/fixed_python_regressions.log",
+      "source_baseline": "working audit candidate",
+      "vitest_driver": null
+    },
+    {
+      "name": "fixed_ops_contract",
+      "cwd": "${AUDIT_WORKSPACE}/zhijing-gateway",
+      "command": [
+        "node",
+        "--test",
+        "tools/tests/test_ops_contract.mjs"
+      ],
+      "exit_code": 0,
+      "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/fixed_ops_contract.log",
+      "source_baseline": "working audit candidate",
+      "vitest_driver": null
+    },
+    {
+      "name": "fixed_duplicate_operations",
+      "cwd": "frontend",
+      "command": [
+        "node",
+        "node_modules/vitest/vitest.mjs",
+        "run",
+        "src/api/__tests__/admin.accounts.duplicate.spec.ts",
+        "src/api/__tests__/admin.groups.duplicate.spec.ts",
+        "src/api/__tests__/admin.channelMonitor.duplicate.spec.ts",
+        "src/api/__tests__/admin.duplicateConcurrency.spec.ts",
+        "--maxWorkers=1"
+      ],
+      "exit_code": 0,
+      "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/fixed_duplicate_operations.log",
+      "source_baseline": "working audit candidate",
+      "vitest_driver": "4.1.12"
+    },
+    {
+      "name": "fixed_targeted_lint",
+      "cwd": "frontend",
+      "command": [
+        "node",
+        "node_modules/eslint/bin/eslint.js",
+        "src/api/admin/accounts.ts",
+        "src/api/admin/groups.ts",
+        "src/api/admin/channelMonitor.ts",
+        "src/api/__tests__/admin.accounts.duplicate.spec.ts",
+        "src/api/__tests__/admin.duplicateConcurrency.spec.ts"
+      ],
+      "exit_code": 0,
+      "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/fixed_targeted_lint.log",
+      "source_baseline": "working audit candidate",
+      "vitest_driver": null
+    },
+    {
+      "name": "fixed_patch_integrity_optimized",
+      "cwd": "${AUDIT_WORKSPACE}/zhijing-gateway",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-O",
+        "integrations/sub2api/check_patch.py",
+        "--artifact-only"
+      ],
+      "exit_code": 0,
+      "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/fixed_patch_integrity_optimized.log",
+      "source_baseline": "working audit candidate",
+      "vitest_driver": null
+    }
+  ],
+  "counts": {
+    "python_tests_passed": 20,
+    "node_contract_tests_passed": 3,
+    "duplicate_api_tests_passed": 21,
+    "duplicate_api_test_files": 4
+  },
+  "original_patch_unchanged": true,
+  "original_integration_manifest_unchanged": true,
+  "history_extraction": {
+    "bytes": 5017,
+    "sha256": "e8a3456113140ef1013ab83aa40fe861aace6d41792cd0fe97af4ee9e7f19855",
+    "verified": true,
+    "go_compiled": false
+  },
+  "not_verified": [
+    "complete private Go backend compilation/tests/vet/race",
+    "Go history probes or benchmarks (toolchain unavailable)",
+    "production TLS/auth/RBAC/storage/billing/Redis/scheduler behavior",
+    "production p50/p95/p99 latency, TPS/RPS or provider latency",
+    "a real new release ZIP build or any deployment"
+  ],
+  "storage_note": "Evidence logs are synthetic and contain no production data. Baseline probes use original source plus new tests; duplicate API probes use the current Vitest 4.1.12 driver, not the original full dependency environment.",
+  "published_release_verification": {
+    "report": "${AUDIT_WORKSPACE}/release-artifact-verification.json",
+    "all_four_github_asset_digests_match": true,
+    "published_checksum_entries_match": true,
+    "current_verifier_exit_code": 0,
+    "static_files": 310,
+    "manifest_source_commit": "c690c0dbb84b627dedabf85d7f0178fda28bb510",
+    "archive_code_executed": false
+  }
+}

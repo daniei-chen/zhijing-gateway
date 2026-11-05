@@ -1,0 +1,320 @@
+
+ RUN  v2.1.9 baseline/frontend
+
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ❯ src/views/user/__tests__/ChannelStatusV2View.race.spec.ts (4 tests | 4 failed) 46ms
+   × channel monitor V2 request ownership > does not overwrite the current filter with a response whose adapter ignored abort 31ms
+     → expected [ { model: 'old' } ] to deeply equal [ { model: 'new' } ]
+   × channel monitor V2 request ownership > preserves the new tab loading state when an earlier tab request finishes 5ms
+     → expected false to be true // Object.is equality
+   × channel monitor V2 request ownership > suppresses errors from a superseded tab request 6ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "obsolete failure",
+    ]
+
+
+Number of calls: 1
+
+   × channel monitor V2 request ownership > does not restart polling or load a tab after unmount during metrics loading 3ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      Object {
+        "groupIds": Array [],
+        "models": Array [],
+        "platforms": Array [],
+        "range": "90m",
+      },
+      true,
+      AbortSignal {},
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/admin/__tests__/BackupView.polling.spec.ts (6 tests | 6 failed) 178ms
+   × backup page backup poll ownership > keeps at most one request in flight when a response takes several intervals 75ms
+     → expected "spy" to be called 1 times, but got 4 times
+   × backup page backup poll ownership > ignores a completion after navigation and does not reload the list or notify 22ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "admin.backup.operations.backupCreated",
+    ]
+
+
+Number of calls: 1
+
+   × backup page backup poll ownership > does not let an old poll stop the new poll after a visibility restart 26ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "admin.backup.operations.backupCreated",
+    ]
+
+
+Number of calls: 1
+
+   × backup page restore poll ownership > keeps at most one request in flight when a response takes several intervals 22ms
+     → expected "spy" to be called 1 times, but got 4 times
+   × backup page restore poll ownership > ignores a completion after navigation and does not reload the list or notify 13ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "admin.backup.actions.restoreSuccess",
+    ]
+
+
+Number of calls: 1
+
+   × backup page restore poll ownership > does not let an old poll stop the new poll after a visibility restart 20ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "admin.backup.actions.restoreSuccess",
+    ]
+
+
+Number of calls: 1
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 10 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/views/admin/__tests__/BackupView.polling.spec.ts > backup page backup poll ownership > keeps at most one request in flight when a response takes several intervals
+ FAIL  src/views/admin/__tests__/BackupView.polling.spec.ts > backup page restore poll ownership > keeps at most one request in flight when a response takes several intervals
+AssertionError: expected "spy" to be called 1 times, but got 4 times
+ ❯ src/views/admin/__tests__/BackupView.polling.spec.ts:62:23
+     60|     await flushPromises()
+     61|     await vi.advanceTimersByTimeAsync(8000)
+     62|     expect(getBackup).toHaveBeenCalledTimes(1)
+       |                       ^
+     63|     slow.resolve(record('current', operation))
+     64|     await flushPromises()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/10]⎯
+
+ FAIL  src/views/admin/__tests__/BackupView.polling.spec.ts > backup page backup poll ownership > ignores a completion after navigation and does not reload the list or notify
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "admin.backup.operations.backupCreated",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/admin/__tests__/BackupView.polling.spec.ts:78:29
+     76|     slow.resolve(record('current', operation, true))
+     77|     await flushPromises()
+     78|     expect(showSuccess).not.toHaveBeenCalled()
+       |                             ^
+     79|     expect(showError).not.toHaveBeenCalled()
+     80|     expect(listBackups).toHaveBeenCalledTimes(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/10]⎯
+
+ FAIL  src/views/admin/__tests__/BackupView.polling.spec.ts > backup page backup poll ownership > does not let an old poll stop the new poll after a visibility restart
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "admin.backup.operations.backupCreated",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/admin/__tests__/BackupView.polling.spec.ts:101:29
+     99|     old.resolve(record('current', operation, true))
+    100|     await flushPromises()
+    101|     expect(showSuccess).not.toHaveBeenCalled()
+       |                             ^
+    102|     expect(vi.getTimerCount()).toBe(1)
+    103|     current.resolve(record('new', operation, true))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/10]⎯
+
+ FAIL  src/views/admin/__tests__/BackupView.polling.spec.ts > backup page restore poll ownership > ignores a completion after navigation and does not reload the list or notify
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "admin.backup.actions.restoreSuccess",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/admin/__tests__/BackupView.polling.spec.ts:78:29
+     76|     slow.resolve(record('current', operation, true))
+     77|     await flushPromises()
+     78|     expect(showSuccess).not.toHaveBeenCalled()
+       |                             ^
+     79|     expect(showError).not.toHaveBeenCalled()
+     80|     expect(listBackups).toHaveBeenCalledTimes(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/10]⎯
+
+ FAIL  src/views/admin/__tests__/BackupView.polling.spec.ts > backup page restore poll ownership > does not let an old poll stop the new poll after a visibility restart
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "admin.backup.actions.restoreSuccess",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/admin/__tests__/BackupView.polling.spec.ts:101:29
+     99|     old.resolve(record('current', operation, true))
+    100|     await flushPromises()
+    101|     expect(showSuccess).not.toHaveBeenCalled()
+       |                             ^
+    102|     expect(vi.getTimerCount()).toBe(1)
+    103|     current.resolve(record('new', operation, true))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/10]⎯
+
+ FAIL  src/views/user/__tests__/ChannelStatusV2View.race.spec.ts > channel monitor V2 request ownership > does not overwrite the current filter with a response whose adapter ignored abort
+AssertionError: expected [ { model: 'old' } ] to deeply equal [ { model: 'new' } ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+-     "model": "new",
++     "model": "old",
+    },
+  ]
+
+ ❯ src/views/user/__tests__/ChannelStatusV2View.race.spec.ts:68:29
+     66|     old.resolve({ items: [{ model: 'old' }] })
+     67|     await flushPromises()
+     68|     expect(state.modelRows).toEqual([{ model: 'new' }])
+       |                             ^
+     69|     expect(oldSignal.aborted).toBe(true)
+     70|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/10]⎯
+
+ FAIL  src/views/user/__tests__/ChannelStatusV2View.race.spec.ts > channel monitor V2 request ownership > preserves the new tab loading state when an earlier tab request finishes
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/views/user/__tests__/ChannelStatusV2View.race.spec.ts:84:30
+     82|     old.resolve({ items: [{ model: 'old' }] })
+     83|     await flushPromises()
+     84|     expect(state.tabLoading).toBe(true)
+       |                              ^
+     85|     expect(state.modelRows).toEqual([])
+     86|     current.resolve({ items: [{ model: 'current' }] })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/10]⎯
+
+ FAIL  src/views/user/__tests__/ChannelStatusV2View.race.spec.ts > channel monitor V2 request ownership > suppresses errors from a superseded tab request
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "obsolete failure",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/user/__tests__/ChannelStatusV2View.race.spec.ts:101:27
+     99|     old.reject(new Error('obsolete failure'))
+    100|     await flushPromises()
+    101|     expect(showError).not.toHaveBeenCalled()
+       |                           ^
+    102|   })
+    103|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/10]⎯
+
+ FAIL  src/views/user/__tests__/ChannelStatusV2View.race.spec.ts > channel monitor V2 request ownership > does not restart polling or load a tab after unmount during metrics loading
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      Object {
+        "groupIds": Array [],
+        "models": Array [],
+        "platforms": Array [],
+        "range": "90m",
+      },
+      true,
+      AbortSignal {},
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/user/__tests__/ChannelStatusV2View.race.spec.ts:112:27
+    110|     slow.resolve({ config: { refresh_interval_seconds: 60 } })
+    111|     await flushPromises()
+    112|     expect(getModels).not.toHaveBeenCalled()
+       |                           ^
+    113|     expect(vi.getTimerCount()).toBe(0)
+    114|     expect(showError).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/10]⎯
+
+ Test Files  2 failed (2)
+      Tests  10 failed (10)
+   Start at  19:58:12
+   Duration  3.39s (transform 1.27s, setup 192ms, collect 1.38s, tests 224ms, environment 798ms, prepare 151ms)

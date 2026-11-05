@@ -35,12 +35,16 @@ export function useTableLoader<T, P extends Record<string, any>>(options: TableL
   })
 
   let abortController: AbortController | null = null
+  let disposed = false
 
   const isAbortError = (error: any) => {
     return error?.name === 'AbortError' || error?.code === 'ERR_CANCELED' || error?.name === 'CanceledError'
   }
 
   const load = async () => {
+    // A queued debounce can outlive its component. Never start another request
+    // after unmount, even when the callback itself cannot be cancelled.
+    if (disposed) return
     if (abortController) {
       abortController.abort()
     }
@@ -52,14 +56,18 @@ export function useTableLoader<T, P extends Record<string, any>>(options: TableL
       const response = await fetchFn(
         pagination.page,
         pagination.page_size,
-        toRaw(params) as P,
+        { ...toRaw(params) } as P,
         { signal: currentController.signal }
       )
 
+      // AbortSignal is cooperative: an adapter/cache can still resolve after
+      // cancellation. Only the latest live request may replace table contents.
+      if (disposed || currentController.signal.aborted || abortController !== currentController) return
       items.value = response.items || []
       pagination.total = response.total || 0
       pagination.pages = response.pages || 0
     } catch (error) {
+      if (disposed || currentController.signal.aborted || abortController !== currentController) return
       if (!isAbortError(error)) {
         console.error('Table load error:', error)
         throw error
@@ -67,6 +75,7 @@ export function useTableLoader<T, P extends Record<string, any>>(options: TableL
     } finally {
       if (abortController === currentController) {
         loading.value = false
+        abortController = null
       }
     }
   }
@@ -82,18 +91,21 @@ export function useTableLoader<T, P extends Record<string, any>>(options: TableL
     // 确保页码在有效范围内
     const validPage = Math.max(1, Math.min(page, pagination.pages || 1))
     pagination.page = validPage
-    load()
+    return load()
   }
 
   const handlePageSizeChange = (size: number) => {
     pagination.page_size = size
     pagination.page = 1
     setPersistedPageSize(size)
-    load()
+    return load()
   }
 
   onUnmounted(() => {
+    disposed = true
     abortController?.abort()
+    abortController = null
+    loading.value = false
   })
 
   return {

@@ -2,6 +2,7 @@ import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
 import AccountTestModal from '../AccountTestModal.vue'
+import { adoptDocumentAuthSession, replaceAuthSession } from '@/api/authSession'
 
 const { getAvailableModelsMock } = vi.hoisted(() => ({
   getAvailableModelsMock: vi.fn()
@@ -106,11 +107,14 @@ describe('AccountTestModal', () => {
       ok: true,
       body: {
         getReader: () => ({
+          cancel: vi.fn().mockResolvedValue(undefined),
+          releaseLock: vi.fn(),
           read: vi.fn().mockResolvedValue({ done: true, value: undefined })
         })
       }
     } as any)
-    localStorage.setItem('auth_token', 'test-token')
+    replaceAuthSession({ accessToken: 'test-token', user: { id: 101 } })
+    adoptDocumentAuthSession()
   })
 
   afterEach(() => {
@@ -158,6 +162,8 @@ describe('AccountTestModal', () => {
       ok: true,
       body: {
         getReader: () => ({
+          cancel: vi.fn().mockResolvedValue(undefined),
+          releaseLock: vi.fn(),
           read: vi.fn().mockImplementation(() => Promise.resolve(
             chunks.length > 0
               ? { done: false, value: chunks.shift() }

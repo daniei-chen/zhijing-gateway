@@ -1,0 +1,157 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+  "authorization": "本轮用户明确要求对 v0.0.2 最新源码进行全面严格审计及前后端、延迟和速率优化。此增量只记录已审阅的公开仓库修复，不表示完整后端或生产部署已获验证。",
+  "files": [
+    {
+      "path": "frontend/src/api/__tests__/admin.accounts.duplicate.spec.ts",
+      "before_sha256": "236880271725921adb0ef52416d37718769e892f8fca57294a1ae3ff0d366836",
+      "after_sha256": "5a4704d7cd324bc9c03f61af7e352f85fd3599cdb7342b2c1bbaf90519e807e8",
+      "reason": "Preserve duplicate API assertions while covering principal-scoped retry keys.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/api/__tests__/passkey.spec.ts",
+      "before_sha256": "a0d4693c10f77539221e93a5ea5345b0667f1725ba5ccd7e4cef4a3e01a941a2",
+      "after_sha256": "fdaf8f25bc27d4dce514b26e75171d4ee25d0f850723cb8da4e4a0c72ae1a831",
+      "reason": "Add session-replacement regressions for login/registration credential ceremonies.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/accounts.ts",
+      "before_sha256": "e225230816da0d2d2bbfd6d730440473be18f61d4693cdf793760c764572ab73",
+      "after_sha256": "11bd939d7f738530187310ba7f4f9f839f528cefd54b1e590d7b34f76d95046f",
+      "reason": "Scope ambiguous duplicate retries by administrator and clear only the captured operation key.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/backup.ts",
+      "before_sha256": "ab075a014eb820554170f0802768bc97d0a412a502124d34541153d299ee9b39",
+      "after_sha256": "4ccb26d5bc07c51af899ad8f4ae764593c12f3bf2a6a96c2cc45fbd4dbee0872",
+      "reason": "Add backwards-compatible optional AbortSignal to two read-only backup helpers.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/channelMonitor.ts",
+      "before_sha256": "0ad6d38cc9e2ac3c8b026ca0b91bfafa6396051ce66ab1ed5f46caeb9f11d6c2",
+      "after_sha256": "32e73847fb7b31166a2aed51fa4303b7930695d098bfd3197fc949767c22d355",
+      "reason": "Prevent a late success from deleting a newer duplicate operation retry key.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/groups.ts",
+      "before_sha256": "2e96f6c14714144236deedb7c8e71b45eaa1d2f11d861db49162408e6a7091c6",
+      "after_sha256": "bc3e32e6abc5728adfc86ec1702be1eb397c277d7fbf45033c276341d72e52b3",
+      "reason": "Prevent a late success from deleting a newer duplicate operation retry key.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/ops.ts",
+      "before_sha256": "55576d7b4a11c100d740eade9a047fb1adca942c9dd237a58bbf7d2cbba1a718",
+      "after_sha256": "5833407aacae43d8f549b14c5cd954897dd69aab04e23315049eb3a3b775ed3a",
+      "reason": "Bind QPS sockets/reconnect attempts to their originating session and make retry budgets and teardown bounded; this is a runtime change.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/api/passkey.ts",
+      "before_sha256": "b38ab22fc8e47277fe4aa9448424bbff41586044d448758dca1521806d6509dd",
+      "after_sha256": "215009c3c2922a2ccade3bb9ee4a7886a55d9c350e8466ba2916863643f244f4",
+      "reason": "Bind native WebAuthn waits and finish requests to the initiating authentication session.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useBatchImageAccess.ts",
+      "before_sha256": "00983cd67629d4d1c27af600f4a11ce5f9776de0f27fcb52d14ded7abe5f0930",
+      "after_sha256": "5719f6b02ee634fd131fac200a438d9a24b5dde538a614dd2caf047d79e197d2",
+      "reason": "Partition shared access state by session and stop stale pagination/finalizers.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useStepUp.ts",
+      "before_sha256": "e493b40b1e18b2e7c72caeff49c4964e4a1ca257bfc93878926542051b12a4e9",
+      "after_sha256": "5c5c88ae55953d636bce27b06152a4579fe069b05b42a65137147eb19593e3a5",
+      "reason": "Cancel stale TOTP prompts on session/scope disposal and prevent sensitive action replay under a new session.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useTableLoader.ts",
+      "before_sha256": "312b02aef5292521a35797fbc7aed4df668ffd5029f6412ba32ddeaa35a868f3",
+      "after_sha256": "2c138c91271f17071a289148cbff1a542d5c0166ca5532f2c0eec874d6ef0804",
+      "reason": "Snapshot query parameters and accept results only from the latest live controller.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/stores/auth.ts",
+      "before_sha256": "e283d82a19a939440c749c88868719d8d90ba84d15c86767ac9785152336c2f5",
+      "after_sha256": "d9aacbc8c0cfffb8e98961dc74867468b515e10c22780406e9e61c92641500a1",
+      "reason": "Prevent short-TTL refresh loops, timer overflow, mixed-session hydration and stale asynchronous authentication intent.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/utils/__tests__/embedded-url.spec.ts",
+      "before_sha256": "978a6caa016eb789bdf3aafee96f9e40be0fd225f018d5c3c274447038223ff3",
+      "after_sha256": "db7c6bf80ed52ce31ec27cc7dd74b694a41f91ab69b0def58751b8e77fbb71ca",
+      "reason": "Exercise malformed URL, encoded fragment and userinfo rejection.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/utils/embedded-url.ts",
+      "before_sha256": "8857292d8594abac89743fafc811db9d6503a66a3569f0a0ee8e0edd4247ab54",
+      "after_sha256": "b2321ed6d6ca4a66c4788006b55e5f15dedfaa1fb544d4673358b5f225c7ef01",
+      "reason": "Fail closed on invalid/userinfo URLs and decode credential-bearing fragment keys.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    },
+    {
+      "path": "frontend/src/api/authSession.ts",
+      "before_sha256": "4e2f9249556608664125e2d5c697aba33ec6c4afd4886a3261cc23a66258860c",
+      "after_sha256": "6261024f14e5b1a3148bf1bd4b3722a273456f49f8c234c053d56e08eb53fa2b",
+      "reason": "Memoize only the most recent credential digest, clear legacy registration secrets, and validate explicit document-session adoption.",
+      "tests": [
+        "Final Vitest 4.1.12 coverage run: 409 files and 3245 assertions passed; global coverage gate separately failed below 80%. See docs/audits/2026-11-05/tests-candidate.json and coverage-summary.json.",
+        "Frontend ESLint: 994 files, 0 errors, 0 warnings; vue-tsc --noEmit passed. Targeted original/fixed regressions are recorded in the audit review/evidence files."
+      ]
+    }
+  ]
+}

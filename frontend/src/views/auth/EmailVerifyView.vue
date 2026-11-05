@@ -194,6 +194,8 @@ import {
   sendVerifyCode,
 } from '@/api/auth'
 import { apiClient } from '@/api/client'
+import { assertAuthSession, AuthSessionChangedError, captureAuthSession } from '@/api/authSession'
+import { takeRegistrationDraft } from '@/utils/registrationDraft'
 import { buildAuthErrorMessage } from '@/utils/authError'
 import { extractApiErrorCode } from '@/utils/apiError'
 import {
@@ -214,6 +216,8 @@ const { t, locale } = useI18n()
 const router = useRouter()
 const authStore = useAuthStore()
 const appStore = useAppStore()
+const verificationSession = captureAuthSession()
+let disposed = false
 
 // ==================== State ====================
 
@@ -225,7 +229,7 @@ const verifyCode = ref<string>('')
 const countdown = ref<number>(0)
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 
-// Registration data from sessionStorage
+// Registration secrets live only in this component after a one-use handoff.
 type PendingAuthTokenField = 'pending_auth_token' | 'pending_oauth_token'
 type PendingAuthSessionSummary = {
   token: string
@@ -326,33 +330,27 @@ watch(validationToastMessage, (value, previousValue) => {
 onMounted(async () => {
   const activePendingSession = authStore.pendingAuthSession as PendingAuthSessionSummary | null
 
-  // Load registration data from sessionStorage
-  const registerDataStr = sessionStorage.getItem('register_data')
-  if (registerDataStr) {
-    try {
-      const registerData = JSON.parse(registerDataStr)
-      email.value = registerData.email || ''
-      password.value = registerData.password || ''
-      initialTurnstileToken.value =
-        registerData.tencent_captcha_ticket || registerData.turnstile_token || ''
-      initialTencentCaptchaRandstr.value = registerData.tencent_captcha_randstr || ''
-      promoCode.value = registerData.promo_code || ''
-      invitationCode.value = registerData.invitation_code || ''
-      affCode.value = registerData.aff_code || loadAffiliateReferralCode()
-      pendingAuthToken.value = registerData.pending_auth_token || activePendingSession?.token || ''
-      pendingAuthTokenField.value = registerData.pending_auth_token_field || activePendingSession?.token_field || 'pending_auth_token'
-      pendingProvider.value = registerData.pending_provider || activePendingSession?.provider || ''
-      pendingRedirect.value = registerData.pending_redirect || activePendingSession?.redirect || ''
-      pendingAdoptionDecision.value = registerData.pending_adoption_decision
-        ? {
-            adoptDisplayName: registerData.pending_adoption_decision.adopt_display_name === true,
-            adoptAvatar: registerData.pending_adoption_decision.adopt_avatar === true
-          }
-        : null
-      hasRegisterData.value = !!(email.value && password.value)
-    } catch {
-      hasRegisterData.value = false
-    }
+  const registerData = takeRegistrationDraft()
+  if (registerData) {
+    email.value = registerData.email || ''
+    password.value = registerData.password || ''
+    initialTurnstileToken.value =
+      registerData.tencent_captcha_ticket || registerData.turnstile_token || ''
+    initialTencentCaptchaRandstr.value = registerData.tencent_captcha_randstr || ''
+    promoCode.value = registerData.promo_code || ''
+    invitationCode.value = registerData.invitation_code || ''
+    affCode.value = registerData.aff_code || loadAffiliateReferralCode()
+    pendingAuthToken.value = registerData.pending_auth_token || activePendingSession?.token || ''
+    pendingAuthTokenField.value = registerData.pending_auth_token_field || activePendingSession?.token_field || 'pending_auth_token'
+    pendingProvider.value = registerData.pending_provider || activePendingSession?.provider || ''
+    pendingRedirect.value = registerData.pending_redirect || activePendingSession?.redirect || ''
+    pendingAdoptionDecision.value = registerData.pending_adoption_decision
+      ? {
+          adoptDisplayName: registerData.pending_adoption_decision.adopt_display_name === true,
+          adoptAvatar: registerData.pending_adoption_decision.adopt_avatar === true
+        }
+      : null
+    hasRegisterData.value = !!(email.value && password.value)
   } else if (activePendingSession) {
     pendingAuthToken.value = activePendingSession.token
     pendingAuthTokenField.value = activePendingSession.token_field
@@ -363,6 +361,7 @@ onMounted(async () => {
   // Load public settings
   try {
     const settings = await getPublicSettings()
+    if (disposed) return
     turnstileEnabled.value = settings.turnstile_enabled
     turnstileSiteKey.value = settings.turnstile_site_key || ''
     tencentCaptchaEnabled.value = settings.tencent_captcha_enabled === true
@@ -382,17 +381,35 @@ onMounted(async () => {
   }
 
   // Auto-send verification code if we have valid data
-  if (hasRegisterData.value) {
+  if (!disposed && hasRegisterData.value) {
     await sendCode()
   }
 })
 
 onUnmounted(() => {
+  disposed = true
+  clearVerificationSecrets()
   if (countdownTimer) {
     clearInterval(countdownTimer)
     countdownTimer = null
   }
 })
+
+function assertVerificationSession(): void {
+  if (disposed) throw new AuthSessionChangedError()
+  assertAuthSession(verificationSession)
+}
+
+function clearVerificationSecrets(): void {
+  password.value = ''
+  initialTurnstileToken.value = ''
+  initialTencentCaptchaRandstr.value = ''
+  resendTurnstileToken.value = ''
+  resendTencentCaptchaRandstr.value = ''
+  createAccountTurnstileToken.value = ''
+  createAccountTencentCaptchaRandstr.value = ''
+  hasRegisterData.value = false
+}
 
 // ==================== Countdown ====================
 
@@ -533,6 +550,7 @@ async function sendCode(): Promise<void> {
   let captchaProofUsed = false
 
   try {
+    assertVerificationSession()
     if (!shouldBypassRegistrationEmailPolicy() && !isRegistrationEmailSuffixAllowed(email.value, registrationEmailSuffixWhitelist.value)) {
       errorMessage.value = buildEmailSuffixNotAllowedMessage()
       appStore.showError(errorMessage.value)
@@ -560,13 +578,14 @@ async function sendCode(): Promise<void> {
     const response = isPendingOAuthFlow()
       ? await sendPendingOAuthVerifyCode(requestPayload)
       : await sendVerifyCode(requestPayload)
+    assertVerificationSession()
     requestSucceeded = true
 
     const pendingSendCodeSession = isPendingOAuthFlow()
       ? getPendingOAuthSendCodeSessionResponse(response as PendingOAuthSendVerifyCodeResponse)
       : null
     if (pendingSendCodeSession) {
-      sessionStorage.removeItem('register_data')
+      clearVerificationSecrets()
       persistPendingOAuthSession(
         pendingSendCodeSession.provider || pendingProvider.value,
         pendingSendCodeSession.redirect,
@@ -587,7 +606,6 @@ async function sendCode(): Promise<void> {
     appStore.showError(errorMessage.value)
   } finally {
     if (captchaProofUsed) {
-      clearStoredCaptchaProof()
       initialTurnstileToken.value = ''
       initialTencentCaptchaRandstr.value = ''
       resendTurnstileToken.value = ''
@@ -601,24 +619,10 @@ async function sendCode(): Promise<void> {
   }
 }
 
-function clearStoredCaptchaProof(): void {
-  const registerDataStr = sessionStorage.getItem('register_data')
-  if (!registerDataStr) return
-
-  try {
-    const registerData = JSON.parse(registerDataStr) as Record<string, unknown>
-    delete registerData.turnstile_token
-    delete registerData.tencent_captcha_ticket
-    delete registerData.tencent_captcha_randstr
-    sessionStorage.setItem('register_data', JSON.stringify(registerData))
-  } catch {
-    // Invalid registration state is handled by the existing onMounted parser.
-  }
-}
-
 // ==================== Handlers ====================
 
 async function handleResendCode(): Promise<void> {
+  if (isSendingCode.value || countdown.value > 0) return
   // Turnstile stays staged; Tencent is acquired from this action.
   if (turnstileEnabled.value && !showResendTurnstile.value) {
     showResendTurnstile.value = true
@@ -630,11 +634,18 @@ async function handleResendCode(): Promise<void> {
     return
   }
 
-  if (!(await acquireResendActionProof())) {
-    return
+  isSendingCode.value = true
+  try {
+    assertVerificationSession()
+    if (!(await acquireResendActionProof())) return
+    assertVerificationSession()
+    await sendCode()
+  } catch (error) {
+    errorMessage.value = buildRegistrationErrorMessage(error, t('auth.sendCodeFailed'))
+    appStore.showError(errorMessage.value)
+  } finally {
+    isSendingCode.value = false
   }
-
-  await sendCode()
 }
 
 function validateForm(): boolean {
@@ -654,6 +665,7 @@ function validateForm(): boolean {
 }
 
 async function handleVerify(): Promise<void> {
+  if (isLoading.value || !hasRegisterData.value) return
   errorMessage.value = ''
 
   if (!validateForm()) {
@@ -666,13 +678,12 @@ async function handleVerify(): Promise<void> {
     return
   }
 
-  if (!(await acquireCreateAccountActionProof())) {
-    return
-  }
-
   isLoading.value = true
 
   try {
+    assertVerificationSession()
+    if (!(await acquireCreateAccountActionProof())) return
+    assertVerificationSession()
     if (isPendingOAuthFlow()) {
       const payload: Record<string, unknown> = {
         email: email.value,
@@ -704,8 +715,9 @@ async function handleVerify(): Promise<void> {
         '/auth/oauth/pending/create-account',
         payload
       )
+      assertVerificationSession()
       if (isPendingOAuthSessionResponse(data)) {
-        sessionStorage.removeItem('register_data')
+        clearVerificationSecrets()
         persistPendingOAuthSession(data.provider || pendingProvider.value, data.redirect)
         await router.push(resolvePendingOAuthCallbackRoute(data.provider || pendingProvider.value))
         return
@@ -716,6 +728,7 @@ async function handleVerify(): Promise<void> {
 
       persistOAuthTokenContext(data)
       await authStore.setToken(data.access_token)
+      if (disposed) return
       authStore.clearPendingAuthSession?.()
     } else {
       // Register with verification code
@@ -735,8 +748,8 @@ async function handleVerify(): Promise<void> {
       })
     }
 
-    // Clear session data
-    sessionStorage.removeItem('register_data')
+    if (disposed) return
+    clearVerificationSecrets()
     clearAllAffiliateReferralCodes()
 
     // Show success toast
@@ -759,8 +772,7 @@ async function handleVerify(): Promise<void> {
 }
 
 function handleBack(): void {
-  // Clear session data
-  sessionStorage.removeItem('register_data')
+  clearVerificationSecrets()
 
   // Go back to registration
   router.push('/register')

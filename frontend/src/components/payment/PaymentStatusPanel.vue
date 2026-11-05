@@ -228,6 +228,7 @@ import { useI18n } from 'vue-i18n'
 import { usePaymentStore } from '@/stores/payment'
 import { useAppStore } from '@/stores'
 import { paymentAPI } from '@/api/payment'
+import { captureAuthSession, isAuthSessionCurrent, subscribeAuthSession, type AuthSessionSnapshot } from '@/api/authSession'
 import { extractI18nErrorMessage } from '@/utils/apiError'
 import { getPaymentPopupFeatures, isBuiltInAlipayMethod, isBuiltInWxpayMethod } from '@/components/payment/providerConfig'
 import { currencySymbol, formatPaymentAmount, normalizePaymentCurrency } from '@/components/payment/currency'
@@ -292,6 +293,20 @@ let countdownTimer: ReturnType<typeof setInterval> | null = null
 let verifyAttempts = 0
 let lastVerifyAt = 0
 let alipayLauncher: AlipayDeepLinkLauncher | null = null
+let generation = 0
+let active = false
+let disposed = false
+let mounted = false
+let session: AuthSessionSnapshot | null = null
+
+function ownsOperation(version: number, orderId: number): boolean {
+  return !disposed && active && version === generation && orderId === props.orderId
+    && !outcome.value && session !== null && isAuthSessionCurrent(session)
+}
+
+const unsubscribeSession = subscribeAuthSession(() => {
+  if (session && !isAuthSessionCurrent(session)) cleanup()
+})
 
 const VERIFY_RETRY_INTERVAL_MS = 15000
 const VERIFY_RETRY_MAX_ATTEMPTS = 6
@@ -364,8 +379,10 @@ function setOutcome(next: PaymentOutcome) {
 }
 
 async function renderQR() {
+  const version = generation
+  const orderId = props.orderId
   await nextTick()
-  if (!showQRCode.value || !qrCanvas.value || !qrUrl.value) return
+  if (!ownsOperation(version, orderId) || !showQRCode.value || !qrCanvas.value || !qrUrl.value) return
   await QRCode.toCanvas(qrCanvas.value, qrUrl.value, {
     width: 220, margin: 2,
     errorCorrectionLevel: 'M',
@@ -373,6 +390,7 @@ async function renderQR() {
 }
 
 function updateDeepLinkState(state: AlipayDeepLinkState) {
+  if (!ownsOperation(generation, props.orderId)) return
   deepLinkState.value = state
   if (state === 'fallback') {
     deepLinkFallbackVisible.value = true
@@ -420,17 +438,18 @@ async function tryRecoverPendingOrder(order: PaymentOrder): Promise<PaymentOrder
 
 let pollInFlight = false
 async function pollStatus() {
-  if (!props.orderId || outcome.value) return
+  const version = generation
+  const orderId = props.orderId
+  if (!orderId || !ownsOperation(version, orderId) || cancelling.value) return
   // 防重入：接口（含 verifyOrder 二次确认）响应慢于 3 秒轮询间隔时避免并发重叠请求。
   if (pollInFlight) return
   pollInFlight = true
   try {
-    let order = await paymentStore.pollOrderStatus(props.orderId)
-    if (!order) return
+    let order = await paymentStore.pollOrderStatus(orderId)
+    if (!order || order.id !== orderId || !ownsOperation(version, orderId) || cancelling.value) return
     // 已进入终态则不再处理迟到的响应。
-    if (outcome.value) return
     order = await tryRecoverPendingOrder(order)
-    if (outcome.value) return
+    if (!ownsOperation(version, orderId) || order.id !== orderId || cancelling.value) return
     if (isSuccessStatus(order.status)) {
       cleanup()
       paidOrder.value = order
@@ -444,7 +463,7 @@ async function pollStatus() {
       setOutcome('expired')
     }
   } finally {
-    pollInFlight = false
+    if (version === generation) pollInFlight = false
   }
 }
 
@@ -459,52 +478,77 @@ function startCountdown(seconds: number) {
 }
 
 async function handleCancel() {
-  if (!props.orderId || cancelling.value) return
+  const version = generation
+  const orderId = props.orderId
+  if (!orderId || cancelling.value || !ownsOperation(version, orderId)) return
   cancelling.value = true
   try {
-    await paymentAPI.cancelOrder(props.orderId)
+    await paymentAPI.cancelOrder(orderId)
+    if (!ownsOperation(version, orderId)) return
     cleanup()
     setOutcome('cancelled')
   } catch (err: unknown) {
-    appStore.showError(extractI18nErrorMessage(err, t, 'payment.errors', t('common.error')))
+    if (ownsOperation(version, orderId)) appStore.showError(extractI18nErrorMessage(err, t, 'payment.errors', t('common.error')))
   } finally {
-    cancelling.value = false
+    if (version === generation) cancelling.value = false
   }
 }
 
 function handleDone() { cleanup(); emit('done') }
 
 function cleanup() {
+  generation += 1
+  active = false
+  pollInFlight = false
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
   if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null }
   alipayLauncher?.dispose()
   alipayLauncher = null
 }
 
-// Initialize on mount
-qrUrl.value = props.qrCode
-verifyAttempts = 0
-lastVerifyAt = 0
-let seconds = 30 * 60
-if (props.expiresAt) {
-  seconds = Math.floor((new Date(props.expiresAt).getTime() - Date.now()) / 1000)
-}
-startCountdown(seconds)
-pollTimer = setInterval(pollStatus, 3000)
-renderQR()
-
-watch([() => qrUrl.value, showQRCode], () => renderQR())
-onMounted(() => {
-  if (!isMobileAlipayDeepLink.value) return
+function launchAlipay() {
+  if (!mounted || !ownsOperation(generation, props.orderId) || !isMobileAlipayDeepLink.value) return
+  const version = generation
+  const orderId = props.orderId
   alipayLauncher = createAlipayDeepLinkLauncher({
     qrCode: qrUrl.value,
     document,
     lifecycleTarget: window,
     userAgent: window.navigator.userAgent,
     assignLocation: (url) => window.location.assign(url),
-    onStateChange: updateDeepLinkState,
+    onStateChange: state => {
+      if (ownsOperation(version, orderId)) updateDeepLinkState(state)
+    },
   })
   alipayLauncher.launch()
-})
-onUnmounted(() => cleanup())
+}
+
+function init() {
+  cleanup()
+  if (disposed) return
+  try { session = captureAuthSession() } catch { return }
+  active = true
+  outcome.value = null
+  cancelling.value = false
+  paidOrder.value = null
+  qrUrl.value = props.qrCode
+  deepLinkState.value = 'idle'
+  deepLinkFallbackVisible.value = false
+  verifyAttempts = 0
+  lastVerifyAt = 0
+  let seconds = 30 * 60
+  if (props.expiresAt) {
+    const deadline = new Date(props.expiresAt).getTime()
+    seconds = Number.isFinite(deadline) ? Math.floor((deadline - Date.now()) / 1000) : 0
+  }
+  startCountdown(seconds)
+  if (!outcome.value) pollTimer = setInterval(pollStatus, 3000)
+  renderQR()
+  launchAlipay()
+}
+
+watch([() => props.orderId, () => props.qrCode, () => props.expiresAt, () => props.paymentType, () => props.mobileAlipayDeepLink], init, { immediate: true })
+watch([() => qrUrl.value, showQRCode], () => renderQR())
+onMounted(() => { mounted = true; launchAlipay() })
+onUnmounted(() => { disposed = true; cleanup(); unsubscribeSession() })
 </script>

@@ -1,0 +1,26 @@
+test_delta_cannot_approve_an_unknown_file_or_break_the_hash_chain (test_frontend_contract.FrontendContractTests.test_delta_cannot_approve_an_unknown_file_or_break_the_hash_chain) ... ok
+test_explicit_delta_passes_without_rewriting_historical_baselines (test_frontend_contract.FrontendContractTests.test_explicit_delta_passes_without_rewriting_historical_baselines) ... ok
+test_optimized_python_still_rejects_unreviewed_source (test_frontend_contract.FrontendContractTests.test_optimized_python_still_rejects_unreviewed_source) ... ok
+test_original_baseline_passes_without_an_audit_delta (test_frontend_contract.FrontendContractTests.test_original_baseline_passes_without_an_audit_delta) ... ok
+test_unknown_schema_fields_and_duplicate_entries_are_rejected (test_frontend_contract.FrontendContractTests.test_unknown_schema_fields_and_duplicate_entries_are_rejected) ... ok
+test_ambiguous_http_framing_is_rejected (test_preview_http.PreviewBoundaryTests.test_ambiguous_http_framing_is_rejected) ... ok
+test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies (test_preview_http.PreviewBoundaryTests.test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies) ... ok
+test_invalid_diagnostic_pagination_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_invalid_diagnostic_pagination_returns_a_client_error) ... ok
+test_malformed_or_nonobject_json_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_malformed_or_nonobject_json_returns_a_client_error) ... ok
+test_oversized_body_is_rejected (test_preview_http.PreviewBoundaryTests.test_oversized_body_is_rejected) ... ok
+test_valid_synthetic_login_is_unchanged (test_preview_http.PreviewBoundaryTests.test_valid_synthetic_login_is_unchanged) ... ok
+test_package_rebuilds_dist_and_excludes_ignored_integration_secrets (test_release_integrity.PackageProvenanceTests.test_package_rebuilds_dist_and_excludes_ignored_integration_secrets) ... ok
+test_optimized_python_still_checks_patch_digest (test_release_integrity.PatchVerificationTests.test_optimized_python_still_checks_patch_digest) ... ok
+test_checksums_cannot_be_empty_or_omit_an_archive (test_release_integrity.ReleaseVerificationTests.test_checksums_cannot_be_empty_or_omit_an_archive) ... ok
+test_duplicate_zip_entries_are_rejected (test_release_integrity.ReleaseVerificationTests.test_duplicate_zip_entries_are_rejected) ... ok
+test_optimized_python_still_rejects_a_tampered_asset (test_release_integrity.ReleaseVerificationTests.test_optimized_python_still_rejects_a_tampered_asset) ... ok
+test_path_traversal_in_either_archive_is_rejected (test_release_integrity.ReleaseVerificationTests.test_path_traversal_in_either_archive_is_rejected) ... ok
+test_symlink_zip_entry_is_rejected (test_release_integrity.ReleaseVerificationTests.test_symlink_zip_entry_is_rejected) ... ok
+test_unlisted_release_files_are_rejected (test_release_integrity.ReleaseVerificationTests.test_unlisted_release_files_are_rejected) ... ok
+test_valid_release_is_accepted_in_both_python_modes (test_release_integrity.ReleaseVerificationTests.test_valid_release_is_accepted_in_both_python_modes) ... ok
+
+----------------------------------------------------------------------
+Ran 20 tests in 2.529s
+
+OK
+{"version": "0.0.2", "static_files": 1, "source_commit": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "assets": ["zhijing-gateway-v0.0.2-frontend.zip", "zhijing-gateway-v0.0.2-diagnostics-source.zip", "BUILD-MANIFEST.json", "SHA256SUMS.txt"], "production_deployed": false}

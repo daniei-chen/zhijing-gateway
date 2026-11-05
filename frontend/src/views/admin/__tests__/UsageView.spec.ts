@@ -3,6 +3,7 @@ import { flushPromises, mount } from '@vue/test-utils'
 import { defineComponent, ref } from 'vue'
 
 import UsageView from '../UsageView.vue'
+import { adoptDocumentAuthSession, replaceAuthSession } from '@/api/authSession'
 
 const { list, exportList, getStats, getSnapshotV2, getById, getModelStats, listErrorLogs, routeQuery, aoaToSheet, sheetAddAoa, saveAs, xlsxWrite } = vi.hoisted(() => {
   vi.stubGlobal('localStorage', {
@@ -739,6 +740,12 @@ describe('admin UsageView ranking tab', () => {
 describe('admin UsageView model audit export', () => {
 	beforeEach(() => {
 		vi.useFakeTimers()
+		const storage = new Map<string, string>()
+		vi.mocked(localStorage.getItem).mockImplementation(key => storage.get(key) ?? null)
+		vi.mocked(localStorage.setItem).mockImplementation((key, value) => { storage.set(key, value) })
+		vi.mocked(localStorage.removeItem).mockImplementation(key => { storage.delete(key) })
+		replaceAuthSession({ accessToken: 'SYNTHETIC-EXPORT', user: { id: 101 } })
+		adoptDocumentAuthSession()
 		list.mockReset().mockResolvedValue({ items: [], total: 0, pages: 0 })
 		exportList.mockReset().mockResolvedValue({
 			items: [{

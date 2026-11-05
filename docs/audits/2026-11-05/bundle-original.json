@@ -1,0 +1,968 @@
+{
+  "directory": "${AUDIT_WORKSPACE}/perf-build-release",
+  "method": "Sum individually gzip-compressed JS files reachable through manifest imports from index.html and the route. Excludes dynamicImports, CSS/images, transport overhead and browser timings.",
+  "routes": {
+    "index.html": {
+      "files": [
+        {
+          "source": "_vendor-i18n-cY70av7B.js",
+          "file": "app-assets/vendor-i18n-cY70av7B.js",
+          "bytes": 56991,
+          "gzip_bytes": 19111
+        },
+        {
+          "source": "_vendor-misc-BBAVm09x.js",
+          "file": "app-assets/vendor-misc-BBAVm09x.js",
+          "bytes": 280570,
+          "gzip_bytes": 95227
+        },
+        {
+          "source": "_vendor-vue-DJQ-D4Ek.js",
+          "file": "app-assets/vendor-vue-DJQ-D4Ek.js",
+          "bytes": 114299,
+          "gzip_bytes": 44270
+        },
+        {
+          "source": "index.html",
+          "file": "app-assets/index-CT74q1ON.js",
+          "bytes": 203047,
+          "gzip_bytes": 60171
+        }
+      ],
+      "js_bytes": 654907,
+      "gzip_js_bytes": 218779
+    },
+    "src/views/auth/LoginView.vue": {
+      "files": [
+        {
+          "source": "_CaptchaChallenge.vue_vue_type_script_setup_true_lang-DH9Kj3Gn.js",
+          "file": "app-assets/CaptchaChallenge.vue_vue_type_script_setup_true_lang-DH9Kj3Gn.js",
+          "bytes": 10792,
+          "gzip_bytes": 4119
+        },
+        {
+          "source": "_LocaleSwitcher-DXhcf-n7.js",
+          "file": "app-assets/LocaleSwitcher-DXhcf-n7.js",
+          "bytes": 2287,
+          "gzip_bytes": 1170
+        },
+        {
+          "source": "_LoginAgreementPrompt-CdWkXRGD.js",
+          "file": "app-assets/LoginAgreementPrompt-CdWkXRGD.js",
+          "bytes": 16271,
+          "gzip_bytes": 5650
+        },
+        {
+          "source": "_ZhijingLoginLayout-Ca-6i_n-.js",
+          "file": "app-assets/ZhijingLoginLayout-Ca-6i_n-.js",
+          "bytes": 3775,
+          "gzip_bytes": 2019
+        },
+        {
+          "source": "_apiError-zX02PgX9.js",
+          "file": "app-assets/apiError-zX02PgX9.js",
+          "bytes": 1212,
+          "gzip_bytes": 566
+        },
+        {
+          "source": "_oauthAffiliate-CrlUwkd1.js",
+          "file": "app-assets/oauthAffiliate-CrlUwkd1.js",
+          "bytes": 1197,
+          "gzip_bytes": 500
+        },
+        {
+          "source": "_useWorkspaceAppearance-IwYz9p8w.js",
+          "file": "app-assets/useWorkspaceAppearance-IwYz9p8w.js",
+          "bytes": 549,
+          "gzip_bytes": 325
+        },
+        {
+          "source": "_vendor-i18n-cY70av7B.js",
+          "file": "app-assets/vendor-i18n-cY70av7B.js",
+          "bytes": 56991,
+          "gzip_bytes": 19111
+        },
+        {
+          "source": "_vendor-misc-BBAVm09x.js",
+          "file": "app-assets/vendor-misc-BBAVm09x.js",
+          "bytes": 280570,
+          "gzip_bytes": 95227
+        },
+        {
+          "source": "_vendor-ui-CP-ddnDN.js",
+          "file": "app-assets/vendor-ui-CP-ddnDN.js",
+          "bytes": 436938,
+          "gzip_bytes": 144776
+        },
+        {
+          "source": "_vendor-vue-DJQ-D4Ek.js",
+          "file": "app-assets/vendor-vue-DJQ-D4Ek.js",
+          "bytes": 114299,
+          "gzip_bytes": 44270
+        },
+        {
+          "source": "_zhijing-z-DIW96NAL.js",
+          "file": "app-assets/zhijing-z-DIW96NAL.js",
+          "bytes": 52,
+          "gzip_bytes": 72
+        },
+        {
+          "source": "index.html",
+          "file": "app-assets/index-CT74q1ON.js",
+          "bytes": 203047,
+          "gzip_bytes": 60171
+        },
+        {
+          "source": "src/views/auth/LoginView.vue",
+          "file": "app-assets/LoginView-qHnk1H2a.js",
+          "bytes": 19750,
+          "gzip_bytes": 7183
+        }
+      ],
+      "js_bytes": 1147730,
+      "gzip_js_bytes": 385159
+    },
+    "src/views/user/DashboardView.vue": {
+      "files": [
+        {
+          "source": "_AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js",
+          "file": "app-assets/AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js",
+          "bytes": 117802,
+          "gzip_bytes": 33631
+        },
+        {
+          "source": "_EmptyState.vue_vue_type_script_setup_true_lang-dBVwGpw5.js",
+          "file": "app-assets/EmptyState.vue_vue_type_script_setup_true_lang-dBVwGpw5.js",
+          "bytes": 1709,
+          "gzip_bytes": 926
+        },
+        {
+          "source": "_LoadingSpinner-pc5kvMU_.js",
+          "file": "app-assets/LoadingSpinner-pc5kvMU_.js",
+          "bytes": 828,
+          "gzip_bytes": 509
+        },
+        {
+          "source": "_LocaleSwitcher-DXhcf-n7.js",
+          "file": "app-assets/LocaleSwitcher-DXhcf-n7.js",
+          "bytes": 2287,
+          "gzip_bytes": 1170
+        },
+        {
+          "source": "_TokenUsageTrend.vue_vue_type_script_setup_true_lang-Jo5j1ymn.js",
+          "file": "app-assets/TokenUsageTrend.vue_vue_type_script_setup_true_lang-Jo5j1ymn.js",
+          "bytes": 13308,
+          "gzip_bytes": 4764
+        },
+        {
+          "source": "_WorkspaceLoadError.vue_vue_type_script_setup_true_lang-BH-mMnGV.js",
+          "file": "app-assets/WorkspaceLoadError.vue_vue_type_script_setup_true_lang-BH-mMnGV.js",
+          "bytes": 791,
+          "gzip_bytes": 579
+        },
+        {
+          "source": "_usage-qDYuiKSz.js",
+          "file": "app-assets/usage-qDYuiKSz.js",
+          "bytes": 1882,
+          "gzip_bytes": 619
+        },
+        {
+          "source": "_useClipboard-CFxBZvRH.js",
+          "file": "app-assets/useClipboard-CFxBZvRH.js",
+          "bytes": 917,
+          "gzip_bytes": 571
+        },
+        {
+          "source": "_useWorkspaceAppearance-IwYz9p8w.js",
+          "file": "app-assets/useWorkspaceAppearance-IwYz9p8w.js",
+          "bytes": 549,
+          "gzip_bytes": 325
+        },
+        {
+          "source": "_user-9HvA_x98.js",
+          "file": "app-assets/user-9HvA_x98.js",
+          "bytes": 2057,
+          "gzip_bytes": 869
+        },
+        {
+          "source": "_vendor-chart-BchnUoOD.js",
+          "file": "app-assets/vendor-chart-BchnUoOD.js",
+          "bytes": 178340,
+          "gzip_bytes": 61253
+        },
+        {
+          "source": "_vendor-i18n-cY70av7B.js",
+          "file": "app-assets/vendor-i18n-cY70av7B.js",
+          "bytes": 56991,
+          "gzip_bytes": 19111
+        },
+        {
+          "source": "_vendor-misc-BBAVm09x.js",
+          "file": "app-assets/vendor-misc-BBAVm09x.js",
+          "bytes": 280570,
+          "gzip_bytes": 95227
+        },
+        {
+          "source": "_vendor-ui-CP-ddnDN.js",
+          "file": "app-assets/vendor-ui-CP-ddnDN.js",
+          "bytes": 436938,
+          "gzip_bytes": 144776
+        },
+        {
+          "source": "_vendor-vue-DJQ-D4Ek.js",
+          "file": "app-assets/vendor-vue-DJQ-D4Ek.js",
+          "bytes": 114299,
+          "gzip_bytes": 44270
+        },
+        {
+          "source": "_zhijing-z-DIW96NAL.js",
+          "file": "app-assets/zhijing-z-DIW96NAL.js",
+          "bytes": 52,
+          "gzip_bytes": 72
+        },
+        {
+          "source": "_zhijingPalette-CRCmkR-p.js",
+          "file": "app-assets/zhijingPalette-CRCmkR-p.js",
+          "bytes": 146,
+          "gzip_bytes": 130
+        },
+        {
+          "source": "index.html",
+          "file": "app-assets/index-CT74q1ON.js",
+          "bytes": 203047,
+          "gzip_bytes": 60171
+        },
+        {
+          "source": "src/views/user/DashboardView.vue",
+          "file": "app-assets/DashboardView-BvoW5g1i.js",
+          "bytes": 32069,
+          "gzip_bytes": 9639
+        }
+      ],
+      "js_bytes": 1444582,
+      "gzip_js_bytes": 478612
+    },
+    "src/views/admin/UsageView.vue": {
+      "files": [
+        {
+          "source": "_AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js",
+          "file": "app-assets/AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js",
+          "bytes": 117802,
+          "gzip_bytes": 33631
+        },
+        {
+          "source": "_ConfirmDialog.vue_vue_type_script_setup_true_lang-5Gk_2lKn.js",
+          "file": "app-assets/ConfirmDialog.vue_vue_type_script_setup_true_lang-5Gk_2lKn.js",
+          "bytes": 1535,
+          "gzip_bytes": 747
+        },
+        {
+          "source": "_DataTable-CycQmh_1.js",
+          "file": "app-assets/DataTable-CycQmh_1.js",
+          "bytes": 16349,
+          "gzip_bytes": 5723
+        },
+        {
+          "source": "_EmptyState.vue_vue_type_script_setup_true_lang-dBVwGpw5.js",
+          "file": "app-assets/EmptyState.vue_vue_type_script_setup_true_lang-dBVwGpw5.js",
+          "bytes": 1709,
+          "gzip_bytes": 926
+        },
+        {
+          "source": "_EndpointDistributionChart.vue_vue_type_script_setup_true_lang-DCRCakm1.js",
+          "file": "app-assets/EndpointDistributionChart.vue_vue_type_script_setup_true_lang-DCRCakm1.js",
+          "bytes": 7804,
+          "gzip_bytes": 2661
+        },
+        {
+          "source": "_GroupDistributionChart.vue_vue_type_script_setup_true_lang-C_4PPfNG.js",
+          "file": "app-assets/GroupDistributionChart.vue_vue_type_script_setup_true_lang-C_4PPfNG.js",
+          "bytes": 48876,
+          "gzip_bytes": 12214
+        },
+        {
+          "source": "_LoadingSpinner-pc5kvMU_.js",
+          "file": "app-assets/LoadingSpinner-pc5kvMU_.js",
+          "bytes": 828,
+          "gzip_bytes": 509
+        },
+        {
+          "source": "_LocaleSwitcher-DXhcf-n7.js",
+          "file": "app-assets/LocaleSwitcher-DXhcf-n7.js",
+          "bytes": 2287,
+          "gzip_bytes": 1170
+        },
+        {
+          "source": "_ModelDistributionChart.vue_vue_type_script_setup_true_lang-CYVX23it.js",
+          "file": "app-assets/ModelDistributionChart.vue_vue_type_script_setup_true_lang-CYVX23it.js",
+          "bytes": 14656,
+          "gzip_bytes": 4078
+        },
+        {
+          "source": "_OpsErrorLogTable.vue_vue_type_script_setup_true_lang-zaNiSRIJ.js",
+          "file": "app-assets/OpsErrorLogTable.vue_vue_type_script_setup_true_lang-zaNiSRIJ.js",
+          "bytes": 31129,
+          "gzip_bytes": 8677
+        },
+        {
+          "source": "_Pagination-B5XYMtNs.js",
+          "file": "app-assets/Pagination-B5XYMtNs.js",
+          "bytes": 5813,
+          "gzip_bytes": 2021
+        },
+        {
+          "source": "_Select-DXROXICb.js",
+          "file": "app-assets/Select-DXROXICb.js",
+          "bytes": 8050,
+          "gzip_bytes": 3145
+        },
+        {
+          "source": "_TokenUsageTrend.vue_vue_type_script_setup_true_lang-Jo5j1ymn.js",
+          "file": "app-assets/TokenUsageTrend.vue_vue_type_script_setup_true_lang-Jo5j1ymn.js",
+          "bytes": 13308,
+          "gzip_bytes": 4764
+        },
+        {
+          "source": "_UserBalanceHistoryModal.vue_vue_type_script_setup_true_lang-B29O0lId.js",
+          "file": "app-assets/UserBalanceHistoryModal.vue_vue_type_script_setup_true_lang-B29O0lId.js",
+          "bytes": 9108,
+          "gzip_bytes": 3193
+        },
+        {
+          "source": "_errorBadges-CVgLgGDI.js",
+          "file": "app-assets/errorBadges-CVgLgGDI.js",
+          "bytes": 7505,
+          "gzip_bytes": 2952
+        },
+        {
+          "source": "_useClipboard-CFxBZvRH.js",
+          "file": "app-assets/useClipboard-CFxBZvRH.js",
+          "bytes": 917,
+          "gzip_bytes": 571
+        },
+        {
+          "source": "_usePersistedPageSize-x0WpaIWh.js",
+          "file": "app-assets/usePersistedPageSize-x0WpaIWh.js",
+          "bytes": 1205,
+          "gzip_bytes": 585
+        },
+        {
+          "source": "_useWorkspaceAppearance-IwYz9p8w.js",
+          "file": "app-assets/useWorkspaceAppearance-IwYz9p8w.js",
+          "bytes": 549,
+          "gzip_bytes": 325
+        },
+        {
+          "source": "_vendor-chart-BchnUoOD.js",
+          "file": "app-assets/vendor-chart-BchnUoOD.js",
+          "bytes": 178340,
+          "gzip_bytes": 61253
+        },
+        {
+          "source": "_vendor-i18n-cY70av7B.js",
+          "file": "app-assets/vendor-i18n-cY70av7B.js",
+          "bytes": 56991,
+          "gzip_bytes": 19111
+        },
+        {
+          "source": "_vendor-misc-BBAVm09x.js",
+          "file": "app-assets/vendor-misc-BBAVm09x.js",
+          "bytes": 280570,
+          "gzip_bytes": 95227
+        },
+        {
+          "source": "_vendor-ui-CP-ddnDN.js",
+          "file": "app-assets/vendor-ui-CP-ddnDN.js",
+          "bytes": 436938,
+          "gzip_bytes": 144776
+        },
+        {
+          "source": "_vendor-vue-DJQ-D4Ek.js",
+          "file": "app-assets/vendor-vue-DJQ-D4Ek.js",
+          "bytes": 114299,
+          "gzip_bytes": 44270
+        },
+        {
+          "source": "_zhijingPalette-CRCmkR-p.js",
+          "file": "app-assets/zhijingPalette-CRCmkR-p.js",
+          "bytes": 146,
+          "gzip_bytes": 130
+        },
+        {
+          "source": "index.html",
+          "file": "app-assets/index-CT74q1ON.js",
+          "bytes": 203047,
+          "gzip_bytes": 60171
+        },
+        {
+          "source": "src/views/admin/UsageView.vue",
+          "file": "app-assets/UsageView-BTGnJDwO.js",
+          "bytes": 51062,
+          "gzip_bytes": 14716
+        }
+      ],
+      "js_bytes": 1610823,
+      "gzip_js_bytes": 527546
+    },
+    "src/views/user/AirwallexPaymentView.vue": {
+      "files": [
+        {
+          "source": "_AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js",
+          "file": "app-assets/AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js",
+          "bytes": 117802,
+          "gzip_bytes": 33631
+        },
+        {
+          "source": "_LocaleSwitcher-DXhcf-n7.js",
+          "file": "app-assets/LocaleSwitcher-DXhcf-n7.js",
+          "bytes": 2287,
+          "gzip_bytes": 1170
+        },
+        {
+          "source": "_paymentFlow-cys_N5rS.js",
+          "file": "app-assets/paymentFlow-cys_N5rS.js",
+          "bytes": 4394,
+          "gzip_bytes": 1547
+        },
+        {
+          "source": "_useClipboard-CFxBZvRH.js",
+          "file": "app-assets/useClipboard-CFxBZvRH.js",
+          "bytes": 917,
+          "gzip_bytes": 571
+        },
+        {
+          "source": "_useWorkspaceAppearance-IwYz9p8w.js",
+          "file": "app-assets/useWorkspaceAppearance-IwYz9p8w.js",
+          "bytes": 549,
+          "gzip_bytes": 325
+        },
+        {
+          "source": "_vendor-i18n-cY70av7B.js",
+          "file": "app-assets/vendor-i18n-cY70av7B.js",
+          "bytes": 56991,
+          "gzip_bytes": 19111
+        },
+        {
+          "source": "_vendor-misc-BBAVm09x.js",
+          "file": "app-assets/vendor-misc-BBAVm09x.js",
+          "bytes": 280570,
+          "gzip_bytes": 95227
+        },
+        {
+          "source": "_vendor-ui-CP-ddnDN.js",
+          "file": "app-assets/vendor-ui-CP-ddnDN.js",
+          "bytes": 436938,
+          "gzip_bytes": 144776
+        },
+        {
+          "source": "_vendor-vue-DJQ-D4Ek.js",
+          "file": "app-assets/vendor-vue-DJQ-D4Ek.js",
+          "bytes": 114299,
+          "gzip_bytes": 44270
+        },
+        {
+          "source": "index.html",
+          "file": "app-assets/index-CT74q1ON.js",
+          "bytes": 203047,
+          "gzip_bytes": 60171
+        },
+        {
+          "source": "src/views/user/AirwallexPaymentView.vue",
+          "file": "app-assets/AirwallexPaymentView-B9LtE96t.js",
+          "bytes": 3723,
+          "gzip_bytes": 1779
+        }
+      ],
+      "js_bytes": 1221517,
+      "gzip_js_bytes": 402578
+    },
+    "src/views/admin/AccountsView.vue": {
+      "files": [
+        {
+          "source": "_AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js",
+          "file": "app-assets/AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js",
+          "bytes": 117802,
+          "gzip_bytes": 33631
+        },
+        {
+          "source": "_ConfirmDialog.vue_vue_type_script_setup_true_lang-5Gk_2lKn.js",
+          "file": "app-assets/ConfirmDialog.vue_vue_type_script_setup_true_lang-5Gk_2lKn.js",
+          "bytes": 1535,
+          "gzip_bytes": 747
+        },
+        {
+          "source": "_DataTable-CycQmh_1.js",
+          "file": "app-assets/DataTable-CycQmh_1.js",
+          "bytes": 16349,
+          "gzip_bytes": 5723
+        },
+        {
+          "source": "_EndpointDistributionChart.vue_vue_type_script_setup_true_lang-DCRCakm1.js",
+          "file": "app-assets/EndpointDistributionChart.vue_vue_type_script_setup_true_lang-DCRCakm1.js",
+          "bytes": 7804,
+          "gzip_bytes": 2661
+        },
+        {
+          "source": "_GroupBadge.vue_vue_type_script_setup_true_lang-C2LWwRnZ.js",
+          "file": "app-assets/GroupBadge.vue_vue_type_script_setup_true_lang-C2LWwRnZ.js",
+          "bytes": 5854,
+          "gzip_bytes": 1870
+        },
+        {
+          "source": "_GroupSelector.vue_vue_type_script_setup_true_lang-Cvi4mdS8.js",
+          "file": "app-assets/GroupSelector.vue_vue_type_script_setup_true_lang-Cvi4mdS8.js",
+          "bytes": 3699,
+          "gzip_bytes": 1634
+        },
+        {
+          "source": "_HelpTooltip.vue_vue_type_script_setup_true_lang-Cy3-STOy.js",
+          "file": "app-assets/HelpTooltip.vue_vue_type_script_setup_true_lang-Cy3-STOy.js",
+          "bytes": 3188,
+          "gzip_bytes": 1454
+        },
+        {
+          "source": "_LoadingSpinner-pc5kvMU_.js",
+          "file": "app-assets/LoadingSpinner-pc5kvMU_.js",
+          "bytes": 828,
+          "gzip_bytes": 509
+        },
+        {
+          "source": "_LocaleSwitcher-DXhcf-n7.js",
+          "file": "app-assets/LocaleSwitcher-DXhcf-n7.js",
+          "bytes": 2287,
+          "gzip_bytes": 1170
+        },
+        {
+          "source": "_ModelDistributionChart.vue_vue_type_script_setup_true_lang-CYVX23it.js",
+          "file": "app-assets/ModelDistributionChart.vue_vue_type_script_setup_true_lang-CYVX23it.js",
+          "bytes": 14656,
+          "gzip_bytes": 4078
+        },
+        {
+          "source": "_ModelWhitelistSelector.vue_vue_type_script_setup_true_lang-BCfV6saZ.js",
+          "file": "app-assets/ModelWhitelistSelector.vue_vue_type_script_setup_true_lang-BCfV6saZ.js",
+          "bytes": 72122,
+          "gzip_bytes": 23249
+        },
+        {
+          "source": "_Pagination-B5XYMtNs.js",
+          "file": "app-assets/Pagination-B5XYMtNs.js",
+          "bytes": 5813,
+          "gzip_bytes": 2021
+        },
+        {
+          "source": "_PlatformIcon.vue_vue_type_script_setup_true_lang-Dr1JJGl2.js",
+          "file": "app-assets/PlatformIcon.vue_vue_type_script_setup_true_lang-Dr1JJGl2.js",
+          "bytes": 18898,
+          "gzip_bytes": 7633
+        },
+        {
+          "source": "_ProxySelector-CQ8wt4Qd.js",
+          "file": "app-assets/ProxySelector-CQ8wt4Qd.js",
+          "bytes": 6002,
+          "gzip_bytes": 2344
+        },
+        {
+          "source": "_SearchInput.vue_vue_type_script_setup_true_lang-DCylzWJm.js",
+          "file": "app-assets/SearchInput.vue_vue_type_script_setup_true_lang-DCylzWJm.js",
+          "bytes": 910,
+          "gzip_bytes": 540
+        },
+        {
+          "source": "_Select-DXROXICb.js",
+          "file": "app-assets/Select-DXROXICb.js",
+          "bytes": 8050,
+          "gzip_bytes": 3145
+        },
+        {
+          "source": "_TablePageLayout-Dp-fxumx.js",
+          "file": "app-assets/TablePageLayout-Dp-fxumx.js",
+          "bytes": 1592,
+          "gzip_bytes": 742
+        },
+        {
+          "source": "_Toggle.vue_vue_type_script_setup_true_lang-DzK4SmRK.js",
+          "file": "app-assets/Toggle.vue_vue_type_script_setup_true_lang-DzK4SmRK.js",
+          "bytes": 916,
+          "gzip_bytes": 533
+        },
+        {
+          "source": "_UsageProgressBar.vue_vue_type_script_setup_true_lang-BiJkXOe5.js",
+          "file": "app-assets/UsageProgressBar.vue_vue_type_script_setup_true_lang-BiJkXOe5.js",
+          "bytes": 4435,
+          "gzip_bytes": 1674
+        },
+        {
+          "source": "_apiError-zX02PgX9.js",
+          "file": "app-assets/apiError-zX02PgX9.js",
+          "bytes": 1212,
+          "gzip_bytes": 566
+        },
+        {
+          "source": "_peak-rate-qZGUWdry.js",
+          "file": "app-assets/peak-rate-qZGUWdry.js",
+          "bytes": 279,
+          "gzip_bytes": 206
+        },
+        {
+          "source": "_platformColors-Dd3s_EBB.js",
+          "file": "app-assets/platformColors-Dd3s_EBB.js",
+          "bytes": 10246,
+          "gzip_bytes": 2021
+        },
+        {
+          "source": "_platforms-uhXoHWRa.js",
+          "file": "app-assets/platforms-uhXoHWRa.js",
+          "bytes": 292,
+          "gzip_bytes": 228
+        },
+        {
+          "source": "_proxyExpiry-DEo1igzi.js",
+          "file": "app-assets/proxyExpiry-DEo1igzi.js",
+          "bytes": 19432,
+          "gzip_bytes": 6504
+        },
+        {
+          "source": "_stableObjectKey-DullU5Fx.js",
+          "file": "app-assets/stableObjectKey-DullU5Fx.js",
+          "bytes": 150,
+          "gzip_bytes": 138
+        },
+        {
+          "source": "_totp-BNcEbwE-.js",
+          "file": "app-assets/totp-BNcEbwE-.js",
+          "bytes": 733,
+          "gzip_bytes": 288
+        },
+        {
+          "source": "_useClipboard-CFxBZvRH.js",
+          "file": "app-assets/useClipboard-CFxBZvRH.js",
+          "bytes": 917,
+          "gzip_bytes": 571
+        },
+        {
+          "source": "_usePersistedPageSize-x0WpaIWh.js",
+          "file": "app-assets/usePersistedPageSize-x0WpaIWh.js",
+          "bytes": 1205,
+          "gzip_bytes": 585
+        },
+        {
+          "source": "_useStepUp-DtSzDtS8.js",
+          "file": "app-assets/useStepUp-DtSzDtS8.js",
+          "bytes": 5327,
+          "gzip_bytes": 2487
+        },
+        {
+          "source": "_useTableSelection-Ahk4XL3Q.js",
+          "file": "app-assets/useTableSelection-Ahk4XL3Q.js",
+          "bytes": 991,
+          "gzip_bytes": 471
+        },
+        {
+          "source": "_useWorkspaceAppearance-IwYz9p8w.js",
+          "file": "app-assets/useWorkspaceAppearance-IwYz9p8w.js",
+          "bytes": 549,
+          "gzip_bytes": 325
+        },
+        {
+          "source": "_vendor-chart-BchnUoOD.js",
+          "file": "app-assets/vendor-chart-BchnUoOD.js",
+          "bytes": 178340,
+          "gzip_bytes": 61253
+        },
+        {
+          "source": "_vendor-i18n-cY70av7B.js",
+          "file": "app-assets/vendor-i18n-cY70av7B.js",
+          "bytes": 56991,
+          "gzip_bytes": 19111
+        },
+        {
+          "source": "_vendor-misc-BBAVm09x.js",
+          "file": "app-assets/vendor-misc-BBAVm09x.js",
+          "bytes": 280570,
+          "gzip_bytes": 95227
+        },
+        {
+          "source": "_vendor-ui-CP-ddnDN.js",
+          "file": "app-assets/vendor-ui-CP-ddnDN.js",
+          "bytes": 436938,
+          "gzip_bytes": 144776
+        },
+        {
+          "source": "_vendor-vue-DJQ-D4Ek.js",
+          "file": "app-assets/vendor-vue-DJQ-D4Ek.js",
+          "bytes": 114299,
+          "gzip_bytes": 44270
+        },
+        {
+          "source": "_zhijingPalette-CRCmkR-p.js",
+          "file": "app-assets/zhijingPalette-CRCmkR-p.js",
+          "bytes": 146,
+          "gzip_bytes": 130
+        },
+        {
+          "source": "index.html",
+          "file": "app-assets/index-CT74q1ON.js",
+          "bytes": 203047,
+          "gzip_bytes": 60171
+        },
+        {
+          "source": "src/views/admin/AccountsView.vue",
+          "file": "app-assets/AccountsView-BdASsCSv.js",
+          "bytes": 855369,
+          "gzip_bytes": 176633
+        }
+      ],
+      "js_bytes": 2459773,
+      "gzip_js_bytes": 711319
+    },
+    "src/views/admin/SettingsView.vue": {
+      "files": [
+        {
+          "source": "_AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js",
+          "file": "app-assets/AppLayout.vue_vue_type_script_setup_true_lang-B4C65C9N.js",
+          "bytes": 117802,
+          "gzip_bytes": 33631
+        },
+        {
+          "source": "_ConfirmDialog.vue_vue_type_script_setup_true_lang-5Gk_2lKn.js",
+          "file": "app-assets/ConfirmDialog.vue_vue_type_script_setup_true_lang-5Gk_2lKn.js",
+          "bytes": 1535,
+          "gzip_bytes": 747
+        },
+        {
+          "source": "_GroupBadge.vue_vue_type_script_setup_true_lang-C2LWwRnZ.js",
+          "file": "app-assets/GroupBadge.vue_vue_type_script_setup_true_lang-C2LWwRnZ.js",
+          "bytes": 5854,
+          "gzip_bytes": 1870
+        },
+        {
+          "source": "_GroupOptionItem-CiCbkUDI.js",
+          "file": "app-assets/GroupOptionItem-CiCbkUDI.js",
+          "bytes": 3322,
+          "gzip_bytes": 1493
+        },
+        {
+          "source": "_HelpTooltip.vue_vue_type_script_setup_true_lang-Cy3-STOy.js",
+          "file": "app-assets/HelpTooltip.vue_vue_type_script_setup_true_lang-Cy3-STOy.js",
+          "bytes": 3188,
+          "gzip_bytes": 1454
+        },
+        {
+          "source": "_LocaleSwitcher-DXhcf-n7.js",
+          "file": "app-assets/LocaleSwitcher-DXhcf-n7.js",
+          "bytes": 2287,
+          "gzip_bytes": 1170
+        },
+        {
+          "source": "_PlatformIcon.vue_vue_type_script_setup_true_lang-Dr1JJGl2.js",
+          "file": "app-assets/PlatformIcon.vue_vue_type_script_setup_true_lang-Dr1JJGl2.js",
+          "bytes": 18898,
+          "gzip_bytes": 7633
+        },
+        {
+          "source": "_ProxySelector-CQ8wt4Qd.js",
+          "file": "app-assets/ProxySelector-CQ8wt4Qd.js",
+          "bytes": 6002,
+          "gzip_bytes": 2344
+        },
+        {
+          "source": "_Select-DXROXICb.js",
+          "file": "app-assets/Select-DXROXICb.js",
+          "bytes": 8050,
+          "gzip_bytes": 3145
+        },
+        {
+          "source": "_Toggle.vue_vue_type_script_setup_true_lang-DzK4SmRK.js",
+          "file": "app-assets/Toggle.vue_vue_type_script_setup_true_lang-DzK4SmRK.js",
+          "bytes": 916,
+          "gzip_bytes": 533
+        },
+        {
+          "source": "_apiError-zX02PgX9.js",
+          "file": "app-assets/apiError-zX02PgX9.js",
+          "bytes": 1212,
+          "gzip_bytes": 566
+        },
+        {
+          "source": "_paymentFlow-cys_N5rS.js",
+          "file": "app-assets/paymentFlow-cys_N5rS.js",
+          "bytes": 4394,
+          "gzip_bytes": 1547
+        },
+        {
+          "source": "_peak-rate-qZGUWdry.js",
+          "file": "app-assets/peak-rate-qZGUWdry.js",
+          "bytes": 279,
+          "gzip_bytes": 206
+        },
+        {
+          "source": "_platforms-uhXoHWRa.js",
+          "file": "app-assets/platforms-uhXoHWRa.js",
+          "bytes": 292,
+          "gzip_bytes": 228
+        },
+        {
+          "source": "_providerConfig-BiMVXo-X.js",
+          "file": "app-assets/providerConfig-BiMVXo-X.js",
+          "bytes": 3726,
+          "gzip_bytes": 1269
+        },
+        {
+          "source": "_rechargeBonus-Cjpd3isk.js",
+          "file": "app-assets/rechargeBonus-Cjpd3isk.js",
+          "bytes": 2988,
+          "gzip_bytes": 1141
+        },
+        {
+          "source": "_registrationEmailPolicy-BIuq-4e8.js",
+          "file": "app-assets/registrationEmailPolicy-BIuq-4e8.js",
+          "bytes": 1581,
+          "gzip_bytes": 701
+        },
+        {
+          "source": "_totp-BNcEbwE-.js",
+          "file": "app-assets/totp-BNcEbwE-.js",
+          "bytes": 733,
+          "gzip_bytes": 288
+        },
+        {
+          "source": "_useClipboard-CFxBZvRH.js",
+          "file": "app-assets/useClipboard-CFxBZvRH.js",
+          "bytes": 917,
+          "gzip_bytes": 571
+        },
+        {
+          "source": "_useStepUp-DtSzDtS8.js",
+          "file": "app-assets/useStepUp-DtSzDtS8.js",
+          "bytes": 5327,
+          "gzip_bytes": 2487
+        },
+        {
+          "source": "_useWorkspaceAppearance-IwYz9p8w.js",
+          "file": "app-assets/useWorkspaceAppearance-IwYz9p8w.js",
+          "bytes": 549,
+          "gzip_bytes": 325
+        },
+        {
+          "source": "_vendor-i18n-cY70av7B.js",
+          "file": "app-assets/vendor-i18n-cY70av7B.js",
+          "bytes": 56991,
+          "gzip_bytes": 19111
+        },
+        {
+          "source": "_vendor-misc-BBAVm09x.js",
+          "file": "app-assets/vendor-misc-BBAVm09x.js",
+          "bytes": 280570,
+          "gzip_bytes": 95227
+        },
+        {
+          "source": "_vendor-ui-CP-ddnDN.js",
+          "file": "app-assets/vendor-ui-CP-ddnDN.js",
+          "bytes": 436938,
+          "gzip_bytes": 144776
+        },
+        {
+          "source": "_vendor-vue-DJQ-D4Ek.js",
+          "file": "app-assets/vendor-vue-DJQ-D4Ek.js",
+          "bytes": 114299,
+          "gzip_bytes": 44270
+        },
+        {
+          "source": "index.html",
+          "file": "app-assets/index-CT74q1ON.js",
+          "bytes": 203047,
+          "gzip_bytes": 60171
+        },
+        {
+          "source": "src/views/admin/SettingsView.vue",
+          "file": "app-assets/SettingsView-CPBss4RU.js",
+          "bytes": 440486,
+          "gzip_bytes": 86741
+        }
+      ],
+      "js_bytes": 1722183,
+      "gzip_js_bytes": 513645
+    }
+  },
+  "vendor_chunks": {
+    "vendor-chart-BchnUoOD.js": {
+      "bytes": 178340,
+      "gzip_bytes": 61253
+    },
+    "vendor-i18n-cY70av7B.js": {
+      "bytes": 56991,
+      "gzip_bytes": 19111
+    },
+    "vendor-misc-BBAVm09x.js": {
+      "bytes": 280570,
+      "gzip_bytes": 95227
+    },
+    "vendor-stripe-DSy-tJeT.js": {
+      "bytes": 3308,
+      "gzip_bytes": 1520
+    },
+    "vendor-ui-CP-ddnDN.js": {
+      "bytes": 436938,
+      "gzip_bytes": 144776
+    },
+    "vendor-vue-DJQ-D4Ek.js": {
+      "bytes": 114299,
+      "gzip_bytes": 44270
+    }
+  },
+  "largest_js_chunks": [
+    {
+      "file": "app-assets/AccountsView-BdASsCSv.js",
+      "bytes": 855369,
+      "gzip_bytes": 176633
+    },
+    {
+      "file": "app-assets/index-CDqNL0_y.js",
+      "bytes": 446010,
+      "gzip_bytes": 135646
+    },
+    {
+      "file": "app-assets/SettingsView-CPBss4RU.js",
+      "bytes": 440486,
+      "gzip_bytes": 86741
+    },
+    {
+      "file": "app-assets/vendor-ui-CP-ddnDN.js",
+      "bytes": 436938,
+      "gzip_bytes": 144776
+    },
+    {
+      "file": "app-assets/index-Djdmzfdh.js",
+      "bytes": 426373,
+      "gzip_bytes": 143123
+    },
+    {
+      "file": "app-assets/vendor-misc-BBAVm09x.js",
+      "bytes": 280570,
+      "gzip_bytes": 95227
+    },
+    {
+      "file": "app-assets/OpsDashboard-BbifKsi8.js",
+      "bytes": 224727,
+      "gzip_bytes": 48308
+    },
+    {
+      "file": "app-assets/GroupsView-cKKSvOIL.js",
+      "bytes": 218138,
+      "gzip_bytes": 44563
+    },
+    {
+      "file": "app-assets/index-CT74q1ON.js",
+      "bytes": 203047,
+      "gzip_bytes": 60171
+    },
+    {
+      "file": "app-assets/vendor-chart-BchnUoOD.js",
+      "bytes": 178340,
+      "gzip_bytes": 61253
+    }
+  ],
+  "all_js_files": 143,
+  "all_js_bytes": 5993068
+}
