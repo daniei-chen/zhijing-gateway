@@ -1,0 +1,172 @@
+{
+  "schema_version": 1,
+  "version": "0.0.3",
+  "status": "review_candidate_with_open_quality_gates",
+  "frontend_parent_commit": "06b62f9536373265879b14023270299dc79e1874",
+  "backend_base_commit": "4851ca95b134322c14ca9904bc82c550a3880a67",
+  "production_deployed": false,
+  "frontend": {
+    "test_files": 418,
+    "passed_tests": 3290,
+    "failed_tests": 0,
+    "pending_tests": 0,
+    "coverage": {
+      "lines": {
+        "total": 49957,
+        "covered": 33731,
+        "skipped": 0,
+        "pct": 67.52
+      },
+      "statements": {
+        "total": 55459,
+        "covered": 36286,
+        "skipped": 0,
+        "pct": 65.42
+      },
+      "functions": {
+        "total": 11835,
+        "covered": 6176,
+        "skipped": 0,
+        "pct": 52.18
+      },
+      "branches": {
+        "total": 42536,
+        "covered": 23265,
+        "skipped": 0,
+        "pct": 54.69
+      }
+    },
+    "global_coverage_threshold": 80,
+    "global_coverage_gate_passed": false,
+    "coverage_command_exit": 1,
+    "typecheck": true,
+    "eslint": true,
+    "vite_build_manifest": true,
+    "measured_build_files": 347,
+    "measured_build_files_include_manifest": true,
+    "formal_release_zip_created": false,
+    "source_sha256_lf": {
+      "frontend/src/api/__tests__/batchImage.session.spec.ts": "23647c7f437404f3440c41876a6773da3ea752b8d4fab160d2f478e65f31abb9",
+      "frontend/src/api/__tests__/browserSession.spec.ts": "ce234c4d1e2539ec14506f5ba556eb343ca6f7c92b2fc140006e7a0228af49a3",
+      "frontend/src/api/accountTestStream.ts": "b8a91b0171812ab2ce39c672ab057c41185827119bd91612af76ba4e12311001",
+      "frontend/src/api/auth.ts": "e0fe53de5465c9198076c9f9480370f4aa67a9054968663631ac6a2e1b33649f",
+      "frontend/src/api/authSession.ts": "7ea7868d4518be4290a689a636ff6eb48dc71ff878e314d29242dbad07d7fc5e",
+      "frontend/src/api/batchImage.ts": "9b77477627c836c88e1f350ab642eacda7f62f4aa0f87df8819ea0e3dae51332",
+      "frontend/src/api/browserSession.ts": "2d3fa4d39d2c8198b1032a96a5e4c08aab4abf130f5f0a95e200b031b1e43a67",
+      "frontend/src/api/client.ts": "d59fca9a60c960a3e85335a6ae6bd9c6a6a3026101c15979b7c5de0e06f5f67e",
+      "frontend/src/api/tokenRefresh.ts": "d923fc3489d5aea6434fc6e99652741934971b58b569e30fe872364699ec9a83",
+      "frontend/src/composables/__tests__/useRoutePrefetch.budget.spec.ts": "88bd4bb31650d49c5f0d82542c965327ee8977eaae458004788e47c8b0dd08d9",
+      "frontend/src/composables/__tests__/useRoutePrefetch.spec.ts": "4963ad8325705404665544e3215ef93393d1a1f0624077faea4174de551e7dab",
+      "frontend/src/composables/useRoutePrefetch.ts": "13799469a72791c0ce8ea9f8c0e69547c4c90b16dc0db99c331e2bb132a5c72b",
+      "frontend/src/i18n/locales/en/admin/ops.ts": "83ea29e464c5d2d4e45e362e1af72c391faaf490565035e7206c08d22efb8dd0",
+      "frontend/src/i18n/locales/zh/admin/ops.ts": "1cf9bf832bde3792f8e02fcb950f2127c22c7793a8518fc274d79d4405f64d20",
+      "frontend/src/stores/auth.ts": "e4c5f9867833e97c791ce31f7a5697e3cc62e6a2ee7daaaca710c612df25dc65",
+      "frontend/src/utils/__tests__/imageThumbnail.spec.ts": "592c6dc4a1d08110bc9429df15969ceba34a1618b932b552f6b0e7f0b7062b00",
+      "frontend/src/utils/__tests__/oauthCallbackFragment.spec.ts": "af54165df58d3e16dc49048805473b6e9dfe98037df8fcae28552c3ce3a0fbf8",
+      "frontend/src/utils/__tests__/oauthCallbackSession.spec.ts": "f6151af969ca182094c540d037051a5aa146d4e53de85b15798cc747190af616",
+      "frontend/src/utils/__tests__/sessionPreviewCache.spec.ts": "6053fee855bc56f00712dd91d78a95a48a02e733a0961fabdbc805e3e45e2799",
+      "frontend/src/utils/__tests__/sessionTasks.spec.ts": "01fd1b9506bbd22b714e8491b2745cbe95a91fa44b9bd338b50eb923e7935269",
+      "frontend/src/utils/imageThumbnail.ts": "59d725e475ee58404f1bd03c214feb50d0e7f4e5be5cd24a01da6e5995a1650e",
+      "frontend/src/utils/oauthCallbackFragment.ts": "4a395e0d1197620001d638a20fc0f1c78b149fac7e0c777d1619a8e8d396cefd",
+      "frontend/src/utils/oauthCallbackSession.ts": "cac30614842cd062b93b08b0898b334e544797bad7681c59de343f3efd426071",
+      "frontend/src/utils/sessionPreviewCache.ts": "cac451ec92a680d875a3b9a65d641d38a1fc80f939d506fb3eefc536a4b8e857",
+      "frontend/src/utils/sessionTasks.ts": "db482c3b5b1fef55b8f8ace33b49ef2a4c3d0fdac939abb531ccaa501c71c5a8",
+      "frontend/src/views/admin/AccountsView.vue": "5b38c47b9eeefedb9d2f508bad35c844371c73abb24ea0bd9f375f4579ec1caf",
+      "frontend/src/views/admin/GroupsView.vue": "01c6a5bba1b483eb82ac0e8bebdb1ee7f06102d1441e59975f2ac4dd42a9dc8e",
+      "frontend/src/views/admin/SettingsView.vue": "92d85399b6e0fcefe94c0ebb7a0615cd1ebb36d229938f14fc4d005f20ed7cef",
+      "frontend/src/views/admin/__tests__/AccountsView.lite.spec.ts": "59210c50e2a6c5f488dda80552d8b6f07c66bdec1c5a62814537494063ed675f",
+      "frontend/src/views/admin/__tests__/GroupsView.duplicate.spec.ts": "8d2fa952b8452169bb569c43790e8c64ea317405401a816f9d432b39b935d329",
+      "frontend/src/views/admin/__tests__/SettingsView.spec.ts": "462b3f36154c8bd302518180d68b2f38a5c52c9747ae5c1471b1abed140b77c0",
+      "frontend/src/views/admin/ops/components/OpsRequestDiagnostics.vue": "9b1497b5b908b088149e178f3ade6acc4e1c5084c1b4af182fe305fe3fb51c5d",
+      "frontend/src/views/admin/ops/components/__tests__/OpsRequestDiagnostics.spec.ts": "e5df84b268463003ed1a25b33e6fc99883665875d6e1f95c3611ed7cdfcac95e",
+      "frontend/src/views/admin/ops/utils/requestDiagnostics.ts": "45ef62b7365d047b241a1127d5acd23b2d02579e716e7f793aa55c168242d1c2",
+      "frontend/src/views/auth/DingTalkCallbackView.vue": "f7a13176861e7574f73289b206dd724c22e1a94cd4841197080cec7f9f71ba2b",
+      "frontend/src/views/auth/ForgotPasswordView.vue": "8238974bde29465e52fd5f73ba651219569b7e27741177a8398c8dd866faa91a",
+      "frontend/src/views/auth/LinuxDoCallbackView.vue": "fa5f159927e55694a16788a0fa36aed9b63cfb2f27f092a21b0681cdf408e0c5",
+      "frontend/src/views/auth/OAuthCallbackView.vue": "cbb6b5795a0b22c36b69d04c267332b2a6d20982157a731df7ac80acd554b3ee",
+      "frontend/src/views/auth/OidcCallbackView.vue": "e7f1c230c489b67e07c6f32edd788a1af07db2c543550c91a7d84e6153e6cb92",
+      "frontend/src/views/auth/WechatCallbackView.vue": "a5292526f1e71d3470c1bc8d2ee6644c51ae52a7ac8682132f84e1120494712e",
+      "frontend/src/views/auth/__tests__/LinuxDoCallbackView.spec.ts": "9ad4fee73d8e0bc3699ae9358ad6381827b9b6baa36fac2d569f5e9e539c0625",
+      "frontend/src/views/auth/__tests__/MCPLoginRedirect.spec.ts": "92c79739812d1afb563ebe134e96844751a3f639f18c8996e816f344d4939cc6",
+      "frontend/src/views/auth/__tests__/OAuthCallbackView.spec.ts": "8a15d79084a607f1a769a6b4844eec8a19396fe82dd3180dfa3c876e2a072455",
+      "frontend/src/views/auth/__tests__/OidcCallbackView.spec.ts": "c5643c45316df617c50f12207b65c1458860890c3b281aef1ab0ec437240169d",
+      "frontend/src/views/auth/__tests__/TencentCaptchaForgotPassword.spec.ts": "d580736c0596663ff200eea7b07cd383fad3ff9b78ef130327df74e0c66fe2ad",
+      "frontend/src/views/auth/__tests__/WechatCallbackView.spec.ts": "1e3826d0adeb1cf28de5d3e6407ae23a5a82008a78333ed35ba3e3f67e02057f",
+      "frontend/src/views/user/BatchImageGuideView.vue": "baa992e58824908a379912482afd8d51493d1773d084a8605648de37209b8822",
+      "frontend/src/views/user/__tests__/BatchImageGuideView.lifecycle.spec.ts": "8f451dd77dd0a11226561612e6f2316351242d6360250b144e821acb0f33df92",
+      "frontend/vitest.config.ts": "da5b53eca5892b80a24a2b368f859974cc4f03895d6c146bb0735217645b0fc4",
+      "tools/package_release.py": "efa77646eda07be3ac4ee33ac5e735c3da6b4bab2eb09bb00103b28c0a1497c0",
+      "tools/tests/test_frontend_contract.py": "b574a1f3f10741cf1799074845182e5ca6d24e9fcae474dd65394ebfbf9116af",
+      "tools/tests/test_release_integrity.py": "24bdc1bd32898905af3f6f5bc099a4c7786359e760eb43244c21852552bc7b3d",
+      "tools/verify_frontend.py": "1f5d63dbb98bda183b5d189e1cbbb6e404eec55c2d9bfeacd7c068cc14f939eb",
+      "tools/verify_release.py": "e38b139d971a12c2300d3b588ceee29b08262236c5c1b5293497be056d731e3e"
+    },
+    "dependency_audit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0
+    }
+  },
+  "contract": {
+    "checked_at": "2026-11-05T23:17:21+08:00",
+    "protected_files": 227,
+    "optional_contract_extensions": 1,
+    "approved_security_files": 13,
+    "reviewed_audit_files": 15,
+    "reviewed_v003_files": 8,
+    "runtime_documents": 2,
+    "routes": 68,
+    "built_files": 347,
+    "qa_code_in_build": false,
+    "static_frontend_build": true
+  },
+  "backend": {
+    "public_patch_files": 23,
+    "patch_sha256": "0d3a1fe06f1ded8f0f45297242122428e20fc0b5aa99dddbb93f15583817deab",
+    "short_regression_passed": true,
+    "targeted_race_passed": true,
+    "real_auth_cookie_roundtrip_race_passed": true,
+    "go_vet": true,
+    "linux_amd64_cross_build": true,
+    "fresh_baseline_patch_apply_and_hashes": true,
+    "fresh_applied_patch_targeted_tests": true,
+    "complete_private_backend_public": false,
+    "full_external_integration_tested": false
+  },
+  "tools": {
+    "python_tests": 26,
+    "passed": 25,
+    "skipped": 1,
+    "skip_reason": "Windows synthetic symlink creation unavailable; reparse-point rejection tested independently.",
+    "ops_contract_tests_passed": true
+  },
+  "browser": {
+    "data": "synthetic local fixtures with real Go auth handlers",
+    "observed": [
+      "password login",
+      "reload session restoration",
+      "settings unsaved draft retained across tabs",
+      "cross-tab admin to member transition removes old admin route",
+      "member reload restoration"
+    ],
+    "initial_seeded_preview_auth_error_observed": true,
+    "live_payment_email_inference_tested": false
+  },
+  "latency": {
+    "production_read_only": true,
+    "provider_inference_calls": 0,
+    "config_writes": 0,
+    "controlled_upstream_benchmark": false,
+    "production_improvement_measured": false,
+    "historical_ttft_semantics_changed": false,
+    "model_effort_billing_concurrency_changed": false
+  },
+  "unresolved": [
+    "four global coverage thresholds below 80 percent",
+    "production upstream useful-output TTFT tail not resolved or benchmarked",
+    "large uncompressed client uploads need client/upstream compatibility validation",
+    "full backend and real email/payment/provider end-to-end review out of verified scope"
+  ]
+}

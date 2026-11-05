@@ -4276,6 +4276,7 @@
 
     <!-- Group Rate Multipliers Modal -->
     <GroupRateMultipliersModal
+      v-if="showRateMultipliersModal"
       :show="showRateMultipliersModal"
       :group="rateMultipliersGroup"
       @close="showRateMultipliersModal = false"
@@ -4284,6 +4285,7 @@
 
     <!-- Group RPM Overrides Modal -->
     <GroupRPMOverridesModal
+      v-if="showRPMOverridesModal"
       :show="showRPMOverridesModal"
       :group="rpmOverridesGroup"
       @close="showRPMOverridesModal = false"
@@ -4293,7 +4295,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted, watch } from "vue";
+import { ref, reactive, computed, defineAsyncComponent, onMounted, onUnmounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAppStore } from "@/stores/app";
 import { useAuthStore } from "@/stores/auth";
@@ -4329,12 +4331,12 @@ import PlatformIcon from "@/components/common/PlatformIcon.vue";
 import { platformLabel } from "@/utils/platformColors";
 import Icon from "@/components/icons/Icon.vue";
 import GroupI18nField from "@/components/admin/group/GroupI18nField.vue";
-import GroupRateMultipliersModal from "@/components/admin/group/GroupRateMultipliersModal.vue";
-import GroupRPMOverridesModal from "@/components/admin/group/GroupRPMOverridesModal.vue";
+const GroupRateMultipliersModal = defineAsyncComponent(() => import("@/components/admin/group/GroupRateMultipliersModal.vue"));
+const GroupRPMOverridesModal = defineAsyncComponent(() => import("@/components/admin/group/GroupRPMOverridesModal.vue"));
 import GroupCapacityBadge from "@/components/common/GroupCapacityBadge.vue";
 import ReasoningEffortPolicyFields from "@/components/admin/group/ReasoningEffortPolicyFields.vue";
-import CodexManifestAccountsField from "@/components/admin/group/CodexManifestAccountsField.vue";
-import PricingEntryCard from "@/components/admin/channel/PricingEntryCard.vue";
+const CodexManifestAccountsField = defineAsyncComponent(() => import("@/components/admin/group/CodexManifestAccountsField.vue"));
+const PricingEntryCard = defineAsyncComponent(() => import("@/components/admin/channel/PricingEntryCard.vue"));
 import type { PricingFormEntry } from "@/components/admin/channel/types";
 import {
   apiIntervalsToForm,
@@ -4347,7 +4349,7 @@ import {
   validateReasoningEffortMultipliers,
 } from "@/components/admin/channel/types";
 import type { ChannelModelPricing } from "@/api/admin/channels";
-import { VueDraggable } from "vue-draggable-plus";
+const VueDraggable = defineAsyncComponent(() => import("vue-draggable-plus").then(module => module.VueDraggable));
 import { createStableObjectKeyResolver } from "@/utils/stableObjectKey";
 import { extractApiErrorMessage } from "@/utils/apiError";
 import { useKeyedDebouncedSearch } from "@/composables/useKeyedDebouncedSearch";

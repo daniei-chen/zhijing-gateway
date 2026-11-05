@@ -1,0 +1,1909 @@
+diff --git a/backend/internal/handler/auth_browser_session_test.go b/backend/internal/handler/auth_browser_session_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..d959e70cd0131c9234fbcd31933778a8465d5278
+--- /dev/null
++++ b/backend/internal/handler/auth_browser_session_test.go
+@@ -0,0 +1,134 @@
++package handler
++
++import (
++	"context"
++	"encoding/json"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"sync"
++	"testing"
++	"time"
++
++	"github.com/Wei-Shaw/sub2api/internal/config"
++	middleware2 "github.com/Wei-Shaw/sub2api/internal/server/middleware"
++	"github.com/Wei-Shaw/sub2api/internal/service"
++	"github.com/gin-gonic/gin"
++	"github.com/stretchr/testify/require"
++	"golang.org/x/crypto/bcrypt"
++)
++
++type browserFlowCache struct {
++	oauthPendingFlowRefreshTokenCacheStub
++	mu     sync.Mutex
++	tokens map[string]service.RefreshTokenData
++}
++
++func (c *browserFlowCache) StoreRefreshToken(_ context.Context, key string, data *service.RefreshTokenData, _ time.Duration) error {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	if c.tokens == nil {
++		c.tokens = make(map[string]service.RefreshTokenData)
++	}
++	c.tokens[key] = *data
++	return nil
++}
++func (c *browserFlowCache) GetRefreshToken(_ context.Context, key string) (*service.RefreshTokenData, error) {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	data, ok := c.tokens[key]
++	if !ok {
++		return nil, service.ErrRefreshTokenNotFound
++	}
++	return &data, nil
++}
++func (c *browserFlowCache) DeleteRefreshToken(_ context.Context, key string) error {
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	delete(c.tokens, key)
++	return nil
++}
++
++func browserFlowHandler(t *testing.T) (*gin.Engine, *AuthHandler) {
++	t.Helper()
++	h, client := newOAuthPendingFlowTestHandlerWithDependencies(t, oauthPendingFlowTestHandlerOptions{refreshCache: &browserFlowCache{}})
++	hash, err := bcrypt.GenerateFromPassword([]byte("SyntheticPassword2026!"), bcrypt.MinCost)
++	require.NoError(t, err)
++	_, err = client.User.Create().SetEmail("browser@example.invalid").SetUsername("Synthetic member").SetPasswordHash(string(hash)).SetRole(service.RoleUser).SetStatus(service.StatusActive).Save(context.Background())
++	require.NoError(t, err)
++	r := gin.New()
++	r.Use(middleware2.BrowserSession(&config.Config{JWT: config.JWTConfig{RefreshTokenExpireDays: 7}}))
++	r.POST("/api/v1/auth/login", h.Login)
++	r.POST("/api/v1/auth/refresh", h.RefreshToken)
++	r.POST("/api/v1/auth/logout", h.Logout)
++	jwt := gin.HandlerFunc(middleware2.NewJWTAuthMiddleware(h.authService, h.userService, h.settingSvc, nil))
++	r.GET("/api/v1/auth/me", jwt, h.GetCurrentUser)
++	r.GET("/api/v1/admin/test", jwt, func(c *gin.Context) {
++		if role, _ := c.Get(string(middleware2.ContextKeyUserRole)); role != service.RoleAdmin {
++			c.Status(403)
++			return
++		}
++		c.Status(204)
++	})
++	return r, h
++}
++
++func TestBrowserSessionRealLoginJWTRefreshAndLogout(t *testing.T) {
++	r, h := browserFlowHandler(t)
++	const id = "12345678-1234-4234-8234-123456789abc"
++	call := func(path, mode, body string, cookies []*http.Cookie) *httptest.ResponseRecorder {
++		method := "POST"
++		if path == "/api/v1/auth/me" || path == "/api/v1/admin/test" {
++			method = "GET"
++		}
++		req := httptest.NewRequest(method, "https://gateway.example"+path, strings.NewReader(body))
++		req.Header.Set("X-Zhijing-Session", mode)
++		req.Header.Set("Origin", "https://gateway.example")
++		req.Header.Set("Content-Type", "application/json")
++		for _, cookie := range cookies {
++			if cookie.MaxAge >= 0 {
++				req.AddCookie(cookie)
++			}
++		}
++		w := httptest.NewRecorder()
++		r.ServeHTTP(w, req)
++		return w
++	}
++	login := call("/api/v1/auth/login", "init."+id, `{"email":"browser@example.invalid","password":"SyntheticPassword2026!"}`, nil)
++	require.Equal(t, 200, login.Code, login.Body.String())
++	data := decodeJSONResponseData(t, login)
++	handle := data["access_token"].(string)
++	refresh := data["refresh_token"].(string)
++	require.True(t, strings.HasPrefix(handle, "zjs."))
++	require.True(t, strings.HasPrefix(refresh, "zjr."))
++	cookies := login.Result().Cookies()
++	var actualJWT string
++	for _, cookie := range cookies {
++		if strings.HasPrefix(cookie.Name, "__Secure-zj_at_") {
++			actualJWT = cookie.Value
++		}
++	}
++	claims, err := h.authService.ValidateToken(actualJWT)
++	require.NoError(t, err)
++	require.Positive(t, claims.UserID)
++	require.NotContains(t, login.Body.String(), actualJWT)
++	me := call("/api/v1/auth/me", handle, "", cookies)
++	require.Equal(t, 200, me.Code, me.Body.String())
++	require.Equal(t, float64(claims.UserID), decodeJSONResponseData(t, me)["id"])
++	require.Equal(t, 403, call("/api/v1/admin/test", handle, "", cookies).Code, "a member must remain a member")
++	require.Equal(t, 401, call("/api/v1/auth/me", handle, "", nil).Code, "selector alone must not authenticate")
++	rotation := call("/api/v1/auth/refresh", handle, `{"refresh_token":"`+refresh+`"}`, cookies)
++	require.Equal(t, 200, rotation.Code, rotation.Body.String())
++	rotated := decodeJSONResponseData(t, rotation)
++	require.NotEqual(t, handle, rotated["access_token"])
++	require.NotEqual(t, refresh, rotated["refresh_token"])
++	require.GreaterOrEqual(t, call("/api/v1/auth/refresh", handle, `{"refresh_token":"`+refresh+`"}`, cookies).Code, 400, "old refresh credential must be consumed")
++	newCookies := rotation.Result().Cookies()
++	logout := call("/api/v1/auth/logout", rotated["access_token"].(string), `{"refresh_token":"`+rotated["refresh_token"].(string)+`"}`, newCookies)
++	require.Equal(t, 200, logout.Code)
++	require.GreaterOrEqual(t, call("/api/v1/auth/refresh", rotated["access_token"].(string), `{"refresh_token":"`+rotated["refresh_token"].(string)+`"}`, newCookies).Code, 400)
++	// Public JSON remains ordinary data, with no JWT returned through /auth/me.
++	var profile map[string]any
++	require.NoError(t, json.Unmarshal(me.Body.Bytes(), &profile))
++	require.NotContains(t, me.Body.String(), actualJWT)
++}
+diff --git a/backend/internal/handler/auth_email_oauth.go b/backend/internal/handler/auth_email_oauth.go
+index 8717485ecfcd7649ad4ff465c5bef8209f0e388c..b4f4ee12273532655d7a1d0a216edcad5b8e6800 100644
+--- a/backend/internal/handler/auth_email_oauth.go
++++ b/backend/internal/handler/auth_email_oauth.go
+@@ -210,13 +210,8 @@ func (h *AuthHandler) emailOAuthCallbackWithProfile(
+ 		return
+ 	}
+ 
+-	fragment := url.Values{}
+-	fragment.Set("access_token", tokenPair.AccessToken)
+-	fragment.Set("refresh_token", tokenPair.RefreshToken)
+-	fragment.Set("expires_in", fmt.Sprintf("%d", tokenPair.ExpiresIn))
+-	fragment.Set("token_type", "Bearer")
+-	fragment.Set("redirect", redirectTo)
+-	redirectWithFragment(c, frontendCallback, fragment)
++	h.stageOAuthLogin(c, frontendCallback, tokenPair, user, redirectTo,
++		service.PendingAuthIdentityKey{ProviderType: provider, ProviderKey: provider, ProviderSubject: profile.Subject}, profile.Metadata)
+ }
+ 
+ func (h *AuthHandler) emailOAuthShouldCreatePendingRegistration(ctx context.Context, input service.EmailOAuthIdentityInput) (bool, error) {
+diff --git a/backend/internal/handler/auth_email_oauth_test.go b/backend/internal/handler/auth_email_oauth_test.go
+index 0a6b653ec635e62385dbf8e7136472fa7b98aed4..3770f60238629b8cb79d4299276aa42d8a00a428 100644
+--- a/backend/internal/handler/auth_email_oauth_test.go
++++ b/backend/internal/handler/auth_email_oauth_test.go
+@@ -114,12 +114,16 @@ func TestEmailOAuthCallbackExistingEmailLogsInWhenInvitationEnabled(t *testing.T
+ 
+ 	require.Equal(t, http.StatusFound, recorder.Code)
+ 	location := recorder.Header().Get("Location")
+-	require.Contains(t, location, "access_token=")
+-	require.Contains(t, location, "redirect=%252Fdashboard")
++	require.Equal(t, "/auth/oauth/callback", location)
++	require.NotContains(t, location, "access_token=")
+ 
+ 	sessionCount, err := client.PendingAuthSession.Query().Count(ctx)
+ 	require.NoError(t, err)
+-	require.Zero(t, sessionCount)
++	require.Equal(t, 1, sessionCount)
++	session, err := client.PendingAuthSession.Query().Only(ctx)
++	require.NoError(t, err)
++	require.Equal(t, user.ID, *session.TargetUserID)
++	require.NotEmpty(t, findSetCookieValue(recorder.Result().Cookies(), oauthPendingSessionCookieName))
+ 
+ 	identityCount, err := client.AuthIdentity.Query().Where(
+ 		authidentity.ProviderTypeEQ("google"),
+diff --git a/backend/internal/handler/auth_linuxdo_oauth.go b/backend/internal/handler/auth_linuxdo_oauth.go
+index 8a5b9ae0ca0787abc5b54d2bd5d4c345fd428fc4..3f5d71ad563cc2dbe59b271ed1dabbe810f10a3f 100644
+--- a/backend/internal/handler/auth_linuxdo_oauth.go
++++ b/backend/internal/handler/auth_linuxdo_oauth.go
+@@ -365,10 +365,7 @@ func (h *AuthHandler) LinuxDoOAuthCallback(c *gin.Context) {
+ 				redirectOAuthError(c, frontendCallback, "session_error", "failed to bind oauth identity", "")
+ 				return
+ 			}
+-			h.authService.RecordSuccessfulLogin(c.Request.Context(), user.ID)
+-			clearOAuthPendingSessionCookie(c, secureCookie)
+-			clearOAuthPendingBrowserCookie(c, secureCookie)
+-			redirectOAuthTokenPair(c, frontendCallback, tokenPair, redirectTo)
++			h.stageOAuthLogin(c, frontendCallback, tokenPair, user, redirectTo, identityKey, upstreamClaims)
+ 			return
+ 		}
+ 		if !errors.Is(err, service.ErrOAuthInvitationRequired) {
+@@ -849,6 +846,9 @@ func redirectOAuthTokenPair(c *gin.Context, frontendCallback string, tokenPair *
+ }
+ 
+ func redirectWithFragment(c *gin.Context, frontendCallback string, fragment url.Values) {
++	if fragment.Has("access_token") || fragment.Has("refresh_token") {
++		fragment = url.Values{"error": {"oauth_session_required"}}
++	}
+ 	u, err := url.Parse(frontendCallback)
+ 	if err != nil {
+ 		// 兜底：尽力跳转到默认页面，避免卡死在回调页。
+diff --git a/backend/internal/handler/auth_linuxdo_oauth_test.go b/backend/internal/handler/auth_linuxdo_oauth_test.go
+index 2f1e73c4a8d39cd417aea73d45a04733429013c4..bc755fefb2b2fefc5fa6c44bce40a4fc65e571e4 100644
+--- a/backend/internal/handler/auth_linuxdo_oauth_test.go
++++ b/backend/internal/handler/auth_linuxdo_oauth_test.go
+@@ -242,9 +242,9 @@ func TestLinuxDoOAuthCallbackAllowsMissingVerifierWhenPKCEDisabled(t *testing.T)
+ 
+ 	require.Equal(t, http.StatusFound, recorder.Code)
+ 	location := recorder.Header().Get("Location")
+-	require.Contains(t, location, "/auth/linuxdo/callback#")
+-	require.Contains(t, location, "access_token=")
+-	requireCookieCleared(t, recorder, oauthPendingSessionCookieName)
++	require.Equal(t, "/auth/linuxdo/callback", location)
++	require.NotContains(t, location, "access_token=")
++	require.NotEmpty(t, findSetCookieValue(recorder.Result().Cookies(), oauthPendingSessionCookieName))
+ 
+ 	identity, err := client.AuthIdentity.Query().
+ 		Where(
+@@ -777,13 +777,10 @@ func TestLinuxDoOAuthCallbackDirectlyLogsInNewUserWhenEmailVerificationDisabled(
+ 
+ 	require.Equal(t, http.StatusFound, recorder.Code)
+ 	location := recorder.Header().Get("Location")
+-	require.Contains(t, location, "/auth/linuxdo/callback#")
+-	require.Contains(t, location, "access_token=")
+-	require.Contains(t, location, "refresh_token=")
+-	fragmentValues := parseOAuthRedirectFragment(t, location)
+-	require.Equal(t, "/dashboard", fragmentValues.Get("redirect"))
+-	requireCookieCleared(t, recorder, oauthPendingSessionCookieName)
+-	requireCookieCleared(t, recorder, oauthPendingBrowserCookieName)
++	require.Equal(t, "/auth/linuxdo/callback", location)
++	require.NotContains(t, location, "access_token=")
++	require.NotContains(t, location, "refresh_token=")
++	require.NotEmpty(t, findSetCookieValue(recorder.Result().Cookies(), oauthPendingSessionCookieName))
+ 
+ 	ctx := context.Background()
+ 	userEntity, err := client.User.Query().
+@@ -806,7 +803,7 @@ func TestLinuxDoOAuthCallbackDirectlyLogsInNewUserWhenEmailVerificationDisabled(
+ 
+ 	sessionCount, err := client.PendingAuthSession.Query().Count(ctx)
+ 	require.NoError(t, err)
+-	require.Zero(t, sessionCount)
++	require.Equal(t, 1, sessionCount)
+ }
+ 
+ func TestLinuxDoOAuthCallbackCreatesBindPendingSessionForCurrentUser(t *testing.T) {
+diff --git a/backend/internal/handler/auth_oauth_login_handoff.go b/backend/internal/handler/auth_oauth_login_handoff.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..8002575482d2592a838b09fa36de730bc06022c8
+--- /dev/null
++++ b/backend/internal/handler/auth_oauth_login_handoff.go
+@@ -0,0 +1,45 @@
++package handler
++
++import (
++	"strings"
++
++	"github.com/Wei-Shaw/sub2api/internal/service"
++	"github.com/gin-gonic/gin"
++)
++
++// Successful OAuth login uses the same browser-bound, single-consumption
++// exchange as account adoption. No reusable login credential travels in a URL.
++func (h *AuthHandler) stageOAuthLogin(c *gin.Context, callback string, pair *service.TokenPair, user *service.User, redirect string, identity service.PendingAuthIdentityKey, claims map[string]any) {
++	if pair == nil || user == nil || user.ID <= 0 {
++		redirectOAuthError(c, callback, "session_error", "invalid login completion", "")
++		return
++	}
++	// Legacy service calls issue a pair before returning the resolved user. That
++	// pair is never delivered; discard its refresh token before staging exchange.
++	if strings.TrimSpace(pair.RefreshToken) != "" {
++		if err := h.authService.RevokeRefreshToken(c.Request.Context(), pair.RefreshToken); err != nil {
++			redirectOAuthError(c, callback, "session_error", "unable to stage login completion", "")
++			return
++		}
++	}
++	browser, _ := readOAuthPendingBrowserCookie(c)
++	if strings.TrimSpace(browser) == "" {
++		var err error
++		browser, err = generateOAuthPendingBrowserSession()
++		if err != nil {
++			redirectOAuthError(c, callback, "session_error", "unable to stage login completion", "")
++			return
++		}
++		setOAuthPendingBrowserCookie(c, browser, isRequestHTTPS(c))
++	}
++	err := h.createOAuthPendingSession(c, oauthPendingSessionPayload{
++		Intent: oauthIntentLogin, Identity: identity, TargetUserID: &user.ID,
++		ResolvedEmail: user.Email, RedirectTo: redirect, BrowserSessionKey: browser,
++		UpstreamIdentityClaims: claims, CompletionResponse: map[string]any{"provider": identity.ProviderType},
++	})
++	if err != nil {
++		redirectOAuthError(c, callback, "session_error", "unable to stage login completion", "")
++		return
++	}
++	redirectToFrontendCallback(c, callback)
++}
+diff --git a/backend/internal/handler/auth_oauth_login_handoff_test.go b/backend/internal/handler/auth_oauth_login_handoff_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..d156f94cb550a5bf69bfa82f8a3c26323b55d1c2
+--- /dev/null
++++ b/backend/internal/handler/auth_oauth_login_handoff_test.go
+@@ -0,0 +1,95 @@
++package handler
++
++import (
++	"context"
++	"net/http"
++	"net/http/httptest"
++	"testing"
++	"time"
++
++	"github.com/Wei-Shaw/sub2api/internal/service"
++	"github.com/gin-gonic/gin"
++	"github.com/stretchr/testify/require"
++)
++
++func TestOAuthLoginHandoffBrowserBoundSingleConsumption(t *testing.T) {
++	for _, provider := range []string{"github", "google", "linuxdo", "oidc"} {
++		t.Run(provider, func(t *testing.T) {
++			h, client := newOAuthPendingFlowTestHandler(t, false)
++			ctx := context.Background()
++			u, err := client.User.Create().SetEmail(provider + "@example.invalid").SetUsername(provider).SetPasswordHash("unused").SetRole(service.RoleUser).SetStatus(service.StatusActive).Save(ctx)
++			require.NoError(t, err)
++			_, err = client.AuthIdentity.Create().SetUserID(u.ID).SetProviderType(provider).SetProviderKey(provider).SetProviderSubject("fixture-subject").Save(ctx)
++			require.NoError(t, err)
++			recorder := httptest.NewRecorder()
++			c, _ := gin.CreateTestContext(recorder)
++			c.Request = httptest.NewRequest("GET", "https://gateway.example/api/v1/auth/oauth/"+provider+"/callback", nil)
++			h.stageOAuthLogin(c, "/auth/oauth/callback", &service.TokenPair{AccessToken: "never-in-url"}, &service.User{ID: u.ID, Email: u.Email}, "/dashboard", service.PendingAuthIdentityKey{ProviderType: provider, ProviderKey: provider, ProviderSubject: "fixture-subject"}, nil)
++			require.Equal(t, http.StatusFound, recorder.Code)
++			require.Equal(t, "/auth/oauth/callback", recorder.Header().Get("Location"))
++			require.NotContains(t, recorder.Body.String(), "never-in-url")
++			cookies := recorder.Result().Cookies()
++			for _, cookie := range cookies {
++				require.True(t, cookie.HttpOnly)
++				require.True(t, cookie.Secure)
++				require.Equal(t, http.SameSiteLaxMode, cookie.SameSite)
++			}
++			stored, err := client.PendingAuthSession.Query().Only(ctx)
++			require.NoError(t, err)
++			require.Equal(t, u.ID, *stored.TargetUserID)
++			payload, ok := readCompletionResponse(stored.LocalFlowState)
++			require.True(t, ok)
++			require.NotContains(t, payload, "access_token")
++			require.NotContains(t, payload, "refresh_token")
++			exchange := func(wrongBrowser bool) *httptest.ResponseRecorder {
++				response := httptest.NewRecorder()
++				c, _ := gin.CreateTestContext(response)
++				c.Request = httptest.NewRequest("POST", "https://gateway.example/api/v1/auth/oauth/pending/exchange", nil)
++				for _, cookie := range cookies {
++					clone := *cookie
++					if wrongBrowser && clone.Name == oauthPendingBrowserCookieName {
++						clone.Value = encodeCookieValue("another-browser")
++					}
++					c.Request.AddCookie(&clone)
++				}
++				h.ExchangePendingOAuthCompletion(c)
++				return response
++			}
++			require.GreaterOrEqual(t, exchange(true).Code, 400)
++			stored, err = client.PendingAuthSession.Get(ctx, stored.ID)
++			require.NoError(t, err)
++			require.Nil(t, stored.ConsumedAt)
++			success := exchange(false)
++			require.Equal(t, http.StatusOK, success.Code, success.Body.String())
++			data := decodeJSONResponseData(t, success)
++			require.NotEmpty(t, data["access_token"])
++			claims, err := h.authService.ValidateToken(data["access_token"].(string))
++			require.NoError(t, err)
++			require.Equal(t, u.ID, claims.UserID)
++			require.GreaterOrEqual(t, exchange(false).Code, 400, "completion must be single use")
++		})
++	}
++}
++
++func TestOAuthLoginHandoffExpiredPendingCannotIssueLogin(t *testing.T) {
++	h, client := newOAuthPendingFlowTestHandler(t, false)
++	ctx := context.Background()
++	u, err := client.User.Create().SetEmail("expired@example.invalid").SetPasswordHash("unused").SetRole(service.RoleUser).SetStatus(service.StatusActive).Save(ctx)
++	require.NoError(t, err)
++	recorder := httptest.NewRecorder()
++	c, _ := gin.CreateTestContext(recorder)
++	c.Request = httptest.NewRequest("GET", "https://gateway.example/api/v1/auth/oauth/github/callback", nil)
++	h.stageOAuthLogin(c, "/auth/oauth/callback", &service.TokenPair{AccessToken: "discarded"}, &service.User{ID: u.ID, Email: u.Email}, "/dashboard", service.PendingAuthIdentityKey{ProviderType: "github", ProviderKey: "github", ProviderSubject: "expired"}, nil)
++	stored, err := client.PendingAuthSession.Query().Only(ctx)
++	require.NoError(t, err)
++	require.NoError(t, client.PendingAuthSession.UpdateOneID(stored.ID).SetExpiresAt(time.Now().Add(-time.Minute)).Exec(ctx))
++	response := httptest.NewRecorder()
++	exchange, _ := gin.CreateTestContext(response)
++	exchange.Request = httptest.NewRequest("POST", "https://gateway.example/api/v1/auth/oauth/pending/exchange", nil)
++	for _, cookie := range recorder.Result().Cookies() {
++		exchange.Request.AddCookie(cookie)
++	}
++	h.ExchangePendingOAuthCompletion(exchange)
++	require.GreaterOrEqual(t, response.Code, 400)
++	require.NotContains(t, response.Body.String(), "access_token")
++}
+diff --git a/backend/internal/handler/auth_oauth_pending_flow_test.go b/backend/internal/handler/auth_oauth_pending_flow_test.go
+index dd8e1c03fe35b974e63ddcad2f7aa29054f1763f..cf8eb11b383d3c06f499951ff140584896acd9d1 100644
+--- a/backend/internal/handler/auth_oauth_pending_flow_test.go
++++ b/backend/internal/handler/auth_oauth_pending_flow_test.go
+@@ -2513,6 +2513,7 @@ func newOAuthPendingFlowTestHandlerWithOptions(
+ }
+ 
+ type oauthPendingFlowTestHandlerOptions struct {
++	refreshCache       service.RefreshTokenCache
+ 	invitationEnabled  bool
+ 	emailVerifyEnabled bool
+ 	emailCache         service.EmailCache
+@@ -2622,11 +2623,15 @@ CREATE TABLE IF NOT EXISTS user_affiliates (
+ 			},
+ 		}, options.emailCache)
+ 	}
++	refreshCache := options.refreshCache
++	if refreshCache == nil {
++		refreshCache = &oauthPendingFlowRefreshTokenCacheStub{}
++	}
+ 	authSvc := service.NewAuthService(
+ 		client,
+ 		userRepo,
+ 		redeemRepo,
+-		&oauthPendingFlowRefreshTokenCacheStub{},
++		refreshCache,
+ 		cfg,
+ 		settingSvc,
+ 		emailService,
+diff --git a/backend/internal/handler/auth_oidc_oauth.go b/backend/internal/handler/auth_oidc_oauth.go
+index 13c26cf18cd9185c4e1ecbc01f52248c7a2056e3..d56aa153328691316eea173db1027dc74f494701 100644
+--- a/backend/internal/handler/auth_oidc_oauth.go
++++ b/backend/internal/handler/auth_oidc_oauth.go
+@@ -1271,7 +1271,7 @@ func (h *AuthHandler) tryOIDCVerifiedEmailFastPath(
+ 		AvatarURL:        pendingSessionStringValue(upstreamClaims, "suggested_avatar_url"),
+ 		UpstreamMetadata: upstreamMetadata,
+ 	}
+-	tokenPair, _, err := h.authService.LoginOrRegisterVerifiedEmailOAuthWithSignupCodes(
++	tokenPair, user, err := h.authService.LoginOrRegisterVerifiedEmailOAuthWithSignupCodes(
+ 		ctx,
+ 		input,
+ 		"",
+@@ -1282,15 +1282,6 @@ func (h *AuthHandler) tryOIDCVerifiedEmailFastPath(
+ 		log.Printf("[OIDC OAuth] verified-email fast path skipped: reason=%s", infraerrors.Reason(err))
+ 		return false
+ 	}
+-
+-	fragment := url.Values{}
+-	fragment.Set("access_token", tokenPair.AccessToken)
+-	fragment.Set("refresh_token", tokenPair.RefreshToken)
+-	fragment.Set("expires_in", fmt.Sprintf("%d", tokenPair.ExpiresIn))
+-	fragment.Set("token_type", "Bearer")
+-	fragment.Set("redirect", redirectTo)
+-	clearOAuthPendingSessionCookie(c, isRequestHTTPS(c))
+-	clearOAuthPendingBrowserCookie(c, isRequestHTTPS(c))
+-	redirectWithFragment(c, frontendCallback, fragment)
++	h.stageOAuthLogin(c, frontendCallback, tokenPair, user, redirectTo, identity, upstreamMetadata)
+ 	return true
+ }
+diff --git a/backend/internal/handler/auth_oidc_oauth_test.go b/backend/internal/handler/auth_oidc_oauth_test.go
+index 08bb459a0c9ed51b4bafaca8d3893259af023089..8ffe6b45471a362fe10e399960b6ea19a6e05cae 100644
+--- a/backend/internal/handler/auth_oidc_oauth_test.go
++++ b/backend/internal/handler/auth_oidc_oauth_test.go
+@@ -957,10 +957,9 @@ func TestTryOIDCVerifiedEmailFastPathCreatesUserAndIdentity(t *testing.T) {
+ 	require.Equal(t, http.StatusFound, recorder.Code)
+ 
+ 	location := recorder.Header().Get("Location")
+-	require.Contains(t, location, "/auth/oidc/callback")
+-	require.Contains(t, location, "access_token=")
+-	require.Contains(t, location, "refresh_token=")
+-	require.Contains(t, location, "token_type=Bearer")
++	require.Equal(t, "/auth/oidc/callback", location)
++	require.NotContains(t, location, "access_token=")
++	require.NotContains(t, location, "refresh_token=")
+ 
+ 	user, err := client.User.Query().Where(dbuser.EmailEQ("fastpath@example.com")).Only(ctx)
+ 	require.NoError(t, err)
+@@ -979,10 +978,10 @@ func TestTryOIDCVerifiedEmailFastPathCreatesUserAndIdentity(t *testing.T) {
+ 
+ 	pendingCount, err := client.PendingAuthSession.Query().Count(ctx)
+ 	require.NoError(t, err)
+-	require.Zero(t, pendingCount)
++	require.Equal(t, 1, pendingCount)
+ }
+ 
+-func TestOIDCOAuthCallbackVerifiedEmailFastPathIssuesTokenWithoutPendingSession(t *testing.T) {
++func TestOIDCOAuthCallbackVerifiedEmailFastPathStagesBrowserBoundLogin(t *testing.T) {
+ 	cfg, cleanup := newOIDCTestProvider(t, oidcProviderFixture{
+ 		Subject:           "oidc-fast-callback-subject",
+ 		PreferredUsername: "oidc_fast_callback",
+@@ -1011,14 +1010,10 @@ func TestOIDCOAuthCallbackVerifiedEmailFastPathIssuesTokenWithoutPendingSession(
+ 
+ 	require.Equal(t, http.StatusFound, recorder.Code)
+ 	location := recorder.Header().Get("Location")
+-	require.Contains(t, location, "/auth/oidc/callback#")
+-	require.Contains(t, location, "access_token=")
+-	require.Contains(t, location, "refresh_token=")
+-	require.Contains(t, location, "token_type=Bearer")
+-	fragmentValues := parseOAuthRedirectFragment(t, location)
+-	require.Equal(t, "/dashboard", fragmentValues.Get("redirect"))
+-	requireCookieCleared(t, recorder, oauthPendingSessionCookieName)
+-	requireCookieCleared(t, recorder, oauthPendingBrowserCookieName)
++	require.Equal(t, "/auth/oidc/callback", location)
++	require.NotEmpty(t, findSetCookieValue(recorder.Result().Cookies(), oauthPendingSessionCookieName))
++	require.NotContains(t, location, "access_token=")
++	require.NotContains(t, location, "refresh_token=")
+ 
+ 	ctx := context.Background()
+ 	user, err := client.User.Query().Where(dbuser.EmailEQ("oidc-fast-callback@example.com")).Only(ctx)
+@@ -1040,7 +1035,7 @@ func TestOIDCOAuthCallbackVerifiedEmailFastPathIssuesTokenWithoutPendingSession(
+ 
+ 	pendingCount, err := client.PendingAuthSession.Query().Count(ctx)
+ 	require.NoError(t, err)
+-	require.Zero(t, pendingCount)
++	require.Equal(t, 1, pendingCount)
+ }
+ 
+ func TestOIDCOAuthCallbackVerifiedEmailFastPathBackendModeBlocksBeforeUserCreation(t *testing.T) {
+diff --git a/backend/internal/handler/ops_error_logger_test.go b/backend/internal/handler/ops_error_logger_test.go
+index 7714f4e34918d8e2b4b705947bcaee5e528a79c6..c10790951c53e794a80d37f247e01346fe8d610d 100644
+--- a/backend/internal/handler/ops_error_logger_test.go
++++ b/backend/internal/handler/ops_error_logger_test.go
+@@ -1098,6 +1098,8 @@ func TestClassifyOpsLocalBusinessLimitErrorsExcludedFromSLA(t *testing.T) {
+ 		status      int
+ 		wantErrType string
+ 		wantPhase   string
++		wantOwner   string
++		wantSource  string
+ 	}{
+ 		{
+ 			name:        "standard API key quota exhausted",
+@@ -1215,6 +1217,8 @@ func TestClassifyOpsLocalBusinessLimitErrorsExcludedFromSLA(t *testing.T) {
+ 			status:      http.StatusTooManyRequests,
+ 			wantErrType: "rate_limit_error",
+ 			wantPhase:   "request",
++			wantOwner:   "platform",
++			wantSource:  "gateway",
+ 		},
+ 		{
+ 			name:        "local concurrency limit",
+@@ -1224,6 +1228,8 @@ func TestClassifyOpsLocalBusinessLimitErrorsExcludedFromSLA(t *testing.T) {
+ 			status:      http.StatusTooManyRequests,
+ 			wantErrType: "rate_limit_error",
+ 			wantPhase:   "request",
++			wantOwner:   "client",
++			wantSource:  "gateway",
+ 		},
+ 		{
+ 			name:        "group claude code only feature gate",
+@@ -1347,8 +1353,15 @@ func TestClassifyOpsLocalBusinessLimitErrorsExcludedFromSLA(t *testing.T) {
+ 			require.Equal(t, tt.wantErrType, errType)
+ 			require.Equal(t, tt.wantPhase, phase)
+ 			require.True(t, isBusinessLimited)
+-			require.Equal(t, "client", errorOwner)
+-			require.Equal(t, "client_request", errorSource)
++			wantOwner, wantSource := tt.wantOwner, tt.wantSource
++			if wantOwner == "" {
++				wantOwner = "client"
++			}
++			if wantSource == "" {
++				wantSource = "client_request"
++			}
++			require.Equal(t, wantOwner, errorOwner)
++			require.Equal(t, wantSource, errorSource)
+ 		})
+ 	}
+ }
+diff --git a/backend/internal/pkg/gatewaytiming/history.go b/backend/internal/pkg/gatewaytiming/history.go
+index 4c95030f262952b478c33d2105fa6a44ef051cb6..18bf2cb3144d977a386c5032004b52b5d417a331 100644
+--- a/backend/internal/pkg/gatewaytiming/history.go
++++ b/backend/internal/pkg/gatewaytiming/history.go
+@@ -36,13 +36,26 @@ type historyIndex struct {
+ 	entry     *list.Element
+ 	ambiguous bool
+ }
++
++// A retired alias must remain ambiguous for the whole overlap of two +/-5m
++// matching windows. Tombstones are bounded too: on exhaustion attribution stops
++// until the overlap has elapsed rather than forgetting an alias and guessing.
++const historyMatchWindow = 5 * time.Minute
++
++type retiredAlias struct {
++	key   historyKey
++	until time.Time
++}
+ type History struct {
+-	mu       sync.Mutex
+-	capacity int
+-	ttl      time.Duration
+-	entries  *list.List
+-	index    map[historyKey]historyIndex
+-	now      func() time.Time
++	mu           sync.Mutex
++	capacity     int
++	ttl          time.Duration
++	entries      *list.List
++	index        map[historyKey]historyIndex
++	retired      *list.List
++	retiredIndex map[historyKey]*list.Element
++	blockedUntil time.Time
++	now          func() time.Time
+ }
+ 
+ func NewHistory(capacity int, ttl time.Duration) *History {
+@@ -52,7 +65,30 @@ func NewHistory(capacity int, ttl time.Duration) *History {
+ 	if ttl <= 0 || ttl > 24*time.Hour {
+ 		ttl = 24 * time.Hour
+ 	}
+-	return &History{capacity: capacity, ttl: ttl, entries: list.New(), index: make(map[historyKey]historyIndex), now: time.Now}
++	return &History{capacity: capacity, ttl: ttl, entries: list.New(), index: make(map[historyKey]historyIndex),
++		retired: list.New(), retiredIndex: make(map[historyKey]*list.Element), now: time.Now}
++}
++
++func boundedHistoryKey(scope Scope, id string) (historyKey, bool) {
++	if len(id) > 160 || strings.ContainsAny(id, "\r\n\x00") {
++		return historyKey{}, false
++	}
++	id = strings.TrimSpace(id)
++	if id == "" {
++		return historyKey{}, false
++	}
++	return historyKey{Scope: scope, ID: sha256.Sum256([]byte(id))}, true
++}
++
++func (h *History) pruneRetired(now time.Time) {
++	for front := h.retired.Front(); front != nil; front = h.retired.Front() {
++		item := front.Value.(retiredAlias)
++		if !now.After(item.until) {
++			break
++		}
++		delete(h.retiredIndex, item.key)
++		h.retired.Remove(front)
++	}
+ }
+ 
+ var historyMetricAllowlist = map[string]bool{
+@@ -65,7 +101,9 @@ var historyMetricAllowlist = map[string]bool{
+ 	"chat_first_event_ingress_ms": true, "chat_first_text_event_ingress_ms": true,
+ 	"upstream_semantic_ingress_ms": true, "downstream_semantic_flush_ingress_ms": true,
+ 	"downstream_write_block_ms": true, "downstream_flush_block_ms": true,
+-	"upstream_attempts": true,
++	"upstream_attempts":         true,
++	"upstream_request_write_ms": true, "upstream_first_byte_ms": true,
++	"upstream_first_event_ingress_ms": true,
+ }
+ 
+ func (h *History) Publish(scope Scope, ids []string, snapshot map[string]any) {
+@@ -83,11 +121,10 @@ func (h *History) Publish(scope Scope, ids []string, snapshot map[string]any) {
+ 	}
+ 	keys := make([]historyKey, 0, 2)
+ 	for _, id := range ids {
+-		id = strings.TrimSpace(id)
+-		if id == "" || len(id) > 160 || strings.ContainsAny(id, "\r\n\x00") {
++		key, valid := boundedHistoryKey(scope, id)
++		if !valid {
+ 			continue
+ 		}
+-		key := historyKey{Scope: scope, ID: sha256.Sum256([]byte(id))}
+ 		if len(keys) > 0 && keys[0] == key {
+ 			continue
+ 		}
+@@ -106,10 +143,15 @@ func (h *History) Publish(scope Scope, ids []string, snapshot map[string]any) {
+ 	h.mu.Lock()
+ 	defer h.mu.Unlock()
+ 	now := h.now()
++	if !h.blockedUntil.IsZero() && !now.After(h.blockedUntil) {
++		return
++	}
++	h.pruneRetired(now)
+ 	collisions := make(map[historyKey]bool, len(keys))
+ 	for _, key := range keys {
++		_, collisions[key] = h.retiredIndex[key]
+ 		if previous, exists := h.index[key]; exists {
+-			collisions[key] = now.Sub(previous.entry.Value.(*historyEntry).record.ObservedAt) < h.ttl
++			collisions[key] = collisions[key] || now.Sub(previous.entry.Value.(*historyEntry).record.ObservedAt) < h.ttl
+ 		}
+ 	}
+ 	for front := h.entries.Front(); front != nil; front = h.entries.Front() {
+@@ -117,7 +159,13 @@ func (h *History) Publish(scope Scope, ids []string, snapshot map[string]any) {
+ 		if h.entries.Len() < h.capacity && now.Sub(entry.record.ObservedAt) < h.ttl {
+ 			break
+ 		}
+-		h.remove(front)
++		if !h.remove(front, now) {
++			return
++		}
++	}
++	for _, key := range keys {
++		_, retired := h.retiredIndex[key]
++		collisions[key] = collisions[key] || retired
+ 	}
+ 	entry := h.entries.PushBack(&historyEntry{keys: keys, record: Record{
+ 		SchemaVersion: 1, Source: "process_memory", ObservedAt: now,
+@@ -133,23 +181,32 @@ func (h *History) Lookup(scope Scope, id string, createdAt time.Time) *Record {
+ 	if h == nil || scope.UserID <= 0 || scope.APIKeyID <= 0 || createdAt.IsZero() {
+ 		return nil
+ 	}
++	key, valid := boundedHistoryKey(scope, id)
++	if !valid {
++		return nil
++	}
+ 	h.mu.Lock()
+-	defer h.mu.Unlock()
+-	indexed, found := h.index[historyKey{Scope: scope, ID: sha256.Sum256([]byte(id))}]
++	indexed, found := h.index[key]
+ 	if !found || indexed.ambiguous {
++		h.mu.Unlock()
+ 		return nil
+ 	}
+ 	entry := indexed.entry.Value.(*historyEntry)
+ 	if h.now().Sub(entry.record.ObservedAt) >= h.ttl {
+-		h.remove(indexed.entry)
++		h.remove(indexed.entry, h.now())
++		h.mu.Unlock()
+ 		return nil
+ 	}
+ 	// Reused identifiers or a delayed, unrelated row must not receive this sample.
+ 	delta := createdAt.Sub(entry.record.ObservedAt)
+-	if delta < -5*time.Minute || delta > 5*time.Minute {
++	if delta < -historyMatchWindow || delta > historyMatchWindow {
++		h.mu.Unlock()
+ 		return nil
+ 	}
+ 	result := entry.record
++	h.mu.Unlock()
++	// Cached records are immutable after publication. Copying this snapshot
++	// outside the lock cannot race with eviction or a caller's returned map.
+ 	result.Metrics = make(map[string]int64, len(entry.record.Metrics))
+ 	for name, value := range entry.record.Metrics {
+ 		result.Metrics[name] = value
+@@ -157,11 +214,32 @@ func (h *History) Lookup(scope Scope, id string, createdAt time.Time) *Record {
+ 	return &result
+ }
+ 
+-func (h *History) remove(element *list.Element) {
+-	for _, key := range element.Value.(*historyEntry).keys {
++func (h *History) remove(element *list.Element, now time.Time) bool {
++	entry := element.Value.(*historyEntry)
++	until := entry.record.ObservedAt.Add(2 * historyMatchWindow)
++	for _, key := range entry.keys {
++		if !now.After(until) {
++			if retired := h.retiredIndex[key]; retired != nil {
++				if until.After(retired.Value.(retiredAlias).until) {
++					retired.Value = retiredAlias{key, until}
++					h.retired.MoveToBack(retired)
++				}
++			} else {
++				if len(h.retiredIndex) >= 2*h.capacity {
++					h.entries.Init()
++					clear(h.index)
++					h.retired.Init()
++					clear(h.retiredIndex)
++					h.blockedUntil = now.Add(2 * historyMatchWindow)
++					return false
++				}
++				h.retiredIndex[key] = h.retired.PushBack(retiredAlias{key, until})
++			}
++		}
+ 		if h.index[key].entry == element {
+ 			delete(h.index, key)
+ 		}
+ 	}
+ 	h.entries.Remove(element)
++	return true
+ }
+diff --git a/backend/internal/pkg/gatewaytiming/history_eviction_test.go b/backend/internal/pkg/gatewaytiming/history_eviction_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..5bf6e95fd3ef34229454b2b61ade8b42cbabcc53
+--- /dev/null
++++ b/backend/internal/pkg/gatewaytiming/history_eviction_test.go
+@@ -0,0 +1,138 @@
++package gatewaytiming
++
++import (
++	"strconv"
++	"strings"
++	"sync"
++	"sync/atomic"
++	"testing"
++	"time"
++)
++
++// This is an audit probe of the unmodified, published helper. It fails until a
++// backend fix can reliably correlate a persisted row with one request instance.
++func TestHistoryDoesNotAttachNewRequestTimingToEvictedOldRow(t *testing.T) {
++	h := NewHistory(1, time.Hour)
++	now := time.Unix(1800000000, 0)
++	h.now = func() time.Time { return now }
++	scope := Scope{UserID: 101, APIKeyID: 201}
++	oldRowCreatedAt := now
++	h.Publish(scope, []string{"client:reused"}, map[string]any{"body_read_block_ms": int64(10)})
++	now = now.Add(time.Second)
++	h.Publish(scope, []string{"client:intervening"}, map[string]any{"body_read_block_ms": int64(20)})
++	now = now.Add(time.Second)
++	h.Publish(scope, []string{"client:reused"}, map[string]any{"body_read_block_ms": int64(999)})
++	if record := h.Lookup(scope, "client:reused", oldRowCreatedAt); record != nil {
++		t.Fatalf("old persisted row incorrectly receives a newer request sample: body_read_block_ms=%d, observed_at=%s, old_row_created_at=%s",
++			record.Metrics["body_read_block_ms"], record.ObservedAt, oldRowCreatedAt)
++	}
++}
++
++func TestHistoryKeepsPrivacyAndCapacityBounds(t *testing.T) {
++	h := NewHistory(4, time.Hour)
++	now := time.Now()
++	scope := Scope{UserID: 101, APIKeyID: 201}
++	h.Publish(scope, []string{"request"}, map[string]any{"body_read_block_ms": int64(0), "prompt": "synthetic-private"})
++	record := h.Lookup(scope, "request", now)
++	if record == nil || len(record.Metrics) != 1 || record.Metrics["body_read_block_ms"] != 0 {
++		t.Fatal("measured zero or metric allowlist was not preserved")
++	}
++	if h.Lookup(Scope{UserID: 102, APIKeyID: 201}, "request", now) != nil {
++		t.Fatal("cross-user timing leaked")
++	}
++	record.Metrics["body_read_block_ms"] = 9
++	if h.Lookup(scope, "request", now).Metrics["body_read_block_ms"] != 0 {
++		t.Fatal("caller mutated the cached sample")
++	}
++	for i := 0; i < 20; i++ {
++		h.Publish(scope, []string{strconv.Itoa(i)}, map[string]any{"body_read_block_ms": int64(i)})
++	}
++	if h.entries.Len() > 4 || len(h.index) > 8 {
++		t.Fatal("bounded cache exceeded capacity")
++	}
++}
++
++func TestHistoryConcurrentReadAndPublish(t *testing.T) {
++	h := NewHistory(32, time.Hour)
++	var workers sync.WaitGroup
++	for worker := int64(1); worker <= 8; worker++ {
++		workers.Add(1)
++		go func(id int64) {
++			defer workers.Done()
++			scope := Scope{UserID: id, APIKeyID: id + 100}
++			for iteration := 0; iteration < 100; iteration++ {
++				key := strconv.Itoa(iteration)
++				h.Publish(scope, []string{key}, map[string]any{"user_wait_ms": int64(iteration)})
++				h.Lookup(scope, key, time.Now())
++			}
++		}(worker)
++	}
++	workers.Wait()
++	if h.entries.Len() > 32 || len(h.index) > 64 {
++		t.Fatal("concurrent cache exceeded capacity")
++	}
++}
++
++func BenchmarkHistoryPublish(b *testing.B) {
++	h := NewHistory(4096, time.Hour)
++	scope := Scope{UserID: 101, APIKeyID: 201}
++	metrics := map[string]any{"body_read_block_ms": int64(10), "user_wait_ms": int64(0)}
++	b.ReportAllocs()
++	b.ResetTimer()
++	for i := 0; i < b.N; i++ {
++		h.Publish(scope, []string{strconv.Itoa(i)}, metrics)
++	}
++}
++
++func BenchmarkHistoryLookup(b *testing.B) {
++	h := NewHistory(4096, time.Hour)
++	scope := Scope{UserID: 101, APIKeyID: 201}
++	now := time.Now()
++	h.Publish(scope, []string{"request"}, map[string]any{"body_read_block_ms": int64(10), "user_wait_ms": int64(0)})
++	b.ReportAllocs()
++	b.ResetTimer()
++	b.RunParallel(func(pb *testing.PB) {
++		for pb.Next() {
++			h.Lookup(scope, "request", now)
++		}
++	})
++}
++
++func BenchmarkHistoryParallelPublishLookup(b *testing.B) {
++	h := NewHistory(4096, time.Hour)
++	var sequence int64
++	metrics := map[string]any{"body_read_block_ms": int64(10), "user_wait_ms": int64(0)}
++	b.ReportAllocs()
++	b.ResetTimer()
++	b.RunParallel(func(pb *testing.PB) {
++		id := atomic.AddInt64(&sequence, 1)
++		scope := Scope{UserID: id, APIKeyID: id + 100}
++		i := 0
++		for pb.Next() {
++			key := strconv.Itoa(i)
++			h.Publish(scope, []string{key}, metrics)
++			h.Lookup(scope, key, time.Now())
++			i++
++		}
++	})
++}
++
++// Publish rejects aliases over 160 bytes; Lookup should have a comparable bound.
++// Backend reachability of an oversized persisted identifier is not established.
++func BenchmarkHistoryLookupIDLength(b *testing.B) {
++	for _, size := range []int{160, 1024 * 1024} {
++		b.Run(strconv.Itoa(size), func(b *testing.B) {
++			h := NewHistory(4096, time.Hour)
++			scope := Scope{UserID: 101, APIKeyID: 201}
++			id := strings.Repeat("x", size)
++			now := time.Now()
++			b.ReportAllocs()
++			b.ResetTimer()
++			b.RunParallel(func(pb *testing.PB) {
++				for pb.Next() {
++					h.Lookup(scope, id, now)
++				}
++			})
++		})
++	}
++}
+diff --git a/backend/internal/pkg/gatewaytiming/history_retirement_test.go b/backend/internal/pkg/gatewaytiming/history_retirement_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..9f0f209852bc19ab710179185075231e399dbe1f
+--- /dev/null
++++ b/backend/internal/pkg/gatewaytiming/history_retirement_test.go
+@@ -0,0 +1,50 @@
++package gatewaytiming
++
++import (
++	"fmt"
++	"github.com/stretchr/testify/require"
++	"strings"
++	"testing"
++	"time"
++)
++
++func TestHistoryRetirementIsBoundedAndRecoversAfterOverlap(t *testing.T) {
++	h := NewHistory(2, time.Hour)
++	now := time.Unix(1800000000, 0)
++	h.now = func() time.Time { return now }
++	scope := Scope{101, 201}
++	for i := 0; i < 20; i++ {
++		h.Publish(scope, []string{fmt.Sprint(i)}, map[string]any{"user_wait_ms": int64(0)})
++		require.LessOrEqual(t, len(h.retiredIndex), 4)
++		require.LessOrEqual(t, h.retired.Len(), 4)
++		require.LessOrEqual(t, h.entries.Len(), 2)
++	}
++	require.False(t, h.blockedUntil.IsZero())
++	require.Nil(t, h.Lookup(scope, "19", now))
++	now = h.blockedUntil.Add(time.Nanosecond)
++	h.Publish(scope, []string{"after-overlap"}, map[string]any{"user_wait_ms": int64(0)})
++	require.NotNil(t, h.Lookup(scope, "after-overlap", now))
++}
++
++func TestHistoryExpiredAliasCannotBorrowNewMetrics(t *testing.T) {
++	h := NewHistory(2, time.Second)
++	now := time.Unix(1800000000, 0)
++	h.now = func() time.Time { return now }
++	old := now
++	scope := Scope{101, 201}
++	h.Publish(scope, []string{"same"}, map[string]any{"user_wait_ms": int64(1)})
++	now = now.Add(2 * time.Second)
++	h.Publish(scope, []string{"same"}, map[string]any{"user_wait_ms": int64(9)})
++	require.Nil(t, h.Lookup(scope, "same", old))
++}
++
++func TestHistoryLookupRejectsUnboundedOrInvalidIDs(t *testing.T) {
++	h := NewHistory(2, time.Hour)
++	scope := Scope{101, 201}
++	now := time.Now()
++	h.Publish(scope, []string{"valid"}, map[string]any{"user_wait_ms": int64(0)})
++	for _, id := range []string{"", strings.Repeat(" ", 1<<20), strings.Repeat("x", 161), "valid\n", "valid\x00"} {
++		require.Nil(t, h.Lookup(scope, id, now))
++	}
++	require.NotNil(t, h.Lookup(scope, " valid ", now))
++}
+diff --git a/backend/internal/pkg/gatewaytiming/timing.go b/backend/internal/pkg/gatewaytiming/timing.go
+index 37266771324a66bdefd3bfd7ef6162983b5c4ba3..00e9687e6efd8ffe79cfbeae723cb7feda1a27f9 100644
+--- a/backend/internal/pkg/gatewaytiming/timing.go
++++ b/backend/internal/pkg/gatewaytiming/timing.go
+@@ -206,6 +206,20 @@ func MarkOutput(ctx context.Context, stage, kind string) {
+ 	}
+ }
+ 
++// MarkResponseEvent distinguishes provider preamble from actual usable output.
++// Only a timestamp is retained, never the upstream event or response content.
++func MarkResponseEvent(ctx context.Context) {
++	c := collector(ctx)
++	if c == nil {
++		return
++	}
++	c.mu.Lock()
++	defer c.mu.Unlock()
++	if _, exists := c.values["upstream_first_event_ingress_ms"]; !exists {
++		c.values["upstream_first_event_ingress_ms"] = time.Since(c.started).Milliseconds()
++	}
++}
++
+ func RecordDownstreamWrite(ctx context.Context, started time.Time, written int, err error) {
+ 	c := collector(ctx)
+ 	if c == nil {
+@@ -246,6 +260,19 @@ func Trace(req *http.Request) (*http.Request, func(*http.Response, error)) {
+ 	var getConn, dns, tlsStart time.Time
+ 	connects := make(map[string]time.Time)
+ 	trace := &httptrace.ClientTrace{
++		WroteRequest: func(info httptrace.WroteRequestInfo) {
++			if info.Err != nil {
++				return
++			}
++			c.mu.Lock()
++			defer c.mu.Unlock()
++			c.add("upstream_request_write_ms", time.Since(started).Milliseconds())
++		},
++		GotFirstResponseByte: func() {
++			c.mu.Lock()
++			defer c.mu.Unlock()
++			c.add("upstream_first_byte_ms", time.Since(started).Milliseconds())
++		},
+ 		GetConn: func(string) { c.mu.Lock(); getConn = time.Now(); c.mu.Unlock() },
+ 		GotConn: func(info httptrace.GotConnInfo) {
+ 			c.mu.Lock()
+diff --git a/backend/internal/repository/backup_pg_dumper_test.go b/backend/internal/repository/backup_pg_dumper_test.go
+index 586182b70ffba46d5f367efa0f87761a7cbb8fb3..d84fc7fad90c85e32e255b54e9af9f1ecb0d1fa0 100644
+--- a/backend/internal/repository/backup_pg_dumper_test.go
++++ b/backend/internal/repository/backup_pg_dumper_test.go
+@@ -4,8 +4,10 @@ import (
+ 	"context"
+ 	"errors"
+ 	"io"
++	"os"
+ 	"os/exec"
+ 	"regexp"
++	"strconv"
+ 	"testing"
+ 
+ 	"github.com/DATA-DOG/go-sqlmock"
+@@ -52,7 +54,7 @@ func TestPgDumperHoldsMigrationLockThroughReaderClose(t *testing.T) {
+ 		require.Equal(t, "pg_dump", name)
+ 		require.Contains(t, args, "--clean")
+ 		require.NoError(t, mock.ExpectationsWereMet(), "migration lock must be acquired before pg_dump is created")
+-		return exec.CommandContext(ctx, "sh", "-c", "printf backup-data")
++		return pgDumpFixtureCommand(ctx, "backup-data", 0)
+ 	})
+ 	mock = createdMock
+ 	expectBackupMigrationLock(mock)
+@@ -73,7 +75,7 @@ func TestPgDumperHoldsMigrationLockThroughReaderClose(t *testing.T) {
+ 
+ func TestPgDumperReleasesMigrationLockWhenStdoutPipeSetupFails(t *testing.T) {
+ 	dumper, mock := newTestPgDumper(t, func(ctx context.Context, _ string, _ ...string) *exec.Cmd {
+-		cmd := exec.CommandContext(ctx, "sh", "-c", "true")
++		cmd := pgDumpFixtureCommand(ctx, "", 0)
+ 		cmd.Stdout = io.Discard
+ 		return cmd
+ 	})
+@@ -101,7 +103,7 @@ func TestPgDumperReleasesMigrationLockWhenProcessStartFails(t *testing.T) {
+ 
+ func TestPgDumperReleasesMigrationLockWhenProcessFails(t *testing.T) {
+ 	dumper, mock := newTestPgDumper(t, func(ctx context.Context, _ string, _ ...string) *exec.Cmd {
+-		return exec.CommandContext(ctx, "sh", "-c", "printf partial-backup; exit 7")
++		return pgDumpFixtureCommand(ctx, "partial-backup", 7)
+ 	})
+ 	expectBackupMigrationLock(mock)
+ 
+@@ -117,7 +119,7 @@ func TestPgDumperReleasesMigrationLockWhenProcessFails(t *testing.T) {
+ 
+ func TestPgDumperReportsUnlockFailureAndDiscardsConnection(t *testing.T) {
+ 	dumper, mock := newTestPgDumper(t, func(ctx context.Context, _ string, _ ...string) *exec.Cmd {
+-		return exec.CommandContext(ctx, "sh", "-c", "printf backup-data")
++		return pgDumpFixtureCommand(ctx, "backup-data", 0)
+ 	})
+ 	expectBackupMigrationLock(mock)
+ 
+@@ -136,7 +138,7 @@ func TestPgDumperDoesNotStartProcessWhenMigrationLockFails(t *testing.T) {
+ 	commandCreated := false
+ 	dumper, mock := newTestPgDumper(t, func(ctx context.Context, _ string, _ ...string) *exec.Cmd {
+ 		commandCreated = true
+-		return exec.CommandContext(ctx, "sh", "-c", "true")
++		return pgDumpFixtureCommand(ctx, "", 0)
+ 	})
+ 	mock.ExpectQuery(regexp.QuoteMeta("SELECT pg_try_advisory_lock($1)")).
+ 		WithArgs(migrationsAdvisoryLockID).
+@@ -155,3 +157,27 @@ func TestPgDumperRejectsNilDatabase(t *testing.T) {
+ 	require.Nil(t, reader)
+ 	require.ErrorContains(t, err, "nil sql db")
+ }
++
++// Portable fixture subprocess: no POSIX shell or installed database is required.
++func pgDumpFixtureCommand(ctx context.Context, output string, code int) *exec.Cmd {
++	cmd := exec.CommandContext(ctx, os.Args[0], "-test.run=^TestPgDumperFixtureProcess$", "--", output, strconv.Itoa(code))
++	cmd.Env = append(os.Environ(), "ZHIJING_PGDUMP_TEST_PROCESS=1")
++	return cmd
++}
++func TestPgDumperFixtureProcess(t *testing.T) {
++	if os.Getenv("ZHIJING_PGDUMP_TEST_PROCESS") != "1" {
++		return
++	}
++	args := os.Args
++	for i, arg := range args {
++		if arg == "--" && i+2 < len(args) {
++			_, _ = io.WriteString(os.Stdout, args[i+1])
++			code, err := strconv.Atoi(args[i+2])
++			if err != nil {
++				os.Exit(99)
++			}
++			os.Exit(code)
++		}
++	}
++	os.Exit(98)
++}
+diff --git a/backend/internal/server/middleware/browser_session.go b/backend/internal/server/middleware/browser_session.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..0db51d4cde758f42eb260e5195906a9f02db7cc1
+--- /dev/null
++++ b/backend/internal/server/middleware/browser_session.go
+@@ -0,0 +1,295 @@
++package middleware
++
++import (
++	"bytes"
++	"crypto/rand"
++	"encoding/hex"
++	"encoding/json"
++	"io"
++	"net"
++	"net/http"
++	"net/url"
++	"regexp"
++	"strconv"
++	"strings"
++
++	"github.com/Wei-Shaw/sub2api/internal/config"
++	"github.com/gin-gonic/gin"
++)
++
++const browserSessionHeader = "X-Zhijing-Session"
++
++var browserSessionID = regexp.MustCompile(`^(?:[a-f0-9]{32}|[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})$`)
++var browserSessionVersion = regexp.MustCompile(`^[a-f0-9]{32}$`)
++
++type browserSessionHandle struct{ id, version string }
++
++func parseBrowserSessionHandle(value string) (browserSessionHandle, bool) {
++	p := strings.Split(value, ".")
++	if len(p) != 3 || p[0] != "zjs" || !browserSessionID.MatchString(p[1]) || !browserSessionVersion.MatchString(p[2]) {
++		return browserSessionHandle{}, false
++	}
++	return browserSessionHandle{p[1], p[2]}, true
++}
++func (h browserSessionHandle) access() string  { return "zjs." + h.id + "." + h.version }
++func (h browserSessionHandle) refresh() string { return "zjr." + h.id + "." + h.version }
++func (h browserSessionHandle) name(kind string, secure bool) string {
++	prefix := "zj_"
++	if secure {
++		prefix = "__Secure-zj_"
++	}
++	return prefix + kind + "_" + h.id + "_" + h.version
++}
++
++// BrowserSession keeps reusable credentials in HttpOnly cookies. The public
++// zjs/zjr handles are selectors, never credentials: every use still needs the
++// selected cookie and the ordinary JWT/role/session-version checks downstream.
++// Existing bearer/API-key clients do not opt in and retain their wire contract.
++// Each login AND rotation has a separate cookie name. A late response from an
++// old login/refresh cannot overwrite cookies selected by a newer session.
++func BrowserSession(cfg *config.Config) gin.HandlerFunc {
++	refreshDays := 30
++	if cfg != nil && cfg.JWT.RefreshTokenExpireDays > 0 {
++		refreshDays = cfg.JWT.RefreshTokenExpireDays
++	}
++	if refreshDays > 90 {
++		refreshDays = 90
++	}
++	return func(c *gin.Context) {
++		if !strings.HasPrefix(c.Request.URL.Path, "/api/v1/") {
++			c.Next()
++			return
++		}
++		mode := c.GetHeader(browserSessionHeader)
++		ws := isWebSocketUpgradeRequest(c)
++		wsHandle := false
++		if mode == "" && ws && c.Request.URL.Path == "/api/v1/admin/ops/ws/qps" {
++			for _, p := range strings.Split(c.GetHeader("Sec-WebSocket-Protocol"), ",") {
++				candidate := strings.TrimPrefix(strings.TrimSpace(p), "jwt.")
++				if _, ok := parseBrowserSessionHandle(candidate); ok {
++					mode = candidate
++					wsHandle = true
++					break
++				}
++			}
++		}
++		if mode == "" {
++			c.Next()
++			return
++		}
++		secure := c.Request.TLS != nil || strings.EqualFold(c.GetHeader("X-Forwarded-Proto"), "https")
++		if !secure && !browserLoopbackRequest(c.Request) {
++			AbortWithError(c, 400, "BROWSER_SESSION_HTTPS_REQUIRED", "Browser sessions require HTTPS")
++			return
++		}
++		if !browserSameOrigin(c.Request, secure, ws) {
++			AbortWithError(c, 403, "BROWSER_SESSION_ORIGIN", "Browser session origin mismatch")
++			return
++		}
++		current, cookieMode := parseBrowserSessionHandle(mode)
++		loginID := ""
++		if cookieMode {
++			loginID = current.id
++		} else if strings.HasPrefix(mode, "init.") && browserSessionID.MatchString(strings.TrimPrefix(mode, "init.")) {
++			loginID = strings.TrimPrefix(mode, "init.")
++		}
++		if loginID == "" || len(mode) > 120 {
++			AbortWithError(c, 400, "BROWSER_SESSION_INVALID", "Invalid browser session selector")
++			return
++		}
++		c.Header("X-Zhijing-Session-Supported", "1")
++		path := c.Request.URL.Path
++		refreshPath := path == "/api/v1/auth/refresh" || path == "/api/v1/auth/logout"
++		if cookieMode {
++			access, unique := browserCookie(c.Request, current.name("at", secure))
++			if !unique {
++				AbortWithError(c, 401, "BROWSER_SESSION_AMBIGUOUS", "Ambiguous browser session")
++				return
++			}
++			auth := strings.TrimSpace(c.GetHeader("Authorization"))
++			if auth != "" && auth != "Bearer "+current.access() {
++				AbortWithError(c, 401, "BROWSER_SESSION_MISMATCH", "Browser session credential mismatch")
++				return
++			}
++			if access != "" {
++				c.Request.Header.Set("Authorization", "Bearer "+access)
++			} else {
++				c.Request.Header.Del("Authorization")
++			}
++			if wsHandle {
++				protocols := []string{}
++				for _, p := range strings.Split(c.GetHeader("Sec-WebSocket-Protocol"), ",") {
++					p = strings.TrimSpace(p)
++					if p != "jwt."+current.access() {
++						protocols = append(protocols, p)
++					}
++				}
++				c.Request.Header.Set("Sec-WebSocket-Protocol", strings.Join(protocols, ", "))
++			}
++			if refreshPath {
++				refresh, unique := browserCookie(c.Request, current.name("rt", secure))
++				if !unique || refresh == "" {
++					AbortWithError(c, 401, "BROWSER_SESSION_EXPIRED", "Browser session expired")
++					return
++				}
++				raw, err := io.ReadAll(io.LimitReader(c.Request.Body, 4097))
++				var payload map[string]json.RawMessage
++				var selector string
++				if err != nil || len(raw) > 4096 || json.Unmarshal(raw, &payload) != nil || json.Unmarshal(payload["refresh_token"], &selector) != nil || selector != current.refresh() {
++					AbortWithError(c, 400, "BROWSER_SESSION_MISMATCH", "Browser session refresh mismatch")
++					return
++				}
++				payload["refresh_token"], _ = json.Marshal(refresh)
++				body, _ := json.Marshal(payload)
++				_ = c.Request.Body.Close()
++				c.Request.Body = io.NopCloser(bytes.NewReader(body))
++				c.Request.ContentLength = int64(len(body))
++			}
++		}
++		// Streaming and other panel responses are never buffered by this adapter.
++		capture := c.Request.Method == http.MethodPost && strings.HasPrefix(path, "/api/v1/auth/")
++		if !capture {
++			c.Next()
++			return
++		}
++		original := c.Writer
++		writer := &browserAuthWriter{ResponseWriter: original, status: http.StatusOK}
++		c.Writer = writer
++		c.Next()
++		c.Writer = original
++		body := writer.body.Bytes()
++		status := writer.status
++		if writer.overflow {
++			status = http.StatusInternalServerError
++			body = []byte(`{"code":500,"message":"Authentication response exceeds limit"}`)
++		}
++		if status >= 200 && status < 300 && !writer.overflow {
++			var envelope map[string]json.RawMessage
++			if json.Unmarshal(body, &envelope) == nil {
++				tokenData := envelope
++				wrapped := false
++				if data := envelope["data"]; len(data) > 0 {
++					var nested map[string]json.RawMessage
++					if json.Unmarshal(data, &nested) == nil && nested != nil {
++						tokenData = nested
++						wrapped = true
++					}
++				}
++				var access, refresh string
++				_ = json.Unmarshal(tokenData["access_token"], &access)
++				_ = json.Unmarshal(tokenData["refresh_token"], &refresh)
++				if access != "" {
++					var expires int
++					var version [16]byte
++					_, randomErr := rand.Read(version[:])
++					if json.Unmarshal(tokenData["expires_in"], &expires) != nil || expires <= 0 || expires > 90*86400 || randomErr != nil {
++						status = http.StatusInternalServerError
++						body = []byte(`{"code":500,"message":"Unable to establish browser session"}`)
++					} else {
++						next := browserSessionHandle{loginID, hex.EncodeToString(version[:])}
++						browserSetCookie(c, next.name("at", secure), access, expires, secure)
++						tokenData["access_token"], _ = json.Marshal(next.access())
++						if refresh != "" {
++							browserSetCookie(c, next.name("rt", secure), refresh, refreshDays*86400, secure)
++							tokenData["refresh_token"], _ = json.Marshal(next.refresh())
++						}
++						if cookieMode {
++							browserClearPair(c, current, secure)
++						}
++						if wrapped {
++							envelope["data"], _ = json.Marshal(tokenData)
++						}
++						body, _ = json.Marshal(envelope)
++					}
++				}
++			}
++		}
++		if cookieMode && path == "/api/v1/auth/logout" {
++			browserClearPair(c, current, secure)
++		}
++		c.Header("Cache-Control", "no-store")
++		c.Header("Pragma", "no-cache")
++		c.Header("Content-Length", strconv.Itoa(len(body)))
++		original.WriteHeader(status)
++		if len(body) > 0 {
++			_, _ = original.Write(body)
++		}
++	}
++}
++
++func browserSameOrigin(r *http.Request, secure, websocket bool) bool {
++	site := strings.ToLower(r.Header.Get("Sec-Fetch-Site"))
++	if site != "" && site != "same-origin" && site != "none" {
++		return false
++	}
++	origin := r.Header.Get("Origin")
++	if origin == "" {
++		return !websocket
++	}
++	u, err := url.Parse(origin)
++	scheme := "http"
++	if secure {
++		scheme = "https"
++	}
++	return err == nil && u.User == nil && u.Scheme == scheme && strings.EqualFold(u.Host, r.Host) && u.Path == "" && u.RawQuery == "" && u.Fragment == ""
++}
++func browserLoopbackRequest(r *http.Request) bool {
++	host := r.Host
++	if h, _, e := net.SplitHostPort(host); e == nil {
++		host = h
++	}
++	remote, _, err := net.SplitHostPort(r.RemoteAddr)
++	localIP := net.ParseIP(host)
++	remoteIP := net.ParseIP(remote)
++	return err == nil && (host == "localhost" || (localIP != nil && localIP.IsLoopback())) && remoteIP != nil && remoteIP.IsLoopback()
++}
++func browserCookie(r *http.Request, name string) (string, bool) {
++	value := ""
++	count := 0
++	for _, cookie := range r.Cookies() {
++		if cookie.Name == name {
++			count++
++			value = cookie.Value
++		}
++	}
++	return value, count <= 1 && len(value) <= 8192
++}
++func browserSetCookie(c *gin.Context, name, value string, maxAge int, secure bool) {
++	http.SetCookie(c.Writer, &http.Cookie{Name: name, Value: value, Path: "/api/v1", HttpOnly: true, Secure: secure, SameSite: http.SameSiteStrictMode, MaxAge: maxAge})
++}
++func browserClearPair(c *gin.Context, h browserSessionHandle, secure bool) {
++	browserSetCookie(c, h.name("at", secure), "", -1, secure)
++	browserSetCookie(c, h.name("rt", secure), "", -1, secure)
++}
++
++type browserAuthWriter struct {
++	gin.ResponseWriter
++	body              bytes.Buffer
++	status            int
++	written, overflow bool
++}
++
++func (w *browserAuthWriter) WriteHeader(code int) {
++	if !w.written {
++		w.status = code
++	}
++}
++func (w *browserAuthWriter) WriteHeaderNow() { w.written = true }
++func (w *browserAuthWriter) Status() int     { return w.status }
++func (w *browserAuthWriter) Size() int {
++	if !w.written {
++		return -1
++	}
++	return w.body.Len()
++}
++func (w *browserAuthWriter) Written() bool { return w.written }
++func (w *browserAuthWriter) Write(p []byte) (int, error) {
++	w.written = true
++	if w.overflow || w.body.Len()+len(p) > 128*1024 {
++		w.overflow = true
++		return len(p), nil
++	}
++	return w.body.Write(p)
++}
++func (w *browserAuthWriter) WriteString(s string) (int, error) { return w.Write([]byte(s)) }
++func (w *browserAuthWriter) Flush()                            { w.overflow = true }
+diff --git a/backend/internal/server/middleware/browser_session_test.go b/backend/internal/server/middleware/browser_session_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..3cf9cb7d69d46afd88e91afec8c85c0c4811b9fd
+--- /dev/null
++++ b/backend/internal/server/middleware/browser_session_test.go
+@@ -0,0 +1,222 @@
++package middleware
++
++import (
++	"bytes"
++	"encoding/json"
++	"io"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"testing"
++
++	"github.com/gin-gonic/gin"
++	"github.com/stretchr/testify/require"
++)
++
++const fixtureBrowserID = "12345678-1234-4234-8234-123456789abc"
++
++var fixtureBrowserHandle = browserSessionHandle{fixtureBrowserID, strings.Repeat("a", 32)}
++
++func browserFixtureRouter(handler gin.HandlerFunc) *gin.Engine {
++	gin.SetMode(gin.TestMode)
++	r := gin.New()
++	r.Use(BrowserSession(nil))
++	r.Any("/api/v1/*path", handler)
++	return r
++}
++func browserRequest(path, mode, body string) *http.Request {
++	req := httptest.NewRequest("POST", "https://gateway.example"+path, strings.NewReader(body))
++	req.Header.Set(browserSessionHeader, mode)
++	req.Header.Set("Content-Type", "application/json")
++	req.Header.Set("Origin", "https://gateway.example")
++	return req
++}
++func fixtureBrowserCookies(req *http.Request, h browserSessionHandle) {
++	req.AddCookie(&http.Cookie{Name: h.name("at", true), Value: "fixture-access-secret"})
++	req.AddCookie(&http.Cookie{Name: h.name("rt", true), Value: "fixture-refresh-secret"})
++}
++
++func TestBrowserSessionLoginStoresOnlyPublicSelectorsInJSON(t *testing.T) {
++	for _, wrapped := range []bool{false, true} {
++		t.Run(map[bool]string{false: "root", true: "wrapped"}[wrapped], func(t *testing.T) {
++			r := browserFixtureRouter(func(c *gin.Context) {
++				data := gin.H{"access_token": "fixture-access-secret", "refresh_token": "fixture-refresh-secret", "expires_in": 3600, "user": gin.H{"id": 7, "role": "user"}}
++				if wrapped {
++					c.JSON(200, gin.H{"code": 0, "data": data})
++				} else {
++					c.JSON(200, data)
++				}
++			})
++			w := httptest.NewRecorder()
++			r.ServeHTTP(w, browserRequest("/api/v1/auth/login", "init."+fixtureBrowserID, `{}`))
++			require.Equal(t, 200, w.Code)
++			require.NotContains(t, w.Body.String(), "fixture-access-secret")
++			require.NotContains(t, w.Body.String(), "fixture-refresh-secret")
++			var envelope map[string]any
++			require.NoError(t, json.Unmarshal(w.Body.Bytes(), &envelope))
++			data := envelope
++			if wrapped {
++				data = envelope["data"].(map[string]any)
++			}
++			handle, ok := parseBrowserSessionHandle(data["access_token"].(string))
++			require.True(t, ok)
++			require.Equal(t, fixtureBrowserID, handle.id)
++			require.Equal(t, handle.refresh(), data["refresh_token"])
++			cookies := w.Result().Cookies()
++			require.Len(t, cookies, 2)
++			for _, cookie := range cookies {
++				require.True(t, cookie.HttpOnly)
++				require.True(t, cookie.Secure)
++				require.Equal(t, http.SameSiteStrictMode, cookie.SameSite)
++				require.Equal(t, "/api/v1", cookie.Path)
++				require.Empty(t, cookie.Domain)
++				require.Positive(t, cookie.MaxAge)
++			}
++			require.Equal(t, "no-store", w.Header().Get("Cache-Control"))
++			require.Equal(t, "1", w.Header().Get("X-Zhijing-Session-Supported"))
++			followup := browserFixtureRouter(func(c *gin.Context) {
++				require.Equal(t, "Bearer fixture-access-secret", c.GetHeader("Authorization"))
++				c.Status(204)
++			})
++			req := browserRequest("/api/v1/auth/me", handle.access(), "")
++			req.Method = "GET"
++			for _, cookie := range cookies {
++				req.AddCookie(cookie)
++			}
++			out := httptest.NewRecorder()
++			followup.ServeHTTP(out, req)
++			require.Equal(t, 204, out.Code)
++			// Copying localStorage selectors into another browser provides no credential.
++			isolated := browserFixtureRouter(func(c *gin.Context) { require.Empty(t, c.GetHeader("Authorization")); c.Status(401) })
++			out = httptest.NewRecorder()
++			isolated.ServeHTTP(out, browserRequest("/api/v1/auth/me", handle.access(), ""))
++			require.Equal(t, 401, out.Code)
++		})
++	}
++}
++
++func TestBrowserSessionRejectsCrossOriginAndCookieAmbiguity(t *testing.T) {
++	cases := []struct {
++		name, origin, site, mode string
++		duplicate                bool
++	}{
++		{"cross origin", "https://attacker.example", "", fixtureBrowserHandle.access(), false},
++		{"same site other origin", "https://sub.gateway.example", "same-site", fixtureBrowserHandle.access(), false},
++		{"null origin", "null", "", fixtureBrowserHandle.access(), false},
++		{"cross site metadata", "https://gateway.example", "cross-site", fixtureBrowserHandle.access(), false},
++		{"selector injection", "https://gateway.example", "", "zjs.invalid.invalid", false},
++		{"duplicate selected cookie", "https://gateway.example", "", fixtureBrowserHandle.access(), true},
++	}
++	for _, tc := range cases {
++		t.Run(tc.name, func(t *testing.T) {
++			called := false
++			r := browserFixtureRouter(func(c *gin.Context) { called = true; c.Status(200) })
++			req := browserRequest("/api/v1/profile", tc.mode, `{}`)
++			fixtureBrowserCookies(req, fixtureBrowserHandle)
++			req.Header.Set("Origin", tc.origin)
++			req.Header.Set("Sec-Fetch-Site", tc.site)
++			if tc.duplicate {
++				req.AddCookie(&http.Cookie{Name: fixtureBrowserHandle.name("at", true), Value: "shadow"})
++			}
++			w := httptest.NewRecorder()
++			r.ServeHTTP(w, req)
++			require.False(t, called)
++			require.GreaterOrEqual(t, w.Code, 400)
++		})
++	}
++}
++
++func TestBrowserSessionRefreshRotatesNamesAndExpiresOnlyConsumedPair(t *testing.T) {
++	newer := browserSessionHandle{fixtureBrowserID, strings.Repeat("b", 32)}
++	r := browserFixtureRouter(func(c *gin.Context) {
++		body, err := io.ReadAll(c.Request.Body)
++		require.NoError(t, err)
++		require.Contains(t, string(body), "fixture-refresh-secret")
++		require.NotContains(t, string(body), fixtureBrowserHandle.refresh())
++		c.JSON(200, gin.H{"code": 0, "data": gin.H{"access_token": "rotated-access-secret", "refresh_token": "rotated-refresh-secret", "expires_in": 60}})
++	})
++	req := browserRequest("/api/v1/auth/refresh", fixtureBrowserHandle.access(), `{"refresh_token":"`+fixtureBrowserHandle.refresh()+`"}`)
++	fixtureBrowserCookies(req, fixtureBrowserHandle)
++	fixtureBrowserCookies(req, newer)
++	w := httptest.NewRecorder()
++	r.ServeHTTP(w, req)
++	require.Equal(t, 200, w.Code)
++	require.NotContains(t, w.Body.String(), "rotated-access-secret")
++	require.NotContains(t, w.Body.String(), "rotated-refresh-secret")
++	expired := 0
++	newNames := []string{}
++	for _, cookie := range w.Result().Cookies() {
++		require.NotEqual(t, newer.name("at", true), cookie.Name)
++		require.NotEqual(t, newer.name("rt", true), cookie.Name)
++		if cookie.MaxAge < 0 {
++			expired++
++		} else {
++			newNames = append(newNames, cookie.Name)
++			require.NotEqual(t, fixtureBrowserHandle.name("at", true), cookie.Name)
++			require.NotEqual(t, fixtureBrowserHandle.name("rt", true), cookie.Name)
++		}
++	}
++	require.Equal(t, 2, expired)
++	require.Len(t, newNames, 2)
++}
++
++func TestBrowserSessionDoesNotAlterBearerClientsOrStreaming(t *testing.T) {
++	r := browserFixtureRouter(func(c *gin.Context) {
++		require.Equal(t, "Bearer explicit-secret", c.GetHeader("Authorization"))
++		c.JSON(200, gin.H{"access_token": "legacy-token", "expires_in": 3600})
++	})
++	req := browserRequest("/api/v1/auth/login", "", `{}`)
++	req.Header.Set("Authorization", "Bearer explicit-secret")
++	w := httptest.NewRecorder()
++	r.ServeHTTP(w, req)
++	require.Contains(t, w.Body.String(), "legacy-token")
++	require.Empty(t, w.Result().Cookies())
++	r = browserFixtureRouter(func(c *gin.Context) { _, _ = c.Writer.Write([]byte("data: fixture\n\n")); c.Writer.Flush() })
++	req = browserRequest("/api/v1/admin/accounts/1/test", fixtureBrowserHandle.access(), `{}`)
++	fixtureBrowserCookies(req, fixtureBrowserHandle)
++	w = httptest.NewRecorder()
++	r.ServeHTTP(w, req)
++	require.True(t, w.Flushed)
++	require.Equal(t, "data: fixture\n\n", w.Body.String())
++}
++
++func TestBrowserSessionWebsocketSelectorRequiresOriginAndCookie(t *testing.T) {
++	r := browserFixtureRouter(func(c *gin.Context) {
++		require.Equal(t, "Bearer fixture-access-secret", c.GetHeader("Authorization"))
++		require.Equal(t, "sub2api-admin", c.GetHeader("Sec-WebSocket-Protocol"))
++		c.Status(204)
++	})
++	req := browserRequest("/api/v1/admin/ops/ws/qps", "", "")
++	req.Method = "GET"
++	req.Header.Set("Upgrade", "websocket")
++	req.Header.Set("Connection", "Upgrade")
++	req.Header.Set("Sec-WebSocket-Protocol", "sub2api-admin, jwt."+fixtureBrowserHandle.access())
++	fixtureBrowserCookies(req, fixtureBrowserHandle)
++	missingOrigin := req.Clone(req.Context())
++	missingOrigin.Header.Del("Origin")
++	w := httptest.NewRecorder()
++	r.ServeHTTP(w, req)
++	require.Equal(t, 204, w.Code)
++	w = httptest.NewRecorder()
++	r.ServeHTTP(w, missingOrigin)
++	require.Equal(t, 403, w.Code)
++}
++
++func TestBrowserSessionRejectsMismatchedRefreshAndUnboundedAuthResponse(t *testing.T) {
++	called := false
++	r := browserFixtureRouter(func(c *gin.Context) { called = true; c.Status(204) })
++	req := browserRequest("/api/v1/auth/refresh", fixtureBrowserHandle.access(), `{"refresh_token":"wrong-selector"}`)
++	fixtureBrowserCookies(req, fixtureBrowserHandle)
++	w := httptest.NewRecorder()
++	r.ServeHTTP(w, req)
++	require.Equal(t, 400, w.Code)
++	require.False(t, called)
++	for _, body := range []string{`{"access_token":"secret-without-expiry"}`, strings.Repeat("fixture", 20000)} {
++		r = browserFixtureRouter(func(c *gin.Context) { _, _ = io.Copy(c.Writer, bytes.NewBufferString(body)) })
++		w = httptest.NewRecorder()
++		r.ServeHTTP(w, browserRequest("/api/v1/auth/login", "init."+fixtureBrowserID, `{}`))
++		require.Equal(t, 500, w.Code)
++		require.NotContains(t, w.Body.String(), "secret-without-expiry")
++		require.Less(t, w.Body.Len(), 200)
++	}
++}
+diff --git a/backend/internal/server/router.go b/backend/internal/server/router.go
+index 8dcc7ab9423fdbf567b6388a1a6f5f59d203ef75..e12d8a0c5cec671828e16b5da64eab6f0ea53ae6 100644
+--- a/backend/internal/server/router.go
++++ b/backend/internal/server/router.go
+@@ -118,6 +118,7 @@ func registerRoutes(
+ 
+ 	// API v1
+ 	v1 := r.Group("/api/v1")
++	v1.Use(middleware2.BrowserSession(cfg))
+ 
+ 	// 面板 API 限流器：认证接口按用户 ID、公开接口按安全客户端 IP，
+ 	// 防止高频刷管理面接口打爆数据库（阈值可在系统设置中调整）。
+diff --git a/backend/internal/service/openai_gateway_passthrough.go b/backend/internal/service/openai_gateway_passthrough.go
+index 98f2749455d8493d36081fee1425ab339cb002d6..4bf2f306fafe6d78972f827099473bdabf3ab15e 100644
+--- a/backend/internal/service/openai_gateway_passthrough.go
++++ b/backend/internal/service/openai_gateway_passthrough.go
+@@ -9,6 +9,7 @@ import (
+ 	"encoding/json"
+ 	"errors"
+ 	"fmt"
++	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
+ 	"io"
+ 	"net/http"
+ 	"sort"
+@@ -1966,6 +1967,7 @@ func (s *OpenAIGatewayService) handleStreamingResponsePassthrough(
+ 	// 返回后不会再有字节写出。
+ 	defer stopKeepalive()
+ 	// flushPending 表示已写入但未到 SSE 空行边界的脏状态；defer 兜底函数退出前的残留，断连后不再 Flush。
++	pendingSemanticKind := ""
+ 	flushPending := false
+ 	pendingSSEEventType := ""
+ 	flushPendingOutput := func() {
+@@ -1973,6 +1975,10 @@ func (s *OpenAIGatewayService) handleStreamingResponsePassthrough(
+ 			return
+ 		}
+ 		flusher.Flush()
++		if pendingSemanticKind != "" {
++			gatewaytiming.MarkOutput(ctx, "downstream_semantic_flush", pendingSemanticKind)
++			pendingSemanticKind = ""
++		}
+ 		flushPending = false
+ 	}
+ 	defer flushPendingOutput()
+@@ -2073,6 +2079,13 @@ func (s *OpenAIGatewayService) handleStreamingResponsePassthrough(
+ 				}
+ 			}
+ 			eventType := effectiveOpenAISSEEventType(dataBytes, rawEventType)
++			if gjson.ValidBytes(dataBytes) {
++				gatewaytiming.MarkResponseEvent(ctx)
++			}
++			if kind := openAIResponseOutputKind(trimmedData, eventType); kind != "" {
++				gatewaytiming.MarkOutput(ctx, "upstream_semantic", kind)
++				pendingSemanticKind = kind
++			}
+ 			createdAtTracker.Observe(dataBytes, eventType)
+ 			if codexFailureTerminal && sawBareError && !sawResponseFailed && eventType != "response.failed" {
+ 				suppressCurrentEvent = true
+diff --git a/backend/internal/service/openai_gateway_response_handling.go b/backend/internal/service/openai_gateway_response_handling.go
+index 481227c11a9f28e63b93ff4522f10ee07eb1e81c..3376e940433b463539f161ca3fedffa46d360611 100644
+--- a/backend/internal/service/openai_gateway_response_handling.go
++++ b/backend/internal/service/openai_gateway_response_handling.go
+@@ -15,6 +15,7 @@ import (
+ 	"time"
+ 
+ 	"github.com/Wei-Shaw/sub2api/internal/pkg/apicompat"
++	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
+ 	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
+ 	"github.com/Wei-Shaw/sub2api/internal/pkg/xai"
+ 	"github.com/Wei-Shaw/sub2api/internal/util/responseheaders"
+@@ -121,6 +122,7 @@ func (s *OpenAIGatewayService) handleStreamingResponseWithReasoning(ctx context.
+ 	var firstTokenMs *int
+ 	ttftMode := s.openAITTFTMode(ctx)
+ 	firstOutputProgressObserved := false
++	pendingSemanticKind := ""
+ 	bufferedWriter := bufio.NewWriterSize(w, 4*1024)
+ 	var firstOutputStage *openAIFirstOutputStage
+ 	if stageFirstOutput {
+@@ -154,6 +156,10 @@ func (s *OpenAIGatewayService) handleStreamingResponseWithReasoning(ctx context.
+ 			}
+ 		}
+ 		flusher.Flush()
++		if pendingSemanticKind != "" {
++			gatewaytiming.MarkOutput(ctx, "downstream_semantic_flush", pendingSemanticKind)
++			pendingSemanticKind = ""
++		}
+ 		return nil
+ 	}
+ 
+@@ -265,6 +271,7 @@ func (s *OpenAIGatewayService) handleStreamingResponseWithReasoning(ctx context.
+ 	eventInProgress := false
+ 	eventStartsClientOutput := false
+ 	eventStartsTTFTOutput := false
++
+ 	eventShouldFlush := false
+ 	handlePendingWriteError := func(err error) {
+ 		if firstOutputStage != nil && !firstOutputStage.closed {
+@@ -487,6 +494,13 @@ func (s *OpenAIGatewayService) handleStreamingResponseWithReasoning(ctx context.
+ 		if data, ok := extractOpenAISSEDataLine(line); ok {
+ 			dataBytes := []byte(data)
+ 			eventType := effectiveOpenAISSEEventType(dataBytes, pendingSSEEventType)
++			if gjson.ValidBytes(dataBytes) {
++				gatewaytiming.MarkResponseEvent(ctx)
++			}
++			if kind := openAIResponseOutputKind(data, eventType); kind != "" {
++				gatewaytiming.MarkOutput(ctx, "upstream_semantic", kind)
++				pendingSemanticKind = kind
++			}
+ 			if codexFailureTerminal && sawBareError && !sawResponseFailed &&
+ 				(eventType == "response.completed" || eventType == "response.done") {
+ 				// A later successful terminal is authoritative over a pending bare
+diff --git a/backend/internal/service/openai_response_timing.go b/backend/internal/service/openai_response_timing.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..04c529ca45d589a719a74c79fdde09138646c77e
+--- /dev/null
++++ b/backend/internal/service/openai_response_timing.go
+@@ -0,0 +1,45 @@
++package service
++
++import (
++	"github.com/tidwall/gjson"
++	"strings"
++)
++
++// This classifier is diagnostic only. It does not change TTFT, flush policy,
++// routing, billing or the forwarded SSE bytes. Preamble and empty deltas are not
++// usable output, even when the legacy semantic TTFT mode counts structural items.
++func openAIResponseOutputKind(data, eventType string) string {
++	if !gjson.Valid(data) {
++		return ""
++	}
++	eventType = strings.TrimSpace(eventType)
++	if eventType == "" {
++		eventType = gjson.Get(data, "type").String()
++	}
++	if !openAIStreamDataStartsVisibleOutput(data, eventType) {
++		return ""
++	}
++	switch eventType {
++	case "response.output_text.delta", "response.output_text.done", "response.refusal.delta", "response.refusal.done":
++		return "text"
++	case "response.function_call_arguments.delta", "response.function_call_arguments.done", "response.custom_tool_call_input.delta", "response.custom_tool_call_input.done":
++		return "tool"
++	case "response.reasoning_summary_text.delta", "response.reasoning_summary_text.done", "response.reasoning_text.delta", "response.reasoning_text.done", "response.reasoning_summary_part.added", "response.reasoning_summary_part.done":
++		return "reasoning"
++	case "response.content_part.added", "response.content_part.done":
++		if gjson.Get(data, "part.type").String() == "reasoning_text" {
++			return "reasoning"
++		}
++		return "text"
++	case "response.output_item.added", "response.output_item.done":
++		switch gjson.Get(data, "item.type").String() {
++		case "function_call", "custom_tool_call":
++			return "tool"
++		case "reasoning":
++			return "reasoning"
++		case "message":
++			return "text"
++		}
++	}
++	return ""
++}
+diff --git a/backend/internal/service/openai_response_timing_test.go b/backend/internal/service/openai_response_timing_test.go
+new file mode 100644
+index 0000000000000000000000000000000000000000..6e87daf56a81d3c8d90536f1218e3cf09513cbcf
+--- /dev/null
++++ b/backend/internal/service/openai_response_timing_test.go
+@@ -0,0 +1,109 @@
++package service
++
++import (
++	"context"
++	"io"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"testing"
++	"time"
++
++	"github.com/Wei-Shaw/sub2api/internal/config"
++	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
++	"github.com/gin-gonic/gin"
++	"github.com/stretchr/testify/require"
++)
++
++func TestResponsesOutputKindDoesNotCountPreambleOrEmptyContent(t *testing.T) {
++	for _, tc := range []struct{ data, kind string }{
++		{`{"type":"response.created"}`, ""},
++		{`{"type":"response.output_item.added","item":{"type":"reasoning","summary":[]}}`, ""},
++		{`{"type":"response.output_text.delta","delta":""}`, ""},
++		{`{"type":"response.output_text.delta","delta":"fixture"}`, "text"},
++		{`{"type":"response.function_call_arguments.delta","delta":"{"}`, "tool"},
++		{`{"type":"response.reasoning_summary_text.delta","delta":"fixture"}`, "reasoning"},
++		{`{"type":"response.failed","response":{"error":{"message":"fixture"}}}`, ""},
++		{`{"type":"response.output_item.done","item":{"type":"function_call","arguments":"{}"}}`, "tool"},
++		{`{"type":"response.output_item.done","item":{"type":"reasoning","summary":[{"text":"fixture"}]}}`, "reasoning"},
++	} {
++		require.Equal(t, tc.kind, openAIResponseOutputKind(tc.data, ""), tc.data)
++	}
++}
++
++type semanticFlushRecorder struct {
++	*httptest.ResponseRecorder
++	semantic chan struct{}
++	signaled bool
++}
++
++func (w *semanticFlushRecorder) Flush() {
++	w.ResponseRecorder.Flush()
++	if !w.signaled && strings.Contains(w.Body.String(), `"delta":"fixture"`) {
++		w.signaled = true
++		close(w.semantic)
++	}
++}
++
++func TestResponsesUsefulOutputFlushesWhileUpstreamStillOpen(t *testing.T) {
++	for _, passthrough := range []bool{false, true} {
++		name := "forward"
++		if passthrough {
++			name = "passthrough"
++		}
++		t.Run(name, func(t *testing.T) {
++			ctx := gatewaytiming.Start(context.Background())
++			reader, writer := io.Pipe()
++			defer reader.Close()
++			release := make(chan struct{})
++			defer close(release)
++			writerDone := make(chan struct{})
++			go func() {
++				defer close(writerDone)
++				defer writer.Close()
++				_, _ = io.WriteString(writer, "data: {\"type\":\"response.created\",\"response\":{\"id\":\"fixture\"}}\n\n")
++				_, _ = io.WriteString(writer, "data: {\"type\":\"response.output_text.delta\",\"delta\":\"fixture\"}\n\n")
++				<-release
++			}()
++			recorder := &semanticFlushRecorder{ResponseRecorder: httptest.NewRecorder(), semantic: make(chan struct{})}
++			c, _ := gin.CreateTestContext(recorder)
++			c.Request = httptest.NewRequest("POST", "/v1/responses", nil).WithContext(ctx)
++			resp := &http.Response{StatusCode: 200, Header: http.Header{}, Body: reader}
++			account := &Account{ID: 1, Platform: PlatformOpenAI}
++			svc := &OpenAIGatewayService{cfg: &config.Config{Gateway: config.GatewayConfig{MaxLineSize: defaultMaxLineSize}}}
++			done := make(chan struct{})
++			go func() {
++				defer close(done)
++				if passthrough {
++					_, _ = svc.handleStreamingResponsePassthrough(ctx, resp, c, account, time.Now(), "fixture", "fixture")
++				} else {
++					_, _ = svc.handleStreamingResponse(ctx, resp, c, account, time.Now(), "fixture", "fixture")
++				}
++			}()
++			select {
++			case <-recorder.semantic:
++			case <-time.After(2 * time.Second):
++				t.Fatal("useful event buffered until upstream EOF")
++			}
++			deadline := time.Now().Add(time.Second)
++			var timing map[string]any
++			for time.Now().Before(deadline) {
++				timing = gatewaytiming.Snapshot(ctx)
++				if timing["downstream_semantic_flush_ingress_ms"] != nil {
++					break
++				}
++				time.Sleep(time.Millisecond)
++			}
++			require.Equal(t, "text", timing["upstream_semantic_kind"])
++			require.Equal(t, "text", timing["downstream_semantic_flush_kind"])
++			require.LessOrEqual(t, timing["upstream_first_event_ingress_ms"], timing["upstream_semantic_ingress_ms"])
++			require.LessOrEqual(t, timing["upstream_semantic_ingress_ms"], timing["downstream_semantic_flush_ingress_ms"])
++			require.NoError(t, writer.Close())
++			select {
++			case <-done:
++			case <-time.After(2 * time.Second):
++				t.Fatal("stream failed to exit")
++			}
++		})
++	}
++}

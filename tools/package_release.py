@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import stat
 import subprocess
 import sys
 import zipfile
@@ -22,12 +23,25 @@ def git(*args):
 
 
 def sha(path):
-    require(path.is_file() and path.resolve() == path.absolute(), 'Nonregular release input: ' + str(path))
+    # Windows 8.3 names resolve to their long spelling without being links.
+    # Inspect link/junction entries instead of comparing those two spellings.
+    require(path.is_file() and not any(
+        entry.is_symlink() or bool(getattr(entry.lstat(), 'st_file_attributes', 0) &
+                                   getattr(stat, 'FILE_ATTRIBUTE_REPARSE_POINT', 0x400))
+        for entry in (path, *path.parents)), 'Nonregular release input: ' + str(path))
     digest = hashlib.sha256()
     with path.open('rb') as source:
         for chunk in iter(lambda: source.read(1024 * 1024), b''):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def integration_bundle(version):
+    base = ROOT/'integrations/sub2api'
+    root = base if version == '0.0.2' else base/f'v{version}'
+    manifest = json.loads((root/'INTEGRATION-MANIFEST.json').read_text(encoding='utf-8'))
+    require(manifest.get('version') == version, 'Backend bundle version does not match VERSION.')
+    return root, manifest
 
 
 def main():
@@ -38,6 +52,8 @@ def main():
     source_commit = git('rev-parse', 'HEAD')
     version = (ROOT/'VERSION').read_text().strip()
     require(re.fullmatch(r'\d+\.\d+\.\d+', version), 'Invalid release version.')
+    integration_base = ROOT/'integrations/sub2api'
+    integration_root, integration_manifest = integration_bundle(version)
     output = args.output.resolve()
     require(not output.is_relative_to(ROOT.resolve()), 'Release output must be outside the source checkout.')
     output.mkdir(parents=True, exist_ok=True)
@@ -49,11 +65,12 @@ def main():
     # dist is ignored by Git. A clean worktree alone cannot establish its provenance.
     commands = [
         ['pnpm', '--dir', 'frontend', 'install', '--frozen-lockfile'],
-        ['pnpm', '--dir', 'frontend', 'test:run', '--maxWorkers=4'],
+        ['pnpm', '--dir', 'frontend', 'lint:check'],
         ['pnpm', '--dir', 'frontend', 'build'],
         [sys.executable, str(ROOT/'tools/verify_frontend.py')],
         ['node', str(ROOT/'tools/verify_ops_contract.mjs')],
-        [sys.executable, str(ROOT/'integrations/sub2api/check_patch.py'), '--artifact-only'],
+        [sys.executable, str(integration_base/'check_patch.py'), '--bundle', f'v{version}', '--artifact-only'],
+        ['pnpm', '--dir', 'frontend', 'test:coverage', '--maxWorkers=4'],
     ]
     for command in commands:
         subprocess.run(command, cwd=ROOT, check=True)
@@ -63,14 +80,15 @@ def main():
     files = sorted(p for p in dist.rglob('*') if p.is_file())
     require((dist/'index.html').is_file() and not dist.is_symlink(), 'Missing regular frontend build.')
     require(not any(p.is_symlink() for p in dist.rglob('*')), 'Symlinks are not permitted in release assets.')
-    integration_root = ROOT/'integrations/sub2api'
-    integration_manifest = json.loads((integration_root/'INTEGRATION-MANIFEST.json').read_text(encoding='utf-8'))
     integration_files = [integration_root/name for name in
-                         ['INTEGRATION-MANIFEST.json', 'README.zh-CN.md', 'check_patch.py', integration_manifest['patch']]]
+                         ['INTEGRATION-MANIFEST.json', 'README.zh-CN.md', integration_manifest['patch']]]
     for path in integration_files:
         require(path.parent == integration_root and path.resolve().is_relative_to(integration_root.resolve()),
                 'Invalid integration release path.')
         sha(path)
+    checker = integration_base/'check_patch.py'
+    sha(checker)
+    integration_files.append(checker)
     legal_files = [(ROOT/name, name) for name in ['LICENSE', 'CLA.md', 'VERSION']]
     legal_files += [(path, 'licenses/fonts/' + path.name)
                     for path in sorted((ROOT/'docs/font-licenses').glob('*.txt'))]
@@ -94,7 +112,8 @@ def main():
     instructions = (f'ZHIJING v{version}\n\n'
                     'dist/ contains the static frontend only. Keep the existing API origin and routes.\n'
                     'Original login tokens are no longer forwarded to embedded pages.\n'
-                    'The optional backend source patch is distributed separately and is not deployed.\n'
+                    'The matching backend source patch is in the companion source ZIP and is not deployed.\n'
+                    'For v0.0.3, install the matching backend before publishing the frontend (OAuth exchange and cookies).\n'
                     'Retain old hashed assets when an operator later chooses to publish an entry page.\n'
                     'No QA identities, server configuration, credentials or production logs are included.\n')
     with zipfile.ZipFile(archive, 'x', zipfile.ZIP_DEFLATED, compresslevel=9) as z:

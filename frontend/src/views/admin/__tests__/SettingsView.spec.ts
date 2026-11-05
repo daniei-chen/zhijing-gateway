@@ -563,6 +563,8 @@ function mountView() {
         ProxySelector: true,
         ImageUpload: ImageUploadStub,
         BackupSettings: true,
+        AdminAccessKeysSettings: true,
+        RouterLink: { template: '<a><slot /></a>' },
       },
     },
   });
@@ -778,6 +780,8 @@ describe("admin SettingsView payment visible method controls", () => {
     updatePanelRateLimitSettings.mockImplementation(async (payload) => payload);
 
     const wrapper = mountView();
+    await flushPromises();
+    await wrapper.get("#settings-tab-security").trigger("click");
     await flushPromises();
 
     expect(getPanelRateLimitSettings).toHaveBeenCalled();
@@ -1365,6 +1369,8 @@ describe("admin SettingsView payment visible method controls", () => {
           ProxySelector: true,
           ImageUpload: ImageUploadStub,
           BackupSettings: true,
+        AdminAccessKeysSettings: true,
+        RouterLink: { template: '<a><slot /></a>' },
         },
       },
     });
@@ -1381,6 +1387,8 @@ describe("admin SettingsView payment visible method controls", () => {
   it("renders advanced scheduler copy as local experimental gateway policy", async () => {
     const wrapper = mountView();
 
+    await flushPromises();
+    await wrapper.get("#settings-tab-gateway").trigger("click");
     await flushPromises();
 
     expect(wrapper.text()).toContain("OpenAI 实验调度策略");
@@ -1544,6 +1552,8 @@ describe("admin SettingsView payment visible method controls", () => {
     });
     const wrapper = mountView();
     await flushPromises();
+    await wrapper.get("#settings-tab-gateway").trigger("click");
+    await flushPromises();
     const input = wrapper.get('[data-testid="openai-oauth-scheduling-rate-multiplier"]');
     expect(input.attributes("required")).toBeUndefined();
     await input.setValue("");
@@ -1574,6 +1584,8 @@ describe("admin SettingsView payment visible method controls", () => {
     });
     const wrapper = mountView();
     await flushPromises();
+    await wrapper.get("#settings-tab-gateway").trigger("click");
+    await flushPromises();
     const input = wrapper.get<HTMLInputElement>('[data-testid="openai-oauth-scheduling-rate-multiplier"]');
     expect(input.element.value).toBe("");
     await wrapper.find("form").trigger("submit.prevent");
@@ -1586,6 +1598,8 @@ describe("admin SettingsView payment visible method controls", () => {
   it("places and explains rate controls for both scheduling modes", async () => {
     const wrapper = mountView();
 
+    await flushPromises();
+    await wrapper.get("#settings-tab-gateway").trigger("click");
     await flushPromises();
     expect(
       wrapper.find('[data-testid="openai-oauth-scheduling-rate-multiplier"]').exists(),
@@ -1711,6 +1725,8 @@ describe("admin SettingsView payment visible method controls", () => {
           ProxySelector: true,
           ImageUpload: ImageUploadStub,
           BackupSettings: true,
+        AdminAccessKeysSettings: true,
+        RouterLink: { template: '<a><slot /></a>' },
         },
       },
     });

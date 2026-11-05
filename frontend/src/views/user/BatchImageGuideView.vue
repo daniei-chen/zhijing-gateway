@@ -783,8 +783,15 @@ import {
   type BatchImageStatus,
   type BatchImageSubmitItem,
 } from '@/api/batchImage'
+import { createSessionTasks } from '@/utils/sessionTasks'
+import { sessionPreviewCache } from '@/utils/sessionPreviewCache'
+import { createImageThumbnail } from '@/utils/imageThumbnail'
 import type { ApiKey } from '@/types'
 import type { Column } from '@/components/common/types'
+
+const tasks = createSessionTasks()
+let selectionRevision = 0
+let pollingRevision = 0
 
 type BatchImageJobRow = Pick<BatchImageJob, 'id' | 'task_name' | 'parent_batch_id' | 'status' | 'model' | 'provider' | 'item_count' | 'success_count' | 'fail_count' | 'estimated_cost' | 'hold_amount' | 'actual_cost' | 'created_at' | 'downloaded_at'> & {
   api_key_id: number
@@ -811,24 +818,9 @@ type ReferenceImageDraft = BatchImageReferenceImage & {
   size: number
 }
 
-type PreviewCacheRecord = {
-  key: string
-  blob: Blob
-  size: number
-  createdAt: number
-  lastAccessedAt: number
-}
 
-type PreviewImageSource = ImageBitmap | HTMLImageElement
 
 const TERMINAL_STATUSES = new Set(['completed', 'failed', 'cancelled', 'output_deleted'])
-const PREVIEW_CACHE_DB_NAME = 'sub2api-batch-image-preview-cache'
-const PREVIEW_CACHE_STORE_NAME = 'thumbnails'
-const PREVIEW_THUMBNAIL_MAX_EDGE = 360
-const PREVIEW_THUMBNAIL_QUALITY = 0.72
-const PREVIEW_CACHE_MAX_AGE_MS = 3 * 24 * 60 * 60 * 1000
-const PREVIEW_CACHE_MAX_ENTRIES = 120
-const PREVIEW_CACHE_MAX_BYTES = 48 * 1024 * 1024
 const BATCH_IMAGE_MAX_OUTPUTS_PER_ITEM = 4
 const BATCH_IMAGE_MAX_OUTPUTS_PER_JOB = 200
 const outputCountOptions = Array.from({ length: BATCH_IMAGE_MAX_OUTPUTS_PER_ITEM }, (_, index) => index + 1)
@@ -931,8 +923,6 @@ const promptPopover = reactive({
 })
 let modelRequestSeq = 0
 let pollTimer: ReturnType<typeof setInterval> | null = null
-let previewCacheDBPromise: Promise<IDBDatabase | null> | null = null
-let previewCacheCleanupTimer: ReturnType<typeof setInterval> | null = null
 let promptPopoverCloseTimer: ReturnType<typeof setTimeout> | null = null
 let promptPopoverOpenTimer: ReturnType<typeof setTimeout> | null = null
 let activePromptPopoverTarget: HTMLElement | null = null
@@ -1185,6 +1175,10 @@ function removeReferenceImageDraft(index: number) {
 }
 
 async function handleReferenceImageFiles(event: Event) {
+  const taskGuard=tasks.begin("handleReferenceImageFiles")
+  if(!taskGuard.active()) return
+  try {
+
   const input = event.target as HTMLInputElement
   const files = Array.from(input.files || [])
   input.value = ''
@@ -1214,6 +1208,8 @@ async function handleReferenceImageFiles(event: Event) {
       continue
     }
     const data = await readFileAsBase64(file)
+    if(!taskGuard.active()) return
+
     next.push({
       id: file.name,
       type: 'reference',
@@ -1224,6 +1220,8 @@ async function handleReferenceImageFiles(event: Event) {
     })
   }
   referenceImageDrafts.value = [...referenceImageDrafts.value, ...next]
+
+  } finally { taskGuard.finish() }
 }
 
 function readFileAsBase64(file: File): Promise<string> {
@@ -1239,9 +1237,15 @@ function readFileAsBase64(file: File): Promise<string> {
 }
 
 async function loadApiKeys() {
+  const taskGuard=tasks.begin("loadApiKeys")
+  if(!taskGuard.active()) return
+  try {
+
   loadingKeys.value = true
   try {
     const response = await keysAPI.list(1, 100, { status: 'active', sort_by: 'created_at', sort_order: 'desc' })
+    if(!taskGuard.active()) return
+
     apiKeys.value = response.items || []
     if (!selectedApiKey.value && geminiApiKeys.value.length > 0) {
       form.apiKeyId = geminiApiKeys.value[0].id
@@ -1254,13 +1258,25 @@ async function loadApiKeys() {
       form.model = ''
     }
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('loadKeysFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     loadingKeys.value = false
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 async function loadAvailableModels() {
+  const taskGuard=tasks.begin("loadAvailableModels")
+  if(!taskGuard.active()) return
+  try {
+
   const key = selectedApiKey.value
   const requestID = ++modelRequestSeq
   modelLoadError.value = ''
@@ -1270,7 +1286,9 @@ async function loadAvailableModels() {
 
   loadingModels.value = true
   try {
-    const result = await listBatchImageModels(key.key)
+    const result = await listBatchImageModels(key.key, taskGuard.signal)
+    if(!taskGuard.active()) return
+
     if (requestID !== modelRequestSeq) return
     const seen = new Set<string>()
     availableBatchImageModels.value = (result.data || [])
@@ -1283,18 +1301,36 @@ async function loadAvailableModels() {
       .map(model => ({ value: model, label: model }))
     form.model = availableBatchImageModels.value[0]?.value || ''
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     if (requestID !== modelRequestSeq) return
     modelLoadError.value = batchImageErrorMessage(error, batchImageText('loadModelsFailed'))
   } finally {
+    if (taskGuard.owned()) {
+
     if (requestID === modelRequestSeq) {
       loadingModels.value = false
     }
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 async function refreshPage() {
+  const taskGuard=tasks.begin("refreshPage")
+  if(!taskGuard.active()) return
+  try {
+
   await loadApiKeys()
+    if(!taskGuard.active()) return
+
   await loadBatchJobs()
+    if(!taskGuard.active()) return
+
+
+  } finally { taskGuard.finish() }
 }
 
 function applyFilters() {
@@ -1495,6 +1531,10 @@ function copyPromptPopover() {
 }
 
 async function loadBatchJobs() {
+  const taskGuard=tasks.begin("loadBatchJobs")
+  if(!taskGuard.active()) return
+  try {
+
   const keys = filteredApiKeys.value
   if (!keys.length) {
     batchJobs.value = []
@@ -1506,12 +1546,14 @@ async function loadBatchJobs() {
   try {
     const options = listOptions()
     const results = await Promise.all(keys.map(async (key) => {
-      const result = await listBatchImageJobs(key.key, options)
+      const result = await listBatchImageJobs(key.key, options, taskGuard.signal)
       return {
         hasMore: Boolean(result.has_more),
         rows: (result.data || []).map(job => toJobRow(job, key)),
       }
     }))
+    if(!taskGuard.active()) return
+
     batchJobs.value = applyChildCounts(results
       .flatMap(result => result.rows)
       .sort((a, b) => b.created_at - a.created_at)
@@ -1519,10 +1561,18 @@ async function loadBatchJobs() {
     pagination.has_more = results.some(result => result.hasMore)
     selectedJobIds.value = new Set([...selectedJobIds.value].filter(id => visibleBatchJobs.value.some(job => job.id === id)))
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('loadJobsFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     loadingJobs.value = false
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 function upsertJob(job: BatchImageJob) {
@@ -1562,12 +1612,14 @@ function openCreateModal() {
 }
 
 function closeCreateModal() {
+  tasks.cancel('handleReferenceImageFiles')
   if (submitting.value) return
   showCreateModal.value = false
   resetCreateDraft()
 }
 
 function resetCreateDraft() {
+  tasks.cancel('handleReferenceImageFiles')
   form.taskName = ''
   form.responseMimeType = 'image/png'
   promptRows.value = []
@@ -1577,13 +1629,23 @@ function resetCreateDraft() {
   referenceImageDrafts.value = []
 }
 
+function invalidateDetailSelection() {
+  selectionRevision += 1
+  tasks.cancel('refreshSelected')
+  tasks.cancel('loadItems')
+  refreshing.value = false
+  loadingItems.value = false
+  stopPolling()
+  clearItemPreviews()
+}
+
 function closeDetail() {
+  invalidateDetailSelection()
   closePromptPopover()
   currentJob.value = null
   selectedBatchId.value = ''
   selectedBatchApiKeyId.value = 0
   items.value = []
-  clearItemPreviews()
 }
 
 function keyForSelectedBatch(): ApiKey | null {
@@ -1626,65 +1688,105 @@ function validateForm(): boolean {
 
 async function submitJob() {
   if (submitting.value) return
+  const expectedSelection = selectionRevision
+  const taskGuard=tasks.begin("submitJob")
+  if(!taskGuard.active()) return
+  try {
+
+  if (submitting.value) return
   if (promptDraft.value.trim()) addPromptRow()
   if (!validateForm()) return
   const key = requireApiKey()
   if (!key) return
 	  submitting.value = true
 	  try {
-	    const job = await submitBatchImageJob(
-	      key.key,
-	      {
+	    const job = await submitBatchImageJob(key.key, {
 	        model: form.model,
         task_name: form.taskName.trim() || defaultTaskName(),
         image_size: '1K',
         response_mime_type: form.responseMimeType,
         items: parsedItems.value,
-	      },
-	      `sub2api-ui-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+	      }, `sub2api-ui-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`, taskGuard.signal
 	    )
-	    currentJob.value = job
-	    selectedBatchId.value = job.id
-	    selectedBatchApiKeyId.value = key.id
-	    items.value = []
-	    upsertJob(job)
-	    showCreateModal.value = false
-	    resetCreateDraft()
-	    appStore.showSuccess(batchImageText('submitted'))
-	    void loadItems()
-	    startPolling()
+    if(!taskGuard.active()) return
+
+    upsertJob(job)
+    showCreateModal.value = false
+    resetCreateDraft()
+    appStore.showSuccess(batchImageText('submitted'))
+    if (expectedSelection === selectionRevision) {
+      invalidateDetailSelection()
+      currentJob.value = job
+      selectedBatchId.value = job.id
+      selectedBatchApiKeyId.value = key.id
+      items.value = []
+      void loadItems()
+      startPolling()
+    }
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('submitFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     submitting.value = false
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 async function refreshSelected() {
+  const expectedSelection = selectionRevision
+  const taskGuard=tasks.begin("refreshSelected", () => expectedSelection === selectionRevision)
+  if(!taskGuard.active()) return
+  try {
+
   if (!selectedBatchId.value) return
   const key = keyForSelectedBatch() || requireApiKey()
   if (!key) return
   refreshing.value = true
   try {
-    const job = await getBatchImageJob(key.key, selectedBatchId.value)
+    const job = await getBatchImageJob(key.key, selectedBatchId.value, taskGuard.signal)
+    if(!taskGuard.active()) return
+
     currentJob.value = job
     upsertJob(job)
     if (TERMINAL_STATUSES.has(job.status)) stopPolling()
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('refreshFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     refreshing.value = false
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 async function refreshDetail() {
+  const taskGuard=tasks.begin("refreshDetail")
+  if(!taskGuard.active()) return
+  try {
+
   await Promise.all([
     refreshSelected(),
     loadItems(),
   ])
+    if(!taskGuard.active()) return
+
+
+  } finally { taskGuard.finish() }
 }
 
 function selectJob(batchId: string) {
+  invalidateDetailSelection()
   const row = batchJobs.value.find(job => job.id === batchId)
   if (row?.api_key_id && geminiApiKeys.value.some(key => key.id === row.api_key_id)) {
     form.apiKeyId = row.api_key_id
@@ -1695,26 +1797,27 @@ function selectJob(batchId: string) {
   selectedBatchId.value = batchId
   currentJob.value = null
   items.value = []
-  void refreshSelected()
+  const selectedRevision = selectionRevision
+  void refreshSelected().then(() => {
+    if (tasks.current() && selectedRevision === selectionRevision && currentJob.value && !TERMINAL_STATUSES.has(currentJob.value.status)) startPolling()
+  })
   void loadItems()
 }
 
 function startPolling() {
   stopPolling()
-  pollTimer = setInterval(() => {
-    if (!currentJob.value || TERMINAL_STATUSES.has(currentJob.value.status)) {
-      stopPolling()
-      return
-    }
-    void refreshSelected()
-  }, 8000)
-}
-
-function stopPolling() {
-  if (pollTimer) {
-    clearInterval(pollTimer)
+  const expected = pollingRevision
+  const schedule = () => { pollTimer = setTimeout(async () => {
     pollTimer = null
-  }
+    if (expected !== pollingRevision || !tasks.current() || !currentJob.value || TERMINAL_STATUSES.has(currentJob.value.status)) return
+    await refreshSelected()
+    if (expected === pollingRevision && tasks.current() && currentJob.value && !TERMINAL_STATUSES.has(currentJob.value.status)) schedule()
+  }, 8000) }
+  schedule()
+}
+function stopPolling() {
+  pollingRevision += 1
+  if (pollTimer) { clearTimeout(pollTimer); pollTimer = null }
 }
 
 function canCancel(job: Pick<BatchImageJob, 'status'>) {
@@ -1768,41 +1871,81 @@ function canDeleteRecord(job: Pick<BatchImageJob, 'status'>) {
 }
 
 async function cancelSelected() {
+  if (cancelling.value) return
+  const expectedSelection = selectionRevision
+  const taskGuard=tasks.begin("cancelSelected")
+  if(!taskGuard.active()) return
+  try {
+
   if (!currentJob.value) return
   const key = keyForSelectedBatch() || requireApiKey()
   if (!key) return
   if (!window.confirm(batchImageText('cancelConfirm'))) return
   cancelling.value = true
   try {
-    const job = await cancelBatchImageJob(key.key, currentJob.value.id)
-    currentJob.value = job
+    const job = await cancelBatchImageJob(key.key, currentJob.value.id, taskGuard.signal)
+    if(!taskGuard.active()) return
+
+    if (expectedSelection === selectionRevision) currentJob.value = job
     upsertJob(job)
     appStore.showSuccess(batchImageText('cancelled'))
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('cancelFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     cancelling.value = false
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 async function downloadSelected() {
+  const taskGuard=tasks.begin("downloadSelected")
+  if(!taskGuard.active()) return
+  try {
+
   if (!currentJob.value) return
   await downloadJob(currentJob.value)
+    if(!taskGuard.active()) return
+
+
+  } finally { taskGuard.finish() }
 }
 
 async function retrySelected() {
+  const taskGuard=tasks.begin("retrySelected")
+  if(!taskGuard.active()) return
+  try {
+
   if (!currentJob.value) return
   await retryFailedJob(currentJob.value)
+    if(!taskGuard.active()) return
+
+
+  } finally { taskGuard.finish() }
 }
 
 async function retryFailedJob(job: BatchImageJobRow | BatchImageJob) {
+  if (retryingBatchId.value) return
+  const expectedSelection = selectionRevision
+  const taskGuard=tasks.begin("retryFailedJob")
+  if(!taskGuard.active()) return
+  try {
+
   if (!canRetry(job) || retryingBatchId.value) return
   closeMoreMenu()
   const key = apiKeyForJob(job) || keyForSelectedBatch() || requireApiKey()
   if (!key) return
   retryingBatchId.value = job.id
   try {
-    const sourceItems = await ensureItemsForRetry(key.key, job.id)
+    const sourceItems = await ensureItemsForRetry(key.key, job.id, taskGuard.signal)
+    if(!taskGuard.active()) return
+
     const failedItems = sourceItems
       .filter(item => item.status === 'failed')
       .map(item => ({ custom_id: retryCustomID(item.custom_id), prompt: String(item.prompt_preview || '').trim() }))
@@ -1811,9 +1954,7 @@ async function retryFailedJob(job: BatchImageJobRow | BatchImageJob) {
       appStore.showError(batchImageText('retryMissingPrompts'))
       return
     }
-    const retryJob = await submitBatchImageJob(
-      key.key,
-      {
+    const retryJob = await submitBatchImageJob(key.key, {
         model: job.model,
         task_name: `${job.task_name || defaultTaskName()} ${t('batchImage.messages.retryTaskNameSuffix')}`,
         parent_batch_id: rootBatchIdForRetry(job),
@@ -1821,32 +1962,44 @@ async function retryFailedJob(job: BatchImageJobRow | BatchImageJob) {
         image_size: '1K',
         response_mime_type: form.responseMimeType,
         items: failedItems,
-      },
-      `sub2api-ui-retry-${job.id}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+      }, `sub2api-ui-retry-${job.id}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`, taskGuard.signal
     )
-    currentJob.value = retryJob
-    selectedBatchId.value = retryJob.id
-    selectedBatchApiKeyId.value = key.id
-    items.value = []
+    if(!taskGuard.active()) return
+
     upsertJob(retryJob)
     if (retryJob.parent_batch_id) {
       expandedParentIds.value = new Set([...expandedParentIds.value, retryJob.parent_batch_id])
     }
     appStore.showSuccess(batchImageText('retrySubmitted'))
-    void loadItems()
-    startPolling()
+    if (expectedSelection === selectionRevision) {
+      invalidateDetailSelection()
+      currentJob.value = retryJob
+      selectedBatchId.value = retryJob.id
+      selectedBatchApiKeyId.value = key.id
+      items.value = []
+      void loadItems()
+      startPolling()
+    }
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('retryFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     retryingBatchId.value = ''
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
-async function ensureItemsForRetry(apiKey: string, batchId: string) {
+async function ensureItemsForRetry(apiKey: string, batchId: string, signal: AbortSignal) {
   if (selectedBatchId.value === batchId && items.value.length > 0) {
     return items.value
   }
-  const result = await listBatchImageItems(apiKey, batchId)
+  const result = await listBatchImageItems(apiKey, batchId, '', signal)
   return result.data || []
 }
 
@@ -1861,6 +2014,11 @@ function rootBatchIdForRetry(job: BatchImageJobRow | BatchImageJob) {
 
 async function downloadJob(job: (BatchImageJobRow | Pick<BatchImageJob, 'id'>)) {
   if (downloading.value) return
+  const taskGuard=tasks.begin("downloadJob")
+  if(!taskGuard.active()) return
+  try {
+
+  if (downloading.value) return
   closeMoreMenu()
   applyJobApiKey(job)
   const key = apiKeyForJob(job) || requireApiKey()
@@ -1868,18 +2026,33 @@ async function downloadJob(job: (BatchImageJobRow | Pick<BatchImageJob, 'id'>)) 
   downloading.value = true
   downloadingBatchId.value = job.id
   try {
-    const blob = await downloadBatchImageZip(key.key, job.id)
+    const blob = await downloadBatchImageZip(key.key, job.id, taskGuard.signal)
+    if(!taskGuard.active()) return
+
     saveBlob(blob, `${job.id}.zip`)
     markJobDownloaded(job.id)
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('downloadFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     downloading.value = false
     downloadingBatchId.value = ''
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 async function downloadSelectedJobs() {
+  if (bulkDownloading.value) return
+  const taskGuard=tasks.begin("downloadSelectedJobs")
+  if(!taskGuard.active()) return
+  try {
+
   if (bulkDownloading.value || selectedDownloadableRows.value.length === 0) return
   bulkDownloading.value = true
   try {
@@ -1888,21 +2061,36 @@ async function downloadSelectedJobs() {
       if (!key) continue
       downloading.value = true
       downloadingBatchId.value = row.id
-      const blob = await downloadBatchImageZip(key.key, row.id)
+      const blob = await downloadBatchImageZip(key.key, row.id, taskGuard.signal)
+    if(!taskGuard.active()) return
+
       saveBlob(blob, `${row.id}.zip`)
       markJobDownloaded(row.id)
     }
     appStore.showSuccess(batchImageText('batchDownloadStarted'))
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('downloadFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     bulkDownloading.value = false
     downloading.value = false
     downloadingBatchId.value = ''
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 async function deleteJob(job: BatchImageJobRow) {
+  if (deletingBatchId.value) return
+  const taskGuard=tasks.begin("deleteJob")
+  if(!taskGuard.active()) return
+  try {
+
   if (!canDeleteRecord(job) || deletingBatchId.value) return
   closeMoreMenu()
   const key = apiKeyForJob(job)
@@ -1910,17 +2098,32 @@ async function deleteJob(job: BatchImageJobRow) {
   if (!window.confirm(batchImageText('deleteConfirm'))) return
   deletingBatchId.value = job.id
   try {
-    await deleteBatchImageJobRecord(key.key, job.id)
+    await deleteBatchImageJobRecord(key.key, job.id, taskGuard.signal)
+    if(!taskGuard.active()) return
+
     removeJobFromList(job.id)
     appStore.showSuccess(batchImageText('deleted'))
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('deleteFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     deletingBatchId.value = ''
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 async function deleteSelectedJobs() {
+  if (bulkDeleting.value) return
+  const taskGuard=tasks.begin("deleteSelectedJobs")
+  if(!taskGuard.active()) return
+  try {
+
   const rows = selectedRows.value.filter(job => canDeleteRecord(job))
   if (bulkDeleting.value || rows.length === 0) return
   if (!window.confirm(batchImageText('deleteSelectedConfirm'))) return
@@ -1930,16 +2133,26 @@ async function deleteSelectedJobs() {
       const key = apiKeyForJob(row)
       if (!key) continue
       deletingBatchId.value = row.id
-      await deleteBatchImageJobRecord(key.key, row.id)
+      await deleteBatchImageJobRecord(key.key, row.id, taskGuard.signal)
+    if(!taskGuard.active()) return
+
       removeJobFromList(row.id)
     }
     appStore.showSuccess(batchImageText('deleted'))
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('deleteFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     bulkDeleting.value = false
     deletingBatchId.value = ''
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 function markJobDownloaded(batchId: string) {
@@ -1994,200 +2207,38 @@ function detailItemRowClass(item: BatchImageDetailItem) {
   return 'hover:bg-gray-50/70 dark:hover:bg-dark-800/60'
 }
 
-function previewCacheSupported() {
-  return typeof window !== 'undefined' && 'indexedDB' in window
-}
 
 function previewCacheKey(batchId: string, customID: string, imageIndex = 0) {
-  return [batchId, customID, imageIndex].map(part => encodeURIComponent(String(part))).join(':')
+  return [selectedBatchApiKeyId.value || form.apiKeyId, batchId, customID, imageIndex].map(part => encodeURIComponent(String(part))).join(':')
 }
-
-function itemPreviewKey(item: Pick<BatchImageItem, 'batch_id' | 'custom_id'>) {
-  return previewCacheKey(item.batch_id || selectedBatchId.value || currentJob.value?.id || '', item.custom_id, 0)
+function itemPreviewKey(item: Pick<BatchImageItem, 'batch_id'|'custom_id'>) {
+  return previewCacheKey(item.batch_id || selectedBatchId.value || currentJob.value?.id || '', item.custom_id)
 }
-
-function idbRequest<T>(request: IDBRequest<T>): Promise<T> {
-  return new Promise((resolve, reject) => {
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => reject(request.error)
-  })
-}
-
-function openPreviewCacheDB(): Promise<IDBDatabase | null> {
-  if (!previewCacheSupported()) return Promise.resolve(null)
-  if (previewCacheDBPromise) return previewCacheDBPromise
-
-  previewCacheDBPromise = new Promise((resolve) => {
-    const request = window.indexedDB.open(PREVIEW_CACHE_DB_NAME, 1)
-    request.onupgradeneeded = () => {
-      const db = request.result
-      if (!db.objectStoreNames.contains(PREVIEW_CACHE_STORE_NAME)) {
-        const store = db.createObjectStore(PREVIEW_CACHE_STORE_NAME, { keyPath: 'key' })
-        store.createIndex('lastAccessedAt', 'lastAccessedAt', { unique: false })
-      }
-    }
-    request.onsuccess = () => resolve(request.result)
-    request.onerror = () => resolve(null)
-    request.onblocked = () => resolve(null)
-  })
-  return previewCacheDBPromise
-}
-
-async function getCachedPreviewBlob(cacheKey: string): Promise<Blob | null> {
-  const db = await openPreviewCacheDB()
-  if (!db) return null
-  const record = await idbRequest<PreviewCacheRecord | undefined>(
-    db.transaction(PREVIEW_CACHE_STORE_NAME, 'readonly').objectStore(PREVIEW_CACHE_STORE_NAME).get(cacheKey),
-  ).catch(() => undefined)
-  if (!record?.blob) return null
-
-  const now = Date.now()
-  if (now - record.createdAt > PREVIEW_CACHE_MAX_AGE_MS) {
-    void deleteCachedPreview(cacheKey)
-    return null
-  }
-  void touchCachedPreview(cacheKey, now)
-  return record.blob
-}
-
+async function getCachedPreviewBlob(key: string) { return sessionPreviewCache.get(key,tasks.session) }
+async function putCachedPreviewBlob(key: string, blob: Blob) { sessionPreviewCache.put(key,blob,tasks.session) }
 async function hydrateCachedItemPreviews(detailItems: BatchImageDetailItem[]) {
-  const previewableItems = detailItems.filter(item => canLoadItemPreview(item))
-  if (!previewableItems.length || !previewCacheSupported()) return
-
-  await Promise.all(previewableItems.map(async (item) => {
-    const batchId = item.batch_id || selectedBatchId.value || currentJob.value?.id || ''
-    const previewKey = itemPreviewKey(item)
-    if (!batchId || itemPreviewUrls[previewKey] || previewErrorIds.value.has(previewKey)) return
-    const cached = await getCachedPreviewBlob(previewCacheKey(batchId, item.custom_id, 0)).catch(() => null)
-    if (!cached || itemPreviewUrls[previewKey]) return
-    itemPreviewUrls[previewKey] = URL.createObjectURL(cached)
-  }))
-}
-
-async function putCachedPreviewBlob(cacheKey: string, blob: Blob) {
-  const db = await openPreviewCacheDB()
-  if (!db) return
-  const now = Date.now()
-  const record: PreviewCacheRecord = {
-    key: cacheKey,
-    blob,
-    size: blob.size,
-    createdAt: now,
-    lastAccessedAt: now,
-  }
-  await idbRequest(db.transaction(PREVIEW_CACHE_STORE_NAME, 'readwrite').objectStore(PREVIEW_CACHE_STORE_NAME).put(record)).catch(() => null)
-  void cleanupPreviewCache()
-}
-
-async function touchCachedPreview(cacheKey: string, lastAccessedAt: number) {
-  const db = await openPreviewCacheDB()
-  if (!db) return
-  const record = await idbRequest<PreviewCacheRecord | undefined>(
-    db.transaction(PREVIEW_CACHE_STORE_NAME, 'readonly').objectStore(PREVIEW_CACHE_STORE_NAME).get(cacheKey),
-  ).catch(() => undefined)
-  if (!record) return
-  record.lastAccessedAt = lastAccessedAt
-  await idbRequest(db.transaction(PREVIEW_CACHE_STORE_NAME, 'readwrite').objectStore(PREVIEW_CACHE_STORE_NAME).put(record)).catch(() => null)
-}
-
-async function deleteCachedPreview(cacheKey: string) {
-  const db = await openPreviewCacheDB()
-  if (!db) return
-  await idbRequest(db.transaction(PREVIEW_CACHE_STORE_NAME, 'readwrite').objectStore(PREVIEW_CACHE_STORE_NAME).delete(cacheKey)).catch(() => null)
-}
-
-async function cleanupPreviewCache() {
-  const db = await openPreviewCacheDB()
-  if (!db) return
-  const records = await idbRequest<PreviewCacheRecord[]>(
-    db.transaction(PREVIEW_CACHE_STORE_NAME, 'readonly').objectStore(PREVIEW_CACHE_STORE_NAME).getAll(),
-  ).catch(() => [])
-  if (!records.length) return
-
-  const now = Date.now()
-  const sorted = [...records].sort((a, b) => a.lastAccessedAt - b.lastAccessedAt)
-  const deleteKeys = new Set<string>()
-  let totalBytes = 0
-  let keptCount = 0
-
-  for (const record of sorted) {
-    if (now - record.createdAt > PREVIEW_CACHE_MAX_AGE_MS) {
-      deleteKeys.add(record.key)
-      continue
-    }
-    totalBytes += record.size || record.blob?.size || 0
-    keptCount += 1
-  }
-
-  for (const record of sorted) {
-    if (deleteKeys.has(record.key)) continue
-    if (keptCount <= PREVIEW_CACHE_MAX_ENTRIES && totalBytes <= PREVIEW_CACHE_MAX_BYTES) break
-    deleteKeys.add(record.key)
-    totalBytes -= record.size || record.blob?.size || 0
-    keptCount -= 1
-  }
-
-  if (!deleteKeys.size) return
-  const store = db.transaction(PREVIEW_CACHE_STORE_NAME, 'readwrite').objectStore(PREVIEW_CACHE_STORE_NAME)
-  for (const key of deleteKeys) {
-    store.delete(key)
-  }
-}
-
-async function createThumbnailBlob(blob: Blob): Promise<Blob> {
-  const source = await loadPreviewImageSource(blob)
-  const width = source.width
-  const height = source.height
-  const scale = Math.min(1, PREVIEW_THUMBNAIL_MAX_EDGE / Math.max(width, height))
-  const targetWidth = Math.max(1, Math.round(width * scale))
-  const targetHeight = Math.max(1, Math.round(height * scale))
-  const canvas = document.createElement('canvas')
-  canvas.width = targetWidth
-  canvas.height = targetHeight
-  const ctx = canvas.getContext('2d')
-  if (!ctx) throw new Error('canvas unavailable')
-  ctx.drawImage(source.image, 0, 0, targetWidth, targetHeight)
-  source.close()
-  return await new Promise<Blob>((resolve, reject) => {
-    canvas.toBlob((thumbnail) => {
-      if (thumbnail) resolve(thumbnail)
-      else reject(new Error('thumbnail unavailable'))
-    }, 'image/webp', PREVIEW_THUMBNAIL_QUALITY)
-  })
-}
-
-async function loadPreviewImageSource(blob: Blob): Promise<{ image: PreviewImageSource, width: number, height: number, close: () => void }> {
-  if ('createImageBitmap' in window) {
-    const bitmap = await window.createImageBitmap(blob)
-    return {
-      image: bitmap,
-      width: bitmap.width,
-      height: bitmap.height,
-      close: () => bitmap.close(),
-    }
-  }
-
-  const url = URL.createObjectURL(blob)
+  const taskGuard=tasks.begin('hydrate:items')
+  if(!taskGuard.active()) return
   try {
-    const image = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const img = new Image()
-      img.onload = () => resolve(img)
-      img.onerror = () => reject(new Error('image unavailable'))
-      img.src = url
-    })
-    return {
-      image,
-      width: image.naturalWidth || image.width,
-      height: image.naturalHeight || image.height,
-      close: () => URL.revokeObjectURL(url),
-    }
-  } catch (error) {
-    URL.revokeObjectURL(url)
-    throw error
-  }
+
+  await Promise.all(detailItems.filter(canLoadItemPreview).map(async item => {
+    const key=itemPreviewKey(item)
+    const cached=await getCachedPreviewBlob(key)
+    if(!taskGuard.active() || !cached || itemPreviewUrls[key] || previewErrorIds.value.has(key)) return
+    itemPreviewUrls[key]=URL.createObjectURL(cached)
+  }))
+    if(!taskGuard.active()) return
+
+
+  } finally { taskGuard.finish() }
 }
 
 async function loadItems() {
+  const expectedSelection = selectionRevision
+  const taskGuard=tasks.begin("loadItems", () => expectedSelection === selectionRevision)
+  if(!taskGuard.active()) return
+  try {
+
   const batchId = selectedBatchId.value || currentJob.value?.id || ''
   if (!batchId) return
   const key = keyForSelectedBatch() || requireApiKey()
@@ -2197,21 +2248,31 @@ async function loadItems() {
     clearItemPreviews()
     const jobs = detailJobsForBatch(batchId)
     const results = await Promise.all(jobs.map(async (job) => {
-      const result = await listBatchImageItems(key.key, job.id)
+      const result = await listBatchImageItems(key.key, job.id, '', taskGuard.signal)
       return (result.data || []).map(item => ({
         ...item,
         batch_id: job.id,
         source_task_name: detailSourceName(job, batchId),
       }))
     }))
+    if(!taskGuard.active()) return
+
     const detailItems = results.flat()
     items.value = detailItems
     void hydrateCachedItemPreviews(detailItems)
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     appStore.showError(batchImageErrorMessage(error, batchImageText('loadItemsFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     loadingItems.value = false
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 function detailJobsForBatch(batchId: string): BatchImageJobRow[] {
@@ -2229,6 +2290,10 @@ function detailSourceName(job: Pick<BatchImageJobRow, 'id' | 'task_name' | 'pare
 }
 
 async function loadItemPreview(item: BatchImageItem) {
+  const taskGuard=tasks.begin('preview:'+itemPreviewKey(item))
+  if(!taskGuard.active()) return
+  try {
+
   const batchId = item.batch_id || selectedBatchId.value || currentJob.value?.id || ''
   const previewKey = itemPreviewKey(item)
   if (!batchId || !canLoadItemPreview(item) || (itemPreviewUrls[previewKey] && !previewErrorIds.value.has(previewKey))) return
@@ -2243,24 +2308,38 @@ async function loadItemPreview(item: BatchImageItem) {
       delete itemPreviewUrls[previewKey]
     }
     const cached = await getCachedPreviewBlob(cacheKey)
+    if(!taskGuard.active()) return
+
     if (cached) {
       itemPreviewUrls[previewKey] = URL.createObjectURL(cached)
       return
     }
-    const blob = await getBatchImageItemContent(key.key, batchId, item.custom_id, 0)
-    const thumbnail = await createThumbnailBlob(blob).catch(() => blob)
+    const blob = await getBatchImageItemContent(key.key, batchId, item.custom_id, 0, taskGuard.signal)
+    if(!taskGuard.active()) return
+
+    const thumbnail = await createImageThumbnail(blob, taskGuard.signal).catch(() => blob)
+    if(!taskGuard.active()) return
+
     itemPreviewUrls[previewKey] = URL.createObjectURL(thumbnail)
     if (thumbnail !== blob || thumbnail.size <= 1024 * 1024) {
       void putCachedPreviewBlob(cacheKey, thumbnail)
     }
   } catch (error: any) {
+    if(!taskGuard.active()) return
+
     previewErrorIds.value = new Set([...previewErrorIds.value, previewKey])
     appStore.showError(batchImageErrorMessage(error, batchImageText('loadPreviewFailed')))
   } finally {
+    if (taskGuard.owned()) {
+
     const next = new Set(previewLoadingIds.value)
     next.delete(previewKey)
     previewLoadingIds.value = next
+
+    }
   }
+
+  } finally { taskGuard.finish() }
 }
 
 function openImagePreview(item: BatchImageItem) {
@@ -2282,6 +2361,8 @@ function handlePreviewError(customID: string) {
 }
 
 function clearItemPreviews() {
+  tasks.cancel('preview:')
+  tasks.cancel('hydrate:')
   closePromptPopover()
   for (const url of Object.values(itemPreviewUrls)) {
     if (url) URL.revokeObjectURL(url)
@@ -2602,10 +2683,6 @@ function defaultTaskName(timestamp?: number) {
 onMounted(() => {
   void appStore.fetchPublicSettings()
   void refreshPage()
-  void cleanupPreviewCache()
-  previewCacheCleanupTimer = setInterval(() => {
-    void cleanupPreviewCache()
-  }, 60 * 60 * 1000)
   document.addEventListener('click', closeMoreMenu)
   window.addEventListener('resize', closeMoreMenu)
   window.addEventListener('scroll', closeMoreMenu, true)
@@ -2623,6 +2700,7 @@ watch(
 watch(
   () => form.model,
   () => {
+    tasks.cancel('handleReferenceImageFiles')
     const limit = selectedModelReferenceLimit.value
     if (limit <= 0) {
       referenceImageDrafts.value = []
@@ -2635,11 +2713,8 @@ watch(
 )
 
 onBeforeUnmount(() => {
+  tasks.dispose()
   stopPolling()
-  if (previewCacheCleanupTimer) {
-    clearInterval(previewCacheCleanupTimer)
-    previewCacheCleanupTimer = null
-  }
   clearItemPreviews()
   document.removeEventListener('click', closeMoreMenu)
   window.removeEventListener('resize', closeMoreMenu)

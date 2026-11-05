@@ -133,13 +133,17 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, reactive, onMounted, watch } from 'vue'
+import { computed, ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { AuthLayout } from '@/components/layout'
 import Icon from '@/components/icons/Icon.vue'
 import TurnstileWidget from '@/components/CaptchaChallenge.vue'
 import { useAppStore } from '@/stores'
 import { getPublicSettings, forgotPassword } from '@/api/auth'
+import { captureAuthSession, isAuthSessionCurrent } from '@/api/authSession'
+
+let disposed = false
+onBeforeUnmount(() => { disposed = true })
 
 const { t } = useI18n()
 
@@ -207,6 +211,7 @@ watch(validationToastMessage, (value, previousValue) => {
 onMounted(async () => {
   try {
     const settings = await getPublicSettings()
+    if (disposed) return
     turnstileEnabled.value = settings.turnstile_enabled
     turnstileSiteKey.value = settings.turnstile_site_key || ''
     tencentCaptchaEnabled.value = settings.tencent_captcha_enabled === true
@@ -288,30 +293,33 @@ function validateForm(): boolean {
 // ==================== Form Handlers ====================
 
 async function handleSubmit(): Promise<void> {
+  if (disposed || isLoading.value || isSubmitted.value) return
   errorMessage.value = ''
 
   if (!validateForm()) {
     return
   }
 
-  if (!(await acquireActionProof())) {
-    return
-  }
-
+  const session = captureAuthSession()
+  const active = () => !disposed && isAuthSessionCurrent(session)
+  const email = formData.email.trim()
   isLoading.value = true
 
   try {
+    if (!(await acquireActionProof()) || !active()) return
     await forgotPassword({
-      email: formData.email,
+      email,
       turnstile_token:
         turnstileEnabled.value || aliyunCaptchaEnabled.value ? turnstileToken.value : undefined,
       tencent_captcha_ticket: tencentCaptchaEnabled.value ? turnstileToken.value : undefined,
       tencent_captcha_randstr: tencentCaptchaEnabled.value ? tencentCaptchaRandstr.value : undefined
     })
 
+    if (!active()) return
     isSubmitted.value = true
     appStore.showSuccess(t('auth.resetEmailSent'))
   } catch (error: unknown) {
+    if (!active()) return
     const err = error as { message?: string; response?: { data?: { detail?: string } } }
 
     if (err.response?.data?.detail) {
@@ -324,10 +332,10 @@ async function handleSubmit(): Promise<void> {
 
     appStore.showError(errorMessage.value)
   } finally {
-    if (captchaEnabled.value) {
+    if (active() && captchaEnabled.value) {
       resetCaptchaProof()
     }
-    isLoading.value = false
+    if (!disposed) isLoading.value = false
   }
 }
 </script>

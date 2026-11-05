@@ -385,12 +385,13 @@ export const useAuthStore = defineStore('auth', () => {
    * 会自动读取 localStorage 中已设置的 refresh_token 和 token_expires_in
    * @param newToken - 后端签发的 JWT access token
    */
-  async function setToken(newToken: string): Promise<User> {
+  async function setToken(newToken: string, expected = captureAuthSession()): Promise<User> {
+    assertAuthSession(expected)
     const previousToken = localStorage.getItem(AUTH_TOKEN_KEY)
     const mayAdoptCallback = !previousToken || previousToken === newToken
     const savedRefresh = mayAdoptCallback ? localStorage.getItem(REFRESH_TOKEN_KEY) : null
     const savedExpiry = mayAdoptCallback ? Number(localStorage.getItem(TOKEN_EXPIRES_AT_KEY)) : 0
-    const established = replaceAuthSession({ accessToken: newToken, refreshToken: savedRefresh, expiresIn: savedExpiry > Date.now() ? (savedExpiry - Date.now()) / 1000 : undefined })
+    const established = previousToken === newToken ? expected : replaceAuthSession({ accessToken: newToken, refreshToken: savedRefresh, expiresIn: savedExpiry > Date.now() ? (savedExpiry - Date.now()) / 1000 : undefined }, expected)
     // Clear any previous state first (avoid mixing sessions)
     // Note: Don't clear localStorage here as OAuth callback may have set refresh_token
     stopAutoRefresh()

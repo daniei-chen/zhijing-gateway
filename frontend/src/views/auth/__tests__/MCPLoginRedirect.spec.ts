@@ -30,7 +30,6 @@ vi.mock('@/api/auth', async () => {
     isTotp2FARequired: () => false,
     resolveWeChatOAuthStart: () => ({ mode: 'open' }),
     exchangePendingOAuthCompletion: exchangeCompletion,
-    persistOAuthTokenContext: vi.fn()
   }
 })
 vi.mock('@/composables/useClipboard', () => ({ useClipboard: () => ({ copyToClipboard: vi.fn() }) }))

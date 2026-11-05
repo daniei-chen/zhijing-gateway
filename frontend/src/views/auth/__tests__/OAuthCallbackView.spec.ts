@@ -66,7 +66,6 @@ vi.mock('@/api/auth', async () => {
   return {
     ...actual,
     exchangePendingOAuthCompletion: (...args: any[]) => exchangePendingOAuthCompletionMock(...args),
-    persistOAuthTokenContext: vi.fn(),
   }
 })
 
@@ -185,7 +184,7 @@ describe('OAuthCallbackView', () => {
       invitation_code: 'INVITE456',
       aff_code: 'AFF456',
     })
-    expect(setTokenMock).toHaveBeenCalledWith('token-1')
+    expect(setTokenMock).toHaveBeenCalledWith('token-1', expect.objectContaining({ generation: expect.any(String) }))
   })
 
   it('completes email oauth registration with readonly email and without posting email', async () => {
@@ -221,6 +220,6 @@ describe('OAuthCallbackView', () => {
       password: 'secret-456',
     })
     expect(apiPostMock.mock.calls[0][1]).not.toHaveProperty('email')
-    expect(setTokenMock).toHaveBeenCalledWith('token-2')
+    expect(setTokenMock).toHaveBeenCalledWith('token-2', expect.objectContaining({ generation: expect.any(String) }))
   })
 })

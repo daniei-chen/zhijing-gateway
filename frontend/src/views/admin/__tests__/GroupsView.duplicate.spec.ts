@@ -341,6 +341,7 @@ describe('GroupsView duplicate action', () => {
     await flushPromises()
     await wrapper.findAll('button').find(button => button.text() === 'common.edit')!.trigger('click')
     await flushPromises()
+    await vi.waitFor(() => expect(wrapper.find('[data-reasoning-effort="high"]').exists()).toBe(true))
 
     expect(wrapper.get<HTMLInputElement>('[data-reasoning-effort="high"]').element.value).toBe('1.5')
     await wrapper.get('[data-reasoning-effort="high"]').setValue('0.5')
@@ -369,6 +370,7 @@ describe('GroupsView duplicate action', () => {
     await flushPromises()
     await wrapper.findAll('button').find(button => button.text() === 'common.edit')!.trigger('click')
     await flushPromises()
+    await vi.waitFor(() => expect(wrapper.find('[data-reasoning-effort="high"]').exists()).toBe(true))
 
     await wrapper.get('[data-reasoning-effort="high"]').setValue('0')
     await wrapper.get('#edit-group-form').trigger('submit')

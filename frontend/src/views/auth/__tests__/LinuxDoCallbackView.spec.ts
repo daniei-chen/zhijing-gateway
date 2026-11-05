@@ -96,7 +96,7 @@ describe('LinuxDoCallbackView', () => {
     sessionStorage.clear()
   })
 
-  it('accepts the legacy fragment token success callback without pending-session exchange', async () => {
+  it('rejects unsolicited reusable login tokens in the fragment', async () => {
     window.location.hash =
       '#access_token=legacy-access-token&refresh_token=legacy-refresh-token&expires_in=3600&token_type=Bearer&redirect=%2Flegacy-dashboard'
     setToken.mockResolvedValue({})
@@ -115,11 +115,11 @@ describe('LinuxDoCallbackView', () => {
     await flushPromises()
 
     expect(exchangePendingOAuthCompletion).not.toHaveBeenCalled()
-    expect(setToken).toHaveBeenCalledWith('legacy-access-token')
-    expect(localStorage.getItem('refresh_token')).toBe('legacy-refresh-token')
-    expect(localStorage.getItem('token_expires_at')).not.toBeNull()
-    expect(showSuccess).toHaveBeenCalledWith('auth.loginSuccess')
-    expect(replace).toHaveBeenCalledWith('/legacy-dashboard')
+    expect(setToken).not.toHaveBeenCalled()
+    expect(localStorage.getItem('refresh_token')).toBeNull()
+    expect(localStorage.getItem('token_expires_at')).toBeNull()
+    expect(showSuccess).not.toHaveBeenCalled()
+    expect(replace).not.toHaveBeenCalled()
   })
 
   it('accepts the legacy pending oauth invitation fragment without pending-session exchange', async () => {
@@ -158,7 +158,7 @@ describe('LinuxDoCallbackView', () => {
       pending_oauth_token: 'legacy-pending-token',
       invitation_code: 'invite-code'
     })
-    expect(setToken).toHaveBeenCalledWith('legacy-access-token')
+    expect(setToken).toHaveBeenCalledWith('legacy-access-token', expect.objectContaining({ generation: expect.any(String) }))
     expect(replace).toHaveBeenCalledWith('/legacy-invite')
   })
 
@@ -236,7 +236,7 @@ describe('LinuxDoCallbackView', () => {
       adoptDisplayName: true,
       adoptAvatar: false
     })
-    expect(setToken).toHaveBeenCalledWith('access-token')
+    expect(setToken).toHaveBeenCalledWith('access-token', expect.objectContaining({ generation: expect.any(String) }))
     expect(replace).toHaveBeenCalledWith('/dashboard')
   })
 
@@ -535,7 +535,7 @@ describe('LinuxDoCallbackView', () => {
       adopt_display_name: true,
       adopt_avatar: false
     })
-    expect(setToken).toHaveBeenCalledWith('new-access-token')
+    expect(setToken).toHaveBeenCalledWith('new-access-token', expect.objectContaining({ generation: expect.any(String) }))
     expect(replace).toHaveBeenCalledWith('/welcome')
   })
 
@@ -681,7 +681,7 @@ describe('LinuxDoCallbackView', () => {
       adopt_display_name: false,
       adopt_avatar: true
     })
-    expect(setToken).toHaveBeenCalledWith('bind-access-token')
+    expect(setToken).toHaveBeenCalledWith('bind-access-token', expect.objectContaining({ generation: expect.any(String) }))
     expect(replace).toHaveBeenCalledWith('/profile/security')
   })
 
@@ -733,8 +733,8 @@ describe('LinuxDoCallbackView', () => {
     expect(login2FA).toHaveBeenCalledWith({
       temp_token: 'temp-123',
       totp_code: '123456'
-    })
-    expect(setToken).toHaveBeenCalledWith('2fa-access-token')
+    }, { persist: false })
+    expect(setToken).toHaveBeenCalledWith('2fa-access-token', expect.objectContaining({ generation: expect.any(String) }))
     expect(replace).toHaveBeenCalledWith('/profile')
   })
 })

@@ -63,12 +63,16 @@ def artifact():
 
 
 def main():
+    global HERE
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--artifact-only', action='store_true', help='Only inspect the distributed patch and manifest.')
+    parser.add_argument('--bundle', choices=['v0.0.2', 'v0.0.3'], default='v0.0.2', help='Choose an immutable patch bundle; the historical bundle remains the default.')
     parser.add_argument('--root', type=Path, help='An isolated local backend source checkout; never a production deployment directory.')
     parser.add_argument('--apply', action='store_true', help='Apply only after exact source hashes and git apply --check succeed.')
     parser.add_argument('--verify-applied', action='store_true', help='Verify the resulting source hashes instead of applying.')
     args = parser.parse_args()
+    if args.bundle == 'v0.0.3':
+        HERE = HERE / 'v0.0.3'
     require(not (args.artifact_only and (args.apply or args.verify_applied or args.root)), 'incompatible_modes')
     require(not (args.apply and args.verify_applied), 'incompatible_modes')
     manifest, patch, names = artifact()

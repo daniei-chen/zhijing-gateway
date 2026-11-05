@@ -19,15 +19,15 @@ def digest(value):
     return isinstance(value, str) and re.fullmatch(r'[0-9a-f]{64}', value) is not None
 
 
-def reviewed_delta(expected):
+def reviewed_delta(expected, name=AUDIT_DELTA, baseline=AUDIT_BASE):
     """Apply explicit reviewed changes without rewriting either historical baseline."""
-    delta_path = ROOT / AUDIT_DELTA
+    delta_path = ROOT / name
     if not delta_path.exists():
         return 0
     delta = json.loads(delta_path.read_text(encoding='utf-8'))
     require(isinstance(delta, dict) and set(delta) == {'schema_version', 'baseline_commit', 'authorization', 'files'},
             'invalid_audit_schema')
-    require(delta['schema_version'] == 1 and delta['baseline_commit'] == AUDIT_BASE, 'invalid_audit_baseline')
+    require(delta['schema_version'] == 1 and delta['baseline_commit'] == baseline, 'invalid_audit_baseline')
     require(isinstance(delta['authorization'], str) and delta['authorization'].strip(), 'missing_audit_authorization')
     require(isinstance(delta['files'], list) and delta['files'], 'empty_audit_delta')
     seen = set()
@@ -74,6 +74,8 @@ def verify():
         require(digest(entry['after_sha256']), 'invalid_extension_digest:' + name)
         expected[name] = entry['after_sha256']
     audit_count = reviewed_delta(expected)
+    repair_count = reviewed_delta(expected, 'docs/security-changes-v0.0.3.json',
+                                  '06b62f9536373265879b14023270299dc79e1874')
     for name, expected_digest in expected.items():
         require(digest(expected_digest) and hashlib.sha256(source_bytes(name)).hexdigest() == expected_digest,
                 'contract_changed:' + name)
@@ -97,6 +99,7 @@ def verify():
                   optional_contract_extensions=len(extensions['files']),
                   approved_security_files=len(security['files']),
                   reviewed_audit_files=audit_count,
+                  reviewed_v003_files=repair_count,
                   runtime_documents=len(baseline['runtime_documents']), routes=len(routes),
                   built_files=len(files), qa_code_in_build=False, static_frontend_build=True)
     print(json.dumps(report, indent=2))

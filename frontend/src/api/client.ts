@@ -14,6 +14,7 @@ import {
 } from './adminUIRequest'
 import { refreshAuthTokens } from './tokenRefresh'
 import { getAPIBaseURL } from './url'
+import { browserSessionHeaders, isBrowserSessionHandle } from './browserSession'
 import {
   assertAuthSession, AuthSessionChangedError, captureAuthSession, captureRequestAuthSession,
   clearStoredAuthSession, isAuthSessionCurrent, trackAuthRequest, type AuthSessionSnapshot
@@ -75,8 +76,12 @@ apiClient.interceptors.request.use(
     config._authCleanup = () => { untrack(); originalSignal?.removeEventListener?.('abort', abort) }
     config.signal = controller.signal
     // Attach token from localStorage
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`
+    if (config.headers) {
+      const url = String(config.url || '')
+      const target = /^(?:[a-z][a-z\d+.-]*:|\/\/)/i.test(url) ? url : String(config.baseURL || getAPIBaseURL())
+      const sessionHeaders = browserSessionHeaders(token, config._authSession, target)
+      if (isBrowserSessionHandle(token)) delete config.headers.Authorization
+      for (const [name, value] of Object.entries(sessionHeaders)) config.headers[name] = value
     }
 
     // Attach locale for backend translations
@@ -117,6 +122,16 @@ apiClient.interceptors.response.use(
     const config = response.config as SessionRequestConfig | undefined
     config?._authCleanup?.()
     if (config?._authSession && !isAuthSessionCurrent(config._authSession)) return Promise.reject(new AuthSessionChangedError())
+    // An upgraded backend advertises cookie support. Migrate a legacy browser
+    // pair after /auth/me succeeds, retaining the existing cross-tab refresh lock.
+    // Older backends never advertise this and retain their existing contract.
+    const supportsCookie = String(response.headers?.['x-zhijing-session-supported'] || '') === '1'
+    if (supportsCookie && config?._authSession?.subject && String(config.url).split('?')[0]?.endsWith('/auth/me')) {
+      const token = localStorage.getItem('auth_token')
+      if (token && !isBrowserSessionHandle(token) && localStorage.getItem('refresh_token')) {
+        void refreshAuthTokens({ session: config._authSession }).catch(() => { /* A later authenticated profile refresh retries migration. */ })
+      }
+    }
     // Unwrap standard API response format { code, message, data }
     const apiResponse = response.data as ApiResponse<unknown>
     if (apiResponse && typeof apiResponse === 'object' && 'code' in apiResponse) {

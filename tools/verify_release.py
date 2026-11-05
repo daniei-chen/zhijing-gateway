@@ -130,6 +130,7 @@ def verify(directory):
         require(prefix + 'INTEGRATION-MANIFEST.json' in names, 'integration_manifest_missing')
         meta = read_json(archive.read(prefix + 'INTEGRATION-MANIFEST.json'))
         require(isinstance(meta, dict), 'invalid_integration_manifest')
+        require(meta.get('version') == version, 'integration_version_mismatch')
         patch = meta.get('patch')
         require(isinstance(patch, str), 'invalid_patch_path')
         path = safe_name(patch)

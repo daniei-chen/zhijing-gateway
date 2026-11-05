@@ -235,7 +235,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { createOAuthCallbackSession } from '@/utils/oauthCallbackSession'
+import { readOAuthCallbackFragment } from '@/utils/oauthCallbackFragment'
+import { computed, onMounted, ref, watch, onBeforeUnmount } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { AuthLayout } from '@/components/layout'
@@ -250,7 +252,6 @@ import {
   getOAuthCompletionKind,
   isOAuthLoginCompletion,
   login2FA,
-  persistOAuthTokenContext,
   type OAuthAdoptionDecision,
   type OAuthTokenResponse,
   type PendingOAuthExchangeResponse
@@ -266,6 +267,13 @@ const router = useRouter()
 const { t } = useI18n()
 
 const authStore = useAuthStore()
+const callbackSession = createOAuthCallbackSession()
+onBeforeUnmount(() => {
+  callbackSession.dispose()
+  bindLoginPassword.value = ''
+  totpTempToken.value = ''
+  totpCode.value = ''
+})
 const appStore = useAppStore()
 
 const isProcessing = ref(true)
@@ -350,9 +358,7 @@ function clearPendingAuthSession() {
 }
 
 function parseFragmentParams(): URLSearchParams {
-  const raw = typeof window !== 'undefined' ? window.location.hash : ''
-  const hash = raw.startsWith('#') ? raw.slice(1) : raw
-  return new URLSearchParams(hash)
+  return readOAuthCallbackFragment(t('auth.oauth.invalidCallbackHint'))
 }
 
 function readLegacyFragmentLogin(params: URLSearchParams): OAuthTokenResponse | null {
@@ -570,12 +576,13 @@ function isCreateAccountRecoveryError(error: unknown): boolean {
 }
 
 async function finalizeCompletion(completion: PendingOAuthExchangeResponse, redirect: string) {
+  if (!callbackSession.isCurrent()) return
   if (getOAuthCompletionKind(completion) === 'bind') {
     const bindRedirect = sanitizeRedirectPath(completion.redirect || '/profile')
     clearPendingAuthSession()
     clearAllAffiliateReferralCodes()
     appStore.showSuccess(bindSuccessMessage)
-    await router.replace(bindRedirect)
+    await callbackSession.wait(router.replace(bindRedirect))
     return
   }
 
@@ -583,14 +590,14 @@ async function finalizeCompletion(completion: PendingOAuthExchangeResponse, redi
     throw new Error(t('auth.linuxdo.callbackMissingToken'))
   }
 
-  persistOAuthTokenContext(completion)
-  await authStore.setToken(completion.access_token)
+  await callbackSession.wait(callbackSession.login(completion, (token, expected) => authStore.setToken(token, expected)))
   clearAllAffiliateReferralCodes()
   appStore.showSuccess(t('auth.loginSuccess'))
-  await router.replace(redirect)
+  await callbackSession.wait(router.replace(redirect))
 }
 
 async function finalizePendingAccountResponse(completion: LinuxDoPendingActionResponse) {
+  if (!callbackSession.isCurrent()) return
   applyAdoptionSuggestionState(completion)
   const redirect = sanitizeRedirectPath(completion.redirect || redirectTo.value)
 
@@ -625,10 +632,11 @@ async function finalizePendingAccountResponse(completion: LinuxDoPendingActionRe
     return
   }
 
-  await finalizeCompletion(completion, redirect)
+  await callbackSession.wait(finalizeCompletion(completion, redirect))
 }
 
 async function handleSubmitInvitation() {
+  if (!callbackSession.isCurrent()) return
   invitationError.value = ''
   if (!invitationCode.value.trim()) return
 
@@ -638,46 +646,56 @@ async function handleSubmitInvitation() {
     const decision = currentAdoptionDecision()
     const completion: LinuxDoPendingActionResponse = legacyPendingOAuthToken.value
       ? (
-          await apiClient.post<LinuxDoPendingActionResponse>('/auth/oauth/linuxdo/complete-registration', {
+          await callbackSession.wait(apiClient.post<LinuxDoPendingActionResponse>('/auth/oauth/linuxdo/complete-registration', {
             pending_oauth_token: legacyPendingOAuthToken.value,
             invitation_code: invitationCode.value.trim(),
             ...oauthAffiliatePayload(affCode),
             ...serializeAdoptionDecision(decision)
-          })
+          }))
         ).data
       : affCode
-        ? await completeLinuxDoOAuthRegistration(invitationCode.value.trim(), decision, affCode)
-        : await completeLinuxDoOAuthRegistration(invitationCode.value.trim(), decision)
-    await finalizePendingAccountResponse(completion)
+        ? await callbackSession.wait(completeLinuxDoOAuthRegistration(invitationCode.value.trim(), decision, affCode))
+        : await callbackSession.wait(completeLinuxDoOAuthRegistration(invitationCode.value.trim(), decision))
+    await callbackSession.wait(finalizePendingAccountResponse(completion))
   } catch (e: unknown) {
+    if (!callbackSession.isCurrent()) return
     const err = e as { message?: string; response?: { data?: { message?: string } } }
     invitationError.value =
       err.response?.data?.message || err.message || t('auth.linuxdo.completeRegistrationFailed')
   } finally {
+    if (callbackSession.isCurrent()) {
     isSubmitting.value = false
+
+    }
   }
 }
 
 async function handleContinueLogin() {
+  if (!callbackSession.isCurrent()) return
   isSubmitting.value = true
   try {
-    const completion = await exchangePendingOAuthCompletion(currentAdoptionDecision()) as LinuxDoPendingActionResponse
-    await finalizePendingAccountResponse(completion)
+    const completion = await callbackSession.wait(exchangePendingOAuthCompletion(currentAdoptionDecision())) as LinuxDoPendingActionResponse
+    await callbackSession.wait(finalizePendingAccountResponse(completion))
   } catch (e: unknown) {
+    if (!callbackSession.isCurrent()) return
     errorMessage.value = getRequestErrorMessage(e, t('auth.loginFailed'))
     needsAdoptionConfirmation.value = false
   } finally {
+    if (callbackSession.isCurrent()) {
     isSubmitting.value = false
+
+    }
   }
 }
 
 async function handleCreateAccount(payload: PendingOAuthCreateAccountPayload) {
+  if (!callbackSession.isCurrent()) return
   accountActionError.value = ''
   if (!payload.email || !payload.password) return
 
   isSubmitting.value = true
   try {
-    const { data } = await apiClient.post<LinuxDoPendingActionResponse>('/auth/oauth/pending/create-account', {
+    const { data } = await callbackSession.wait(apiClient.post<LinuxDoPendingActionResponse>('/auth/oauth/pending/create-account', {
       email: payload.email,
       password: payload.password,
       verify_code: payload.verifyCode || undefined,
@@ -691,20 +709,25 @@ async function handleCreateAccount(payload: PendingOAuthCreateAccountPayload) {
       invitation_code: payload.invitationCode || undefined,
       ...oauthAffiliatePayload(loadOAuthAffiliateCode()),
       ...serializeAdoptionDecision(currentAdoptionDecision())
-    })
-    await finalizePendingAccountResponse(data)
+    }))
+    await callbackSession.wait(finalizePendingAccountResponse(data))
   } catch (e: unknown) {
+    if (!callbackSession.isCurrent()) return
     if (isCreateAccountRecoveryError(e)) {
       switchToBindLoginMode(payload.email.trim())
       return
     }
     accountActionError.value = getRequestErrorMessage(e, t('auth.loginFailed'))
   } finally {
+    if (callbackSession.isCurrent()) {
     isSubmitting.value = false
+
+    }
   }
 }
 
 async function handleBindLogin() {
+  if (!callbackSession.isCurrent()) return
   accountActionError.value = ''
   const email = bindLoginEmail.value.trim()
   const password = bindLoginPassword.value
@@ -712,38 +735,47 @@ async function handleBindLogin() {
 
   isSubmitting.value = true
   try {
-    const { data } = await apiClient.post<LinuxDoPendingActionResponse>('/auth/oauth/pending/bind-login', {
+    const { data } = await callbackSession.wait(apiClient.post<LinuxDoPendingActionResponse>('/auth/oauth/pending/bind-login', {
       email,
       password,
       ...serializeAdoptionDecision(currentAdoptionDecision())
-    })
-    await finalizePendingAccountResponse(data)
+    }))
+    await callbackSession.wait(finalizePendingAccountResponse(data))
   } catch (e: unknown) {
+    if (!callbackSession.isCurrent()) return
     accountActionError.value = getRequestErrorMessage(e, t('auth.loginFailed'))
   } finally {
+    if (callbackSession.isCurrent()) {
     isSubmitting.value = false
+
+    }
   }
 }
 
 async function handleSubmitTotpChallenge() {
+  if (!callbackSession.isCurrent()) return
   totpError.value = ''
   const code = totpCode.value.trim()
   if (!totpTempToken.value || code.length !== 6) return
 
   isSubmitting.value = true
   try {
-    const completion = await login2FA({
+    const completion = await callbackSession.wait(login2FA({
       temp_token: totpTempToken.value,
       totp_code: code
-    })
-    await authStore.setToken(completion.access_token)
+    }, { persist: false }))
+    await callbackSession.wait(callbackSession.login(completion, (token, expected) => authStore.setToken(token, expected)))
     clearAllAffiliateReferralCodes()
     appStore.showSuccess(t('auth.loginSuccess'))
-    await router.replace(redirectTo.value)
+    await callbackSession.wait(router.replace(redirectTo.value))
   } catch (e: unknown) {
+    if (!callbackSession.isCurrent()) return
     totpError.value = getRequestErrorMessage(e, t('auth.loginFailed'))
   } finally {
+    if (callbackSession.isCurrent()) {
     isSubmitting.value = false
+
+    }
   }
 }
 
@@ -759,11 +791,10 @@ onMounted(async () => {
 
   try {
     if (legacyLogin) {
-      persistOAuthTokenContext(legacyLogin)
-      await authStore.setToken(legacyLogin.access_token)
+      await callbackSession.wait(callbackSession.login(legacyLogin, (token, expected) => authStore.setToken(token, expected)))
       clearAllAffiliateReferralCodes()
       appStore.showSuccess(t('auth.loginSuccess'))
-      await router.replace(redirect)
+      await callbackSession.wait(router.replace(redirect))
       return
     }
 
@@ -781,7 +812,7 @@ onMounted(async () => {
       return
     }
 
-    const completion = await exchangePendingOAuthCompletion()
+    const completion = await callbackSession.wait(exchangePendingOAuthCompletion())
     const completionRedirect = sanitizeRedirectPath(
       completion.redirect || (route.query.redirect as string | undefined) || '/dashboard'
     )
@@ -814,8 +845,9 @@ onMounted(async () => {
       return
     }
 
-    await finalizeCompletion(completion, completionRedirect)
+    await callbackSession.wait(finalizeCompletion(completion, completionRedirect))
   } catch (e: unknown) {
+    if (!callbackSession.isCurrent()) return
     clearPendingAuthSession()
     errorMessage.value = getRequestErrorMessage(e, t('auth.loginFailed'))
     isProcessing.value = false

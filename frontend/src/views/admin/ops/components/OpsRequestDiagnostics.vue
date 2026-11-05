@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { OpsRequestDetail } from '@/api/admin/ops'
 import OpsAdmissionNotice from './OpsAdmissionNotice.vue'
-import { durationStages, getAdmissionHint, getGatewayTiming, ingressMilestones, measuredNumber } from '../utils/requestDiagnostics'
+import { attemptMilestones, durationStages, getAdmissionHint, getGatewayTiming, ingressMilestones, measuredNumber } from '../utils/requestDiagnostics'
 
 const props = defineProps<{ request: OpsRequestDetail }>()
 const { t } = useI18n()
@@ -11,8 +11,9 @@ const timing = computed(() => getGatewayTiming(props.request.gateway_timing))
 const admission = computed(() => getAdmissionHint(props.request))
 const stages = computed(() => durationStages.map(stage => ({ ...stage, value: measuredNumber(timing.value?.metrics[stage.key]) })))
 const milestones = computed(() => ingressMilestones.map(stage => ({ ...stage, value: measuredNumber(timing.value?.metrics[stage.key]) })))
+const attempts = computed(() => attemptMilestones.map(stage => ({ ...stage, value: measuredNumber(timing.value?.metrics[stage.key]) })))
 const scale = computed(() => Math.max(1, ...stages.value.map(stage => stage.value ?? 0)))
-const hasMeasurements = computed(() => stages.value.some(stage => stage.value !== null) || milestones.value.some(stage => stage.value !== null))
+const hasMeasurements = computed(() => [...stages.value, ...milestones.value, ...attempts.value].some(stage => stage.value !== null))
 
 function duration(value: unknown) {
   const n = measuredNumber(value)
@@ -65,6 +66,16 @@ function duration(value: unknown) {
           </li>
         </ol>
       </div>
+    </div>
+
+    <div class="mt-5">
+      <h4 class="text-xs font-semibold text-gray-600 dark:text-gray-300">{{ t('admin.ops.diagnostics.attemptTitle') }}</h4>
+      <dl class="mt-3 grid gap-3 sm:grid-cols-3">
+        <div v-for="stage in attempts" :key="stage.key" class="rounded-xl bg-indigo-50/60 p-3 dark:bg-indigo-950/30" :data-stage="stage.key">
+          <dt class="text-xs text-gray-500 dark:text-gray-400">{{ t(`admin.ops.diagnostics.attempts.${stage.label}`) }}</dt>
+          <dd class="mt-2 font-mono text-sm tabular-nums text-gray-900 dark:text-white">{{ duration(stage.value) }}</dd>
+        </div>
+      </dl>
     </div>
 
     <div class="ops-forward-metric mt-5">

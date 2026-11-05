@@ -3,6 +3,7 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+from types import SimpleNamespace
 import subprocess
 import sys
 import tempfile
@@ -115,6 +116,17 @@ class ReleaseVerificationTests(unittest.TestCase):
         self.write_sums()
         self.assert_rejected()
 
+    def test_backend_bundle_version_must_match_the_frontend_release(self):
+        name = 'integrations/sub2api/INTEGRATION-MANIFEST.json'
+        meta = json.loads(self.integration_members[name])
+        meta['version'] = '0.0.1'
+        self.integration_members[name] = json.dumps(meta).encode()
+        self.write_archive(self.integration, self.integration_members)
+        self.write_sums()
+        result = self.verify(optimized=True)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn('integration_version_mismatch', result.stderr)
+
     def test_symlink_zip_entry_is_rejected(self):
         with zipfile.ZipFile(self.frontend, 'a') as archive:
             info = zipfile.ZipInfo('licenses/fonts/link.txt')
@@ -142,6 +154,58 @@ class PatchVerificationTests(unittest.TestCase):
 
 
 class PackageProvenanceTests(unittest.TestCase):
+    def test_v003_selects_its_own_backend_bundle_without_falling_back_to_v002(self):
+        module = load_module('package_bundle_for_test', ROOT / 'tools/package_release.py')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base = root / 'integrations/sub2api'
+            nested = base / 'v0.0.3'
+            nested.mkdir(parents=True)
+            (base / 'INTEGRATION-MANIFEST.json').write_text(json.dumps(dict(version='0.0.2')))
+            (nested / 'INTEGRATION-MANIFEST.json').write_text(json.dumps(dict(version='0.0.3')))
+            with patch.object(module, 'ROOT', root):
+                self.assertEqual(module.integration_bundle('0.0.2')[0], base)
+                self.assertEqual(module.integration_bundle('0.0.3')[0], nested)
+                (nested / 'INTEGRATION-MANIFEST.json').write_text(json.dumps(dict(version='0.0.2')))
+                with self.assertRaisesRegex(ValueError, 'Backend bundle version'):
+                    module.integration_bundle('0.0.3')
+                (nested / 'INTEGRATION-MANIFEST.json').unlink()
+                with self.assertRaises(FileNotFoundError):
+                    module.integration_bundle('0.0.3')
+
+    def test_sha_rejects_windows_reparse_points_without_requiring_new_pathlib(self):
+        module = load_module('package_reparse_for_test', ROOT / 'tools/package_release.py')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'file.txt'
+            path.write_text('synthetic')
+            with patch.object(Path, 'is_symlink', return_value=False), \
+                 patch.object(Path, 'lstat', return_value=SimpleNamespace(st_file_attributes=0x400)):
+                with self.assertRaisesRegex(ValueError, 'Nonregular release input'):
+                    module.sha(path)
+
+    def test_regular_file_may_have_a_different_resolved_spelling(self):
+        module = load_module('package_sha_for_test', ROOT / 'tools/package_release.py')
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'file.txt'
+            path.write_bytes(b'regular content')
+            with patch.object(Path, 'resolve', return_value=Path(directory) / 'long-spelling.txt'):
+                self.assertEqual(module.sha(path), sha(b'regular content'))
+
+    def test_sha_rejects_linked_files_and_linked_parent_directories(self):
+        module = load_module('package_link_for_test', ROOT / 'tools/package_release.py')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            target = root / 'actual'
+            target.mkdir()
+            (target / 'file.txt').write_text('synthetic')
+            link = root / 'link'
+            try:
+                link.symlink_to(target, target_is_directory=True)
+            except OSError as error:
+                self.skipTest('Platform does not permit synthetic symlinks: ' + str(error))
+            with self.assertRaisesRegex(ValueError, 'Nonregular release input'):
+                module.sha(link / 'file.txt')
+
     def test_package_rebuilds_dist_and_excludes_ignored_integration_secrets(self):
         module = load_module('package_release_for_test', ROOT / 'tools/package_release.py')
         with tempfile.TemporaryDirectory() as directory:

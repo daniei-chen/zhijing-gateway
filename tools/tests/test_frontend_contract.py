@@ -91,6 +91,24 @@ class FrontendContractTests(unittest.TestCase):
                 result = self.run_check()
                 self.assertNotEqual(result.returncode, 0, result.stdout)
 
+    def test_v003_delta_extends_the_audit_chain_without_replacing_it(self):
+        self.write_json('docs/security-changes-audit-20261105.json', self.delta)
+        repair = json.loads(json.dumps(self.delta))
+        repair['baseline_commit'] = '06b62f9536373265879b14023270299dc79e1874'
+        repair['files'][0].update(before_sha256=sha('reviewed source'), after_sha256=sha('repaired source'))
+        self.write_json('docs/security-changes-v0.0.3.json', repair)
+        (self.root / SOURCE).write_text('repaired source')
+        result = self.run_check(optimized=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('"reviewed_v003_files": 1', result.stdout)
+        # Neither the original pre-audit digest nor a stale final digest can skip a link.
+        for invalid in (sha('old source'), sha('repaired source')):
+            repair['files'][0]['before_sha256'] = invalid
+            self.write_json('docs/security-changes-v0.0.3.json', repair)
+            result = self.run_check(optimized=True)
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+            self.assertIn('audit_baseline_mismatch', result.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()

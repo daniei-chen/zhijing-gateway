@@ -39,8 +39,6 @@ jobs:
         run: pnpm --dir frontend install --frozen-lockfile
       - name: Verify explicit runtime audit approvals
         run: node --test tools/tests/test_ops_contract.mjs
-      - name: Run all frontend regressions
-        run: pnpm --dir frontend test:run --maxWorkers=4
       - name: Build the static frontend
         run: pnpm --dir frontend build
       - name: Verify reviewed compatibility boundaries
@@ -48,4 +46,8 @@ jobs:
           python3 tools/verify_frontend.py
           node tools/verify_ops_contract.mjs
       - name: Verify the optional backend patch artifact
-        run: python3 integrations/sub2api/check_patch.py --artifact-only
+        run: |
+          python3 integrations/sub2api/check_patch.py --artifact-only
+          python3 integrations/sub2api/check_patch.py --bundle v0.0.3 --artifact-only
+      - name: Run regressions and enforce all four global 80 percent coverage gates
+        run: pnpm --dir frontend test:coverage --maxWorkers=4

@@ -4,6 +4,9 @@ export const AUTH_SESSION_KEY = 'auth_session_identity_v1'
 export const AUTH_SESSION_REPLACED_EVENT = 'auth-session-replaced'
 const storageKeys = new Set([AUTH_SESSION_KEY, 'auth_token', 'refresh_token', 'auth_user', 'token_expires_at'])
 export interface AuthSessionSnapshot { generation: string; subject: string | null }
+const signalSessions = new WeakMap<AbortSignal, AuthSessionSnapshot>()
+export function bindAuthSignal(signal: AbortSignal, session: AuthSessionSnapshot): void { signalSessions.set(signal, session) }
+export function authSignalSession(signal?: AbortSignal | null): AuthSessionSnapshot | undefined { return signal ? signalSessions.get(signal) : undefined }
 interface SessionRecord extends AuthSessionSnapshot { phase: 'ready' | 'transition'; credentials: string }
 const pending = new Set<{ session: AuthSessionSnapshot; abort: () => void }>()
 const subscribers = new Set<() => void>()

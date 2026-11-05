@@ -1,6 +1,7 @@
 import { buildApiUrl } from './url'
 import { ADMIN_UI_REQUEST_HEADER } from './adminUIRequest'
 import { assertAuthSession, captureRequestAuthSession, trackAuthRequest } from './authSession'
+import { browserSessionHeaders } from './browserSession'
 
 export interface AccountTestEvent {
   type: string
@@ -45,7 +46,7 @@ export async function streamAccountTest(
     const response = await fetch(buildApiUrl(`/admin/accounts/${accountId}/test`), {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token ?? ''}`,
+        ...browserSessionHeaders(token, session, buildApiUrl(`/admin/accounts/${accountId}/test`)),
         'Content-Type': 'application/json',
         [ADMIN_UI_REQUEST_HEADER]: '1',
       },

@@ -4,7 +4,7 @@
 </picture>
 
 <p align="center">
-  <b>智境网关 · 会话有界，诊断有据</b><br>
+  <b>智境网关 · 会话稳固，等待可见</b><br>
   <sub>以液态玻璃、清晰排版和细腻交互，连接你的工具与创造。</sub>
 </p>
 
@@ -12,6 +12,7 @@
   <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat-square">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-638bdf?style=flat-square">
   <a href="https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2"><img alt="Release v0.0.2" src="https://img.shields.io/badge/Release-v0.0.2-8b6ad5?style=flat-square"></a>
+  <a href="docs/releases/v0.0.3.zh-CN.md"><img alt="v0.0.3 review candidate" src="https://img.shields.io/badge/Candidate-v0.0.3-638bdf?style=flat-square"></a>
   <a href="https://github.com/daniei-chen/zhijing-gateway/actions/workflows/ci.yml"><img alt="Frontend verification" src="https://github.com/daniei-chen/zhijing-gateway/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="LGPL v3" src="https://img.shields.io/badge/License-LGPL--3.0-868093?style=flat-square"></a>
 </p>
@@ -20,13 +21,25 @@
   <a href="#界面一览">界面一览</a> · <a href="#本地运行">本地运行</a> · <a href="#设计与交互">设计与交互</a> · <a href="#验证与兼容">验证与兼容</a>
 </p>
 
-智境提供登录、成员工作台与管理员控制台的统一前端。业务能力沿用 [Sub2API](https://github.com/Wei-Shaw/sub2api)，权限、计费与功能开关继续由原后端决定。v0.0.2 增加前端会话隔离与运维时序，公开前端源码、合成预览、验证工具及可选的后端诊断差异补丁。
+智境提供登录、成员工作台与管理员控制台的统一前端。业务能力沿用 [Sub2API](https://github.com/Wei-Shaw/sub2api)，权限、计费与功能开关继续由后端决定。公开前端源码、合成预览、验证工具及明确版本的通用后端差异补丁。
 
 > **上线状态**：v0.0.2 前端与后端已于 2026-11-05 完成上线，采用并行 API 实例与热切流量，保留在途请求和回退入口。GitHub 发布与生产验证分别记录，详见 [Release](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2)。本页截图继续使用合成数据，额度、价格、指标与有效期均为演示样例。
 
 **版本下载**：[v0.0.2 · 会话有界，诊断有据](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2)，提供静态构建包、可选诊断源码包、构建清单和 SHA256；[更新说明](docs/releases/v0.0.2.zh-CN.md)。
 
-## v0.0.2 · 清晰的边界，从容的工作台
+## v0.0.3 候选 · 会话稳固，等待可见
+
+<p align="center"><sub>SESSION / 持有有界　·　WORKSPACE / 按需展开　·　OBSERVABILITY / 等待可见</sub></p>
+
+| 更稳固的会话 | 更从容的工作台 | 更细的首响应诊断 |
+| :--- | :--- | :--- |
+| 匹配后端支持 HttpOnly Cookie；OAuth 不再通过 URL 返回登录凭据，晚到结果绑定发起会话。 | 账号弹窗与重组件按需加载，设置草稿保留；图片轮询、缓存、下载和预览及时清理。 | 分开上游请求写完、首字节、首事件与有内容输出，保留原 TTFT 口径。 |
+
+**当前是本地验证候选，未部署 v0.0.3，也未发布正式 Release。** 前端 418 个文件、3,290 项测试通过；类型、ESLint、构建，以及匹配后端短回归、定向 race、vet 和 Linux 构建通过。全局覆盖率仍低于 80%：行 67.52%、语句 65.42%、函数 52.18%、分支 54.69%。CI 和打包脚本执行真实门槛，不能将其写成全部门禁通过。
+
+配套认证升级需要**先匹配后端，再更新前端**。只读样本的 TTFT 长尾主要出现在上游响应头之后；新增诊断和本地流式回归不能证明生产 30 秒等待已经消除。详见[候选更新说明](docs/releases/v0.0.3.zh-CN.md)、[修复与剩余项](docs/reviews/2026-11-05-v003-repair.zh-CN.md)、[匹配后端补丁](integrations/sub2api/v0.0.3/README.zh-CN.md)。
+
+## v0.0.2 · 已发布的工作台基础
 
 | 连接的边界 | 这一版的行为 |
 | :--- | :--- |
@@ -106,6 +119,8 @@ python qa/preview_server.py --port 18872
 
 ## 验证与兼容
 
+当前 v0.0.3 候选的结果见[机器可读验证摘要](docs/validation-v0.0.3.json)。[严格审计报告](docs/reviews/2026-11-05-strict-audit.zh-CN.md)记录继承的安全、依赖与性能修复；其历史计数不改写为本轮结果。下面的 v0.0.2 数据保留原发布口径。
+
 v0.0.2 前端全量回归 **392 个文件、3,139 项测试通过**；原四条失败的安全验收全部转为通过。真实客户端、认证 API 与状态仓库的合成往返覆盖不同 HTTP 方法、晚到结果、同账号重新登录、刷新与会话切换。本地浏览器验证双标签管理员到成员切换、浅/深色时序面板、320/390px 和关闭后焦点恢复。
 
 V6 原有 24 个管理入口的视觉验收作为基础保留；本轮没有把其余移动排序、启动恢复或 OTP 易用性待办宣称全部修复。详细范围见[验证摘要](docs/validation-v0.0.2.json)。
@@ -113,15 +128,18 @@ V6 原有 24 个管理入口的视觉验收作为基础保留；本轮没有把�
 ```bash
 cd frontend
 pnpm typecheck
-pnpm test:run --maxWorkers=4 --minWorkers=1
+pnpm lint:check
+pnpm test:coverage --maxWorkers=4
+# 当前四项覆盖率不足会退出 1；构建和下列检查可以分别执行。
 pnpm build
 cd ..
 python tools/verify_frontend.py
 node tools/verify_ops_contract.mjs
 python integrations/sub2api/check_patch.py --artifact-only
+python integrations/sub2api/check_patch.py --bundle v0.0.3 --artifact-only
 ```
 
-- 原 227 文件兼容基线保留；218 个文件保持原摘要，5 个安全行为文件与 3 个相关测试明确登记，1 个运维 API 文件只追加可选类型。
+- 原 227 文件兼容基线保留；v0.0.2、严格审计与 v0.0.3 的变更分别通过明确摘要链登记，未静默重建基线。Ops 契约明确包含已批准的运行时变化。
 - 68 条路由声明与两份运行时法律文本保持；原 API 路径、服务端权限、额度与计费继续生效。
 - 构建资源使用 `/app-assets/`，与官网 `/assets/` 分离。
 - `frontend/dist/` 仅为静态前端，演示注入与合成身份不进入构建。
@@ -135,12 +153,12 @@ frontend/              Vue、TypeScript、样式与组件测试
   src/styles/          智境设计语言与各版本表现层
   public/app-assets/   本地托管字体与品牌资源
 qa/                    本机合成数据预览
-integrations/sub2api/  可选诊断补丁与准确匹配检查
+integrations/sub2api/  历史诊断补丁、v0.0.3 配套会话补丁与摘要核验
 tools/                 契约、构建、发布包及下载校验
 docs/                  设计、验证、界面图片和字体许可
 ```
 
-接入既有网关时，保持原有 API 路由与认证配置，先验证静态资源，再由维护者选择发布窗口并保留旧哈希资源。更新安全版本时应完整刷新旧标签。完整后端不包含在本工程中；诊断补丁需要准确匹配既有自定义源码，不应直接套用原版 Sub2API。
+接入既有网关时保持原 API 路由，先验证匹配后端与静态资源，再选择发布窗口并保留旧哈希资源。更新安全版本时应完整刷新旧标签；v0.0.3 认证变更要求后端先升级。完整后端不包含在本工程中，补丁只适用于明确匹配的自定义源码，不应直接套用原版 Sub2API。
 
 ## 来源与许可
 

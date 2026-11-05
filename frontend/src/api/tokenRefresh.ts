@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type { ApiResponse } from '@/types'
 import { getAPIBaseURL } from './url'
+import { browserSessionHeaders } from './browserSession'
 import { assertAuthSession, AuthSessionChangedError, captureAuthSession, commitAuthTokenRotation, isAuthSessionCurrent, trackAuthRequest, type AuthSessionSnapshot } from './authSession'
 
 const AUTH_TOKEN_KEY = 'auth_token'
@@ -152,7 +153,7 @@ async function requestTokenPair(
     const response = await axios.post<ApiResponse<RefreshTokenResponse>>(
       `${getAPIBaseURL()}/auth/refresh`,
       { refresh_token: snapshot.refreshToken },
-      { headers: { 'Content-Type': 'application/json' }, timeout: TOKEN_REFRESH_TIMEOUT_MS, signal: controller.signal }
+      { headers: { 'Content-Type': 'application/json', ...browserSessionHeaders(snapshot.accessToken, snapshot.session, `${getAPIBaseURL()}/auth/refresh`) }, withCredentials: true, timeout: TOKEN_REFRESH_TIMEOUT_MS, signal: controller.signal }
     )
     const payload = response.data
     if (payload.code !== 0 || !payload.data) {

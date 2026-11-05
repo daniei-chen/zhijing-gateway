@@ -48,6 +48,7 @@ describe('useRoutePrefetch', () => {
   let mockRouter: Router
 
   beforeEach(() => {
+    vi.spyOn(document, 'visibilityState', 'get').mockReturnValue('visible')
     mockRouter = createMockRouter()
 
     // 保存原始函数
@@ -200,7 +201,7 @@ describe('useRoutePrefetch', () => {
   })
 
   describe('requestIdleCallback 超时处理', () => {
-    it('超时后仍能正常执行预加载', async () => {
+    it('空闲预算耗尽时不启动非必要的预加载', async () => {
       // 模拟超时情况
       vi.stubGlobal('requestIdleCallback', (cb: IdleRequestCallback, options?: IdleRequestOptions) => {
         const timeout = options?.timeout || 2000
@@ -215,7 +216,7 @@ describe('useRoutePrefetch', () => {
       // 等待超时执行
       await new Promise((resolve) => setTimeout(resolve, 2100))
 
-      expect(prefetchedRoutes.value.has('/dashboard')).toBe(true)
+      expect(prefetchedRoutes.value.has('/dashboard')).toBe(false)
     })
   })
 

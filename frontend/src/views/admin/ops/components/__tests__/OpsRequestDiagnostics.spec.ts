@@ -11,6 +11,21 @@ function render(request: OpsRequestDetail) {
 }
 
 describe('Ops request timing panel', () => {
+  it('separates overlapping upstream milestones without changing recorded TTFT', () => {
+    const request: OpsRequestDetail = { kind: 'success', created_at: '2026-11-05T00:00:00Z', request_id: 'synthetic', first_token_ms: 30354,
+      gateway_timing: { schema_version: 1, source: 'process_memory', observed_at: '2026-11-05T00:00:00Z', capacity: 4096, retention_seconds: 86400,
+        metrics: { upstream_request_write_ms: 20, upstream_headers_ms: 3100, upstream_first_event_ingress_ms: 5000 } } }
+    const before = JSON.stringify(request)
+    const wrapper = render(request)
+    expect(wrapper.get('[data-stage="upstream_request_write_ms"]').text()).toContain('20 ms')
+    expect(wrapper.get('[data-stage="upstream_first_byte_ms"]').text()).toContain('未采集')
+    expect(wrapper.get('[data-stage="upstream_headers_ms"]').text()).toContain('3.10 s')
+    expect(wrapper.get('[data-stage="upstream_first_event_ingress_ms"]').text()).toContain('5.00 s')
+    expect(wrapper.text()).toContain('数值不可相加')
+    expect(wrapper.text()).toContain('30.35 s')
+    expect(JSON.stringify(request)).toBe(before)
+    wrapper.unmount()
+  })
   it('shows measured zero independently from missing stages and retains forwarding TTFT', () => {
     const wrapper = render({ kind: 'success', created_at: '2026-11-05T00:00:00Z', request_id: 'synthetic', first_token_ms: 823,
       gateway_timing: { schema_version: 1, source: 'process_memory', observed_at: '2026-11-05T00:00:00Z', capacity: 4096, retention_seconds: 86400,
