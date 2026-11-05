@@ -1,0 +1,948 @@
+diff --git a/backend/internal/handler/concurrency_error_response.go b/backend/internal/handler/concurrency_error_response.go
+index 4190425..d8c6e8b 100644
+--- a/backend/internal/handler/concurrency_error_response.go
++++ b/backend/internal/handler/concurrency_error_response.go
+@@ -7,9 +7,11 @@ import (
+ 	"net/http"
+ 
+ 	"github.com/Wei-Shaw/sub2api/internal/service"
++	"github.com/gin-gonic/gin"
+ )
+ 
+ const statusClientClosedRequest = 499
++const opsLocalConcurrencyCodeKey = "ops_local_concurrency_code"
+ 
+ const (
+ 	gatewayQueueFullCode        = "gateway_queue_full"
+@@ -19,9 +21,9 @@ const (
+ func concurrencyErrorResponse(err error, slotType string) (int, string, string, string) {
+ 	var policyErr *service.GatewayConcurrencyLimitError
+ 	if errors.As(err, &policyErr) {
+-		code := "gateway_user_concurrency_limit"
++		code := service.GatewayUserConcurrencyLimitCode
+ 		if policyErr.Scope == "global" {
+-			code = "gateway_global_concurrency_limit"
++			code = service.GatewayGlobalConcurrencyLimitCode
+ 		}
+ 		return http.StatusTooManyRequests, "rate_limit_error", code,
+ 			fmt.Sprintf("%s（上限 %d）", policyErr.Error(), policyErr.Limit)
+@@ -47,3 +49,17 @@ func concurrencyErrorResponse(err error, slotType string) (int, string, string,
+ 
+ 	return http.StatusServiceUnavailable, "api_error", "", "Service temporarily unavailable, please retry later"
+ }
++
++// markLocalConcurrencyResponse describes a local refusal without dispatching,
++// retrying, clearing previous attempt evidence or changing concurrency policy.
++func markLocalConcurrencyResponse(c *gin.Context, status int, code string, streamStarted bool) {
++	if c == nil || status != http.StatusTooManyRequests || service.OpsConcurrencyScope(code, "") == "" {
++		return
++	}
++	service.SetOpsLocalErrorType(c, "rate_limit_error", code)
++	c.Set(opsLocalConcurrencyCodeKey, code)
++	if !streamStarted && !c.Writer.Written() {
++		// Advisory minimum backoff, not a promise that capacity will be available.
++		c.Header("Retry-After", "2")
++	}
++}
+diff --git a/backend/internal/handler/gateway_handler.go b/backend/internal/handler/gateway_handler.go
+index be7cc0a..89d4127 100644
+--- a/backend/internal/handler/gateway_handler.go
++++ b/backend/internal/handler/gateway_handler.go
+@@ -1913,6 +1913,7 @@ func (h *GatewayHandler) calculateSubscriptionRemaining(group *service.Group, su
+ // handleConcurrencyError handles concurrency-related acquire errors.
+ func (h *GatewayHandler) handleConcurrencyError(c *gin.Context, err error, slotType string, streamStarted bool) {
+ 	status, errType, code, message := concurrencyErrorResponse(err, slotType)
++	markLocalConcurrencyResponse(c, status, code, streamStarted)
+ 	h.handleStreamingAwareErrorWithCode(c, status, errType, code, message, streamStarted)
+ }
+ 
+diff --git a/backend/internal/handler/gemini_v1beta_handler.go b/backend/internal/handler/gemini_v1beta_handler.go
+index 3c8c34b..e7837c9 100644
+--- a/backend/internal/handler/gemini_v1beta_handler.go
++++ b/backend/internal/handler/gemini_v1beta_handler.go
+@@ -994,6 +994,7 @@ func googleClientErrorType(status int) string {
+ // 沿用 concurrencyErrorResponse 的统一映射（客户端断开为 499）。
+ func googleConcurrencyError(c *gin.Context, err error, slotType string) {
+ 	status, errType, code, message := concurrencyErrorResponse(err, slotType)
++	markLocalConcurrencyResponse(c, status, code, false)
+ 	googleErrorWithType(c, status, errType, code, message)
+ }
+ 
+diff --git a/backend/internal/handler/openai_gateway_handler.go b/backend/internal/handler/openai_gateway_handler.go
+index ded161c..4507511 100644
+--- a/backend/internal/handler/openai_gateway_handler.go
++++ b/backend/internal/handler/openai_gateway_handler.go
+@@ -2297,6 +2297,11 @@ func (h *OpenAIGatewayHandler) acquireOpenAIAccountSlot(
+ 			h.handleStreamingAwareErrorWithCode(c, status, errType, code, message, *streamStarted, false)
+ 		}
+ 	}
++	writeAdmissionError := writeError
++	writeError = func(status int, errType, code, message string) {
++		markLocalConcurrencyResponse(c, status, code, streamStarted != nil && *streamStarted)
++		writeAdmissionError(status, errType, code, message)
++	}
+ 	if selection == nil || selection.Account == nil {
+ 		markOpsRoutingCapacityLimited(c)
+ 		writeError(http.StatusServiceUnavailable, "api_error", "", "No available accounts")
+@@ -3545,6 +3550,7 @@ func (h *OpenAIGatewayHandler) acquireImageGenerationSlot(c *gin.Context, stream
+ // handleConcurrencyError handles concurrency-related acquire errors.
+ func (h *OpenAIGatewayHandler) handleConcurrencyError(c *gin.Context, err error, slotType string, streamStarted bool) {
+ 	status, errType, code, message := concurrencyErrorResponse(err, slotType)
++	markLocalConcurrencyResponse(c, status, code, streamStarted)
+ 	h.handleStreamingAwareErrorWithCode(c, status, errType, code, message, streamStarted, false)
+ }
+ 
+diff --git a/backend/internal/handler/ops_admission_test.go b/backend/internal/handler/ops_admission_test.go
+new file mode 100644
+index 0000000..1924d5f
+--- /dev/null
++++ b/backend/internal/handler/ops_admission_test.go
+@@ -0,0 +1,90 @@
++package handler
++
++import (
++	"context"
++	"encoding/json"
++	"net/http"
++	"net/http/httptest"
++	"testing"
++
++	"github.com/Wei-Shaw/sub2api/internal/service"
++	"github.com/gin-gonic/gin"
++	"github.com/stretchr/testify/require"
++)
++
++func TestOpsLocalConcurrencyAttribution(t *testing.T) {
++	gin.SetMode(gin.TestMode)
++	for _, tt := range []struct {
++		name, code, message, marker, owner string
++		upstream, local                    bool
++	}{
++		{"user code", service.GatewayUserConcurrencyLimitCode, "busy", "", "client", false, true},
++		{"global code", service.GatewayGlobalConcurrencyLimitCode, "busy", "", "platform", false, true},
++		{"legacy user", "", "个人并发已达上限，请等待正在执行的请求完成后再试", "", "client", false, true},
++		{"legacy global", "", "网关并发已达上限，请等待正在执行的请求完成后再试", "", "platform", false, true},
++		{"queue", gatewayQueueFullCode, "Too many pending requests, please retry later", "", "platform", false, true},
++		{"real upstream", "rate_limit_exceeded", "Rate limit reached", "", "provider", true, false},
++		{"provider returned local-like code", service.GatewayUserConcurrencyLimitCode, "个人并发已达上限", "", "provider", true, false},
++		{"local refusal after prior attempt", "", "busy", service.GatewayGlobalConcurrencyLimitCode, "platform", true, true},
++	} {
++		t.Run(tt.name, func(t *testing.T) {
++			c, _ := gin.CreateTestContext(httptest.NewRecorder())
++			c.Request = httptest.NewRequest("POST", "/v1/responses", nil)
++			if tt.upstream {
++				c.Set(service.OpsUpstreamStatusCodeKey, 429)
++				// Generic error-envelope metadata is not trusted local-origin evidence.
++				service.SetOpsLocalErrorType(c, "rate_limit_error", tt.code)
++			}
++			if tt.marker != "" {
++				markLocalConcurrencyResponse(c, 429, tt.marker, false)
++			}
++			phase, limited, owner, source := classifyOpsErrorLog(c, "rate_limit_error", tt.message, tt.code, 429)
++			require.Equal(t, tt.owner, owner)
++			require.Equal(t, tt.local, limited)
++			if tt.local {
++				require.Equal(t, "request", phase)
++				require.Equal(t, "gateway", source)
++			} else {
++				require.Equal(t, "upstream", phase)
++				require.Equal(t, "upstream_http", source)
++			}
++			if tt.upstream {
++				require.Equal(t, 429, c.GetInt(service.OpsUpstreamStatusCodeKey))
++			}
++		})
++	}
++}
++
++func TestOpenAIConcurrencyResponseHasAdvisoryBackoff(t *testing.T) {
++	gin.SetMode(gin.TestMode)
++	for _, scope := range []string{"user", "global"} {
++		rec := httptest.NewRecorder()
++		c, _ := gin.CreateTestContext(rec)
++		c.Request = httptest.NewRequest("POST", "/v1/responses", nil)
++		h := &OpenAIGatewayHandler{}
++		h.handleConcurrencyError(c, &service.GatewayConcurrencyLimitError{Scope: scope, Limit: 3}, scope, false)
++		require.Equal(t, http.StatusTooManyRequests, rec.Code)
++		require.Equal(t, "2", rec.Header().Get("Retry-After"))
++		var body struct {
++			Error struct{ Type, Code, Message string }
++		}
++		require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &body))
++		require.Equal(t, "rate_limit_error", body.Error.Type)
++		require.Equal(t, "gateway_"+scope+"_concurrency_limit", body.Error.Code)
++		require.Contains(t, body.Error.Message, "上限 3")
++		_, code := service.OpsLocalErrorType(c)
++		require.Equal(t, body.Error.Code, code)
++	}
++}
++
++func TestConcurrencyBackoffDoesNotChangeStartedStreamOrCancellation(t *testing.T) {
++	rec := httptest.NewRecorder()
++	c, _ := gin.CreateTestContext(rec)
++	c.Writer.WriteHeaderNow()
++	markLocalConcurrencyResponse(c, 429, service.GatewayUserConcurrencyLimitCode, true)
++	require.Empty(t, rec.Header().Get("Retry-After"))
++	status, _, code, _ := concurrencyErrorResponse(context.Canceled, "user")
++	markLocalConcurrencyResponse(c, status, code, false)
++	require.Equal(t, 499, status)
++	require.Empty(t, rec.Header().Get("Retry-After"))
++}
+diff --git a/backend/internal/handler/ops_error_logger.go b/backend/internal/handler/ops_error_logger.go
+index 272bc4e..098b512 100644
+--- a/backend/internal/handler/ops_error_logger.go
++++ b/backend/internal/handler/ops_error_logger.go
+@@ -2224,6 +2224,24 @@ func classifyOpsSeverity(errType string, status int) string {
+ }
+ 
+ func classifyOpsErrorLog(c *gin.Context, errType, message, code string, status int) (phase string, isBusinessLimited bool, errorOwner string, errorSource string) {
++	localCode := ""
++	if c != nil {
++		localCode = c.GetString(opsLocalConcurrencyCodeKey)
++	}
++	localScope := ""
++	if service.OpsConcurrencyScope(localCode, "") != "" {
++		localScope = service.OpsConcurrencyScope(localCode, message)
++	}
++	if localScope == "" && !hasOpsUpstreamErrorContext(c) {
++		localScope = service.OpsConcurrencyScope(code, message)
++	}
++	if status == http.StatusTooManyRequests && localScope != "" {
++		owner := "client"
++		if localScope == "global" || localScope == "queue" || localScope == "account" {
++			owner = "platform"
++		}
++		return "request", true, owner, "gateway"
++	}
+ 	if _, localCode := service.OpsLocalErrorType(c); status == http.StatusForbidden && localCode == "content_policy_violation" && service.IsOpsRequestScopedError(c) {
+ 		return "request", true, "client", "gateway_content_policy"
+ 	}
+@@ -2311,6 +2329,9 @@ func isOpsClientAuthError(code string, msg string) bool {
+ }
+ 
+ func isOpsLocalBusinessLimitError(code string, msg string) bool {
++	if service.OpsConcurrencyScope(code, msg) != "" {
++		return true
++	}
+ 	switch strings.TrimSpace(code) {
+ 	case opsCodeInsufficientBalance,
+ 		opsCodeUsageLimitExceeded,
+diff --git a/backend/internal/pkg/gatewaytiming/history.go b/backend/internal/pkg/gatewaytiming/history.go
+new file mode 100644
+index 0000000..4c95030
+--- /dev/null
++++ b/backend/internal/pkg/gatewaytiming/history.go
+@@ -0,0 +1,167 @@
++package gatewaytiming
++
++import (
++	"container/list"
++	"crypto/sha256"
++	"strings"
++	"sync"
++	"time"
++)
++
++// Recent is diagnostic-only, bounded, process-local and never used for billing,
++// admission, routing, retries or health scores. No request/Gin/context is retained.
++var Recent = NewHistory(4096, 24*time.Hour)
++
++type Scope struct{ UserID, APIKeyID int64 }
++
++type Record struct {
++	SchemaVersion    int              `json:"schema_version"`
++	Source           string           `json:"source"`
++	ObservedAt       time.Time        `json:"observed_at"`
++	RetentionSeconds int64            `json:"retention_seconds"`
++	Capacity         int              `json:"capacity"`
++	Metrics          map[string]int64 `json:"metrics"`
++	BodyReadResult   string           `json:"body_read_result,omitempty"`
++}
++
++type historyKey struct {
++	Scope
++	ID [sha256.Size]byte
++}
++type historyEntry struct {
++	keys   []historyKey
++	record Record
++}
++type historyIndex struct {
++	entry     *list.Element
++	ambiguous bool
++}
++type History struct {
++	mu       sync.Mutex
++	capacity int
++	ttl      time.Duration
++	entries  *list.List
++	index    map[historyKey]historyIndex
++	now      func() time.Time
++}
++
++func NewHistory(capacity int, ttl time.Duration) *History {
++	if capacity < 1 || capacity > 4096 {
++		capacity = 4096
++	}
++	if ttl <= 0 || ttl > 24*time.Hour {
++		ttl = 24 * time.Hour
++	}
++	return &History{capacity: capacity, ttl: ttl, entries: list.New(), index: make(map[historyKey]historyIndex), now: time.Now}
++}
++
++var historyMetricAllowlist = map[string]bool{
++	"body_read_block_ms": true, "body_wire_bytes": true, "body_normalize_ms": true,
++	"body_first_read_ingress_ms": true, "body_last_read_ingress_ms": true,
++	"handler_enter_ingress_ms": true, "body_ready_ingress_ms": true,
++	"security_complete_ingress_ms": true, "routing_start_ingress_ms": true,
++	"user_wait_ms": true, "account_wait_ms": true,
++	"upstream_headers_ms": true, "connection_wait_ms": true,
++	"chat_first_event_ingress_ms": true, "chat_first_text_event_ingress_ms": true,
++	"upstream_semantic_ingress_ms": true, "downstream_semantic_flush_ingress_ms": true,
++	"downstream_write_block_ms": true, "downstream_flush_block_ms": true,
++	"upstream_attempts": true,
++}
++
++func (h *History) Publish(scope Scope, ids []string, snapshot map[string]any) {
++	if h == nil || scope.UserID <= 0 || scope.APIKeyID <= 0 {
++		return
++	}
++	metrics := make(map[string]int64)
++	for name, value := range snapshot {
++		if n, ok := value.(int64); ok && historyMetricAllowlist[name] && n >= 0 && n <= 1<<40 {
++			metrics[name] = n
++		}
++	}
++	if len(metrics) == 0 {
++		return
++	}
++	keys := make([]historyKey, 0, 2)
++	for _, id := range ids {
++		id = strings.TrimSpace(id)
++		if id == "" || len(id) > 160 || strings.ContainsAny(id, "\r\n\x00") {
++			continue
++		}
++		key := historyKey{Scope: scope, ID: sha256.Sum256([]byte(id))}
++		if len(keys) > 0 && keys[0] == key {
++			continue
++		}
++		keys = append(keys, key)
++		if len(keys) == 2 {
++			break
++		}
++	}
++	if len(keys) == 0 {
++		return
++	}
++	bodyResult, _ := snapshot["body_read_result"].(string)
++	if bodyResult != "complete" && bodyResult != "error" {
++		bodyResult = ""
++	}
++	h.mu.Lock()
++	defer h.mu.Unlock()
++	now := h.now()
++	collisions := make(map[historyKey]bool, len(keys))
++	for _, key := range keys {
++		if previous, exists := h.index[key]; exists {
++			collisions[key] = now.Sub(previous.entry.Value.(*historyEntry).record.ObservedAt) < h.ttl
++		}
++	}
++	for front := h.entries.Front(); front != nil; front = h.entries.Front() {
++		entry := front.Value.(*historyEntry)
++		if h.entries.Len() < h.capacity && now.Sub(entry.record.ObservedAt) < h.ttl {
++			break
++		}
++		h.remove(front)
++	}
++	entry := h.entries.PushBack(&historyEntry{keys: keys, record: Record{
++		SchemaVersion: 1, Source: "process_memory", ObservedAt: now,
++		RetentionSeconds: int64(h.ttl.Seconds()), Capacity: h.capacity,
++		Metrics: metrics, BodyReadResult: bodyResult,
++	}})
++	for _, key := range keys {
++		h.index[key] = historyIndex{entry: entry, ambiguous: collisions[key]}
++	}
++}
++
++func (h *History) Lookup(scope Scope, id string, createdAt time.Time) *Record {
++	if h == nil || scope.UserID <= 0 || scope.APIKeyID <= 0 || createdAt.IsZero() {
++		return nil
++	}
++	h.mu.Lock()
++	defer h.mu.Unlock()
++	indexed, found := h.index[historyKey{Scope: scope, ID: sha256.Sum256([]byte(id))}]
++	if !found || indexed.ambiguous {
++		return nil
++	}
++	entry := indexed.entry.Value.(*historyEntry)
++	if h.now().Sub(entry.record.ObservedAt) >= h.ttl {
++		h.remove(indexed.entry)
++		return nil
++	}
++	// Reused identifiers or a delayed, unrelated row must not receive this sample.
++	delta := createdAt.Sub(entry.record.ObservedAt)
++	if delta < -5*time.Minute || delta > 5*time.Minute {
++		return nil
++	}
++	result := entry.record
++	result.Metrics = make(map[string]int64, len(entry.record.Metrics))
++	for name, value := range entry.record.Metrics {
++		result.Metrics[name] = value
++	}
++	return &result
++}
++
++func (h *History) remove(element *list.Element) {
++	for _, key := range element.Value.(*historyEntry).keys {
++		if h.index[key].entry == element {
++			delete(h.index, key)
++		}
++	}
++	h.entries.Remove(element)
++}
+diff --git a/backend/internal/pkg/gatewaytiming/history_test.go b/backend/internal/pkg/gatewaytiming/history_test.go
+new file mode 100644
+index 0000000..e5c065f
+--- /dev/null
++++ b/backend/internal/pkg/gatewaytiming/history_test.go
+@@ -0,0 +1,92 @@
++package gatewaytiming
++
++import (
++	"sync"
++	"testing"
++	"time"
++
++	"github.com/stretchr/testify/require"
++)
++
++func TestHistoryPrivacyIsolationAndMeasuredZero(t *testing.T) {
++	h := NewHistory(4, time.Hour)
++	now := time.Now()
++	h.now = func() time.Time { return now }
++	scope := Scope{UserID: 101, APIKeyID: 201}
++	input := map[string]any{"body_read_block_ms": int64(120), "user_wait_ms": int64(0),
++		"body_read_result": "complete", "request_body": "synthetic-private-text", "model": "synthetic-model",
++		"account_wait_ms": int64(-1), "connection_wait_ms": "not-a-number"}
++	h.Publish(scope, []string{"synthetic-request", "local:synthetic-request"}, input)
++	input["body_read_block_ms"] = int64(999)
++	record := h.Lookup(scope, "local:synthetic-request", now)
++	require.NotNil(t, record)
++	require.Equal(t, map[string]int64{"body_read_block_ms": 120, "user_wait_ms": 0}, record.Metrics)
++	require.Equal(t, "complete", record.BodyReadResult)
++	require.Equal(t, "process_memory", record.Source)
++	record.Metrics["body_read_block_ms"] = 888
++	require.EqualValues(t, 120, h.Lookup(scope, "synthetic-request", now).Metrics["body_read_block_ms"])
++	require.Nil(t, h.Lookup(Scope{102, 201}, "synthetic-request", now))
++	require.Nil(t, h.Lookup(Scope{101, 202}, "synthetic-request", now))
++	require.Nil(t, h.Lookup(scope, "synthetic-request", now.Add(-6*time.Minute)))
++	require.Nil(t, h.Lookup(scope, "synthetic-request", time.Time{}))
++}
++
++func TestHistoryBoundsExpiryAndAmbiguousIDs(t *testing.T) {
++	h := NewHistory(2, time.Hour)
++	now := time.Now()
++	h.now = func() time.Time { return now }
++	scope := Scope{101, 201}
++	metrics := map[string]any{"body_read_block_ms": int64(1)}
++	h.Publish(scope, []string{"a", "client:reused"}, metrics)
++	h.Publish(scope, []string{"b", "client:reused"}, metrics)
++	require.Nil(t, h.Lookup(scope, "client:reused", now))
++	require.NotNil(t, h.Lookup(scope, "a", now))
++	h.Publish(scope, []string{"c"}, metrics)
++	require.Nil(t, h.Lookup(scope, "a", now))
++	require.Nil(t, h.Lookup(scope, "client:reused", now))
++	require.Equal(t, 2, h.entries.Len())
++	require.LessOrEqual(t, len(h.index), 4)
++	now = now.Add(time.Hour)
++	require.Nil(t, h.Lookup(scope, "c", now))
++	h.Publish(scope, []string{"d"}, metrics)
++	require.Equal(t, 1, h.entries.Len())
++}
++
++func TestHistoryRejectsUnauthenticatedAndUnboundedAliases(t *testing.T) {
++	h := NewHistory(2, time.Hour)
++	metrics := map[string]any{"body_read_block_ms": int64(1)}
++	h.Publish(Scope{}, []string{"request"}, metrics)
++	h.Publish(Scope{101, 201}, []string{"bad\nidentifier"}, metrics)
++	h.Publish(Scope{101, 201}, []string{"x"}, map[string]any{"request_body": "private"})
++	require.Zero(t, h.entries.Len())
++	h.Publish(Scope{101, 201}, []string{"a", "b", "c"}, metrics)
++	require.Equal(t, 2, len(h.index))
++}
++
++func TestHistoryRepeatedAliasRemainsUnknownWhenPreviousEntryIsEvicted(t *testing.T) {
++	h := NewHistory(1, time.Hour)
++	scope := Scope{101, 201}
++	metrics := map[string]any{"body_read_block_ms": int64(1)}
++	h.Publish(scope, []string{"reused"}, metrics)
++	h.Publish(scope, []string{"reused"}, metrics)
++	require.Nil(t, h.Lookup(scope, "reused", time.Now()))
++}
++
++func TestHistoryConcurrentAccess(t *testing.T) {
++	h := NewHistory(32, time.Hour)
++	var wg sync.WaitGroup
++	for i := int64(1); i <= 20; i++ {
++		wg.Add(1)
++		go func(id int64) {
++			defer wg.Done()
++			scope := Scope{id, id + 100}
++			for j := 0; j < 10; j++ {
++				h.Publish(scope, []string{"request"}, map[string]any{"body_read_block_ms": int64(j)})
++				h.Lookup(scope, "request", time.Now())
++			}
++		}(i)
++	}
++	wg.Wait()
++	require.LessOrEqual(t, h.entries.Len(), 32)
++	require.LessOrEqual(t, len(h.index), 64)
++}
+diff --git a/backend/internal/repository/ops_repo_request_details.go b/backend/internal/repository/ops_repo_request_details.go
+index c529049..3e9707b 100644
+--- a/backend/internal/repository/ops_repo_request_details.go
++++ b/backend/internal/repository/ops_repo_request_details.go
+@@ -103,7 +103,9 @@ WITH combined AS (
+     ul.api_key_id AS api_key_id,
+     ul.account_id AS account_id,
+     ul.group_id AS group_id,
+-    ul.stream AS stream
++    ul.stream AS stream,
++    NULL::TEXT AS error_owner,
++    NULL::TEXT AS error_source
+   FROM usage_logs ul
+   LEFT JOIN groups g ON g.id = ul.group_id
+   LEFT JOIN accounts a ON a.id = ul.account_id
+@@ -128,7 +130,9 @@ WITH combined AS (
+     o.api_key_id AS api_key_id,
+     o.account_id AS account_id,
+     o.group_id AS group_id,
+-    o.stream AS stream
++    o.stream AS stream,
++    o.error_owner AS error_owner,
++    o.error_source AS error_source
+   FROM ops_error_logs o
+   LEFT JOIN groups g ON g.id = o.group_id
+   LEFT JOIN accounts a ON a.id = o.account_id
+@@ -180,7 +184,9 @@ SELECT
+   api_key_id,
+   account_id,
+   group_id,
+-  stream
++  stream,
++  error_owner,
++  error_source
+ FROM combined
+ %s
+ %s
+@@ -232,7 +238,9 @@ LIMIT $%d OFFSET $%d
+ 			accountID sql.NullInt64
+ 			groupID   sql.NullInt64
+ 
+-			stream bool
++			stream      bool
++			errorOwner  sql.NullString
++			errorSource sql.NullString
+ 		)
+ 
+ 		if err := rows.Scan(
+@@ -253,6 +261,8 @@ LIMIT $%d OFFSET $%d
+ 			&accountID,
+ 			&groupID,
+ 			&stream,
++			&errorOwner,
++			&errorSource,
+ 		); err != nil {
+ 			return nil, 0, err
+ 		}
+@@ -277,7 +287,9 @@ LIMIT $%d OFFSET $%d
+ 			AccountID: toInt64Ptr(accountID),
+ 			GroupID:   toInt64Ptr(groupID),
+ 
+-			Stream: stream,
++			Stream:      stream,
++			ErrorOwner:  errorOwner.String,
++			ErrorSource: errorSource.String,
+ 		}
+ 
+ 		if item.Platform == "" {
+diff --git a/backend/internal/repository/ops_repo_request_details_test.go b/backend/internal/repository/ops_repo_request_details_test.go
+index e0dc36e..f56db7f 100644
+--- a/backend/internal/repository/ops_repo_request_details_test.go
++++ b/backend/internal/repository/ops_repo_request_details_test.go
+@@ -39,10 +39,11 @@ func TestOpsRepositoryListRequestDetails_LatencySort(t *testing.T) {
+ 			rows := sqlmock.NewRows([]string{
+ 				"kind", "created_at", "request_id", "platform", "model", "duration_ms", "first_token_ms",
+ 				"status_code", "error_id", "phase", "severity", "message", "user_id", "api_key_id", "account_id", "group_id", "stream",
++				"error_owner", "error_source",
+ 			}).
+-				AddRow("success", start, "req-slow", "openai", "gpt-5.5", 12000, 800, nil, nil, nil, nil, nil, 1, 2, 3, 4, true).
+-				AddRow("error", start, "req-zero", "openai", "gpt-5.5", 9000, 0, 502, 5, "upstream", "error", "failed", 1, 2, 3, 4, true).
+-				AddRow("success", start, "req-missing", "openai", "gpt-5.5", 5000, nil, nil, nil, nil, nil, nil, 1, 2, 3, 4, false)
++				AddRow("success", start, "req-slow", "openai", "gpt-5.5", 12000, 800, nil, nil, nil, nil, nil, 1, 2, 3, 4, true, nil, nil).
++				AddRow("error", start, "req-zero", "openai", "gpt-5.5", 9000, 0, 502, 5, "upstream", "error", "failed", 1, 2, 3, 4, true, "provider", "upstream_http").
++				AddRow("success", start, "req-missing", "openai", "gpt-5.5", 5000, nil, nil, nil, nil, nil, nil, 1, 2, 3, 4, false, nil, nil)
+ 			mock.ExpectQuery(`(?s)ul\.first_token_ms AS first_token_ms.*o\.time_to_first_token_ms AS first_token_ms.*SELECT.*duration_ms,\s+first_token_ms,.*ORDER BY `+tc.order+`\s+LIMIT \$3 OFFSET \$4`).
+ 				WithArgs(start, end, 10, 10).
+ 				WillReturnRows(rows)
+@@ -57,6 +58,9 @@ func TestOpsRepositoryListRequestDetails_LatencySort(t *testing.T) {
+ 			require.NotNil(t, items[1].FirstTokenMs)
+ 			require.Zero(t, *items[1].FirstTokenMs)
+ 			require.Nil(t, items[2].FirstTokenMs)
++			require.Empty(t, items[0].ErrorSource)
++			require.Equal(t, "provider", items[1].ErrorOwner)
++			require.Equal(t, "upstream_http", items[1].ErrorSource)
+ 			require.NoError(t, mock.ExpectationsWereMet())
+ 		})
+ 	}
+diff --git a/backend/internal/server/middleware/gateway_timing_history_test.go b/backend/internal/server/middleware/gateway_timing_history_test.go
+new file mode 100644
+index 0000000..91d2813
+--- /dev/null
++++ b/backend/internal/server/middleware/gateway_timing_history_test.go
+@@ -0,0 +1,64 @@
++package middleware
++
++import (
++	"context"
++	"io"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"testing"
++	"time"
++
++	"github.com/Wei-Shaw/sub2api/internal/pkg/ctxkey"
++	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
++	"github.com/Wei-Shaw/sub2api/internal/service"
++	"github.com/gin-gonic/gin"
++	"github.com/stretchr/testify/require"
++)
++
++func TestLoggerPublishesScopedTimingWithBillingAndErrorAliases(t *testing.T) {
++	gin.SetMode(gin.TestMode)
++	initMiddlewareTestLogger(t)
++	r := gin.New()
++	r.Use(Logger())
++	r.POST("/v1/responses", func(c *gin.Context) {
++		c.Set(string(ContextKeyAPIKey), &service.APIKey{ID: 990201, UserID: 990101})
++		ctx := context.WithValue(c.Request.Context(), ctxkey.RequestID, "synthetic-history-local")
++		ctx = context.WithValue(ctx, ctxkey.ClientRequestID, "synthetic-history-client")
++		c.Request = c.Request.WithContext(ctx)
++		_, _ = io.ReadAll(c.Request.Body)
++		gatewaytiming.MarkIngressStage(ctx, "body_ready")
++		c.JSON(200, gin.H{"ok": true})
++	})
++	rec := httptest.NewRecorder()
++	r.ServeHTTP(rec, httptest.NewRequest(http.MethodPost, "/v1/responses", strings.NewReader("synthetic body")))
++	require.Equal(t, 200, rec.Code)
++	scope := gatewaytiming.Scope{UserID: 990101, APIKeyID: 990201}
++	for _, id := range []string{"synthetic-history-local", "client:synthetic-history-client"} {
++		record := gatewaytiming.Recent.Lookup(scope, id, time.Now())
++		require.NotNil(t, record)
++		require.EqualValues(t, len("synthetic body"), record.Metrics["body_wire_bytes"])
++		require.Equal(t, "complete", record.BodyReadResult)
++		require.NotContains(t, record.Metrics, "user_wait_ms")
++	}
++}
++
++func TestTimingHistoryDoesNotPublishUnauthenticatedOrWebSocketLifetime(t *testing.T) {
++	gin.SetMode(gin.TestMode)
++	initMiddlewareTestLogger(t)
++	r := gin.New()
++	r.Use(Logger())
++	for _, method := range []string{"POST", "GET"} {
++		r.Handle(method, "/v1/responses", func(c *gin.Context) {
++			ctx := context.WithValue(c.Request.Context(), ctxkey.RequestID, "synthetic-no-history")
++			c.Request = c.Request.WithContext(ctx)
++			if c.Request.Method == "GET" {
++				c.Set(string(ContextKeyAPIKey), &service.APIKey{ID: 990202, UserID: 990102})
++			}
++			gatewaytiming.MarkIngressStage(ctx, "body_ready")
++			c.Status(200)
++		})
++		r.ServeHTTP(httptest.NewRecorder(), httptest.NewRequest(method, "/v1/responses", nil))
++	}
++	require.Nil(t, gatewaytiming.Recent.Lookup(gatewaytiming.Scope{UserID: 990102, APIKeyID: 990202}, "synthetic-no-history", time.Now()))
++}
+diff --git a/backend/internal/server/middleware/logger.go b/backend/internal/server/middleware/logger.go
+index c4d3093..48db6d0 100644
+--- a/backend/internal/server/middleware/logger.go
++++ b/backend/internal/server/middleware/logger.go
+@@ -87,6 +87,7 @@ func Logger() gin.HandlerFunc {
+ 
+ 		if timings := gatewaytiming.Snapshot(c.Request.Context()); len(timings) > 0 {
+ 			fields = append(fields, zap.Any("gateway_timing", timings))
++			publishGatewayTiming(c, timings)
+ 		}
+ 		l := logger.FromContext(c.Request.Context()).With(fields...)
+ 		l.Info("http request completed", zap.Time("completed_at", endTime))
+@@ -96,3 +97,22 @@ func Logger() gin.HandlerFunc {
+ 		}
+ 	}
+ }
++
++func publishGatewayTiming(c *gin.Context, timings map[string]any) {
++	if c.Request.Method != "POST" {
++		return // WebSocket connection lifetime is not an individual inference request.
++	}
++	apiKey, ok := GetAPIKeyFromContext(c)
++	if !ok || apiKey == nil {
++		return
++	}
++	requestID, _ := c.Request.Context().Value(ctxkey.RequestID).(string)
++	clientID, _ := c.Request.Context().Value(ctxkey.ClientRequestID).(string)
++	billingID := ""
++	if clientID = strings.TrimSpace(clientID); clientID != "" {
++		billingID = "client:" + clientID
++	} else if requestID = strings.TrimSpace(requestID); requestID != "" {
++		billingID = "local:" + requestID
++	}
++	gatewaytiming.Recent.Publish(gatewaytiming.Scope{UserID: apiKey.UserID, APIKeyID: apiKey.ID}, []string{requestID, billingID}, timings)
++}
+diff --git a/backend/internal/service/ops_admission.go b/backend/internal/service/ops_admission.go
+new file mode 100644
+index 0000000..eaedae7
+--- /dev/null
++++ b/backend/internal/service/ops_admission.go
+@@ -0,0 +1,42 @@
++package service
++
++import "strings"
++
++const (
++	GatewayUserConcurrencyLimitCode   = "gateway_user_concurrency_limit"
++	GatewayGlobalConcurrencyLimitCode = "gateway_global_concurrency_limit"
++)
++
++// OpsConcurrencyScope recognizes only gateway codes and anchored legacy messages.
++// Callers must still check HTTP status and trustworthy upstream/local context.
++func OpsConcurrencyScope(code, message string) string {
++	message = strings.ToLower(strings.TrimSpace(message))
++	switch strings.TrimSpace(code) {
++	case GatewayUserConcurrencyLimitCode:
++		return "user"
++	case GatewayGlobalConcurrencyLimitCode:
++		return "global"
++	case "gateway_queue_full":
++		return "queue"
++	case "gateway_concurrency_limit":
++		if strings.HasPrefix(message, "concurrency limit exceeded for user,") {
++			return "user"
++		}
++		return "account"
++	}
++	switch {
++	case strings.HasPrefix(message, "个人并发已达上限"):
++		return "user"
++	case strings.HasPrefix(message, "网关并发已达上限"):
++		return "global"
++	case strings.HasPrefix(message, "concurrency limit exceeded for user,"):
++		return "user"
++	case strings.HasPrefix(message, "concurrency limit exceeded for "),
++		strings.HasPrefix(message, "image generation concurrency limit exceeded"):
++		return "account"
++	case message == "too many pending requests, please retry later":
++		return "queue"
++	default:
++		return ""
++	}
++}
+diff --git a/backend/internal/service/ops_admission_test.go b/backend/internal/service/ops_admission_test.go
+new file mode 100644
+index 0000000..bff5881
+--- /dev/null
++++ b/backend/internal/service/ops_admission_test.go
+@@ -0,0 +1,14 @@
++package service
++
++import (
++	"github.com/stretchr/testify/require"
++	"testing"
++)
++
++func TestOpsConcurrencyScopeUsesCodesAndAnchoredTemplates(t *testing.T) {
++	require.Equal(t, "user", OpsConcurrencyScope(GatewayUserConcurrencyLimitCode, "localized message"))
++	require.Equal(t, "user", OpsConcurrencyScope("gateway_concurrency_limit", "Concurrency limit exceeded for user, please retry later"))
++	require.Equal(t, "global", OpsConcurrencyScope("", "网关并发已达上限，请稍后重试"))
++	require.Equal(t, "", OpsConcurrencyScope("rate_limit_exceeded", "upstream says 个人并发已达上限"))
++	require.Equal(t, "", OpsConcurrencyScope("rate_limit_exceeded", "organization rate limit reached"))
++}
+diff --git a/backend/internal/service/ops_request_details.go b/backend/internal/service/ops_request_details.go
+index 532cac6..61d2535 100644
+--- a/backend/internal/service/ops_request_details.go
++++ b/backend/internal/service/ops_request_details.go
+@@ -3,6 +3,8 @@ package service
+ import (
+ 	"context"
+ 	"time"
++
++	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
+ )
+ 
+ type OpsRequestKind string
+@@ -29,9 +31,11 @@ type OpsRequestDetail struct {
+ 	// When Kind == "error", ErrorID links to /admin/ops/errors/:id.
+ 	ErrorID *int64 `json:"error_id,omitempty"`
+ 
+-	Phase    string `json:"phase,omitempty"`
+-	Severity string `json:"severity,omitempty"`
+-	Message  string `json:"message,omitempty"`
++	Phase       string `json:"phase,omitempty"`
++	Severity    string `json:"severity,omitempty"`
++	Message     string `json:"message,omitempty"`
++	ErrorOwner  string `json:"error_owner,omitempty"`
++	ErrorSource string `json:"error_source,omitempty"`
+ 
+ 	UserID    *int64 `json:"user_id,omitempty"`
+ 	APIKeyID  *int64 `json:"api_key_id,omitempty"`
+@@ -39,6 +43,8 @@ type OpsRequestDetail struct {
+ 	GroupID   *int64 `json:"group_id,omitempty"`
+ 
+ 	Stream bool `json:"stream"`
++
++	GatewayTiming *gatewaytiming.Record `json:"gateway_timing,omitempty"`
+ }
+ 
+ type OpsRequestDetailFilter struct {
+@@ -142,6 +148,12 @@ func (s *OpsService) ListRequestDetails(ctx context.Context, filter *OpsRequestD
+ 	if items == nil {
+ 		items = []*OpsRequestDetail{}
+ 	}
++	for _, item := range items {
++		if item != nil && item.UserID != nil && item.APIKeyID != nil {
++			item.GatewayTiming = gatewaytiming.Recent.Lookup(
++				gatewaytiming.Scope{UserID: *item.UserID, APIKeyID: *item.APIKeyID}, item.RequestID, item.CreatedAt)
++		}
++	}
+ 
+ 	return &OpsRequestDetailList{
+ 		Items:    items,
+diff --git a/backend/internal/service/ops_request_timing_test.go b/backend/internal/service/ops_request_timing_test.go
+new file mode 100644
+index 0000000..c9da02a
+--- /dev/null
++++ b/backend/internal/service/ops_request_timing_test.go
+@@ -0,0 +1,40 @@
++package service
++
++import (
++	"context"
++	"encoding/json"
++	"testing"
++	"time"
++
++	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
++	"github.com/stretchr/testify/require"
++)
++
++type requestTimingRepo struct {
++	opsRepoMock
++	rows []*OpsRequestDetail
++}
++
++func (r *requestTimingRepo) ListRequestDetails(context.Context, *OpsRequestDetailFilter) ([]*OpsRequestDetail, int64, error) {
++	return r.rows, int64(len(r.rows)), nil
++}
++
++func TestOpsRequestDetailsAddsOptionalScopedTimingWithoutChangingLatency(t *testing.T) {
++	user, key := int64(990301), int64(990401)
++	first, duration := 823, 4100
++	now := time.Now()
++	row := &OpsRequestDetail{Kind: OpsRequestKindSuccess, RequestID: "local:synthetic-service", CreatedAt: now,
++		UserID: &user, APIKeyID: &key, FirstTokenMs: &first, DurationMs: &duration}
++	gatewaytiming.Recent.Publish(gatewaytiming.Scope{UserID: user, APIKeyID: key}, []string{row.RequestID}, map[string]any{"body_read_block_ms": int64(12000)})
++	s := &OpsService{opsRepo: &requestTimingRepo{rows: []*OpsRequestDetail{row, {Kind: OpsRequestKindError, RequestID: "old-row", CreatedAt: now}}}}
++	out, err := s.ListRequestDetails(context.Background(), nil)
++	require.NoError(t, err)
++	require.EqualValues(t, 2, out.Total)
++	require.NotNil(t, out.Items[0].GatewayTiming)
++	require.Equal(t, &first, out.Items[0].FirstTokenMs)
++	require.Equal(t, &duration, out.Items[0].DurationMs)
++	require.Nil(t, out.Items[1].GatewayTiming)
++	body, err := json.Marshal(out.Items[1])
++	require.NoError(t, err)
++	require.NotContains(t, string(body), "gateway_timing")
++}
+diff --git a/backend/internal/service/ops_timing_http_test.go b/backend/internal/service/ops_timing_http_test.go
+new file mode 100644
+index 0000000..69be3dd
+--- /dev/null
++++ b/backend/internal/service/ops_timing_http_test.go
+@@ -0,0 +1,76 @@
++package service_test
++
++import (
++	"context"
++	"encoding/json"
++	"io"
++	"net/http"
++	"net/http/httptest"
++	"strings"
++	"testing"
++	"time"
++
++	adminhandler "github.com/Wei-Shaw/sub2api/internal/handler/admin"
++	"github.com/Wei-Shaw/sub2api/internal/pkg/ctxkey"
++	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
++	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
++	"github.com/Wei-Shaw/sub2api/internal/service"
++	"github.com/gin-gonic/gin"
++	"github.com/stretchr/testify/require"
++)
++
++type timingHTTPRepo struct {
++	service.OpsRepository
++	rows []*service.OpsRequestDetail
++}
++
++func (r *timingHTTPRepo) ListRequestDetails(context.Context, *service.OpsRequestDetailFilter) ([]*service.OpsRequestDetail, int64, error) {
++	return r.rows, int64(len(r.rows)), nil
++}
++
++// Real logger, collector, ops service, HTTP handler and response envelope;
++// synthetic identity/data replace auth/storage/provider dependencies here.
++func TestOpsTimingHTTPRoundTrip(t *testing.T) {
++	gin.SetMode(gin.TestMode)
++	repo := &timingHTTPRepo{}
++	ops := service.NewOpsService(repo, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
++	router := gin.New()
++	router.Use(middleware.Logger())
++	user, key := int64(991101), int64(991201)
++	router.POST("/v1/responses", func(c *gin.Context) {
++		c.Set(string(middleware.ContextKeyAPIKey), &service.APIKey{ID: key, UserID: user})
++		ctx := context.WithValue(c.Request.Context(), ctxkey.RequestID, "synthetic-http-timing")
++		c.Request = c.Request.WithContext(ctx)
++		_, err := io.ReadAll(c.Request.Body)
++		require.NoError(t, err)
++		gatewaytiming.MarkIngressStage(ctx, "body_ready")
++		gatewaytiming.RecordSlot(ctx, "user", time.Now(), 1, "acquired")
++		first, duration := 23, 90
++		repo.rows = []*service.OpsRequestDetail{{Kind: service.OpsRequestKindSuccess,
++			CreatedAt: time.Now(), RequestID: "local:synthetic-http-timing", UserID: &user, APIKeyID: &key,
++			FirstTokenMs: &first, DurationMs: &duration}}
++		c.JSON(200, gin.H{"synthetic": true})
++	})
++	router.GET("/api/v1/admin/ops/requests", adminhandler.NewOpsHandler(ops).ListRequestDetails)
++	forward := httptest.NewRecorder()
++	router.ServeHTTP(forward, httptest.NewRequest(http.MethodPost, "/v1/responses", strings.NewReader("synthetic context")))
++	require.Equal(t, 200, forward.Code)
++	details := httptest.NewRecorder()
++	router.ServeHTTP(details, httptest.NewRequest(http.MethodGet, "/api/v1/admin/ops/requests?kind=all", nil))
++	require.Equal(t, 200, details.Code)
++	var result struct {
++		Code int
++		Data service.OpsRequestDetailList
++	}
++	require.NoError(t, json.Unmarshal(details.Body.Bytes(), &result))
++	require.Zero(t, result.Code)
++	require.Len(t, result.Data.Items, 1)
++	row := result.Data.Items[0]
++	require.Equal(t, 23, *row.FirstTokenMs)
++	require.Equal(t, 90, *row.DurationMs)
++	require.NotNil(t, row.GatewayTiming)
++	require.EqualValues(t, len("synthetic context"), row.GatewayTiming.Metrics["body_wire_bytes"])
++	require.Contains(t, row.GatewayTiming.Metrics, "user_wait_ms")
++	require.NotContains(t, row.GatewayTiming.Metrics, "account_wait_ms")
++	require.NotContains(t, details.Body.String(), "synthetic context")
++}

@@ -11,6 +11,7 @@ import { getSetupStatus } from '@/api/setup'
 import { updateFavicon } from '@/utils/branding'
 import { FeatureFlags, isFeatureFlagEnabled } from '@/utils/featureFlags'
 import { resolveSiteBillingMode } from '@/utils/siteBillingMode'
+import { AUTH_SESSION_REPLACED_EVENT, authDocumentIsStale } from '@/api/authSession'
 
 const router = useRouter()
 const route = useRoute()
@@ -20,6 +21,14 @@ const subscriptionStore = useSubscriptionStore()
 const announcementStore = useAnnouncementStore()
 const adminComplianceStore = useAdminComplianceStore()
 const adminSettingsStore = useAdminSettingsStore()
+let reloadingSession = false
+function reloadReplacedSession() {
+  if (reloadingSession) return
+  reloadingSession = true
+  // Recreate every page/store so the next account cannot act on cached rows or
+  // subscriptions owned by the previous account. Ordinary token rotation stays.
+  window.location.reload()
+}
 
 function updateDocumentTitle() {
   const customMenuItems = [
@@ -137,9 +146,12 @@ router.afterEach(() => {
 onBeforeUnmount(() => {
   document.removeEventListener('visibilitychange', onVisibilityChange)
   window.removeEventListener('admin-compliance-required', onAdminComplianceRequired)
+  window.removeEventListener(AUTH_SESSION_REPLACED_EVENT, reloadReplacedSession)
 })
 
 onMounted(async () => {
+  window.addEventListener(AUTH_SESSION_REPLACED_EVENT, reloadReplacedSession)
+  if (authDocumentIsStale()) { reloadReplacedSession(); return }
   window.addEventListener('admin-compliance-required', onAdminComplianceRequired)
 
   // Check if setup is needed

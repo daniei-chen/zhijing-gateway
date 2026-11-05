@@ -117,6 +117,17 @@ export type OpsRequestKind = 'success' | 'error'
 export type OpsRequestDetailsKind = OpsRequestKind | 'all'
 export type OpsRequestDetailsSort = 'created_at_desc' | 'duration_desc' | 'ttft_desc'
 
+// Optional v0.0.2 diagnostics. Older backends omit this field.
+export interface OpsGatewayTiming {
+  schema_version: number
+  source: string
+  observed_at: string
+  retention_seconds: number
+  capacity: number
+  metrics: Record<string, number | null | undefined>
+  body_read_result?: 'complete' | 'error'
+}
+
 export interface OpsRequestDetail {
   kind: OpsRequestKind
   created_at: string
@@ -130,6 +141,8 @@ export interface OpsRequestDetail {
 
   error_id?: number | null
   phase?: string
+  error_owner?: string
+  error_source?: string
   severity?: string
   message?: string
 
@@ -139,6 +152,7 @@ export interface OpsRequestDetail {
   group_id?: number | null
 
   stream?: boolean
+  gateway_timing?: OpsGatewayTiming | null
 }
 
 export interface OpsRequestDetailsParams {

@@ -1,0 +1,13 @@
+{
+  "version": "0.0.2",
+  "date": "2026-11-05",
+  "environment": "Windows, Node.js 24, pnpm 9.15.9, locked dependencies reused without modification",
+  "frontend": { "files_passed": 392, "tests_passed": 3139, "failed": 0, "skipped": 0, "typecheck": true, "production_build": true, "changed_core_lint": true },
+  "security": { "original_acceptance_before": { "failed": 4 }, "original_acceptance_after": { "passed": 4 }, "real_client_api_store_synthetic_cases": 12, "backend_authorization_tested_in_production": false },
+  "browser": { "synthetic_login_logout": true, "two_tab_admin_to_member_switch": true, "previous_admin_navigation_removed": true, "request_timing_light_dark": true, "request_timing_widths": [320, 390], "no_dialog_horizontal_overflow": true, "escape_restores_focus": true },
+  "compatibility": { "original_baseline_files": 227, "unchanged_original_files": 218, "reviewed_runtime_files": 5, "reviewed_existing_test_files": 3, "optional_type_only_files": 1, "routes_unchanged": 68, "runtime_legal_documents_unchanged": 2, "qa_markers_in_static_build": false },
+  "optional_backend": { "unit_packages_passed": 5, "tests_and_subtests_passed": 196, "account_admission_regressions": true, "go_vet": true, "linux_amd64_cross_build": true, "patch_files_checked_applied_and_verified": 17, "full_backend_present_in_public_repo": false, "production_binary_baseline_confirmed": false },
+  "production_deployed": false,
+  "paid_inference_executed": false,
+  "production_database_modified": false
+}

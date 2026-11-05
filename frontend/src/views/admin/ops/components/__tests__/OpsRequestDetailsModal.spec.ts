@@ -108,4 +108,58 @@ describe('Ops request latency details', () => {
     expect(wrapper.text()).not.toContain('800 ms')
     wrapper.unmount()
   })
+
+  it('opens the all-request timing view without changing the legacy latency-card presets', async () => {
+    const wrapper = shallowMount(OpsDashboardHeader, {
+      props: { overview: {} as OpsDashboardOverview, platform: '', groupId: null, timeRange: '1h', queryMode: 'auto', loading: false, lastUpdated: null },
+    })
+    await flushPromises()
+    const button = wrapper.findAll('button').find(b => b.text() === 'admin.ops.diagnostics.title')
+    await button!.trigger('click')
+    expect(wrapper.emitted('openRequestDetails')).toEqual([[{ title: 'admin.ops.diagnostics.title', kind: 'all', sort: 'created_at_desc' }]])
+    wrapper.unmount()
+  })
+
+  it.each([true, false])('expands timing inside the correct request (desktop: %s)', async (desktop) => {
+    viewport.desktop = desktop
+    const wrapper = await openDetails('ttft_desc')
+    const button = wrapper.findAll('button').find(b => b.text() === 'admin.ops.diagnostics.open')
+    await button!.trigger('click')
+    expect(wrapper.findComponent({ name: 'OpsRequestDiagnostics' }).props('request').first_token_ms).toBe(800)
+    expect(button!.attributes('aria-expanded')).toBe('true')
+    await button!.trigger('click')
+    expect(wrapper.findComponent({ name: 'OpsRequestDiagnostics' }).exists()).toBe(false)
+    wrapper.unmount()
+  })
+
+  it('preserves the custom reporting window and group filters', async () => {
+    const wrapper = mount(OpsRequestDetailsModal, {
+      props: { modelValue: false, timeRange: 'custom', customStartTime: '2026-11-04T00:00:00Z', customEndTime: '2026-11-05T00:00:00Z', groupId: 7, platform: 'openai', preset: { title: 'Details' } },
+      global: { stubs: { BaseDialog: { template: '<div><slot /></div>' }, Pagination: true } },
+    })
+    await wrapper.setProps({ modelValue: true })
+    await flushPromises()
+    expect(listRequestDetails).toHaveBeenCalledWith(expect.objectContaining({ start_time: '2026-11-04T00:00:00Z', end_time: '2026-11-05T00:00:00Z', group_id: 7, platform: 'openai' }))
+    wrapper.unmount()
+  })
+
+  it('ignores a stale response after a newer filter request finishes', async () => {
+    let resolveOld!: (value: unknown) => void
+    let resolveNew!: (value: unknown) => void
+    listRequestDetails.mockReturnValueOnce(new Promise(resolve => { resolveOld = resolve }))
+      .mockReturnValueOnce(new Promise(resolve => { resolveNew = resolve }))
+    const wrapper = mount(OpsRequestDetailsModal, {
+      props: { modelValue: false, timeRange: '1h', preset: { title: 'Details' } },
+      global: { stubs: { BaseDialog: { template: '<div><slot /></div>' }, Pagination: true } },
+    })
+    await wrapper.setProps({ modelValue: true })
+    await wrapper.setProps({ timeRange: '6h' })
+    resolveNew({ items: [{ kind: 'success', request_id: 'new-window', model: 'new-model' }], total: 1 })
+    await flushPromises()
+    resolveOld({ items: [{ kind: 'success', request_id: 'old-window', model: 'old-model' }], total: 1 })
+    await flushPromises()
+    expect(wrapper.text()).toContain('new-model')
+    expect(wrapper.text()).not.toContain('old-model')
+    wrapper.unmount()
+  })
 })

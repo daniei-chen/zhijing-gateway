@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import BaseDialog from '@/components/common/BaseDialog.vue'
@@ -9,6 +9,8 @@ import { useAppStore } from '@/stores'
 import { opsAPI, type OpsRequestDetailsParams, type OpsRequestDetail } from '@/api/admin/ops'
 import { parseTimeRangeMinutes, formatDateTime } from '../utils/opsFormatters'
 import { getAccountNameMap } from '../utils/accountNameMap'
+import OpsRequestDiagnostics from './OpsRequestDiagnostics.vue'
+import { normalizeTablePageSize } from '@/utils/tablePreferences'
 
 export interface OpsRequestDetailsPreset {
   title: string
@@ -25,6 +27,8 @@ interface Props {
   platform?: string
   groupId?: number | null
   resumeState?: boolean
+  customStartTime?: string | null
+  customEndTime?: string | null
 }
 
 const props = defineProps<Props>()
@@ -44,8 +48,15 @@ const loading = ref(false)
 const items = ref<OpsRequestDetail[]>([])
 const total = ref(0)
 const page = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(Math.min(100, normalizeTablePageSize(10)))
 const accountNameById = ref<Map<number, string>>(new Map())
+const selectedRequest = ref<OpsRequestDetail | null>(null)
+let fetchVersion = 0
+onBeforeUnmount(() => { fetchVersion++ })
+
+function toggleDiagnostics(row: OpsRequestDetail) {
+  selectedRequest.value = selectedRequest.value === row ? null : row
+}
 
 const close = () => emit('update:modelValue', false)
 
@@ -58,12 +69,18 @@ function formatLatency(row: OpsRequestDetail): string {
 }
 
 const rangeLabel = computed(() => {
+  if (props.timeRange === 'custom' && props.customStartTime && props.customEndTime) {
+    return `${formatDateTime(props.customStartTime)} — ${formatDateTime(props.customEndTime)}`
+  }
   const minutes = parseTimeRangeMinutes(props.timeRange)
   if (minutes >= 60) return t('admin.ops.requestDetails.rangeHours', { n: Math.round(minutes / 60) })
   return t('admin.ops.requestDetails.rangeMinutes', { n: minutes })
 })
 
 function buildTimeParams(): Pick<OpsRequestDetailsParams, 'start_time' | 'end_time'> {
+  if (props.timeRange === 'custom' && props.customStartTime && props.customEndTime) {
+    return { start_time: props.customStartTime, end_time: props.customEndTime }
+  }
   const minutes = parseTimeRangeMinutes(props.timeRange)
   const endTime = new Date()
   const startTime = new Date(endTime.getTime() - minutes * 60 * 1000)
@@ -75,6 +92,8 @@ function buildTimeParams(): Pick<OpsRequestDetailsParams, 'start_time' | 'end_ti
 
 const fetchData = async () => {
   if (!props.modelValue) return
+  const version = ++fetchVersion
+  selectedRequest.value = null
   loading.value = true
   try {
     const params: OpsRequestDetailsParams = {
@@ -93,16 +112,18 @@ const fetchData = async () => {
     if (typeof props.preset.max_duration_ms === 'number') params.max_duration_ms = props.preset.max_duration_ms
 
     const res = await opsAPI.listRequestDetails(params)
+    if (version !== fetchVersion || !props.modelValue) return
     items.value = res.items || []
     total.value = res.total || 0
     refreshAccountNames()
   } catch (e: any) {
+    if (version !== fetchVersion || !props.modelValue) return
     console.error('[OpsRequestDetailsModal] Failed to fetch request details', e)
     appStore.showError(e?.message || t('admin.ops.requestDetails.failedToLoad'))
     items.value = []
     total.value = 0
   } finally {
-    loading.value = false
+    if (version === fetchVersion) loading.value = false
   }
 }
 
@@ -112,8 +133,12 @@ watch(
     if (open) {
       if (props.resumeState) return
       page.value = 1
-      pageSize.value = 10
+      pageSize.value = Math.min(100, normalizeTablePageSize(10))
       fetchData()
+    } else {
+      fetchVersion++
+      loading.value = false
+      selectedRequest.value = null
     }
   }
 )
@@ -123,6 +148,8 @@ watch(
     props.timeRange,
     props.platform,
     props.groupId,
+    props.customStartTime,
+    props.customEndTime,
     props.preset.kind,
     props.preset.sort,
     props.preset.min_duration_ms,
@@ -261,6 +288,10 @@ function accountLabel(row: OpsRequestDetail): string {
                   >
                     {{ t('admin.ops.requestDetails.viewError') }}
                   </button>
+                  <button type="button" class="btn btn-secondary btn-sm w-full" :aria-expanded="selectedRequest === row" @click="toggleDiagnostics(row)">
+                    {{ t(selectedRequest === row ? 'admin.ops.diagnostics.close' : 'admin.ops.diagnostics.open') }}
+                  </button>
+                  <OpsRequestDiagnostics v-if="selectedRequest === row" :request="row" />
                 </div>
               </div>
               <table v-else class="min-w-full divide-y divide-gray-200 dark:divide-dark-700">
@@ -296,7 +327,8 @@ function accountLabel(row: OpsRequestDetail): string {
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200 bg-white dark:divide-dark-700 dark:bg-dark-800">
-                <tr v-for="(row, idx) in items" :key="idx" class="hover:bg-gray-50 dark:hover:bg-dark-700/50">
+                <template v-for="(row, idx) in items" :key="idx">
+                <tr class="hover:bg-gray-50 dark:hover:bg-dark-700/50">
                   <td class="whitespace-nowrap px-4 py-3 text-xs text-gray-600 dark:text-gray-300">
                     {{ formatDateTime(row.created_at) }}
                   </td>
@@ -335,6 +367,9 @@ function accountLabel(row: OpsRequestDetail): string {
                     <span v-else class="text-xs text-gray-400">-</span>
                   </td>
                   <td class="whitespace-nowrap px-4 py-3 text-right">
+                    <button type="button" class="btn btn-secondary btn-sm mr-2" :aria-expanded="selectedRequest === row" @click="toggleDiagnostics(row)">
+                      {{ t(selectedRequest === row ? 'admin.ops.diagnostics.close' : 'admin.ops.diagnostics.open') }}
+                    </button>
                     <button
                       v-if="row.kind === 'error' && row.error_id"
                       class="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-300 dark:hover:bg-red-900/30"
@@ -342,9 +377,12 @@ function accountLabel(row: OpsRequestDetail): string {
                     >
                       {{ t('admin.ops.requestDetails.viewError') }}
                     </button>
-                    <span v-else class="text-xs text-gray-400">-</span>
                   </td>
                 </tr>
+                <tr v-if="selectedRequest === row">
+                  <td colspan="9" class="p-4"><OpsRequestDiagnostics :request="row" /></td>
+                </tr>
+                </template>
               </tbody>
             </table>
             </div>

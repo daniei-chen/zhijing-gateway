@@ -3,6 +3,8 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 import json
+import hashlib
+import uuid
 import mimetypes
 import re
 from copy import deepcopy
@@ -17,6 +19,7 @@ SETTINGS.update(site_name='Sub2API', version='local-ui-preview', password_reset_
                 balance_low_notify_enabled=True, balance_low_notify_threshold=5,
                 payment_enabled=True, risk_control_enabled=True,
                 affiliate_enabled=True, plugin_management_enabled=True)
+SETTINGS['version'] = 'v0.0.2-local-preview'
 STATS.update(total_users=6, today_new_users=1, total_accounts=2, normal_accounts=2,
              error_accounts=0, active_users=3, today_account_cost=12.84, total_account_cost=391.25,
              active_requests=0, avg_response_time=18320)
@@ -24,7 +27,7 @@ GROUP.update(name='旗舰版', description='智境旗舰工作区 · 本地合�
 SUBSCRIPTION.update(expires_at='2099-12-31T15:59:59+00:00')
 MEMBER = user(username='创造者 · 本地样本', email='member@preview.local', email_bound=True,
               balance_notify_extra_emails=[dict(email='member@preview.local', verified=True, disabled=False)])
-ADMIN = user(role='admin', username='维护者 · 本地样本', email='admin@preview.local')
+ADMIN = user(102, role='admin', username='维护者 · 本地样本', email='admin@preview.local')
 KEYS = [KEY, KEY | dict(id=22, name='自动化任务 · 合成', status='inactive')]
 USERS = [user(i, username=f'创造者 {i-100:02d} · 合成', concurrency=3) for i in range(101, 107)]
 TREND = [dict(date=(datetime.now(timezone.utc)-timedelta(days=6-i)).strftime('%Y-%m-%d'),
@@ -123,7 +126,7 @@ class Handler(BaseHTTPRequestHandler):
                         balance_disabled=True, balance_recharge_multiplier=1, subscription_usd_to_cny_rate=0,
                         recharge_fee_rate=0, help_text='本地合成预览，支付未接通', help_image_url='', stripe_publishable_key='')
         if p == '/admin/system/check-updates':
-            return dict(current_version='local-ui-preview', latest_version='local-ui-preview', has_update=False, cached=True, build_type='source')
+            return dict(current_version='0.0.2-local-preview', latest_version='0.0.2-local-preview', has_update=False, cached=True, build_type='source')
         if p == '/announcements': return []
         if p.startswith('/subscriptions'):
             if p == '/subscriptions' and self.scenario == 'error' and Handler.fail_member_read:
@@ -227,14 +230,22 @@ class Handler(BaseHTTPRequestHandler):
         if target.name == 'index.html':
             code = 'if(!localStorage.getItem("sub2api_locale"))localStorage.setItem("sub2api_locale","zh");'
             seed = next((v.split('=', 1)[1] for v in self.headers.get('Cookie', '').split('; ') if v.startswith('preview_seed=')), None)
+            if seed not in ('admin', 'member', 'logout'): seed = None
             if seed:
+                identity = None if seed == 'logout' else ADMIN if seed == 'admin' else MEMBER
+                access = None if identity is None else f'preview-{seed}'
+                fingerprint = hashlib.sha256(json.dumps([access, None], separators=(',', ':')).encode()).hexdigest()
+                record = dict(generation=uuid.uuid4().hex, subject=str(identity['id']) if identity else None,
+                              phase='transition', credentials=fingerprint)
+                code += 'const previewSession=' + json.dumps(record) + ';localStorage.setItem("auth_session_identity_v1",JSON.stringify(previewSession));'
                 code += 'localStorage.removeItem("refresh_token");localStorage.removeItem("token_expires_at");'
                 if seed == 'logout': code += 'localStorage.removeItem("auth_token");localStorage.removeItem("auth_user");'
                 else:
-                    identity = ADMIN if seed == 'admin' else MEMBER
                     code += f'localStorage.setItem("auth_token","preview-{seed}");localStorage.setItem("auth_user",{json.dumps(json.dumps(identity, ensure_ascii=False))});'
+                code += 'previewSession.phase="ready";localStorage.setItem("auth_session_identity_v1",JSON.stringify(previewSession));'
             for role in ('user', 'admin'):
                 code += f'localStorage.setItem("{role}_guide_101_{role}_v4_interactive","true");'
+                code += f'localStorage.setItem("{role}_guide_102_{role}_v4_interactive","true");'
             code += 'window.__APP_CONFIG__=' + json.dumps(SETTINGS, ensure_ascii=False) + ';'
             banner = '<div id="local-preview-banner" style="position:fixed;bottom:0;left:0;right:0;z-index:10000;padding:5px 8px;background:#201e27;color:#dfd7ee;text-align:center;font:10px/1.5 system-ui;pointer-events:none">本地隔离预览 · 合成数据 · 未连接生产服务</div>'
             data = data.replace(b'</head>', ('<script>' + code + '</script></head>').encode()).replace(b'</body>', (banner + '</body>').encode())

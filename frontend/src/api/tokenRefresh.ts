@@ -1,6 +1,7 @@
 import axios from 'axios'
 import type { ApiResponse } from '@/types'
 import { getAPIBaseURL } from './url'
+import { assertAuthSession, AuthSessionChangedError, captureAuthSession, commitAuthTokenRotation, isAuthSessionCurrent, trackAuthRequest, type AuthSessionSnapshot } from './authSession'
 
 const AUTH_TOKEN_KEY = 'auth_token'
 const AUTH_USER_KEY = 'auth_user'
@@ -22,9 +23,11 @@ export interface RefreshTokenResponse {
 export interface RefreshAuthTokensOptions {
   /** Access token attached to the request that received a 401 response. */
   failedAccessToken?: string | null
+  session?: AuthSessionSnapshot
 }
 
 interface AuthSnapshot {
+  session: AuthSessionSnapshot
   accessToken: string | null
   refreshToken: string
   expiresAt: number
@@ -32,6 +35,7 @@ interface AuthSnapshot {
 }
 
 let inFlightRefresh: Promise<RefreshTokenResponse> | null = null
+let inFlightSession: AuthSessionSnapshot | null = null
 
 function getStoredUserID(): number | null {
   const rawUser = localStorage.getItem(AUTH_USER_KEY)
@@ -47,13 +51,15 @@ function getStoredUserID(): number | null {
   }
 }
 
-function readAuthSnapshot(): AuthSnapshot {
+function readAuthSnapshot(session: AuthSessionSnapshot): AuthSnapshot {
+  assertAuthSession(session)
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
   if (!refreshToken) {
     throw new Error('No refresh token available')
   }
 
   return {
+    session,
     accessToken: localStorage.getItem(AUTH_TOKEN_KEY),
     refreshToken,
     expiresAt: Number(localStorage.getItem(TOKEN_EXPIRES_AT_KEY)),
@@ -62,6 +68,7 @@ function readAuthSnapshot(): AuthSnapshot {
 }
 
 function readStoredTokenPair(snapshot: AuthSnapshot): RefreshTokenResponse | null {
+  if (!isAuthSessionCurrent(snapshot.session)) return null
   const accessToken = localStorage.getItem(AUTH_TOKEN_KEY)
   const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
   const expiresAt = Number(localStorage.getItem(TOKEN_EXPIRES_AT_KEY))
@@ -114,6 +121,7 @@ async function waitForPeerRefresh(
   deadline = Date.now() + PEER_REFRESH_WAIT_MS
 ): Promise<RefreshTokenResponse | null> {
   while (Date.now() < deadline) {
+    assertAuthSession(snapshot.session)
     const peerResult = readPeerRefreshResult(snapshot, failedAccessToken)
     if (peerResult) {
       return peerResult
@@ -124,11 +132,8 @@ async function waitForPeerRefresh(
   return readPeerRefreshResult(snapshot, failedAccessToken)
 }
 
-function persistTokenPair(tokens: RefreshTokenResponse): void {
-  localStorage.setItem(AUTH_TOKEN_KEY, tokens.access_token)
-  localStorage.setItem(TOKEN_EXPIRES_AT_KEY, String(Date.now() + tokens.expires_in * 1000))
-  // The rotating refresh token is written last so other tabs can treat its change as a commit marker.
-  localStorage.setItem(REFRESH_TOKEN_KEY, tokens.refresh_token)
+function persistTokenPair(tokens: RefreshTokenResponse, session: AuthSessionSnapshot): void {
+  commitAuthTokenRotation(session, tokens)
 }
 
 async function requestTokenPair(
@@ -140,17 +145,21 @@ async function requestTokenPair(
   // as our own HTTP timeout to publish its replacement token. Keep the recovery window tied to
   // that timeout instead of an arbitrary short delay.
   const peerRefreshDeadline = Date.now() + TOKEN_REFRESH_TIMEOUT_MS + PEER_REFRESH_GRACE_MS
+  const controller = new AbortController()
+  const untrack = trackAuthRequest(snapshot.session, () => controller.abort())
 
   try {
     const response = await axios.post<ApiResponse<RefreshTokenResponse>>(
       `${getAPIBaseURL()}/auth/refresh`,
       { refresh_token: snapshot.refreshToken },
-      { headers: { 'Content-Type': 'application/json' }, timeout: TOKEN_REFRESH_TIMEOUT_MS }
+      { headers: { 'Content-Type': 'application/json' }, timeout: TOKEN_REFRESH_TIMEOUT_MS, signal: controller.signal }
     )
     const payload = response.data
     if (payload.code !== 0 || !payload.data) {
       throw new Error(payload.message || 'Token refresh failed')
     }
+    assertAuthSession(snapshot.session)
+    if (typeof payload.data.access_token !== 'string' || !payload.data.access_token || typeof payload.data.refresh_token !== 'string' || !payload.data.refresh_token || !Number.isFinite(payload.data.expires_in) || payload.data.expires_in <= 0) throw new Error('Invalid token refresh response')
 
     if (
       localStorage.getItem(REFRESH_TOKEN_KEY) !== snapshot.refreshToken ||
@@ -163,9 +172,10 @@ async function requestTokenPair(
       throw new Error('Session changed during token refresh')
     }
 
-    persistTokenPair(payload.data)
+    persistTokenPair(payload.data, snapshot.session)
     return payload.data
   } catch (error) {
+    if (!isAuthSessionCurrent(snapshot.session)) throw new AuthSessionChangedError('Session changed during token refresh')
     // A peer tab may have rotated the one-time refresh token while this request was in flight.
     // A 4xx response can arrive quickly while the winning peer's response is still in flight, so
     // wait through the shared request deadline before treating the session as expired. Transient
@@ -184,12 +194,13 @@ async function requestTokenPair(
       return peerResult
     }
     throw error
-  }
+  } finally { untrack() }
 }
 
 async function runRefresh(options: RefreshAuthTokensOptions): Promise<RefreshTokenResponse> {
-  const snapshot = readAuthSnapshot()
+  const snapshot = readAuthSnapshot(options.session ?? captureAuthSession())
   const refresh = async (mayHaveUncoordinatedPeer = false): Promise<RefreshTokenResponse> => {
+    assertAuthSession(snapshot.session)
     const peerResult = readPeerRefreshResult(snapshot, options.failedAccessToken)
     if (peerResult) {
       return peerResult
@@ -210,18 +221,22 @@ async function runRefresh(options: RefreshAuthTokensOptions): Promise<RefreshTok
  * Calls in the same document share one promise. Web Locks serialize refreshes across tabs, while
  * the token snapshot check adopts a peer's newly rotated token instead of logging the user out.
  */
-export function refreshAuthTokens(
+export async function refreshAuthTokens(
   options: RefreshAuthTokensOptions = {}
 ): Promise<RefreshTokenResponse> {
-  if (inFlightRefresh) {
+  const session = options.session ?? captureAuthSession()
+  assertAuthSession(session)
+  if (inFlightRefresh && inFlightSession && inFlightSession.generation === session.generation && inFlightSession.subject === session.subject && isAuthSessionCurrent(inFlightSession)) {
     return inFlightRefresh
   }
 
-  const pending = runRefresh(options)
+  const pending = runRefresh({ ...options, session })
   inFlightRefresh = pending
+  inFlightSession = session
   const clearPending = (): void => {
     if (inFlightRefresh === pending) {
       inFlightRefresh = null
+      inFlightSession = null
     }
   }
   void pending.then(clearPending, clearPending)
