@@ -25,6 +25,9 @@
           <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium" :class="getTypeBadge(row).className">
             {{ getTypeBadge(row).label }}
           </span>
+          <span v-if="getAdmissionHint(row)?.basis === 'legacy'" class="ml-1 inline-flex rounded bg-indigo-50 px-2 py-0.5 text-xs text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200" :title="t('admin.ops.diagnostics.legacyHint')">
+            {{ t('admin.ops.diagnostics.legacyBadge') }} · {{ t(`admin.ops.diagnostics.scope.${getAdmissionHint(row)!.scope}`) }}
+          </span>
         </template>
 
         <template #cell-endpoint="{ row }">
@@ -191,6 +194,7 @@ import type { Column } from '@/components/common/types'
 import { getSeverityClass, formatDateTime } from '../utils/opsFormatters'
 import { mapErrorCategory } from '@/utils/errorCategory'
 import { mapErrorSortKey, statusCodeBadgeClass } from '@/utils/errorBadges'
+import { getAdmissionHint } from '../utils/requestDiagnostics'
 
 const { t } = useI18n()
 
@@ -259,6 +263,10 @@ function formatRequestType(type: number | null | undefined): string {
 
 // 徽章配色对齐用量明细(UsageTable)的 bg-X-100/text-X-800 体系
 function getTypeBadge(log: OpsErrorLog): { label: string; className: string } {
+  const admission = getAdmissionHint(log)
+  if (admission?.basis === 'recorded') {
+    return { label: t(`admin.ops.diagnostics.scope.${admission.scope}`), className: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-200' }
+  }
   const phase = String(log.phase || '').toLowerCase()
   const owner = String(log.error_owner || '').toLowerCase()
 

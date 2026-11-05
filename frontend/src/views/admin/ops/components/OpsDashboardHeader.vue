@@ -895,6 +895,9 @@ function handleToolbarRefresh() {
       </div>
 
       <div class="flex flex-wrap items-center gap-3">
+        <button type="button" class="btn btn-secondary btn-sm" @click="openDetails({ title: t('admin.ops.diagnostics.title'), kind: 'all', sort: 'created_at_desc' })">
+          {{ t('admin.ops.diagnostics.title') }}
+        </button>
         <template v-if="!props.fullscreen">
           <Select
             :model-value="platform"

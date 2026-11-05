@@ -37,7 +37,8 @@ describe('embedded-url', () => {
     const url = new URL(result)
     expect(url.searchParams.get('plan')).toBe('pro')
     expect(url.searchParams.get('user_id')).toBe('42')
-    expect(url.searchParams.get('token')).toBe('token-123')
+    expect(url.searchParams.has('token')).toBe(false)
+    expect(result).not.toContain('token-123')
     expect(url.searchParams.get('theme')).toBe('dark')
     expect(url.searchParams.get('lang')).toBe('zh-CN')
     expect(url.searchParams.get('ui_mode')).toBe('embedded')
@@ -54,6 +55,22 @@ describe('embedded-url', () => {
     expect(url.searchParams.has('user_id')).toBe(false)
     expect(url.searchParams.has('token')).toBe(false)
     expect(url.searchParams.has('lang')).toBe(false)
+  })
+
+  it.each(['https://app.example.com/docs', 'https://third-party.example.test/docs', 'https://app.example.com/redirect?next=https%3A%2F%2Fthird-party.example.test'])('never adds the login credential to %s', base => {
+    const url = new URL(buildEmbeddedUrl(base, 42, 'SYNTHETIC-LOGIN-SECRET'))
+    expect(url.searchParams.has('token')).toBe(false)
+    expect(url.toString()).not.toContain('SYNTHETIC-LOGIN-SECRET')
+  })
+
+  it('removes credential parameters and excludes callback queries/fragments from source tracking', () => {
+    window.location.href = 'https://app.example.com/callback?access_token=SYNTHETIC-ACCESS&refresh_token=SYNTHETIC-REFRESH#token=SYNTHETIC-HASH'
+    const url = new URL(buildEmbeddedUrl('https://example.test/docs?TOKEN=SYNTHETIC-OLD&access_token=SYNTHETIC-OLD2&plan=pro', 42, 'SYNTHETIC-LOGIN-SECRET'))
+    expect(url.searchParams.get('src_url')).toBe('https://app.example.com/callback')
+    expect(url.searchParams.get('plan')).toBe('pro')
+    expect(url.toString()).not.toContain('SYNTHETIC')
+    expect(buildEmbeddedUrl('https://example.test/docs#access_token=SYNTHETIC')).toBe('')
+    expect(buildEmbeddedUrl('https://example.test/docs#guide')).toContain('#guide')
   })
 
   it('returns original string for invalid url input', () => {

@@ -60,6 +60,8 @@ describe('useAuthStore', () => {
   })
 
   afterEach(() => {
+    useAuthStore().$dispose()
+    vi.clearAllTimers()
     vi.useRealTimers()
   })
 

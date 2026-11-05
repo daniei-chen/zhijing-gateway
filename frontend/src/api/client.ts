@@ -14,6 +14,10 @@ import {
 } from './adminUIRequest'
 import { refreshAuthTokens } from './tokenRefresh'
 import { getAPIBaseURL } from './url'
+import {
+  assertAuthSession, AuthSessionChangedError, captureAuthSession, captureRequestAuthSession,
+  clearStoredAuthSession, isAuthSessionCurrent, trackAuthRequest, type AuthSessionSnapshot
+} from './authSession'
 export { buildApiUrl, buildGatewayUrl } from './url'
 
 // ==================== Axios Instance Configuration ====================
@@ -29,6 +33,24 @@ export const apiClient: AxiosInstance = axios.create({
 
 // ==================== Request Interceptor ====================
 
+interface SessionRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean
+  _authSession?: AuthSessionSnapshot
+  _authCleanup?: () => void
+  _authExternalSignal?: InternalAxiosRequestConfig['signal']
+}
+
+function responseSession(config?: InternalAxiosRequestConfig): AuthSessionSnapshot | undefined {
+  const bound = (config as SessionRequestConfig | undefined)?._authSession
+  if (bound) return bound
+  // Compatibility for custom adapters that omit unknown config fields. A real
+  // browser adapter preserves the original stamp. Never adopt a different bearer.
+  const auth = config?.headers?.Authorization ?? config?.headers?.authorization
+  const current = localStorage.getItem('auth_token')
+  if (auth && auth !== `Bearer ${current}`) throw new AuthSessionChangedError()
+  return config ? captureAuthSession() : undefined
+}
+
 // Get user's timezone
 const getUserTimezone = (): string => {
   try {
@@ -39,9 +61,20 @@ const getUserTimezone = (): string => {
 }
 
 apiClient.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    // Attach token from localStorage
+  (config: SessionRequestConfig) => {
+    if (config._authSession) assertAuthSession(config._authSession)
+    else { config._authSession = captureRequestAuthSession(); config._authExternalSignal = config.signal }
     const token = localStorage.getItem('auth_token')
+    assertAuthSession(config._authSession)
+    const controller = new AbortController()
+    const originalSignal = config._authExternalSignal
+    const abort = () => controller.abort()
+    if (originalSignal?.aborted) abort()
+    else originalSignal?.addEventListener?.('abort', abort, { once: true })
+    const untrack = trackAuthRequest(config._authSession, abort)
+    config._authCleanup = () => { untrack(); originalSignal?.removeEventListener?.('abort', abort) }
+    config.signal = controller.signal
+    // Attach token from localStorage
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -72,14 +105,18 @@ apiClient.interceptors.request.use(
     return config
   },
   (error) => {
-    return Promise.reject(error)
-  }
+    throw error
+  },
+  { synchronous: true }
 )
 
 // ==================== Response Interceptor ====================
 
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
+    const config = response.config as SessionRequestConfig | undefined
+    config?._authCleanup?.()
+    if (config?._authSession && !isAuthSessionCurrent(config._authSession)) return Promise.reject(new AuthSessionChangedError())
     // Unwrap standard API response format { code, message, data }
     const apiResponse = response.data as ApiResponse<unknown>
     if (apiResponse && typeof apiResponse === 'object' && 'code' in apiResponse) {
@@ -101,13 +138,15 @@ apiClient.interceptors.response.use(
     return response
   },
   async (error: AxiosError<ApiResponse<unknown>>) => {
+    if (error.code === 'AUTH_SESSION_CHANGED') return Promise.reject(error)
+    const originalRequest = error.config as SessionRequestConfig | undefined
+    originalRequest?._authCleanup?.()
+    if (originalRequest?._authSession && !isAuthSessionCurrent(originalRequest._authSession)) return Promise.reject(new AuthSessionChangedError())
     // Request cancellation: keep the original axios cancellation error so callers can ignore it.
     // Otherwise we'd misclassify it as a generic "network error".
     if (error.code === 'ERR_CANCELED' || axios.isCancel(error)) {
       return Promise.reject(error)
     }
-
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean }
 
     // Handle common errors
     if (error.response) {
@@ -162,7 +201,9 @@ apiClient.interceptors.response.use(
 
       // 401: Try to refresh the token if we have a refresh token
       // This handles TOKEN_EXPIRED, INVALID_TOKEN, TOKEN_REVOKED, etc.
-      if (status === 401 && !originalRequest._retry) {
+      if (status === 401 && originalRequest && !originalRequest._retry) {
+        let requestSession: AuthSessionSnapshot | undefined
+        try { requestSession = responseSession(originalRequest); if (requestSession) assertAuthSession(requestSession) } catch { return Promise.reject(new AuthSessionChangedError()) }
         const refreshToken = localStorage.getItem('refresh_token')
         const isAuthEndpoint =
           url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh')
@@ -179,7 +220,8 @@ apiClient.interceptors.response.use(
               typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
                 ? authHeader.slice('Bearer '.length)
                 : null
-            const tokens = await refreshAuthTokens({ failedAccessToken })
+            const tokens = await refreshAuthTokens({ failedAccessToken, session: requestSession })
+            if (requestSession) assertAuthSession(requestSession)
 
             // Retry the original request with the refreshed token
             if (originalRequest.headers) {
@@ -189,9 +231,9 @@ apiClient.interceptors.response.use(
           } catch (refreshError) {
             // A stale request must never destroy a session that was logged out or replaced while
             // its refresh was in flight (for example, when another tab signs in as another user).
-            const sessionChanged =
+            const sessionChanged = requestSession ? !isAuthSessionCurrent(requestSession) : (
               localStorage.getItem('refresh_token') !== refreshToken ||
-              localStorage.getItem('auth_user') !== refreshSessionUser
+              localStorage.getItem('auth_user') !== refreshSessionUser)
             if (sessionChanged) {
               return Promise.reject({
                 status: 401,
@@ -212,10 +254,7 @@ apiClient.interceptors.response.use(
             }
 
             // Clear tokens and redirect to login
-            localStorage.removeItem('auth_token')
-            localStorage.removeItem('refresh_token')
-            localStorage.removeItem('auth_user')
-            localStorage.removeItem('token_expires_at')
+            if (!clearStoredAuthSession(requestSession)) return Promise.reject(new AuthSessionChangedError())
             sessionStorage.setItem('auth_expired', '1')
 
             if (!window.location.pathname.includes('/login')) {
@@ -241,10 +280,7 @@ apiClient.interceptors.response.use(
               ? authHeader.length > 0
               : !!authHeader
 
-        localStorage.removeItem('auth_token')
-        localStorage.removeItem('refresh_token')
-        localStorage.removeItem('auth_user')
-        localStorage.removeItem('token_expires_at')
+        if (!clearStoredAuthSession(requestSession)) return Promise.reject(new AuthSessionChangedError())
         if ((hasToken || sentAuth) && !isAuthEndpoint) {
           sessionStorage.setItem('auth_expired', '1')
         }

@@ -2,6 +2,26 @@ export default {
     ops: {
       title: 'Ops Monitoring',
       description: 'Operational monitoring and troubleshooting',
+      diagnostics: {
+        title: 'Request timing', subtitle: 'Separate upload, waiting and first-response timing',
+        open: 'View timing', close: 'Hide timing', unknown: 'Not collected',
+        memorySource: 'Process-local sample', noSample: 'No stage sample',
+        missingHint: 'No matching stage sample is available. An older backend, restart, expiry, eviction or reused identifier can cause missing data. Missing does not mean zero wait.',
+        bodyInterrupted: 'Reading the request body was interrupted. Check the client and upload path; this alone does not establish an upstream failure.',
+        stageTitle: 'Stage durations · measured separately', milestoneTitle: 'Milestones · measured from gateway ingress',
+        stages: { upload: 'Read request body', normalize: 'Decode and normalize', userWait: 'Member slot wait', accountWait: 'Account slot wait', connection: 'Upstream connection wait' },
+        milestones: { bodyReady: 'Request body ready', routing: 'Routing started', firstEvent: 'First event', semantic: 'First semantic event', flush: 'Semantic event flushed downstream' },
+        forwardFirst: 'Forwarding first event · existing definition', forwardHint: 'Preserves first_token_ms; earlier upload waiting is excluded.',
+        semanticHint: 'Milestones are cumulative from ingress. Do not add them to stage durations. Semantic events can include tool calls rather than visible text.',
+        retentionHint: 'This process retains up to {count} requests for {hours} hours. Restart clears samples; unmatched data remains unknown.',
+        admissionTitle: 'Concurrency admission',
+        capacityHint: 'Account-side capacity is shown below. Member and gateway-wide admission limits also apply.',
+        scope: { user: 'Member concurrency full', global: 'Gateway concurrency full', account: 'Account slot wait exhausted', queue: 'Local waiting queue full' },
+        limit: 'Limit {n}', legacyBadge: 'Template hint',
+        admissionAdvice: 'Wait for running requests to finish, then follow the client’s backoff guidance. Check for simultaneous tasks or sessions.',
+        recordedHint: 'The final response is a local gateway admission refusal. Existing quota and concurrency policies remain enforced; this is not an upstream-account penalty.',
+        legacyHint: 'Recognized from a historical local error template. Recorded attribution and historical metrics are preserved. This hint does not edit records or trigger retries.',
+      },
       // Dashboard
       systemHealth: 'System Health',
       outputTps: 'Per-request output TPS',
@@ -212,9 +232,9 @@ export default {
         memoryHigh: 'Memory usage elevated ({usage}%)',
         memoryHighImpact: 'Memory pressure is high, needs attention',
         memoryHighAction: 'Monitor memory trends, check for memory leaks',
-        ttftHigh: 'Time to first token elevated ({ttft}ms)',
-        ttftHighImpact: 'User perceived latency increased',
-        ttftHighAction: 'Optimize request processing flow, reduce pre-processing time',
+        ttftHigh: 'Forwarding first event elevated ({ttft}ms)',
+        ttftHighImpact: 'Longer first-response wait during forwarding',
+        ttftHighAction: 'Inspect upload, routing and upstream timing together; one metric cannot establish the cause',
         // Error rate diagnostics
         upstreamCritical: 'Upstream error rate critically high ({rate}%)',
         upstreamCriticalImpact: 'May affect many user requests',
@@ -826,7 +846,7 @@ export default {
         errors: 'Error statistics, including total errors, error rate, and upstream error rate.',
         upstreamErrors: 'Upstream error statistics, excluding rate limit errors (429/529).',
         latency: 'Request duration statistics, including p50, p90, p95, p99 percentiles.',
-        ttft: 'Time To First Token, measuring the speed of first token return in streaming responses.',
+        ttft: 'Forwarding first-event timing (first_token_ms). Earlier upload waiting is excluded; the first event is not necessarily visible text.',
         health: 'System health score (0-100), considering SLA, error rate, and resource usage.'
       },
       charts: {

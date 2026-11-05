@@ -1,0 +1,88 @@
+{
+  "version": "0.0.2",
+  "baseline_commit": "d8551a2257746993f9844b6fffa325dd1ff5c172",
+  "authorization": "User explicitly included ZJ-01 and ZJ-02 in the local v0.0.2 candidate on 2026-11-05. Production deployment is not authorized.",
+  "api_paths_unchanged": true,
+  "backend_auth_billing_roles_unchanged": true,
+  "tests": "Four previously failing acceptance probes and full frontend regressions; see docs/reviews/2026-11-05-security-followup.zh-CN.md.",
+  "files": [
+    {
+      "path": "frontend/src/api/client.ts",
+      "before_sha256": "4519dc7afaf2b08c28084e590be61332c6ed6e932dafba55bb425b0130047fcf",
+      "after_sha256": "495f1f15813f0d9138a270fe2cb51956116a40cff93bf1cc20c566ae2d6b9bee",
+      "reason": "Bind dispatch, responses and 401 retries to the originating session; cancel stale requests."
+    },
+    {
+      "path": "frontend/src/api/tokenRefresh.ts",
+      "before_sha256": "d591850505eb41c22e23ee40d960ae5f530df97b0f134d0900da9c5a7d980f61",
+      "after_sha256": "a4862d87be391ad3d2f8a39532b707faa609881982125c17ac78f9f578a705cb",
+      "reason": "Bind singleflight, Web Locks, peer adoption and persistence to one session generation."
+    },
+    {
+      "path": "frontend/src/api/auth.ts",
+      "before_sha256": "ab5a86c199d45762ed805193d0d5fbae84df0595571ba67cab94436abf99fcc7",
+      "after_sha256": "af7d5a19b1f4b1e7c59567707688fdb18034715f5c23cdcbdc137f847556d2d8",
+      "reason": "Commit login/OAuth credentials together and prevent stale logout or login completions."
+    },
+    {
+      "path": "frontend/src/stores/auth.ts",
+      "before_sha256": "98c5e1fdd0564253637517197cfbcee6d23f2e9de43feaa920497459113d38f1",
+      "after_sha256": "e283d82a19a939440c749c88868719d8d90ba84d15c86767ac9785152336c2f5",
+      "reason": "Guard profile, auth and refresh writes; synchronize and dispose session observers."
+    },
+    {
+      "path": "frontend/src/utils/embedded-url.ts",
+      "before_sha256": "c1503c6ebdcdcae4530344ef37783ac0bfa83b5a03f87e7e9915b319267537b9",
+      "after_sha256": "8857292d8594abac89743fafc811db9d6503a66a3569f0a0ee8e0edd4247ab54",
+      "reason": "Remove original login credentials and callback secrets from embedded URLs."
+    },
+    {
+      "path": "frontend/src/App.vue",
+      "before_sha256": "90782b2fb86e08dcced9fbc1aeddf03d295b6e9b5e0d7af66ea272a5541f2ab0",
+      "after_sha256": "ab8cb2538329ed5401bf45cb3c8c9a6480f4694f4ae002a486156da8578b27ab",
+      "reason": "Reload a replaced document to discard prior-account page and store caches."
+    },
+    {
+      "path": "frontend/src/views/user/CustomPageView.vue",
+      "before_sha256": "33f8bd398e477e1fb71d8f0a79b62e2f9d4645d07c653600666dc7f21d6f3bb0",
+      "after_sha256": "50b487b1e2267c24b273861427748abdb9c4744caccaa06c59c88c87a94d8b3c",
+      "reason": "Stop passing login tokens; use no-referrer iframe navigation."
+    },
+    {
+      "path": "frontend/src/api/authSession.ts",
+      "before_sha256": null,
+      "after_sha256": "4e2f9249556608664125e2d5c697aba33ec6c4afd4886a3261cc23a66258860c",
+      "reason": "New generation, commit validation, cancellation and document replacement coordinator."
+    },
+    {
+      "path": "frontend/src/api/authSessionDigest.ts",
+      "before_sha256": null,
+      "after_sha256": "f146a52c90eb396a617b568b0861eb249df0a9b19ccda897d05c208908b89d51",
+      "reason": "New synchronous SHA-256 storage consistency fingerprint; not server authorization."
+    },
+    {
+      "path": "frontend/src/api/__tests__/tokenRefresh.spec.ts",
+      "before_sha256": "75c1f9e1d36e7cac656787858fdb6b577848cc696a135958b13851635e595f81",
+      "after_sha256": "c9c781ed8f0e1228a4a12adbe33e945b3a5d0a2ddf3750ea7391bde16f443e62",
+      "reason": "Peer fixtures use the actual versioned commit protocol; changed-session rejection asserts the new session is preserved."
+    },
+    {
+      "path": "frontend/src/stores/__tests__/auth.spec.ts",
+      "before_sha256": "461b0def8832646af5cd636d7d4085b1a794e88e369dc3cd5d12e479fd05d7af",
+      "after_sha256": "71a1d276fe65d86f25e9970b6126d24b06ca6ab27d334aab42c0a2ed95aaaa23",
+      "reason": "Dispose session observers and timers between store tests."
+    },
+    {
+      "path": "frontend/src/utils/__tests__/embedded-url.spec.ts",
+      "before_sha256": "4f6a1a3bf54b778d70c4720db973fc31f78a1b59820ab0ee912a13f2271ce50f",
+      "after_sha256": "978a6caa016eb789bdf3aafee96f9e40be0fd225f018d5c3c274447038223ff3",
+      "reason": "Replace the former token-forwarding expectation with credential-free URL acceptance cases."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/CustomPageView.spec.ts",
+      "before_sha256": "a295019ada1f4bf68718fcdb30d5efac65249b9ebe5c9123b4fad7f5a5df9290",
+      "after_sha256": "992cbbdd1a2418beb4572187217c87ec0070c9820f3c735ad6fe5122497cdb83",
+      "reason": "Verify both iframe and new-window links omit the login token and use no-referrer navigation."
+    }
+  ]
+}

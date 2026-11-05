@@ -1,6 +1,7 @@
 """V4 loopback UI fixtures. No network, credentials, inference or persistent writes."""
 from datetime import datetime, timedelta, timezone
 from fixtures import GROUP, SUBSCRIPTION, STAMP, START, paginated
+from diagnostic_fixtures import resolve_diagnostics
 
 NOW = datetime.now(timezone.utc)
 POINTS = [dict(bucket_start=(NOW-timedelta(minutes=59-i)).isoformat(), request_count=8+i%7,
@@ -10,12 +11,12 @@ THROUGHPUT = dict(bucket='1m', points=POINTS,
                   by_platform=[dict(platform='openai', request_count=684, token_consumed=3510000)],
                   top_groups=[dict(group_id=7, group_name='旗舰版 · 合成', request_count=684, token_consumed=3510000)])
 OVERVIEW = dict(start_time=START, end_time=STAMP, platform='', health_score=98,
-    success_count=682, error_count_total=2, business_limited_count=0, error_count_sla=2,
-    request_count_total=684, request_count_sla=684, token_consumed=3510000,
-    sla=.99708, error_rate=.00292, upstream_error_rate=.00146,
-    upstream_error_count_excl_429_529=1, upstream_429_count=0, upstream_529_count=0,
+    success_count=680, error_count_total=4, business_limited_count=1, error_count_sla=3,
+    request_count_total=684, request_count_sla=683, token_consumed=3510000,
+    sla=680/683, error_rate=3/683, upstream_error_rate=0,
+    upstream_error_count_excl_429_529=0, upstream_429_count=2, upstream_529_count=0,
     qps=dict(current=.28, peak=.36, avg=.24), tps=dict(current=1920, peak=2260, avg=1580),
-    output_tps=dict(p5=18.2, p10=22.3, p50=48.1, avg=47.4, sample_count=682),
+    output_tps=dict(p5=18.2, p10=22.3, p50=48.1, avg=47.4, sample_count=680),
     duration=dict(p50_ms=8400, p90_ms=18800, p95_ms=24500, p99_ms=41000, avg_ms=12900, max_ms=58000),
     ttft=dict(p50_ms=820, p90_ms=2100, p95_ms=2800, p99_ms=4200, avg_ms=960, max_ms=7800),
     system_metrics=dict(id=1, created_at=STAMP, window_minutes=1, cpu_usage_percent=12.4,
@@ -26,9 +27,9 @@ OVERVIEW = dict(start_time=START, end_time=STAMP, platform='', health_score=98,
     job_heartbeats=[dict(job_name='合成指标聚合', last_run_at=STAMP, last_success_at=STAMP,
                          last_duration_ms=18, last_result='ok', updated_at=STAMP)])
 ERROR_TREND = dict(bucket='1m', points=[dict(bucket_start=p['bucket_start'],
-    error_count_total=1 if i in (12, 40) else 0, error_count_sla=1 if i in (12, 40) else 0,
-    business_limited_count=0, upstream_error_count_excl_429_529=1 if i==12 else 0,
-    upstream_429_count=0, upstream_529_count=0) for i,p in enumerate(POINTS)])
+    error_count_total={56:1,57:2,58:1}.get(i,0), error_count_sla={56:1,57:2}.get(i,0),
+    business_limited_count=1 if i==58 else 0, upstream_error_count_excl_429_529=0,
+    upstream_429_count=2 if i==57 else 0, upstream_529_count=0) for i,p in enumerate(POINTS)])
 ADVANCED = dict(data_retention=dict(cleanup_enabled=True, cleanup_schedule='0 3 * * *',
     error_log_retention_days=30, minute_metrics_retention_days=7, hourly_metrics_retention_days=90),
     aggregation=dict(aggregation_enabled=True), openai_account_quota_auto_pause=dict(default_threshold_5h=0,default_threshold_7d=0),
@@ -59,13 +60,16 @@ RISK_CONFIG = dict(engine='openai', enabled=False, mode='off', base_url='', mode
 def resolve_admin(p, query):
     if p.startswith('/admin/ops/'):
         end=p.removeprefix('/admin/ops/')
+        diagnostic = resolve_diagnostics(end, query)
+        if diagnostic is not NotImplemented:
+            return diagnostic
         fixed={
             'dashboard/snapshot-v2':dict(generated_at=STAMP, overview=OVERVIEW, throughput_trend=THROUGHPUT,error_trend=ERROR_TREND),
             'dashboard/overview':OVERVIEW, 'dashboard/throughput-trend':THROUGHPUT,
             'dashboard/error-trend':ERROR_TREND,
             'dashboard/latency-histogram':dict(start_time=START,end_time=STAMP,platform='',total_requests=684,
                 buckets=[dict(range=r,count=n) for r,n in [('0-5s',116),('5-10s',296),('10-20s',194),('20-40s',65),('40s+',13)]]),
-            'dashboard/error-distribution':dict(total=2,items=[dict(status_code=502,total=1,sla=1,business_limited=0),dict(status_code=504,total=1,sla=1,business_limited=0)]),
+            'dashboard/error-distribution':dict(total=4,items=[dict(status_code=429,total=3,sla=2,business_limited=1),dict(status_code=400,total=1,sla=1,business_limited=0)]),
             'dashboard/openai-token-stats':dict(time_range='1h',start_time=START,end_time=STAMP,items=[],total=0),
             'concurrency':dict(enabled=True,platform=dict(openai=dict(platform='openai',**CONCURRENCY)),
                 group={'7':dict(group_id=7,group_name='旗舰版 · 合成',platform='openai',**CONCURRENCY)},

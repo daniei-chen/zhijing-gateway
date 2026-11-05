@@ -5,6 +5,7 @@
 
 import { apiClient } from './client'
 import { refreshAuthTokens, type RefreshTokenResponse } from './tokenRefresh'
+import { assertAuthSession, captureAuthSession, clearStoredAuthSession, markAuthResponse, replaceAuthSession, setSessionRefreshToken, type AuthSessionSnapshot } from './authSession'
 export type { RefreshTokenResponse } from './tokenRefresh'
 import type {
   LoginRequest,
@@ -72,14 +73,14 @@ export function isTotp2FARequired(response: LoginResponse): response is TotpLogi
  * Store authentication token in localStorage
  */
 export function setAuthToken(token: string): void {
-  localStorage.setItem('auth_token', token)
+  replaceAuthSession({ accessToken: token })
 }
 
 /**
  * Store refresh token in localStorage
  */
 export function setRefreshToken(token: string): void {
-  localStorage.setItem('refresh_token', token)
+  setSessionRefreshToken(token)
 }
 
 /**
@@ -116,11 +117,13 @@ export function getTokenExpiresAt(): number | null {
 /**
  * Clear authentication token from localStorage
  */
-export function clearAuthToken(): void {
-  localStorage.removeItem('auth_token')
-  localStorage.removeItem('refresh_token')
-  localStorage.removeItem('auth_user')
-  localStorage.removeItem('token_expires_at')
+export function clearAuthToken(expected?: AuthSessionSnapshot): void {
+  clearStoredAuthSession(expected)
+}
+
+function persistAuthResponse(data: AuthResponse, expected: AuthSessionSnapshot): void {
+  const session = replaceAuthSession({ accessToken: data.access_token, refreshToken: data.refresh_token, expiresIn: data.expires_in, user: data.user }, expected)
+  markAuthResponse(data, session)
 }
 
 /**
@@ -129,18 +132,13 @@ export function clearAuthToken(): void {
  * @returns Authentication response with token and user data, or 2FA required response
  */
 export async function login(credentials: LoginRequest): Promise<LoginResponse> {
+  const expected = captureAuthSession()
   const { data } = await apiClient.post<LoginResponse>('/auth/login', credentials)
+  assertAuthSession(expected)
 
   // Only store token if 2FA is not required
   if (!isTotp2FARequired(data)) {
-    setAuthToken(data.access_token)
-    if (data.refresh_token) {
-      setRefreshToken(data.refresh_token)
-    }
-    if (data.expires_in) {
-      setTokenExpiresAt(data.expires_in)
-    }
-    localStorage.setItem('auth_user', JSON.stringify(data.user))
+    persistAuthResponse(data, expected)
   }
 
   return data
@@ -152,17 +150,11 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
  * @returns Authentication response with token and user data
  */
 export async function login2FA(request: TotpLogin2FARequest): Promise<AuthResponse> {
+  const expected = captureAuthSession()
   const { data } = await apiClient.post<AuthResponse>('/auth/login/2fa', request)
 
   // Store token and user data
-  setAuthToken(data.access_token)
-  if (data.refresh_token) {
-    setRefreshToken(data.refresh_token)
-  }
-  if (data.expires_in) {
-    setTokenExpiresAt(data.expires_in)
-  }
-  localStorage.setItem('auth_user', JSON.stringify(data.user))
+  persistAuthResponse(data, expected)
 
   return data
 }
@@ -173,17 +165,11 @@ export async function login2FA(request: TotpLogin2FARequest): Promise<AuthRespon
  * @returns Authentication response with token and user data
  */
 export async function register(userData: RegisterRequest): Promise<AuthResponse> {
+  const expected = captureAuthSession()
   const { data } = await apiClient.post<AuthResponse>('/auth/register', userData)
 
   // Store token and user data
-  setAuthToken(data.access_token)
-  if (data.refresh_token) {
-    setRefreshToken(data.refresh_token)
-  }
-  if (data.expires_in) {
-    setTokenExpiresAt(data.expires_in)
-  }
-  localStorage.setItem('auth_user', JSON.stringify(data.user))
+  persistAuthResponse(data, expected)
 
   return data
 }
@@ -202,6 +188,7 @@ export async function getCurrentUser() {
  * Optionally revokes the refresh token on the server
  */
 export async function logout(): Promise<void> {
+  const expected = captureAuthSession()
   const refreshToken = getRefreshToken()
 
   // Try to revoke the refresh token on the server
@@ -213,7 +200,7 @@ export async function logout(): Promise<void> {
     }
   }
 
-  clearAuthToken()
+  clearAuthToken(expected)
 }
 
 /**
@@ -306,6 +293,10 @@ export function hasPendingOAuthSuggestedProfile(
 }
 
 export function persistOAuthTokenContext(tokens: Partial<OAuthTokenResponse>): void {
+  if (tokens.access_token) {
+    replaceAuthSession({ accessToken: tokens.access_token, refreshToken: tokens.refresh_token, expiresIn: tokens.expires_in })
+    return
+  }
   if (tokens.refresh_token) {
     setRefreshToken(tokens.refresh_token)
   }

@@ -12,6 +12,7 @@
     </div>
 
     <div v-else class="space-y-6 p-6">
+      <OpsAdmissionNotice v-if="admission" :hint="admission" />
       <!-- Summary -->
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div class="rounded-xl bg-gray-50 p-4 dark:bg-dark-900">
@@ -233,6 +234,8 @@ import { useAppStore } from '@/stores'
 import { opsAPI, type OpsErrorDetail } from '@/api/admin/ops'
 import { formatDateTime } from '@/utils/format'
 import { resolveUpstreamPayload } from '../utils/errorDetailResponse'
+import OpsAdmissionNotice from './OpsAdmissionNotice.vue'
+import { getAdmissionHint } from '../utils/requestDiagnostics'
 
 interface Props {
   show: boolean
@@ -254,6 +257,7 @@ const appStore = useAppStore()
 
 const loading = ref(false)
 const detail = ref<OpsErrorDetail | null>(null)
+const admission = computed(() => detail.value ? getAdmissionHint(detail.value) : null)
 
 const showUpstreamList = computed(() => props.errorType === 'request')
 

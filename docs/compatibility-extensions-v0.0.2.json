@@ -1,0 +1,12 @@
+{
+  "version": "0.0.2",
+  "files": [
+    {
+      "path": "frontend/src/api/admin/ops.ts",
+      "before_sha256": "89ffebf64685c35efe48e09f457fad7607a7457d51d9a41b8c0643bb24525ce6",
+      "after_sha256": "55576d7b4a11c100d740eade9a047fb1adca942c9dd237a58bbf7d2cbba1a718",
+      "runtime_sha256": "807a525eca152a16c58bcd0f252258444b54481c7ee34e1f1afd82f8006128dc",
+      "reason": "Only optional request diagnostic types and recorded error-origin fields are added. Request methods, URLs and serialization stay unchanged."
+    }
+  ]
+}

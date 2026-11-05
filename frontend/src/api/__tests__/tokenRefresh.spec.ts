@@ -69,10 +69,10 @@ describe('refreshAuthTokens', () => {
 
   it('adopts tokens refreshed by another tab after acquiring the Web Lock', async () => {
     seedSession()
+    const sessions = await import('@/api/authSession')
+    const expected = sessions.captureAuthSession()
     const request = vi.fn(async (_name: string, callback: () => Promise<unknown>) => {
-      localStorage.setItem('auth_token', 'peer-access')
-      localStorage.setItem('token_expires_at', String(Date.now() + 3600_000))
-      localStorage.setItem('refresh_token', 'peer-refresh')
+      sessions.commitAuthTokenRotation(expected, { access_token: 'peer-access', refresh_token: 'peer-refresh', expires_in: 3600 })
       return callback()
     })
     Object.defineProperty(navigator, 'locks', {
@@ -110,13 +110,13 @@ describe('refreshAuthTokens', () => {
 
   it('recovers when a peer publishes the rotated token just after this request fails', async () => {
     seedSession()
+    const sessions = await import('@/api/authSession')
+    const expected = sessions.captureAuthSession()
     mockedPost.mockRejectedValueOnce(new Error('refresh token already used'))
     const { refreshAuthTokens } = await import('@/api/tokenRefresh')
 
     window.setTimeout(() => {
-      localStorage.setItem('auth_token', 'peer-access')
-      localStorage.setItem('token_expires_at', String(Date.now() + 3600_000))
-      localStorage.setItem('refresh_token', 'peer-refresh')
+      sessions.commitAuthTokenRotation(expected, { access_token: 'peer-access', refresh_token: 'peer-refresh', expires_in: 3600 })
     }, 10)
 
     await expect(
@@ -168,9 +168,11 @@ describe('refreshAuthTokens', () => {
 
     const rejection = expect(
       refreshAuthTokens({ failedAccessToken: 'old-access' })
-    ).rejects.toThrow('refresh token already used')
+    ).rejects.toMatchObject({ code: 'AUTH_SESSION_CHANGED' })
     await vi.advanceTimersByTimeAsync(1_100)
     await rejection
+    expect(localStorage.getItem('auth_token')).toBe('other-access')
+    expect(JSON.parse(localStorage.getItem('auth_user')!).id).toBe(8)
   })
 
   it('does not restore a session that was logged out while refresh was in flight', async () => {

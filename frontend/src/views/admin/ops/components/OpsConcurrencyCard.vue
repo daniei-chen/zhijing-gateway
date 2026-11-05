@@ -379,6 +379,7 @@ watch(
     </div>
 
     <!-- 错误提示 -->
+    <p v-if="!showByUser" class="mb-3 shrink-0 text-xs text-gray-500 dark:text-gray-400">{{ t('admin.ops.diagnostics.capacityHint') }}</p>
     <div v-if="errorMessage" class="mb-3 shrink-0 rounded-xl bg-red-50 p-2.5 text-xs text-red-600 dark:bg-red-900/20 dark:text-red-400">
       {{ errorMessage }}
     </div>

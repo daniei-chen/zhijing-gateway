@@ -2,6 +2,26 @@ export default {
     ops: {
       title: '运维监控',
       description: '运维监控与排障',
+      diagnostics: {
+        title: '请求时序', subtitle: '把上传、等待与首响应放到各自的计时口径中',
+        open: '查看时序', close: '收起时序', unknown: '未采集',
+        memorySource: '进程内采样', noSample: '阶段未采集',
+        missingHint: '此记录没有可匹配的阶段采样。旧后端、进程重启、过期、容量淘汰或重复编号均可能造成缺失；未采集不代表零等待。',
+        bodyInterrupted: '请求体读取出现中断。需要结合客户端与上传链路排查，不能仅据此判断上游故障。',
+        stageTitle: '阶段耗时 · 分别计时', milestoneTitle: '入站里程碑 · 从网关收到请求开始',
+        stages: { upload: '读取请求体', normalize: '解压与规范化', userWait: '个人并发等待', accountWait: '账号并发等待', connection: '上游连接等待' },
+        milestones: { bodyReady: '请求体就绪', routing: '开始调度', firstEvent: '首个事件', semantic: '首个语义事件', flush: '语义刷新到下游' },
+        forwardFirst: '转发首事件 · 原有口径', forwardHint: '保留 first_token_ms 的定义，不包含此前的上传等待。',
+        semanticHint: '里程碑是入站后的累计时间，不能与阶段耗时相加。语义事件可包含工具调用，不总是可见文字。',
+        retentionHint: '当前进程最多保留 {count} 条、最长 {hours} 小时；重启会清空，未匹配的数据保持未知。',
+        admissionTitle: '并发准入提示',
+        capacityHint: '下方为账号侧容量；实际请求还受个人与网关总并发限制。',
+        scope: { user: '个人并发已满', global: '网关并发已满', account: '账号并发等待已满', queue: '本地等待队列已满' },
+        limit: '上限 {n}', legacyBadge: '模板识别',
+        admissionAdvice: '先等待正在执行的请求完成，再按客户端退避提示重试；检查是否同时运行了多个任务或会话。',
+        recordedHint: '最终响应由网关本地并发准入拒绝。既有额度与并发策略继续生效，不据此惩罚上游账号。',
+        legacyHint: '按历史本地错误模板识别；原始归因和历史统计保持。此提示用于核对，不会修改记录或触发重试。',
+      },
       // Dashboard
       systemHealth: '系统健康',
       outputTps: '单次输出 TPS',
@@ -212,9 +232,9 @@ export default {
         memoryHigh: '内存使用率偏高 ({usage}%)',
         memoryHighImpact: '内存压力较大，需要关注',
         memoryHighAction: '监控内存趋势，检查是否有内存泄漏',
-        ttftHigh: '首 Token 时间偏高 ({ttft}ms)',
-        ttftHighImpact: '用户感知时长增加',
-        ttftHighAction: '优化请求处理流程，减少前置逻辑耗时',
+        ttftHigh: '转发首事件偏慢 ({ttft}ms)',
+        ttftHighImpact: '转发阶段的首响应等待增加',
+        ttftHighAction: '结合请求时序核对上传、调度与上游等待；单一指标不能定位原因',
         // Error rate diagnostics
         upstreamCritical: '上游错误率严重偏高 ({rate}%)',
         upstreamCriticalImpact: '可能影响大量用户请求',
@@ -827,7 +847,7 @@ export default {
         sla: '服务等级协议达成率，排除业务限制（如余额不足、配额超限）的成功请求占比。',
         errors: '错误统计，包括总错误数、错误率和上游错误率。',
         latency: '请求时长统计，包括 p50、p90、p95、p99 等百分位数。',
-        ttft: '首 Token 延迟（Time To First Token），衡量流式响应的首 Token 返回速度。',
+        ttft: '转发阶段的首事件指标（first_token_ms），不包含此前的上传等待，也不保证对应可见文字。',
         health: '系统健康评分（0-100），综合考虑 SLA、错误率和资源使用情况。'
       },
       charts: {
