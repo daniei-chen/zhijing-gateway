@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520" role="img" aria-labelledby="title desc">
+<title id="title">智境 ZHIJING · 复杂有序，智能从容。</title>
+<desc id="desc">紫蓝青色光场、半透明玻璃面板与智境 Z 标识。</desc>
+<defs>
+  <radialGradient id="purple"><stop stop-color="#9774df" stop-opacity=".2"/><stop offset="1" stop-color="#9774df" stop-opacity="0"/></radialGradient>
+  <radialGradient id="blue"><stop stop-color="#68b8dc" stop-opacity=".16"/><stop offset="1" stop-color="#68b8dc" stop-opacity="0"/></radialGradient>
+  <linearGradient id="rim" x2="1" y2="1"><stop stop-color="#fff" stop-opacity=".85"/><stop offset="1" stop-color="#b5b3e8" stop-opacity=".18"/></linearGradient>
+  <linearGradient id="lens" x2="1" y2="1"><stop stop-color="#9c7ce5" stop-opacity=".2"/><stop offset="1" stop-color="#72c2cb" stop-opacity=".09"/></linearGradient>
+  <filter id="shadow" x="-40%" y="-40%" width="180%" height="200%"><feDropShadow dx="0" dy="18" stdDeviation="21" flood-color="#372855" flood-opacity=".09"/></filter>
+</defs>
+<rect width="1600" height="520" rx="30" fill="#18151f"/>
+<ellipse cx="390" cy="120" rx="670" ry="510" fill="url(#purple)"/>
+<ellipse cx="1310" cy="280" rx="620" ry="490" fill="url(#blue)"/>
+<g font-family="Manrope, Noto Sans SC, Microsoft YaHei, sans-serif">
+  <rect x="76" y="62" width="57" height="57" rx="17" fill="#2c263b" fill-opacity=".7" stroke="#c8b6f239"/>
+  <text x="104" y="104" text-anchor="middle" fill="#c2a5ff" font-size="40" font-weight="750" font-style="italic">Z</text>
+  <text x="152" y="97" fill="#f0eafa" font-size="20" font-weight="600" letter-spacing="3">ZHIJING</text>
+  <text x="78" y="241" fill="#f0eafa" font-size="72" font-weight="650" letter-spacing="-3">复杂有序，</text>
+  <text x="78" y="332" fill="#c2a5ff" font-size="72" font-weight="650" letter-spacing="-3">智能从容。</text>
+  <text x="81" y="390" fill="#afa5c2" font-size="21">让接入、用量与每一次管理，都清晰可见。</text>
+  <text x="81" y="458" fill="#afa5c2" font-size="12" letter-spacing="3">YOUR WORK, IN FOCUS  /  智境前端工作区</text>
+  <g transform="translate(990 89) rotate(-7 150 150)" filter="url(#shadow)">
+    <rect width="328" height="310" rx="37" fill="#2c263b" fill-opacity=".65" stroke="url(#rim)" stroke-width="2"/>
+    <rect x="18" y="18" width="292" height="274" rx="27" fill="url(#lens)" stroke="#c8b6f239" stroke-opacity=".25"/>
+    <text x="164" y="194" text-anchor="middle" fill="#c2a5ff" font-size="130" font-weight="750" font-style="italic">Z</text>
+    <text x="164" y="251" text-anchor="middle" fill="#afa5c2" font-size="10" letter-spacing="4">ZHIJING / WORKSPACE</text>
+  </g>
+  <g filter="url(#shadow)">
+    <rect x="1290" y="139" width="211" height="81" rx="22" fill="#2c263b" fill-opacity=".8" stroke="url(#rim)"/>
+    <circle cx="1321" cy="180" r="5" fill="#32b49b"/>
+    <text x="1338" y="175" fill="#f0eafa" font-size="15" font-weight="600">每一处连接，有序发生</text>
+    <text x="1338" y="196" fill="#afa5c2" font-size="10" letter-spacing="1">CLEAR CONNECTIONS</text>
+    <rect x="938" y="365" width="276" height="71" rx="20" fill="#2c263b" fill-opacity=".8" stroke="url(#rim)"/>
+    <path d="M962 401h14l7-13 9 24 8-11h14" fill="none" stroke="#c2a5ff" stroke-width="2" stroke-linecap="round"/>
+    <text x="1031" y="395" fill="#f0eafa" font-size="14" font-weight="600">专注创造，其余井然。</text>
+    <text x="1031" y="415" fill="#afa5c2" font-size="10" letter-spacing="1">ROOM FOR YOUR NEXT IDEA</text>
+  </g>
+</g></svg>

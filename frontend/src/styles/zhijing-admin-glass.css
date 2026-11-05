@@ -1,0 +1,262 @@
+/* V6: admin presentation only. Native data, geometry, events and portals remain authoritative. */
+.z-admin-workspace, body:has(.z-admin-workspace) {
+  --zag-card: #ffffffdb;
+  --zag-glass: #ffffffb8;
+  --zag-field: #ffffffc7;
+  --zag-table: #fdfdff;
+  --zag-head: #f3f4fb;
+  --zag-hover: #f4f1ff;
+  --zag-selected: #eeebfc;
+  --zag-edge: #ffffffed;
+  --zag-line: #d8d9eaa8;
+  --zag-ink: #292637;
+  --zag-muted: #787489;
+  --zag-accent: #7857ce;
+  --zag-soft: #8a6bd50a;
+  --zag-light: linear-gradient(125deg, #ffffff42, #ffffff00 58%, #b1d2ee0a);
+  --zag-shadow: 0 10px 30px #33284e08, 0 2px 4px #33284e04, inset 0 1px 0 #ffffffed;
+  --zag-ease: cubic-bezier(.22,.8,.25,1);
+}
+.dark .z-admin-workspace, .dark body:has(.z-admin-workspace) {
+  --zag-card: #272432e8;
+  --zag-glass: #292635ce;
+  --zag-field: #211f2bdb;
+  --zag-table: #252230;
+  --zag-head: #2e293c;
+  --zag-hover: #342c46;
+  --zag-selected: #403451;
+  --zag-edge: #c6b7f32b;
+  --zag-line: #c1b5df20;
+  --zag-ink: #efeaf9;
+  --zag-muted: #b1a9c2;
+  --zag-accent: #c2a5ff;
+  --zag-soft: #b492ff0c;
+  --zag-light: linear-gradient(125deg, #ffffff07, #ffffff00 58%, #729ec108);
+  --zag-shadow: 0 12px 32px #08060e20, 0 2px 4px #08060e0a, inset 0 1px 0 #ffffff0c;
+}
+.z-admin-workspace {
+  --za-card: var(--zag-card);
+  --za-soft: var(--zag-soft);
+  --za-line: var(--zag-line);
+  --za-ink: var(--zag-ink);
+  --za-muted: var(--zag-muted);
+  --za-violet: var(--zag-accent);
+}
+
+/* Painted glass for large/data-dense surfaces: no per-row blur or new containing blocks. */
+.z-admin-workspace :is(.card, .z-table-filters, .z-table-shell, .z-data-card,
+  .z-admin-ops-summary, .z-admin-system-logs, .settings-tabs-shell),
+.z-admin-workspace .z-admin-ops-grid > div > div,
+.z-admin-workspace .z-admin-ops-analysis > div {
+  border: 1px solid var(--zag-line);
+  border-radius: 21px;
+  background: var(--zag-light), var(--zag-card);
+  box-shadow: var(--zag-shadow);
+}
+.z-admin-workspace .z-table-filters > .card { border: 0; background: transparent; box-shadow: none; }
+.z-admin-workspace .z-page-header { padding-block: 7px; gap: 14px 24px; }
+.z-admin-workspace .z-page-description { color: var(--zag-muted); }
+.z-admin-workspace .z-eyebrow { color: var(--zag-accent); letter-spacing: .17em; }
+.z-admin-workspace :is(.z-page-heading h2, .z-section-heading h3) { color: var(--zag-ink); }
+.z-admin-workspace .z-table-filters { padding: 16px 18px; }
+.z-admin-workspace .z-table-pagination {
+  padding: 10px 12px; border: 1px solid var(--zag-line); border-radius: 16px;
+  background: var(--zag-light), var(--zag-glass); box-shadow: inset 0 1px 0 var(--zag-edge);
+}
+.z-admin-workspace .z-table-pagination :is(button, .select-trigger) { border-radius: 10px; }
+.z-admin-workspace .z-data-card[data-selected=true] { background: var(--zag-selected); border-color: var(--zag-accent); }
+
+/* Tables retain native sticky cells, row measurements and bounded scrolling. */
+.z-admin-workspace .z-table-shell { background: var(--zag-table); }
+.z-admin-workspace table { background: transparent; }
+.z-admin-workspace table thead { background: var(--zag-head); }
+.z-admin-workspace table th { color: var(--zag-muted); font-size: 11px; letter-spacing: .015em; }
+.z-admin-workspace table :is(th, td) { border-color: var(--zag-line); }
+.z-admin-workspace table tbody tr:hover { background-color: var(--zag-hover); }
+.z-admin-workspace table td[class*="sticky"] { background-color: var(--zag-table); }
+.z-admin-workspace table th[class*="sticky"] { background-color: var(--zag-head); }
+.z-admin-workspace table tbody tr:hover > td[class*="sticky"] { background-color: var(--zag-hover); }
+.z-admin-workspace table tbody tr:has(input[type=checkbox]:checked) { background: var(--zag-selected); }
+.z-admin-workspace table tbody tr:has(input[type=checkbox]:checked) > td[class*="sticky"] { background: var(--zag-selected); }
+.z-admin-workspace table :is(.z-table-heading, .action-menu-trigger) { border-radius: 9px; }
+.z-admin-workspace table .z-table-heading { min-height: 28px; }
+.z-admin-workspace table td button.flex-col {
+  min-height: 40px; min-width: 36px; border: 1px solid transparent; border-radius: 10px;
+  transition: background-color .18s, border-color .18s, box-shadow .18s;
+}
+.z-admin-workspace table td button.flex-col:hover {
+  border-color: var(--zag-line); box-shadow: inset 0 1px 0 var(--zag-edge);
+}
+.z-admin-workspace table input[type=checkbox] { accent-color: #8663d4; border-radius: 5px; }
+.z-admin-workspace .z-table-shell :is(table, thead, tbody, tr, td, th) { backdrop-filter: none; }
+
+/* Controls share light edges, a clear focus ring, and restrained pressed feedback. */
+.z-admin-workspace .btn, body:has(.z-admin-workspace) .modal-content .btn {
+  min-height: 40px; border-radius: 12px; font-size: 12px; font-weight: 600;
+  box-shadow: inset 0 1px 0 var(--zag-edge);
+  transition: background-color .18s, border-color .18s, box-shadow .18s, transform .18s var(--zag-ease);
+}
+.z-admin-workspace .btn-sm, body:has(.z-admin-workspace) .modal-content .btn-sm { min-height: 32px; border-radius: 10px; }
+.z-admin-workspace .btn-primary, body:has(.z-admin-workspace) .modal-content .btn-primary {
+  border: 1px solid #9980df;
+  background: linear-gradient(135deg, #9875de, #7955c9 72%, #6c50c1);
+  color: #fff; box-shadow: inset 0 1px 0 #ffffff45, 0 4px 10px #7955c920;
+}
+.z-admin-workspace .btn-primary:hover:not(:disabled), body:has(.z-admin-workspace) .modal-content .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #a282e5, #815bd2 72%, #7457c8);
+  box-shadow: inset 0 1px 0 #ffffff65, 0 6px 16px #7955c92b;
+}
+.z-admin-workspace .btn-secondary, body:has(.z-admin-workspace) .modal-content .btn-secondary {
+  background: var(--zag-light), var(--zag-field); border: 1px solid var(--zag-line); color: var(--zag-ink);
+}
+.z-admin-workspace .btn-secondary:hover:not(:disabled), body:has(.z-admin-workspace) .modal-content .btn-secondary:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--zag-accent) 40%, var(--zag-line)); background-color: var(--zag-hover);
+}
+.z-admin-workspace .btn:active:not(:disabled), body:has(.z-admin-workspace) .modal-content .btn:active:not(:disabled) { transform: translateY(1px) scale(.985); }
+.z-admin-workspace :is(.input, .select-trigger, select, textarea),
+body:has(.z-admin-workspace) .modal-content :is(.input, .select-trigger, select, textarea) {
+  border-color: var(--zag-line); border-radius: 12px; background-color: var(--zag-field); color: var(--zag-ink);
+  box-shadow: inset 0 1px 2px #32244803, 0 1px 0 var(--zag-edge);
+  transition: background-color .18s, border-color .18s, box-shadow .18s;
+}
+.z-admin-workspace .select-trigger, body:has(.z-admin-workspace) .modal-content .select-trigger { min-height: 40px; }
+.z-admin-workspace :is(.input, .select-trigger, textarea):hover:not(:disabled),
+body:has(.z-admin-workspace) .modal-content :is(.input, .select-trigger, textarea):hover:not(:disabled) { border-color: color-mix(in srgb, var(--zag-accent) 32%, var(--zag-line)); }
+.z-admin-workspace :is(.input, .select-trigger, textarea):focus,
+body:has(.z-admin-workspace) .modal-content :is(.input, .select-trigger, textarea):focus { border-color: var(--zag-accent); box-shadow: 0 0 0 3px #8c6ad51a; }
+.z-admin-workspace :is(button, a, summary, input, select, textarea):focus-visible,
+body:has(.z-admin-workspace) :is(.modal-content, .select-dropdown-portal) :is(button, a, input, select, textarea, [role=option]):focus-visible { outline: 2px solid var(--zag-accent); outline-offset: 3px; }
+.z-admin-workspace :is(.input, .select-trigger):disabled,
+body:has(.z-admin-workspace) .modal-content :is(.input, .select-trigger):disabled { color: var(--zag-muted); background-color: var(--zag-soft); box-shadow: none; }
+
+/* Operations: a glass instrument panel with calm nested surfaces, not repeated white boxes. */
+.z-admin-workspace .z-admin-ops-summary { padding: 22px; border-radius: 25px; }
+.z-admin-workspace .z-admin-ops-toolbar {
+  padding: 0 0 18px; border-color: var(--zag-line); align-items: center; gap: 14px 22px;
+}
+.z-admin-workspace .z-admin-ops-toolbar h2 { color: var(--zag-ink); }
+.z-admin-workspace .z-admin-ops-toolbar button { border-radius: 11px; box-shadow: inset 0 1px 0 var(--zag-edge); }
+.z-admin-workspace .z-admin-ops-health {
+  border: 1px solid var(--zag-line); border-radius: 19px;
+  background: linear-gradient(115deg, #8d6ad50b, #629fdf08 65%, #56b7a50a), var(--zag-glass);
+  box-shadow: inset 0 1px 0 var(--zag-edge);
+}
+.z-admin-workspace .z-admin-ops-kpis > div {
+  border: 1px solid var(--zag-line); border-radius: 16px;
+  background: var(--zag-light), var(--zag-field); box-shadow: inset 0 1px 0 var(--zag-edge);
+}
+.z-admin-workspace .z-admin-ops-kpis > div:first-child { background: linear-gradient(115deg, #8a65d710, #6dbbb908), var(--zag-field); }
+.z-admin-workspace .z-admin-system-metrics > div, .z-admin-workspace .z-admin-log-config {
+  border-color: var(--zag-line); border-radius: 14px; background: var(--zag-soft); box-shadow: inset 0 1px 0 var(--zag-edge);
+}
+.z-admin-workspace .z-admin-ops-analysis > div > :first-child,
+.z-admin-workspace .z-admin-system-logs > :first-child { border-color: var(--zag-line); }
+.z-admin-workspace .z-admin-system-logs { padding: 22px; }
+.z-admin-workspace .z-admin-system-logs pre { border-radius: 12px; }
+
+/* Overview, configuration, billing and audit use the same material without changing their native layouts. */
+.z-admin-workspace .z-admin-intro {
+  border-color: var(--zag-edge); border-radius: 25px;
+  background: radial-gradient(ellipse at 80% 10%, #97bde91a, transparent 50%), linear-gradient(115deg, #9c7fe30c, #ffffff00 65%), var(--zag-card);
+  box-shadow: var(--zag-shadow);
+}
+.z-admin-workspace .z-admin-orbit-node { color: var(--zag-accent); border: 1px solid var(--zag-edge); background: var(--zag-light), var(--zag-glass); box-shadow: inset 0 1px 0 var(--zag-edge), 0 18px 36px #7258a624; }
+.z-admin-workspace .z-admin-orbit-ring { border-color: color-mix(in srgb, var(--zag-accent) 20%, transparent); }
+.z-admin-workspace .z-admin-kpis > .card::after { border-color: #9778d510; }
+.z-admin-workspace .z-admin-kpis > .card:nth-child(2)::after { border-color: #42b39c10; }
+.z-admin-workspace .z-admin-kpis > .card:nth-child(3)::after { border-color: #649be510; }
+.z-admin-workspace .z-admin-costs > .card { border-top-width: 1px; border-top-color: var(--zag-edge); }
+.z-admin-workspace .z-admin-costs > .card:nth-child(even) { border-top-color: var(--zag-edge); }
+.z-admin-workspace .z-admin-settings .settings-tabs-shell { border-radius: 20px; box-shadow: var(--zag-shadow); }
+.z-admin-workspace .z-admin-settings .settings-tab { border-radius: 12px; }
+.z-admin-workspace .z-admin-settings .settings-tab-active,
+.dark .z-admin-workspace .z-admin-settings .settings-tab-active { color: var(--zag-accent); background: var(--zg-lens); box-shadow: inset 0 1px 0 var(--zag-edge), inset 0 0 0 1px var(--zag-line); }
+.z-admin-workspace .z-admin-settings-save {
+  border-color: var(--zag-edge); border-radius: 18px; background: var(--zag-light), var(--zag-glass);
+  box-shadow: var(--zag-shadow), 0 8px 24px #33284e0a; backdrop-filter: blur(18px) saturate(140%);
+}
+.z-admin-workspace .z-admin-analytics-body .card { border-color: var(--zag-line); border-radius: 16px; background: var(--zag-field); }
+.z-admin-workspace .z-admin-usage-records > :first-child .border-primary-500 { color: var(--zag-accent); background: var(--zag-selected); box-shadow: inset 0 1px 0 var(--zag-edge); }
+.z-admin-workspace .z-admin-prompt-audit > header,
+.z-admin-workspace .z-admin-plugins > section:first-child { border-color: var(--zag-line); background: var(--zag-light), var(--zag-card); box-shadow: var(--zag-shadow); }
+
+/* Teleported surfaces are scoped by the active admin page. No modal/store changes. */
+body:has(.z-admin-workspace) .modal-overlay { background: #28213645; backdrop-filter: blur(7px) saturate(115%); }
+body:has(.z-admin-workspace) .modal-content.z-dialog,
+.dark body:has(.z-admin-workspace) .modal-content.z-dialog {
+  border: 1px solid var(--zag-edge); border-radius: 25px;
+  background: var(--zag-light), var(--zag-card); backdrop-filter: blur(24px) saturate(145%);
+  box-shadow: inset 0 1px 0 var(--zag-edge), 0 28px 100px #1c142a38, 0 4px 12px #1c142a12;
+}
+body:has(.z-admin-workspace) .modal-header,
+.dark body:has(.z-admin-workspace) .modal-header {
+  padding: 24px 26px 20px; border-color: var(--zag-line); background: linear-gradient(115deg, #9274db09, #79bdd307);
+}
+body:has(.z-admin-workspace) .modal-title,
+.dark body:has(.z-admin-workspace) .modal-title { color: var(--zag-ink); font-size: 19px; letter-spacing: -.035em; }
+body:has(.z-admin-workspace) .modal-body { padding: 22px 26px 26px; }
+body:has(.z-admin-workspace) .modal-footer,
+.dark body:has(.z-admin-workspace) .modal-footer {
+  padding: 16px 26px; gap: 10px; border-color: var(--zag-line); background: #8b70b905;
+}
+body:has(.z-admin-workspace) .modal-footer button { min-height: 40px; border-radius: 12px; }
+body:has(.z-admin-workspace) .z-dialog-close { margin-right: 0; border: 1px solid var(--zag-line); border-radius: 12px; background: var(--zag-field); }
+body:has(.z-admin-workspace) .z-dialog-close:hover { color: var(--zag-accent); background: var(--zag-hover); }
+body:has(.z-admin-workspace) .modal-content :is(.input-label, label) { color: var(--zag-ink); }
+body:has(.z-admin-workspace) .modal-content .input-hint { color: var(--zag-muted); }
+body:has(.z-admin-workspace) .select-dropdown-portal {
+  padding: 5px; border: 1px solid var(--zag-edge); border-radius: 16px; background: var(--zag-light), var(--zag-card);
+  backdrop-filter: blur(22px) saturate(145%); box-shadow: var(--zag-shadow), 0 18px 45px #21162f25;
+}
+body:has(.z-admin-workspace) .select-option { border-radius: 10px; }
+body:has(.z-admin-workspace) .select-option-selected { color: var(--zag-accent); background: var(--zag-selected); }
+body:has(.z-admin-workspace) .select-option:hover:not([aria-disabled=true]) { background: var(--zag-hover); }
+
+/* Legacy inline menus and teleported row actions keep their original positioning/z-order. */
+.z-admin-workspace :is(.z-table-filters, .z-page-actions) .absolute[class*=shadow][class*=bg-white],
+.z-admin-workspace .date-picker-dropdown,
+body:has(.z-admin-workspace) .action-menu-content {
+  padding: 5px; border: 1px solid var(--zag-edge); border-radius: 16px;
+  background: var(--zag-light), var(--zag-card); backdrop-filter: blur(22px) saturate(145%);
+  box-shadow: var(--zag-shadow), 0 18px 45px #21162f25;
+}
+.z-admin-workspace :is(.z-table-filters, .z-page-actions) .absolute[class*=shadow] > button,
+body:has(.z-admin-workspace) .action-menu-content button { border-radius: 10px; min-height: 34px; }
+body:has(.z-admin-workspace) .action-menu-content button:hover { background-color: var(--zag-hover); }
+.z-admin-workspace .z-admin-ops-health button { border-radius: 7px; background-image: linear-gradient(130deg, #ffffff24, #ffffff00); box-shadow: inset 0 1px 0 var(--zag-edge); }
+.dark body:has(.z-admin-workspace) .modal-content :is(.input, .select-trigger, select, textarea) { border-color: var(--zag-line); background-color: var(--zag-field); color: var(--zag-ink); }
+
+/* Native step-up verification is another panel, not another authentication implementation. */
+body:has(.z-admin-workspace) .z-stepup-backdrop { background: #28213645; backdrop-filter: blur(7px) saturate(115%); }
+body:has(.z-admin-workspace) .z-stepup-panel {
+  border: 1px solid var(--zag-edge); border-radius: 25px; background: var(--zag-light), var(--zag-card);
+  backdrop-filter: blur(24px) saturate(145%); box-shadow: var(--zag-shadow), 0 28px 100px #1c142a38;
+}
+body:has(.z-admin-workspace) .z-stepup-panel h3 { color: var(--zag-ink); }
+body:has(.z-admin-workspace) .z-stepup-code-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; max-width: 320px; margin-inline: auto; }
+body:has(.z-admin-workspace) .z-stepup-code-grid > input { min-width: 0; width: 100%; border-color: var(--zag-line); background: var(--zag-field); color: var(--zag-ink); border-radius: 11px; }
+body:has(.z-admin-workspace) .z-stepup-panel .btn-secondary { border-color: var(--zag-line); border-radius: 12px; background: var(--zag-field); color: var(--zag-ink); }
+
+@media (max-width: 767px) {
+  .z-admin-workspace :is(.z-table-filters, .z-admin-ops-summary, .z-admin-system-logs) { padding: 16px; border-radius: 19px; }
+  .z-admin-workspace :is(.btn, .select-trigger), body:has(.z-admin-workspace) .modal-content :is(.btn, .select-trigger) { min-height: 44px; }
+  .z-admin-workspace input.input, body:has(.z-admin-workspace) .modal-content input.input { min-height: 44px; font-size: 16px; }
+  body:has(.z-admin-workspace) .modal-content.z-dialog { border-radius: 22px; }
+  body:has(.z-admin-workspace) :is(.modal-header, .modal-body, .modal-footer) { padding-inline: 19px; }
+  body:has(.z-admin-workspace) .modal-footer { padding-bottom: max(16px, env(safe-area-inset-bottom)); flex-wrap: wrap; }
+  body:has(.z-admin-workspace) .modal-footer .btn { min-width: 82px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  body:has(.z-admin-workspace[data-motion=full]) .modal-enter-active .modal-content { transition: transform .3s var(--zag-ease), opacity .22s ease; }
+  body:has(.z-admin-workspace[data-motion=full]) .modal-enter-from .modal-content { transform: translateY(10px) scale(.985); }
+  body:has(.z-admin-workspace[data-motion=full]) .modal-leave-to .modal-content { transform: translateY(5px) scale(.99); }
+}
+body:has(.z-admin-workspace[data-motion=reduced]) :is(.modal-overlay, .modal-content, .select-dropdown-portal),
+body:has(.z-admin-workspace[data-motion=reduced]) :is(.modal-overlay, .modal-content, .select-dropdown-portal) * { animation: none !important; transition-duration: .01ms !important; }
+@media (prefers-reduced-motion: reduce) {
+  body:has(.z-admin-workspace) :is(.modal-overlay, .modal-content, .select-dropdown-portal),
+  body:has(.z-admin-workspace) :is(.modal-overlay, .modal-content, .select-dropdown-portal) * { animation: none !important; transition-duration: .01ms !important; }
+}
+@supports not (backdrop-filter: blur(1px)) {
+  body:has(.z-admin-workspace) :is(.modal-content.z-dialog, .select-dropdown-portal) { background: var(--zag-table); }
+}

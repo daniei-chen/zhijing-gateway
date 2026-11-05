@@ -1,0 +1,12 @@
+frontend/node_modules/
+frontend/dist/
+frontend/.cache/
+frontend/coverage/
+qa/runtime/
+__pycache__/
+*.pyc
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store

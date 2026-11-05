@@ -1,0 +1,273 @@
+/* V4 administration. Role + route scoped; native forms, tables and business states stay authoritative. */
+.z-admin-workspace {
+  --za-bg: #f5f7fc;
+  --za-card: #fff;
+  --za-soft: #f7f9fd;
+  --za-line: #e6eaf3;
+  --za-ink: #1b2440;
+  --za-muted: #77829b;
+  --za-blue: #4778ee;
+  --za-violet: #8063e7;
+  --za-mint: #21ae97;
+  background: radial-gradient(ellipse at 93% 0, #ecebff 0, transparent 37%), var(--za-bg);
+  color: var(--za-ink);
+}
+.dark .z-admin-workspace {
+  --za-bg: #101522;
+  --za-card: #191f30;
+  --za-soft: #1e2638;
+  --za-line: #2d354b;
+  --za-ink: #edf1fd;
+  --za-muted: #9da9c1;
+  --za-blue: #87a9ff;
+  --za-violet: #b39aff;
+  --za-mint: #65d7bd;
+  background: radial-gradient(ellipse at 93% 0, #24213c 0, transparent 38%), var(--za-bg);
+}
+.z-admin-workspace .z-console-main { max-width: 1800px; margin-inline: auto; padding: 24px 30px 30px; }
+.z-admin-workspace .z-admin-page { min-width: 0; width: 100%; max-width: none; }
+.z-admin-workspace .z-page-header { align-items: center; gap: 20px; margin-bottom: 0; padding: 6px 0 4px; }
+.z-admin-workspace .z-page-header-standalone { margin-bottom: 24px; }
+.z-admin-workspace .z-page-heading h2 { color: var(--za-ink); font-size: clamp(24px, 2vw, 30px); font-weight: 650; letter-spacing: -.055em; }
+.z-admin-workspace .z-eyebrow { color: var(--za-violet); font-size: 9px; font-weight: 650; letter-spacing: .2em; }
+.z-admin-workspace .z-page-description { color: var(--za-muted); font-size: 12px; line-height: 1.8; }
+.z-admin-workspace .card {
+  border: 1px solid var(--za-line);
+  border-radius: 22px;
+  background: var(--za-card);
+  box-shadow: 0 4px 18px #252f5210, 0 1px 2px #252f5203;
+}
+.z-admin-workspace .card > h3 { color: var(--za-ink); font-size: 13px; font-weight: 650; letter-spacing: -.015em; }
+.z-admin-workspace .btn { min-height: 38px; gap: 6px; border-radius: 12px; font-size: 12px; font-weight: 550; box-shadow: none; transition: background .18s, border-color .18s, transform .18s; }
+.z-admin-workspace .btn:active:not(:disabled) { transform: scale(.97); }
+.z-admin-workspace .btn-primary { border: 1px solid #8475e8; background: linear-gradient(120deg, #6961d9, #8a71e8); color: #fff; box-shadow: 0 4px 10px #7962db20; }
+.z-admin-workspace .btn-primary:hover:not(:disabled) { background: linear-gradient(120deg, #5854c9, #7a5bdc); box-shadow: 0 5px 15px #7962db36; }
+.z-admin-workspace .btn-secondary { border-color: var(--za-line); background: var(--za-card); color: var(--za-ink); }
+.z-admin-workspace .btn-secondary:hover:not(:disabled) { background: var(--za-soft); border-color: #9eabe0; }
+.z-admin-workspace :is(.input, .select, .form-input) { border-color: var(--za-line); border-radius: 11px; background-color: var(--za-card); color: var(--za-ink); font-size: 12px; box-shadow: none; }
+.z-admin-workspace :is(.input, .select, .form-input):focus { border-color: var(--za-violet); box-shadow: 0 0 0 3px #8b72e814; }
+.z-admin-workspace input.input:not([type=checkbox]):not([type=radio]) { min-height: 39px; }
+.z-admin-workspace :is(button, a, summary, input, select, textarea):focus-visible { outline: 2px solid var(--za-blue); outline-offset: 3px; }
+.z-admin-workspace button:disabled { cursor: not-allowed; }
+
+/* Floating navigation islands; preserve the native nested menus and mobile focus management. */
+.z-admin-workspace .sidebar { background: transparent; }
+.z-admin-workspace .sidebar-nav { padding: 5px 14px 14px; }
+.z-admin-workspace .sidebar-section.z-admin-nav-island { position: relative; isolation: isolate; margin-bottom: 10px; padding: 7px; border: 1px solid var(--za-line); border-radius: 20px; background: var(--za-card); box-shadow: 0 2px 10px #25335703; }
+.z-admin-workspace .z-admin-nav-island > :not(.z-admin-nav-marker) { position: relative; z-index: 1; }
+.z-admin-workspace .z-admin-nav-marker { position: absolute; z-index: 0; top: 0; left: 7px; right: 7px; pointer-events: none; opacity: 0; border-radius: 12px; background: linear-gradient(100deg, #eeebff, #f4f3ff); box-shadow: inset 0 0 0 1px #e3ddfa; transition: transform .32s cubic-bezier(.22,.8,.25,1), height .25s, opacity .2s; }
+.z-admin-workspace .z-admin-nav-marker[data-visible=true] { opacity: 1; }
+.dark .z-admin-workspace .z-admin-nav-marker { background: linear-gradient(100deg, #343052, #2a2842); box-shadow: inset 0 0 0 1px #49416e; }
+.z-admin-workspace .z-admin-nav-island:has(> .z-admin-nav-marker[data-visible=true]) .sidebar-link-active { background: transparent; box-shadow: none; }
+.z-admin-workspace .z-admin-nav-island:has(> .z-admin-nav-marker[data-visible=true]) .sidebar-link-active::before { display: none; }
+.z-admin-workspace .z-admin-nav-marker::before { content: ''; position: absolute; top: calc(50% - 6px); left: -4px; height: 12px; width: 3px; border-radius: 4px; background: var(--za-violet); }
+.z-admin-workspace[data-motion=reduced] .z-admin-nav-marker { transition: none; }
+.z-admin-workspace .z-admin-nav-title { margin: 8px 9px 9px; color: var(--za-muted); font-size: 9px; font-weight: 600; letter-spacing: .1em; }
+.z-admin-workspace .sidebar-link { position: relative; min-height: 39px; margin-bottom: 3px; padding: 10px 11px; border-radius: 12px; color: var(--za-muted); font-size: 12px; transition: color .2s, background .2s, transform .2s; }
+.z-admin-workspace .sidebar-link:hover { color: var(--za-ink); background: var(--za-soft); transform: translateX(2px); }
+.z-admin-workspace .sidebar-link.sidebar-link-active { color: #7157d4; background: linear-gradient(100deg, #eeebff, #f4f3ff); box-shadow: inset 0 0 0 1px #e3ddfa; font-weight: 600; }
+.dark .z-admin-workspace .sidebar-link.sidebar-link-active { color: #c3b4ff; background: linear-gradient(100deg, #343052, #2a2842); box-shadow: inset 0 0 0 1px #49416e; }
+.z-admin-workspace .sidebar-link-active::before { content: ''; position: absolute; left: -4px; top: 14px; width: 3px; height: 13px; border-radius: 4px; background: var(--za-violet); }
+.z-admin-workspace .z-admin-nav-children { margin-left: 16px; border-color: var(--za-line); }
+.z-admin-workspace .z-admin-nav-children .sidebar-link { min-height: 34px; padding: 8px 9px; font-size: 11px; }
+.z-admin-workspace .sidebar-link svg { width: 17px; height: 17px; }
+.z-admin-workspace .sidebar-header { margin-bottom: 12px; border-color: var(--za-line); background: var(--za-card); }
+.z-admin-workspace .z-header { border-color: var(--za-line); background: color-mix(in srgb, var(--za-card) 94%, transparent); }
+.z-admin-workspace .z-workspace-footer { color: var(--za-muted); margin-top: 26px; border-top: 1px solid var(--za-line); }
+
+/* Overview: a quiet brand canvas, operational counters, then detailed analysis. */
+.z-admin-workspace .z-admin-intro { position: relative; display: flex; align-items: center; justify-content: space-between; min-height: 210px; overflow: hidden; padding: 32px 38px; border: 1px solid #d7def5; border-radius: 26px; background: linear-gradient(115deg, #f9faff 10%, #eef2ff 65%, #eae8ff); }
+.dark .z-admin-workspace .z-admin-intro { border-color: #3b3c61; background: linear-gradient(115deg, #20253d, #2a2c4b 65%, #373054); }
+.z-admin-workspace .z-admin-intro-copy { position: relative; z-index: 1; }
+.z-admin-workspace .z-admin-intro h2 { margin-top: 15px; color: var(--za-ink); font-size: clamp(24px, 2.3vw, 37px); font-weight: 600; letter-spacing: -.06em; }
+.z-admin-workspace .z-admin-intro-copy > p:not(.z-eyebrow) { margin-top: 12px; color: var(--za-muted); font-size: 12px; line-height: 1.8; }
+.z-admin-workspace .z-admin-intro-label { display: inline-flex; align-items: center; gap: 7px; margin-top: 23px; color: #7c7ca1; font-size: 9px; letter-spacing: .06em; }
+.z-admin-workspace .z-admin-intro-label i { width: 5px; height: 5px; border-radius: 5px; background: #9383d9; }
+.z-admin-workspace .z-admin-orbit { position: absolute; width: 360px; height: 210px; right: 55px; top: 5px; }
+.z-admin-workspace .z-admin-orbit-ring { position: absolute; width: 175px; height: 175px; top: 15px; left: 90px; border: 1px solid #abade842; border-radius: 50%; transform: rotate(-30deg) scaleX(1.65); }
+.z-admin-workspace .z-admin-orbit-ring + .z-admin-orbit-ring { transform: rotate(30deg) scaleX(1.65); }
+.z-admin-workspace .z-admin-orbit-node { position: absolute; display: grid; place-items: center; inset: 60px auto auto 140px; width: 80px; height: 80px; color: #fff; background: linear-gradient(140deg, #a28ef2, #6869d4); border-radius: 25px; box-shadow: 0 20px 45px #7775cc30, inset 0 2px 2px #ffffff80; font-size: 44px; font-weight: 750; font-style: italic; transform: rotate(-8deg); }
+.z-admin-workspace .z-admin-orbit i { position: absolute; width: 11px; height: 11px; border: 3px solid #fff; border-radius: 50%; background: #4ca1d7; top: 45px; left: 75px; box-shadow: 0 2px 9px #7775cc30; }
+.z-admin-workspace .z-admin-orbit i:nth-of-type(2) { top: 165px; left: 230px; background: #62c6b6; }
+.z-admin-workspace .z-admin-orbit i:nth-of-type(3) { top: 60px; left: 285px; width: 8px; height: 8px; background: #a48ce5; }
+.z-admin-workspace .z-admin-orbit svg { position: absolute; inset: 25px 0 0; opacity: .35; }
+.z-admin-workspace .z-admin-orbit path { stroke: #8395e2; stroke-width: 1; }
+.z-admin-workspace .z-admin-orbit path + path { stroke: #41b7b2; }
+.z-admin-workspace .z-admin-kpis > .card { position: relative; min-height: 135px; overflow: hidden; padding: 22px; }
+.z-admin-workspace .z-admin-kpis > .card::after { content: ''; position: absolute; width: 64px; height: 64px; right: -22px; bottom: -28px; border: 8px solid #eaf0ff; border-radius: 50%; }
+.z-admin-workspace .z-admin-kpis > .card:nth-child(2)::after { border-color: #e1f6f0; }
+.z-admin-workspace .z-admin-kpis > .card:nth-child(3)::after { border-color: #efebfc; }
+.z-admin-workspace .z-admin-kpis > .card:nth-child(4)::after { border-color: #e5f2fb; }
+.dark .z-admin-workspace .z-admin-kpis > .card::after { opacity: .1; }
+.z-admin-workspace .z-admin-kpis .text-2xl { margin-top: 6px; font-size: 29px; font-weight: 650; letter-spacing: -.05em; }
+.z-admin-workspace .z-admin-costs > .card { padding: 20px; border-top: 2px solid #d5dffa; }
+.z-admin-workspace .z-admin-costs > .card:nth-child(even) { border-top-color: #d7cffa; }
+.z-admin-workspace .z-admin-dashboard .z-admin-chart-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); }
+.z-admin-workspace .z-admin-dashboard .z-admin-chart-grid > .card { padding: 24px; }
+.z-admin-workspace .z-admin-dashboard .z-admin-chart-grid .h-48 { height: 240px; }
+
+/* All native data registers share a calm filter bar and a bounded scroll surface. */
+.z-admin-workspace .table-page-layout.z-admin-page,
+.z-admin-workspace .z-admin-page .table-page-layout { height: auto; min-height: 0; gap: 20px; }
+.z-admin-workspace .z-admin-channels-monitor .table-page-layout > .z-page-header { display: none; }
+.z-admin-workspace .z-admin-page .layout-section-scrollable { flex: none; min-width: 0; }
+.z-admin-workspace .z-admin-page .z-table-filters { padding: 18px; border: 1px solid var(--za-line); border-radius: 19px; background: var(--za-card); }
+.z-admin-workspace .z-admin-page .z-table-filters > .card { padding: 0; border: 0; background: transparent; box-shadow: none; }
+.z-admin-workspace .z-admin-page .z-table-shell { height: clamp(300px, 55dvh, 620px); min-height: 300px; border-radius: 19px; box-shadow: 0 4px 18px #252f5207; }
+.z-admin-workspace .z-admin-page .z-table-pagination { margin-top: -5px; padding: 0 4px; }
+.z-admin-workspace table { font-size: 12px; }
+.z-admin-workspace table thead { background: var(--za-soft); }
+.z-admin-workspace table :is(th, td) { border-color: var(--za-line); }
+.z-admin-workspace table th { color: var(--za-muted); font-size: 10px; font-weight: 600; letter-spacing: .02em; }
+.z-admin-workspace table td { padding-top: 16px; padding-bottom: 16px; }
+.z-admin-workspace table tbody tr { transition: background .16s; }
+.z-admin-workspace table tbody tr:hover { background-color: var(--za-soft); }
+.z-admin-workspace table :is(.badge, [class*=rounded-full]) { font-size: 10px; }
+.z-admin-workspace .z-table-overview { padding: 0; }
+.z-admin-workspace .z-admin-usage-records { overflow: visible; }
+.z-admin-workspace .z-admin-usage-records > :first-child { gap: 6px; padding: 10px 16px; border-color: var(--za-line); }
+.z-admin-workspace .z-admin-usage-records > :first-child button { margin: 0; padding: 9px 14px; border: 0; border-radius: 10px; }
+.z-admin-workspace .z-admin-usage-records > :first-child .border-primary-500 { background: #eeebfb; color: #7556cf; }
+.dark .z-admin-workspace .z-admin-usage-records > :first-child .border-primary-500 { background: #35304f; color: #beacfa; }
+.z-admin-workspace .z-admin-analytics { overflow: hidden; }
+.z-admin-workspace .z-admin-analytics-heading { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; color: var(--za-ink); font-size: 13px; font-weight: 600; list-style: none; cursor: pointer; }
+.z-admin-workspace .z-admin-analytics-heading::-webkit-details-marker { display: none; }
+.z-admin-workspace .z-admin-analytics-heading .z-eyebrow { display: block; margin-bottom: 6px; font-size: 8px; }
+.z-admin-workspace .z-admin-analytics-heading svg { transition: transform .2s; }
+.z-admin-workspace .z-admin-analytics[open] > summary svg { transform: rotate(180deg); }
+.z-admin-workspace .z-admin-analytics-body { padding: 0 20px 20px; }
+.z-admin-workspace .z-admin-analytics-body > div { gap: 18px; }
+.z-admin-workspace .z-admin-analytics-body .card { box-shadow: none; background: var(--za-soft); border-color: transparent; }
+
+/* Ops: separate the live pulse, request KPIs and host health instead of stretching one block. */
+.z-admin-workspace .z-admin-ops-summary { padding: 24px; border: 1px solid var(--za-line); background: var(--za-card); box-shadow: 0 4px 18px #252f5207; }
+.z-admin-workspace .z-admin-ops-toolbar { align-items: flex-start; border-color: var(--za-line); padding-bottom: 20px; gap: 20px; }
+.z-admin-workspace .z-admin-ops-toolbar h2 { margin-top: 9px; color: var(--za-ink); font-size: 25px; font-weight: 650; letter-spacing: -.05em; }
+.z-admin-workspace .z-admin-ops-toolbar h2 > svg { display: none; }
+.z-admin-workspace .z-admin-ops-toolbar > div:last-child { max-width: 100%; }
+.z-admin-workspace .z-admin-ops-toolbar button { min-height: 36px; border-radius: 10px; }
+.z-admin-workspace .z-admin-ops-vitals { display: flex; flex-direction: column; gap: 18px; }
+.z-admin-workspace .z-admin-ops-health { padding: 16px 24px; background: linear-gradient(105deg, var(--za-soft), color-mix(in srgb, var(--za-violet) 6%, var(--za-card))); border: 1px solid var(--za-line); }
+.z-admin-workspace .z-admin-ops-health > .grid { grid-template-columns: 160px minmax(0, 1fr); gap: 26px; }
+.z-admin-workspace .z-admin-ops-health > .grid > div:last-child { display: block; }
+.z-admin-workspace .z-admin-ops-health > .grid > div:last-child > div:first-child { grid-column: 1 / -1; margin-bottom: 12px; }
+.z-admin-workspace .z-admin-ops-health > .grid > div:last-child > div:nth-child(2) { display: grid; grid-template-columns: minmax(160px, 1fr) minmax(180px, 1fr); gap: 30px; margin: 0; }
+.z-admin-workspace .z-admin-ops-health > .grid > div:last-child > div:nth-child(2) > div { margin-top: 0; }
+.z-admin-workspace .z-admin-ops-kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.z-admin-workspace .z-admin-ops-kpis > div { min-width: 0; padding: 17px; border: 1px solid var(--za-line); background: var(--za-card); border-radius: 16px; }
+.z-admin-workspace .z-admin-ops-kpis > div:first-child { grid-column: span 2; background: linear-gradient(105deg, var(--za-soft), var(--za-card)); }
+.z-admin-workspace .z-admin-ops-kpis .text-3xl { font-size: 25px; letter-spacing: -.04em; }
+.z-admin-workspace .z-admin-system-metrics { gap: 10px; }
+.z-admin-workspace .z-admin-system-metrics > div { padding: 14px; border: 1px solid var(--za-line); border-radius: 14px; background: var(--za-soft); }
+.z-admin-workspace .z-admin-ops-grid > div > div,
+.z-admin-workspace .z-admin-ops-analysis > div { border: 1px solid var(--za-line); border-radius: 20px; background: var(--za-card); box-shadow: 0 4px 18px #252f5207; }
+.z-admin-workspace .z-admin-ops-grid { gap: 18px; }
+.z-admin-workspace .z-admin-ops-analysis { gap: 18px; }
+.z-admin-workspace .z-admin-system-logs { padding: 24px; border-color: var(--za-line); border-radius: 22px; background: var(--za-card); }
+.z-admin-workspace .z-admin-log-config { border-color: var(--za-line); background: var(--za-soft); }
+.z-admin-workspace .z-admin-log-config-title { margin: 0; padding: 3px; list-style: none; cursor: pointer; }
+.z-admin-workspace .z-admin-log-config-title::after { content: '+'; margin-left: auto; color: var(--za-violet); font-size: 17px; font-weight: 500; }
+.z-admin-workspace .z-admin-log-config[open] > summary { margin-bottom: 18px; }
+.z-admin-workspace .z-admin-log-config[open] > summary::after { content: '−'; }
+.z-admin-workspace .z-admin-log-config-title::-webkit-details-marker { display: none; }
+.z-admin-ops-fullscreen { padding: 12px; }
+
+/* Settings: keep native tab keyboard support and the original save boundaries. */
+.z-admin-workspace .z-admin-settings { max-width: 1440px; }
+.z-admin-workspace .z-admin-settings .settings-tabs-shell { margin-inline: 0; border: 1px solid var(--za-line); background: var(--za-card); box-shadow: 0 4px 18px #252f5207; }
+.z-admin-workspace .z-admin-settings .settings-tabs { min-width: max-content; gap: 5px; }
+.z-admin-workspace .z-admin-settings .settings-tab { flex: none; min-width: auto; justify-content: flex-start; height: 41px; padding-inline: 12px; color: var(--za-muted); font-size: 12px; border-radius: 10px; }
+.z-admin-workspace .z-admin-settings .settings-tab-active { border-color: transparent; background: #eeebfb; color: #7757d6; box-shadow: none; }
+.dark .z-admin-workspace .z-admin-settings .settings-tab-active { background: #34304e; color: #c5b1ff; }
+.z-admin-workspace .z-admin-settings .settings-tab-active::after { display: none; }
+.z-admin-workspace .z-admin-settings .settings-tab-icon { background: transparent; }
+.z-admin-workspace .z-admin-settings-save { position: sticky; bottom: 18px; z-index: 15; padding: 12px 16px; border: 1px solid var(--za-line); border-radius: 17px; background: color-mix(in srgb, var(--za-card) 95%, transparent); box-shadow: 0 5px 25px #1d254818; }
+.z-admin-workspace .z-admin-settings .card > div:first-child:has(> h3) { padding: 20px 24px; border-color: var(--za-line); }
+.z-admin-workspace .z-admin-settings .card > div:first-child > h3 { font-size: 14px; font-weight: 600; }
+.z-admin-workspace .z-admin-settings .card > div:first-child > p { color: var(--za-muted); font-size: 12px; line-height: 1.8; }
+.z-admin-workspace .z-admin-settings .card > div:nth-child(2) { padding: 24px; }
+.z-admin-workspace .z-admin-orders-dashboard .card { padding: 24px; }
+.z-admin-workspace .z-admin-orders-plans > .flex:first-child { margin-bottom: 16px; }
+.z-admin-workspace .z-admin-plugins > section:first-child { padding: 24px; border: 1px solid var(--za-line); border-radius: 24px; background: linear-gradient(110deg, var(--za-card), var(--za-soft)); }
+.z-admin-workspace .z-admin-prompt-audit > header { padding: 24px; border: 1px solid var(--za-line); border-radius: 24px; background: var(--za-card); }
+.z-admin-workspace .z-admin-channels-monitor > .page-header { border: 1px solid var(--za-line); background: linear-gradient(105deg, var(--za-card), var(--za-soft)); box-shadow: 0 4px 18px #252f5207; }
+
+/* Native dialogs teleport to body; restrict their visual extension to an active admin workspace. */
+body:has(.z-admin-workspace) .modal-overlay { background: #141d394d; backdrop-filter: blur(5px); }
+body:has(.z-admin-workspace) .modal-content.z-dialog { border: 1px solid #e3e8f3; border-radius: 25px; box-shadow: 0 30px 100px #18234940; }
+body:has(.z-admin-workspace) .modal-header { padding: 22px 26px; border-bottom-color: #e8ecf4; background: linear-gradient(100deg, #fafbff, #f5f3ff); }
+body:has(.z-admin-workspace) .modal-title { color: #27314b; font-size: 18px; font-weight: 600; letter-spacing: -.035em; }
+body:has(.z-admin-workspace) .modal-body { padding: 24px 26px; }
+body:has(.z-admin-workspace) .modal-footer { padding: 16px 26px; border-top-color: #e8ecf4; background: #fafbfe; }
+body:has(.z-admin-workspace) .modal-content .input { border-radius: 11px; border-color: #e0e5f1; }
+body:has(.z-admin-workspace) .modal-content .btn { min-height: 38px; border-radius: 11px; font-size: 12px; }
+body:has(.z-admin-workspace) .modal-content .btn-primary { border-color: #8475e8; background: linear-gradient(120deg, #6961d9, #8a71e8); color: white; }
+.dark body:has(.z-admin-workspace) .modal-content.z-dialog { border-color: #343c53; background: #191f30; }
+.dark body:has(.z-admin-workspace) .modal-header { border-color: #303950; background: linear-gradient(100deg, #1c2336, #28223b); }
+.dark body:has(.z-admin-workspace) .modal-title { color: #edf1fd; }
+.dark body:has(.z-admin-workspace) .modal-footer { border-color: #303950; background: #161c2b; }
+.dark body:has(.z-admin-workspace) .modal-content .input { border-color: #343c53; background: #20283b; }
+
+@media (min-width: 1280px) {
+  .z-admin-workspace .z-admin-settings-form { display: grid; grid-template-columns: 190px minmax(0, 1fr); align-items: start; gap: 20px 26px; }
+  .z-admin-workspace .z-admin-page.z-admin-settings .z-admin-settings-form > * { margin-top: 0; }
+  .z-admin-workspace .z-admin-settings-form > :not(.settings-tabs-shell) { grid-column: 2; }
+  .z-admin-workspace .z-admin-settings .settings-tabs-shell { position: sticky; top: 104px; grid-column: 1; grid-row: 1 / span 2; max-height: calc(100dvh - 128px); padding: 8px; overflow: auto; }
+  .z-admin-workspace .z-admin-settings .settings-tabs { flex-direction: column; align-items: stretch; min-width: 0; }
+  .z-admin-workspace .z-admin-settings .settings-tab { width: 100%; }
+  .z-admin-workspace .z-admin-ops-grid > div:last-child { order: -1; }
+}
+@media (max-width: 1279px) {
+  .z-admin-workspace .z-console-main { padding-inline: 22px; }
+  .z-admin-workspace .z-admin-orbit { right: -40px; opacity: .75; }
+  .z-admin-workspace .z-admin-intro-copy { max-width: 68%; }
+  .z-admin-workspace .z-admin-ops-kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .z-admin-workspace .z-admin-ops-kpis > div:first-child { grid-column: span 3; }
+  .z-admin-workspace .z-admin-ops-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .z-admin-workspace .z-admin-ops-grid > div:last-child { grid-column: 1 / -1; }
+  .z-admin-workspace .z-admin-ops-health > .grid > div:last-child { display: block; }
+  .z-admin-workspace .z-admin-ops-health > .grid > div:last-child > div:nth-child(2) { display: block; }
+}
+@media (max-width: 767px) {
+  .z-admin-workspace .z-console-main { padding: 18px 14px 24px; }
+  .z-admin-workspace .sidebar { background: var(--za-bg); }
+  .z-admin-workspace .z-page-header { flex-wrap: wrap; gap: 16px; }
+  .z-admin-workspace .z-page-header .z-page-actions { width: 100%; justify-content: flex-start; }
+  .z-admin-workspace .z-admin-intro { padding: 26px; min-height: 210px; }
+  .z-admin-workspace .z-admin-intro-copy { max-width: 100%; }
+  .z-admin-workspace .z-admin-intro h2 { font-size: 25px; }
+  .z-admin-workspace .z-admin-orbit { right: -165px; top: 40px; opacity: .13; }
+  .z-admin-workspace .z-admin-kpis > .card { min-height: 125px; padding: 17px; }
+  .z-admin-workspace .z-admin-kpis .text-2xl { font-size: 25px; }
+  .z-admin-workspace .z-admin-costs > .card { padding: 17px; }
+  .z-admin-workspace .z-admin-dashboard .z-admin-chart-grid { grid-template-columns: minmax(0, 1fr); }
+  .z-admin-workspace .z-admin-page .z-table-filters { padding: 14px; }
+  .z-admin-workspace .z-admin-page .z-table-shell { height: 480px; min-height: 300px; max-height: 68dvh; }
+  .z-admin-workspace .z-admin-ops-summary { padding: 18px; }
+  .z-admin-workspace .z-admin-ops-toolbar > div:last-child { gap: 8px; }
+  .z-admin-workspace .z-admin-ops-health { padding: 15px; }
+  .z-admin-workspace .z-admin-ops-health > .grid { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .z-admin-workspace .z-admin-ops-health > .grid > div:first-child { padding: 0; }
+  .z-admin-workspace .z-admin-ops-health > .grid > div:last-child { display: block; padding: 0; }
+  .z-admin-workspace .z-admin-ops-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .z-admin-workspace .z-admin-ops-kpis > div:first-child { grid-column: span 2; }
+  .z-admin-workspace .z-admin-system-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .z-admin-workspace .z-admin-ops-grid { grid-template-columns: minmax(0, 1fr); }
+  .z-admin-workspace .z-admin-settings-save { bottom: 10px; }
+  .z-admin-workspace .z-admin-settings .card > div:nth-child(2) { padding: 18px; }
+  .z-admin-workspace .z-admin-analytics-body { padding-inline: 12px; }
+  body:has(.z-admin-workspace) :is(.modal-header, .modal-body, .modal-footer) { padding-inline: 18px; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .z-admin-workspace[data-motion=full] .z-admin-orbit-node { animation: za-float 7s ease-in-out infinite; }
+  .z-admin-workspace[data-motion=full] .z-admin-orbit i { animation: za-drift 6s ease-in-out infinite; }
+  .z-admin-workspace[data-motion=full] .z-admin-orbit i:nth-of-type(2) { animation-delay: -3s; }
+  .z-admin-workspace[data-motion=full] .z-admin-page { animation: za-arrive .35s ease-out both; }
+  @keyframes za-float { 50% { transform: translateY(-7px) rotate(-4deg); } }
+  @keyframes za-drift { 50% { transform: translateY(8px); } }
+  @keyframes za-arrive { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+}
+.z-admin-workspace[data-motion=reduced] :is(.animate-ping, .z-admin-orbit *) { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .z-admin-workspace *, .z-admin-workspace *::before, .z-admin-workspace *::after { animation: none !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

@@ -1,0 +1,97 @@
+/* Shared authentication presentation. Native forms and authentication handlers stay intact. */
+.zj-login.zj-liquid-auth[data-motion] {
+  --z-auth-glass: #ffffffc7;
+  --z-auth-edge: #ffffffeb;
+  --z-auth-field: #ffffffb8;
+  --z-auth-rim: #c9c2e14f;
+  --z-auth-shadow: 0 16px 48px #42305c0a, 0 2px 6px #42305c04, inset 0 1px 0 #fffffff0;
+  padding-top: 24px; padding-bottom: 24px;
+  background-color: #f3f4fa;
+  background-image: radial-gradient(ellipse 750px 650px at 0 15%, #c7b6ee45, transparent 80%), radial-gradient(ellipse 600px 500px at 100% 30%, #b9d9ef38, transparent 80%), radial-gradient(ellipse 600px 400px at 60% 100%, #b6dedd26, transparent 80%);
+}
+.dark .zj-login.zj-liquid-auth[data-motion] {
+  --z-auth-glass: #26232fd9;
+  --z-auth-edge: #ffffff16;
+  --z-auth-field: #15131d66;
+  --z-auth-rim: #c9b8f12b;
+  --z-auth-shadow: 0 18px 48px #09061126, 0 2px 6px #09061112, inset 0 1px 0 #ffffff0c;
+  background-color: #19171f;
+  background-image: radial-gradient(ellipse 750px 650px at 0 15%, #7557ae22, transparent 80%), radial-gradient(ellipse 600px 500px at 100% 30%, #3b7faf18, transparent 80%);
+}
+.zj-login.zj-liquid-auth > header {
+  position: relative; z-index: 20;
+  min-height: 62px; padding: 12px 18px; border: 1px solid var(--z-auth-edge); border-radius: 20px;
+  background: var(--z-surface); background: var(--z-auth-glass); box-shadow: var(--z-auth-shadow);
+  -webkit-backdrop-filter: blur(20px) saturate(150%); backdrop-filter: blur(20px) saturate(150%);
+}
+.zj-login.zj-liquid-auth .zj-brand { min-height: 36px; }
+.zj-login.zj-liquid-auth .zj-brand > span { letter-spacing: .01em; }
+.zj-login.zj-liquid-auth .zj-login-tools { gap: 12px; }
+.zj-login.zj-liquid-auth .zj-back { min-height: 36px; padding: 7px 11px; border: 1px solid var(--z-auth-rim); border-radius: 11px; background: var(--z-auth-field); }
+.zj-login.zj-liquid-auth .zj-login-tools button { min-height: 36px; border-radius: 11px; }
+.zj-login.zj-liquid-auth .zj-login-layout { grid-template-columns: minmax(0, 1fr) minmax(360px, 432px); gap: clamp(36px, 6vw, 88px); padding-block: 28px; }
+.zj-login.zj-liquid-auth .zj-login-layout > section h1 > span { color: var(--z-brand); }
+.zj-login.zj-liquid-auth .zj-lede { max-width: 480px; }
+.zj-login.zj-liquid-auth .zj-principles { gap: 8px; margin-top: 28px; }
+.zj-login.zj-liquid-auth .zj-principles > span { padding: 6px 11px; border: 1px solid var(--z-auth-rim); border-radius: 9px; background: var(--z-auth-field); }
+.zj-login.zj-liquid-auth .zj-login-form {
+  padding: 29px; border: 1px solid var(--z-auth-edge); border-radius: 25px;
+  background: var(--z-surface); background: var(--z-auth-glass); box-shadow: var(--z-auth-shadow);
+  -webkit-backdrop-filter: blur(22px) saturate(140%); backdrop-filter: blur(22px) saturate(140%);
+}
+.zj-login.zj-liquid-auth .zj-login-form > h2 { margin-top: 16px; margin-bottom: 8px; font-size: 28px; }
+.zj-login.zj-liquid-auth .zj-login-form > p { margin-bottom: 22px; }
+.zj-login.zj-liquid-auth .zj-login-form > small { margin-top: 20px; padding-top: 16px; border-color: var(--z-auth-rim); }
+.zj-login.zj-liquid-auth .zj-login-form .input { height: 50px; border-color: var(--z-auth-rim); border-radius: 12px; background: var(--z-auth-field); box-shadow: inset 0 1px 2px #33234e03; transition: border-color .18s, box-shadow .18s, background-color .18s; }
+.zj-login.zj-liquid-auth .zj-login-form .input:not(.input-error):focus { border-color: var(--z-brand); background: var(--z-surface); box-shadow: 0 0 0 3px var(--z-focus); }
+.zj-login.zj-liquid-auth .zj-login-form .input-error { border-color: #bb435c; }
+.zj-login.zj-liquid-auth .zj-login-form .input-error:focus { border-color: #bb435c; box-shadow: 0 0 0 3px #bb435c18; }
+.dark .zj-login.zj-liquid-auth .zj-login-form :is(.z-field-error, .zj-form-error) { color: #ffa7b7; }
+.dark .zj-login.zj-liquid-auth .zj-login-form .zj-form-error { background: #54233340; border-color: #a7556b44; }
+.zj-login.zj-liquid-auth .zj-login-form .input:disabled { opacity: .65; }
+.zj-login.zj-liquid-auth .zj-login-form .btn { min-height: 48px; border-radius: 12px; font-size: 14px; transition: transform .18s var(--z-ease), box-shadow .18s, background-color .18s; }
+.zj-login.zj-liquid-auth .zj-login-form .btn-primary { box-shadow: inset 0 1px 0 #ffffff29, 0 5px 14px #7656ce1c; }
+.zj-login.zj-liquid-auth .zj-login-form .btn-secondary { border-color: var(--z-auth-rim); background: var(--z-auth-field); color: var(--z-ink); }
+.zj-login.zj-liquid-auth .zj-login-form .btn:disabled { box-shadow: none; }
+.zj-login.zj-liquid-auth .zj-login-form .z-password-toggle { border-radius: 12px; color: var(--z-muted); transition: background-color .18s, color .18s; }
+.zj-login.zj-liquid-auth .zj-login-form .z-password-toggle:hover:not(:disabled) { color: var(--z-brand); background: var(--z-wash); }
+.zj-login.zj-liquid-auth .zj-login-form .z-password-toggle:focus-visible { outline-offset: -5px; }
+.zj-login.zj-liquid-auth > footer { border-color: var(--z-auth-rim); padding-top: 16px; }
+body:has(.zj-liquid-auth) .modal-content.z-dialog { border: 1px solid var(--z-line); border-radius: 24px; box-shadow: 0 28px 90px #29203d2b; }
+.zj-totp-modal { padding: clamp(20px, 4vw, 28px); border: 1px solid var(--z-line); border-radius: 24px; background: var(--z-surface); color: var(--z-ink); box-shadow: 0 24px 80px #29203d26; }
+.zj-totp-inputs { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; max-width: 326px; margin-inline: auto; }
+.zj-totp-inputs input { min-width: 0; width: 100%; height: 52px; border-radius: 11px; background: var(--z-canvas); color: var(--z-ink); }
+.zj-totp-modal .btn { min-height: 44px; border-radius: 12px; }
+@media (max-width: 380px) { .zj-totp-inputs { gap: 6px; } .zj-totp-inputs input { height: 48px; font-size: 18px; } }
+body:has(.zj-liquid-auth[data-motion=reduced]) .zj-totp-modal, body:has(.zj-liquid-auth[data-motion=reduced]) .zj-totp-modal * { animation: none !important; transition-duration: .01ms !important; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .zj-login.zj-liquid-auth[data-motion=full] .zj-login-form { animation: zj-auth-arrive .3s ease-out; }
+  @keyframes zj-auth-arrive { from { opacity: .65; } to { opacity: 1; } }
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .zj-login.zj-liquid-auth[data-motion=full] .btn:not(:disabled):active { transform: translateY(1px) scale(.985); }
+  .zj-login.zj-liquid-auth[data-motion=full] .btn-primary:not(:disabled):hover { box-shadow: inset 0 1px 0 #ffffff29, 0 7px 20px #7656ce2b; }
+}
+@media (max-width: 1000px) { .zj-login.zj-liquid-auth .zj-login-layout { grid-template-columns: minmax(0, 1fr) 390px; gap: 32px; } }
+@media (max-width: 760px) {
+  .zj-login.zj-liquid-auth[data-motion] { padding: 16px max(16px, env(safe-area-inset-right)) max(18px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+  .zj-login.zj-liquid-auth > header { min-height: 58px; padding: 10px 12px; border-radius: 17px; gap: 10px; }
+  .zj-login.zj-liquid-auth .zj-login-tools { gap: 5px; }
+  .zj-login.zj-liquid-auth .zj-back { padding-inline: 8px; font-size: 10px; }
+  .zj-login.zj-liquid-auth .zj-login-layout { display: block; padding: 26px 0; }
+  .zj-login.zj-liquid-auth .zj-eyebrow { font-size: 8px; letter-spacing: .1em; }
+  .zj-login.zj-liquid-auth .zj-login-layout > section h1 { font-size: clamp(23px, 6.7vw, 28px); line-height: 1.4; margin: 11px 0; }
+  .zj-login.zj-liquid-auth:lang(zh) .zj-login-layout > section h1 br { display: none; }
+  .zj-login.zj-liquid-auth .zj-lede { font-size: 11px; line-height: 1.9; }
+  .zj-login.zj-liquid-auth .zj-login-form { margin-top: 24px; padding: 24px; border-radius: 22px; }
+  .zj-login.zj-liquid-auth .zj-badge { display: none; }
+  .zj-login.zj-liquid-auth .zj-login-form > h2 { margin-top: 0; font-size: 25px; }
+  .zj-login.zj-liquid-auth .zj-login-form > p { margin-bottom: 20px; }
+  .zj-login.zj-liquid-auth .zj-login-form .input { font-size: 16px; }
+  .zj-login.zj-liquid-auth.zj-auth-auxiliary .zj-login-form { margin-top: 20px; }
+}
+@media (max-width: 359px) { .zj-login.zj-liquid-auth .zj-login-form { padding: 22px 19px; } .zj-login.zj-liquid-auth .zj-brand > span { font-size: 14px; } .zj-login.zj-liquid-auth .zj-login-tools { gap: 2px; } }
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .zj-login.zj-liquid-auth > header, .zj-login.zj-liquid-auth .zj-login-form { background: var(--z-surface); border-color: var(--z-line); } }
+.zj-login.zj-liquid-auth[data-motion=reduced] *, .zj-login.zj-liquid-auth[data-motion=reduced] *::before, .zj-login.zj-liquid-auth[data-motion=reduced] *::after { animation: none !important; transition-duration: .01ms !important; }
+@media (prefers-reduced-motion: reduce) { .zj-login.zj-liquid-auth *, .zj-login.zj-liquid-auth *::before, .zj-login.zj-liquid-auth *::after, .zj-totp-modal, .zj-totp-modal * { animation: none !important; transition-duration: .01ms !important; } }

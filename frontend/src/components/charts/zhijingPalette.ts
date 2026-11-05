@@ -1,0 +1,6 @@
+// Blue, green and violet lead the workspace's categorical series.
+// Series ordering and all values continue to come from the original chart data.
+export const zhijingChartColors = [
+  '#4f7cff', '#16b99a', '#8b5cf6', '#38bdf8', '#ec4899', '#6366f1',
+  '#22c55e', '#a78bfa', '#06b6d4', '#3b82f6', '#14b8a6', '#c084fc'
+]
