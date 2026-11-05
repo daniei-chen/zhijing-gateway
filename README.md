@@ -22,7 +22,7 @@
 
 智境提供登录、成员工作台与管理员控制台的统一前端。业务能力沿用 [Sub2API](https://github.com/Wei-Shaw/sub2api)，权限、计费与功能开关继续由原后端决定。v0.0.2 增加前端会话隔离与运维时序，公开前端源码、合成预览、验证工具及可选的后端诊断差异补丁。
 
-> **交付边界**：本版本完成本地隔离验证，GitHub 发布与生产部署分别记录，本次没有切换线上。截图来自合成数据，额度、价格、指标与有效期均为演示样例。
+> **上线状态**：v0.0.2 前端与后端已于 2026-11-05 完成上线，采用并行 API 实例与热切流量，保留在途请求和回退入口。GitHub 发布与生产验证分别记录，详见 [Release](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2)。本页截图继续使用合成数据，额度、价格、指标与有效期均为演示样例。
 
 **版本下载**：[v0.0.2 · 会话有界，诊断有据](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2)，提供静态构建包、可选诊断源码包、构建清单和 SHA256；[更新说明](docs/releases/v0.0.2.zh-CN.md)。
 
