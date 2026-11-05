@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat-square">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-638bdf?style=flat-square">
-  <img alt="V6 local preview" src="https://img.shields.io/badge/UI-V6%20Preview-8b6ad5?style=flat-square">
+  <a href="https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.1"><img alt="Release v0.0.1" src="https://img.shields.io/badge/Release-v0.0.1-8b6ad5?style=flat-square"></a>
   <a href="LICENSE"><img alt="LGPL v3" src="https://img.shields.io/badge/License-LGPL--3.0-868093?style=flat-square"></a>
 </p>
 
@@ -22,6 +22,8 @@
 智境提供登录、成员工作台与管理员控制台的统一前端。业务能力沿用 [Sub2API](https://github.com/Wei-Shaw/sub2api)，认证、权限、计费与功能开关继续由原后端决定。本仓库包含前端源码、隔离演示与验证工具。
 
 > **当前进展**：V5 登录与成员工作台已上线；V6 管理员内部玻璃化已完成本地验收，尚未替换线上。下方截图来自合成数据预览，额度、价格与有效期均为演示样例。
+
+**版本下载**：[v0.0.1 · 智境液态玻璃前端](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.1)，提供静态构建包、文件清单和 SHA256 校验；[更新说明](docs/releases/v0.0.1.zh-CN.md)。
 
 ## 界面一览
 
