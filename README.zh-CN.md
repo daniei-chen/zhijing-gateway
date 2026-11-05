@@ -90,7 +90,7 @@ V6 已完成 **24 个管理入口**的本地浏览器检查，覆盖浅色、深
 ```bash
 cd frontend
 pnpm typecheck
-pnpm test:run
+pnpm test:run src/components/common/__tests__ src/components/layout/__tests__ src/components/auth/__tests__ src/composables/__tests__/useStepUp.spec.ts
 pnpm build
 cd ..
 python tools/verify_frontend.py
@@ -118,7 +118,7 @@ docs/                  设计、验证、界面图片和字体许可
 
 ## 来源与许可
 
-业务前端基于 [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api) 的 `d851a38477597157e78450d30af2d8504764d085` 及既有智境登录外壳演进。原 [LICENSE](LICENSE)、[CLA](CLA.md) 与上游法律文本保留，遵循 LGPL v3，不将上游工程声明为原创 MIT 项目。
+业务前端基于 [Wei-Shaw/sub2api](https://github.com/Wei-Shaw/sub2api) 的 `d851a38477597157e78450d30af2d8504764d085` 及既有智境登录外壳演进。原 [LICENSE](LICENSE)、[CLA](CLA.md) 与上游法律文本保留，遵循 LGPL v3。
 
 Manrope、Noto Sans SC 与 IBM Plex Mono 的 OFL 文本见 [字体许可](docs/font-licenses)。封面为项目自有 SVG 表现层；界面中的品牌标识与字体来源见 [资源说明](docs/ASSETS.zh-CN.md)。
 
