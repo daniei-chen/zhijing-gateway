@@ -1,0 +1,28 @@
+{
+  "recorded_at": "2026-11-06T03:09:59.705257+00:00",
+  "source_files": 1102,
+  "test_files": 482,
+  "tests": 4915,
+  "passed_tests": 4914,
+  "failed_tests": 1,
+  "pending_tests": 0,
+  "test_assertions_passed": false,
+  "coverage_command_exit": 1,
+  "completed_standard_coverage_reports": false,
+  "latest_valid_coverage_checkpoint": "08",
+  "original_four_global_thresholds": 80,
+  "all_global_coverage_gates_passed": false,
+  "failures": [
+    {
+      "file": "src/i18n/__tests__/localeKeyCompleteness.spec.ts",
+      "test": "locale key completeness contains every statically referenced production key",
+      "message": "AssertionError: English locale is missing referenced keys: expected [ 'common.retry' ] to deeply equal []"
+    }
+  ],
+  "typecheck": "passed",
+  "whole_eslint": "passed",
+  "vite_manifest_build": "passed",
+  "current_tree_frozen_source_verified": true,
+  "production_deployed": false,
+  "limitation": "JSON coverageMap is available for private planning only. It is not a successful full-run coverage report."
+}

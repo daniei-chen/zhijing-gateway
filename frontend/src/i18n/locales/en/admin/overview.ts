@@ -651,6 +651,7 @@ export default {
       concurrencyNonNegative: 'Concurrency cannot be negative; 0 = unlimited',
       amountRequired: 'Please enter a valid amount',
       insufficientBalance: 'Insufficient balance',
+      balanceResultUnconfirmed: 'The previous balance operation is unconfirmed. Review the balance history before starting another operation. This check does not apply another balance change.',
       adjustBalance: 'Adjust Balance',
       adjustConcurrency: 'Adjust Concurrency',
       adjustmentAmount: 'Adjustment Amount',

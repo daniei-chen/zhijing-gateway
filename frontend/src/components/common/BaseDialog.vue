@@ -114,7 +114,10 @@ const handleClose = () => {
 }
 
 const handleEscape = (event: KeyboardEvent) => {
-  if (props.show && props.closeOnEscape && event.key === 'Escape' && [...openDialogs].pop() === dialogId) {
+  if (
+    props.show && props.closeOnEscape && event.key === 'Escape' &&
+    !event.defaultPrevented && !event.isComposing && [...openDialogs].pop() === dialogId
+  ) {
     emit('close')
   }
 }

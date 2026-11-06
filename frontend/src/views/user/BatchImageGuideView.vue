@@ -13,9 +13,9 @@
                   @search="applyFilters"
                 />
               </div>
-              <Select v-model="filters.apiKeyId" :options="apiKeyFilterOptions" class="w-full" @change="applyFilters" />
-              <Select v-model="filters.status" :options="statusFilterOptions" class="w-full" @change="applyFilters" />
-              <Select v-model="filters.downloaded" :options="downloadFilterOptions" class="w-full" @change="applyFilters" />
+              <Select v-model="filters.apiKeyId" :options="apiKeyFilterOptions" :aria-label="t('batchImage.columns.apiKey')" class="w-full" @change="applyFilters" />
+              <Select v-model="filters.status" :options="statusFilterOptions" :aria-label="t('common.status')" class="w-full" @change="applyFilters" />
+              <Select v-model="filters.downloaded" :options="downloadFilterOptions" :aria-label="t('batchImage.columns.downloadStatus')" class="w-full" @change="applyFilters" />
             </div>
             <div class="flex flex-wrap items-center justify-start gap-2 sm:justify-end 2xl:flex-shrink-0">
               <button type="button" class="btn btn-secondary" :disabled="loadingJobs" @click="resetFilters">
@@ -35,6 +35,13 @@
             </div>
           </div>
 
+          <div v-if="pendingRetryRecovery.length" class="space-y-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-800 dark:bg-amber-950/30">
+            <p class="text-amber-900 dark:text-amber-100">{{ t('batchImage.messages.pendingRetryResults') }}</p>
+            <div v-for="[batchId, operation] in pendingRetryRecovery" :key="batchId" class="flex flex-wrap items-center justify-between gap-2">
+              <span class="min-w-0 break-words text-gray-700 dark:text-gray-300">{{ operation.request.task_name }} · {{ operation.key.name }}</span>
+              <button type="button" class="btn btn-secondary btn-sm" :disabled="!!retryingBatchId" :aria-label="t('batchImage.messages.checkSubmissionFor', { task: operation.request.task_name })" @click="retryFailedJob(operation.sourceJob)">{{ batchImageText('checkSubmission') }}</button>
+            </div>
+          </div>
           <div
             v-if="selectedJobIds.size"
             class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-sm dark:border-dark-700 dark:bg-dark-800"
@@ -85,6 +92,7 @@
           <template #header-select>
             <input
               type="checkbox"
+              :aria-label="t('common.selectAll')"
               class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               :checked="allVisibleSelected"
               :indeterminate="someVisibleSelected"
@@ -95,6 +103,7 @@
           <template #cell-select="{ row }">
             <input
               type="checkbox"
+              :aria-label="row.task_name || row.id"
               class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               :checked="selectedJobIds.has(row.id)"
               @change="toggleJobSelection(row.id, ($event.target as HTMLInputElement).checked)"
@@ -249,6 +258,7 @@
               <Select
                 v-model="pagination.page_size"
                 :options="batchPageSizeOptions"
+                :aria-label="t('pagination.perPage')"
                 class="w-24"
                 @change="handlePageSizeChange"
               />
@@ -288,14 +298,14 @@
         <template v-for="job in batchJobs" :key="job.id">
           <template v-if="job.id === openMoreJobId">
             <button
-              v-if="canRetry(job)"
+              v-if="canRetry(job) || pendingRetryOperations.has(job.id)"
               type="button"
               class="flex w-full items-center gap-2 px-3 py-2 text-left text-gray-700 transition-colors hover:bg-amber-50 hover:text-amber-700 disabled:opacity-60 dark:text-gray-200 dark:hover:bg-amber-900/20 dark:hover:text-amber-300"
               :disabled="retryingBatchId === job.id"
               @click="retryFailedJob(job)"
             >
               <Icon name="refresh" size="sm" :class="retryingBatchId === job.id ? 'animate-spin' : ''" />
-              {{ t('batchImage.actions.retryFailedItems') }}
+              {{ pendingRetryOperations.has(job.id) ? batchImageText('checkSubmission') : t('batchImage.actions.retryFailedItems') }}
             </button>
             <button
               v-if="canDeleteRecord(job)"
@@ -494,14 +504,14 @@
 	            {{ t('batchImage.actions.cancelJob') }}
 	          </button>
 	          <button
-	            v-if="currentJob && currentDisplayJob && canRetry(currentDisplayJob)"
+	            v-if="currentJob && (canRetry(currentJob) || pendingRetryOperations.has(currentJob.id))"
 	            type="button"
 	            class="btn btn-secondary inline-flex min-w-[116px] items-center justify-center"
 	            :disabled="retryingBatchId === currentJob.id"
 	            @click="retrySelected"
 	          >
 	            <Icon name="refresh" size="sm" class="mr-2" :class="currentJob && retryingBatchId === currentJob.id ? 'animate-spin' : ''" />
-	            {{ t('batchImage.actions.retryFailedItems') }}
+	            {{ currentJob && pendingRetryOperations.has(currentJob.id) ? batchImageText('checkSubmission') : t('batchImage.actions.retryFailedItems') }}
 	          </button>
 	          <button
             type="button"
@@ -539,10 +549,15 @@
 
     <BaseDialog :show="showCreateModal" :title="t('batchImage.create.title')" width="wide" @close="closeCreateModal">
       <form class="space-y-5" @submit.prevent="submitJob">
+        <p v-if="pendingCreateOperation?.outcomeUncertain" role="status" class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/30 dark:text-amber-100">
+          {{ t('batchImage.messages.pendingSubmission', { task: pendingCreateOperation.request.task_name, key: pendingCreateOperation.key.name }) }}
+        </p>
+        <fieldset :disabled="createParametersLocked" class="space-y-5 disabled:opacity-70">
         <div class="grid gap-4 md:grid-cols-2">
           <div class="md:col-span-2">
-            <label class="input-label">{{ t('batchImage.create.taskName') }}</label>
+            <label :for="`${controlId}-task-name`" class="input-label">{{ t('batchImage.create.taskName') }}</label>
             <input
+              :id="`${controlId}-task-name`"
               v-model="form.taskName"
               type="text"
               maxlength="255"
@@ -552,8 +567,9 @@
           </div>
 
           <div class="md:col-span-2">
-            <label class="input-label">API Key</label>
-            <select v-model.number="form.apiKeyId" class="input" :disabled="loadingKeys">
+            <label :for="`${controlId}-api-key`" class="input-label">API Key</label>
+            <select :id="`${controlId}-api-key`" v-model.number="form.apiKeyId" class="input" :disabled="loadingKeys">
+              <option v-if="pendingCreateOperation?.outcomeUncertain && !geminiApiKeys.some(key => key.id === pendingCreateOperation!.key.id)" :value="pendingCreateOperation.key.id">{{ pendingCreateOperation.key.name }}</option>
               <option :value="0">{{ loadingKeys ? t('batchImage.create.loadingKeys') : t('batchImage.create.selectKeyPlaceholder') }}</option>
               <option v-for="key in geminiApiKeys" :key="key.id" :value="key.id">
                 {{ key.name }} · {{ key.group?.name || 'Gemini' }}
@@ -565,8 +581,8 @@
           </div>
 
           <div>
-            <label class="input-label">{{ t('batchImage.create.model') }}</label>
-            <select v-model="form.model" class="input" :disabled="loadingModels || availableBatchImageModels.length === 0">
+            <label :for="`${controlId}-model`" class="input-label">{{ t('batchImage.create.model') }}</label>
+            <select :id="`${controlId}-model`" v-model="form.model" class="input" :disabled="loadingModels || availableBatchImageModels.length === 0">
               <option v-if="loadingModels" value="">{{ batchImageText('loadingModels') }}</option>
               <option v-else-if="availableBatchImageModels.length === 0" value="">{{ batchImageText('noModels') }}</option>
               <option v-for="model in availableBatchImageModels" :key="model.value" :value="model.value">
@@ -590,8 +606,8 @@
           </div>
 
           <div>
-            <label class="input-label">{{ t('batchImage.create.outputFormat') }}</label>
-            <select v-model="form.responseMimeType" class="input">
+            <label :for="`${controlId}-format`" class="input-label">{{ t('batchImage.create.outputFormat') }}</label>
+            <select :id="`${controlId}-format`" v-model="form.responseMimeType" class="input">
               <option value="image/png">PNG</option>
               <option value="image/jpeg">JPEG</option>
               <option value="image/webp">WebP</option>
@@ -608,11 +624,12 @@
 
         <div class="space-y-3">
           <div class="flex items-center justify-between gap-3">
-            <label class="input-label mb-0">Prompt</label>
+            <label :for="`${controlId}-prompt`" class="input-label mb-0">Prompt</label>
             <span class="text-xs text-gray-500 dark:text-gray-400">{{ t('batchImage.create.promptAdded', { count: promptRows.length }) }}</span>
           </div>
           <div class="rounded-lg border border-gray-200 p-3 dark:border-dark-700">
             <textarea
+              :id="`${controlId}-prompt`"
               v-model="promptDraft"
               rows="3"
               class="h-[76px] w-full resize-y rounded-md border border-gray-300 px-3 py-2 text-sm leading-5 outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100 dark:border-dark-600 dark:bg-dark-900 dark:text-gray-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/40"
@@ -621,6 +638,7 @@
             <div class="mt-2 grid gap-2 md:grid-cols-[minmax(0,1fr)_112px_132px_112px] md:items-center">
               <input
                 v-model="customIdDraft"
+                :aria-label="t('batchImage.create.customIdPlaceholder')"
                 type="text"
                 maxlength="255"
                 class="input h-9 text-sm"
@@ -638,7 +656,7 @@
               </select>
               <label
                 class="btn btn-secondary h-9 cursor-pointer justify-center text-sm"
-                :class="referenceImageDrafts.length >= selectedModelReferenceLimit ? 'pointer-events-none opacity-60' : ''"
+                :class="(readingReferenceImages || referenceImageDrafts.length >= selectedModelReferenceLimit) ? 'pointer-events-none opacity-60' : ''"
               >
                 <Icon name="upload" size="sm" class="mr-1.5" />
                 {{ t('batchImage.create.referenceImage') }}
@@ -647,15 +665,16 @@
                   accept="image/png,image/jpeg,image/webp"
                   multiple
                   class="hidden"
-                  :disabled="referenceImageDrafts.length >= selectedModelReferenceLimit"
+                  :disabled="readingReferenceImages || referenceImageDrafts.length >= selectedModelReferenceLimit" :aria-busy="readingReferenceImages"
                   @change="handleReferenceImageFiles"
                 />
               </label>
-              <button type="button" class="btn btn-secondary h-9 justify-center whitespace-nowrap px-4 text-sm" :disabled="!promptDraft.trim()" @click="addPromptRow">
+              <button type="button" class="btn btn-secondary h-9 justify-center whitespace-nowrap px-4 text-sm" :disabled="readingReferenceImages || !promptDraft.trim()" @click="addPromptRow">
                 <Icon name="plus" size="sm" class="mr-1.5" />
                 {{ t('common.add') }}
               </button>
             </div>
+            <p v-if="readingReferenceImages" role="status" class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ t('batchImage.create.refReading') }}</p>
             <div v-if="referenceImageDrafts.length" class="mt-3 flex flex-wrap gap-2">
               <span
                 v-for="(ref, refIndex) in referenceImageDrafts"
@@ -702,14 +721,16 @@
 	        <div v-if="submitting" class="rounded-lg border border-sky-200 bg-sky-50 p-3 text-sm leading-6 text-sky-800 dark:border-sky-800 dark:bg-sky-950/30 dark:text-sky-100">
 	          {{ t('batchImage.create.submittingNotice') }}
 	        </div>
+        </fieldset>
 	      </form>
 
       <template #footer>
-        <div class="flex justify-end gap-3">
+        <div class="flex flex-wrap justify-end gap-3">
           <button type="button" class="btn btn-secondary" :disabled="submitting" @click="closeCreateModal">{{ t('common.cancel') }}</button>
-	          <button type="button" class="btn btn-primary inline-flex min-w-[120px] justify-center" :disabled="submitting || loadingModels || (parsedItems.length === 0 && !promptDraft.trim()) || !selectedApiKey || !form.model" @click="submitJob">
+          <button v-if="pendingCreateOperation?.outcomeUncertain" type="button" class="btn btn-secondary" :disabled="submitting" @click="startNewCreateOperation">{{ t('batchImage.messages.startNewSubmission') }}</button>
+	          <button type="button" class="btn btn-primary inline-flex min-w-[120px] justify-center" :disabled="readingReferenceImages || submitting || (!pendingCreateOperation?.outcomeUncertain && (loadingModels || (parsedItems.length === 0 && !promptDraft.trim()) || !selectedApiKey || !form.model))" @click="submitJob">
             <Icon v-if="submitting" name="refresh" size="sm" class="mr-2 animate-spin" />
-            {{ submitting ? t('common.submitting') : t('batchImage.actions.submitJob') }}
+            {{ submitting ? t('common.submitting') : pendingCreateOperation?.outcomeUncertain ? t('batchImage.messages.checkSubmission') : t('batchImage.actions.submitJob') }}
           </button>
         </div>
       </template>
@@ -752,7 +773,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, reactive, ref, shallowReactive, shallowRef, useId, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import TablePageLayout from '@/components/layout/TablePageLayout.vue'
@@ -776,20 +797,25 @@ import {
   listBatchImageModels,
   saveBlob,
   submitBatchImageJob,
+  replayBatchImageSubmission,
+  getBatchImageRecovery,
   type BatchImageItem,
   type BatchImageJob,
   type BatchImageJobsListOptions,
   type BatchImageReferenceImage,
   type BatchImageStatus,
   type BatchImageSubmitItem,
+  type BatchImageSubmitRequest,
 } from '@/api/batchImage'
 import { createSessionTasks } from '@/utils/sessionTasks'
 import { sessionPreviewCache } from '@/utils/sessionPreviewCache'
 import { createImageThumbnail } from '@/utils/imageThumbnail'
+import { createBatchRetryIdentity } from '@/utils/batchImageRetryIdentity'
 import type { ApiKey } from '@/types'
 import type { Column } from '@/components/common/types'
 
 const tasks = createSessionTasks()
+const controlId = `batch-image-${useId()}`
 let selectionRevision = 0
 let pollingRevision = 0
 
@@ -817,6 +843,19 @@ type ReferenceImageDraft = BatchImageReferenceImage & {
   name: string
   size: number
 }
+
+type BatchSubmissionOperation = {
+  key: ApiKey
+  request: BatchImageSubmitRequest
+  idempotencyKey: string
+  outcomeUncertain: boolean
+}
+
+const pendingCreateOperation = shallowRef<BatchSubmissionOperation | null>(null)
+type RetrySubmissionOperation = BatchSubmissionOperation & { sourceJob: BatchImageJobRow | BatchImageJob }
+const pendingRetryOperations = shallowReactive(new Map<string, RetrySubmissionOperation>())
+const pendingRetryRecovery = computed(() => [...pendingRetryOperations.entries()].filter(([, operation]) => operation.outcomeUncertain))
+const createParametersLocked = computed(() => submitting.value || !!pendingCreateOperation.value?.outcomeUncertain)
 
 
 
@@ -908,6 +947,7 @@ const promptDraft = ref('')
 const customIdDraft = ref('')
 const outputCountDraft = ref(1)
 const referenceImageDrafts = ref<ReferenceImageDraft[]>([])
+const readingReferenceImages = ref(false)
 const itemPreviewUrls = reactive<Record<string, string>>({})
 const previewLoadingIds = ref(new Set<string>())
 const previewErrorIds = ref(new Set<string>())
@@ -973,8 +1013,9 @@ const childrenByParent = computed(() => {
 
 const visibleBatchJobs = computed(() => {
   const rows: BatchImageJobRow[] = []
-  for (const job of batchJobs.value.filter(item => !item.parent_batch_id)) {
-    rows.push(job)
+  const presentIds = new Set(batchJobs.value.map(job => job.id))
+  for (const job of batchJobs.value.filter(item => !item.parent_batch_id || !presentIds.has(item.parent_batch_id))) {
+    rows.push(job.parent_batch_id ? { ...job, is_child: true } : job)
     if (expandedParentIds.value.has(job.id)) {
       rows.push(...(childrenByParent.value.get(job.id) || []).map(child => ({ ...child, is_child: true })))
     }
@@ -1145,6 +1186,7 @@ function normalizeOutputCount(value: unknown): number {
 }
 
 function addPromptRow() {
+  if (readingReferenceImages.value) return
   const prompt = promptDraft.value.trim()
   if (!prompt) return
   const outputCount = normalizeOutputCount(outputCountDraft.value)
@@ -1175,8 +1217,10 @@ function removeReferenceImageDraft(index: number) {
 }
 
 async function handleReferenceImageFiles(event: Event) {
+  if (createParametersLocked.value || readingReferenceImages.value) return
   const taskGuard=tasks.begin("handleReferenceImageFiles")
   if(!taskGuard.active()) return
+  readingReferenceImages.value = true
   try {
 
   const input = event.target as HTMLInputElement
@@ -1207,7 +1251,7 @@ async function handleReferenceImageFiles(event: Event) {
       appStore.showError(t('batchImage.create.refFileTooLarge', { name: file.name }))
       continue
     }
-    const data = await readFileAsBase64(file)
+    const data = await readFileAsBase64(file, taskGuard.signal)
     if(!taskGuard.active()) return
 
     next.push({
@@ -1220,19 +1264,35 @@ async function handleReferenceImageFiles(event: Event) {
     })
   }
   referenceImageDrafts.value = [...referenceImageDrafts.value, ...next]
-
-  } finally { taskGuard.finish() }
+  } catch {
+    if (taskGuard.active()) appStore.showError(t('batchImage.create.refReadFailed'))
+  } finally {
+    if (taskGuard.owned()) readingReferenceImages.value = false
+    taskGuard.finish()
+  }
 }
 
-function readFileAsBase64(file: File): Promise<string> {
+function cancelReferenceImageRead() {
+  tasks.cancel('handleReferenceImageFiles')
+  readingReferenceImages.value = false
+}
+
+function readFileAsBase64(file: File, signal: AbortSignal): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onerror = () => reject(reader.error || new Error('Failed to read file'))
+    const cleanup = () => signal.removeEventListener('abort', abort)
+    const aborted = () => { cleanup(); reject(new DOMException('File read cancelled', 'AbortError')) }
+    const abort = () => reader.abort()
+    reader.onerror = () => { cleanup(); reject(reader.error || new Error('Failed to read file')) }
+    reader.onabort = aborted
     reader.onload = () => {
+      cleanup()
       const result = String(reader.result || '')
       resolve(result.includes(',') ? result.slice(result.indexOf(',') + 1) : result)
     }
-    reader.readAsDataURL(file)
+    if (signal.aborted) { aborted(); return }
+    signal.addEventListener('abort', abort, { once: true })
+    try { reader.readAsDataURL(file) } catch (error) { cleanup(); reject(error) }
   })
 }
 
@@ -1247,6 +1307,16 @@ async function loadApiKeys() {
     if(!taskGuard.active()) return
 
     apiKeys.value = response.items || []
+    const pending = pendingCreateOperation.value
+    if (pending?.outcomeUncertain) {
+      tasks.cancel('loadAvailableModels')
+      form.apiKeyId = pending.key.id
+      form.model = pending.request.model
+      availableBatchImageModels.value = [{ value: pending.request.model, label: pending.request.model }]
+      loadingModels.value = false
+      if (filters.apiKeyId && !geminiApiKeys.value.some(key => String(key.id) === filters.apiKeyId)) filters.apiKeyId = ''
+      return
+    }
     if (!selectedApiKey.value && geminiApiKeys.value.length > 0) {
       form.apiKeyId = geminiApiKeys.value[0].id
     }
@@ -1254,6 +1324,9 @@ async function loadApiKeys() {
       filters.apiKeyId = ''
     }
     if (!selectedApiKey.value) {
+      tasks.cancel('loadAvailableModels')
+      form.apiKeyId = 0
+      loadingModels.value = false
       availableBatchImageModels.value = []
       form.model = ''
     }
@@ -1282,7 +1355,10 @@ async function loadAvailableModels() {
   modelLoadError.value = ''
   availableBatchImageModels.value = []
   form.model = ''
-  if (!key) return
+  if (!key) {
+    loadingModels.value = false
+    return
+  }
 
   loadingModels.value = true
   try {
@@ -1358,7 +1434,7 @@ function listOptions(): BatchImageJobsListOptions {
   return options
 }
 
-function toJobRow(job: BatchImageJob, key = selectedApiKey.value): BatchImageJobRow {
+function toJobRow(job: BatchImageJob, key: ApiKey | null): BatchImageJobRow {
   return {
     id: job.id,
     task_name: job.task_name || defaultTaskName(job.created_at),
@@ -1539,26 +1615,37 @@ async function loadBatchJobs() {
   if (!keys.length) {
     batchJobs.value = []
     pagination.has_more = false
+    loadingJobs.value = false
     return
   }
   loadingJobs.value = true
   closeMoreMenu()
   try {
     const options = listOptions()
+    const page = pagination.page
+    const pageSize = pagination.page_size
+    const required = page * pageSize
     const results = await Promise.all(keys.map(async (key) => {
-      const result = await listBatchImageJobs(key.key, options, taskGuard.signal)
+      const rows: BatchImageJobRow[] = []
+      let hasMore = true
+      while (rows.length < required && hasMore) {
+        const result = await listBatchImageJobs(key.key, { ...options, cursor: String(rows.length), limit: Math.min(required - rows.length, 100) }, taskGuard.signal)
+        if (!taskGuard.active()) return { hasMore: false, rows: [] }
+        const received = result.data || []
+        rows.push(...received.map(job => toJobRow(job, key)))
+        hasMore = Boolean(result.has_more) && received.length > 0
+      }
       return {
-        hasMore: Boolean(result.has_more),
-        rows: (result.data || []).map(job => toJobRow(job, key)),
+        hasMore, rows,
       }
     }))
     if(!taskGuard.active()) return
 
-    batchJobs.value = applyChildCounts(results
+    const merged = results
       .flatMap(result => result.rows)
       .sort((a, b) => b.created_at - a.created_at)
-      .slice(0, pagination.page_size))
-    pagination.has_more = results.some(result => result.hasMore)
+    batchJobs.value = applyChildCounts(merged.slice((page - 1) * pageSize, required))
+    pagination.has_more = merged.length > required || results.some(result => result.hasMore)
     selectedJobIds.value = new Set([...selectedJobIds.value].filter(id => visibleBatchJobs.value.some(job => job.id === id)))
   } catch (error: any) {
     if(!taskGuard.active()) return
@@ -1575,8 +1662,8 @@ async function loadBatchJobs() {
   } finally { taskGuard.finish() }
 }
 
-function upsertJob(job: BatchImageJob) {
-  const next = toJobRow(job)
+function upsertJob(job: BatchImageJob, key: ApiKey) {
+  const next = toJobRow(job, key)
   const index = batchJobs.value.findIndex(item => item.id === job.id)
   if (index >= 0) {
     const rows = [...batchJobs.value]
@@ -1612,14 +1699,22 @@ function openCreateModal() {
 }
 
 function closeCreateModal() {
-  tasks.cancel('handleReferenceImageFiles')
+  cancelReferenceImageRead()
   if (submitting.value) return
   showCreateModal.value = false
+  if (!pendingCreateOperation.value?.outcomeUncertain) resetCreateDraft()
+}
+
+function startNewCreateOperation() {
+  if (!tasks.current() || submitting.value || !pendingCreateOperation.value?.outcomeUncertain) return
+  if (!window.confirm(t('batchImage.messages.startNewSubmissionConfirm'))) return
   resetCreateDraft()
+  void loadAvailableModels()
 }
 
 function resetCreateDraft() {
-  tasks.cancel('handleReferenceImageFiles')
+  cancelReferenceImageRead()
+  pendingCreateOperation.value = null
   form.taskName = ''
   form.responseMimeType = 'image/png'
   promptRows.value = []
@@ -1650,8 +1745,7 @@ function closeDetail() {
 
 function keyForSelectedBatch(): ApiKey | null {
   if (selectedBatchApiKeyId.value) {
-    const key = geminiApiKeys.value.find(item => item.id === selectedBatchApiKeyId.value)
-    if (key) return key
+    return geminiApiKeys.value.find(item => item.id === selectedBatchApiKeyId.value) || null
   }
   return selectedApiKey.value
 }
@@ -1687,55 +1781,90 @@ function validateForm(): boolean {
 }
 
 async function submitJob() {
-  if (submitting.value) return
+  if (submitting.value || readingReferenceImages.value) return
   const expectedSelection = selectionRevision
-  const taskGuard=tasks.begin("submitJob")
-  if(!taskGuard.active()) return
+  const taskGuard = tasks.begin('submitJob')
+  if (!taskGuard.active()) return
   try {
-
-  if (submitting.value) return
-  if (promptDraft.value.trim()) addPromptRow()
-  if (!validateForm()) return
-  const key = requireApiKey()
-  if (!key) return
-	  submitting.value = true
-	  try {
-	    const job = await submitBatchImageJob(key.key, {
-	        model: form.model,
-        task_name: form.taskName.trim() || defaultTaskName(),
+    let operation = pendingCreateOperation.value
+    if (!operation) {
+      if (promptDraft.value.trim()) addPromptRow()
+      if (!validateForm()) return
+      const key = requireApiKey()
+      if (!key) return
+      operation = createBatchSubmissionOperation(key, {
+        model: form.model, task_name: form.taskName.trim() || defaultTaskName(),
         image_size: '1K',
         response_mime_type: form.responseMimeType,
         items: parsedItems.value,
-	      }, `sub2api-ui-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`, taskGuard.signal
-	    )
-    if(!taskGuard.active()) return
-
-    upsertJob(job)
-    showCreateModal.value = false
-    resetCreateDraft()
-    appStore.showSuccess(batchImageText('submitted'))
-    if (expectedSelection === selectionRevision) {
-      invalidateDetailSelection()
-      currentJob.value = job
-      selectedBatchId.value = job.id
-      selectedBatchApiKeyId.value = key.id
-      items.value = []
-      void loadItems()
-      startPolling()
+      }, 'sub2api-ui')
+      pendingCreateOperation.value = operation
     }
-  } catch (error: any) {
-    if(!taskGuard.active()) return
-
-    appStore.showError(batchImageErrorMessage(error, batchImageText('submitFailed')))
-  } finally {
-    if (taskGuard.owned()) {
-
-    submitting.value = false
-
+    if (!hasBatchOperationKey(operation)) return
+    submitting.value = true
+    try {
+      const job = await dispatchBatchSubmission(operation, taskGuard.signal)
+      if (!taskGuard.active()) return
+      upsertJob(job, operation.key)
+      showCreateModal.value = false
+      resetCreateDraft()
+      appStore.showSuccess(batchImageText(operation.outcomeUncertain ? 'resultRecovered' : 'submitted'))
+      if (expectedSelection === selectionRevision) {
+        invalidateDetailSelection()
+        currentJob.value = job
+        selectedBatchId.value = job.id
+        selectedBatchApiKeyId.value = operation.key.id
+        items.value = []
+        void loadItems()
+        startPolling()
+      }
+    } catch (error: unknown) {
+      if (!taskGuard.active()) return
+      if (operation.outcomeUncertain || batchSubmissionOutcomeUncertain(error)) {
+        pendingCreateOperation.value = { ...operation, outcomeUncertain: true }
+        tasks.cancel('loadAvailableModels')
+        loadingModels.value = false
+        form.apiKeyId = operation.key.id
+        form.model = operation.request.model
+        availableBatchImageModels.value = [{ value: operation.request.model, label: operation.request.model }]
+      } else {
+        pendingCreateOperation.value = null
+      }
+      appStore.showError(batchImageErrorMessage(error, batchImageText('submitFailed')))
+    } finally {
+      if (taskGuard.owned()) submitting.value = false
     }
-  }
-
   } finally { taskGuard.finish() }
+}
+
+function createBatchSubmissionOperation(key: ApiKey, payload: BatchImageSubmitRequest, prefix: string): BatchSubmissionOperation {
+  return {
+    key: { ...key },
+    request: { ...payload, metadata: payload.metadata ? { ...payload.metadata } : undefined, items: payload.items.map(item => ({ ...item, reference_images: item.reference_images?.map(image => ({ ...image })) })) },
+    idempotencyKey: `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+    outcomeUncertain: false,
+  }
+}
+
+function hasBatchOperationKey(operation: BatchSubmissionOperation) {
+  // Result lookup uses the original key; gateway authentication still decides
+  // whether an exhausted or revoked key may read its own saved metadata.
+  if (operation.outcomeUncertain) return true
+  if (apiKeys.value.some(key => key.id === operation.key.id && key.key === operation.key.key && key.status === 'active')) return true
+  appStore.showError(batchImageText('selectApiKey'))
+  return false
+}
+
+function batchSubmissionOutcomeUncertain(error: unknown) {
+  const failure = error as { status?: number; response?: { status?: number } }
+  const status = failure?.status ?? failure?.response?.status
+  return !status || status >= 500 || status === 408 || status === 409
+}
+
+function dispatchBatchSubmission(operation: BatchSubmissionOperation, signal: AbortSignal) {
+  return operation.outcomeUncertain
+    ? replayBatchImageSubmission(operation.key.key, operation.request, operation.idempotencyKey, signal)
+    : submitBatchImageJob(operation.key.key, operation.request, operation.idempotencyKey, signal)
 }
 
 async function refreshSelected() {
@@ -1745,7 +1874,7 @@ async function refreshSelected() {
   try {
 
   if (!selectedBatchId.value) return
-  const key = keyForSelectedBatch() || requireApiKey()
+  const key = keyForSelectedBatch()
   if (!key) return
   refreshing.value = true
   try {
@@ -1753,7 +1882,7 @@ async function refreshSelected() {
     if(!taskGuard.active()) return
 
     currentJob.value = job
-    upsertJob(job)
+    upsertJob(job, key)
     if (TERMINAL_STATUSES.has(job.status)) stopPolling()
   } catch (error: any) {
     if(!taskGuard.active()) return
@@ -1847,7 +1976,12 @@ function apiKeyForJob(job: BatchImageJobRow | Pick<BatchImageJob, 'id'>): ApiKey
   if ('api_key_id' in job && job.api_key_id) {
     return geminiApiKeys.value.find(key => key.id === job.api_key_id) || null
   }
-  return selectedApiKey.value
+  const row = batchJobs.value.find(item => item.id === job.id)
+  if (row?.api_key_id) {
+    return geminiApiKeys.value.find(key => key.id === row.api_key_id) || null
+  }
+  if (job.id === selectedBatchId.value) return keyForSelectedBatch()
+  return null
 }
 
 function toggleJobSelection(batchId: string, checked: boolean) {
@@ -1878,7 +2012,7 @@ async function cancelSelected() {
   try {
 
   if (!currentJob.value) return
-  const key = keyForSelectedBatch() || requireApiKey()
+  const key = keyForSelectedBatch()
   if (!key) return
   if (!window.confirm(batchImageText('cancelConfirm'))) return
   cancelling.value = true
@@ -1887,7 +2021,7 @@ async function cancelSelected() {
     if(!taskGuard.active()) return
 
     if (expectedSelection === selectionRevision) currentJob.value = job
-    upsertJob(job)
+    upsertJob(job, key)
     appStore.showSuccess(batchImageText('cancelled'))
   } catch (error: any) {
     if(!taskGuard.active()) return
@@ -1933,83 +2067,82 @@ async function retrySelected() {
 async function retryFailedJob(job: BatchImageJobRow | BatchImageJob) {
   if (retryingBatchId.value) return
   const expectedSelection = selectionRevision
-  const taskGuard=tasks.begin("retryFailedJob")
-  if(!taskGuard.active()) return
+  const taskGuard = tasks.begin('retryFailedJob')
+  if (!taskGuard.active()) return
   try {
-
-  if (!canRetry(job) || retryingBatchId.value) return
-  closeMoreMenu()
-  const key = apiKeyForJob(job) || keyForSelectedBatch() || requireApiKey()
-  if (!key) return
-  retryingBatchId.value = job.id
-  try {
-    const sourceItems = await ensureItemsForRetry(key.key, job.id, taskGuard.signal)
-    if(!taskGuard.active()) return
-
-    const failedItems = sourceItems
-      .filter(item => item.status === 'failed')
-      .map(item => ({ custom_id: retryCustomID(item.custom_id), prompt: String(item.prompt_preview || '').trim() }))
-      .filter(item => item.prompt)
-    if (failedItems.length === 0) {
-      appStore.showError(batchImageText('retryMissingPrompts'))
-      return
+    let operation = pendingRetryOperations.get(job.id)
+    if ((!canRetry(job) && !operation) || retryingBatchId.value) return
+    closeMoreMenu()
+    const key = operation?.key ?? apiKeyForJob(job)
+    if (!key || (operation && !hasBatchOperationKey(operation))) return
+    retryingBatchId.value = job.id
+    try {
+      if (!operation) {
+        const failedItems = await ensureItemsForRetry(key.key, job, taskGuard.signal)
+        if (!taskGuard.active()) return
+        if (failedItems.length === 0) {
+          appStore.showError(t('batchImage.messages.noUnresolvedFailures'))
+          return
+        }
+        if (!window.confirm(t('batchImage.messages.retryPromptOnlyConfirm', { count: failedItems.length }))) return
+        if (!taskGuard.active()) return
+        operation = { ...createBatchSubmissionOperation(key, {
+          model: job.model,
+          task_name: `${job.task_name || defaultTaskName()} ${t('batchImage.messages.retryTaskNameSuffix')}`,
+          // Submit checks the visible anchor and folds its existing parent.
+          // A historical root/parent can be hidden while this target is visible.
+          parent_batch_id: job.id, provider: job.provider,
+          image_size: '1K', response_mime_type: form.responseMimeType, items: failedItems,
+        }, `sub2api-ui-retry-${job.id}`), sourceJob: { ...job } }
+        pendingRetryOperations.set(job.id, operation)
+      }
+      const retryJob = await dispatchBatchSubmission(operation, taskGuard.signal)
+      if (!taskGuard.active()) return
+      pendingRetryOperations.delete(job.id)
+      upsertJob(retryJob, operation.key)
+      if (retryJob.parent_batch_id) {
+        expandedParentIds.value = new Set([...expandedParentIds.value, retryJob.parent_batch_id])
+      }
+      appStore.showSuccess(batchImageText(operation.outcomeUncertain ? 'resultRecovered' : 'retrySubmitted'))
+      if (expectedSelection === selectionRevision) {
+        invalidateDetailSelection()
+        currentJob.value = retryJob
+        selectedBatchId.value = retryJob.id
+        selectedBatchApiKeyId.value = operation.key.id
+        items.value = []
+        void loadItems()
+        startPolling()
+      }
+    } catch (error: unknown) {
+      if (!taskGuard.active()) return
+      if (operation) {
+        if (operation.outcomeUncertain || batchSubmissionOutcomeUncertain(error)) pendingRetryOperations.set(job.id, { ...operation, outcomeUncertain: true })
+        else pendingRetryOperations.delete(job.id)
+      }
+      appStore.showError(batchImageErrorMessage(error, batchImageText('retryFailed')))
+    } finally {
+      if (taskGuard.owned()) retryingBatchId.value = ''
     }
-    const retryJob = await submitBatchImageJob(key.key, {
-        model: job.model,
-        task_name: `${job.task_name || defaultTaskName()} ${t('batchImage.messages.retryTaskNameSuffix')}`,
-        parent_batch_id: rootBatchIdForRetry(job),
-        provider: job.provider,
-        image_size: '1K',
-        response_mime_type: form.responseMimeType,
-        items: failedItems,
-      }, `sub2api-ui-retry-${job.id}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`, taskGuard.signal
-    )
-    if(!taskGuard.active()) return
-
-    upsertJob(retryJob)
-    if (retryJob.parent_batch_id) {
-      expandedParentIds.value = new Set([...expandedParentIds.value, retryJob.parent_batch_id])
-    }
-    appStore.showSuccess(batchImageText('retrySubmitted'))
-    if (expectedSelection === selectionRevision) {
-      invalidateDetailSelection()
-      currentJob.value = retryJob
-      selectedBatchId.value = retryJob.id
-      selectedBatchApiKeyId.value = key.id
-      items.value = []
-      void loadItems()
-      startPolling()
-    }
-  } catch (error: any) {
-    if(!taskGuard.active()) return
-
-    appStore.showError(batchImageErrorMessage(error, batchImageText('retryFailed')))
-  } finally {
-    if (taskGuard.owned()) {
-
-    retryingBatchId.value = ''
-
-    }
-  }
-
   } finally { taskGuard.finish() }
 }
 
-async function ensureItemsForRetry(apiKey: string, batchId: string, signal: AbortSignal) {
-  if (selectedBatchId.value === batchId && items.value.length > 0) {
-    return items.value
+async function ensureItemsForRetry(apiKey: string, job: BatchImageJobRow | BatchImageJob, signal: AbortSignal): Promise<BatchImageSubmitItem[]> {
+  const history = await getBatchImageRecovery(apiKey, job.id, signal)
+  const identity = await createBatchRetryIdentity(history.root_custom_ids)
+  if (signal.aborted) throw new DOMException('Request cancelled', 'AbortError')
+  const recovered = new Set(history.successful_items.map(item => identity.child(item.custom_id)))
+  const pending = new Set(history.pending_items.map(item => identity.child(item.custom_id)))
+  const nonce = `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+  const remaining: BatchImageSubmitItem[] = []
+  for (const item of history.target_items) {
+    if (item.status !== 'failed') continue
+    const source = history.batch_id === history.root_batch_id ? identity.root(item.custom_id) : identity.child(item.custom_id)
+    if (recovered.has(source) || pending.has(source)) continue
+    const prompt = String(item.prompt_preview || '').trim()
+    if (!prompt) throw Object.assign(new Error('The original failed prompt is unavailable.'), { code: 'BATCH_IMAGE_PROMPT_HISTORY_MISSING' })
+    remaining.push({ custom_id: identity.next(source, nonce, remaining.length), prompt })
   }
-  const result = await listBatchImageItems(apiKey, batchId, '', signal)
-  return result.data || []
-}
-
-function retryCustomID(customID: string) {
-  const base = String(customID || 'item').replace(/[^\w.-]+/g, '_').replace(/^_+|_+$/g, '') || 'item'
-  return `${base}_retry_${Date.now().toString(36)}`
-}
-
-function rootBatchIdForRetry(job: BatchImageJobRow | BatchImageJob) {
-  return job.parent_batch_id || job.id
+  return remaining
 }
 
 async function downloadJob(job: (BatchImageJobRow | Pick<BatchImageJob, 'id'>)) {
@@ -2021,7 +2154,7 @@ async function downloadJob(job: (BatchImageJobRow | Pick<BatchImageJob, 'id'>)) 
   if (downloading.value) return
   closeMoreMenu()
   applyJobApiKey(job)
-  const key = apiKeyForJob(job) || requireApiKey()
+  const key = apiKeyForJob(job)
   if (!key) return
   downloading.value = true
   downloadingBatchId.value = job.id
@@ -2241,15 +2374,15 @@ async function loadItems() {
 
   const batchId = selectedBatchId.value || currentJob.value?.id || ''
   if (!batchId) return
-  const key = keyForSelectedBatch() || requireApiKey()
+  const key = keyForSelectedBatch()
   if (!key) return
   loadingItems.value = true
   try {
     clearItemPreviews()
     const jobs = detailJobsForBatch(batchId)
     const results = await Promise.all(jobs.map(async (job) => {
-      const result = await listBatchImageItems(key.key, job.id, '', taskGuard.signal)
-      return (result.data || []).map(item => ({
+      const result = await readAllBatchImageItems(key.key, job.id, taskGuard.signal)
+      return result.map(item => ({
         ...item,
         batch_id: job.id,
         source_task_name: detailSourceName(job, batchId),
@@ -2275,9 +2408,26 @@ async function loadItems() {
   } finally { taskGuard.finish() }
 }
 
+async function readAllBatchImageItems(apiKey: string, batchId: string, signal: AbortSignal) {
+  const result: BatchImageItem[] = []
+  const ids = new Set<string>()
+  let cursor = 0
+  for (;;) {
+    const page = cursor === 0
+      ? await listBatchImageItems(apiKey, batchId, '', signal)
+      : await listBatchImageItems(apiKey, batchId, '', signal, { cursor: String(cursor), limit: 100 })
+    if (signal.aborted) throw new DOMException('Request cancelled', 'AbortError')
+    const rows = page.data || []
+    if ((page.has_more && !rows.length) || rows.some(item => ids.has(item.custom_id))) throw Object.assign(new Error('Incomplete item history.'), { code: 'BATCH_IMAGE_HISTORY_UNCONFIRMED' })
+    for (const item of rows) { ids.add(item.custom_id); result.push(item) }
+    if (!page.has_more) return result
+    cursor += rows.length
+  }
+}
+
 function detailJobsForBatch(batchId: string): BatchImageJobRow[] {
   const row = batchJobs.value.find(job => job.id === batchId)
-  const base = row || (currentJob.value && currentJob.value.id === batchId ? toJobRow(currentJob.value, keyForSelectedBatch() || selectedApiKey.value) : null)
+  const base = row || (currentJob.value && currentJob.value.id === batchId ? toJobRow(currentJob.value, keyForSelectedBatch()) : null)
   if (!base) return []
   if (base.parent_batch_id) return [base]
   return [base, ...(childrenByParent.value.get(base.id) || [])]
@@ -2297,7 +2447,7 @@ async function loadItemPreview(item: BatchImageItem) {
   const batchId = item.batch_id || selectedBatchId.value || currentJob.value?.id || ''
   const previewKey = itemPreviewKey(item)
   if (!batchId || !canLoadItemPreview(item) || (itemPreviewUrls[previewKey] && !previewErrorIds.value.has(previewKey))) return
-  const key = keyForSelectedBatch() || requireApiKey()
+  const key = keyForSelectedBatch()
   if (!key) return
   const cacheKey = previewCacheKey(batchId, item.custom_id, 0)
   previewLoadingIds.value = new Set([...previewLoadingIds.value, previewKey])
@@ -2490,6 +2640,9 @@ type BatchImageTextKey =
   | 'promptRequired'
   | 'submitted'
   | 'submitFailed'
+  | 'resultUnconfirmed'
+  | 'checkSubmission'
+  | 'resultRecovered'
   | 'refreshFailed'
   | 'cancelConfirm'
   | 'cancelled'
@@ -2571,6 +2724,9 @@ function batchImagePlainError(base: string) {
 function batchImageErrorMessage(error: any, fallback: string) {
   const code = String(error?.code || '').trim()
   const message = String(error?.message || '').trim()
+  if (code === 'BATCH_IMAGE_RESULT_UNCONFIRMED') return batchImageText('resultUnconfirmed')
+  if (code === 'BATCH_IMAGE_HISTORY_UNCONFIRMED' || code === 'BATCH_IMAGE_RETRY_SOURCE_UNCONFIRMED') return t('batchImage.messages.retryHistoryUnconfirmed')
+  if (code === 'BATCH_IMAGE_PROMPT_HISTORY_MISSING') return batchImageText('retryMissingPrompts')
   if (code === 'API_KEY_REQUIRED' || code === '401') {
     return batchImagePlainError(batchImageText('authRequired'))
   }
@@ -2693,6 +2849,7 @@ onMounted(() => {
 watch(
   () => form.apiKeyId,
   () => {
+    if (pendingCreateOperation.value?.outcomeUncertain) return
     void loadAvailableModels()
   },
 )
@@ -2700,7 +2857,7 @@ watch(
 watch(
   () => form.model,
   () => {
-    tasks.cancel('handleReferenceImageFiles')
+    cancelReferenceImageRead()
     const limit = selectedModelReferenceLimit.value
     if (limit <= 0) {
       referenceImageDrafts.value = []
@@ -2714,6 +2871,8 @@ watch(
 
 onBeforeUnmount(() => {
   tasks.dispose()
+  pendingCreateOperation.value = null
+  pendingRetryOperations.clear()
   stopPolling()
   clearItemPreviews()
   document.removeEventListener('click', closeMoreMenu)

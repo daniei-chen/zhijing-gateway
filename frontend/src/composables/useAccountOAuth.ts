@@ -32,7 +32,13 @@ export interface TokenInfo {
   [key: string]: unknown
 }
 
-export function useAccountOAuth() {
+export function useAccountOAuth(getRequestOwner?: () => unknown) {
+  let requestVersion = 0
+  const beginRequest = () => {
+    const version = ++requestVersion
+    const owner = getRequestOwner?.()
+    return () => version === requestVersion && owner === getRequestOwner?.()
+  }
   const appStore = useAppStore()
 
   // State
@@ -45,6 +51,7 @@ export function useAccountOAuth() {
 
   // Reset state
   const resetState = () => {
+    requestVersion++
     authUrl.value = ''
     authCode.value = ''
     sessionId.value = ''
@@ -58,6 +65,7 @@ export function useAccountOAuth() {
     addMethod: AddMethod,
     proxyId?: number | null
   ): Promise<boolean> => {
+    const isCurrent = beginRequest()
     loading.value = true
     authUrl.value = ''
     sessionId.value = ''
@@ -71,15 +79,17 @@ export function useAccountOAuth() {
           : '/admin/accounts/generate-setup-token-url'
 
       const response = await adminAPI.accounts.generateAuthUrl(endpoint, proxyConfig)
+      if (!isCurrent()) return false
       authUrl.value = response.auth_url
       sessionId.value = response.session_id
       return true
     } catch (err: any) {
+      if (!isCurrent()) return false
       error.value = err.response?.data?.detail || 'Failed to generate auth URL'
       appStore.showError(error.value)
       return false
     } finally {
-      loading.value = false
+      if (isCurrent()) loading.value = false
     }
   }
 
@@ -88,6 +98,7 @@ export function useAccountOAuth() {
     addMethod: AddMethod,
     proxyId?: number | null
   ): Promise<TokenInfo | null> => {
+    const isCurrent = beginRequest()
     if (!authCode.value.trim() || !sessionId.value) {
       error.value = 'Missing auth code or session ID'
       return null
@@ -109,13 +120,15 @@ export function useAccountOAuth() {
         ...proxyConfig
       })
 
+      if (!isCurrent()) return null
       return tokenInfo as TokenInfo
     } catch (err: any) {
+      if (!isCurrent()) return null
       error.value = err.response?.data?.detail || 'Failed to exchange auth code'
       appStore.showError(error.value)
       return null
     } finally {
-      loading.value = false
+      if (isCurrent()) loading.value = false
     }
   }
 
@@ -125,6 +138,7 @@ export function useAccountOAuth() {
     sessionKeyValue: string,
     proxyId?: number | null
   ): Promise<TokenInfo | null> => {
+    const isCurrent = beginRequest()
     if (!sessionKeyValue.trim()) {
       error.value = 'Please enter sessionKey'
       return null
@@ -146,12 +160,14 @@ export function useAccountOAuth() {
         ...proxyConfig
       })
 
+      if (!isCurrent()) return null
       return tokenInfo as TokenInfo
     } catch (err: any) {
+      if (!isCurrent()) return null
       error.value = err.response?.data?.detail || 'Cookie authorization failed'
       return null
     } finally {
-      loading.value = false
+      if (isCurrent()) loading.value = false
     }
   }
 

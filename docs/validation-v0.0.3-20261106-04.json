@@ -1,0 +1,114 @@
+{
+  "schema_version": 2,
+  "version": "0.0.3",
+  "status": "iteration_in_progress_with_open_quality_gates",
+  "production_deployed": false,
+  "formal_release_created": false,
+  "previous_checkpoint": "validation-v0.0.3-20261105.json",
+  "frontend": {
+    "checkpoint": "2026-11-06-04",
+    "test_files": 449,
+    "passed_tests": 4038,
+    "failed_tests": 0,
+    "pending_tests": 0,
+    "source_sha256_lf_manifest": "proofs/v0.0.3-followup/frontend-source-checkpoint-04.json",
+    "source_manifest_sha256": "d40fc2700dfbd1066576a1bd7e8817aedba2c519a15081290b30e5bc73151488",
+    "source_files_in_checkpoint": 1068,
+    "coverage": {
+      "lines": {
+        "total": 50752,
+        "covered": 38389,
+        "skipped": 0,
+        "pct": 75.64
+      },
+      "statements": {
+        "total": 56767,
+        "covered": 41601,
+        "skipped": 0,
+        "pct": 73.28
+      },
+      "functions": {
+        "total": 12004,
+        "covered": 7520,
+        "skipped": 0,
+        "pct": 62.64
+      },
+      "branches": {
+        "total": 44030,
+        "covered": 28075,
+        "skipped": 0,
+        "pct": 63.76
+      }
+    },
+    "global_coverage_threshold": 80,
+    "global_coverage_gate_passed": false,
+    "coverage_command_exit": 1,
+    "typecheck": true,
+    "eslint": true,
+    "vite_build_manifest": false,
+    "previous_vite_build_checkpoint": "2026-11-06-03",
+    "current_tree_has_changes_after_checkpoint": true,
+    "current_tree_full_regression_complete": false,
+    "formal_release_zip_created": false
+  },
+  "backend": {
+    "source_commit": "253cbd24a1290d8b283a216750dacf238e6933b0",
+    "base_commit": "4851ca95b134322c14ca9904bc82c550a3880a67",
+    "generic_patch_files": 53,
+    "patch_sha256": "bdcbdab2139e717904c56f7157c431052cad42cdfeddfaf63c6a39d04a95e471",
+    "go_toolchain": "1.27.3",
+    "unit_short": {
+      "passed_packages": 41,
+      "passed_top_level_tests": 11997,
+      "passed_test_events_including_subtests": 23767,
+      "skipped_test_events": 29,
+      "skipped_packages": 2,
+      "failed_events": 0
+    },
+    "fresh_patch_targeted_race": {
+      "passed_packages": 8,
+      "passed_top_level_tests": 138,
+      "passed_test_events_including_subtests": 248,
+      "skipped_test_events": 1,
+      "skipped_packages": 0,
+      "failed_events": 0
+    },
+    "go_vet": true,
+    "linux_amd64_cross_build": true,
+    "artifact_apply_and_result_hashes": true,
+    "external_live_database_integration_executed": false,
+    "matching_api_peer_embed_cross_build": true,
+    "matching_api_peer_build_proof": "proofs/v0.0.3-followup/backend-api-peer-build.json",
+    "isolated_redis_durability_smoke_executed": true,
+    "production_redis_policy_applied": false,
+    "real_redis_capacity_test_executed": false,
+    "isolated_redis_evidence": "proofs/v0.0.3-followup/isolated-redis-lab.json"
+  },
+  "tools": {
+    "python_test_cases": 51,
+    "python_passed": 50,
+    "python_skipped": 1,
+    "python_failed": 0,
+    "skip_reason": "Windows test symlink creation privilege; separate reparse-point rejection remains tested.",
+    "upload_relay_real_http_tests": 24,
+    "upload_relay_supplier_inference_benchmark": false
+  },
+  "browser": {
+    "data": "synthetic_local_preview_only",
+    "member_dark_view_observed": true,
+    "proxy_mobile_390x844_observed": true,
+    "protocol_select_keyboard_and_return_focus_observed": true,
+    "real_payments_or_emails_sent": false,
+    "screenshots": [
+      "images/v0.0.3-member-dark.jpg",
+      "images/v0.0.3-proxy-mobile-dark.jpg"
+    ]
+  },
+  "open_work": [
+    "Finish independent cross-review of user, channel and API-key repairs and actual administrator workflow validation.",
+    "Reach all four original global coverage gates without exclusions or reduced thresholds.",
+    "Apply/read-back required Redis policy and monitor actual shared-store overhead during controlled cutover.",
+    "Verify actual client upload compression and matched upstream/output milestones; no TTFT improvement claim yet.",
+    "Rebuild and verify final frozen source, production drain/cutover, GitHub tag and release assets."
+  ]
+}

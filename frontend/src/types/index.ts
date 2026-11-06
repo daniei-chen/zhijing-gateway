@@ -1615,7 +1615,6 @@ export interface UpdateAccountRequest {
   load_factor?: number | null
   priority?: number
   rate_multiplier?: number // Account billing multiplier (>=0, 0 means free)
-  schedulable?: boolean
   status?: 'active' | 'inactive' | 'error'
   group_ids?: number[]
   expires_at?: number | null

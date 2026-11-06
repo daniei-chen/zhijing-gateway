@@ -11,14 +11,16 @@
 
         <!-- Auth Method Selection -->
         <div v-if="showMethodSelection" class="mb-4">
-          <label class="mb-2 block text-sm font-medium text-blue-800 dark:text-blue-300">
+          <div :id="`${fieldId}-method-label`" class="mb-2 block text-sm font-medium text-blue-800 dark:text-blue-300">
             {{ methodLabel }}
-          </label>
-          <div class="flex flex-wrap gap-4">
+          </div>
+          <div class="flex flex-wrap gap-4" role="radiogroup" :aria-labelledby="`${fieldId}-method-label`">
             <label v-if="showManualOption" class="flex cursor-pointer items-center gap-2">
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="manual"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -30,6 +32,8 @@
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="cookie"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -41,6 +45,8 @@
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="refresh_token"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -52,6 +58,8 @@
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="sso_cookie"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -63,6 +71,8 @@
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="email_password"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -74,6 +84,8 @@
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="mobile_refresh_token"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -85,6 +97,8 @@
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="session_token"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -96,6 +110,8 @@
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="access_token"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -107,6 +123,8 @@
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="codex_session"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -118,6 +136,8 @@
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="agent_identity"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -129,6 +149,8 @@
               <input
                 v-model="inputMethod"
                 type="radio"
+                :name="`${fieldId}-method`"
+                :disabled="loading"
                 value="codex_pat"
                 class="text-blue-600 focus:ring-blue-500"
               />
@@ -150,7 +172,7 @@
 
             <!-- Refresh Token Input -->
             <div class="mb-4">
-              <label
+              <label :for="`${fieldId}-refreshToken`"
                 class="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
               >
                 <Icon name="key" size="sm" class="text-blue-500" />
@@ -163,6 +185,7 @@
                 </span>
               </label>
               <textarea
+                :id="`${fieldId}-refreshToken`"
                 v-model="refreshTokenInput"
                 rows="3"
                 class="input w-full resize-y font-mono text-sm"
@@ -233,7 +256,7 @@
             </p>
 
             <div class="mb-4">
-              <label
+              <label :for="`${fieldId}-ssoCookie`"
                 class="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
               >
                 <Icon name="key" size="sm" class="text-blue-500" />
@@ -246,6 +269,7 @@
                 </span>
               </label>
               <textarea
+                :id="`${fieldId}-ssoCookie`"
                 v-model="ssoCookieInput"
                 rows="5"
                 class="input w-full resize-y font-mono text-sm"
@@ -307,7 +331,7 @@
               {{ t(getOAuthKey('emailPasswordDesc')) }}
             </p>
             <div class="mb-4">
-              <label
+              <label :for="`${fieldId}-emailPassword`"
                 class="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
               >
                 <Icon name="user" size="sm" class="text-blue-500" />
@@ -320,6 +344,7 @@
                 </span>
               </label>
               <textarea
+                :id="`${fieldId}-emailPassword`"
                 v-model="emailPasswordInput"
                 rows="4"
                 class="input w-full resize-y font-mono text-sm"
@@ -381,7 +406,7 @@
             </p>
 
             <div class="mb-4">
-              <label
+              <label :for="`${fieldId}-codexSession`"
                 class="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
               >
                 <Icon name="key" size="sm" class="text-blue-500" />
@@ -394,6 +419,7 @@
                 </span>
               </label>
               <textarea
+                :id="`${fieldId}-codexSession`"
                 v-model="codexSessionInput"
                 rows="8"
                 class="input w-full resize-y font-mono text-sm"
@@ -460,13 +486,14 @@
             </p>
 
             <div class="mb-4">
-              <label
+              <label :for="`${fieldId}-codexPAT`"
                 class="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
               >
                 <Icon name="key" size="sm" class="text-blue-500" />
                 {{ t('admin.accounts.oauth.openai.codexPatInputLabel') }}
               </label>
               <textarea
+                :id="`${fieldId}-codexPAT`"
                 v-model="codexPATInput"
                 rows="3"
                 class="input w-full resize-y font-mono text-sm"
@@ -534,7 +561,7 @@
 
             <!-- sessionKey Input -->
             <div class="mb-4">
-              <label
+              <label :for="`${fieldId}-sessionKey`"
                 class="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700 dark:text-gray-300"
               >
                 <Icon name="key" size="sm" class="text-blue-500" />
@@ -549,6 +576,9 @@
                   v-if="showHelp"
                   type="button"
                   class="text-blue-500 hover:text-blue-600"
+                  :aria-label="t('admin.accounts.oauth.howToGetSessionKey')"
+                  :aria-expanded="showHelpDialog"
+                  :aria-controls="`${fieldId}-cookie-help`"
                   @click="showHelpDialog = !showHelpDialog"
                 >
                   <svg
@@ -567,6 +597,7 @@
                 </button>
               </label>
               <textarea
+                :id="`${fieldId}-sessionKey`"
                 v-model="sessionKeyInput"
                 rows="3"
                 class="input w-full resize-y font-mono text-sm"
@@ -587,6 +618,7 @@
             <!-- Help Section -->
             <div
               v-if="showHelpDialog && showHelp"
+              :id="`${fieldId}-cookie-help`"
               class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-900/30"
             >
               <h5 class="mb-2 font-semibold text-amber-800 dark:text-amber-200">
@@ -676,7 +708,7 @@
                   {{ oauthStep1GenerateUrl }}
                 </p>
                 <div v-if="showProjectId && platform === 'gemini'" class="mb-3">
-                  <label class="input-label flex items-center gap-2">
+                  <label :for="`${fieldId}-project-id`" class="input-label flex items-center gap-2">
                     {{ t('admin.accounts.oauth.gemini.projectIdLabel') }}
                     <a
                       href="https://console.cloud.google.com/"
@@ -691,7 +723,8 @@
                     </a>
                   </label>
                   <input
-                    v-model="projectId"
+                    :id="`${fieldId}-project-id`"
+                v-model="projectId"
                     type="text"
                     class="input w-full font-mono text-sm"
                     :placeholder="t('admin.accounts.oauth.gemini.projectIdPlaceholder')"
@@ -733,6 +766,7 @@
                 <div v-else class="space-y-3">
                   <div class="flex items-center gap-2">
                     <input
+                      :aria-label="oauthStep1GenerateUrl"
                       :value="authUrl"
                       readonly
                       type="text"
@@ -742,6 +776,7 @@
                       type="button"
                       class="btn btn-secondary p-2"
                       title="Copy URL"
+                      aria-label="Copy URL"
                       @click="handleCopyUrl"
                     >
                       <svg
@@ -769,6 +804,7 @@
                   </div>
                   <button
                     type="button"
+                    :disabled="loading"
                     class="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
                     @click="handleRegenerate"
                   >
@@ -840,12 +876,13 @@
                   v-text="oauthAuthCodeDesc"
                 ></p>
                 <div>
-                  <label class="input-label">
+                  <label :for="`${fieldId}-authCode`" class="input-label">
                     <Icon name="key" size="sm" class="mr-1 inline text-blue-500" />
                     {{ oauthAuthCode }}
                   </label>
                   <textarea
-                    v-model="authCodeInput"
+                    :id="`${fieldId}-authCode`"
+                v-model="authCodeInput"
                     rows="3"
                     class="input w-full resize-none font-mono text-sm"
                     :placeholder="oauthAuthCodePlaceholder"
@@ -894,13 +931,14 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, useId, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useClipboard } from '@/composables/useClipboard'
 import Icon from '@/components/icons/Icon.vue'
 import type { AddMethod, AuthInputMethod } from '@/composables/useAccountOAuth'
 import type { AccountPlatform } from '@/types'
 import { adminAPI } from '@/api/admin'
+import { createSessionTasks } from '@/utils/sessionTasks'
 
 interface Props {
   addMethod: AddMethod
@@ -976,6 +1014,9 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const fieldId = `oauth-flow-${useId()}`
+const flowTasks = createSessionTasks()
+onBeforeUnmount(() => flowTasks.dispose())
 const passwordAuthEnabled = ref(false)
 const emailPasswordOptionEnabled = computed(
   () => props.showEmailPasswordOption && props.platform === 'grok' && passwordAuthEnabled.value
@@ -1028,38 +1069,41 @@ const projectId = ref('')
 
 watch(
   () => [props.platform, props.showEmailPasswordOption] as const,
-  async ([platform, requested]) => {
+  async ([platform, requested], _, onCleanup) => {
+    const task = flowTasks.begin('password-capability')
+    onCleanup(() => { task.finish(); flowTasks.cancel('password-capability') })
     passwordAuthEnabled.value = false
-    if (platform !== 'grok' || !requested) return
+    if (platform !== 'grok' || !requested || !task.active()) { task.finish(); return }
     try {
       const capabilities = await adminAPI.grok.getCapabilities()
-      passwordAuthEnabled.value = capabilities.password_auth_enabled
+      if (task.active()) passwordAuthEnabled.value = capabilities.password_auth_enabled
     } catch {
       // Fail closed; the backend enforces the same capability.
+    } finally {
+      task.finish()
     }
   },
   { immediate: true }
 )
 
-watch(emailPasswordOptionEnabled, (enabled) => {
-  if (!enabled && inputMethod.value === 'email_password') inputMethod.value = 'manual'
-})
-
 // Computed: show method selection only when there is something to choose.
-const methodOptionCount = computed(() => [
-  props.showManualOption,
-  props.showCookieOption,
-  props.showRefreshTokenOption,
-  props.showMobileRefreshTokenOption,
-  props.showSessionTokenOption,
-  props.showAccessTokenOption,
-  props.showCodexSessionImportOption,
-  props.showAgentIdentityOption,
-  props.showCodexPatOption,
-  props.showSsoOption,
-  emailPasswordOptionEnabled.value
-].filter(Boolean).length)
-const showMethodSelection = computed(() => methodOptionCount.value > 1)
+const availableInputMethods = computed(() => [
+  props.showManualOption && 'manual',
+  props.showCookieOption && 'cookie',
+  props.showRefreshTokenOption && 'refresh_token',
+  props.showMobileRefreshTokenOption && 'mobile_refresh_token',
+  props.showSessionTokenOption && 'session_token',
+  props.showAccessTokenOption && 'access_token',
+  props.showCodexSessionImportOption && 'codex_session',
+  props.showAgentIdentityOption && 'agent_identity',
+  props.showCodexPatOption && 'codex_pat',
+  props.showSsoOption && 'sso_cookie',
+  emailPasswordOptionEnabled.value && 'email_password'
+].filter(Boolean) as AuthInputMethod[])
+const showMethodSelection = computed(() => availableInputMethods.value.length > 1)
+watch(availableInputMethods, (methods) => {
+  if (!methods.includes(inputMethod.value)) inputMethod.value = methods[0] ?? 'manual'
+}, { immediate: true })
 
 // Clipboard
 const { copied, copyToClipboard } = useClipboard()
@@ -1112,7 +1156,7 @@ const handleAuthorizePassword = () => {
 
 // Watchers
 watch(() => props.initialInputMethod, (newVal) => {
-  inputMethod.value = newVal
+  inputMethod.value = availableInputMethods.value.includes(newVal) ? newVal : availableInputMethods.value[0] ?? 'manual'
 })
 
 watch(
@@ -1137,28 +1181,12 @@ watch(authCodeInput, (newVal) => {
   const trimmed = newVal.trim()
   // Check if it looks like a URL with code parameter
   if (trimmed.includes('code=')) {
-    try {
-      // Try to parse as URL
-      const url = trimmed.includes('?') ? new URL(trimmed) : new URL(`http://localhost/callback?${trimmed.replace(/^\?/, '')}`)
-      const code = url.searchParams.get('code')
-      const stateParam = url.searchParams.get('state')
-      if ((props.platform === 'openai' || props.platform === 'gemini' || props.platform === 'antigravity' || props.platform === 'grok') && stateParam) {
-        oauthState.value = stateParam
-      }
-      if (code && code !== trimmed) {
-        // Replace the input with just the code
-        authCodeInput.value = code
-      }
-    } catch {
-      // If URL parsing fails, try regex extraction
-      const match = trimmed.match(/[?&]code=([^&]+)/)
-      const stateMatch = trimmed.match(/[?&]state=([^&]+)/)
-      if ((props.platform === 'openai' || props.platform === 'gemini' || props.platform === 'antigravity' || props.platform === 'grok') && stateMatch && stateMatch[1]) {
-        oauthState.value = stateMatch[1]
-      }
-      if (match && match[1] && match[1] !== trimmed) {
-        authCodeInput.value = match[1]
-      }
+    const query = trimmed.slice(trimmed.indexOf('?') + 1).split('#')[0]
+    const params = new URLSearchParams(query)
+    const code = params.get('code')
+    if (code && code !== trimmed) {
+      oauthState.value = params.get('state') || ''
+      authCodeInput.value = code
     }
   }
 })
@@ -1176,6 +1204,7 @@ const handleCopyUrl = () => {
 
 const handleRegenerate = () => {
   authCodeInput.value = ''
+  oauthState.value = ''
   emit('generate-url')
 }
 
@@ -1237,7 +1266,8 @@ defineExpose({
     codexPATInput.value = ''
     ssoCookieInput.value = ''
     emailPasswordInput.value = ''
-    inputMethod.value = props.initialInputMethod
+    inputMethod.value = availableInputMethods.value.includes(props.initialInputMethod)
+      ? props.initialInputMethod : availableInputMethods.value[0] ?? 'manual'
     showHelpDialog.value = false
   }
 })

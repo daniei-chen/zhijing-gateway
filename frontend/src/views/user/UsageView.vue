@@ -18,7 +18,8 @@
         </div>
 
 
-      <UsageStatsCards :stats="usageStats" :show-account-cost="false" :strike-standard-cost="true" />
+      <div v-if="statsFailed" class="card p-4 text-sm text-amber-700 dark:text-amber-300" role="alert" :aria-busy="endpointStatsLoading">{{ t('usage.failedToLoad') }}</div>
+      <UsageStatsCards v-else :stats="usageStats" :show-account-cost="false" :strike-standard-cost="true" :aria-busy="endpointStatsLoading" />
 
 
       <section class="z-usage-filters z-page-section card p-6">
@@ -116,7 +117,7 @@
                 </button>
               </div>
             </div>
-            <button v-if="activeTab !== 'errors'" type="button" @click="exportToCSV" :disabled="exporting" class="btn btn-primary">
+            <button v-if="activeTab !== 'errors'" type="button" @click="exportToCSV" :disabled="exporting || loading || logsFailed" class="btn btn-primary">
               {{ exporting ? t('usage.exporting') : t('usage.exportCsv') }}
             </button>
           </div>
@@ -133,42 +134,54 @@
       </div>
 
       <template v-if="activeTab === 'usage'">
-        <UsageTable
-          :data="usageLogs"
-          :loading="loading"
-          :columns="visibleColumns"
-          :server-side-sort="true"
-          :show-account-billing="false"
-          :show-upstream-endpoint="false"
-          default-sort-key="created_at"
-          default-sort-order="desc"
-          @sort="handleSort"
-          @ipGeoBatchFailed="handleIpGeoBatchFailed"
-        />
+        <div v-if="logsFailed" data-testid="usage-list-error" role="alert" :aria-busy="loading" class="card flex flex-wrap items-center justify-between gap-3 p-4 text-sm text-amber-700 dark:text-amber-300">
+          <p>{{ t('usage.failedToLoad') }}</p>
+          <button type="button" class="btn btn-secondary" :disabled="loading" @click="loadLogs">{{ loading ? t('common.loading') : t('common.tryAgain') }}</button>
+        </div>
+        <template v-else>
+          <UsageTable
+            :data="usageLogs"
+            :loading="loading"
+            :columns="visibleColumns"
+            :server-side-sort="true"
+            :show-account-billing="false"
+            :show-upstream-endpoint="false"
+            default-sort-key="created_at"
+            default-sort-order="desc"
+            @sort="handleSort"
+            @ipGeoBatchFailed="handleIpGeoBatchFailed"
+          />
 
-        <Pagination
-          v-if="pagination.total > 0"
-          :page="pagination.page"
-          :total="pagination.total"
-          :page-size="pagination.page_size"
-          @update:page="handlePageChange"
-          @update:pageSize="handlePageSizeChange"
-        />
+          <Pagination
+            v-if="pagination.total > 0"
+            :page="pagination.page"
+            :total="pagination.total"
+            :page-size="pagination.page_size"
+            @update:page="handlePageChange"
+            @update:pageSize="handlePageSizeChange"
+          />
+        </template>
       </template>
 
-      <UserErrorRequestsTable
-        v-else-if="errorViewEnabled"
-        :rows="errorRows"
-        :total="errorTotal"
-        :loading="errorLoading"
-        :page="errorPage"
-        :page-size="errorPageSize"
-        :visible-column-keys="errVisibleColumnKeys"
-        @sort="onErrorSort"
-        @update:page="onErrorPage"
-        @update:pageSize="onErrorPageSize"
-        @ipGeoBatchFailed="handleIpGeoBatchFailed"
-      />
+      <template v-else-if="errorViewEnabled">
+        <div v-if="errorsFailed" data-testid="usage-errors-error" role="alert" :aria-busy="errorLoading" class="card flex flex-wrap items-center justify-between gap-3 p-4 text-sm text-amber-700 dark:text-amber-300">
+          <p>{{ t('usage.errors.failedToLoad') }}</p>
+          <button type="button" class="btn btn-secondary" :disabled="errorLoading" @click="loadErrors">{{ errorLoading ? t('common.loading') : t('common.tryAgain') }}</button>
+        </div>
+        <UserErrorRequestsTable
+          v-else
+          :rows="errorRows"
+          :total="errorTotal"
+          :loading="errorLoading"
+          :page="errorPage"
+          :page-size="errorPageSize"
+          :visible-column-keys="errVisibleColumnKeys"
+          @sort="onErrorSort"
+          @update:page="onErrorPage"
+          @update:pageSize="onErrorPageSize"
+          @ipGeoBatchFailed="handleIpGeoBatchFailed"
+        />
+      </template>
 
       <details class="z-usage-analysis z-page-section" open>
         <summary><span class="z-section-heading"><span>02 / ANALYTICS</span><h3>{{ locale === 'zh' ? '用量分析' : 'Usage analytics' }}</h3></span><span class="z-analysis-chevron" aria-hidden="true">⌄</span></summary>
@@ -259,14 +272,17 @@ import type {
 } from '@/types'
 import type { Column } from '@/components/common/types'
 import { COMMON_ERROR_STATUS_CODES } from '@/utils/errorBadges'
+import { createSessionTasks } from '@/utils/sessionTasks'
 
 const { t, locale } = useI18n()
 const appStore = useAppStore()
+const pageTasks = createSessionTasks()
 
 type DistributionMetric = 'tokens' | 'actual_cost'
 type EndpointSource = 'inbound' | 'upstream' | 'path'
 
 const usageStats = ref<UsageStatsResponse | null>(null)
+const statsFailed = ref(false)
 const usageLogs = ref<UsageLog[]>([])
 const trendData = ref<TrendDataPoint[]>([])
 const requestedModelStats = ref<ModelStat[]>([])
@@ -276,12 +292,14 @@ const upstreamEndpointStats = ref<EndpointStat[]>([])
 const endpointPathStats = ref<EndpointStat[]>([])
 
 const loading = ref(false)
+const logsFailed = ref(false)
 const chartsLoading = ref(false)
 const modelStatsLoading = ref(false)
 const endpointStatsLoading = ref(false)
 const exporting = ref(false)
 const errorRows = ref<UserErrorRequest[]>([])
 const errorLoading = ref(false)
+const errorsFailed = ref(false)
 const errorPage = ref(1)
 const errorPageSize = ref(20)
 const errorSortBy = ref('created_at')
@@ -331,7 +349,6 @@ const applyErrorFilters = () => {
   void loadErrors()
 }
 
-let abortController: AbortController | null = null
 let chartReqSeq = 0
 let statsReqSeq = 0
 let modelStatsReqSeq = 0
@@ -447,49 +464,60 @@ const buildUsageListParams = (page: number, pageSize: number): UsageQueryParams 
 })
 
 const loadLogs = async () => {
-  abortController?.abort()
-  const controller = new AbortController()
-  abortController = controller
+  const task = pageTasks.begin('logs')
+  if (!task.active()) return
   loading.value = true
   try {
     const res = await usageAPI.query(buildUsageListParams(pagination.page, pagination.page_size), {
-      signal: controller.signal,
+      signal: task.signal,
     })
-    if (!controller.signal.aborted) {
+    if (task.active()) {
       usageLogs.value = res.items
       pagination.total = res.total
+      logsFailed.value = false
     }
   } catch (error: any) {
-    if (error?.name !== 'AbortError' && error?.code !== 'ERR_CANCELED') {
+    if (task.active() && error?.name !== 'AbortError' && error?.code !== 'ERR_CANCELED') {
+      usageLogs.value = []
+      pagination.total = 0
+      logsFailed.value = true
       appStore.showError(t('usage.failedToLoad'))
     }
   } finally {
-    if (abortController === controller) loading.value = false
+    if (task.owned()) loading.value = false
+    task.finish()
   }
 }
 
 const loadStats = async () => {
+  const task = pageTasks.begin('stats')
+  if (!task.active()) return
   const seq = ++statsReqSeq
   endpointStatsLoading.value = true
   try {
     const stats = await usageAPI.getStats(normalizedFilters.value)
-    if (seq !== statsReqSeq) return
+    if (!task.active() || seq !== statsReqSeq) return
     usageStats.value = stats
+    statsFailed.value = false
     inboundEndpointStats.value = stats.endpoints || []
     upstreamEndpointStats.value = []
     endpointPathStats.value = []
   } catch (error) {
-    if (seq !== statsReqSeq) return
+    if (!task.active() || seq !== statsReqSeq) return
     console.error('Failed to load usage stats:', error)
+    statsFailed.value = true
     inboundEndpointStats.value = []
     upstreamEndpointStats.value = []
     endpointPathStats.value = []
   } finally {
-    if (seq === statsReqSeq) endpointStatsLoading.value = false
+    if (task.owned() && seq === statsReqSeq) endpointStatsLoading.value = false
+    task.finish()
   }
 }
 
 const loadModelStats = async () => {
+  const task = pageTasks.begin('models')
+  if (!task.active()) return
   const seq = ++modelStatsReqSeq
   modelStatsLoading.value = true
   try {
@@ -497,19 +525,22 @@ const loadModelStats = async () => {
       ...normalizedFilters.value,
       model_source: 'requested',
     })
-    if (seq !== modelStatsReqSeq) return
+    if (!task.active() || seq !== modelStatsReqSeq) return
     requestedModelStats.value = response.models || []
     refreshModelOptions(response.models || [])
   } catch (error) {
-    if (seq !== modelStatsReqSeq) return
+    if (!task.active() || seq !== modelStatsReqSeq) return
     console.error('Failed to load model stats:', error)
     requestedModelStats.value = []
   } finally {
-    if (seq === modelStatsReqSeq) modelStatsLoading.value = false
+    if (task.owned() && seq === modelStatsReqSeq) modelStatsLoading.value = false
+    task.finish()
   }
 }
 
 const loadChartData = async () => {
+  const task = pageTasks.begin('charts')
+  if (!task.active()) return
   const seq = ++chartReqSeq
   chartsLoading.value = true
   try {
@@ -520,16 +551,17 @@ const loadChartData = async () => {
       include_model_stats: false,
       include_group_stats: true,
     })
-    if (seq !== chartReqSeq) return
+    if (!task.active() || seq !== chartReqSeq) return
     trendData.value = snapshot.trend || []
     groupStats.value = snapshot.groups || []
   } catch (error) {
-    if (seq !== chartReqSeq) return
+    if (!task.active() || seq !== chartReqSeq) return
     console.error('Failed to load chart data:', error)
     trendData.value = []
     groupStats.value = []
   } finally {
-    if (seq === chartReqSeq) chartsLoading.value = false
+    if (task.owned() && seq === chartReqSeq) chartsLoading.value = false
+    task.finish()
   }
 }
 
@@ -608,7 +640,7 @@ const handleSort = (key: string, order: 'asc' | 'desc') => {
 }
 
 const handleIpGeoBatchFailed = () => {
-  appStore.showError(t('usage.ipGeo.batchFailed'))
+  if (pageTasks.current()) appStore.showError(t('usage.ipGeo.batchFailed'))
 }
 
 const getRequestTypeExportText = (log: UsageLog): string => {
@@ -636,19 +668,24 @@ const escapeCSVValue = (value: unknown): string => {
 }
 
 const exportToCSV = async () => {
+  if (exporting.value || loading.value || logsFailed.value || !pageTasks.current()) return
   if (pagination.total === 0) {
     appStore.showWarning(t('usage.noDataToExport'))
     return
   }
+  const task = pageTasks.begin('export')
+  if (!task.active()) return
   exporting.value = true
-  appStore.showInfo(t('usage.preparingExport'))
+  let objectURL: string | undefined
   try {
+    appStore.showInfo(t('usage.preparingExport'))
     const allLogs: UsageLog[] = []
     const pageSize = 100
     const exportParams = buildUsageListParams(1, pageSize)
     const totalPages = Math.ceil(pagination.total / pageSize)
     for (let page = 1; page <= totalPages; page++) {
       const response = await usageAPI.query({ ...exportParams, page })
+      if (!task.active()) return
       allLogs.push(...response.items)
     }
     if (allLogs.length === 0) {
@@ -698,18 +735,23 @@ const exportToCSV = async () => {
       ...rows.map((row) => row.join(',')),
     ].join('\n')
     const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
-    const url = window.URL.createObjectURL(blob)
+    if (!task.active()) return
+    objectURL = window.URL.createObjectURL(blob)
+    if (!task.active()) return
     const link = document.createElement('a')
-    link.href = url
+    link.href = objectURL
     link.download = `usage_${exportParams.start_date}_to_${exportParams.end_date}.csv`
     link.click()
-    window.URL.revokeObjectURL(url)
-    appStore.showSuccess(t('usage.exportSuccess'))
+    if (task.active()) appStore.showSuccess(t('usage.exportSuccess'))
   } catch (error) {
-    console.error('CSV Export failed:', error)
-    appStore.showError(t('usage.exportFailed'))
+    if (task.active()) {
+      console.error('CSV Export failed:', error)
+      appStore.showError(t('usage.exportFailed'))
+    }
   } finally {
-    exporting.value = false
+    if (objectURL) window.URL.revokeObjectURL(objectURL)
+    if (task.owned()) exporting.value = false
+    task.finish()
   }
 }
 
@@ -819,11 +861,13 @@ const handleColumnClickOutside = (event: MouseEvent) => {
   }
 }
 
-const loadApiKeys = async () => {
+const loadApiKeys = async (active: () => boolean) => {
   const firstPage = await keysAPI.list(1, 100)
+  if (!active()) return []
   const keys = [...firstPage.items]
   for (let page = 2; page <= firstPage.pages && keys.length > 0; page++) {
     const response = await keysAPI.list(page, 100)
+    if (!active()) return []
     if (response.items.length === 0) break
     keys.push(...response.items)
   }
@@ -831,15 +875,20 @@ const loadApiKeys = async () => {
 }
 
 const loadFilterOptions = async () => {
+  const task = pageTasks.begin('options')
+  if (!task.active()) return
   try {
     const [keys, availableGroups] = await Promise.all([
-      loadApiKeys(),
+      loadApiKeys(task.active),
       userGroupsAPI.getAvailable(),
     ])
+    if (!task.active()) return
     apiKeys.value = keys
     groups.value = availableGroups
   } catch (error) {
-    console.error('Failed to load usage filter options:', error)
+    if (task.active()) console.error('Failed to load usage filter options:', error)
+  } finally {
+    task.finish()
   }
 }
 
@@ -848,33 +897,50 @@ const resetErrorRows = () => {
   if (activeTab.value === 'errors') {
     void loadErrors()
   } else {
+    pageTasks.cancel('errors')
+    errorLoading.value = false
     errorRows.value = []
     errorTotal.value = 0
+    errorsFailed.value = false
   }
 }
 
+const buildErrorListParams = () => ({
+  page: errorPage.value,
+  page_size: errorPageSize.value,
+  start_date: startDate.value,
+  end_date: endDate.value,
+  model: (errorFilter.value.model ?? '').trim() || undefined,
+  category: errorFilter.value.category || undefined,
+  api_key_id: errorFilter.value.api_key_id ?? undefined,
+  status_code: errorFilter.value.status_code ?? undefined,
+  sort_by: errorSortBy.value,
+  sort_order: errorSortOrder.value,
+})
+
 const loadErrors = async () => {
+  const params = buildErrorListParams()
+  const signature = JSON.stringify(params)
+  const task = pageTasks.begin('errors', () => activeTab.value === 'errors' && errorViewEnabled.value && signature === JSON.stringify(buildErrorListParams()))
+  if (!task.active()) return
   errorLoading.value = true
   try {
-    const resp = await usageAPI.listMyErrorRequests({
-      page: errorPage.value,
-      page_size: errorPageSize.value,
-      start_date: startDate.value,
-      end_date: endDate.value,
-      model: (errorFilter.value.model ?? '').trim() || undefined,
-      category: errorFilter.value.category || undefined,
-      api_key_id: errorFilter.value.api_key_id ?? undefined,
-      status_code: errorFilter.value.status_code ?? undefined,
-      sort_by: errorSortBy.value,
-      sort_order: errorSortOrder.value,
-    })
+    const resp = await usageAPI.listMyErrorRequests(params)
+    if (!task.active()) return
     errorRows.value = resp.items
     errorTotal.value = resp.total
+    errorsFailed.value = false
   } catch (error) {
-    console.error('[UsageView] loadErrors failed:', error)
-    appStore.showError(t('usage.errors.failedToLoad'))
+    if (task.active()) {
+      console.error('[UsageView] loadErrors failed:', error)
+      errorRows.value = []
+      errorTotal.value = 0
+      errorsFailed.value = true
+      appStore.showError(t('usage.errors.failedToLoad'))
+    }
   } finally {
-    errorLoading.value = false
+    if (task.owned()) errorLoading.value = false
+    task.finish()
   }
 }
 
@@ -910,7 +976,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  abortController?.abort()
+  pageTasks.dispose()
   document.removeEventListener('click', handleColumnClickOutside)
 })
 

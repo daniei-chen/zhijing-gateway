@@ -8,8 +8,9 @@
       :aria-expanded="isOpen"
       :aria-haspopup="true"
       :id="id"
-      :aria-label="ariaLabel ?? 'Select option'"
+      :aria-label="ariaLabel ?? (id ? undefined : placeholder || 'Select option')"
       :aria-describedby="ariaDescribedby"
+      :aria-controls="`${instanceId}-listbox`"
       :class="[
         'select-trigger',
         isOpen && 'select-trigger-open',
@@ -18,23 +19,12 @@
       ]"
       @keydown.down.prevent="onTriggerKeyDown"
       @keydown.up.prevent="onTriggerKeyDown"
+      @keydown="onTriggerKeyboard"
     >
-      <span class="select-value">
+      <span class="select-value" :class="{ 'pr-6': clearable && hasValue && !disabled }">
         <slot name="selected" :option="selectedOption">
           {{ selectedLabel }}
         </slot>
-      </span>
-      <span
-        v-if="clearable && hasValue && !disabled"
-        class="select-clear"
-        role="button"
-        tabindex="-1"
-        aria-label="Clear selection"
-        @click.stop="clearSelection"
-        @mousedown.stop
-        @keydown.enter.stop.prevent="clearSelection"
-      >
-        <Icon name="x" size="sm" />
       </span>
       <span class="select-icon">
         <Icon
@@ -43,6 +33,17 @@
           :class="['transition-transform duration-200', isOpen && 'rotate-180']"
         />
       </span>
+    </button>
+    <button
+      v-if="clearable && hasValue && !disabled"
+      ref="clearButtonRef"
+      type="button"
+      class="select-clear absolute right-9 top-1/2 -translate-y-1/2 focus:outline-none focus:ring-2 focus:ring-primary-500/30"
+      aria-label="Clear selection"
+      @click.stop="clearSelection"
+      @mousedown.stop
+    >
+      <Icon name="x" size="sm" />
     </button>
 
     <!-- Teleport dropdown to body to escape stacking context -->
@@ -55,6 +56,9 @@
           :class="[instanceId]"
           :style="dropdownStyle"
           role="listbox"
+          :id="`${instanceId}-listbox`"
+          :aria-labelledby="id"
+          :aria-activedescendant="focusedOptionId"
           tabindex="-1"
           @click.stop
           @mousedown.stop
@@ -69,6 +73,8 @@
               type="text"
               :placeholder="searchPlaceholderText"
               :aria-label="searchPlaceholderText"
+              :aria-controls="`${instanceId}-listbox`"
+              :aria-activedescendant="focusedOptionId"
               class="select-search-input"
               @click.stop
             />
@@ -80,6 +86,7 @@
               v-for="(option, index) in filteredOptions"
               :key="`${typeof getOptionValue(option)}:${String(getOptionValue(option) ?? '')}`"
               role="option"
+              :id="`${instanceId}-option-${index}`"
               :aria-selected="isSelected(option)"
               :aria-disabled="isOptionDisabled(option)"
               @click.stop="!isOptionDisabled(option) && selectOption(option)"
@@ -185,8 +192,11 @@ const emit = defineEmits<Emits>()
 const isOpen = ref(false)
 const searchQuery = ref('')
 const focusedIndex = ref(-1)
+const focusedOptionId = computed(() => focusedIndex.value >= 0 && focusedIndex.value < filteredOptions.value.length
+  ? `${instanceId}-option-${focusedIndex.value}` : undefined)
 const containerRef = ref<HTMLElement | null>(null)
 const triggerRef = ref<HTMLButtonElement | null>(null)
+const clearButtonRef = ref<HTMLButtonElement | null>(null)
 const searchInputRef = ref<HTMLInputElement | null>(null)
 const dropdownRef = ref<HTMLElement | null>(null)
 const optionsListRef = ref<HTMLElement | null>(null)
@@ -425,6 +435,7 @@ watch(searchQuery, (query) => {
 })
 
 const selectOption = (option: any) => {
+  if (props.disabled || !isOpen.value || isOptionDisabled(option)) return
   const value = getOptionValue(option) ?? null
   emit('update:modelValue', value)
   emit('change', value, option)
@@ -433,9 +444,28 @@ const selectOption = (option: any) => {
 }
 
 const clearSelection = () => {
-  if (props.disabled) return
+  if (props.disabled || !props.clearable || !hasValue.value) return
+  const previousFocus = document.activeElement
+  const restoreFocus = previousFocus === triggerRef.value || previousFocus === clearButtonRef.value
   emit('update:modelValue', null)
   emit('change', null, null)
+  void nextTick(() => {
+    if (!restoreFocus || !triggerRef.value?.isConnected || props.disabled) return
+    // A controlled value removes the clear button. Return keyboard focus to
+    // this field unless the parent/user has deliberately focused elsewhere.
+    if (document.activeElement === previousFocus ||
+        (document.activeElement === document.body && !previousFocus?.isConnected)) {
+      triggerRef.value.focus()
+    }
+  })
+}
+
+const onTriggerKeyboard = (event: KeyboardEvent) => {
+  if (event.isComposing || !props.clearable || !hasValue.value || props.disabled) return
+  if (event.key === 'Delete' || event.key === 'Backspace') {
+    event.preventDefault()
+    clearSelection()
+  }
 }
 
 // Keyboards

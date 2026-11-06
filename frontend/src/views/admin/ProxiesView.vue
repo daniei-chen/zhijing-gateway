@@ -14,6 +14,7 @@
               v-model="searchQuery"
               type="text"
               :placeholder="t('admin.proxies.searchProxies')"
+              :aria-label="t('admin.proxies.searchProxies')"
               class="input pl-10"
               @input="handleSearch"
             />
@@ -24,6 +25,7 @@
               v-model="filters.protocol"
               :options="protocolOptions"
               :placeholder="t('admin.proxies.allProtocols')"
+              :aria-label="t('admin.proxies.allProtocols')"
               @change="handleFilterChange"
             />
           </div>
@@ -32,6 +34,7 @@
               v-model="filters.status"
               :options="statusOptions"
               :placeholder="t('admin.proxies.allStatus')"
+              :aria-label="t('admin.proxies.allStatus')"
               @change="handleFilterChange"
             />
           </div>
@@ -76,7 +79,7 @@
             <button @click="showImportData = true" class="btn btn-secondary">
               {{ t('admin.proxies.dataImport') }}
             </button>
-            <button @click="showExportDataDialog = true" class="btn btn-secondary">
+            <button @click="openExportDataDialog" class="btn btn-secondary">
               {{ selectedCount > 0 ? t('admin.proxies.dataExportSelected') : t('admin.proxies.dataExport') }}
             </button>
             <button @click="showCreateModal = true" class="btn btn-primary">
@@ -100,6 +103,7 @@
         >
           <template #header-select>
             <input
+              :aria-label="t('common.selectAll')"
               type="checkbox"
               class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               :checked="allVisibleSelected"
@@ -110,6 +114,7 @@
 
           <template #cell-select="{ row }">
             <input
+              :aria-label="row.name"
               type="checkbox"
               class="h-4 w-4 cursor-pointer rounded border-gray-300 text-primary-600 focus:ring-primary-500"
               :checked="selectedProxyIds.has(row.id)"
@@ -174,6 +179,8 @@
               <button
                 v-if="row.password"
                 type="button"
+                :aria-label="t('admin.proxies.password')"
+                :aria-pressed="visiblePasswordIds.has(row.id)"
                 class="ml-1 rounded p-0.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                 @click.stop="visiblePasswordIds.has(row.id) ? visiblePasswordIds.delete(row.id) : visiblePasswordIds.add(row.id)"
               >
@@ -375,7 +382,7 @@
     >
       <!-- Tab Switch -->
       <div
-        class="mb-6 flex items-center justify-between gap-3 border-b border-gray-200 dark:border-dark-600"
+        class="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 dark:border-dark-600"
       >
         <div class="flex min-w-0 shrink-0">
           <button
@@ -428,8 +435,8 @@
         class="space-y-5"
       >
         <div>
-          <label class="input-label">{{ t('admin.proxies.name') }}</label>
-          <input
+          <label for="proxy-create-name" class="input-label">{{ t('admin.proxies.name') }}</label>
+          <input id="proxy-create-name"
             v-model="createForm.name"
             type="text"
             required
@@ -438,13 +445,13 @@
           />
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.protocol') }}</label>
-          <Select v-model="createForm.protocol" :options="protocolSelectOptions" />
+          <label for="proxy-create-protocol" class="input-label">{{ t('admin.proxies.protocol') }}</label>
+          <Select :aria-label="t('admin.proxies.protocol')" id="proxy-create-protocol" v-model="createForm.protocol" :options="protocolSelectOptions" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="input-label">{{ t('admin.proxies.host') }}</label>
-            <input
+            <label for="proxy-create-host" class="input-label">{{ t('admin.proxies.host') }}</label>
+            <input id="proxy-create-host"
               v-model="createForm.host"
               type="text"
               required
@@ -453,8 +460,8 @@
             />
           </div>
           <div>
-            <label class="input-label">{{ t('admin.proxies.port') }}</label>
-            <input
+            <label for="proxy-create-port" class="input-label">{{ t('admin.proxies.port') }}</label>
+            <input id="proxy-create-port"
               v-model.number="createForm.port"
               type="number"
               required
@@ -466,8 +473,8 @@
           </div>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.username') }}</label>
-          <input
+          <label for="proxy-create-username" class="input-label">{{ t('admin.proxies.username') }}</label>
+          <input id="proxy-create-username"
             v-model="createForm.username"
             type="text"
             class="input"
@@ -475,9 +482,9 @@
           />
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.password') }}</label>
+          <label for="proxy-create-password" class="input-label">{{ t('admin.proxies.password') }}</label>
           <div class="relative">
-            <input
+            <input id="proxy-create-password"
               v-model="createForm.password"
               :type="createPasswordVisible ? 'text' : 'password'"
               class="input pr-10"
@@ -486,6 +493,8 @@
             <button
               type="button"
               class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              :aria-label="t('admin.proxies.password')"
+              :aria-pressed="createPasswordVisible"
               @click="createPasswordVisible = !createPasswordVisible"
             >
               <Icon :name="createPasswordVisible ? 'eyeOff' : 'eye'" size="md" />
@@ -493,7 +502,7 @@
           </div>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.expiresAt') }}</label>
+          <label for="proxy-create-expires-at" class="input-label">{{ t('admin.proxies.expiresAt') }}</label>
           <div class="mb-2 flex flex-wrap gap-2">
             <button
               v-for="d in EXPIRY_PRESETS"
@@ -511,21 +520,22 @@
             type="number"
             min="0"
             class="input mb-2"
+              :aria-label="t('admin.proxies.expiryDaysPlaceholder')"
             :placeholder="t('admin.proxies.expiryDaysPlaceholder')"
           />
-          <input v-model="createForm.expires_at" type="date" max="9999-12-31" class="input" />
+          <input id="proxy-create-expires-at" v-model="createForm.expires_at" type="date" max="9999-12-31" class="input" />
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.fallbackMode') }}</label>
-          <Select v-model="createForm.fallback_mode" :options="[
+          <label for="proxy-create-fallback-mode" class="input-label">{{ t('admin.proxies.fallbackMode') }}</label>
+          <Select :aria-label="t('admin.proxies.fallbackMode')" id="proxy-create-fallback-mode" v-model="createForm.fallback_mode" :options="[
             { label: t('admin.proxies.fallbackNone'), value: 'none' },
             { label: t('admin.proxies.fallbackProxy'), value: 'proxy' },
             { label: t('admin.proxies.fallbackDirect'), value: 'direct' },
           ]" />
         </div>
         <div v-if="createForm.fallback_mode === 'proxy'">
-          <label class="input-label">{{ t('admin.proxies.backupProxy') }}</label>
-          <Select v-model="createForm.backup_proxy_id" :options="backupProxyOptions()" />
+          <label for="proxy-create-backup-proxy-id" class="input-label">{{ t('admin.proxies.backupProxy') }}</label>
+          <Select :aria-label="t('admin.proxies.backupProxy')" id="proxy-create-backup-proxy-id" v-model="createForm.backup_proxy_id" :options="backupProxyOptions()" />
         </div>
 
       </form>
@@ -533,8 +543,9 @@
       <!-- Batch Add Form -->
       <div v-else class="space-y-5">
         <div>
-          <label class="input-label">{{ t('admin.proxies.batchInput') }}</label>
+          <label for="proxy-batch-input" class="input-label">{{ t('admin.proxies.batchInput') }}</label>
           <textarea
+            id="proxy-batch-input"
             v-model="batchInput"
             rows="10"
             class="input font-mono text-sm"
@@ -674,21 +685,21 @@
         class="space-y-5"
       >
         <div>
-          <label class="input-label">{{ t('admin.proxies.name') }}</label>
-          <input v-model="editForm.name" type="text" required class="input" />
+          <label for="proxy-edit-name" class="input-label">{{ t('admin.proxies.name') }}</label>
+          <input id="proxy-edit-name" v-model="editForm.name" type="text" required class="input" />
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.protocol') }}</label>
-          <Select v-model="editForm.protocol" :options="protocolSelectOptions" />
+          <label for="proxy-edit-protocol" class="input-label">{{ t('admin.proxies.protocol') }}</label>
+          <Select :aria-label="t('admin.proxies.protocol')" id="proxy-edit-protocol" v-model="editForm.protocol" :options="protocolSelectOptions" />
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="input-label">{{ t('admin.proxies.host') }}</label>
-            <input v-model="editForm.host" type="text" required class="input" />
+            <label for="proxy-edit-host" class="input-label">{{ t('admin.proxies.host') }}</label>
+            <input id="proxy-edit-host" v-model="editForm.host" type="text" required class="input" />
           </div>
           <div>
-            <label class="input-label">{{ t('admin.proxies.port') }}</label>
-            <input
+            <label for="proxy-edit-port" class="input-label">{{ t('admin.proxies.port') }}</label>
+            <input id="proxy-edit-port"
               v-model.number="editForm.port"
               type="number"
               required
@@ -699,13 +710,13 @@
           </div>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.username') }}</label>
-          <input v-model="editForm.username" type="text" class="input" />
+          <label for="proxy-edit-username" class="input-label">{{ t('admin.proxies.username') }}</label>
+          <input id="proxy-edit-username" v-model="editForm.username" type="text" class="input" />
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.password') }}</label>
+          <label for="proxy-edit-password" class="input-label">{{ t('admin.proxies.password') }}</label>
           <div class="relative">
-            <input
+            <input id="proxy-edit-password"
               v-model="editForm.password"
               :type="editPasswordVisible ? 'text' : 'password'"
               :placeholder="t('admin.proxies.leaveEmptyToKeep')"
@@ -715,6 +726,8 @@
             <button
               type="button"
               class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              :aria-label="t('admin.proxies.password')"
+              :aria-pressed="editPasswordVisible"
               @click="editPasswordVisible = !editPasswordVisible"
             >
               <Icon :name="editPasswordVisible ? 'eyeOff' : 'eye'" size="md" />
@@ -722,11 +735,11 @@
           </div>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.status') }}</label>
-          <Select v-model="editForm.status" :options="editStatusOptions" />
+          <label for="proxy-edit-status" class="input-label">{{ t('admin.proxies.status') }}</label>
+          <Select :aria-label="t('admin.proxies.status')" id="proxy-edit-status" v-model="editForm.status" :options="editStatusOptions" />
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.expiresAt') }}</label>
+          <label for="proxy-edit-expires-at" class="input-label">{{ t('admin.proxies.expiresAt') }}</label>
           <div class="mb-2 flex flex-wrap gap-2">
             <button
               v-for="d in EXPIRY_PRESETS"
@@ -744,21 +757,22 @@
             type="number"
             min="0"
             class="input mb-2"
+              :aria-label="t('admin.proxies.expiryDaysPlaceholder')"
             :placeholder="t('admin.proxies.expiryDaysPlaceholder')"
           />
-          <input v-model="editForm.expires_at" type="date" max="9999-12-31" class="input" />
+          <input id="proxy-edit-expires-at" v-model="editForm.expires_at" type="date" max="9999-12-31" class="input" />
         </div>
         <div>
-          <label class="input-label">{{ t('admin.proxies.fallbackMode') }}</label>
-          <Select v-model="editForm.fallback_mode" :options="[
+          <label for="proxy-edit-fallback-mode" class="input-label">{{ t('admin.proxies.fallbackMode') }}</label>
+          <Select :aria-label="t('admin.proxies.fallbackMode')" id="proxy-edit-fallback-mode" v-model="editForm.fallback_mode" :options="[
             { label: t('admin.proxies.fallbackNone'), value: 'none' },
             { label: t('admin.proxies.fallbackProxy'), value: 'proxy' },
             { label: t('admin.proxies.fallbackDirect'), value: 'direct' },
           ]" />
         </div>
         <div v-if="editForm.fallback_mode === 'proxy'">
-          <label class="input-label">{{ t('admin.proxies.backupProxy') }}</label>
-          <Select v-model="editForm.backup_proxy_id" :options="backupProxyOptions(editingProxy?.id)" />
+          <label for="proxy-edit-backup-proxy-id" class="input-label">{{ t('admin.proxies.backupProxy') }}</label>
+          <Select :aria-label="t('admin.proxies.backupProxy')" id="proxy-edit-backup-proxy-id" v-model="editForm.backup_proxy_id" :options="backupProxyOptions(editingProxy?.id)" />
         </div>
 
       </form>
@@ -810,19 +824,19 @@
       :cancel-text="t('common.cancel')"
       :danger="true"
       @confirm="confirmDelete"
-      @cancel="showDeleteDialog = false"
+      @cancel="closeDeleteDialog"
     />
 
     <!-- Batch Delete Confirmation Dialog -->
     <ConfirmDialog
       :show="showBatchDeleteDialog"
       :title="t('admin.proxies.batchDelete')"
-      :message="t('admin.proxies.batchDeleteConfirm', { count: selectedCount })"
+      :message="t('admin.proxies.batchDeleteConfirm', { count: batchDeleteIds.length })"
       :confirm-text="t('common.delete')"
       :cancel-text="t('common.cancel')"
       :danger="true"
       @confirm="confirmBatchDelete"
-      @cancel="showBatchDeleteDialog = false"
+      @cancel="closeBatchDeleteDialog"
     />
     <ConfirmDialog
       :show="showExportDataDialog"
@@ -831,7 +845,7 @@
       :confirm-text="t('admin.proxies.dataExportConfirm')"
       :cancel-text="t('common.cancel')"
       @confirm="handleExportData"
-      @cancel="showExportDataDialog = false"
+      @cancel="closeExportDataDialog"
     />
 
     <ImportDataModal
@@ -988,9 +1002,12 @@ import { useTableSelection } from '@/composables/useTableSelection'
 import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
 import { formatDateTime } from '@/utils/format'
 import { proxyExpiryBadgeClass, proxyExpiryLabelKey } from '@/utils/proxyExpiry'
+import { createSessionTasks } from '@/utils/sessionTasks'
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const pageTasks = createSessionTasks()
+type PageTask = ReturnType<typeof pageTasks.begin>
 const { copyToClipboard } = useClipboard()
 
 const columns = computed<Column[]>(() => [
@@ -1069,6 +1086,12 @@ const showExportDataDialog = ref(false)
 const showAccountsModal = ref(false)
 const submitting = ref(false)
 const exportingData = ref(false)
+const deleting = ref(false)
+const batchDeleting = ref(false)
+const batchDeleteIds = ref<number[]>([])
+let deleteRevision = 0
+let batchDeleteRevision = 0
+let exportRevision = 0
 const testingProxyIds = ref<Set<number>>(new Set())
 const qualityCheckingProxyIds = ref<Set<number>>(new Set())
 const batchTesting = ref(false)
@@ -1081,7 +1104,6 @@ const {
   isSelected,
   select,
   deselect,
-  clear: clearSelectedProxies,
   removeMany: removeSelectedProxies,
   toggleVisible,
   batchUpdate
@@ -1150,7 +1172,15 @@ const editForm = reactive({
 
 const allProxiesForBackup = ref<Proxy[]>([])
 const loadBackupProxyOptions = async () => {
-  allProxiesForBackup.value = await adminAPI.proxies.getAllWithCount()
+  const task = pageTasks.begin('backup-options')
+  try {
+    const options = await adminAPI.proxies.getAllWithCount()
+    if (task.active()) allProxiesForBackup.value = options
+  } catch {
+    if (task.active()) appStore.showError(t('admin.proxies.failedToLoad'))
+  } finally {
+    task.finish()
+  }
 }
 const backupProxyOptions = (excludeId?: number) =>
   allProxiesForBackup.value
@@ -1188,6 +1218,8 @@ const buildProxyQueryFilters = () => ({
 })
 
 const loadProxies = async () => {
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('list')
   if (abortController) {
     abortController.abort()
   }
@@ -1201,14 +1233,14 @@ const loadProxies = async () => {
       buildProxyQueryFilters(),
       { signal: currentAbortController.signal }
     )
-    if (currentAbortController.signal.aborted || abortController !== currentAbortController) {
+    if (!task.active() || currentAbortController.signal.aborted || abortController !== currentAbortController) {
       return
     }
     proxies.value = response.items
     pagination.total = response.total
     pagination.pages = response.pages
   } catch (error) {
-    if (isAbortError(error)) {
+    if (!task.active() || isAbortError(error)) {
       return
     }
     appStore.showError(t('admin.proxies.failedToLoad'))
@@ -1218,6 +1250,7 @@ const loadProxies = async () => {
       loading.value = false
       abortController = null
     }
+    task.finish()
   }
 }
 
@@ -1254,6 +1287,8 @@ const handleSort = (key: string, order: 'asc' | 'desc') => {
 }
 
 const closeCreateModal = () => {
+  pageTasks.cancel('form:create')
+  submitting.value = false
   showCreateModal.value = false
   createMode.value = 'standard'
   createForm.name = ''
@@ -1298,7 +1333,7 @@ const parseProxyUrl = (
   // Host alternatives: [bracketed-IPv6] | hostname/IPv4 (colon-free, so the
   // match stops before the final :port).
   const regex =
-    /^(https?|socks5h?):\/\/(?:([^:@\[\]]+):([^@\[\]]+)@)?(\[[0-9a-f:.]+\]|[^:\[\]]+):(\d+)$/i
+    /^(https?|socks5h?):\/\/(?:([^:@\[\]]*)(?::([^@\[\]]*))?@)?(\[[0-9a-f:.]+\]|[^:@\[\]]+):(\d+)$/i
   const match = trimmed.match(regex)
 
   if (!match) return null
@@ -1310,13 +1345,17 @@ const parseProxyUrl = (
 
   // Strip brackets from IPv6 literals; the backend re-brackets via net.JoinHostPort.
   const host = rawHost.replace(/^\[|\]$/g, '').trim()
+  const decodeCredential = (value = '') => {
+    const raw = value.trim()
+    try { return decodeURIComponent(raw) } catch { return raw }
+  }
 
   return {
     protocol: protocol.toLowerCase() as ProxyProtocol,
     host,
     port: portNum,
-    username: username?.trim() || '',
-    password: password?.trim() || ''
+    username: decodeCredential(username),
+    password: decodeCredential(password)
   }
 }
 
@@ -1352,11 +1391,13 @@ const parseBatchInput = () => {
 }
 
 const handleBatchCreate = async () => {
-  if (batchParseResult.valid === 0) return
+  if (submitting.value || !pageTasks.current() || batchParseResult.valid === 0) return
 
+  const task = pageTasks.begin('form:create')
   submitting.value = true
   try {
     const result = await adminAPI.proxies.batchCreate(batchParseResult.proxies)
+    if (!task.active()) return
     const created = result.created || 0
     const skipped = result.skipped || 0
 
@@ -1369,14 +1410,17 @@ const handleBatchCreate = async () => {
     closeCreateModal()
     loadProxies()
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error.response?.data?.detail || t('admin.proxies.failedToImport'))
     console.error('Error batch creating proxies:', error)
   } finally {
-    submitting.value = false
+    if (task.owned()) submitting.value = false
+    task.finish()
   }
 }
 
 const handleCreateProxy = async () => {
+  if (submitting.value || !pageTasks.current()) return
   if (!createForm.name.trim()) {
     appStore.showError(t('admin.proxies.nameRequired'))
     return
@@ -1385,10 +1429,11 @@ const handleCreateProxy = async () => {
     appStore.showError(t('admin.proxies.hostRequired'))
     return
   }
-  if (createForm.port < 1 || createForm.port > 65535) {
+  if (!Number.isInteger(createForm.port) || createForm.port < 1 || createForm.port > 65535) {
     appStore.showError(t('admin.proxies.portInvalid'))
     return
   }
+  const task = pageTasks.begin('form:create')
   submitting.value = true
   try {
     await adminAPI.proxies.create({
@@ -1403,18 +1448,23 @@ const handleCreateProxy = async () => {
       backup_proxy_id: createForm.fallback_mode === 'proxy' ? createForm.backup_proxy_id : null,
       expiry_warn_days: createForm.expiry_warn_days,
     })
+    if (!task.active()) return
     appStore.showSuccess(t('admin.proxies.proxyCreated'))
     closeCreateModal()
     loadProxies()
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error.response?.data?.detail || t('admin.proxies.failedToCreate'))
     console.error('Error creating proxy:', error)
   } finally {
-    submitting.value = false
+    if (task.owned()) submitting.value = false
+    task.finish()
   }
 }
 
 const handleEdit = (proxy: Proxy) => {
+  pageTasks.cancel('form:edit')
+  submitting.value = false
   editingProxy.value = proxy
   editForm.name = proxy.name
   editForm.protocol = proxy.protocol
@@ -1433,6 +1483,8 @@ const handleEdit = (proxy: Proxy) => {
 }
 
 const closeEditModal = () => {
+  pageTasks.cancel('form:edit')
+  submitting.value = false
   showEditModal.value = false
   editingProxy.value = null
   editPasswordVisible.value = false
@@ -1440,7 +1492,7 @@ const closeEditModal = () => {
 }
 
 const handleUpdateProxy = async () => {
-  if (!editingProxy.value) return
+  if (submitting.value || !pageTasks.current() || !editingProxy.value) return
   if (!editForm.name.trim()) {
     appStore.showError(t('admin.proxies.nameRequired'))
     return
@@ -1449,11 +1501,13 @@ const handleUpdateProxy = async () => {
     appStore.showError(t('admin.proxies.hostRequired'))
     return
   }
-  if (editForm.port < 1 || editForm.port > 65535) {
+  if (!Number.isInteger(editForm.port) || editForm.port < 1 || editForm.port > 65535) {
     appStore.showError(t('admin.proxies.portInvalid'))
     return
   }
 
+  const proxyId = editingProxy.value.id
+  const task = pageTasks.begin('form:edit')
   submitting.value = true
   try {
     const updateData: any = {
@@ -1474,15 +1528,19 @@ const handleUpdateProxy = async () => {
       updateData.password = editForm.password.trim()
     }
 
-    await adminAPI.proxies.update(editingProxy.value.id, updateData)
+    await adminAPI.proxies.update(proxyId, updateData)
+    if (!task.active()) return
+    invalidateProxyChecks(proxyId)
     appStore.showSuccess(t('admin.proxies.proxyUpdated'))
     closeEditModal()
     loadProxies()
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error.response?.data?.detail || t('admin.proxies.failedToUpdate'))
     console.error('Error updating proxy:', error)
   } finally {
-    submitting.value = false
+    if (task.owned()) submitting.value = false
+    task.finish()
   }
 }
 
@@ -1566,10 +1624,21 @@ const stopQualityCheckingProxy = (proxyId: number) => {
   qualityCheckingProxyIds.value = next
 }
 
-const runProxyTest = async (proxyId: number, notify: boolean) => {
+const invalidateProxyChecks = (proxyId: number) => {
+  pageTasks.cancel(`test:${proxyId}:`)
+  pageTasks.cancel(`quality:${proxyId}:`)
+  stopTestingProxy(proxyId)
+  stopQualityCheckingProxy(proxyId)
+  if (qualityReportProxy.value?.id === proxyId) closeQualityReportDialog()
+}
+
+const runProxyTest = async (proxyId: number, notify: boolean, batchTask?: PageTask) => {
+  if (!pageTasks.current() || (batchTask && !batchTask.active())) return null
+  const task = pageTasks.begin(`test:${proxyId}:connection`, () => !batchTask || batchTask.active())
   startTestingProxy(proxyId)
   try {
     const result = await adminAPI.proxies.testProxy(proxyId)
+    if (!task.active()) return null
     applyLatencyResult(proxyId, result)
     if (notify) {
       if (result.success) {
@@ -1583,6 +1652,7 @@ const runProxyTest = async (proxyId: number, notify: boolean) => {
     }
     return result
   } catch (error: any) {
+    if (!task.active()) return null
     const message = error.response?.data?.detail || t('admin.proxies.failedToTest')
     applyLatencyResult(proxyId, { success: false, message })
     if (notify) {
@@ -1591,21 +1661,29 @@ const runProxyTest = async (proxyId: number, notify: boolean) => {
     console.error('Error testing proxy:', error)
     return null
   } finally {
-    stopTestingProxy(proxyId)
+    if (task.owned()) stopTestingProxy(proxyId)
+    task.finish()
   }
 }
 
 const handleTestConnection = async (proxy: Proxy) => {
+  if (testingProxyIds.value.has(proxy.id)) return
   await runProxyTest(proxy.id, true)
 }
 
 const handleQualityCheck = async (proxy: Proxy) => {
+  if (!pageTasks.current() || qualityCheckingProxyIds.value.has(proxy.id)) return
+  const reportTask = pageTasks.begin('detail:quality')
+  const task = pageTasks.begin(`quality:${proxy.id}:check`)
   startQualityCheckingProxy(proxy.id)
   try {
     const result = await adminAPI.proxies.checkProxyQuality(proxy.id)
-    qualityReportProxy.value = proxy
-    qualityReport.value = result
-    showQualityReportDialog.value = true
+    if (!task.active()) return
+    if (reportTask.active()) {
+      qualityReportProxy.value = proxy
+      qualityReport.value = result
+      showQualityReportDialog.value = true
+    }
 
     const baseStep = result.items.find((item) => item.target === 'base_connectivity')
     if (baseStep && baseStep.status === 'pass') {
@@ -1620,19 +1698,22 @@ const handleQualityCheck = async (proxy: Proxy) => {
     }
     applyQualityResult(proxy.id, result)
 
-    appStore.showSuccess(
-      t('admin.proxies.qualityCheckDone', { score: result.score, grade: result.grade })
-    )
+    if (reportTask.active()) {
+      appStore.showSuccess(t('admin.proxies.qualityCheckDone', { score: result.score, grade: result.grade }))
+    }
   } catch (error: any) {
+    if (!task.active() || !reportTask.active()) return
     const message = error.response?.data?.detail || t('admin.proxies.qualityCheckFailed')
     appStore.showError(message)
     console.error('Error checking proxy quality:', error)
   } finally {
-    stopQualityCheckingProxy(proxy.id)
+    if (task.owned()) stopQualityCheckingProxy(proxy.id)
+    task.finish()
+    reportTask.finish()
   }
 }
 
-const runBatchProxyQualityChecks = async (ids: number[]) => {
+const runBatchProxyQualityChecks = async (ids: number[], batchTask: PageTask) => {
   if (ids.length === 0) return { total: 0, healthy: 0, warn: 0, challenge: 0, failed: 0 }
 
   const concurrency = 3
@@ -1643,12 +1724,17 @@ const runBatchProxyQualityChecks = async (ids: number[]) => {
   let failed = 0
 
   const worker = async () => {
-    while (index < ids.length) {
+    while (batchTask.active() && index < ids.length) {
       const current = ids[index]
       index++
+      const task = pageTasks.begin(`quality:${current}:check`, () => batchTask.active())
       startQualityCheckingProxy(current)
       try {
         const result = await adminAPI.proxies.checkProxyQuality(current)
+        if (!task.active()) {
+          if (batchTask.active()) failed++
+          continue
+        }
         const target = proxies.value.find((proxy) => proxy.id === current)
         if (target) {
           const baseStep = result.items.find((item) => item.target === 'base_connectivity')
@@ -1674,9 +1760,10 @@ const runBatchProxyQualityChecks = async (ids: number[]) => {
           healthy++
         }
       } catch {
-        failed++
+        if (batchTask.active()) failed++
       } finally {
-        stopQualityCheckingProxy(current)
+        if (task.owned()) stopQualityCheckingProxy(current)
+        task.finish()
       }
     }
   }
@@ -1693,6 +1780,7 @@ const runBatchProxyQualityChecks = async (ids: number[]) => {
 }
 
 const closeQualityReportDialog = () => {
+  pageTasks.cancel('detail:quality')
   showQualityReportDialog.value = false
   qualityReportProxy.value = null
   qualityReport.value = null
@@ -1804,24 +1892,23 @@ const qualityTargetLabel = (target: string) => {
   }
 }
 
-const fetchAllProxiesForBatch = async (): Promise<Proxy[]> => {
+const fetchAllProxiesForBatch = async (
+  task: PageTask,
+  query: ReturnType<typeof buildProxyQueryFilters>
+): Promise<Proxy[]> => {
   const pageSize = 200
   const result: Proxy[] = []
   let page = 1
   let totalPages = 1
 
-  while (page <= totalPages) {
+  while (task.active() && page <= totalPages) {
     const response = await adminAPI.proxies.list(
       page,
       pageSize,
-      {
-        protocol: filters.protocol || undefined,
-        status: filters.status as any,
-        search: searchQuery.value || undefined,
-        sort_by: sortState.sort_by,
-        sort_order: sortState.sort_order
-      }
+      query,
+      { signal: task.signal }
     )
+    if (!task.active()) return []
     result.push(...response.items)
     totalPages = response.pages || 1
     page++
@@ -1830,16 +1917,17 @@ const fetchAllProxiesForBatch = async (): Promise<Proxy[]> => {
   return result
 }
 
-const runBatchProxyTests = async (ids: number[]) => {
+const runBatchProxyTests = async (ids: number[], task: PageTask) => {
   if (ids.length === 0) return
   const concurrency = 5
   let index = 0
 
   const worker = async () => {
-    while (index < ids.length) {
+    while (task.active() && index < ids.length) {
       const current = ids[index]
       index++
-      await runProxyTest(current, false)
+      await runProxyTest(current, false, task)
+      if (!task.active()) return
     }
   }
 
@@ -1848,15 +1936,17 @@ const runBatchProxyTests = async (ids: number[]) => {
 }
 
 const handleBatchTest = async () => {
-  if (batchTesting.value) return
+  if (batchTesting.value || !pageTasks.current()) return
 
+  const task = pageTasks.begin('batch:test')
+  const query = buildProxyQueryFilters()
+  const selectedIds = Array.from(selectedProxyIds.value)
   batchTesting.value = true
   try {
-    let ids: number[] = []
-    if (selectedCount.value > 0) {
-      ids = Array.from(selectedProxyIds.value)
-    } else {
-      const allProxies = await fetchAllProxiesForBatch()
+    let ids = selectedIds
+    if (ids.length === 0) {
+      const allProxies = await fetchAllProxiesForBatch(task, query)
+      if (!task.active()) return
       ids = allProxies.map((proxy) => proxy.id)
     }
 
@@ -1865,27 +1955,32 @@ const handleBatchTest = async () => {
       return
     }
 
-    await runBatchProxyTests(ids)
+    await runBatchProxyTests(ids, task)
+    if (!task.active()) return
     appStore.showSuccess(t('admin.proxies.batchTestDone', { count: ids.length }))
     loadProxies()
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error.response?.data?.detail || t('admin.proxies.batchTestFailed'))
     console.error('Error batch testing proxies:', error)
   } finally {
-    batchTesting.value = false
+    if (task.owned()) batchTesting.value = false
+    task.finish()
   }
 }
 
 const handleBatchQualityCheck = async () => {
-  if (batchQualityChecking.value) return
+  if (batchQualityChecking.value || !pageTasks.current()) return
 
+  const task = pageTasks.begin('batch:quality')
+  const query = buildProxyQueryFilters()
+  const selectedIds = Array.from(selectedProxyIds.value)
   batchQualityChecking.value = true
   try {
-    let ids: number[] = []
-    if (selectedCount.value > 0) {
-      ids = Array.from(selectedProxyIds.value)
-    } else {
-      const allProxies = await fetchAllProxiesForBatch()
+    let ids = selectedIds
+    if (ids.length === 0) {
+      const allProxies = await fetchAllProxiesForBatch(task, query)
+      if (!task.active()) return
       ids = allProxies.map((proxy) => proxy.id)
     }
 
@@ -1894,7 +1989,8 @@ const handleBatchQualityCheck = async () => {
       return
     }
 
-    const summary = await runBatchProxyQualityChecks(ids)
+    const summary = await runBatchProxyQualityChecks(ids, task)
+    if (!task.active()) return
     appStore.showSuccess(
       t('admin.proxies.batchQualityDone', {
         count: summary.total,
@@ -1906,10 +2002,12 @@ const handleBatchQualityCheck = async () => {
     )
     loadProxies()
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error.response?.data?.detail || t('admin.proxies.batchQualityFailed'))
     console.error('Error batch checking quality:', error)
   } finally {
-    batchQualityChecking.value = false
+    if (task.owned()) batchQualityChecking.value = false
+    task.finish()
   }
 }
 
@@ -1919,76 +2017,128 @@ const formatExportTimestamp = () => {
   return `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(now.getDate())}${pad2(now.getHours())}${pad2(now.getMinutes())}${pad2(now.getSeconds())}`
 }
 
+const closeExportDataDialog = () => {
+  exportRevision++
+  pageTasks.cancel('dialog:export')
+  exportingData.value = false
+  showExportDataDialog.value = false
+}
+
+const openExportDataDialog = () => {
+  if (!pageTasks.current()) return
+  closeExportDataDialog()
+  showExportDataDialog.value = true
+}
+
 const handleExportData = async () => {
-  if (exportingData.value) return
+  if (exportingData.value || !pageTasks.current() || !showExportDataDialog.value) return
+  const revision = exportRevision
+  const task = pageTasks.begin('dialog:export', () => showExportDataDialog.value && revision === exportRevision)
+  const ids = Array.from(selectedProxyIds.value)
+  const options = ids.length > 0 ? { ids } : { filters: buildProxyQueryFilters() }
   exportingData.value = true
   try {
-    const dataPayload = await adminAPI.proxies.exportData(
-      selectedCount.value > 0
-        ? { ids: Array.from(selectedProxyIds.value) }
-        : {
-            filters: buildProxyQueryFilters()
-          }
-    )
+    const dataPayload = await adminAPI.proxies.exportData(options)
+    if (!task.active()) return
     const timestamp = formatExportTimestamp()
     const filename = `sub2api-proxy-${timestamp}.json`
     const blob = new Blob([JSON.stringify(dataPayload, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename
-    link.click()
-    URL.revokeObjectURL(url)
+    try {
+      const link = document.createElement('a')
+      link.href = url
+      link.download = filename
+      link.click()
+    } finally {
+      URL.revokeObjectURL(url)
+    }
     appStore.showSuccess(t('admin.proxies.dataExported'))
+    closeExportDataDialog()
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error?.message || t('admin.proxies.dataExportFailed'))
   } finally {
-    exportingData.value = false
-    showExportDataDialog.value = false
+    if (task.owned()) exportingData.value = false
+    task.finish()
   }
 }
 
+const closeDeleteDialog = () => {
+  deleteRevision++
+  pageTasks.cancel('dialog:delete')
+  deleting.value = false
+  showDeleteDialog.value = false
+  deletingProxy.value = null
+}
+
 const handleDelete = (proxy: Proxy) => {
+  if (!pageTasks.current()) return
   if ((proxy.account_count || 0) > 0) {
     appStore.showError(t('admin.proxies.deleteBlockedInUse'))
     return
   }
+  closeDeleteDialog()
   deletingProxy.value = proxy
   showDeleteDialog.value = true
 }
 
+const closeBatchDeleteDialog = () => {
+  batchDeleteRevision++
+  pageTasks.cancel('dialog:batch-delete')
+  batchDeleting.value = false
+  showBatchDeleteDialog.value = false
+  batchDeleteIds.value = []
+}
+
 const openBatchDelete = () => {
-  if (selectedCount.value === 0) {
+  if (!pageTasks.current() || selectedCount.value === 0) {
     return
   }
+  closeBatchDeleteDialog()
+  batchDeleteIds.value = Array.from(selectedProxyIds.value)
   showBatchDeleteDialog.value = true
 }
 
 const confirmDelete = async () => {
-  if (!deletingProxy.value) return
+  if (!pageTasks.current() || !showDeleteDialog.value || !deletingProxy.value || deleting.value) return
+  const id = deletingProxy.value.id
+  const revision = deleteRevision
+  const task = pageTasks.begin('dialog:delete', () => showDeleteDialog.value && revision === deleteRevision)
+  deleting.value = true
 
   try {
-    await adminAPI.proxies.delete(deletingProxy.value.id)
+    await adminAPI.proxies.delete(id)
+    if (!task.active()) return
     appStore.showSuccess(t('admin.proxies.proxyDeleted'))
-    showDeleteDialog.value = false
-    removeSelectedProxies([deletingProxy.value.id])
-    deletingProxy.value = null
+    invalidateProxyChecks(id)
+    removeSelectedProxies([id])
+    closeDeleteDialog()
     loadProxies()
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error.response?.data?.detail || t('admin.proxies.failedToDelete'))
     console.error('Error deleting proxy:', error)
+  } finally {
+    if (task.owned()) deleting.value = false
+    task.finish()
   }
 }
 
 const confirmBatchDelete = async () => {
-  const ids = Array.from(selectedProxyIds.value)
+  if (!pageTasks.current() || !showBatchDeleteDialog.value || batchDeleting.value) return
+  const ids = [...batchDeleteIds.value]
   if (ids.length === 0) {
-    showBatchDeleteDialog.value = false
+    closeBatchDeleteDialog()
     return
   }
 
+  const revision = batchDeleteRevision
+  const task = pageTasks.begin('dialog:batch-delete', () => showBatchDeleteDialog.value && revision === batchDeleteRevision)
+  batchDeleting.value = true
   try {
     const result = await adminAPI.proxies.batchDelete(ids)
+    if (!task.active()) return
+    result.deleted_ids?.forEach(invalidateProxyChecks)
     const deleted = result.deleted_ids?.length || 0
     const skipped = result.skipped?.length || 0
 
@@ -1998,32 +2148,42 @@ const confirmBatchDelete = async () => {
       appStore.showInfo(t('admin.proxies.batchDeleteSkipped', { skipped }))
     }
 
-    clearSelectedProxies()
-    showBatchDeleteDialog.value = false
+    removeSelectedProxies(result.deleted_ids ?? [])
+    closeBatchDeleteDialog()
     loadProxies()
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error.response?.data?.detail || t('admin.proxies.batchDeleteFailed'))
     console.error('Error batch deleting proxies:', error)
+  } finally {
+    if (task.owned()) batchDeleting.value = false
+    task.finish()
   }
 }
 
 const openAccountsModal = async (proxy: Proxy) => {
+  const task = pageTasks.begin('detail:accounts')
   accountsProxy.value = proxy
   proxyAccounts.value = []
   accountsLoading.value = true
   showAccountsModal.value = true
 
   try {
-    proxyAccounts.value = await adminAPI.proxies.getProxyAccounts(proxy.id)
+    const accounts = await adminAPI.proxies.getProxyAccounts(proxy.id)
+    if (task.active()) proxyAccounts.value = accounts
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error.response?.data?.detail || t('admin.proxies.accountsFailed'))
     console.error('Error loading proxy accounts:', error)
   } finally {
-    accountsLoading.value = false
+    if (task.owned()) accountsLoading.value = false
+    task.finish()
   }
 }
 
 const closeAccountsModal = () => {
+  pageTasks.cancel('detail:accounts')
+  accountsLoading.value = false
   showAccountsModal.value = false
   accountsProxy.value = null
   proxyAccounts.value = []
@@ -2040,7 +2200,12 @@ function buildAuthPart(row: any): string {
 }
 
 function buildProxyUrl(row: any): string {
-  return `${row.protocol}://${buildAuthPart(row)}${row.host}:${row.port}`
+  return `${row.protocol}://${buildAuthPart(row)}${proxyEndpoint(row)}`
+}
+
+function proxyEndpoint(row: Pick<Proxy, 'host' | 'port'>): string {
+  const host = row.host.includes(':') && !row.host.startsWith('[') ? `[${row.host}]` : row.host
+  return `${host}:${row.port}`
 }
 
 function getCopyFormats(row: any) {
@@ -2053,7 +2218,7 @@ function getCopyFormats(row: any) {
     const withoutProtocol = fullUrl.replace(/^[^:]+:\/\//, '')
     formats.push({ label: withoutProtocol, value: withoutProtocol })
   }
-  formats.push({ label: `${row.host}:${row.port}`, value: `${row.host}:${row.port}` })
+  formats.push({ label: proxyEndpoint(row), value: proxyEndpoint(row) })
   return formats
 }
 
@@ -2082,6 +2247,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  pageTasks.dispose()
   clearTimeout(searchTimeout)
   abortController?.abort()
   document.removeEventListener('click', closeCopyMenu)

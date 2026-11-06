@@ -1266,7 +1266,7 @@ describe('EditAccountModal Grok OAuth upstream config', () => {
     expect(translateMock).toHaveBeenCalledWith('admin.accounts.grokModelDiagnostics.mappingFromAria', { index: 2 })
   })
 
-  it.each(['oauth', 'apikey'])('leaves non-grok %s model controls unchanged', async type => {
+  it.each(['oauth', 'apikey'])('keeps non-grok %s model controls with generic accessible names', async type => {
     getByIdMock.mockClear()
     const wrapper = mountLiveSelectorModal({
       ...buildGrokOAuthAccount({ model_mapping: { friendly: 'grok-4.7' } }),
@@ -1289,10 +1289,10 @@ describe('EditAccountModal Grok OAuth upstream config', () => {
     expect(wrapper.text()).toContain('admin.accounts.mapRequestModels')
     const from = wrapper.get('input[placeholder="admin.accounts.requestModel"]')
     const to = wrapper.get('input[placeholder="admin.accounts.actualModel"]')
-    expect(from.attributes('aria-label')).toBeUndefined()
-    expect(to.attributes('aria-label')).toBeUndefined()
+    expect(from.attributes('aria-label')).toBe('admin.accounts.requestModel')
+    expect(to.attributes('aria-label')).toBe('admin.accounts.actualModel')
     const remove = from.element.parentElement?.querySelector('button')
-    expect(remove?.getAttribute('aria-label')).toBeNull()
+    expect(remove?.getAttribute('aria-label')).toBe(translateMock('common.delete'))
     expect(remove?.className.split(/\s+/)).toEqual(expect.arrayContaining(['text-red-500']))
     expect(remove?.className.split(/\s+/)).not.toContain('text-gray-500')
     const mode = wrapper.findAll('button').find(button => button.text().includes('admin.accounts.modelMapping'))

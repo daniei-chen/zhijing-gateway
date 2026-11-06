@@ -5,22 +5,23 @@
     width="wide"
     @close="emit('close')"
   >
-    <form id="provider-form" @submit.prevent="handleSave" class="space-y-4">
+    <form :id="formId" :aria-busy="saving" @submit.prevent="handleSave" class="space-y-4">
       <!-- Name + Key -->
       <div class="grid grid-cols-2 gap-4">
         <div>
-          <label class="input-label">
+          <label :for="`${formId}-name`" class="input-label">
             {{ t('admin.settings.payment.providerName') }}
             <span class="text-red-500">*</span>
           </label>
-          <input v-model="form.name" type="text" class="input" required />
+          <input :id="`${formId}-name`" v-model="form.name" type="text" class="input" required />
         </div>
         <div>
-          <label class="input-label">
+          <label :for="`${formId}-provider-key`" class="input-label">
             {{ t('admin.settings.payment.providerKey') }}
             <span class="text-red-500">*</span>
           </label>
           <Select
+            :id="`${formId}-provider-key`"
             v-model="form.provider_key"
             :options="(!!editing ? allKeyOptions : enabledKeyOptions) as SelectOption[]"
             :disabled="!!editing"
@@ -42,6 +43,7 @@
               :key="mode.value"
               type="button"
               @click="form.payment_mode = mode.value"
+              :aria-pressed="form.payment_mode === mode.value"
               :class="[
                 'rounded-lg border px-2.5 py-1 text-xs font-medium transition-all',
                 form.payment_mode === mode.value
@@ -59,6 +61,7 @@
               :key="pt.value"
               type="button"
               @click="toggleType(pt.value)"
+              :aria-pressed="isTypeSelected(pt.value)"
               :class="[
                 'rounded-lg border px-2.5 py-1 text-xs font-medium transition-all',
                 isTypeSelected(pt.value)
@@ -91,16 +94,16 @@
             class="grid grid-cols-[1fr_1fr_1fr_auto] items-end gap-2"
           >
             <div>
-              <label class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.customMethodType') }}</label>
-              <input v-model="method.type" type="text" class="input mt-0.5" placeholder="credit_card" />
+              <label :for="`${formId}-custom-${index}-type`" class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.customMethodType') }}</label>
+              <input :id="`${formId}-custom-${index}-type`" v-model="method.type" type="text" class="input mt-0.5" placeholder="credit_card" />
             </div>
             <div>
-              <label class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.customMethodUpstreamType') }}</label>
-              <input v-model="method.upstreamType" type="text" class="input mt-0.5" placeholder="credit_card" />
+              <label :for="`${formId}-custom-${index}-upstream`" class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.customMethodUpstreamType') }}</label>
+              <input :id="`${formId}-custom-${index}-upstream`" v-model="method.upstreamType" type="text" class="input mt-0.5" placeholder="credit_card" />
             </div>
             <div>
-              <label class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.customMethodDisplayName') }}</label>
-              <input v-model="method.displayName" type="text" class="input mt-0.5" :placeholder="t('admin.settings.payment.customMethodDisplayNamePlaceholder')" />
+              <label :for="`${formId}-custom-${index}-display-name`" class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.customMethodDisplayName') }}</label>
+              <input :id="`${formId}-custom-${index}-display-name`" v-model="method.displayName" type="text" class="input mt-0.5" :placeholder="t('admin.settings.payment.customMethodDisplayNamePlaceholder')" />
             </div>
             <button
               type="button"
@@ -154,13 +157,15 @@
         </p>
         <div class="space-y-3">
           <div v-for="field in resolvedFields" :key="field.key">
-            <label class="input-label">
+            <label :for="`${formId}-config-${field.key}`" class="input-label">
               {{ field.label }}
               <span v-if="field.optional" class="text-xs text-gray-400">({{ t('common.optional') }})</span>
               <span v-else class="text-red-500"> *</span>
             </label>
             <textarea
               v-if="field.sensitive && field.key.toLowerCase().includes('key') && field.key !== 'pkey'"
+              :id="`${formId}-config-${field.key}`"
+              :aria-describedby="field.hintKey ? `${formId}-config-${field.key}-hint` : undefined"
               v-model="config[field.key]"
               rows="3"
               class="input font-mono text-xs"
@@ -173,6 +178,8 @@
             />
             <div v-else-if="field.sensitive" class="relative">
               <input
+                :id="`${formId}-config-${field.key}`"
+                :aria-describedby="field.hintKey ? `${formId}-config-${field.key}-hint` : undefined"
                 :type="visibleFields[field.key] ? 'text' : 'password'"
                 v-model="config[field.key]"
                 class="input pr-10"
@@ -186,6 +193,9 @@
               <button
                 type="button"
                 @click="visibleFields[field.key] = !visibleFields[field.key]"
+                :aria-label="`${locale === 'zh' ? (visibleFields[field.key] ? '隐藏' : '显示') : (visibleFields[field.key] ? 'Hide' : 'Show')} ${field.label}`"
+                :aria-pressed="!!visibleFields[field.key]"
+                :aria-controls="`${formId}-config-${field.key}`"
                 class="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
               >
                 <svg v-if="visibleFields[field.key]" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" /></svg>
@@ -194,18 +204,22 @@
             </div>
             <Select
               v-else-if="field.options?.length"
+              :id="`${formId}-config-${field.key}`"
+              :aria-describedby="field.hintKey ? `${formId}-config-${field.key}-hint` : undefined"
               v-model="config[field.key]"
               :options="field.options"
               :searchable="field.options.length > 5"
             />
             <input
               v-else
+              :id="`${formId}-config-${field.key}`"
+              :aria-describedby="field.hintKey ? `${formId}-config-${field.key}-hint` : undefined"
               type="text"
               v-model="config[field.key]"
               class="input"
               :placeholder="field.defaultValue || ''"
             />
-            <p v-if="field.hintKey" class="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
+            <p v-if="field.hintKey" :id="`${formId}-config-${field.key}-hint`" class="mt-1 text-xs leading-relaxed text-gray-500 dark:text-gray-400">
               {{ t(field.hintKey) }}
             </p>
           </div>
@@ -214,16 +228,16 @@
         <!-- Callback URLs (each = editable URL + fixed path) -->
         <div v-if="callbackPaths" class="mt-4 space-y-3">
           <div v-if="callbackPaths.notifyUrl">
-            <label class="input-label">{{ t('admin.settings.payment.field_notifyUrl') }} <span class="text-red-500">*</span></label>
+            <label :for="`${formId}-notify-base`" class="input-label">{{ t('admin.settings.payment.field_notifyUrl') }} <span class="text-red-500">*</span></label>
             <div class="flex">
-              <input v-model="notifyBaseUrl" type="text" class="input min-w-0 flex-1 !rounded-r-none !border-r-0" :placeholder="defaultBaseUrl" />
+              <input :id="`${formId}-notify-base`" v-model="notifyBaseUrl" type="text" class="input min-w-0 flex-1 !rounded-r-none !border-r-0" :placeholder="defaultBaseUrl" />
               <span class="inline-flex items-center whitespace-nowrap rounded-r-lg border border-gray-300 bg-gray-50 px-3 text-xs text-gray-500 dark:border-dark-600 dark:bg-dark-700 dark:text-gray-400">{{ callbackPaths.notifyUrl }}</span>
             </div>
           </div>
           <div v-if="callbackPaths.returnUrl">
-            <label class="input-label">{{ t('admin.settings.payment.field_returnUrl') }} <span class="text-red-500">*</span></label>
+            <label :for="`${formId}-return-base`" class="input-label">{{ t('admin.settings.payment.field_returnUrl') }} <span class="text-red-500">*</span></label>
             <div class="flex">
-              <input v-model="returnBaseUrl" type="text" class="input min-w-0 flex-1 !rounded-r-none !border-r-0" :placeholder="defaultBaseUrl" />
+              <input :id="`${formId}-return-base`" v-model="returnBaseUrl" type="text" class="input min-w-0 flex-1 !rounded-r-none !border-r-0" :placeholder="defaultBaseUrl" />
               <span class="inline-flex items-center whitespace-nowrap rounded-r-lg border border-gray-300 bg-gray-50 px-3 text-xs text-gray-500 dark:border-dark-600 dark:bg-dark-700 dark:text-gray-400">{{ callbackPaths.returnUrl }}</span>
             </div>
           </div>
@@ -245,13 +259,13 @@
 
       <!-- Per-type limits (collapsible) -->
       <div v-if="limitableTypes.length" class="border-t border-gray-200 pt-4 dark:border-dark-700">
-        <button type="button" @click="limitsExpanded = !limitsExpanded" class="flex w-full items-center justify-between">
+        <button type="button" @click="limitsExpanded = !limitsExpanded" :aria-expanded="limitsExpanded" :aria-controls="`${formId}-limits`" class="flex w-full items-center justify-between">
           <h4 class="text-sm font-semibold text-gray-900 dark:text-white">
             {{ t('admin.settings.payment.limitsTitle') }}
           </h4>
           <svg :class="['h-4 w-4 text-gray-400 transition-transform', limitsExpanded && 'rotate-180']" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
         </button>
-        <div v-show="limitsExpanded" class="mt-3 space-y-3">
+        <div v-show="limitsExpanded" :id="`${formId}-limits`" class="mt-3 space-y-3">
           <div
             v-for="lt in limitableTypes"
             :key="lt.value"
@@ -260,8 +274,9 @@
             <p class="mb-2 text-xs font-medium text-gray-700 dark:text-gray-300">{{ lt.label }}</p>
             <div class="grid grid-cols-3 gap-3">
               <div>
-                <label class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.limitSingleMin') }}</label>
+                <label :for="`${formId}-limit-${lt.value}-single-min`" class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.limitSingleMin') }}</label>
                 <input
+                  :id="`${formId}-limit-${lt.value}-single-min`"
                   type="number"
                   :value="getLimitVal(lt.value, 'singleMin')"
                   @input="setLimitVal(lt.value, 'singleMin', ($event.target as HTMLInputElement).value)"
@@ -269,8 +284,9 @@
                 />
               </div>
               <div>
-                <label class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.limitSingleMax') }}</label>
+                <label :for="`${formId}-limit-${lt.value}-single-max`" class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.limitSingleMax') }}</label>
                 <input
+                  :id="`${formId}-limit-${lt.value}-single-max`"
                   type="number"
                   :value="getLimitVal(lt.value, 'singleMax')"
                   @input="setLimitVal(lt.value, 'singleMax', ($event.target as HTMLInputElement).value)"
@@ -278,8 +294,9 @@
                 />
               </div>
               <div>
-                <label class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.limitDaily') }}</label>
+                <label :for="`${formId}-limit-${lt.value}-daily`" class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.payment.limitDaily') }}</label>
                 <input
+                  :id="`${formId}-limit-${lt.value}-daily`"
                   type="number"
                   :value="getLimitVal(lt.value, 'dailyLimit')"
                   @input="setLimitVal(lt.value, 'dailyLimit', ($event.target as HTMLInputElement).value)"
@@ -296,13 +313,17 @@
     <template #footer>
       <div class="flex justify-end gap-3">
         <button type="button" @click="emit('close')" class="btn btn-secondary">{{ t('common.cancel') }}</button>
-        <button type="submit" form="provider-form" :disabled="saving" class="btn btn-primary">
+        <button type="submit" :form="formId" :disabled="saving" class="btn btn-primary">
           {{ saving ? t('common.saving') : t('common.save') }}
         </button>
       </div>
     </template>
   </BaseDialog>
 </template>
+
+<script lang="ts">
+let paymentProviderDialogSequence = 0
+</script>
 
 <script setup lang="ts">
 import { reactive, computed, ref } from 'vue'
@@ -379,7 +400,9 @@ const emit = defineEmits<{
   }]
 }>()
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
+// Shared across Vue apps, so overlapping dialogs never target another form.
+const formId = `payment-provider-${++paymentProviderDialogSequence}-form`
 
 interface PaymentGuideItem {
   title: string

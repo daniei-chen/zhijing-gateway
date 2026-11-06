@@ -53,6 +53,9 @@
                   'sidebar-link-collapsed': sidebarCollapsed
                 }"
                 :title="sidebarCollapsed ? item.label : undefined"
+                :aria-expanded="!sidebarCollapsed && isGroupExpanded(item)"
+                :aria-controls="groupRegionID(item.path)"
+                :aria-label="item.label"
                 @click="handleGroupClick(item)"
               >
                 <component :is="item.icon" class="h-5 w-5 flex-shrink-0" />
@@ -69,7 +72,7 @@
                 </span>
               </button>
               <!-- Children -->
-              <div v-if="!sidebarCollapsed && isGroupExpanded(item)" class="z-admin-nav-children mb-1 ml-4 border-l border-gray-200 pl-2 dark:border-dark-600">
+              <div v-if="!sidebarCollapsed && isGroupExpanded(item)" :id="groupRegionID(item.path)" class="z-admin-nav-children mb-1 ml-4 border-l border-gray-200 pl-2 dark:border-dark-600">
                 <router-link
                   v-for="child in item.children"
                   :key="child.path"
@@ -212,7 +215,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, h, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, h, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue'
 import { useMediaQuery } from '@vueuse/core'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -220,6 +223,7 @@ import { useAdminSettingsStore, useAppStore, useAuthStore, useOnboardingStore } 
 import VersionBadge from '@/components/common/VersionBadge.vue'
 import AdminNavigationMarker from './AdminNavigationMarker.vue'
 import { startWorkspaceTransition } from './workspaceMotion'
+import { createMobileDrawerOwner } from './mobileDrawerOwnership'
 import Icon from '@/components/icons/Icon.vue'
 import { sanitizeSvg } from '@/utils/sanitize'
 import { sanitizeUrl } from '@/utils/url'
@@ -279,7 +283,17 @@ const isAdmin = computed(() => authStore.isAdmin)
 const sidebarNavRef = ref<HTMLElement | null>(null)
 const sidebarRootRef = ref<HTMLElement | null>(null)
 const isMobile = useMediaQuery('(max-width: 1023px)')
-let previousMobileFocus: HTMLElement | null = null
+const mobileOwner = createMobileDrawerOwner(document, () => sidebarRootRef.value)
+let disposed = false
+let mobileFocusRevision = 0
+let mobileCloseTimer: ReturnType<typeof setTimeout> | undefined
+const sidebarID = useId()
+const groupRegionID = (path: string) => `${sidebarID}-${navigationSurfaceName(path)}`
+
+function cancelMobileClose() {
+  if (mobileCloseTimer !== undefined) clearTimeout(mobileCloseTimer)
+  mobileCloseTimer = undefined
+}
 
 // Separate link snapshots keep text above the moving glass selection lens.
 function navigationSurfaceName(path: string): string {
@@ -302,20 +316,21 @@ function smoothMemberNavigation(event: MouseEvent) {
 }
 
 watch([mobileOpen, isMobile], async ([open, mobile]) => {
+  const revision = ++mobileFocusRevision
   const active = open && mobile
-  document.body.classList.toggle('z-mobile-nav-open', active)
   if (active) {
-    previousMobileFocus = document.activeElement as HTMLElement
+    mobileOwner.activate()
     await nextTick()
+    if (disposed || revision !== mobileFocusRevision || !mobileOpen.value || !isMobile.value || !mobileOwner.isTop()) return
     sidebarRootRef.value?.querySelector<HTMLElement>('.z-mobile-close')?.focus()
-  } else if (previousMobileFocus) {
-    previousMobileFocus.focus()
-    previousMobileFocus = null
+  } else {
+    cancelMobileClose()
+    mobileOwner.release()
   }
-})
+}, { immediate: true })
 
 function handleNavigationKeys(event: KeyboardEvent) {
-  if (!mobileOpen.value || !isMobile.value) return
+  if (!mobileOpen.value || !isMobile.value || !mobileOwner.isTop()) return
   if (event.key === 'Escape') { event.preventDefault(); closeMobile(); return }
   if (event.key !== 'Tab') return
   const controls = Array.from(sidebarRootRef.value?.querySelectorAll<HTMLElement>('a[href], button:not(:disabled), summary, [tabindex="0"]') || []).filter(el => el.getClientRects().length > 0)
@@ -326,8 +341,11 @@ function handleNavigationKeys(event: KeyboardEvent) {
 
 onMounted(() => document.addEventListener('keydown', handleNavigationKeys))
 onBeforeUnmount(() => {
+  disposed = true
+  mobileFocusRevision++
+  cancelMobileClose()
   document.removeEventListener('keydown', handleNavigationKeys)
-  document.body.classList.remove('z-mobile-nav-open')
+  mobileOwner.release()
 })
 const isDark = ref(document.documentElement.classList.contains('dark'))
 
@@ -981,13 +999,16 @@ function toggleTheme() {
 }
 
 function closeMobile() {
+  cancelMobileClose()
   appStore.setMobileOpen(false)
 }
 
 function handleMenuItemClick(itemPath: string) {
   if (mobileOpen.value) {
-    setTimeout(() => {
-      appStore.setMobileOpen(false)
+    cancelMobileClose()
+    mobileCloseTimer = setTimeout(() => {
+      mobileCloseTimer = undefined
+      if (!disposed && mobileOpen.value && isMobile.value && mobileOwner.isTop()) appStore.setMobileOpen(false)
     }, 150)
   }
 
@@ -1087,6 +1108,24 @@ onBeforeUnmount(() => {
 </script>
 
 <style scoped>
+.sidebar-header {
+  position: relative;
+  z-index: 2;
+}
+
+.sidebar-brand :deep(.version-badge) {
+  position: static;
+}
+
+.sidebar-header :deep(.version-panel) {
+  top: 100%;
+  left: 0;
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 7rem);
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+
 .sidebar-logo {
   flex: 0 0 2.25rem;
   min-width: 2.25rem;

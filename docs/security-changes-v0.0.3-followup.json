@@ -1,0 +1,159 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "331948dc2d0cb0e2f3c2fca1a19547c35c6fb0b2",
+  "authorization": "2026-11-06 用户要求“全部解决”，并设定完整目标：修复已发现的前后端、界面和日志问题，反复子代理审查，通过既有发布门禁后替换线上并发布 GitHub 新版。本增量只逐项记录已复现并修复的受保护源码变化，不修改原始、审计或 v0.0.3 首轮基线。",
+  "files": [
+    {
+      "path": "frontend/src/types/index.ts",
+      "before_sha256": "e0177e52077fe081e31d872ec3a71387729a68f10d1cd942df9b478b56cf1509",
+      "after_sha256": "e8e98b2498ee914f09abef4934857aaccf59038005672c2dd58f09d0ad031ebf",
+      "reason": "Remove only the unsupported schedulable optional field from the single-account UpdateAccountRequest. The matching Go PUT DTO does not accept or forward it; retain the Account state field, the dedicated POST schedulable API and the bulk-update contract. Existing UI callers use the dedicated or bulk paths. This corrects a static type promise and does not change runtime requests.",
+      "tests": [
+        "frontend/src/api/__tests__/admin.accounts.contract-workflow.spec.ts",
+        "frontend/src/views/admin/__tests__/AccountsView.native-workflow.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/api/client.ts",
+      "before_sha256": "d59fca9a60c960a3e85335a6ae6bd9c6a6a3026101c15979b7c5de0e06f5f67e",
+      "after_sha256": "34278df157b3571bd6a6c2b3f1f5253188d02e9d8190105fabdde5954f625dc4",
+      "reason": "Reuse the same browser-session rotated selector on late 401; reject stale Cookie selectors or init generations when a custom adapter drops the request stamp, before success handling or any non-cancellation error side effect.",
+      "tests": [
+        "frontend/src/api/__tests__/client.cookie-rotation.spec.ts",
+        "frontend/src/api/__tests__/client.adapter-boundary.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/users.ts",
+      "before_sha256": "e87310f0d7a2b49adfbeca0370d78ffe40d2e584a2eb3d68708af92f2c44a539",
+      "after_sha256": "2886926c7e03020b41549465b23212597006151631be3bc00eac9b5b8fe71aaf",
+      "reason": "Preserve the four-argument balance API and first-write payload. Scope an uncertain operation key to administrator, target and exact payload; retry only through the distinct read-only replay endpoint, require its replay confirmation, and retain unresolved keys on expiry, missing records, unknown old-backend routes or ambiguous failures. Successful acknowledgment clears only the captured operation.",
+      "tests": [
+        "frontend/src/api/__tests__/admin.users.balance.spec.ts",
+        "frontend/src/components/admin/user/__tests__/UserBalanceModal.workflow.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/api/admin/subscriptions.ts",
+      "before_sha256": "174b0c2b2be4c0f7929dbac829a8089156adc510be8fa30f78699325f3d823e0",
+      "after_sha256": "97b2aa5012b507e782651869de23eded33e604a376f7b2a7b24f3dfc231c9609",
+      "reason": "Preserve two-argument single adjustment calls and the original bulk first-write contract. Bind an uncertain adjustment to administrator, subscription and payload; only read a saved result after an unknown outcome. Bulk callers may explicitly select the same read-only mode with an optional third argument. Both replay routes require the confirmation header, fail safely on old backends and never fall back to another business write.",
+      "tests": [
+        "frontend/src/api/__tests__/admin.subscriptions.extend.spec.ts",
+        "frontend/src/api/__tests__/admin.subscriptions.bulkReplay.spec.ts",
+        "frontend/src/components/admin/subscription/__tests__/BulkSubscriptionActionDialog.replay-wire.spec.ts",
+        "frontend/src/views/admin/__tests__/SubscriptionsView.workflow.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/api/batchImage.ts",
+      "before_sha256": "9b77477627c836c88e1f350ab642eacda7f62f4aa0f87df8819ea0e3dae51332",
+      "after_sha256": "af593dd6f8cf28163c9d651091fed41dcd670965ee1fc4f38e6ffe21525aa26a",
+      "reason": "Preserve the existing first-submit four-argument request, authentication and item-list calls. Unknown submission results use a distinct read-only replay route with the captured key/body/nonce and mandatory acknowledgment, never an execution fallback. Complete recovery history uses an authenticated GET with explicit array/identity validation and prompt_only semantics; it is a read snapshot, not an atomic retry reservation. Add only an optional fifth pagination argument to item listing and reject responses after abort or login replacement. Independently reviewed download cleanup releases its own Blob URL even if anchor creation, append, click or removal throws; every API line outside this helper body remains identical to the preceding reviewed source.",
+      "tests": [
+        "frontend/src/api/__tests__/batchImage.replay.spec.ts",
+        "frontend/src/api/__tests__/batchImage.recovery.spec.ts",
+        "frontend/src/api/__tests__/batchImage.session.spec.ts",
+        "frontend/src/api/__tests__/batchImage.download.spec.ts",
+        "frontend/src/views/user/__tests__/BatchImageGuideView.workflow.spec.ts",
+        "frontend/src/views/user/__tests__/BatchImageGuideView.lifecycle.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useAccountOAuth.ts",
+      "before_sha256": "a0f13132f3a671614b52c414bc097ab01577e45c18649ebb31c81b10f437146f",
+      "after_sha256": "acd237d55dd05817bfb617db5c447eb9ac6aaaa0fce908eef932fefe5712e6bc",
+      "reason": "Keep Claude OAuth completion, errors and loading owned by the initiating modal operation and login; reset/superseding requests invalidate older continuations.",
+      "tests": [
+        "frontend/src/composables/__tests__/useAccountOAuth.requestOwnership.spec.ts",
+        "frontend/src/components/account/__tests__/CreateAccountModal.workflow.spec.ts",
+        "frontend/src/components/account/__tests__/EditAccountModal.workflow.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useAntigravityOAuth.ts",
+      "before_sha256": "58466c632fbe6852e739234a9dcae4238f8d012d94f157551cca8c5ca50b0620",
+      "after_sha256": "bda45a4be4d206849bca9fec987ec19b1291ad035fd72aff8e55b14d2abb5d61",
+      "reason": "Keep Antigravity OAuth generation/exchange owned by the initiating modal operation and login, including reset and superseding completion.",
+      "tests": [
+        "frontend/src/composables/__tests__/useAccountOAuth.requestOwnership.spec.ts",
+        "frontend/src/components/account/__tests__/CreateAccountModal.workflow.spec.ts",
+        "frontend/src/components/account/__tests__/EditAccountModal.workflow.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useGeminiOAuth.ts",
+      "before_sha256": "6a86bdabac076a31f738563119d88bf48f1134269a3c5db80271af808ac827d0",
+      "after_sha256": "031693ec3b24ab64fb5865614d07fcc90315a0dceacd6de73a3f0186c2925d6d",
+      "reason": "Keep Gemini OAuth generation/exchange owned by the initiating modal operation and login, including reset and superseding completion.",
+      "tests": [
+        "frontend/src/composables/__tests__/useAccountOAuth.requestOwnership.spec.ts",
+        "frontend/src/components/account/__tests__/CreateAccountModal.workflow.spec.ts",
+        "frontend/src/components/account/__tests__/EditAccountModal.workflow.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useGrokOAuth.ts",
+      "before_sha256": "911eba898ee437e5f8293134134b6d6e845af8b24d6fbbf0c8b002cfc490add0",
+      "after_sha256": "2fec2486f3ea4a58df906881ba203641f1399693ec9541545fa3a596198965e0",
+      "reason": "Keep Grok OAuth generation/exchange and token-bearing completion owned by the initiating modal operation and login, including reset and superseding completion.",
+      "tests": [
+        "frontend/src/composables/__tests__/useAccountOAuth.requestOwnership.spec.ts",
+        "frontend/src/components/account/__tests__/CreateAccountModal.workflow.spec.ts",
+        "frontend/src/components/account/__tests__/EditAccountModal.workflow.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useOpenAIOAuth.ts",
+      "before_sha256": "da8198599fd35bd95d697b70bce9d5c0ff5692c232b77bc574ec54b721b99c4a",
+      "after_sha256": "84330efbcd5efd25b0f5c2f3c8f3b716224d552036f9a6b8aee297c3b659e377",
+      "reason": "Keep OpenAI OAuth generation/exchange owned by the initiating modal operation and login, including reset and superseding completion.",
+      "tests": [
+        "frontend/src/composables/__tests__/useAccountOAuth.requestOwnership.spec.ts",
+        "frontend/src/components/account/__tests__/CreateAccountModal.workflow.spec.ts",
+        "frontend/src/components/account/__tests__/EditAccountModal.workflow.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useClipboard.ts",
+      "before_sha256": "9f5b01c2b5a5f35cb16a5b63e0e2e323e5c11acd84e0a770447d00d46aec9da4",
+      "after_sha256": "cb400a282d3f57614af1fb5e5b4f7069763f85ae852909fbe4455038f9458207",
+      "reason": "Keep existing two-argument copy calls compatible; bind asynchronous clipboard completion, fallback, notifications and timers to their scope/login/request and optional caller operation. Completed feedback expires under its own task identity even when the caller draft changes; a newer copy remains untouched. An already accepted OS clipboard write cannot be undone.",
+      "tests": [
+        "frontend/src/composables/__tests__/useClipboard.lifecycle.spec.ts",
+        "frontend/src/components/admin/user/__tests__/UserEditModal.clipboard.spec.ts",
+        "frontend/src/views/user/__tests__/KeysView.workflow.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useOnboardingTour.ts",
+      "before_sha256": "42d227d9d23f87d40d3a022d169445d696ffbc4000ee9a7cf3f3d7669fc3b775",
+      "after_sha256": "bd2af6d4e8e408a21e18f45f4074c192408434e994a0db225b8da249004c77d3",
+      "reason": "Cancel delayed starts after unmount; globally own starts and driver by Pinia application and login; revalidate the captured tour/step after waits, destroy on session replacement, and let live route controls operate only the current owned driver.",
+      "tests": [
+        "frontend/src/composables/__tests__/useOnboardingTour.lifecycle.spec.ts",
+        "frontend/src/composables/__tests__/useOnboardingTour.ownership-boundary.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/stores/onboarding.ts",
+      "before_sha256": "c17941661815dee36f6862a5968b5d809ec4af6b2f8940f1378762fbeba7eea3",
+      "after_sha256": "8d10d6cd5a6fff8a0720138ed529df56c521287d14f10a0c6258b34f9d1cecb7",
+      "reason": "Register route controls with explicit callback identity; removing one owner preserves or restores the latest still-mounted owner, while pending work from an unmounted owner stays cancelled.",
+      "tests": [
+        "frontend/src/composables/__tests__/useOnboardingTour.lifecycle.spec.ts",
+        "frontend/src/composables/__tests__/useOnboardingTour.ownership-boundary.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/router/index.ts",
+      "before_sha256": "df9b0d22492ad3a7bd16feaef45002a59af79cec180ab74ea84becfd293e3fa8",
+      "after_sha256": "9dc0880c1e880ef830874fd7e58ad35ac0a5ad10a79fe5c4464726d4886538b3",
+      "reason": "Revalidate the current login and administrator role after awaited compliance and feature-setting checks, including rejected requests. An old 423 must not apply acknowledgement metadata after logout or demotion. Preserve public redirects, feature toggles and server authorization.",
+      "tests": [
+        "frontend/src/router/__tests__/navigation.workflow.spec.ts",
+        "frontend/src/router/__tests__/feature-access.spec.ts"
+      ]
+    }
+  ]
+}

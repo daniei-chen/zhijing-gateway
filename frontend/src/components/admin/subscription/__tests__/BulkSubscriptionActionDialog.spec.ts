@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { flushPromises, mount } from '@vue/test-utils'
+import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import type { SubscriptionBulkAction, SubscriptionBulkActionResult } from '@/api/admin/subscriptions'
 import type { UserSubscription } from '@/types'
 import BulkSubscriptionActionDialog from '../BulkSubscriptionActionDialog.vue'
+import { replaceAuthSession } from '@/api/authSession'
 
 const bulkAction = vi.hoisted(() => vi.fn())
 vi.mock('@/api/admin', () => ({ adminAPI: { subscriptions: { bulkAction } } }))
@@ -50,13 +51,14 @@ function mountDialog(action: SubscriptionBulkAction = 'extend', subscriptions = 
   return wrapper
 }
 
-const wrappers: ReturnType<typeof mountDialog>[] = []
+const wrappers: VueWrapper[] = []
 let adminId = 100
 
 beforeEach(() => {
   bulkAction.mockReset()
   bulkAction.mockResolvedValue(successResult)
-  localStorage.setItem('auth_user', JSON.stringify({ id: ++adminId }))
+  localStorage.clear()
+  replaceAuthSession({ accessToken: 'synthetic-bulk-dialog', user: { id: ++adminId } })
   sessionStorage.clear()
 })
 
@@ -72,7 +74,7 @@ describe('BulkSubscriptionActionDialog', () => {
     await wrapper.get('input[type="number"]').setValue(days)
     await wrapper.get('form').trigger('submit')
     await flushPromises()
-    expect(bulkAction).toHaveBeenCalledWith({ subscription_ids: [1, 2], action: 'extend', days }, expect.any(String))
+    expect(bulkAction).toHaveBeenCalledWith({ subscription_ids: [1, 2], action: 'extend', days }, expect.any(String), false)
     expect(wrapper.emitted('completed')).toEqual([[successResult]])
     expect(wrapper.find('button[type="submit"]').exists()).toBe(false)
   })
@@ -100,7 +102,7 @@ describe('BulkSubscriptionActionDialog', () => {
     await flushPromises()
     expect(bulkAction).toHaveBeenCalledWith({
       subscription_ids: [1, 2], action: 'reset_quota', daily: false, weekly: true, monthly: false
-    }, expect.any(String))
+    }, expect.any(String), false)
   })
 
   it.each(['revoke', 'restore'] as const)('submits %s without unrelated parameters', async action => {
@@ -108,7 +110,7 @@ describe('BulkSubscriptionActionDialog', () => {
     expect(wrapper.text()).toContain(`admin.subscriptions.bulk.${action}Hint`)
     await wrapper.get('form').trigger('submit')
     await flushPromises()
-    expect(bulkAction).toHaveBeenCalledWith({ subscription_ids: [1, 2], action }, expect.any(String))
+    expect(bulkAction).toHaveBeenCalledWith({ subscription_ids: [1, 2], action }, expect.any(String), false)
   })
 
   it.each([0, 101])('rejects a selection of %s subscriptions', async count => {
@@ -170,7 +172,8 @@ describe('BulkSubscriptionActionDialog', () => {
     await wrapper.setProps({ action: 'revoke', subscriptions: [subscription(3)] })
     await wrapper.get('form').trigger('submit')
     await flushPromises()
-    expect(bulkAction.mock.calls[1]).toEqual(bulkAction.mock.calls[0])
+    expect(bulkAction.mock.calls[1]).toEqual([bulkAction.mock.calls[0][0], bulkAction.mock.calls[0][1], true])
+    expect(bulkAction.mock.calls[0][2]).toBe(false)
     expect(bulkAction.mock.calls[1]![0]).toEqual({ subscription_ids: [1, 2], action: 'extend', days: -7 })
     expect(wrapper.emitted('completed')).toEqual([[successResult]])
   })
@@ -187,7 +190,8 @@ describe('BulkSubscriptionActionDialog', () => {
     const retry = mountDialog('extend', [subscription(2), subscription(1)])
     await retry.get('form').trigger('submit')
     await flushPromises()
-    expect(bulkAction.mock.calls[1]).toEqual(bulkAction.mock.calls[0])
+    expect(bulkAction.mock.calls[1]).toEqual([bulkAction.mock.calls[0][0], bulkAction.mock.calls[0][1], true])
+    expect(bulkAction.mock.calls[0][2]).toBe(false)
     retry.unmount()
 
     const next = mountDialog()
@@ -216,7 +220,8 @@ describe('BulkSubscriptionActionDialog', () => {
       await wrapper.get('form').trigger('submit')
       await flushPromises()
     }
-    expect(bulkAction.mock.calls[1]).toEqual(bulkAction.mock.calls[0])
-    expect(bulkAction.mock.calls[2]).toEqual(bulkAction.mock.calls[0])
+    expect(bulkAction.mock.calls[0][2]).toBe(false)
+    expect(bulkAction.mock.calls[1]).toEqual([bulkAction.mock.calls[0][0], bulkAction.mock.calls[0][1], true])
+    expect(bulkAction.mock.calls[2]).toEqual(bulkAction.mock.calls[1])
   })
 })

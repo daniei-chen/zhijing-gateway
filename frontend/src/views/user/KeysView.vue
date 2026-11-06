@@ -24,12 +24,16 @@
               @search="onFilterChange"
             />
             <Select
+              :id="`${fieldId}-filter-group`"
+              :aria-label="t('keys.group')"
               :model-value="filterGroupId"
               class="w-40"
               :options="groupFilterOptions"
               @update:model-value="onGroupFilterChange"
             />
             <Select
+              :id="`${fieldId}-filter-status`"
+              :aria-label="t('common.status')"
               :model-value="filterStatus"
               class="w-40"
               :options="statusFilterOptions"
@@ -67,6 +71,7 @@
             :disabled="loading"
             class="btn btn-secondary"
             :title="t('common.refresh')"
+            :aria-label="t('common.refresh')"
           >
             <Icon name="refresh" size="md" :class="loading ? 'animate-spin' : ''" />
           </button>
@@ -135,6 +140,7 @@
               </code>
               <button
                 @click="copyToClipboard(value, row.id)"
+                :aria-label="`${copiedKeyId === row.id ? t('keys.copied') : t('keys.copyToClipboard')}: ${row.name}`"
                 class="rounded-lg p-1 transition-colors hover:bg-gray-100 dark:hover:bg-dark-700"
                 :class="
                   copiedKeyId === row.id
@@ -173,6 +179,12 @@
               <button
                 :ref="(el) => setGroupButtonRef(row.id, el)"
                 @click="openGroupSelector(row)"
+                @keydown.down.prevent="openGroupSelector(row)"
+                :disabled="pendingGroupIds.has(row.id)"
+                :aria-label="`${t('keys.group')}: ${row.name}`"
+                aria-haspopup="dialog"
+                :aria-expanded="groupSelectorKeyId === row.id"
+                :aria-controls="`${fieldId}-group-options`"
                 class="-mx-2 -my-1 flex cursor-pointer items-center gap-2 rounded-lg px-2 py-1 transition-all duration-200 hover:bg-gray-100 dark:hover:bg-dark-700"
                 :title="t('keys.clickToChangeGroup')"
               >
@@ -426,6 +438,7 @@
               <!-- Toggle Status Button -->
               <button
                 @click="toggleKeyStatus(row)"
+                :disabled="pendingStatusIds.has(row.id)"
                 :class="[
                   'flex flex-col items-center gap-0.5 rounded-lg p-1.5 transition-colors',
                   row.status === 'active'
@@ -489,10 +502,11 @@
       width="normal"
       @close="closeModals"
     >
-      <form id="key-form" @submit.prevent="handleSubmit" class="space-y-5">
+      <form :id="`${fieldId}-form`" data-test="key-form" :aria-busy="submitting" @submit.prevent="handleSubmit" class="space-y-5">
         <div>
-          <label class="input-label">{{ t('keys.nameLabel') }}</label>
+          <label :for="`${fieldId}-name`" class="input-label">{{ t('keys.nameLabel') }}</label>
           <input
+            :id="`${fieldId}-name`"
             v-model="formData.name"
             type="text"
             required
@@ -551,10 +565,10 @@
         </fieldset>
 
         <div>
-          <label class="input-label" for="key-form-group">{{ t('keys.groupLabel') }}</label>
+          <label class="input-label" :for="`${fieldId}-group`">{{ t('keys.groupLabel') }}</label>
           <Select
             :key="showEditModal ? 'edit' : createProvider"
-            id="key-form-group"
+            :id="`${fieldId}-group`"
             :aria-label="t('keys.groupLabel')"
             v-model="formData.group_id"
             :options="formGroupOptions"
@@ -600,8 +614,13 @@
         <!-- Custom Key Section (only for create) -->
         <div v-if="!showEditModal" class="space-y-3">
           <div class="flex items-center justify-between">
-            <label class="input-label mb-0">{{ t('keys.customKeyLabel') }}</label>
+            <label :for="`${fieldId}-custom-toggle`" class="input-label mb-0">{{ t('keys.customKeyLabel') }}</label>
             <button
+              :id="`${fieldId}-custom-toggle`"
+              role="switch"
+              :aria-label="t('keys.customKeyLabel')"
+              :aria-checked="formData.use_custom_key"
+              :aria-controls="`${fieldId}-custom`"
               type="button"
               @click="formData.use_custom_key = !formData.use_custom_key"
               :class="[
@@ -619,6 +638,9 @@
           </div>
           <div v-if="formData.use_custom_key">
             <input
+              :id="`${fieldId}-custom`"
+              :aria-label="t('keys.customKeyLabel')"
+              :aria-invalid="!!customKeyError"
               v-model="formData.custom_key"
               type="text"
               class="input font-mono"
@@ -631,8 +653,9 @@
         </div>
 
         <div v-if="showEditModal">
-          <label class="input-label">{{ t('keys.statusLabel') }}</label>
+          <label :for="`${fieldId}-status`" class="input-label">{{ t('keys.statusLabel') }}</label>
           <Select
+            :id="`${fieldId}-status`"
             v-model="formData.status"
             :options="statusOptions"
             :placeholder="t('keys.selectStatus')"
@@ -642,8 +665,12 @@
         <!-- IP Restriction Section -->
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <label class="input-label mb-0">{{ t('keys.ipRestriction') }}</label>
+            <label :for="`${fieldId}-ip-toggle`" class="input-label mb-0">{{ t('keys.ipRestriction') }}</label>
             <button
+              :id="`${fieldId}-ip-toggle`"
+              role="switch"
+              :aria-label="t('keys.ipRestriction')"
+              :aria-checked="formData.enable_ip_restriction"
               type="button"
               @click="formData.enable_ip_restriction = !formData.enable_ip_restriction"
               :class="[
@@ -662,8 +689,9 @@
 
           <div v-if="formData.enable_ip_restriction" class="space-y-4 pt-2">
             <div>
-              <label class="input-label">{{ t('keys.ipWhitelist') }}</label>
+              <label :for="`${fieldId}-ip-whitelist`" class="input-label">{{ t('keys.ipWhitelist') }}</label>
               <textarea
+                :id="`${fieldId}-ip-whitelist`"
                 v-model="formData.ip_whitelist"
                 rows="3"
                 class="input font-mono text-sm"
@@ -673,8 +701,9 @@
             </div>
 
             <div>
-              <label class="input-label">{{ t('keys.ipBlacklist') }}</label>
+              <label :for="`${fieldId}-ip-blacklist`" class="input-label">{{ t('keys.ipBlacklist') }}</label>
               <textarea
+                :id="`${fieldId}-ip-blacklist`"
                 v-model="formData.ip_blacklist"
                 rows="3"
                 class="input font-mono text-sm"
@@ -687,7 +716,7 @@
 
         <!-- Quota Limit Section -->
         <div class="space-y-3">
-          <label class="input-label">{{ t('keys.quotaLimit') }}</label>
+          <label :for="`${fieldId}-quota`" class="input-label">{{ t('keys.quotaLimit') }}</label>
           <!-- Switch commented out - always show input, 0 = unlimited
           <div class="flex items-center justify-between">
             <label class="input-label mb-0">{{ t('keys.quotaLimit') }}</label>
@@ -714,6 +743,7 @@
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                 <input
+                  :id="`${fieldId}-quota`"
                   v-model.number="formData.quota"
                   type="number"
                   step="0.01"
@@ -727,7 +757,7 @@
 
             <!-- Quota used display (only in edit mode) -->
             <div v-if="showEditModal && selectedKey && selectedKey.quota > 0">
-              <label class="input-label">{{ t('keys.quotaUsed') }}</label>
+              <p class="input-label">{{ t('keys.quotaUsed') }}</p>
               <div class="flex items-center gap-2">
                 <div class="flex-1 rounded-lg bg-gray-100 px-3 py-2 dark:bg-dark-700">
                   <span class="font-medium text-gray-900 dark:text-white">
@@ -743,6 +773,7 @@
                   @click="confirmResetQuota"
                   class="btn btn-secondary text-sm"
                   :title="t('keys.resetQuotaUsed')"
+                  :disabled="submitting || resettingQuota || resettingRateLimit"
                 >
                   {{ t('keys.reset') }}
                 </button>
@@ -754,8 +785,12 @@
         <!-- Rate Limit Section -->
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <label class="input-label mb-0">{{ t('keys.rateLimitSection') }}</label>
+            <label :for="`${fieldId}-rate-toggle`" class="input-label mb-0">{{ t('keys.rateLimitSection') }}</label>
             <button
+              :id="`${fieldId}-rate-toggle`"
+              role="switch"
+              :aria-label="t('keys.rateLimitSection')"
+              :aria-checked="formData.enable_rate_limit"
               type="button"
               @click="formData.enable_rate_limit = !formData.enable_rate_limit"
               :class="[
@@ -776,10 +811,11 @@
             <p class="input-hint -mt-2">{{ t('keys.rateLimitHint') }}</p>
             <!-- 5-Hour Limit -->
             <div>
-              <label class="input-label">{{ t('keys.rateLimit5h') }}</label>
+              <label :for="`${fieldId}-rate-5h`" class="input-label">{{ t('keys.rateLimit5h') }}</label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                 <input
+                  :id="`${fieldId}-rate-5h`"
                   v-model.number="formData.rate_limit_5h"
                   type="number"
                   step="0.01"
@@ -822,10 +858,11 @@
 
             <!-- Daily Limit -->
             <div>
-              <label class="input-label">{{ t('keys.rateLimit1d') }}</label>
+              <label :for="`${fieldId}-rate-1d`" class="input-label">{{ t('keys.rateLimit1d') }}</label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                 <input
+                  :id="`${fieldId}-rate-1d`"
                   v-model.number="formData.rate_limit_1d"
                   type="number"
                   step="0.01"
@@ -868,10 +905,11 @@
 
             <!-- 7-Day Limit -->
             <div>
-              <label class="input-label">{{ t('keys.rateLimit7d') }}</label>
+              <label :for="`${fieldId}-rate-7d`" class="input-label">{{ t('keys.rateLimit7d') }}</label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
                 <input
+                  :id="`${fieldId}-rate-7d`"
                   v-model.number="formData.rate_limit_7d"
                   type="number"
                   step="0.01"
@@ -917,6 +955,7 @@
               <button
                 type="button"
                 @click="confirmResetRateLimit"
+                :disabled="submitting || resettingQuota || resettingRateLimit"
                 class="btn btn-secondary text-sm"
               >
                 {{ t('keys.resetRateLimitUsage') }}
@@ -928,10 +967,14 @@
         <!-- Expiration Section -->
         <div class="space-y-3">
           <div class="flex items-center justify-between">
-            <label class="input-label mb-0">{{ t('keys.expiration') }}</label>
+            <label :for="`${fieldId}-expiration-toggle`" class="input-label mb-0">{{ t('keys.expiration') }}</label>
             <button
+              :id="`${fieldId}-expiration-toggle`"
+              role="switch"
+              :aria-label="t('keys.expiration')"
+              :aria-checked="formData.enable_expiration"
               type="button"
-              @click="formData.enable_expiration = !formData.enable_expiration"
+              @click="toggleExpiration"
               :class="[
                 'relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
                 formData.enable_expiration ? 'bg-primary-600' : 'bg-gray-200 dark:bg-dark-600'
@@ -954,6 +997,7 @@
                 :key="days"
                 type="button"
                 @click="setExpirationDays(parseInt(days))"
+                :aria-pressed="formData.expiration_preset === days"
                 :class="[
                   'rounded-lg px-3 py-1.5 text-sm transition-colors',
                   formData.expiration_preset === days
@@ -966,6 +1010,7 @@
               <button
                 type="button"
                 @click="formData.expiration_preset = 'custom'"
+                :aria-pressed="formData.expiration_preset === 'custom'"
                 :class="[
                   'rounded-lg px-3 py-1.5 text-sm transition-colors',
                   formData.expiration_preset === 'custom'
@@ -979,10 +1024,14 @@
 
             <!-- Date picker (always show for precise adjustment) -->
             <div>
-              <label class="input-label">{{ t('keys.expirationDate') }}</label>
+              <label :for="`${fieldId}-expiration-date`" class="input-label">{{ t('keys.expirationDate') }}</label>
               <input
+                :id="`${fieldId}-expiration-date`"
                 v-model="formData.expiration_date"
+                @input="markExpirationEdited"
                 type="datetime-local"
+                :required="formData.enable_expiration"
+                :min="showCreateModal ? formatDateTimeLocal(new Date().toISOString()) : undefined"
                 class="input"
               />
               <p class="input-hint">{{ t('keys.expirationDateHint') }}</p>
@@ -1004,9 +1053,9 @@
             {{ t('common.cancel') }}
           </button>
           <button
-            form="key-form"
+            :form="`${fieldId}-form`"
             type="submit"
-            :disabled="submitting"
+            :disabled="submitting || resettingQuota || resettingRateLimit"
             class="btn btn-primary"
             data-tour="key-form-submit"
           >
@@ -1148,6 +1197,10 @@
     <Teleport to="body">
       <div
         v-if="groupSelectorKeyId !== null && dropdownPosition"
+        :id="`${fieldId}-group-options`"
+        role="dialog"
+        :aria-label="t('keys.groupLabel')"
+        @keydown.esc.stop.prevent="dismissGroupSelector"
         ref="dropdownRef"
         class="animate-in fade-in slide-in-from-top-2 fixed z-[100000020] w-max max-w-[calc(100vw-16px)] overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black/5 duration-200 sm:min-w-[380px] dark:bg-dark-800 dark:ring-white/10"
         style="pointer-events: auto !important;"
@@ -1164,6 +1217,7 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
             <input
+              :aria-label="t('keys.searchGroup')"
               v-model="groupSearchQuery"
               type="text"
               class="w-full rounded-lg border border-gray-200 bg-gray-50 py-1.5 pl-8 pr-3 text-sm text-gray-900 placeholder-gray-400 outline-none focus:border-primary-300 focus:ring-1 focus:ring-primary-300 dark:border-dark-600 dark:bg-dark-700 dark:text-white dark:placeholder-gray-500 dark:focus:border-primary-600 dark:focus:ring-primary-600"
@@ -1216,12 +1270,14 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, reactive, computed, watch, onMounted, onUnmounted, type ComponentPublicInstance } from 'vue'
+	import { ref, reactive, computed, watch, onMounted, onBeforeUnmount, nextTick, useId, type ComponentPublicInstance } from 'vue'
 	import { useI18n } from 'vue-i18n'
 	import { useAppStore } from '@/stores/app'
 	import { useOnboardingStore } from '@/stores/onboarding'
 	import { useClipboard } from '@/composables/useClipboard'
 import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
+import { createSessionTasks } from '@/utils/sessionTasks'
+import { subscribeAuthSession } from '@/api/authSession'
 
 const { t, locale } = useI18n()
 import { keysAPI, authAPI, usageAPI, userGroupsAPI } from '@/api'
@@ -1279,6 +1335,8 @@ interface GroupOption {
 const appStore = useAppStore()
 const onboardingStore = useOnboardingStore()
 const { copyToClipboard: clipboardCopy } = useClipboard()
+const pageTasks = createSessionTasks()
+const fieldId = `user-key-${useId()}`
 
 const allColumns = computed<Column[]>(() => [
   { key: 'name', label: t('common.name'), sortable: true },
@@ -1431,7 +1489,34 @@ const dropdownRef = ref<HTMLElement | null>(null)
 const columnDropdownRef = ref<HTMLElement | null>(null)
 const dropdownPosition = ref<{ top?: number; bottom?: number; left: number } | null>(null)
 const groupButtonRefs = ref<Map<number, HTMLElement>>(new Map())
-let abortController: AbortController | null = null
+const deleting = ref(false)
+const resettingQuota = ref(false)
+const resettingRateLimit = ref(false)
+const pendingStatusIds = reactive(new Set<number>())
+const pendingGroupIds = reactive(new Set<number>())
+let editorRevision = 0
+let deleteRevision = 0
+let quotaMutationVersion = 0
+let originalExpiration: string | null = null
+let expirationEdited = false
+let copyTimer: ReturnType<typeof setTimeout> | undefined
+let ccsImportTimer: ReturnType<typeof setTimeout> | undefined
+
+watch([showCreateModal, showEditModal, () => selectedKey.value?.id], () => {
+  editorRevision++
+  pageTasks.cancel('editor:')
+  submitting.value = false
+  resettingQuota.value = false
+  resettingRateLimit.value = false
+  showResetQuotaDialog.value = false
+  showResetRateLimitDialog.value = false
+}, { flush: 'sync' })
+
+watch([showDeleteDialog, () => selectedKey.value?.id], () => {
+  deleteRevision++
+  pageTasks.cancel('delete')
+  deleting.value = false
+}, { flush: 'sync' })
 
 // Get the currently selected key for group change
 const selectedKeyForGroup = computed(() => {
@@ -1586,13 +1671,25 @@ const filteredGroupOptions = computed(() => {
 })
 
 const copyToClipboard = async (text: string, keyId: number) => {
-  const success = await clipboardCopy(text, t('keys.copied'))
-  if (success) {
-    copiedKeyId.value = keyId
-    setTimeout(() => {
-      copiedKeyId.value = null
-    }, 800)
+  if (!pageTasks.current()) return
+  if (copyTimer) clearTimeout(copyTimer)
+  copiedKeyId.value = null
+  const task = pageTasks.begin('copy', () => apiKeys.value.some(key => key.id === keyId && key.key === text))
+  try {
+    const success = await clipboardCopy(text, t('keys.copied'), task.active)
+    if (success && task.active()) {
+      copiedKeyId.value = keyId
+      copyTimer = setTimeout(() => {
+        if (task.owned()) copiedKeyId.value = null
+        task.finish()
+        copyTimer = undefined
+      }, 800)
+      return
+    }
+  } catch {
+    // The clipboard helper owns its user-facing error notification.
   }
+  task.finish()
 }
 
 const isAbortError = (error: unknown) => {
@@ -1602,10 +1699,10 @@ const isAbortError = (error: unknown) => {
 }
 
 const loadApiKeys = async () => {
-  abortController?.abort()
-  const controller = new AbortController()
-  abortController = controller
-  const { signal } = controller
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('list')
+  const mutationVersion = quotaMutationVersion
+  const { signal } = task
   loading.value = true
   try {
     // Build filters
@@ -1625,8 +1722,18 @@ const loadApiKeys = async () => {
     const response = await keysAPI.list(pagination.value.page, pagination.value.page_size, filters, {
       signal
     })
-    if (signal.aborted) return
+    if (!task.active()) return
+    // A list read started before a completed reset can still contain the old
+    // quota. Fetch with the current filters before replacing the visible rows.
+    if (mutationVersion !== quotaMutationVersion) {
+      void loadApiKeys()
+      return
+    }
     apiKeys.value = response.items
+    if (groupSelectorKeyId.value !== null && !response.items.some(key => key.id === groupSelectorKeyId.value)) {
+      groupSelectorKeyId.value = null
+      dropdownPosition.value = null
+    }
     handleSelectionChange(selectedIds.value)
     pagination.value.total = response.total
     pagination.value.pages = response.pages
@@ -1636,51 +1743,66 @@ const loadApiKeys = async () => {
       const keyIds = response.items.map((k) => k.id)
       try {
         const usageResponse = await usageAPI.getDashboardApiKeysUsage(keyIds, { signal })
-        if (signal.aborted) return
+        if (!task.active()) return
         usageStats.value = usageResponse.stats
       } catch (e) {
-        if (!isAbortError(e)) {
+        if (task.active() && !isAbortError(e)) {
           console.error('Failed to load usage stats:', e)
         }
       }
     }
   } catch (error) {
-    if (isAbortError(error)) {
+    if (!task.active() || isAbortError(error)) {
       return
     }
     appStore.showError(t('keys.failedToLoad'))
   } finally {
-    if (abortController === controller) {
-      loading.value = false
-    }
+    if (task.owned()) loading.value = false
+    task.finish()
   }
 }
 
 const loadGroups = async () => {
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('groups')
   try {
-    groups.value = await userGroupsAPI.getAvailable()
+    const result = await userGroupsAPI.getAvailable()
+    if (task.active()) groups.value = result
   } catch (error) {
-    console.error('Failed to load groups:', error)
+    if (task.active()) console.error('Failed to load groups:', error)
+  } finally {
+    task.finish()
   }
 }
 
 const loadUserGroupRates = async () => {
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('group-rates')
   try {
-    userGroupRates.value = await userGroupsAPI.getUserGroupRates()
+    const result = await userGroupsAPI.getUserGroupRates()
+    if (task.active()) userGroupRates.value = result
   } catch (error) {
-    console.error('Failed to load user group rates:', error)
+    if (task.active()) console.error('Failed to load user group rates:', error)
+  } finally {
+    task.finish()
   }
 }
 
 const loadPublicSettings = async () => {
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('public-settings')
   try {
-    publicSettings.value = await authAPI.getPublicSettings()
+    const result = await authAPI.getPublicSettings()
+    if (task.active()) publicSettings.value = result
   } catch (error) {
-    console.error('Failed to load public settings:', error)
+    if (task.active()) console.error('Failed to load public settings:', error)
+  } finally {
+    task.finish()
   }
 }
 
 const openUseKeyModal = (key: ApiKey) => {
+  if (!pageTasks.current()) return
   selectedKey.value = key
   showUseKeyModal.value = true
 }
@@ -1712,7 +1834,10 @@ const handleSort = (key: string, order: 'asc' | 'desc') => {
 }
 
 const editKey = (key: ApiKey) => {
+  if (!pageTasks.current()) return
   selectedKey.value = key
+  originalExpiration = key.expires_at || null
+  expirationEdited = false
   const hasIPRestriction = (key.ip_whitelist?.length > 0) || (key.ip_blacklist?.length > 0)
   const hasExpiration = !!key.expires_at
   formData.value = {
@@ -1738,19 +1863,27 @@ const editKey = (key: ApiKey) => {
 }
 
 const toggleKeyStatus = async (key: ApiKey) => {
+  if (!pageTasks.current() || pendingStatusIds.has(key.id)) return
+  const task = pageTasks.begin(`status:${key.id}`, () => apiKeys.value.some(row => row.id === key.id))
+  pendingStatusIds.add(key.id)
   const newStatus = key.status === 'active' ? 'inactive' : 'active'
   try {
     await keysAPI.toggleStatus(key.id, newStatus)
+    if (!task.active()) return
     appStore.showSuccess(
       newStatus === 'active' ? t('keys.keyEnabledSuccess') : t('keys.keyDisabledSuccess')
     )
     loadApiKeys()
   } catch (error) {
-    appStore.showError(t('keys.failedToUpdateStatus'))
+    if (task.active()) appStore.showError(t('keys.failedToUpdateStatus'))
+  } finally {
+    if (task.owned()) pendingStatusIds.delete(key.id)
+    task.finish()
   }
 }
 
 const openGroupSelector = (key: ApiKey) => {
+  if (!pageTasks.current() || pendingGroupIds.has(key.id)) return
   if (groupSelectorKeyId.value === key.id) {
     groupSelectorKeyId.value = null
     dropdownPosition.value = null
@@ -1781,20 +1914,38 @@ const openGroupSelector = (key: ApiKey) => {
     }
     groupSelectorKeyId.value = key.id
     groupSearchQuery.value = ''
+    void nextTick(() => {
+      if (pageTasks.current() && groupSelectorKeyId.value === key.id) dropdownRef.value?.querySelector('input')?.focus()
+    })
   }
 }
 
-const changeGroup = async (key: ApiKey, newGroupId: number | null) => {
+const dismissGroupSelector = () => {
+  const keyId = groupSelectorKeyId.value
   groupSelectorKeyId.value = null
   dropdownPosition.value = null
+  if (keyId !== null) groupButtonRefs.value.get(keyId)?.focus()
+}
+
+const changeGroup = async (key: ApiKey, newGroupId: number | null) => {
+  if (!pageTasks.current() || !key || pendingGroupIds.has(key.id)) return
+  groupSelectorKeyId.value = null
+  dropdownPosition.value = null
+  groupButtonRefs.value.get(key.id)?.focus()
   if (key.group_id === newGroupId) return
 
+  const task = pageTasks.begin(`group:${key.id}`, () => apiKeys.value.some(row => row.id === key.id))
+  pendingGroupIds.add(key.id)
   try {
     await keysAPI.update(key.id, { group_id: newGroupId })
+    if (!task.active()) return
     appStore.showSuccess(t('keys.groupChangedSuccess'))
     loadApiKeys()
   } catch (error) {
-    appStore.showError(t('keys.failedToChangeGroup'))
+    if (task.active()) appStore.showError(t('keys.failedToChangeGroup'))
+  } finally {
+    if (task.owned()) pendingGroupIds.delete(key.id)
+    task.finish()
   }
 }
 
@@ -1811,11 +1962,14 @@ const closeGroupSelector = (event: MouseEvent) => {
 }
 
 const confirmDelete = (key: ApiKey) => {
+  if (!pageTasks.current()) return
   selectedKey.value = key
   showDeleteDialog.value = true
 }
 
 const handleSubmit = async () => {
+  if (!pageTasks.current() || submitting.value || resettingQuota.value || resettingRateLimit.value ||
+      (!showCreateModal.value && !showEditModal.value)) return
   // Validate group_id is required
   if (formData.value.group_id === null) {
     appStore.showError(t('keys.groupRequired'))
@@ -1844,21 +1998,30 @@ const handleSubmit = async () => {
   const quota = formData.value.quota && formData.value.quota > 0 ? formData.value.quota : 0
 
   // Calculate expiration
+  const editing = showEditModal.value
   let expiresInDays: number | undefined
   let expiresAt: string | null | undefined
-  if (formData.value.enable_expiration && formData.value.expiration_date) {
-    if (!showEditModal.value) {
-      // Create mode: calculate days from date
-      const expDate = new Date(formData.value.expiration_date)
-      const now = new Date()
-      const diffDays = Math.ceil((expDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
-      expiresInDays = diffDays > 0 ? diffDays : 1
+  if (formData.value.enable_expiration) {
+    if (editing && !expirationEdited && originalExpiration) {
+      // datetime-local displays minutes; keep the original seconds and timezone
+      // when the operator is only editing another field, including expired keys.
+      expiresAt = originalExpiration
     } else {
-      // Edit mode: use custom date directly
-      expiresAt = new Date(formData.value.expiration_date).toISOString()
+      const expiration = new Date(formData.value.expiration_date).getTime()
+      if (!formData.value.expiration_date || !Number.isFinite(expiration)) {
+        appStore.showError(t('keys.expirationDateHint'))
+        return
+      }
+      const now = Date.now()
+      if (!editing && expiration <= now) {
+        appStore.showError(`${t('keys.expirationDate')}: ${t('keys.status.expired')}`)
+        return
+      }
+      if (editing) expiresAt = new Date(expiration).toISOString()
+      else expiresInDays = Math.ceil((expiration - now) / (1000 * 60 * 60 * 24))
     }
-  } else if (showEditModal.value) {
-    // Edit mode: if expiration disabled or date cleared, send empty string to clear
+  } else if (editing) {
+    // Only disabling expiration explicitly clears it.
     expiresAt = ''
   }
 
@@ -1869,9 +2032,12 @@ const handleSubmit = async () => {
     rate_limit_7d: formData.value.rate_limit_7d && formData.value.rate_limit_7d > 0 ? formData.value.rate_limit_7d : 0,
   } : { rate_limit_5h: 0, rate_limit_1d: 0, rate_limit_7d: 0 }
 
+  const revision = editorRevision
+  const key = selectedKey.value
+  const task = pageTasks.begin('editor:save', () => revision === editorRevision && (showCreateModal.value || showEditModal.value))
   submitting.value = true
   try {
-    if (showEditModal.value && selectedKey.value) {
+    if (editing && key) {
       const updates: UpdateApiKeyRequest = {
         name: formData.value.name,
         group_id: formData.value.group_id,
@@ -1883,10 +2049,11 @@ const handleSubmit = async () => {
         rate_limit_1d: rateLimitData.rate_limit_1d,
         rate_limit_7d: rateLimitData.rate_limit_7d,
       }
-      if (shouldSubmitEditStatus(selectedKey.value, formData.value.status)) {
+      if (shouldSubmitEditStatus(key, formData.value.status)) {
         updates.status = formData.value.status
       }
-      await keysAPI.update(selectedKey.value.id, updates)
+      await keysAPI.update(key.id, updates)
+      if (!task.active()) return
       appStore.showSuccess(t('keys.keyUpdatedSuccess'))
     } else {
       const customKey = formData.value.use_custom_key ? formData.value.custom_key : undefined
@@ -1900,6 +2067,7 @@ const handleSubmit = async () => {
         expiresInDays,
         rateLimitData
       )
+      if (!task.active()) return
       appStore.showSuccess(t('keys.keyCreatedSuccess'))
       // Only advance tour if active, on submit step, and creation succeeded
       if (onboardingStore.isCurrentStep('[data-tour="key-form-submit"]')) {
@@ -1909,11 +2077,13 @@ const handleSubmit = async () => {
     closeModals()
     loadApiKeys()
   } catch (error: any) {
+    if (!task.active()) return
     const errorMsg = error.response?.data?.detail || t('keys.failedToSave')
     appStore.showError(errorMsg)
     // Don't advance tour on error
   } finally {
-    submitting.value = false
+    if (task.active()) submitting.value = false
+    task.finish()
   }
 }
 
@@ -1923,17 +2093,26 @@ const handleSubmit = async () => {
  * 若后端未返回消息则显示默认的国际化文本
  */
 const handleDelete = async () => {
-  if (!selectedKey.value) return
+  if (!pageTasks.current() || !selectedKey.value || !showDeleteDialog.value || deleting.value) return
+  const key = selectedKey.value
+  const revision = deleteRevision
+  const task = pageTasks.begin('delete', () => revision === deleteRevision && showDeleteDialog.value && selectedKey.value?.id === key.id)
+  deleting.value = true
 
   try {
-    await keysAPI.delete(selectedKey.value.id)
+    await keysAPI.delete(key.id)
+    if (!task.active()) return
     appStore.showSuccess(t('keys.keyDeletedSuccess'))
     showDeleteDialog.value = false
     loadApiKeys()
   } catch (error: any) {
+    if (!task.active()) return
     // 优先使用后端返回的错误消息，提供更具体的错误信息给用户
     const errorMsg = error?.message || t('keys.failedToDelete')
     appStore.showError(errorMsg)
+  } finally {
+    if (task.active()) deleting.value = false
+    task.finish()
   }
 }
 
@@ -1941,6 +2120,8 @@ const closeModals = () => {
   showCreateModal.value = false
   showEditModal.value = false
   selectedKey.value = null
+  originalExpiration = null
+  expirationEdited = false
   formData.value = {
     name: '',
     group_id: null,
@@ -1969,30 +2150,62 @@ const confirmResetQuota = () => {
 
 // Set expiration date based on quick select days
 const setExpirationDays = (days: number) => {
+  expirationEdited = true
   formData.value.expiration_preset = days.toString() as '7' | '30' | '90'
   const expDate = new Date()
   expDate.setDate(expDate.getDate() + days)
   formData.value.expiration_date = formatDateTimeLocal(expDate.toISOString())
 }
 
+const markExpirationEdited = () => {
+  expirationEdited = true
+  formData.value.expiration_preset = 'custom'
+}
+
+const toggleExpiration = () => {
+  formData.value.enable_expiration = !formData.value.enable_expiration
+  if (formData.value.enable_expiration && !formData.value.expiration_date) {
+    const preset = Number(formData.value.expiration_preset)
+    setExpirationDays(preset > 0 ? preset : 30)
+  }
+}
+
 // Reset quota used for an API key
 const resetQuotaUsed = async () => {
   const key = selectedKey.value
-  if (!key) return
+  if (!pageTasks.current() || !key || resettingQuota.value || submitting.value) return
+  const revision = editorRevision
+  const task = pageTasks.begin('editor:quota', () => revision === editorRevision && selectedKey.value?.id === key.id)
+  resettingQuota.value = true
   showResetQuotaDialog.value = false
   try {
     const updatedKey = await keysAPI.update(key.id, { reset_quota: true })
+    if (!task.active()) return
+    quotaMutationVersion++
     appStore.showSuccess(t('keys.quotaResetSuccess'))
+    const currentRow = apiKeys.value.find(row => row.id === key.id)
+    // A status refresh may have replaced the row while the editor kept its
+    // original object. Update the visible quota and preserve a newer status.
+    const previousStatus = key.status
+    const status = currentRow && currentRow.status !== previousStatus ? currentRow.status : updatedKey.status
     key.quota_used = updatedKey.quota_used
-    if (key.status !== updatedKey.status) {
-      key.status = updatedKey.status
+    if (currentRow) {
+      currentRow.quota_used = updatedKey.quota_used
+      currentRow.status = status
+    }
+    if (previousStatus !== status) {
+      key.status = status
       if (selectedKey.value?.id === key.id) {
-        formData.value.status = updatedKey.status === 'active' ? 'active' : 'inactive'
+        formData.value.status = status === 'active' ? 'active' : 'inactive'
       }
     }
   } catch (error: any) {
+    if (!task.active()) return
     const errorMsg = error.response?.data?.detail || t('keys.failedToResetQuota')
     appStore.showError(errorMsg)
+  } finally {
+    if (task.active()) resettingQuota.value = false
+    task.finish()
   }
 }
 
@@ -2009,25 +2222,36 @@ const confirmResetRateLimitFromTable = (row: ApiKey) => {
 
 // Reset rate limit usage for an API key
 const resetRateLimitUsage = async () => {
-  if (!selectedKey.value) return
+  if (!pageTasks.current() || !selectedKey.value || resettingRateLimit.value || submitting.value) return
+  const key = selectedKey.value
+  const revision = editorRevision
+  const task = pageTasks.begin('editor:rate', () => revision === editorRevision && selectedKey.value?.id === key.id)
+  resettingRateLimit.value = true
   showResetRateLimitDialog.value = false
   try {
-    await keysAPI.update(selectedKey.value.id, { reset_rate_limit_usage: true })
+    await keysAPI.update(key.id, { reset_rate_limit_usage: true })
+    if (!task.active()) return
     appStore.showSuccess(t('keys.rateLimitResetSuccess'))
     // Refresh key data
     await loadApiKeys()
+    if (!task.active()) return
     // Update the editing key with fresh data
-    const refreshedKey = apiKeys.value.find(k => k.id === selectedKey.value!.id)
+    const refreshedKey = apiKeys.value.find(k => k.id === key.id)
     if (refreshedKey) {
       selectedKey.value = refreshedKey
     }
   } catch (error: any) {
+    if (!task.active()) return
     const errorMsg = error.response?.data?.detail || t('keys.failedToResetRateLimit')
     appStore.showError(errorMsg)
+  } finally {
+    if (task.active()) resettingRateLimit.value = false
+    task.finish()
   }
 }
 
 const importToCcswitch = (row: ApiKey) => {
+  if (!pageTasks.current()) return
   const platform = row.group?.platform || 'anthropic'
 
   // For antigravity platform, show client selection dialog
@@ -2042,6 +2266,9 @@ const importToCcswitch = (row: ApiKey) => {
 }
 
 const executeCcsImport = (row: ApiKey, clientType: CcSwitchClientType) => {
+  if (!pageTasks.current()) return
+  if (ccsImportTimer) clearTimeout(ccsImportTimer)
+  const task = pageTasks.begin('ccs-import')
   const baseUrl = publicSettings.value?.api_base_url || window.location.origin
   const platform = row.group?.platform || 'anthropic'
 
@@ -2060,14 +2287,17 @@ const executeCcsImport = (row: ApiKey, clientType: CcSwitchClientType) => {
     window.open(deeplink, '_self')
 
     // Check if the protocol handler worked by detecting if we're still focused
-    setTimeout(() => {
-      if (document.hasFocus()) {
+    ccsImportTimer = setTimeout(() => {
+      if (task.active() && document.hasFocus()) {
         // Still focused means the protocol handler likely failed
         appStore.showError(t('keys.ccSwitchNotInstalled'))
       }
+      task.finish()
+      ccsImportTimer = undefined
     }, 100)
   } catch (error) {
-    appStore.showError(t('keys.ccSwitchNotInstalled'))
+    if (task.active()) appStore.showError(t('keys.ccSwitchNotInstalled'))
+    task.finish()
   }
 }
 
@@ -2096,6 +2326,30 @@ function formatResetTime(resetAt: string | null): string {
   return `${mins}m`
 }
 
+const stopAuthWatch = subscribeAuthSession(() => {
+  if (pageTasks.current()) return
+  pageTasks.cancel()
+  closeModals()
+  showDeleteDialog.value = false
+  showUseKeyModal.value = false
+  showBulkEditModal.value = false
+  closeCcsClientSelect()
+  groupSelectorKeyId.value = null
+  dropdownPosition.value = null
+  apiKeys.value = []
+  groups.value = []
+  usageStats.value = {}
+  userGroupRates.value = {}
+  publicSettings.value = null
+  selectedIds.value = []
+  pendingStatusIds.clear()
+  pendingGroupIds.clear()
+  copiedKeyId.value = null
+  loading.value = false
+  if (copyTimer) clearTimeout(copyTimer)
+  if (ccsImportTimer) clearTimeout(ccsImportTimer)
+})
+
 onMounted(() => {
   loadSavedColumns()
   loadApiKeys()
@@ -2106,8 +2360,12 @@ onMounted(() => {
   resetTimer = setInterval(() => { now.value = new Date() }, 60000)
 })
 
-onUnmounted(() => {
+onBeforeUnmount(() => {
+  stopAuthWatch()
+  pageTasks.dispose()
   document.removeEventListener('click', closeGroupSelector)
   if (resetTimer) clearInterval(resetTimer)
+  if (copyTimer) clearTimeout(copyTimer)
+  if (ccsImportTimer) clearTimeout(ccsImportTimer)
 })
 </script>

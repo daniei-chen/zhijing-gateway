@@ -1,60 +1,66 @@
 <template>
   <div class="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-dark-600 dark:bg-dark-800">
-    <!-- Collapsed summary header (clickable) -->
-    <div
-      class="flex cursor-pointer select-none items-center gap-2"
-      @click="collapsed = !collapsed"
-    >
-      <Icon
-        :name="collapsed ? 'chevronRight' : 'chevronDown'"
-        size="sm"
-        :stroke-width="2"
-        class="flex-shrink-0 text-gray-400 transition-transform duration-200"
-      />
-
-      <!-- Summary: model tags + billing badge -->
-      <div v-if="collapsed" class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
-        <!-- Compact model tags (show first 3) -->
-        <div class="flex min-w-0 flex-1 flex-wrap items-center gap-1">
-          <span
-            v-for="(m, i) in entry.models.slice(0, 3)"
-            :key="i"
-            class="inline-flex shrink-0 rounded px-1.5 py-0.5 text-xs"
-            :class="getPlatformTagClass(props.platform || '')"
-          >
-            {{ m }}
-          </span>
-          <span
-            v-if="entry.models.length > 3"
-            class="whitespace-nowrap text-xs text-gray-400"
-          >
-            +{{ entry.models.length - 3 }}
-          </span>
-          <span
-            v-if="entry.models.length === 0"
-            class="text-xs italic text-gray-400"
-          >
-            {{ t('admin.channels.form.noModels') }}
-          </span>
-        </div>
-
-        <!-- Billing mode badge -->
-        <span
-          class="flex-shrink-0 rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
-        >
-          {{ billingModeLabel }}
-        </span>
-      </div>
-
-      <!-- Expanded: show the label "Pricing Entry" or similar -->
-      <div v-else class="flex-1 text-xs font-medium text-gray-500 dark:text-gray-400">
-        {{ t('admin.channels.form.pricingEntry') }}
-      </div>
-
-      <!-- Remove button (always visible, stop propagation) -->
+    <!-- Disclosure and remove are separate keyboard controls. -->
+    <div class="flex items-center gap-2">
       <button
         type="button"
-        @click.stop="emit('remove')"
+        class="flex min-w-0 flex-1 cursor-pointer select-none items-center gap-2 rounded text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary-500"
+        :aria-label="`${t('admin.channels.form.pricingEntry')}${entry.models.length ? `: ${entry.models.join(', ')}` : ''}`"
+        :aria-expanded="!collapsed"
+        :aria-controls="contentId"
+        @click="collapsed = !collapsed"
+      >
+        <Icon
+          :name="collapsed ? 'chevronRight' : 'chevronDown'"
+          size="sm"
+          :stroke-width="2"
+          class="flex-shrink-0 text-gray-400 transition-transform duration-200"
+        />
+
+        <!-- Summary: model tags + billing badge -->
+        <span v-if="collapsed" class="flex min-w-0 flex-1 items-center gap-2 overflow-hidden">
+          <!-- Compact model tags (show first 3) -->
+          <span class="flex min-w-0 flex-1 flex-wrap items-center gap-1">
+            <span
+              v-for="(m, i) in entry.models.slice(0, 3)"
+              :key="i"
+              class="inline-flex shrink-0 rounded px-1.5 py-0.5 text-xs"
+              :class="getPlatformTagClass(props.platform || '')"
+            >
+              {{ m }}
+            </span>
+            <span
+              v-if="entry.models.length > 3"
+              class="whitespace-nowrap text-xs text-gray-400"
+            >
+              +{{ entry.models.length - 3 }}
+            </span>
+            <span
+              v-if="entry.models.length === 0"
+              class="text-xs italic text-gray-400"
+            >
+              {{ t('admin.channels.form.noModels') }}
+            </span>
+          </span>
+
+          <!-- Billing mode badge -->
+          <span
+            class="flex-shrink-0 rounded-full bg-primary-100 px-2 py-0.5 text-xs font-medium text-primary-700 dark:bg-primary-900/30 dark:text-primary-300"
+          >
+            {{ billingModeLabel }}
+          </span>
+        </span>
+
+        <!-- Expanded: show the label "Pricing Entry" or similar -->
+        <span v-else class="flex-1 text-xs font-medium text-gray-500 dark:text-gray-400">
+          {{ t('admin.channels.form.pricingEntry') }}
+        </span>
+      </button>
+
+      <button
+        type="button"
+        :aria-label="t('common.delete')"
+        @click="emit('remove')"
         class="flex-shrink-0 rounded p-1 text-gray-400 hover:text-red-500"
       >
         <Icon name="trash" size="sm" />
@@ -63,8 +69,11 @@
 
     <!-- Expandable content with transition -->
     <div
+      :id="contentId"
       class="collapsible-content"
       :class="{ 'collapsible-content--collapsed': collapsed }"
+      :aria-hidden="collapsed"
+      :inert="collapsed || undefined"
     >
       <div class="collapsible-inner">
         <!-- Header: Models + Billing Mode -->
@@ -299,7 +308,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, nextTick, watch, onUnmounted, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Select from '@/components/common/Select.vue'
 import Icon from '@/components/icons/Icon.vue'
@@ -311,6 +320,7 @@ import { perTokenToMTok, getPlatformTagClass, isValidPositiveMultiplier, validat
 import { REASONING_EFFORT_LEVELS, type ReasoningEffortLevel } from '@/constants/channel'
 import type { BillingMode } from '@/api/admin/channels'
 import channelsAPI from '@/api/admin/channels'
+import { createSessionTasks } from '@/utils/sessionTasks'
 
 const { t } = useI18n()
 
@@ -331,8 +341,18 @@ const emit = defineEmits<{
   remove: []
 }>()
 
+const priceTasks = createSessionTasks()
+let entryRevision = 0
+let modelUpdateVersion = 0
+watch([() => props.entry, () => props.platform], () => {
+  entryRevision++
+  priceTasks.cancel()
+}, { deep: true, flush: 'sync' })
+onUnmounted(() => priceTasks.dispose())
+
 // Collapse state: entries with existing models default to collapsed
 const collapsed = ref(props.entry.models.length > 0)
+const contentId = `pricing-content-${useId()}`
 
 const billingModeOptions = computed(() => [
   { value: 'token', label: t('admin.channels.billingMode.token') },
@@ -408,6 +428,7 @@ function removeInterval(idx: number) {
 }
 
 async function onModelsUpdate(newModels: string[]) {
+  const version = ++modelUpdateVersion
   const oldModels = props.entry.models
   emit('update', { ...props.entry, models: newModels })
 
@@ -418,15 +439,21 @@ async function onModelsUpdate(newModels: string[]) {
   if (oldModels.length !== 0 || addedModels.length !== 1) return
 
   // 检查是否所有价格字段都为空
+  // Wait for the parent to adopt this model edit before owning its new entry.
+  await nextTick()
+  if (version !== modelUpdateVersion || !priceTasks.current()) return
   const e = props.entry
-  const hasPrice = e.input_price != null || e.output_price != null ||
-                   e.cache_write_price != null || e.cache_write_1h_price != null || e.cache_read_price != null
-  if (hasPrice) return
+  if (e.models.length !== newModels.length || e.models.some((model, index) => model !== newModels[index])) return
+  if (e.input_price != null || e.output_price != null || e.cache_write_price != null ||
+      e.cache_write_1h_price != null || e.cache_read_price != null ||
+      e.image_input_price != null || e.image_output_price != null) return
+  const revision = entryRevision
+  const task = priceTasks.begin('default-price', () => entryRevision === revision && props.entry === e)
 
   // 查询第一个新增模型的默认价格
   try {
     const result = await channelsAPI.getModelDefaultPricing(addedModels[0])
-    if (result.found) {
+    if (task.active() && result.found) {
       emit('update', {
         ...props.entry,
         models: newModels,
@@ -442,6 +469,8 @@ async function onModelsUpdate(newModels: string[]) {
     }
   } catch {
     // 查询失败不影响用户操作
+  } finally {
+    task.finish()
   }
 }
 </script>

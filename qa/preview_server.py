@@ -19,7 +19,7 @@ SETTINGS.update(site_name='Sub2API', version='local-ui-preview', password_reset_
                 balance_low_notify_enabled=True, balance_low_notify_threshold=5,
                 payment_enabled=True, risk_control_enabled=True,
                 affiliate_enabled=True, plugin_management_enabled=True)
-SETTINGS['version'] = 'v0.0.2-local-preview'
+SETTINGS['version'] = 'v' + (ROOT / 'VERSION').read_text(encoding='utf-8').strip() + '-local-preview'
 STATS.update(total_users=6, today_new_users=1, total_accounts=2, normal_accounts=2,
              error_accounts=0, active_users=3, today_account_cost=12.84, total_account_cost=391.25,
              active_requests=0, avg_response_time=18320)
@@ -132,7 +132,8 @@ class Handler(BaseHTTPRequestHandler):
                         balance_disabled=True, balance_recharge_multiplier=1, subscription_usd_to_cny_rate=0,
                         recharge_fee_rate=0, help_text='本地合成预览，支付未接通', help_image_url='', stripe_publishable_key='')
         if p == '/admin/system/check-updates':
-            return dict(current_version='0.0.2-local-preview', latest_version='0.0.2-local-preview', has_update=False, cached=True, build_type='source')
+            version = SETTINGS['version'].removeprefix('v')
+            return dict(current_version=version, latest_version=version, has_update=False, cached=True, build_type='source')
         if p == '/announcements': return []
         if p.startswith('/subscriptions'):
             if p == '/subscriptions' and self.scenario == 'error' and Handler.fail_member_read:

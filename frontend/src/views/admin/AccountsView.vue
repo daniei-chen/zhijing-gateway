@@ -14,7 +14,7 @@
           <AccountTableActions
             :loading="loading"
             @refresh="handleManualRefresh"
-            @create="showCreate = true"
+            @create="openCreateModal"
           >
             <template #after>
               <!-- Auto Refresh Dropdown -->
@@ -175,7 +175,12 @@
         </div>
       </template>
       <template #table>
+        <div v-if="accountListError" data-testid="accounts-list-error" role="alert" :aria-busy="loading" class="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800 dark:border-amber-800/50 dark:bg-amber-950/30 dark:text-amber-200">
+          <p>{{ accountListError }}</p>
+          <button type="button" class="btn btn-secondary" :disabled="loading" @click="handleManualRefresh">{{ loading ? t('common.loading') : t('common.tryAgain') }}</button>
+        </div>
         <AccountBulkActionsBar
+          v-else
           :selected-ids="selIds"
           :total-results="pagination.total"
           :selecting-all="selectingAllResults"
@@ -193,6 +198,7 @@
         />
         <div ref="accountTableRef" class="flex min-h-0 flex-1 flex-col overflow-hidden">
         <DataTable
+          v-if="!accountListError"
           ref="dataTableRef"
           :columns="cols"
           :data="accounts"
@@ -452,10 +458,10 @@
         </DataTable>
         </div>
       </template>
-      <template #pagination><Pagination v-if="pagination.total > 0" :page="pagination.page" :total="pagination.total" :page-size="pagination.page_size" @update:page="handlePageChange" @update:pageSize="handlePageSizeChange" /></template>
+      <template #pagination><Pagination v-if="!accountListError && pagination.total > 0" :page="pagination.page" :total="pagination.total" :page-size="pagination.page_size" @update:page="handlePageChange" @update:pageSize="handlePageSizeChange" /></template>
     </TablePageLayout>
     <CreateAccountModal v-if="showCreate" :show="showCreate" :proxies="proxies" :groups="groups" @close="showCreate = false" @created="reload" />
-    <EditAccountModal v-if="showEdit" :show="showEdit" :account="edAcc" :proxies="proxies" :groups="groups" @close="showEdit = false" @updated="handleAccountUpdated" />
+    <EditAccountModal v-if="showEdit" :show="showEdit" :account="edAcc" :proxies="proxies" :groups="groups" @close="closeEditModal" @updated="handleAccountUpdated" />
     <ReAuthAccountModal v-if="showReAuth" :show="showReAuth" :account="reAuthAcc" @close="closeReAuthModal" @reauthorized="handleAccountUpdated" />
     <AccountTestModal v-if="showTest" :show="showTest" :account="testingAcc" @close="closeTestModal" />
     <AccountStatsModal v-if="showStats" :show="showStats" :account="statsAcc" @close="closeStatsModal" />
@@ -471,13 +477,13 @@
       :target="bulkEditTarget ?? undefined"
       :proxies="proxies"
       :groups="groups"
-      @close="showBulkEdit = false"
+      @close="closeBulkEditModal"
       @updated="handleBulkUpdated"
     />
     <TempUnschedStatusModal v-if="showTempUnsched" :show="showTempUnsched" :account="tempUnschedAcc" @close="showTempUnsched = false" @reset="handleTempUnschedReset" />
-    <ConfirmDialog :show="showDeleteDialog" :title="t('admin.accounts.deleteAccount')" :message="t('admin.accounts.deleteConfirm', { name: deletingAcc?.name })" :confirm-text="t('common.delete')" :cancel-text="t('common.cancel')" :danger="true" @confirm="confirmDelete" @cancel="showDeleteDialog = false" />
-    <ConfirmDialog :show="showCreateShadowDialog" :title="t('admin.accounts.createSparkShadow')" :message="t('admin.accounts.createSparkShadowConfirm', { name: creatingShadowAcc?.name })" @confirm="confirmCreateSparkShadow" @cancel="showCreateShadowDialog = false" />
-    <ConfirmDialog :show="showExportDataDialog" :title="t('admin.accounts.dataExport')" :message="t('admin.accounts.dataExportConfirmMessage')" :confirm-text="t('admin.accounts.dataExportConfirm')" :cancel-text="t('common.cancel')" @confirm="handleExportData" @cancel="showExportDataDialog = false">
+    <ConfirmDialog :show="showDeleteDialog" :title="t('admin.accounts.deleteAccount')" :message="t('admin.accounts.deleteConfirm', { name: deletingAcc?.name })" :confirm-text="t('common.delete')" :cancel-text="t('common.cancel')" :danger="true" @confirm="confirmDelete" @cancel="closeDeleteDialog" />
+    <ConfirmDialog :show="showCreateShadowDialog" :title="t('admin.accounts.createSparkShadow')" :message="t('admin.accounts.createSparkShadowConfirm', { name: creatingShadowAcc?.name })" @confirm="confirmCreateSparkShadow" @cancel="closeCreateShadowDialog" />
+    <ConfirmDialog :show="showExportDataDialog" :title="t('admin.accounts.dataExport')" :message="t('admin.accounts.dataExportConfirmMessage')" :confirm-text="t('admin.accounts.dataExportConfirm')" :cancel-text="t('common.cancel')" @confirm="handleExportData" @cancel="closeExportDataDialog">
       <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
         <input type="checkbox" class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500" v-model="includeProxyOnExport" />
         <span>{{ t('admin.accounts.dataExportIncludeProxies') }}</span>
@@ -490,17 +496,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted, toRaw, watch, defineAsyncComponent } from 'vue'
+import { ref, reactive, computed, onBeforeUnmount, onMounted, onUnmounted, toRaw, watch, defineAsyncComponent } from 'vue'
 import { useIntervalFn } from '@vueuse/core'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import { adminAPI } from '@/api/admin'
 import { CONCRETE_PLATFORM_OPTIONS } from '@/constants/platforms'
+import { createSessionTasks } from '@/utils/sessionTasks'
 import { useTableLoader } from '@/composables/useTableLoader'
 import { useSwipeSelect, type SwipeSelectVirtualContext } from '@/composables/useSwipeSelect'
 import { useTableSelection } from '@/composables/useTableSelection'
-import { useStepUp, isStepUpBlocked, isStepUpCancelled, stepUpBlockReason } from '@/composables/useStepUp'
+import { useStepUp, StepUpCancelledError, isStepUpBlocked, isStepUpCancelled, stepUpBlockReason } from '@/composables/useStepUp'
 import TotpStepUpDialog from '@/components/auth/TotpStepUpDialog.vue'
 import AppLayout from '@/components/layout/AppLayout.vue'
 import TablePageLayout from '@/components/layout/TablePageLayout.vue'
@@ -556,6 +563,22 @@ const TLSFingerprintProfilesModal = defineAsyncComponent(() => import('@/compone
 const { t } = useI18n()
 const appStore = useAppStore()
 const authStore = useAuthStore()
+const accountListError = ref('')
+const pageTasks = createSessionTasks()
+onBeforeUnmount(() => pageTasks.dispose())
+const pendingAccountCommands = new Set<string>()
+const beginAccountCommand = (key: string, contextIsCurrent: () => boolean = () => true) => {
+  if (!pageTasks.current() || pendingAccountCommands.has(key)) return null
+  const task = pageTasks.begin(key, contextIsCurrent)
+  if (!task.active()) { task.finish(); return null }
+  pendingAccountCommands.add(key)
+  return { ...task, finish() { pendingAccountCommands.delete(key); task.finish() } }
+}
+const selectionMatches = (ids: number[]) => ids.length === selIds.value.length && ids.every((id, index) => id === selIds.value[index])
+let deleteRevision = 0
+let shadowRevision = 0
+let exportRevision = 0
+let bulkEditRevision = 0
 
 const proxies = ref<AccountProxy[]>([])
 const groups = ref<AdminGroup[]>([])
@@ -809,7 +832,17 @@ const setUsageBatchState = (accountID: number, usage: AccountUsageInfo | null, e
 }
 
 const handleAccountUsageLoaded = (accountID: number, usage: AccountUsageInfo) => {
+  if (disposed) return
   if (usageBatchByAccountId.value[String(accountID)] === usage) return
+  // An on-demand result supersedes passive work already queued or in flight.
+  // Its token and cache must advance together before acknowledging the cell.
+  usageBatchRequestTokenByAccountId.value = {
+    ...usageBatchRequestTokenByAccountId.value,
+    [String(accountID)]: ++usageBatchRequestToken
+  }
+  pendingUsageBatchIds.delete(accountID)
+  usageBatchCache.set(accountID, { data: usage, ts: Date.now() })
+  setUsageBatchLoading(accountID, false)
   setUsageBatchState(accountID, usage, null)
 }
 
@@ -1128,7 +1161,25 @@ const {
   handlePageChange: baseHandlePageChange,
   handlePageSizeChange: baseHandlePageSizeChange
 } = useTableLoader<AccountListItem, any>({
-  fetchFn: adminAPI.accounts.list,
+  fetchFn: async (page, pageSize, filters, options) => {
+    const task = pageTasks.begin('accounts:list')
+    try {
+      if (!task.active()) throw Object.assign(new Error('Obsolete account list'), { code: 'ERR_CANCELED' })
+      const response = await adminAPI.accounts.list(page, pageSize, filters, options)
+      if (!task.active()) throw Object.assign(new Error('Obsolete account list'), { code: 'ERR_CANCELED' })
+      accountListError.value = ''
+      return response
+    } catch (error) {
+      if (!task.active()) throw Object.assign(new Error('Obsolete account list'), { code: 'ERR_CANCELED' })
+      const readError = error as { name?: string; code?: string }
+      if (readError.name === 'AbortError' || readError.name === 'CanceledError' || readError.code === 'ERR_CANCELED') throw error
+      accountListError.value = extractApiErrorMessage(error, t('common.error')) || t('common.error')
+      menu.show = false
+      // Keep the failed read explicit in this view instead of rejecting an
+      // already successful mutation's follow-up or showing prior-filter rows.
+      return { items: [], total: 0, pages: 0, page, page_size: pageSize }
+    } finally { task.finish() }
+  },
   initialParams: {
     ...loadInitialAccountFilterValues(),
     type: '',
@@ -1208,6 +1259,7 @@ type AccountLoadOptions = {
 }
 
 const load = async (options: AccountLoadOptions = {}) => {
+  if (!pageTasks.current()) return
   const requestParams = params as any
   syncAccountListDerivedParams()
   hasPendingListSync.value = false
@@ -1215,16 +1267,17 @@ const load = async (options: AccountLoadOptions = {}) => {
   pendingTodayStatsRefresh.value = false
   requestParams.lite = '1'
   await baseLoad()
-  if (options.refreshTodayStats !== false) await refreshTodayStatsBatch()
+  if (pageTasks.current() && options.refreshTodayStats !== false) await refreshTodayStatsBatch()
 }
 
 const reload = async () => {
+  if (!pageTasks.current()) return
   syncAccountListDerivedParams()
   hasPendingListSync.value = false
   resetAutoRefreshCache()
   pendingTodayStatsRefresh.value = false
   await baseReload()
-  await refreshTodayStatsBatch()
+  if (pageTasks.current()) await refreshTodayStatsBatch()
 }
 
 const buildUpstreamBillingRateFilters = () => {
@@ -1576,6 +1629,8 @@ const closeAccountToolsDropdown = () => {
   showAccountToolsDropdown.value = false
 }
 
+const openCreateModal = () => { if (pageTasks.current()) showCreate.value = true }
+
 const updateAccountToolsDropdownPosition = () => {
   const trigger = accountToolsTriggerRef.value
   if (!trigger) return
@@ -1596,11 +1651,13 @@ const toggleAccountToolsDropdown = () => {
 }
 
 const openSyncFromCrs = () => {
+  if (!pageTasks.current()) return
   closeAccountToolsDropdown()
   showSync.value = true
 }
 
 const openImportData = () => {
+  if (!pageTasks.current()) return
   closeAccountToolsDropdown()
   showImportData.value = true
 }
@@ -1611,11 +1668,13 @@ const openExportDataDialogFromMenu = () => {
 }
 
 const openErrorPassthrough = () => {
+  if (!pageTasks.current()) return
   closeAccountToolsDropdown()
   showErrorPassthrough.value = true
 }
 
 const openTLSFingerprintProfiles = () => {
+  if (!pageTasks.current()) return
   closeAccountToolsDropdown()
   showTLSFingerprintProfiles.value = true
 }
@@ -1901,28 +1960,28 @@ const cols = computed(() =>
   )
 )
 
-const accountDetailLoading = new Set<number>()
-const loadAccountDetails = async (account: Pick<AccountListItem, 'id'>): Promise<Account | null> => {
-  if (accountDetailLoading.has(account.id)) return null
-  accountDetailLoading.add(account.id)
+const accountDetailLoading = new Map<number, Promise<Account>>()
+const loadAccountDetails = async (account: Pick<AccountListItem, 'id'>, apply: (detail: Account) => void) => {
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('account:details')
+  let request = accountDetailLoading.get(account.id)
+  if (!request) { request = adminAPI.accounts.getById(account.id); accountDetailLoading.set(account.id, request) }
   try {
-    return await adminAPI.accounts.getById(account.id)
+    const detail = await request
+    if (task.active()) apply(detail)
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to load account details:', error)
     appStore.showError(extractApiErrorMessage(error, t('common.error')))
-    return null
   } finally {
-    accountDetailLoading.delete(account.id)
+    if (accountDetailLoading.get(account.id) === request) accountDetailLoading.delete(account.id)
+    task.finish()
   }
 }
-
-const handleEdit = async (a: AccountListItem) => {
-  const account = await loadAccountDetails(a)
-  if (!account) return
-  edAcc.value = account
-  showEdit.value = true
-}
+const closeEditModal = () => { pageTasks.cancel('account:details'); showEdit.value = false; edAcc.value = null }
+const handleEdit = (a: AccountListItem) => loadAccountDetails(a, account => { edAcc.value = account; showEdit.value = true })
 const openMenu = (a: Account, e: MouseEvent) => {
+  if (!pageTasks.current()) return
   menu.acc = a
   const target = e.currentTarget as HTMLElement
   menu.anchorRect = target.getBoundingClientRect()
@@ -1935,8 +1994,11 @@ const toggleSelectAllVisible = (event: Event) => {
 const handleBulkDelete = async () => {
   const accountIds = [...selIds.value]
   if (!confirm(t('admin.accounts.bulkActions.confirmDelete', { count: accountIds.length }))) return
+  const task = beginAccountCommand('accounts:bulk', () => selectionMatches(accountIds))
+  if (!task) return
   try {
     const result = await adminAPI.accounts.batchDelete(accountIds)
+    if (!task.active()) return
     if (result.failed > 0) {
       appStore.showError(t('admin.accounts.bulkActions.partialSuccess', {
         success: result.success,
@@ -1949,15 +2011,22 @@ const handleBulkDelete = async () => {
     }
     await reload()
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to bulk delete accounts:', error)
     appStore.showError(String(error))
-  }
+  } finally { task.finish() }
 }
 const handleBulkResetStatus = async () => {
   if (!confirm(t('common.confirm'))) return
+  const accountIds = [...selIds.value]
+  const task = beginAccountCommand('accounts:bulk', () => selectionMatches(accountIds))
+  if (!task) return
   try {
-    const result = await adminAPI.accounts.batchClearError(selIds.value)
+    const result = await adminAPI.accounts.batchClearError(accountIds)
+    if (!task.active()) return
     if (result.failed > 0) {
+      const failedIds = result.failed_ids?.length ? result.failed_ids : result.errors?.map(error => error.account_id) ?? []
+      setSelectedIds(failedIds.length ? failedIds : accountIds)
       appStore.showError(t('admin.accounts.bulkActions.partialSuccess', { success: result.success, failed: result.failed }))
     } else {
       appStore.showSuccess(t('admin.accounts.bulkActions.resetStatusSuccess', { count: result.success }))
@@ -1965,15 +2034,19 @@ const handleBulkResetStatus = async () => {
     }
     reload()
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to bulk reset status:', error)
     appStore.showError(String(error))
-  }
+  } finally { task.finish() }
 }
 const handleBulkRefreshToken = async () => {
   if (!confirm(t('common.confirm'))) return
   const accountIds = [...selIds.value]
+  const task = beginAccountCommand('accounts:bulk', () => selectionMatches(accountIds))
+  if (!task) return
   try {
     const result = await adminAPI.accounts.batchRefresh(accountIds)
+    if (!task.active()) return
     if (result.failed > 0) {
       appStore.showError(t('admin.accounts.bulkActions.partialSuccess', { success: result.success, failed: result.failed }))
       const failedIds = result.errors?.map(error => error.account_id) ?? []
@@ -1984,9 +2057,10 @@ const handleBulkRefreshToken = async () => {
     }
     reload()
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to bulk refresh token:', error)
     appStore.showError(String(error))
-  }
+  } finally { task.finish() }
 }
 const handleBulkProbeUpstreamBilling = async () => {
   const accountIDs = [...selIds.value]
@@ -1998,9 +2072,13 @@ const handleBulkProbeUpstreamBilling = async () => {
     appStore.showError(t('admin.accounts.upstreamBilling.batchLimit'))
     return
   }
+  if (accountIDs.some(id => probingUpstreamBilling.has(id))) return
+  const task = beginAccountCommand('accounts:bulk', () => selectionMatches(accountIDs))
+  if (!task) return
   accountIDs.forEach(id => probingUpstreamBilling.add(id))
   try {
     const results = await adminAPI.accounts.probeUpstreamBillingBatch(accountIDs)
+    if (!task.active()) return
     let patched = false
     results.forEach(result => {
       if (result.snapshot) {
@@ -2009,6 +2087,7 @@ const handleBulkProbeUpstreamBilling = async () => {
       }
     })
     if (patched) await refreshAccountsAfterUpstreamBillingProbe()
+    if (!task.active()) return
     const failed = results.filter(result => result.error).length
     if (failed > 0) {
       appStore.showError(t('admin.accounts.upstreamBilling.batchPartial', { success: results.length - failed, failed }))
@@ -2016,10 +2095,12 @@ const handleBulkProbeUpstreamBilling = async () => {
       appStore.showSuccess(t('admin.accounts.upstreamBilling.batchCompleted', { count: results.length }))
     }
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to probe upstream billing in batch:', error)
     appStore.showError(extractApiErrorMessage(error, t('admin.accounts.upstreamBilling.probeFailed')))
   } finally {
     accountIDs.forEach(id => probingUpstreamBilling.delete(id))
+    task.finish()
   }
 }
 const updateSchedulableInList = (accountIds: number[], schedulable: boolean) => {
@@ -2089,13 +2170,17 @@ const normalizeBulkSchedulableResult = (
 }
 const handleBulkToggleSchedulable = async (schedulable: boolean) => {
   const accountIds = [...selIds.value]
+  const task = beginAccountCommand('accounts:bulk', () => selectionMatches(accountIds))
+  if (!task) return
   try {
     const result = await adminAPI.accounts.bulkUpdate(accountIds, { schedulable })
+    if (!task.active()) return
     const { successIds, failedIds, successCount, failedCount, hasIds, hasCounts } = normalizeBulkSchedulableResult(result, accountIds)
     if (!hasIds && !hasCounts) {
       appStore.showError(t('admin.accounts.bulkSchedulableResultUnknown'))
       setSelectedIds(accountIds)
       load().catch((error) => {
+        if (!task.active()) return
         console.error('Failed to refresh accounts:', error)
       })
       return
@@ -2120,9 +2205,10 @@ const handleBulkToggleSchedulable = async (schedulable: boolean) => {
       else setSelectedIds(accountIds)
     }
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to bulk toggle schedulable:', error)
     appStore.showError(t('common.error'))
-  }
+  } finally { task.finish() }
 }
 const buildBulkEditFilterSnapshot = () => {
   const rawParams = toRaw(params) as Record<string, unknown>
@@ -2140,28 +2226,33 @@ const buildBulkEditFilterSnapshot = () => {
 }
 
 const handleSelectAllResults = async () => {
-  if (selectingAllResults.value || pagination.total === 0) return
+  if (!pageTasks.current() || selectingAllResults.value || pagination.total === 0) return
 
   const requestVersion = ++selectionRequestVersion.value
   const filters = buildBulkEditFilterSnapshot()
+  const task = pageTasks.begin('accounts:select-all', () => requestVersion === selectionRequestVersion.value)
   selectingAllResults.value = true
   try {
     const ids = await fetchAllAccountIds(
-      (page, pageSize, requestFilters) => adminAPI.accounts.list(page, pageSize, requestFilters),
+      (page, pageSize, requestFilters) => {
+        if (!task.active()) throw new Error('Obsolete account selection')
+        return adminAPI.accounts.list(page, pageSize, requestFilters)
+      },
       filters
     )
-    if (requestVersion !== selectionRequestVersion.value) return
+    if (!task.active() || requestVersion !== selectionRequestVersion.value) return
 
     setSelectedIds(ids)
     selectedAllResultIDs.value = new Set(ids)
   } catch (error) {
-    if (requestVersion !== selectionRequestVersion.value) return
+    if (!task.active() || requestVersion !== selectionRequestVersion.value) return
     console.error('Failed to select all account results:', error)
     appStore.showError(t('admin.accounts.bulkActions.selectAllFailed'))
   } finally {
     if (requestVersion === selectionRequestVersion.value) {
       selectingAllResults.value = false
     }
+    task.finish()
   }
 }
 
@@ -2172,6 +2263,9 @@ const collectSelectionMetadata = (rows: Account[]) => {
 }
 
 const openBulkEditSelected = () => {
+  if (!pageTasks.current()) return
+  bulkEditRevision++
+  pageTasks.cancel('account:bulk-preview')
   bulkEditTarget.value = {
     mode: 'selected',
     accountIds: [...selIds.value],
@@ -2181,27 +2275,32 @@ const openBulkEditSelected = () => {
   showBulkEdit.value = true
 }
 
+const closeBulkEditModal = () => { bulkEditRevision++; pageTasks.cancel('account:bulk-preview'); showBulkEdit.value = false; bulkEditTarget.value = null }
 const openBulkEditFiltered = async () => {
   const filters = buildBulkEditFilterSnapshot()
-  const preview = await adminAPI.accounts.list(1, 100, filters)
-  const { selectedPlatforms, selectedTypes } = collectSelectionMetadata(preview.items)
-  bulkEditTarget.value = {
-    mode: 'filtered',
-    filters,
-    previewCount: preview.total,
-    selectedPlatforms,
-    selectedTypes
-  }
-  showBulkEdit.value = true
+  const revision = bulkEditRevision
+  const signature = JSON.stringify(filters)
+  const task = beginAccountCommand('account:bulk-preview', () => revision === bulkEditRevision && signature === JSON.stringify(buildBulkEditFilterSnapshot()))
+  if (!task) return
+  try {
+    const preview = await adminAPI.accounts.list(1, 100, filters)
+    if (!task.active()) return
+    const { selectedPlatforms, selectedTypes } = collectSelectionMetadata(preview.items)
+    bulkEditTarget.value = { mode: 'filtered', filters, previewCount: preview.total, selectedPlatforms, selectedTypes }
+    showBulkEdit.value = true
+  } catch (error) {
+    if (task.active()) appStore.showError(extractApiErrorMessage(error, t('common.error')))
+  } finally { task.finish() }
 }
-
 const handleBulkUpdated = () => {
+  if (!pageTasks.current()) return
+  bulkEditRevision++
   showBulkEdit.value = false
   bulkEditTarget.value = null
   clearSelection()
   reload()
 }
-const handleDataImported = () => { showImportData.value = false; reload() }
+const handleDataImported = () => { if (!pageTasks.current()) return; showImportData.value = false; reload() }
 const ACCOUNT_UNGROUPED_GROUP_QUERY_VALUE = 'ungrouped'
 const ACCOUNT_PRIVACY_MODE_UNSET_QUERY_VALUE = '__unset__'
 const buildAccountQueryFilters = () => ({
@@ -2314,21 +2413,27 @@ const refreshAccountsAfterUpstreamBillingProbe = async () => {
 }
 const handleProbeUpstreamBilling = async (account: Account) => {
   if (probingUpstreamBilling.has(account.id)) return
+  const task = beginAccountCommand(`account:probe:${account.id}`)
+  if (!task) return
   probingUpstreamBilling.add(account.id)
   try {
     const result = await adminAPI.accounts.probeUpstreamBilling(account.id)
+    if (!task.active()) return
     if (result.snapshot) {
       patchUpstreamBillingSnapshot(account.id, result.snapshot)
       await refreshAccountsAfterUpstreamBillingProbe()
     }
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to probe upstream billing:', error)
     appStore.showError(extractApiErrorMessage(error, t('admin.accounts.upstreamBilling.probeFailed')))
   } finally {
     probingUpstreamBilling.delete(account.id)
+    task.finish()
   }
 }
 const handleAccountUpdated = (updatedAccount: Account) => {
+  if (!pageTasks.current()) return
   patchAccountInList(updatedAccount)
   enterAutoRefreshSilentWindow()
 }
@@ -2338,30 +2443,44 @@ const formatExportTimestamp = () => {
   return `${now.getFullYear()}${pad2(now.getMonth() + 1)}${pad2(now.getDate())}${pad2(now.getHours())}${pad2(now.getMinutes())}${pad2(now.getSeconds())}`
 }
 const openExportDataDialog = () => {
+  if (!pageTasks.current()) return
+  exportRevision++
   includeProxyOnExport.value = true
   showExportDataDialog.value = true
 }
+const closeExportDataDialog = () => { exportRevision++; showExportDataDialog.value = false; accountExportStepUp.onCancel() }
 const handleExportData = async () => {
-  if (exportingData.value) return
+  if (!pageTasks.current() || !showExportDataDialog.value || exportingData.value) return
+  const revision = exportRevision
+  const task = pageTasks.begin('account:export', () => showExportDataDialog.value && revision === exportRevision)
+  const snapshot = selIds.value.length > 0
+    ? { ids: [...selIds.value], includeProxies: includeProxyOnExport.value }
+    : { includeProxies: includeProxyOnExport.value, filters: buildAccountQueryFilters() }
+  let objectURL: string | undefined
   exportingData.value = true
   try {
-    const dataPayload = await accountExportStepUp.run(() => adminAPI.accounts.exportData(
-      selIds.value.length > 0
-        ? { ids: selIds.value, includeProxies: includeProxyOnExport.value }
-        : {
-            includeProxies: includeProxyOnExport.value,
-            filters: buildAccountQueryFilters()
-          }
-    ))
+    const dataPayload = await accountExportStepUp.run(async () => {
+      if (!task.active()) throw new StepUpCancelledError()
+      try {
+        const payload = await adminAPI.accounts.exportData(snapshot)
+        if (!task.active()) throw new StepUpCancelledError()
+        return payload
+      } catch (error) {
+        if (!task.active()) throw new StepUpCancelledError()
+        throw error
+      }
+    })
+    if (!task.active()) return
     const timestamp = formatExportTimestamp()
     const filename = `sub2api-account-${timestamp}.json`
     const blob = new Blob([JSON.stringify(dataPayload, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
+    objectURL = url
     const link = document.createElement('a')
     link.href = url
     link.download = filename
     link.click()
-    URL.revokeObjectURL(url)
+    if (!task.active()) return
     // spark 影子账号被后端排除出备份(其凭据透传母账号、调度配置不可经凭据型导入重建);
     // 跳过非零时明确提示用户,避免「下载成功但少了账号」的静默丢失。
     if (dataPayload.skipped_shadows && dataPayload.skipped_shadows > 0) {
@@ -2370,6 +2489,7 @@ const handleExportData = async () => {
       appStore.showSuccess(t('admin.accounts.dataExported'))
     }
   } catch (error: any) {
+    if (!task.active()) return
     if (isStepUpCancelled(error)) {
       // 用户主动取消 step-up 验证，静默返回，不弹错误提示。
     } else if (isStepUpBlocked(error)) {
@@ -2382,84 +2502,95 @@ const handleExportData = async () => {
       appStore.showError(error?.message || t('admin.accounts.dataExportFailed'))
     }
   } finally {
-    exportingData.value = false
-    showExportDataDialog.value = false
+    if (objectURL) URL.revokeObjectURL(objectURL)
+    if (task.owned()) exportingData.value = false
+    if (task.active()) showExportDataDialog.value = false
+    task.finish()
   }
 }
 const accountExportStepUp = useStepUp()
-const closeTestModal = () => { showTest.value = false; testingAcc.value = null }
-const closeStatsModal = () => { showStats.value = false; statsAcc.value = null }
+const closeTestModal = () => { pageTasks.cancel('account:details'); showTest.value = false; testingAcc.value = null }
+const closeStatsModal = () => { pageTasks.cancel('account:details'); showStats.value = false; statsAcc.value = null }
 const closeReAuthModal = () => { showReAuth.value = false; reAuthAcc.value = null }
-const handleTest = async (a: AccountListItem) => {
-  const account = await loadAccountDetails(a)
-  if (!account) return
-  testingAcc.value = account
-  showTest.value = true
-}
-const handleViewStats = async (a: AccountListItem) => {
-  const account = await loadAccountDetails(a)
-  if (!account) return
-  statsAcc.value = account
-  showStats.value = true
-}
+const handleTest = (a: AccountListItem) => loadAccountDetails(a, account => { testingAcc.value = account; showTest.value = true })
+const handleViewStats = (a: AccountListItem) => loadAccountDetails(a, account => { statsAcc.value = account; showStats.value = true })
 const handleSchedule = async (a: Account) => {
+  if (!pageTasks.current()) return
   scheduleAcc.value = a
   scheduleModelOptions.value = []
   showSchedulePanel.value = true
+  const task = pageTasks.begin('account:schedule', () => showSchedulePanel.value && scheduleAcc.value?.id === a.id)
   try {
     const models = await adminAPI.accounts.getAvailableModels(a.id)
-    scheduleModelOptions.value = models.map((m: ClaudeModel) => ({ value: m.id, label: m.display_name || m.id }))
+    if (task.active()) scheduleModelOptions.value = models.map((m: ClaudeModel) => ({ value: m.id, label: m.display_name || m.id }))
   } catch {
-    scheduleModelOptions.value = []
-  }
+    if (task.active()) scheduleModelOptions.value = []
+  } finally { task.finish() }
 }
-const closeSchedulePanel = () => { showSchedulePanel.value = false; scheduleAcc.value = null; scheduleModelOptions.value = [] }
-const handleReAuth = (a: Account) => { reAuthAcc.value = a; showReAuth.value = true }
+const closeSchedulePanel = () => { pageTasks.cancel('account:schedule'); showSchedulePanel.value = false; scheduleAcc.value = null; scheduleModelOptions.value = [] }
+const handleReAuth = (a: Account) => { if (!pageTasks.current()) return; reAuthAcc.value = a; showReAuth.value = true }
 const duplicatingAccountIDs = new Set<number>()
 const handleDuplicateAccount = async (a: Account) => {
   if (duplicatingAccountIDs.has(a.id)) return
+  const task = beginAccountCommand(`account:duplicate:${a.id}`)
+  if (!task) return
   duplicatingAccountIDs.add(a.id)
   try {
     const duplicate = await adminAPI.accounts.duplicate(a.id)
+    if (!task.active()) return
     appStore.showSuccess(t('admin.accounts.duplicateSuccess', { name: duplicate.name }))
     reload()
   } catch (error: any) {
+    if (!task.active()) return
     console.error('Failed to duplicate account:', error)
     appStore.showError(error?.message || t('admin.accounts.duplicateFailed'))
   } finally {
+    task.finish()
     duplicatingAccountIDs.delete(a.id)
   }
 }
 const handleRefresh = async (a: Account) => {
+  const task = beginAccountCommand(`account:refresh:${a.id}`)
+  if (!task) return
   try {
     const result = await adminAPI.accounts.refreshCredentials(a.id)
+    if (!task.active()) return
     patchAccountInList(result.account)
     enterAutoRefreshSilentWindow()
     if (result.warning) appStore.showWarning(result.message)
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to refresh credentials:', error)
-  }
+  } finally { task.finish() }
 }
 const handleRecoverState = async (a: Account) => {
+  const task = beginAccountCommand(`account:recover:${a.id}`)
+  if (!task) return
   try {
     const updated = await adminAPI.accounts.recoverState(a.id)
+    if (!task.active()) return
     patchAccountInList(updated)
     enterAutoRefreshSilentWindow()
     appStore.showSuccess(t('admin.accounts.recoverStateSuccess'))
   } catch (error: any) {
+    if (!task.active()) return
     console.error('Failed to recover account state:', error)
     appStore.showError(error?.message || t('admin.accounts.recoverStateFailed'))
-  }
+  } finally { task.finish() }
 }
 const handleResetQuota = async (a: Account) => {
+  const task = beginAccountCommand(`account:quota:${a.id}`)
+  if (!task) return
   try {
     const updated = await adminAPI.accounts.resetAccountQuota(a.id)
+    if (!task.active()) return
     patchAccountInList(updated)
     enterAutoRefreshSilentWindow()
     appStore.showSuccess(t('common.success'))
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to reset quota:', error)
-  }
+  } finally { task.finish() }
 }
 
 const privacyResultMessageKey = (account: Account): { type: 'success' | 'error'; key: string } => {
@@ -2484,8 +2615,11 @@ const privacyResultMessageKey = (account: Account): { type: 'success' | 'error';
 }
 
 const handleSetPrivacy = async (a: Account) => {
+  const task = beginAccountCommand(`account:privacy:${a.id}`)
+  if (!task) return
   try {
     const updated = await adminAPI.accounts.setPrivacy(a.id)
+    if (!task.active()) return
     patchAccountInList(updated)
     enterAutoRefreshSilentWindow()
     const result = privacyResultMessageKey(updated)
@@ -2495,56 +2629,89 @@ const handleSetPrivacy = async (a: Account) => {
       appStore.showError(t(result.key))
     }
   } catch (error: any) {
+    if (!task.active()) return
     console.error('Failed to set privacy:', error)
     appStore.showError(error?.response?.data?.message || t('admin.accounts.privacyFailed'))
-  }
+  } finally { task.finish() }
 }
 const onRevertFallback = async (a: Account) => {
+  const task = beginAccountCommand(`account:revert:${a.id}`)
+  if (!task) return
   try {
     await adminAPI.accounts.revertProxyFallback(a.id)
+    if (!task.active()) return
     appStore.showSuccess(t('admin.accounts.revertProxySuccess'))
     reload()
   } catch (error: any) {
+    if (!task.active()) return
     console.error('Failed to revert proxy fallback:', error)
     appStore.showError(error?.response?.data?.message || t('admin.accounts.revertProxyFailed'))
-  }
+  } finally { task.finish() }
 }
 const handleCreateSparkShadow = (a: Account) => {
+  if (!pageTasks.current()) return
+  shadowRevision++
   creatingShadowAcc.value = a
   showCreateShadowDialog.value = true
 }
+const closeCreateShadowDialog = () => { shadowRevision++; showCreateShadowDialog.value = false; creatingShadowAcc.value = null }
 const confirmCreateSparkShadow = async () => {
   const a = creatingShadowAcc.value
-  if (!a) return
+  if (!a || !showCreateShadowDialog.value) return
+  const revision = shadowRevision
+  const task = beginAccountCommand(`account:shadow:${a.id}`, () => showCreateShadowDialog.value && revision === shadowRevision && creatingShadowAcc.value?.id === a.id)
+  if (!task) return
   try {
     await adminAPI.accounts.createSparkShadow(a.id, { name: `${a.name} (Spark)` })
-    showCreateShadowDialog.value = false
-    creatingShadowAcc.value = null
+    if (!task.active()) return
+    closeCreateShadowDialog()
     appStore.showSuccess(t('admin.accounts.createSparkShadowSuccess'))
     reload()
   } catch (error: any) {
+    if (!task.active()) return
     console.error('Failed to create spark shadow:', error)
     appStore.showError(error?.response?.data?.message || t('admin.accounts.createSparkShadowFailed'))
-  }
+  } finally { task.finish() }
 }
-const handleDelete = (a: Account) => { deletingAcc.value = a; showDeleteDialog.value = true }
-const confirmDelete = async () => { if(!deletingAcc.value) return; try { await adminAPI.accounts.delete(deletingAcc.value.id); showDeleteDialog.value = false; deletingAcc.value = null; reload() } catch (error) { console.error('Failed to delete account:', error) } }
+const handleDelete = (a: Account) => { if (!pageTasks.current()) return; deleteRevision++; deletingAcc.value = a; showDeleteDialog.value = true }
+const closeDeleteDialog = () => { deleteRevision++; showDeleteDialog.value = false; deletingAcc.value = null }
+const confirmDelete = async () => {
+  const account = deletingAcc.value
+  if (!account || !showDeleteDialog.value) return
+  const revision = deleteRevision
+  const task = beginAccountCommand(`account:delete:${account.id}`, () => showDeleteDialog.value && revision === deleteRevision && deletingAcc.value?.id === account.id)
+  if (!task) return
+  try {
+    await adminAPI.accounts.delete(account.id)
+    if (!task.active()) return
+    closeDeleteDialog()
+    reload()
+  } catch (error) {
+    if (task.active()) console.error('Failed to delete account:', error)
+  } finally { task.finish() }
+}
 const handleToggleSchedulable = async (a: Account) => {
   const nextSchedulable = !a.schedulable
+  const task = beginAccountCommand(`account:schedulable:${a.id}`)
+  if (!task) return
   togglingSchedulable.value = a.id
   try {
     const updated = await adminAPI.accounts.setSchedulable(a.id, nextSchedulable)
+    if (!task.active()) return
     updateSchedulableInList([a.id], updated?.schedulable ?? nextSchedulable)
     enterAutoRefreshSilentWindow()
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to toggle schedulable:', error)
     appStore.showError(t('admin.accounts.failedToToggleSchedulable'))
   } finally {
-    togglingSchedulable.value = null
+    task.finish()
+    if (togglingSchedulable.value === a.id) togglingSchedulable.value = null
   }
 }
-const handleShowTempUnsched = (a: Account) => { tempUnschedAcc.value = a; showTempUnsched.value = true }
+const handleShowTempUnsched = (a: Account) => { if (!pageTasks.current()) return; tempUnschedAcc.value = a; showTempUnsched.value = true }
 const handleTempUnschedReset = async (updated: Account) => {
+  if (!pageTasks.current()) return
   showTempUnsched.value = false
   tempUnschedAcc.value = null
   patchAccountInList(updated)

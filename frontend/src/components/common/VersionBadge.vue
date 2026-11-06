@@ -1,8 +1,13 @@
 <template>
-  <div class="relative">
+  <div class="version-badge relative" @keydown.esc="handleEscape">
     <!-- Admin: Full version badge with dropdown -->
     <template v-if="isAdmin">
       <button
+        ref="triggerRef"
+        type="button"
+        :aria-label="t('version.currentVersion') + ': ' + versionLabel"
+        :aria-expanded="dropdownOpen"
+        :aria-controls="panelId"
         @click="toggleDropdown"
         class="flex items-center gap-1.5 rounded-lg px-2 py-1 text-xs transition-colors"
         :class="[
@@ -30,8 +35,9 @@
       <transition name="dropdown">
         <div
           v-if="dropdownOpen"
+          :id="panelId"
           ref="dropdownRef"
-          class="absolute left-0 z-50 mt-2 overflow-hidden whitespace-normal rounded-xl border border-gray-200 bg-white shadow-lg transition-all duration-200 dark:border-dark-700 dark:bg-dark-800"
+          class="version-panel absolute left-0 z-50 mt-2 overflow-hidden whitespace-normal rounded-xl border border-gray-200 bg-white shadow-lg transition-all duration-200 dark:border-dark-700 dark:bg-dark-800"
           :class="rollbackPanelOpen && isReleaseBuild ? 'w-80' : 'w-64'"
         >
           <!-- Header with refresh button -->
@@ -44,7 +50,8 @@
             <button
               @click="refreshVersion(true)"
               class="rounded-lg p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-dark-700 dark:hover:text-dark-200"
-              :disabled="loading"
+              :disabled="loading || mutationBusy"
+              :aria-label="t('version.refresh')"
               :title="t('version.refresh')"
             >
               <Icon
@@ -80,10 +87,10 @@
             <template v-else>
               <!-- Version display - centered and prominent -->
               <div class="mb-4 text-center">
-                <div class="inline-flex items-center gap-2">
+                <div class="inline-flex max-w-full items-center gap-2">
                   <span
                     v-if="currentVersion"
-                    class="text-2xl font-bold text-gray-900 dark:text-white"
+                    class="min-w-0 break-words text-2xl font-bold text-gray-900 dark:text-white"
                     >{{ versionLabel }}</span
                   >
                   <span v-else class="text-2xl font-bold text-gray-400 dark:text-dark-500">--</span>
@@ -229,6 +236,7 @@
                   </template>
                   <span v-else>{{ t('version.restartNow') }}</span>
                 </button>
+                <p v-if="restartError" role="alert" class="rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-600 dark:border-red-800/50 dark:bg-red-900/20 dark:text-red-400">{{ restartError }}</p>
               </div>
 
               <!-- Priority 3: Update available for source build - show git pull hint -->
@@ -378,6 +386,10 @@
                 <div class="border-t border-gray-100 pt-2 dark:border-dark-700">
                   <button
                     @click="toggleRollbackPanel"
+                    type="button"
+                    :disabled="mutationBusy"
+                    :aria-expanded="rollbackPanelOpen"
+                    :aria-controls="`${panelId}-rollback`"
                     class="group flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-xs text-gray-400 transition-colors hover:bg-gray-50 hover:text-gray-600 dark:text-dark-500 dark:hover:bg-dark-700/50 dark:hover:text-dark-300"
                   >
                     <span class="flex items-center gap-1.5">
@@ -394,7 +406,7 @@
                   </button>
 
                   <transition name="rollback">
-                    <div v-if="rollbackPanelOpen" class="mt-2 space-y-2">
+                    <div v-if="rollbackPanelOpen" :id="`${panelId}-rollback`" class="mt-2 space-y-2">
                       <!-- Source build: online rollback unavailable, use git instead -->
                       <div
                         v-if="!isReleaseBuild"
@@ -546,7 +558,7 @@
                                   </button>
                                 </div>
                                 <button
-                                  @click="copyToClipboard(activeManualCommand)"
+                                  @click="copyManualCommand"
                                   class="flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-600 dark:text-dark-400 dark:hover:bg-dark-600 dark:hover:text-dark-200"
                                 >
                                   <Icon
@@ -638,7 +650,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore, useAppStore } from '@/stores'
 import {
@@ -650,6 +662,8 @@ import {
 } from '@/api/admin/system'
 import { useClipboard } from '@/composables/useClipboard'
 import Icon from '@/components/icons/Icon.vue'
+import { createSessionTasks } from '@/utils/sessionTasks'
+import { extractApiErrorMessage } from '@/utils/apiError'
 
 const GITHUB_REPO = 'Wei-Shaw/sub2api'
 // Docker Hub image published by CI (tags carry no "v" prefix, e.g. weishaw/sub2api:0.1.146)
@@ -668,6 +682,10 @@ const isAdmin = computed(() => authStore.isAdmin)
 
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
+const triggerRef = ref<HTMLButtonElement | null>(null)
+const panelId = `version-panel-${useId()}`
+const requests = createSessionTasks()
+const ownsPanel = () => isAdmin.value && requests.current()
 
 // Use store's cached version state
 const loading = computed(() => appStore.versionLoading)
@@ -685,6 +703,9 @@ const needRestart = ref(false)
 const updateError = ref('')
 const updateSuccess = ref(false)
 const restartCountdown = ref(0)
+const restartError = ref('')
+const mutationBusy = computed(() => updating.value || rollingBack.value || restarting.value)
+let countdownInterval: ReturnType<typeof setInterval> | undefined
 // Distinguishes the success + restart panel between update and rollback flows
 const successKind = ref<'update' | 'rollback'>('update')
 
@@ -729,10 +750,24 @@ const activeManualCommand = computed(() =>
   manualTab.value === 'docker' ? dockerRollbackCommand.value : scriptRollbackCommand.value
 )
 
+async function copyManualCommand() {
+  if (!ownsPanel() || !dropdownOpen.value || !rollbackPanelOpen.value || !activeManualCommand.value) return
+  const command = activeManualCommand.value
+  const task = requests.begin('copy-command', () => ownsPanel() && dropdownOpen.value && rollbackPanelOpen.value && activeManualCommand.value === command)
+  try { await copyToClipboard(command, undefined, task.active) }
+  finally { task.finish() }
+}
+
+watch([activeManualCommand, dropdownOpen, rollbackPanelOpen, isAdmin], () => {
+  requests.cancel('copy-command')
+  copied.value = false
+}, { flush: 'sync' })
+
 // Only show update check for release builds (binary/docker deployment)
 const isReleaseBuild = computed(() => buildType.value === 'release')
 
 function toggleDropdown() {
+  if (!ownsPanel()) return
   dropdownOpen.value = !dropdownOpen.value
 }
 
@@ -740,11 +775,20 @@ function closeDropdown() {
   dropdownOpen.value = false
 }
 
+function handleEscape(event: KeyboardEvent) {
+  if (!dropdownOpen.value) return
+  event.preventDefault()
+  event.stopPropagation()
+  closeDropdown()
+  triggerRef.value?.focus()
+}
+
 async function refreshVersion(force = true) {
-  if (!isAdmin.value) return
+  if (!ownsPanel() || loading.value || mutationBusy.value) return
 
   // Reset update states when refreshing
   updateError.value = ''
+  restartError.value = ''
   updateSuccess.value = false
   needRestart.value = false
   resetRollbackState()
@@ -753,7 +797,9 @@ async function refreshVersion(force = true) {
 }
 
 async function handleUpdate() {
-  if (updating.value) return
+  if (!ownsPanel() || mutationBusy.value || !isReleaseBuild.value) return
+
+  const task = requests.begin('mutation', ownsPanel)
 
   updating.value = true
   updateError.value = ''
@@ -761,20 +807,25 @@ async function handleUpdate() {
 
   try {
     const result = await performUpdate()
+    if (!task.active()) return
     successKind.value = 'update'
     updateSuccess.value = true
     needRestart.value = result.need_restart
     // Clear version cache to reflect update completed
     appStore.clearVersionCache()
   } catch (error: unknown) {
+    if (!task.active()) return
     const err = error as { response?: { data?: { message?: string } }; message?: string }
     updateError.value = err.response?.data?.message || err.message || t('version.updateFailed')
   } finally {
-    updating.value = false
+    if (task.active()) updating.value = false
+    task.finish()
   }
 }
 
 function resetRollbackState() {
+  requests.cancel('rollback-list')
+  rollbackVersionsLoading.value = false
   rollbackPanelOpen.value = false
   rollbackVersions.value = []
   rollbackVersionsError.value = ''
@@ -784,7 +835,7 @@ function resetRollbackState() {
 }
 
 async function toggleRollbackPanel() {
-  if (!isAdmin.value) return
+  if (!ownsPanel() || mutationBusy.value) return
   rollbackPanelOpen.value = !rollbackPanelOpen.value
   // Source builds only show a hint, no version list to fetch
   if (
@@ -798,23 +849,27 @@ async function toggleRollbackPanel() {
 }
 
 async function loadRollbackVersions() {
-  if (!isAdmin.value) return
+  if (!ownsPanel() || rollbackVersionsLoading.value) return
+  const task = requests.begin('rollback-list', ownsPanel)
   rollbackVersionsLoading.value = true
   rollbackVersionsError.value = ''
   try {
     const data = await getRollbackVersions()
+    if (!task.active()) return
     rollbackVersions.value = data.versions || []
   } catch (error: unknown) {
+    if (!task.active()) return
     const err = error as { response?: { data?: { message?: string } }; message?: string }
     rollbackVersionsError.value =
       err.response?.data?.message || err.message || t('version.loadVersionsFailed')
   } finally {
-    rollbackVersionsLoading.value = false
+    if (task.active()) rollbackVersionsLoading.value = false
+    task.finish()
   }
 }
 
 function selectRollbackVersion(version: string) {
-  if (rollingBack.value) return
+  if (!ownsPanel() || mutationBusy.value) return
   rollbackError.value = ''
   selectedRollbackVersion.value = selectedRollbackVersion.value === version ? '' : version
 }
@@ -827,14 +882,17 @@ function formatPublishedAt(publishedAt: string): string {
 }
 
 async function handleRollback() {
-  if (!isAdmin.value) return
-  if (rollingBack.value || !selectedRollbackVersion.value) return
+  if (!ownsPanel() || !isReleaseBuild.value || mutationBusy.value || !selectedRollbackVersion.value) return
+
+  const version = selectedRollbackVersion.value
+  const task = requests.begin('mutation', ownsPanel)
 
   rollingBack.value = true
   rollbackError.value = ''
 
   try {
-    const result = await rollbackAPI(selectedRollbackVersion.value)
+    const result = await rollbackAPI(version)
+    if (!task.active()) return
     successKind.value = 'rollback'
     updateSuccess.value = true
     needRestart.value = result.need_restart
@@ -842,76 +900,119 @@ async function handleRollback() {
     // Clear version cache so the next check reflects the rolled-back version
     appStore.clearVersionCache()
   } catch (error: unknown) {
+    if (!task.active()) return
     const err = error as { response?: { data?: { message?: string } }; message?: string }
     rollbackError.value = err.response?.data?.message || err.message || t('version.rollbackFailed')
   } finally {
-    rollingBack.value = false
+    if (task.active()) rollingBack.value = false
+    task.finish()
   }
 }
 
 async function handleRestart() {
-  if (restarting.value) return
+  if (!ownsPanel() || mutationBusy.value || !needRestart.value) return
+
+  const task = requests.begin('restart', ownsPanel)
+  task.signal.addEventListener('abort', clearCountdown, { once: true })
 
   restarting.value = true
   restartCountdown.value = 8
+  restartError.value = ''
 
   try {
     await restartService()
     // Service will restart, page will reload automatically or show disconnected
-  } catch (error) {
-    // Expected - connection will be lost during restart
-    console.log('Service restarting...')
+  } catch (error: unknown) {
+    if (!task.active()) { task.finish(); return }
+    const rejected = error as { status?: number; response?: { status?: number } }
+    const status = rejected?.status ?? rejected?.response?.status
+    if (typeof status === 'number' && status > 0) {
+      // A server rejection is definitive. Only a lost network acknowledgment
+      // may mean that the accepted restart is already interrupting connections.
+      restarting.value = false
+      restartCountdown.value = 0
+      restartError.value = extractApiErrorMessage(error, t('version.restartFailed'))
+      task.finish()
+      return
+    }
   }
+  if (!task.active()) { task.finish(); return }
 
   // Start countdown
-  const countdownInterval = setInterval(() => {
+  countdownInterval = setInterval(() => {
+    if (!task.active()) { clearCountdown(); task.finish(); return }
     restartCountdown.value--
     if (restartCountdown.value <= 0) {
-      clearInterval(countdownInterval)
+      clearCountdown()
       // Try to check if service is back before reload
-      checkServiceAndReload()
+      void checkServiceAndReload(task)
     }
   }, 1000)
 }
 
-async function checkServiceAndReload() {
+function clearCountdown() {
+  if (countdownInterval !== undefined) clearInterval(countdownInterval)
+  countdownInterval = undefined
+}
+
+function waitForRecovery(task: ReturnType<typeof requests.begin>, milliseconds: number): Promise<void> {
+  return new Promise(resolve => {
+    if (!task.active()) { resolve(); return }
+    const finish = () => { clearTimeout(timer); task.signal.removeEventListener('abort', finish); resolve() }
+    const timer = setTimeout(finish, milliseconds)
+    task.signal.addEventListener('abort', finish, { once: true })
+  })
+}
+
+async function checkServiceAndReload(task: ReturnType<typeof requests.begin>) {
   const maxRetries = 5
   const retryDelay = 1000
 
   for (let i = 0; i < maxRetries; i++) {
+    if (!task.active()) { task.finish(); return }
+    const probe = new AbortController()
+    const cancelProbe = () => probe.abort()
+    task.signal.addEventListener('abort', cancelProbe, { once: true })
+    const probeTimeout = setTimeout(cancelProbe, 2000)
     try {
       const response = await fetch('/health', {
         method: 'GET',
-        cache: 'no-cache'
+        cache: 'no-cache',
+        signal: probe.signal
       })
+      if (!task.active()) { task.finish(); return }
       if (response.ok) {
         // Service is back, reload page
-        window.location.reload()
+        task.finish()
+        location.reload()
         return
       }
     } catch {
       // Service not ready yet
+    } finally {
+      clearTimeout(probeTimeout)
+      task.signal.removeEventListener('abort', cancelProbe)
     }
 
     if (i < maxRetries - 1) {
-      await new Promise((resolve) => setTimeout(resolve, retryDelay))
+      await waitForRecovery(task, retryDelay)
     }
   }
 
   // After retries, reload anyway
-  window.location.reload()
+  if (task.active()) location.reload()
+  task.finish()
 }
 
 function handleClickOutside(event: MouseEvent) {
   const target = event.target as Node
-  const button = (event.target as Element).closest('button')
-  if (dropdownRef.value && !dropdownRef.value.contains(target) && !button?.contains(target)) {
+  if (dropdownRef.value && !dropdownRef.value.contains(target) && !triggerRef.value?.contains(target)) {
     closeDropdown()
   }
 }
 
 onMounted(() => {
-  if (isAdmin.value) {
+  if (ownsPanel()) {
     // Use cached version if available, otherwise fetch
     appStore.fetchVersion(false)
   }
@@ -919,8 +1020,26 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  requests.dispose()
+  clearCountdown()
   document.removeEventListener('click', handleClickOutside)
 })
+
+watch(isAdmin, allowed => {
+  if (allowed) return
+  requests.cancel()
+  clearCountdown()
+  closeDropdown()
+  resetRollbackState()
+  updating.value = false
+  rollingBack.value = false
+  restarting.value = false
+  restartCountdown.value = 0
+  restartError.value = ''
+  updateSuccess.value = false
+  updateError.value = ''
+  needRestart.value = false
+}, { flush: 'sync' })
 </script>
 
 <style scoped>

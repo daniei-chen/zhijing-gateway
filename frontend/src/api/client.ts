@@ -14,7 +14,7 @@ import {
 } from './adminUIRequest'
 import { refreshAuthTokens } from './tokenRefresh'
 import { getAPIBaseURL } from './url'
-import { browserSessionHeaders, isBrowserSessionHandle } from './browserSession'
+import { BROWSER_SESSION_HEADER, browserSessionHeaders, isBrowserSessionHandle } from './browserSession'
 import {
   assertAuthSession, AuthSessionChangedError, captureAuthSession, captureRequestAuthSession,
   clearStoredAuthSession, isAuthSessionCurrent, trackAuthRequest, type AuthSessionSnapshot
@@ -47,8 +47,12 @@ function responseSession(config?: InternalAxiosRequestConfig): AuthSessionSnapsh
   // Compatibility for custom adapters that omit unknown config fields. A real
   // browser adapter preserves the original stamp. Never adopt a different bearer.
   const auth = config?.headers?.Authorization ?? config?.headers?.authorization
+  const cookieSelector = config?.headers?.[BROWSER_SESSION_HEADER] ?? config?.headers?.[BROWSER_SESSION_HEADER.toLowerCase()]
   const current = localStorage.getItem('auth_token')
   if (auth && auth !== `Bearer ${current}`) throw new AuthSessionChangedError()
+  if (isBrowserSessionHandle(cookieSelector) && cookieSelector !== current) throw new AuthSessionChangedError()
+  if (typeof cookieSelector === 'string' && cookieSelector.startsWith('init.') &&
+      cookieSelector !== `init.${captureAuthSession().generation}`) throw new AuthSessionChangedError()
   return config ? captureAuthSession() : undefined
 }
 
@@ -121,7 +125,12 @@ apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
     const config = response.config as SessionRequestConfig | undefined
     config?._authCleanup?.()
-    if (config?._authSession && !isAuthSessionCurrent(config._authSession)) return Promise.reject(new AuthSessionChangedError())
+    try {
+      const session = responseSession(config)
+      if (session) assertAuthSession(session)
+    } catch {
+      return Promise.reject(new AuthSessionChangedError())
+    }
     // An upgraded backend advertises cookie support. Migrate a legacy browser
     // pair after /auth/me succeeds, retaining the existing cross-tab refresh lock.
     // Older backends never advertise this and retain their existing contract.
@@ -161,6 +170,16 @@ apiClient.interceptors.response.use(
     // Otherwise we'd misclassify it as a generic "network error".
     if (error.code === 'ERR_CANCELED' || axios.isCancel(error)) {
       return Promise.reject(error)
+    }
+    // Custom adapters can omit the private stamp while retaining the standard
+    // credential headers. Check their owner before every global error effect,
+    // including feature flags and compliance prompts on non-401 responses.
+    let requestSession: AuthSessionSnapshot | undefined
+    try {
+      requestSession = responseSession(originalRequest)
+      if (requestSession) assertAuthSession(requestSession)
+    } catch {
+      return Promise.reject(new AuthSessionChangedError())
     }
 
     // Handle common errors
@@ -217,8 +236,6 @@ apiClient.interceptors.response.use(
       // 401: Try to refresh the token if we have a refresh token
       // This handles TOKEN_EXPIRED, INVALID_TOKEN, TOKEN_REVOKED, etc.
       if (status === 401 && originalRequest && !originalRequest._retry) {
-        let requestSession: AuthSessionSnapshot | undefined
-        try { requestSession = responseSession(originalRequest); if (requestSession) assertAuthSession(requestSession) } catch { return Promise.reject(new AuthSessionChangedError()) }
         const refreshToken = localStorage.getItem('refresh_token')
         const isAuthEndpoint =
           url.includes('/auth/login') || url.includes('/auth/register') || url.includes('/auth/refresh')
@@ -231,10 +248,11 @@ apiClient.interceptors.response.use(
           try {
             const headers = originalRequest.headers as Record<string, unknown> | undefined
             const authHeader = headers?.Authorization ?? headers?.authorization
+            const cookieSelector = headers?.[BROWSER_SESSION_HEADER] ?? headers?.[BROWSER_SESSION_HEADER.toLowerCase()]
             const failedAccessToken =
               typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
                 ? authHeader.slice('Bearer '.length)
-                : null
+                : typeof cookieSelector === 'string' && isBrowserSessionHandle(cookieSelector) ? cookieSelector : null
             const tokens = await refreshAuthTokens({ failedAccessToken, session: requestSession })
             if (requestSession) assertAuthSession(requestSession)
 

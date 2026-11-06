@@ -1,0 +1,34 @@
+{
+  "preview": "http://127.0.0.1:18875/admin/dashboard",
+  "data": "local synthetic admin fixture only",
+  "build": "frontend-checkpoint-06",
+  "before": {
+    "build": "frontend-checkpoint-05",
+    "viewport_width": 320,
+    "panel_left": 77,
+    "panel_width": 256,
+    "panel_right": 333,
+    "navigation_glass_obscured_panel": true
+  },
+  "after": {
+    "viewport_width": 320,
+    "viewport_height": 740,
+    "panel_left": 15,
+    "panel_right": 271,
+    "panel_top": 89,
+    "panel_bottom": 313,
+    "panel_center_hit_test_is_panel_descendant": true,
+    "header_z_index": "2",
+    "rollback_button_font_size": "12px",
+    "source_rollback_hint_expanded_bottom": 355,
+    "short_viewport_height": 360,
+    "short_viewport_panel_bottom": 355,
+    "short_viewport_overflow_y": "auto",
+    "escape_collapsed_panel_and_returned_focus_to_trigger": true,
+    "temporary_viewport_override_reset": true
+  },
+  "limitations": [
+    "Observed source-build panel and its source rollback hint, not an online binary update or rollback.",
+    "No production request, update, restart, rollback, payment or email was executed."
+  ]
+}

@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="mb-1.5 flex items-center justify-between gap-3">
-      <label class="input-label mb-0">{{ label }}</label>
+      <label :for="controlId" class="input-label mb-0">{{ label }}</label>
       <div ref="menuRef" class="relative">
         <button
           type="button"
@@ -13,6 +13,7 @@
               : 'text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-dark-400 dark:hover:bg-dark-700 dark:hover:text-gray-200'
           "
           :aria-expanded="menuOpen"
+          :aria-label="`${label} · ${activeLabel}`"
           @click="menuOpen = !menuOpen"
         >
           <Icon name="globe" size="sm" />
@@ -46,6 +47,7 @@
     <textarea
       v-if="multiline"
       v-bind="$attrs"
+      :id="controlId"
       ref="controlRef"
       class="input"
       :value="currentValue"
@@ -56,6 +58,7 @@
     <input
       v-else
       v-bind="$attrs"
+      :id="controlId"
       ref="controlRef"
       type="text"
       class="input"
@@ -68,7 +71,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import Icon from '@/components/icons/Icon.vue'
 import { availableLocales } from '@/i18n'
@@ -80,6 +83,7 @@ defineOptions({ inheritAttrs: false })
 const props = withDefaults(
   defineProps<{
     label: string
+    id?: string
     /** 默认内容，即分组自身的 name / description */
     modelValue: string
     /** 全部语言的译文；本组件只读写其中的 field 字段 */
@@ -99,6 +103,8 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const generatedId = useId()
+const controlId = computed(() => props.id || `group-${props.field}-${generatedId}`)
 
 // 输入控件当前编辑的版本：空串为默认内容，其余为界面语言代码
 const activeLocale = ref('')

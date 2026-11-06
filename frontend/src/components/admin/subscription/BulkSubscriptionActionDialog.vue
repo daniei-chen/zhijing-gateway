@@ -7,7 +7,7 @@
     :show-close-button="canClose"
     @close="handleClose"
   >
-    <form id="bulk-subscription-action-form" class="space-y-4" novalidate @submit.prevent="submit">
+    <form :id="formId" class="space-y-4" novalidate @submit.prevent="submit">
       <div>
         <p class="mb-2 text-sm font-medium text-gray-900 dark:text-gray-100">
           {{ t('admin.subscriptions.bulk.confirmTargets', { count: targets.length }) }}
@@ -27,11 +27,11 @@
 
       <fieldset :disabled="parametersLocked" class="space-y-3 disabled:opacity-70">
         <div v-if="currentAction === 'extend'">
-          <label for="bulk-subscription-days" class="input-label">
+          <label :for="daysId" class="input-label">
             {{ t('admin.subscriptions.form.adjustDays') }}
           </label>
           <input
-            id="bulk-subscription-days"
+            :id="daysId"
             v-model.number="days"
             type="number"
             min="-36500"
@@ -40,9 +40,9 @@
             class="input"
             :disabled="parametersLocked"
             :placeholder="t('admin.subscriptions.adjustDaysPlaceholder')"
-            aria-describedby="bulk-subscription-days-hint"
+            :aria-describedby="daysHintId"
           />
-          <p id="bulk-subscription-days-hint" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+          <p :id="daysHintId" class="mt-1 text-xs text-gray-500 dark:text-gray-400">
             {{ t('admin.subscriptions.bulk.extendHint') }}
           </p>
         </div>
@@ -103,7 +103,7 @@
         <button
           v-if="!result"
           type="submit"
-          form="bulk-subscription-action-form"
+          :form="formId"
           :class="['btn', currentAction === 'revoke' ? 'btn-danger' : 'btn-primary']"
           :disabled="submitting || (!pendingOperation && !!validationError)"
         >
@@ -114,14 +114,21 @@
   </BaseDialog>
 </template>
 
+<script lang="ts">
+// Vue apps sharing one document must also share native form ID ownership.
+let bulkDialogInstance = 0
+</script>
+
 <script setup lang="ts">
-import { computed, reactive, ref, shallowRef, watch } from 'vue'
+import { computed, reactive, ref, shallowRef, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { adminAPI } from '@/api/admin'
 import type { SubscriptionBulkAction, SubscriptionBulkActionRequest, SubscriptionBulkActionResult } from '@/api/admin/subscriptions'
 import BaseDialog from '@/components/common/BaseDialog.vue'
 import type { UserSubscription } from '@/types'
 import { completeBulkSubscriptionOperation, prepareBulkSubscriptionOperation, type BulkSubscriptionOperation } from './bulkSubscriptionOperation'
+import { createSessionTasks } from '@/utils/sessionTasks'
+import { extractApiErrorCode } from '@/utils/apiError'
 
 const props = defineProps<{
   show: boolean
@@ -135,6 +142,10 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const instanceId = ++bulkDialogInstance
+const formId = `bulk-subscription-action-form-${instanceId}`
+const daysId = `bulk-subscription-days-${instanceId}`
+const daysHintId = `${daysId}-hint`
 const quotaWindows = ['daily', 'weekly', 'monthly'] as const
 const days = ref<number | string>(30)
 const windows = reactive({ daily: true, weekly: true, monthly: true })
@@ -144,6 +155,25 @@ const result = shallowRef<SubscriptionBulkActionResult | null>(null)
 const pendingOperation = shallowRef<BulkSubscriptionOperation | null>(null)
 const targets = ref<{ id: number; email?: string; group?: string; groupId: number }[]>([])
 const submittedAction = ref<SubscriptionBulkAction | null>(null)
+const requests = createSessionTasks()
+let dialogGeneration = 0
+
+function resetDialog() {
+  dialogGeneration++
+  requests.cancel()
+  submitting.value = false
+  requestError.value = ''
+  result.value = null
+  pendingOperation.value = null
+  submittedAction.value = null
+  days.value = 30
+  Object.assign(windows, { daily: true, weekly: true, monthly: true })
+  targets.value = props.subscriptions.map(subscription => ({
+    id: subscription.id, email: subscription.user?.email, group: subscription.group?.name, groupId: subscription.group_id
+  }))
+}
+watch(() => props.show, () => resetDialog(), { flush: 'sync' })
+onBeforeUnmount(() => { requests.dispose(); dialogGeneration++ })
 
 const currentAction = computed(() => submittedAction.value ?? props.action)
 const parametersLocked = computed(() => submitting.value || !!pendingOperation.value || !!result.value)
@@ -175,7 +205,7 @@ watch(() => props.subscriptions, subscriptions => {
 }, { immediate: true })
 
 function handleClose() {
-  if (canClose.value) emit('close')
+  if (canClose.value) { resetDialog(); emit('close') }
 }
 
 function failedTargetLabel(id: number) {
@@ -184,7 +214,7 @@ function failedTargetLabel(id: number) {
 }
 
 async function submit() {
-  if (submitting.value || result.value) return
+  if (!props.show || !requests.current() || submitting.value || result.value) return
   if (!pendingOperation.value) {
     if (validationError.value) return
     const request: SubscriptionBulkActionRequest = {
@@ -198,19 +228,26 @@ async function submit() {
   }
 
   const operation = pendingOperation.value
+  const generation = dialogGeneration
+  const task = requests.begin('bulk', () => props.show && generation === dialogGeneration && pendingOperation.value === operation)
   submitting.value = true
   requestError.value = ''
   try {
-    result.value = await adminAPI.subscriptions.bulkAction(operation.request, operation.key)
+    const completed = await adminAPI.subscriptions.bulkAction(operation.request, operation.key, operation.outcomeUncertain)
+    if (!task.active()) return
+    result.value = completed
     completeBulkSubscriptionOperation(operation)
     pendingOperation.value = null
     emit('completed', result.value)
   } catch (error: unknown) {
+    if (!task.active()) return
     const failure = error as { status?: number; message?: string; response?: { status?: number; data?: { message?: string } } }
-    requestError.value = failure?.message || failure?.response?.data?.message || t('admin.subscriptions.bulk.requestFailed')
+    requestError.value = extractApiErrorCode(error) === 'IDEMPOTENCY_RESULT_UNCONFIRMED'
+      ? t('admin.subscriptions.bulk.resultUnconfirmed')
+      : failure?.message || failure?.response?.data?.message || t('admin.subscriptions.bulk.requestFailed')
     const status = failure?.status ?? failure?.response?.status
     // A timeout, server error or in-progress conflict may arrive after writes.
-    // Retry the frozen payload and key until a definitive result is available.
+    // The next attempt only reads the frozen operation's saved result.
     if (!operation.outcomeUncertain && status && status >= 400 && status < 500 && status !== 408 && status !== 409) {
       completeBulkSubscriptionOperation(operation)
       pendingOperation.value = null
@@ -219,7 +256,8 @@ async function submit() {
       operation.outcomeUncertain = true
     }
   } finally {
-    submitting.value = false
+    if (task.owned()) submitting.value = false
+    task.finish()
   }
 }
 </script>

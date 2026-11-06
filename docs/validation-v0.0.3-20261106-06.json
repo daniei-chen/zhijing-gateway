@@ -1,0 +1,122 @@
+{
+  "schema_version": 2,
+  "version": "0.0.3",
+  "status": "iteration_in_progress_with_open_quality_gates",
+  "production_deployed": false,
+  "formal_release_created": false,
+  "previous_checkpoint": "validation-v0.0.3-20261106-04.json",
+  "frontend": {
+    "checkpoint": "2026-11-06-06",
+    "test_files": 463,
+    "passed_tests": 4327,
+    "failed_tests": 0,
+    "pending_tests": 0,
+    "source_sha256_lf_manifest": "proofs/v0.0.3-followup/frontend-source-checkpoint-06.json",
+    "source_manifest_sha256": "37a7172d89f2de56cb2b9e7b0a85b2db8101b5f1a957f5d9248c78bac3fd5075",
+    "source_files_in_checkpoint": 1082,
+    "coverage": {
+      "lines": {
+        "total": 51262,
+        "covered": 39503,
+        "skipped": 0,
+        "pct": 77.06
+      },
+      "statements": {
+        "total": 57496,
+        "covered": 42927,
+        "skipped": 0,
+        "pct": 74.66
+      },
+      "functions": {
+        "total": 12060,
+        "covered": 7770,
+        "skipped": 0,
+        "pct": 64.42
+      },
+      "branches": {
+        "total": 44641,
+        "covered": 29220,
+        "skipped": 0,
+        "pct": 65.45
+      }
+    },
+    "global_coverage_threshold": 80,
+    "global_coverage_gate_passed": false,
+    "coverage_command_exit": 1,
+    "typecheck": true,
+    "eslint": true,
+    "vite_build_manifest": true,
+    "previous_vite_build_checkpoint": "2026-11-06-06",
+    "current_tree_has_changes_after_checkpoint": true,
+    "current_tree_full_regression_complete": false,
+    "formal_release_zip_created": false
+  },
+  "backend": {
+    "source_commit": "4b790895b92fded991d91ea04a79fc3a8f0c7149",
+    "base_commit": "4851ca95b134322c14ca9904bc82c550a3880a67",
+    "generic_patch_files": 78,
+    "patch_sha256": "2a2247adb85c0504ab9dd4858f24f82f69f8b6b5755018a68dcb6b61f6a1b44b",
+    "go_toolchain": "1.27.3",
+    "unit_short": {
+      "passed_packages": 41,
+      "passed_top_level_tests": 12022,
+      "passed_test_events_including_subtests": 23877,
+      "skipped_test_events": 29,
+      "skipped_packages": 2,
+      "failed_events": 0
+    },
+    "fresh_patch_targeted_race": {
+      "passed_packages": 10,
+      "passed_top_level_tests": 804,
+      "passed_test_events_including_subtests": 1569,
+      "skipped_test_events": 14,
+      "skipped_packages": 0,
+      "failed_events": 0
+    },
+    "go_vet": true,
+    "linux_amd64_cross_build": true,
+    "fresh_patch_targeted_race_passed": true,
+    "worktree_has_later_changes": true,
+    "later_worktree_changes": [
+      "A complete owner-scoped retry-history summary, including hidden children, is being implemented and independently reviewed."
+    ],
+    "artifact_apply_and_result_hashes": true,
+    "external_live_database_integration_executed": false,
+    "matching_api_peer_embed_cross_build": true,
+    "matching_api_peer_build_proof": "proofs/v0.0.3-followup/backend-api-peer-build.json",
+    "isolated_redis_durability_smoke_executed": true,
+    "production_redis_policy_applied": false,
+    "real_redis_capacity_test_executed": false,
+    "isolated_redis_evidence": "proofs/v0.0.3-followup/isolated-redis-lab.json"
+  },
+  "tools": {
+    "python_test_cases": 51,
+    "python_passed": 50,
+    "python_skipped": 1,
+    "python_failed": 0,
+    "skip_reason": "Windows test symlink creation privilege; separate reparse-point rejection remains tested.",
+    "upload_relay_real_http_tests": 24,
+    "upload_relay_supplier_inference_benchmark": false
+  },
+  "browser": {
+    "data": "synthetic_local_preview_only",
+    "member_dark_view_observed": true,
+    "proxy_mobile_390x844_observed": true,
+    "protocol_select_keyboard_and_return_focus_observed": true,
+    "real_payments_or_emails_sent": false,
+    "version_panel_320px_rebuilt_verified": true,
+    "version_panel_evidence": "proofs/v0.0.3-followup/version-mobile-visual-044.json",
+    "screenshots": [
+      "images/v0.0.3-member-dark.jpg",
+      "images/v0.0.3-proxy-mobile-dark.jpg"
+    ]
+  },
+  "open_work": [
+    "Finish independent cross-review of the latest batch-image recovery, pagination and reference-image repairs.",
+    "Repeat the fresh-backend patch and race checks after the Gin test initialization and batch replay changes are frozen.",
+    "Reach all four original global coverage gates without exclusions or reduced thresholds.",
+    "Apply/read-back required Redis policy and monitor actual shared-store overhead during controlled cutover.",
+    "Verify actual client upload compression and matched upstream/output milestones; no TTFT improvement claim yet.",
+    "Rebuild and verify final frozen source, production drain/cutover, GitHub tag and release assets."
+  ]
+}

@@ -83,6 +83,18 @@ export interface BatchImageItemsResponse {
   has_more: boolean
 }
 
+export interface BatchImageRecovery {
+  object: 'image.batch.recovery'
+  complete: true
+  batch_id: string
+  root_batch_id: string
+  root_custom_ids: string[]
+  target_items: BatchImageItem[]
+  successful_items: { batch_id: string; custom_id: string; image_count: number }[]
+  pending_items: { batch_id: string; custom_id: string }[]
+  input_mode: 'prompt_only'
+}
+
 export interface BatchImageJobsResponse {
   object: string
   data: BatchImageJob[]
@@ -150,6 +162,32 @@ export async function submitBatchImageJob(
    signal }, 'json')
 }
 
+function unconfirmedBatchImageSubmission() {
+  return Object.assign(new Error('The saved batch submission could not be confirmed. Check the task list before starting a new job.'), {
+    code: 'BATCH_IMAGE_RESULT_UNCONFIRMED', status: 409,
+  })
+}
+
+export async function replayBatchImageSubmission(
+  apiKey: string,
+  payload: BatchImageSubmitRequest,
+  idempotencyKey: string,
+  signal?: AbortSignal,
+): Promise<BatchImageJob> {
+  try {
+    const result = await batchImageRequest<BatchImageJob>(buildGatewayUrl('/v1/images/batches/replay'), {
+      method: 'POST',
+      headers: authHeaders(apiKey, { 'Content-Type': 'application/json', 'Idempotency-Key': idempotencyKey }),
+      body: JSON.stringify(payload), signal,
+    }, 'json', true)
+    if (!result || typeof result.id !== 'string' || !result.id.trim()) throw unconfirmedBatchImageSubmission()
+    return result
+  } catch (error) {
+    if ((error as { status?: number })?.status === 404) throw unconfirmedBatchImageSubmission()
+    throw error
+  }
+}
+
 export async function getBatchImageJob(apiKey: string, batchId: string, signal?: AbortSignal): Promise<BatchImageJob> {
   return batchImageRequest<BatchImageJob>(buildGatewayUrl(`/v1/images/batches/${encodeURIComponent(batchId)}`), {
     headers: authHeaders(apiKey),
@@ -183,12 +221,32 @@ export async function listBatchImageModels(apiKey: string, signal?: AbortSignal)
 export async function listBatchImageItems(
   apiKey: string,
   batchId: string,
-  status = '', signal?: AbortSignal
+  status = '', signal?: AbortSignal, pagination?: { limit?: number; cursor?: string }
 ): Promise<BatchImageItemsResponse> {
-  const query = status ? `?status=${encodeURIComponent(status)}` : ''
+  const params = new URLSearchParams()
+  if (status) params.set('status', status)
+  if (pagination?.limit !== undefined) params.set('limit', String(pagination.limit))
+  if (pagination?.cursor !== undefined) params.set('cursor', pagination.cursor)
+  const query = params.size ? `?${params.toString()}` : ''
   return batchImageRequest<BatchImageItemsResponse>(buildGatewayUrl(`/v1/images/batches/${encodeURIComponent(batchId)}/items${query}`), {
     headers: authHeaders(apiKey),
    signal }, 'json')
+}
+
+export async function getBatchImageRecovery(apiKey: string, batchId: string, signal?: AbortSignal): Promise<BatchImageRecovery> {
+  const incomplete = () => Object.assign(new Error('Complete batch retry history could not be confirmed.'), { status: 409, code: 'BATCH_IMAGE_HISTORY_UNCONFIRMED' })
+  try {
+    const value = await batchImageRequest<BatchImageRecovery>(buildGatewayUrl(`/v1/images/batches/${encodeURIComponent(batchId)}/recovery`), { headers: authHeaders(apiKey), signal }, 'json')
+    if (!value || value.object !== 'image.batch.recovery' || value.complete !== true || value.batch_id !== batchId || typeof value.root_batch_id !== 'string' || !value.root_batch_id || value.input_mode !== 'prompt_only' ||
+        !Array.isArray(value.root_custom_ids) || !value.root_custom_ids.every(id => typeof id === 'string' && !!id) || new Set(value.root_custom_ids).size !== value.root_custom_ids.length ||
+        !Array.isArray(value.target_items) || !value.target_items.every(item => item && typeof item.custom_id === 'string' && typeof item.status === 'string' && (item.prompt_preview == null || typeof item.prompt_preview === 'string')) ||
+        !Array.isArray(value.successful_items) || !value.successful_items.every(item => item && typeof item.batch_id === 'string' && typeof item.custom_id === 'string' && Number.isInteger(item.image_count) && item.image_count > 0) ||
+        !Array.isArray(value.pending_items) || !value.pending_items.every(item => item && typeof item.batch_id === 'string' && typeof item.custom_id === 'string')) throw incomplete()
+    return value
+  } catch (error) {
+    if ((error as { status?: number })?.status === 404) throw incomplete()
+    throw error
+  }
 }
 
 export async function cancelBatchImageJob(apiKey: string, batchId: string, signal?: AbortSignal): Promise<BatchImageJob> {
@@ -219,16 +277,19 @@ export async function deleteBatchImageJobRecord(apiKey: string, batchId: string,
 
 export function saveBlob(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  let link: HTMLAnchorElement | undefined
+  try {
+    link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+  } finally {
+    try { link?.remove() } finally { URL.revokeObjectURL(url) }
+  }
 }
 
-async function batchImageRequest<T>(url: string, init: RequestInit, kind: 'json'|'blob'|'none'): Promise<T> {
+async function batchImageRequest<T>(url: string, init: RequestInit, kind: 'json'|'blob'|'none', requireReplayAcknowledgement = false): Promise<T> {
   const session=authSignalSession(init.signal) || captureAuthSession(), controller=new AbortController()
   const abort=()=>controller.abort()
   if(init.signal?.aborted) abort()
@@ -239,7 +300,9 @@ async function batchImageRequest<T>(url: string, init: RequestInit, kind: 'json'
     if(controller.signal.aborted) throw new DOMException('Request cancelled','AbortError')
     const response=await fetch(url,{...init,signal:controller.signal})
     assertAuthSession(session)
+    if(controller.signal.aborted) throw new DOMException('Request cancelled','AbortError')
     if(!response.ok) {const error=await parseBatchImageError(response);assertAuthSession(session);throw error}
+    if (requireReplayAcknowledgement && response.headers.get('X-Idempotency-Replayed') !== 'true') throw unconfirmedBatchImageSubmission()
     const value=kind==='none'?undefined:await (kind==='blob'?response.blob():response.json())
     assertAuthSession(session)
     if(controller.signal.aborted) throw new DOMException('Request cancelled','AbortError')

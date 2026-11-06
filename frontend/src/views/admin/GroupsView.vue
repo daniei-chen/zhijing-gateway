@@ -13,7 +13,7 @@
                 size="md"
                 class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"
               />
-              <input
+              <input :aria-label="t('admin.groups.searchGroups')"
                 v-model="searchQuery"
                 type="text"
                 :placeholder="t('admin.groups.searchGroups')"
@@ -21,21 +21,21 @@
                 @input="handleSearch"
               />
             </div>
-            <Select
+            <Select :aria-label="t('admin.groups.form.platform')"
               v-model="filters.platform"
               :options="platformFilterOptions"
               :placeholder="t('admin.groups.allPlatforms')"
               class="w-44"
               @change="loadGroups"
             />
-            <Select
+            <Select :aria-label="t('admin.groups.form.status')"
               v-model="filters.status"
               :options="statusOptions"
               :placeholder="t('admin.groups.allStatus')"
               class="w-40"
               @change="loadGroups"
             />
-            <Select
+            <Select :aria-label="t('admin.groups.form.exclusive')"
               v-if="!authStore.isSimpleMode"
               v-model="filters.is_exclusive"
               :options="exclusiveOptions"
@@ -510,10 +510,10 @@
           />
         </div>
         <div>
-          <label class="input-label">{{
+          <label for="groups-create-form-platform" class="input-label">{{
             t("admin.groups.form.platform")
           }}</label>
-          <Select
+          <Select id="groups-create-form-platform"
             v-model="createForm.platform"
             :options="platformOptions"
             data-tour="group-form-platform"
@@ -524,7 +524,7 @@
         <!-- 从分组复制账号 -->
         <div v-if="!authStore.isSimpleMode && copyAccountsGroupOptions.length > 0">
           <div class="mb-1.5 flex items-center gap-1">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label for="groups-create-group-form-admin-groups-copy-accounts-title" class="text-sm font-medium text-gray-700 dark:text-gray-300">
               {{ t("admin.groups.copyAccounts.title") }}
             </label>
             <div class="group relative inline-flex">
@@ -579,7 +579,7 @@
             </span>
           </div>
           <!-- 分组选择下拉 -->
-          <select
+          <select id="groups-create-group-form-admin-groups-copy-accounts-title"
             class="input"
             @change="
               (e) => {
@@ -612,10 +612,10 @@
         </div>
         <template v-if="!authStore.isSimpleMode">
         <div>
-          <label class="input-label">{{
+          <label for="groups-create-form-rate-multiplier" class="input-label">{{
             t("admin.groups.form.rateMultiplier")
           }}</label>
-          <input
+          <input id="groups-create-form-rate-multiplier"
             v-model.number="createForm.rate_multiplier"
             type="number"
             step="0.001"
@@ -627,8 +627,8 @@
           <p class="input-hint">{{ t("admin.groups.rateMultiplierHint") }}</p>
         </div>
         <div>
-          <label class="input-label">{{ t("admin.groups.form.rpmLimit") }}</label>
-          <input
+          <label for="groups-create-form-rpm-limit" class="input-label">{{ t("admin.groups.form.rpmLimit") }}</label>
+          <input id="groups-create-form-rpm-limit"
             v-model.number="createForm.rpm_limit"
             type="number"
             min="0"
@@ -652,7 +652,7 @@
           data-tour="group-form-exclusive"
         >
           <div class="mb-1.5 flex items-center gap-1">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label for="groups-create-form-is-exclusive" class="text-sm font-medium text-gray-700 dark:text-gray-300">
               {{ t("admin.groups.form.exclusive") }}
             </label>
             <!-- Help Tooltip -->
@@ -695,7 +695,7 @@
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <Toggle v-model="createForm.is_exclusive" />
+            <Toggle id="groups-create-form-is-exclusive" v-model="createForm.is_exclusive" />
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{
                 createForm.is_exclusive
@@ -709,10 +709,10 @@
         <!-- Subscription Configuration -->
         <div class="mt-4 border-t pt-4">
           <div>
-            <label class="input-label">{{
+            <label for="groups-create-form-subscription-type" class="input-label">{{
               t("admin.groups.subscription.type")
             }}</label>
-            <Select
+            <Select id="groups-create-form-subscription-type"
               v-model="createForm.subscription_type"
               :options="subscriptionTypeOptions"
             />
@@ -727,10 +727,10 @@
             class="space-y-4 border-l-2 border-primary-200 pl-4 dark:border-primary-800"
           >
             <div>
-              <label class="input-label">{{
+              <label for="groups-create-form-daily-limit-usd" class="input-label">{{
                 t("admin.groups.subscription.dailyLimit")
               }}</label>
-              <input
+              <input id="groups-create-form-daily-limit-usd"
                 v-model.number="createForm.daily_limit_usd"
                 type="number"
                 step="0.01"
@@ -740,10 +740,10 @@
               />
             </div>
             <div>
-              <label class="input-label">{{
+              <label for="groups-create-form-weekly-limit-usd" class="input-label">{{
                 t("admin.groups.subscription.weeklyLimit")
               }}</label>
-              <input
+              <input id="groups-create-form-weekly-limit-usd"
                 v-model.number="createForm.weekly_limit_usd"
                 type="number"
                 step="0.01"
@@ -753,10 +753,10 @@
               />
             </div>
             <div>
-              <label class="input-label">{{
+              <label for="groups-create-form-monthly-limit-usd" class="input-label">{{
                 t("admin.groups.subscription.monthlyLimit")
               }}</label>
-              <input
+              <input id="groups-create-form-monthly-limit-usd"
                 v-model.number="createForm.monthly_limit_usd"
                 type="number"
                 step="0.01"
@@ -771,14 +771,14 @@
         <div class="border-t pt-4">
           <div class="mb-3 flex items-center justify-between gap-3">
             <div>
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label for="groups-create-model-allowlist-state-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ t("admin.groups.modelAllowlist.title") }}
               </label>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ t("admin.groups.modelAllowlist.hint") }}
               </p>
             </div>
-            <Toggle v-model="createModelAllowlistState.enabled" />
+            <Toggle id="groups-create-model-allowlist-state-enabled" v-model="createModelAllowlistState.enabled" />
           </div>
           <div
             v-if="createModelAllowlistState.enabled"
@@ -830,7 +830,7 @@
                 :key="item.id"
                 class="flex items-center gap-2 rounded border border-gray-200 bg-white px-3 py-2 dark:border-dark-600 dark:bg-dark-800"
               >
-                <input
+                <input :aria-label="item.id"
                   v-model="item.selected"
                   type="checkbox"
                   class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
@@ -864,7 +864,7 @@
             </div>
             <div class="border-t border-gray-200 px-3 py-2 dark:border-dark-600">
               <div class="flex items-center gap-2">
-                <input
+                <input :aria-label="t('admin.groups.modelAllowlist.addCustom')"
                   v-model="createAllowlistCustomEntry"
                   type="text"
                   :placeholder="t('admin.groups.modelAllowlist.customPlaceholder')"
@@ -938,10 +938,10 @@
             v-if="createForm.image_rate_independent"
             class="mb-4"
           >
-            <label class="input-label">{{
+            <label for="groups-create-form-image-rate-multiplier" class="input-label">{{
               t(imagePricingI18nKey(createForm.platform, "imageMultiplier"))
             }}</label>
-            <input
+            <input id="groups-create-form-image-rate-multiplier"
               v-model.number="createForm.image_rate_multiplier"
               type="number"
               step="0.0001"
@@ -952,8 +952,8 @@
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="input-label">1K ($)</label>
-              <input
+              <label for="groups-create-form-image-price-1k" class="input-label">1K ($)</label>
+              <input id="groups-create-form-image-price-1k"
                 v-model.number="createForm.image_price_1k"
                 type="number"
                 step="0.001"
@@ -963,8 +963,8 @@
               />
             </div>
             <div>
-              <label class="input-label">2K ($)</label>
-              <input
+              <label for="groups-create-form-image-price-2k" class="input-label">2K ($)</label>
+              <input id="groups-create-form-image-price-2k"
                 v-model.number="createForm.image_price_2k"
                 type="number"
                 step="0.001"
@@ -974,8 +974,8 @@
               />
             </div>
             <div>
-              <label class="input-label">4K ($)</label>
-              <input
+              <label for="groups-create-form-image-price-4k" class="input-label">4K ($)</label>
+              <input id="groups-create-form-image-price-4k"
                 v-model.number="createForm.image_price_4k"
                 type="number"
                 step="0.001"
@@ -1020,10 +1020,10 @@
               class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2"
             >
               <div>
-                <label class="input-label">{{
+                <label for="groups-create-form-batch-image-discount-multiplier" class="input-label">{{
                   t("admin.groups.imagePricing.batchDiscountMultiplier")
                 }}</label>
-                <input
+                <input id="groups-create-form-batch-image-discount-multiplier"
                   v-model.number="createForm.batch_image_discount_multiplier"
                   type="number"
                   step="0.0001"
@@ -1033,10 +1033,10 @@
                 />
               </div>
               <div>
-                <label class="input-label">{{
+                <label for="groups-create-form-batch-image-hold-multiplier" class="input-label">{{
                   t("admin.groups.imagePricing.batchHoldMultiplier")
                 }}</label>
-                <input
+                <input id="groups-create-form-batch-image-hold-multiplier"
                   v-model.number="createForm.batch_image_hold_multiplier"
                   type="number"
                   step="0.0001"
@@ -1082,10 +1082,10 @@
             v-if="createForm.video_rate_independent"
             class="mb-4"
           >
-            <label class="input-label">{{
+            <label for="groups-create-form-video-rate-multiplier" class="input-label">{{
               t(videoPricingI18nKey("videoMultiplier"))
             }}</label>
-            <input
+            <input id="groups-create-form-video-rate-multiplier"
               v-model.number="createForm.video_rate_multiplier"
               type="number"
               step="0.0001"
@@ -1096,8 +1096,8 @@
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="input-label">480p ($/s)</label>
-              <input
+              <label for="groups-create-form-video-price-480p" class="input-label">480p ($/s)</label>
+              <input id="groups-create-form-video-price-480p"
                 v-model.number="createForm.video_price_480p"
                 type="number"
                 step="0.001"
@@ -1107,8 +1107,8 @@
               />
             </div>
             <div>
-              <label class="input-label">720p ($/s)</label>
-              <input
+              <label for="groups-create-form-video-price-720p" class="input-label">720p ($/s)</label>
+              <input id="groups-create-form-video-price-720p"
                 v-model.number="createForm.video_price_720p"
                 type="number"
                 step="0.001"
@@ -1118,8 +1118,8 @@
               />
             </div>
             <div>
-              <label class="input-label">1080p ($/s)</label>
-              <input
+              <label for="groups-create-form-video-price-1080p" class="input-label">1080p ($/s)</label>
+              <input id="groups-create-form-video-price-1080p"
                 v-model.number="createForm.video_price_1080p"
                 type="number"
                 step="0.001"
@@ -1203,24 +1203,24 @@
             class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3"
           >
             <div>
-              <label class="input-label">{{ t("admin.groups.peakRate.peakStart") }}</label>
-              <input
+              <label for="groups-create-form-peak-start" class="input-label">{{ t("admin.groups.peakRate.peakStart") }}</label>
+              <input id="groups-create-form-peak-start"
                 v-model="createForm.peak_start"
                 type="time"
                 class="input"
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.peakRate.peakEnd") }}</label>
-              <input
+              <label for="groups-create-form-peak-end" class="input-label">{{ t("admin.groups.peakRate.peakEnd") }}</label>
+              <input id="groups-create-form-peak-end"
                 v-model="createForm.peak_end"
                 type="time"
                 class="input"
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.peakRate.peakMultiplier") }}</label>
-              <input
+              <label for="groups-create-form-peak-rate-multiplier" class="input-label">{{ t("admin.groups.peakRate.peakMultiplier") }}</label>
+              <input id="groups-create-form-peak-rate-multiplier"
                 v-model.number="createForm.peak_rate_multiplier"
                 type="number"
                 step="0.001"
@@ -1255,8 +1255,8 @@
             class="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2"
           >
             <div>
-              <label class="input-label">{{ t("admin.groups.profitControl.minMargin") }}</label>
-              <input
+              <label for="groups-create-form-profit-min-margin-percent" class="input-label">{{ t("admin.groups.profitControl.minMargin") }}</label>
+              <input id="groups-create-form-profit-min-margin-percent"
                 v-model.number="createForm.profit_min_margin_percent"
                 type="number"
                 step="0.1"
@@ -1268,8 +1268,8 @@
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.profitControl.safetyBuffer") }}</label>
-              <input
+              <label for="groups-create-form-profit-safety-buffer-percent" class="input-label">{{ t("admin.groups.profitControl.safetyBuffer") }}</label>
+              <input id="groups-create-form-profit-safety-buffer-percent"
                 v-model.number="createForm.profit_safety_buffer_percent"
                 type="number"
                 step="0.1"
@@ -1360,7 +1360,7 @@
         <!-- MCP XML 协议注入（仅 antigravity 平台） -->
         <div v-if="createForm.platform === 'antigravity'" class="border-t pt-4">
           <div class="mb-1.5 flex items-center gap-1">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label for="groups-create-form-mcp-xml-inject" class="text-sm font-medium text-gray-700 dark:text-gray-300">
               {{ t("admin.groups.mcpXml.title") }}
             </label>
             <div class="group relative inline-flex">
@@ -1387,7 +1387,7 @@
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <Toggle v-model="createForm.mcp_xml_inject" />
+            <Toggle id="groups-create-form-mcp-xml-inject" v-model="createForm.mcp_xml_inject" />
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{
                 createForm.mcp_xml_inject
@@ -1429,7 +1429,7 @@
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <Toggle v-model="createForm.claude_code_only" />
+            <Toggle :aria-label="t('admin.groups.claudeCode.title')" v-model="createForm.claude_code_only" />
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{
                 createForm.claude_code_only
@@ -1440,10 +1440,10 @@
           </div>
           <!-- 降级分组选择（仅当启用 claude_code_only 时显示） -->
           <div v-if="createForm.claude_code_only" class="mt-3">
-            <label class="input-label">{{
+            <label for="groups-create-form-fallback-group-id" class="input-label">{{
               t("admin.groups.claudeCode.fallbackGroup")
             }}</label>
-            <Select
+            <Select id="groups-create-form-fallback-group-id"
               v-model="createForm.fallback_group_id"
               :options="fallbackGroupOptions"
               :placeholder="t('admin.groups.claudeCode.noFallback')"
@@ -1463,10 +1463,10 @@
             {{ t("admin.groups.webSearchPricing.title") }}
           </h4>
           <div>
-            <label class="input-label">{{
+            <label for="groups-create-form-web-search-price-per-call" class="input-label">{{
               t("admin.groups.webSearchPricing.pricePerCall")
             }}</label>
-            <input
+            <input id="groups-create-form-web-search-price-per-call"
               v-model.number="createForm.web_search_price_per_call"
               type="number"
               step="0.001"
@@ -1522,8 +1522,8 @@
           </p>
           <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div>
-              <label class="input-label">{{ t("admin.groups.explicitPricing.searchPricePer1k") }}</label>
-              <input
+              <label for="groups-create-form-search-price-per-1k" class="input-label">{{ t("admin.groups.explicitPricing.searchPricePer1k") }}</label>
+              <input id="groups-create-form-search-price-per-1k"
                 v-model.number="createForm.search_price_per_1k"
                 type="number"
                 step="0.000001"
@@ -1534,8 +1534,8 @@
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.voicePricing.audioRealtimePerMin") }}</label>
-              <input
+              <label for="groups-create-form-audio-realtime-price-per-min" class="input-label">{{ t("admin.groups.voicePricing.audioRealtimePerMin") }}</label>
+              <input id="groups-create-form-audio-realtime-price-per-min"
                 v-model.number="createForm.audio_realtime_price_per_min"
                 type="number"
                 step="0.000001"
@@ -1546,8 +1546,8 @@
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.voicePricing.audioTtsPerMillionChars") }}</label>
-              <input
+              <label for="groups-create-form-audio-tts-price-per-million-chars" class="input-label">{{ t("admin.groups.voicePricing.audioTtsPerMillionChars") }}</label>
+              <input id="groups-create-form-audio-tts-price-per-million-chars"
                 v-model.number="createForm.audio_tts_price_per_million_chars"
                 type="number"
                 step="0.000001"
@@ -1558,8 +1558,8 @@
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.voicePricing.audioSttPerHour") }}</label>
-              <input
+              <label for="groups-create-form-audio-stt-price-per-hour" class="input-label">{{ t("admin.groups.voicePricing.audioSttPerHour") }}</label>
+              <input id="groups-create-form-audio-stt-price-per-hour"
                 v-model.number="createForm.audio_stt_price_per_hour"
                 type="number"
                 step="0.000001"
@@ -1580,10 +1580,10 @@
             {{ t("admin.groups.openaiFast.title") }}
           </h4>
           <div class="flex items-center justify-between gap-4">
-            <label class="text-sm text-gray-600 dark:text-gray-400">
+            <label for="groups-create-form-force-openai-fast" class="text-sm text-gray-600 dark:text-gray-400">
               {{ t("admin.groups.openaiFast.force") }}
             </label>
-            <Toggle
+            <Toggle id="groups-create-form-force-openai-fast"
               data-testid="create-force-openai-fast"
               :aria-label="t('admin.groups.openaiFast.force')"
               v-model="createForm.force_openai_fast"
@@ -1593,10 +1593,10 @@
             {{ t("admin.groups.openaiFast.hint") }}
           </p>
           <div class="flex items-center justify-between gap-4 mt-4">
-            <label class="text-sm text-gray-600 dark:text-gray-400">
+            <label for="groups-create-form-free-openai-fast" class="text-sm text-gray-600 dark:text-gray-400">
               {{ t("admin.groups.openaiFast.free") }}
             </label>
-            <Toggle
+            <Toggle id="groups-create-form-free-openai-fast"
               data-testid="create-free-openai-fast"
               :aria-label="t('admin.groups.openaiFast.free')"
               v-model="createForm.free_openai_fast"
@@ -1616,10 +1616,10 @@
             {{ t("admin.groups.openaiLive.title") }}
           </h4>
           <div class="flex items-center justify-between">
-            <label class="text-sm text-gray-600 dark:text-gray-400">{{
+            <label for="groups-create-form-allow-live" class="text-sm text-gray-600 dark:text-gray-400">{{
               t("admin.groups.openaiLive.allow")
             }}</label>
-            <Toggle
+            <Toggle id="groups-create-form-allow-live"
               :model-value="createForm.allow_live"
               @update:model-value="toggleLive('create')"
             />
@@ -1640,10 +1640,10 @@
 
           <!-- 允许 Messages 调度开关 -->
           <div class="flex items-center justify-between">
-            <label class="text-sm text-gray-600 dark:text-gray-400">{{
+            <label for="groups-create-form-allow-messages-dispatch" class="text-sm text-gray-600 dark:text-gray-400">{{
               t("admin.groups.openaiMessages.allowDispatch")
             }}</label>
-            <Toggle v-model="createForm.allow_messages_dispatch" />
+            <Toggle id="groups-create-form-allow-messages-dispatch" v-model="createForm.allow_messages_dispatch" />
           </div>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {{ t("admin.groups.openaiMessages.allowDispatchHint") }}
@@ -1678,10 +1678,10 @@
               <div class="p-4">
                 <div class="grid gap-4 md:grid-cols-3">
                   <div>
-                    <label class="input-label">{{
+                    <label for="groups-create-form-opus-mapped-model" class="input-label">{{
                       t("admin.groups.openaiMessages.opusModel")
                     }}</label>
-                    <input
+                    <input id="groups-create-form-opus-mapped-model"
                       v-model="createForm.opus_mapped_model"
                       type="text"
                       :placeholder="
@@ -1691,10 +1691,10 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="groups-create-form-sonnet-mapped-model" class="input-label">{{
                       t("admin.groups.openaiMessages.sonnetModel")
                     }}</label>
-                    <input
+                    <input id="groups-create-form-sonnet-mapped-model"
                       v-model="createForm.sonnet_mapped_model"
                       type="text"
                       :placeholder="
@@ -1704,10 +1704,10 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="groups-create-form-haiku-mapped-model" class="input-label">{{
                       t("admin.groups.openaiMessages.haikuModel")
                     }}</label>
-                    <input
+                    <input id="groups-create-form-haiku-mapped-model"
                       v-model="createForm.haiku_mapped_model"
                       type="text"
                       :placeholder="
@@ -1775,10 +1775,10 @@
                         class="grid flex-1 gap-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-start"
                       >
                         <div>
-                          <label class="input-label">{{
+                          <label :for="`groups-create-dispatch-source-${getCreateMessagesDispatchRowKey(row)}`" class="input-label">{{
                             t("admin.groups.openaiMessages.claudeModel")
                           }}</label>
-                          <input
+                          <input :id="`groups-create-dispatch-source-${getCreateMessagesDispatchRowKey(row)}`"
                             v-model="row.claude_model"
                             type="text"
                             :placeholder="
@@ -1799,10 +1799,10 @@
                           />
                         </div>
                         <div>
-                          <label class="input-label">{{
+                          <label :for="`groups-create-dispatch-target-${getCreateMessagesDispatchRowKey(row)}`" class="input-label">{{
                             t("admin.groups.openaiMessages.targetModel")
                           }}</label>
-                          <input
+                          <input :id="`groups-create-dispatch-target-${getCreateMessagesDispatchRowKey(row)}`"
                             v-model="row.target_model"
                             type="text"
                             :placeholder="
@@ -1857,7 +1857,7 @@
           <!-- require_oauth_only toggle -->
           <div class="flex items-center justify-between">
             <div>
-              <label class="text-sm text-gray-600 dark:text-gray-400"
+              <label for="groups-create-form-require-oauth-only" class="text-sm text-gray-600 dark:text-gray-400"
                 >{{ t("admin.groups.accountFilters.oauthOnly") }}</label
               >
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -1868,13 +1868,13 @@
                 }}
               </p>
             </div>
-            <Toggle v-model="createForm.require_oauth_only" />
+            <Toggle id="groups-create-form-require-oauth-only" v-model="createForm.require_oauth_only" />
           </div>
 
           <!-- require_privacy_set toggle -->
           <div class="flex items-center justify-between">
             <div>
-              <label class="text-sm text-gray-600 dark:text-gray-400"
+              <label for="groups-create-form-require-privacy-set" class="text-sm text-gray-600 dark:text-gray-400"
                 >{{ t("admin.groups.accountFilters.privacySetOnly") }}</label
               >
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -1885,7 +1885,7 @@
                 }}
               </p>
             </div>
-            <Toggle v-model="createForm.require_privacy_set" />
+            <Toggle id="groups-create-form-require-privacy-set" v-model="createForm.require_privacy_set" />
           </div>
         </div>
 
@@ -1897,10 +1897,10 @@
           "
           class="border-t pt-4"
         >
-          <label class="input-label">{{
+          <label for="groups-create-form-fallback-group-id-on-invalid-request" class="input-label">{{
             t("admin.groups.invalidRequestFallback.title")
           }}</label>
-          <Select
+          <Select id="groups-create-form-fallback-group-id-on-invalid-request"
             v-model="createForm.fallback_group_id_on_invalid_request"
             :options="invalidRequestFallbackOptions"
             :placeholder="t('admin.groups.invalidRequestFallback.noFallback')"
@@ -1942,7 +1942,7 @@
           </div>
           <!-- 启用开关 -->
           <div class="flex items-center gap-3 mb-3">
-            <Toggle v-model="createForm.model_routing_enabled" />
+            <Toggle :aria-label="t('admin.groups.modelRouting.title')" v-model="createForm.model_routing_enabled" />
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{
                 createForm.model_routing_enabled
@@ -1970,10 +1970,10 @@
               <div class="flex items-start gap-3">
                 <div class="flex-1 space-y-2">
                   <div>
-                    <label class="input-label text-xs">{{
+                    <label :for="`groups-create-routing-pattern-${getCreateRuleRenderKey(rule)}`" class="input-label text-xs">{{
                       t("admin.groups.modelRouting.modelPattern")
                     }}</label>
-                    <input
+                    <input :id="`groups-create-routing-pattern-${getCreateRuleRenderKey(rule)}`"
                       v-model="rule.pattern"
                       type="text"
                       class="input text-sm"
@@ -1983,7 +1983,7 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label text-xs">{{
+                    <label :for="`groups-create-routing-account-${getCreateRuleRenderKey(rule)}`" class="input-label text-xs">{{
                       t("admin.groups.modelRouting.accounts")
                     }}</label>
                     <!-- 已选账号标签 -->
@@ -2008,7 +2008,7 @@
                     </div>
                     <!-- 账号搜索输入框 -->
                     <div class="relative account-search-container">
-                      <input
+                      <input :id="`groups-create-routing-account-${getCreateRuleRenderKey(rule)}`"
                         v-model="
                           accountSearchKeyword[getCreateRuleSearchKey(rule)]
                         "
@@ -2161,10 +2161,10 @@
           />
         </div>
         <div>
-          <label class="input-label">{{
+          <label for="groups-edit-form-platform" class="input-label">{{
             t("admin.groups.form.platform")
           }}</label>
-          <Select
+          <Select id="groups-edit-form-platform"
             v-model="editForm.platform"
             :options="platformOptions"
             :disabled="true"
@@ -2176,7 +2176,7 @@
         <!-- 从分组复制账号（编辑时） -->
         <div v-if="copyAccountsGroupOptionsForEdit.length > 0">
           <div class="mb-1.5 flex items-center gap-1">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label for="groups-edit-group-form-admin-groups-copy-accounts-title" class="text-sm font-medium text-gray-700 dark:text-gray-300">
               {{ t("admin.groups.copyAccounts.title") }}
             </label>
             <div class="group relative inline-flex">
@@ -2231,7 +2231,7 @@
             </span>
           </div>
           <!-- 分组选择下拉 -->
-          <select
+          <select id="groups-edit-group-form-admin-groups-copy-accounts-title"
             class="input"
             @change="
               (e) => {
@@ -2265,10 +2265,10 @@
           </p>
         </div>
         <div>
-          <label class="input-label">{{
+          <label for="groups-edit-form-rate-multiplier" class="input-label">{{
             t("admin.groups.form.rateMultiplier")
           }}</label>
-          <input
+          <input id="groups-edit-form-rate-multiplier"
             v-model.number="editForm.rate_multiplier"
             type="number"
             step="0.001"
@@ -2279,8 +2279,8 @@
           />
         </div>
         <div>
-          <label class="input-label">{{ t("admin.groups.form.rpmLimit") }}</label>
-          <input
+          <label for="groups-edit-form-rpm-limit" class="input-label">{{ t("admin.groups.form.rpmLimit") }}</label>
+          <input id="groups-edit-form-rpm-limit"
             v-model.number="editForm.rpm_limit"
             type="number"
             min="0"
@@ -2301,7 +2301,7 @@
         />
         <div v-if="editForm.subscription_type !== 'subscription'">
           <div class="mb-1.5 flex items-center gap-1">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label for="groups-edit-form-is-exclusive" class="text-sm font-medium text-gray-700 dark:text-gray-300">
               {{ t("admin.groups.form.exclusive") }}
             </label>
             <!-- Help Tooltip -->
@@ -2344,7 +2344,7 @@
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <Toggle v-model="editForm.is_exclusive" />
+            <Toggle id="groups-edit-form-is-exclusive" v-model="editForm.is_exclusive" />
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{
                 editForm.is_exclusive
@@ -2355,17 +2355,17 @@
           </div>
         </div>
         <div>
-          <label class="input-label">{{ t("admin.groups.form.status") }}</label>
-          <Select v-model="editForm.status" :options="editStatusOptions" />
+          <label for="groups-edit-form-status" class="input-label">{{ t("admin.groups.form.status") }}</label>
+          <Select id="groups-edit-form-status" v-model="editForm.status" :options="editStatusOptions" />
         </div>
 
         <!-- Subscription Configuration -->
         <div class="mt-4 border-t pt-4">
           <div>
-            <label class="input-label">{{
+            <label for="groups-edit-form-subscription-type" class="input-label">{{
               t("admin.groups.subscription.type")
             }}</label>
-            <Select
+            <Select id="groups-edit-form-subscription-type"
               v-model="editForm.subscription_type"
               :options="subscriptionTypeOptions"
               :disabled="true"
@@ -2381,10 +2381,10 @@
             class="space-y-4 border-l-2 border-primary-200 pl-4 dark:border-primary-800"
           >
             <div>
-              <label class="input-label">{{
+              <label for="groups-edit-form-daily-limit-usd" class="input-label">{{
                 t("admin.groups.subscription.dailyLimit")
               }}</label>
-              <input
+              <input id="groups-edit-form-daily-limit-usd"
                 v-model.number="editForm.daily_limit_usd"
                 type="number"
                 step="0.01"
@@ -2394,10 +2394,10 @@
               />
             </div>
             <div>
-              <label class="input-label">{{
+              <label for="groups-edit-form-weekly-limit-usd" class="input-label">{{
                 t("admin.groups.subscription.weeklyLimit")
               }}</label>
-              <input
+              <input id="groups-edit-form-weekly-limit-usd"
                 v-model.number="editForm.weekly_limit_usd"
                 type="number"
                 step="0.01"
@@ -2407,10 +2407,10 @@
               />
             </div>
             <div>
-              <label class="input-label">{{
+              <label for="groups-edit-form-monthly-limit-usd" class="input-label">{{
                 t("admin.groups.subscription.monthlyLimit")
               }}</label>
-              <input
+              <input id="groups-edit-form-monthly-limit-usd"
                 v-model.number="editForm.monthly_limit_usd"
                 type="number"
                 step="0.01"
@@ -2425,14 +2425,14 @@
         <div class="border-t pt-4">
           <div class="mb-3 flex items-center justify-between gap-3">
             <div>
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label for="groups-edit-model-allowlist-state-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ t("admin.groups.modelAllowlist.title") }}
               </label>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ t("admin.groups.modelAllowlist.hint") }}
               </p>
             </div>
-            <Toggle v-model="editModelAllowlistState.enabled" />
+            <Toggle id="groups-edit-model-allowlist-state-enabled" v-model="editModelAllowlistState.enabled" />
           </div>
           <div
             v-if="editModelAllowlistState.enabled"
@@ -2484,7 +2484,7 @@
                 :key="item.id"
                 class="flex items-center gap-2 rounded border border-gray-200 bg-white px-3 py-2 dark:border-dark-600 dark:bg-dark-800"
               >
-                <input
+                <input :aria-label="item.id"
                   v-model="item.selected"
                   type="checkbox"
                   class="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
@@ -2518,7 +2518,7 @@
             </div>
             <div class="border-t border-gray-200 px-3 py-2 dark:border-dark-600">
               <div class="flex items-center gap-2">
-                <input
+                <input :aria-label="t('admin.groups.modelAllowlist.addCustom')"
                   v-model="editAllowlistCustomEntry"
                   type="text"
                   :placeholder="t('admin.groups.modelAllowlist.customPlaceholder')"
@@ -2592,10 +2592,10 @@
             v-if="editForm.image_rate_independent"
             class="mb-4"
           >
-            <label class="input-label">{{
+            <label for="groups-edit-form-image-rate-multiplier" class="input-label">{{
               t(imagePricingI18nKey(editForm.platform, "imageMultiplier"))
             }}</label>
-            <input
+            <input id="groups-edit-form-image-rate-multiplier"
               v-model.number="editForm.image_rate_multiplier"
               type="number"
               step="0.0001"
@@ -2606,8 +2606,8 @@
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="input-label">1K ($)</label>
-              <input
+              <label for="groups-edit-form-image-price-1k" class="input-label">1K ($)</label>
+              <input id="groups-edit-form-image-price-1k"
                 v-model.number="editForm.image_price_1k"
                 type="number"
                 step="0.001"
@@ -2617,8 +2617,8 @@
               />
             </div>
             <div>
-              <label class="input-label">2K ($)</label>
-              <input
+              <label for="groups-edit-form-image-price-2k" class="input-label">2K ($)</label>
+              <input id="groups-edit-form-image-price-2k"
                 v-model.number="editForm.image_price_2k"
                 type="number"
                 step="0.001"
@@ -2628,8 +2628,8 @@
               />
             </div>
             <div>
-              <label class="input-label">4K ($)</label>
-              <input
+              <label for="groups-edit-form-image-price-4k" class="input-label">4K ($)</label>
+              <input id="groups-edit-form-image-price-4k"
                 v-model.number="editForm.image_price_4k"
                 type="number"
                 step="0.001"
@@ -2674,10 +2674,10 @@
               class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2"
             >
               <div>
-                <label class="input-label">{{
+                <label for="groups-edit-form-batch-image-discount-multiplier" class="input-label">{{
                   t("admin.groups.imagePricing.batchDiscountMultiplier")
                 }}</label>
-                <input
+                <input id="groups-edit-form-batch-image-discount-multiplier"
                   v-model.number="editForm.batch_image_discount_multiplier"
                   type="number"
                   step="0.0001"
@@ -2687,10 +2687,10 @@
                 />
               </div>
               <div>
-                <label class="input-label">{{
+                <label for="groups-edit-form-batch-image-hold-multiplier" class="input-label">{{
                   t("admin.groups.imagePricing.batchHoldMultiplier")
                 }}</label>
-                <input
+                <input id="groups-edit-form-batch-image-hold-multiplier"
                   v-model.number="editForm.batch_image_hold_multiplier"
                   type="number"
                   step="0.0001"
@@ -2736,10 +2736,10 @@
             v-if="editForm.video_rate_independent"
             class="mb-4"
           >
-            <label class="input-label">{{
+            <label for="groups-edit-form-video-rate-multiplier" class="input-label">{{
               t(videoPricingI18nKey("videoMultiplier"))
             }}</label>
-            <input
+            <input id="groups-edit-form-video-rate-multiplier"
               v-model.number="editForm.video_rate_multiplier"
               type="number"
               step="0.0001"
@@ -2750,8 +2750,8 @@
           </div>
           <div class="grid grid-cols-3 gap-3">
             <div>
-              <label class="input-label">480p ($/s)</label>
-              <input
+              <label for="groups-edit-form-video-price-480p" class="input-label">480p ($/s)</label>
+              <input id="groups-edit-form-video-price-480p"
                 v-model.number="editForm.video_price_480p"
                 type="number"
                 step="0.001"
@@ -2761,8 +2761,8 @@
               />
             </div>
             <div>
-              <label class="input-label">720p ($/s)</label>
-              <input
+              <label for="groups-edit-form-video-price-720p" class="input-label">720p ($/s)</label>
+              <input id="groups-edit-form-video-price-720p"
                 v-model.number="editForm.video_price_720p"
                 type="number"
                 step="0.001"
@@ -2772,8 +2772,8 @@
               />
             </div>
             <div>
-              <label class="input-label">1080p ($/s)</label>
-              <input
+              <label for="groups-edit-form-video-price-1080p" class="input-label">1080p ($/s)</label>
+              <input id="groups-edit-form-video-price-1080p"
                 v-model.number="editForm.video_price_1080p"
                 type="number"
                 step="0.001"
@@ -2857,24 +2857,24 @@
             class="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-3"
           >
             <div>
-              <label class="input-label">{{ t("admin.groups.peakRate.peakStart") }}</label>
-              <input
+              <label for="groups-edit-form-peak-start" class="input-label">{{ t("admin.groups.peakRate.peakStart") }}</label>
+              <input id="groups-edit-form-peak-start"
                 v-model="editForm.peak_start"
                 type="time"
                 class="input"
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.peakRate.peakEnd") }}</label>
-              <input
+              <label for="groups-edit-form-peak-end" class="input-label">{{ t("admin.groups.peakRate.peakEnd") }}</label>
+              <input id="groups-edit-form-peak-end"
                 v-model="editForm.peak_end"
                 type="time"
                 class="input"
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.peakRate.peakMultiplier") }}</label>
-              <input
+              <label for="groups-edit-form-peak-rate-multiplier" class="input-label">{{ t("admin.groups.peakRate.peakMultiplier") }}</label>
+              <input id="groups-edit-form-peak-rate-multiplier"
                 v-model.number="editForm.peak_rate_multiplier"
                 type="number"
                 step="0.001"
@@ -2909,8 +2909,8 @@
             class="mb-3 grid grid-cols-1 gap-3 sm:grid-cols-2"
           >
             <div>
-              <label class="input-label">{{ t("admin.groups.profitControl.minMargin") }}</label>
-              <input
+              <label for="groups-edit-form-profit-min-margin-percent" class="input-label">{{ t("admin.groups.profitControl.minMargin") }}</label>
+              <input id="groups-edit-form-profit-min-margin-percent"
                 v-model.number="editForm.profit_min_margin_percent"
                 type="number"
                 step="0.1"
@@ -2922,8 +2922,8 @@
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.profitControl.safetyBuffer") }}</label>
-              <input
+              <label for="groups-edit-form-profit-safety-buffer-percent" class="input-label">{{ t("admin.groups.profitControl.safetyBuffer") }}</label>
+              <input id="groups-edit-form-profit-safety-buffer-percent"
                 v-model.number="editForm.profit_safety_buffer_percent"
                 type="number"
                 step="0.1"
@@ -3014,7 +3014,7 @@
         <!-- MCP XML 协议注入（仅 antigravity 平台） -->
         <div v-if="editForm.platform === 'antigravity'" class="border-t pt-4">
           <div class="mb-1.5 flex items-center gap-1">
-            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+            <label for="groups-edit-form-mcp-xml-inject" class="text-sm font-medium text-gray-700 dark:text-gray-300">
               {{ t("admin.groups.mcpXml.title") }}
             </label>
             <div class="group relative inline-flex">
@@ -3041,7 +3041,7 @@
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <Toggle v-model="editForm.mcp_xml_inject" />
+            <Toggle id="groups-edit-form-mcp-xml-inject" v-model="editForm.mcp_xml_inject" />
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{
                 editForm.mcp_xml_inject
@@ -3083,7 +3083,7 @@
             </div>
           </div>
           <div class="flex items-center gap-3">
-            <Toggle v-model="editForm.claude_code_only" />
+            <Toggle :aria-label="t('admin.groups.claudeCode.title')" v-model="editForm.claude_code_only" />
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{
                 editForm.claude_code_only
@@ -3094,10 +3094,10 @@
           </div>
           <!-- 降级分组选择（仅当启用 claude_code_only 时显示） -->
           <div v-if="editForm.claude_code_only" class="mt-3">
-            <label class="input-label">{{
+            <label for="groups-edit-form-fallback-group-id" class="input-label">{{
               t("admin.groups.claudeCode.fallbackGroup")
             }}</label>
-            <Select
+            <Select id="groups-edit-form-fallback-group-id"
               v-model="editForm.fallback_group_id"
               :options="fallbackGroupOptionsForEdit"
               :placeholder="t('admin.groups.claudeCode.noFallback')"
@@ -3117,10 +3117,10 @@
             {{ t("admin.groups.webSearchPricing.title") }}
           </h4>
           <div>
-            <label class="input-label">{{
+            <label for="groups-edit-form-web-search-price-per-call" class="input-label">{{
               t("admin.groups.webSearchPricing.pricePerCall")
             }}</label>
-            <input
+            <input id="groups-edit-form-web-search-price-per-call"
               v-model.number="editForm.web_search_price_per_call"
               type="number"
               step="0.001"
@@ -3186,8 +3186,8 @@
           </p>
           <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
             <div>
-              <label class="input-label">{{ t("admin.groups.explicitPricing.searchPricePer1k") }}</label>
-              <input
+              <label for="groups-edit-form-search-price-per-1k" class="input-label">{{ t("admin.groups.explicitPricing.searchPricePer1k") }}</label>
+              <input id="groups-edit-form-search-price-per-1k"
                 v-model.number="editForm.search_price_per_1k"
                 type="number"
                 step="0.000001"
@@ -3198,8 +3198,8 @@
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.voicePricing.audioRealtimePerMin") }}</label>
-              <input
+              <label for="groups-edit-form-audio-realtime-price-per-min" class="input-label">{{ t("admin.groups.voicePricing.audioRealtimePerMin") }}</label>
+              <input id="groups-edit-form-audio-realtime-price-per-min"
                 v-model.number="editForm.audio_realtime_price_per_min"
                 type="number"
                 step="0.000001"
@@ -3210,8 +3210,8 @@
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.voicePricing.audioTtsPerMillionChars") }}</label>
-              <input
+              <label for="groups-edit-form-audio-tts-price-per-million-chars" class="input-label">{{ t("admin.groups.voicePricing.audioTtsPerMillionChars") }}</label>
+              <input id="groups-edit-form-audio-tts-price-per-million-chars"
                 v-model.number="editForm.audio_tts_price_per_million_chars"
                 type="number"
                 step="0.000001"
@@ -3222,8 +3222,8 @@
               />
             </div>
             <div>
-              <label class="input-label">{{ t("admin.groups.voicePricing.audioSttPerHour") }}</label>
-              <input
+              <label for="groups-edit-form-audio-stt-price-per-hour" class="input-label">{{ t("admin.groups.voicePricing.audioSttPerHour") }}</label>
+              <input id="groups-edit-form-audio-stt-price-per-hour"
                 v-model.number="editForm.audio_stt_price_per_hour"
                 type="number"
                 step="0.000001"
@@ -3244,10 +3244,10 @@
             {{ t("admin.groups.openaiFast.title") }}
           </h4>
           <div class="flex items-center justify-between gap-4">
-            <label class="text-sm text-gray-600 dark:text-gray-400">
+            <label for="groups-edit-form-force-openai-fast" class="text-sm text-gray-600 dark:text-gray-400">
               {{ t("admin.groups.openaiFast.force") }}
             </label>
-            <Toggle
+            <Toggle id="groups-edit-form-force-openai-fast"
               data-testid="edit-force-openai-fast"
               :aria-label="t('admin.groups.openaiFast.force')"
               v-model="editForm.force_openai_fast"
@@ -3257,10 +3257,10 @@
             {{ t("admin.groups.openaiFast.hint") }}
           </p>
           <div class="flex items-center justify-between gap-4 mt-4">
-            <label class="text-sm text-gray-600 dark:text-gray-400">
+            <label for="groups-edit-form-free-openai-fast" class="text-sm text-gray-600 dark:text-gray-400">
               {{ t("admin.groups.openaiFast.free") }}
             </label>
-            <Toggle
+            <Toggle id="groups-edit-form-free-openai-fast"
               data-testid="edit-free-openai-fast"
               :aria-label="t('admin.groups.openaiFast.free')"
               v-model="editForm.free_openai_fast"
@@ -3280,10 +3280,10 @@
             {{ t("admin.groups.openaiLive.title") }}
           </h4>
           <div class="flex items-center justify-between">
-            <label class="text-sm text-gray-600 dark:text-gray-400">{{
+            <label for="groups-edit-form-allow-live" class="text-sm text-gray-600 dark:text-gray-400">{{
               t("admin.groups.openaiLive.allow")
             }}</label>
-            <Toggle
+            <Toggle id="groups-edit-form-allow-live"
               :model-value="editForm.allow_live"
               @update:model-value="toggleLive('edit')"
             />
@@ -3304,10 +3304,10 @@
 
           <!-- 允许 Messages 调度开关 -->
           <div class="flex items-center justify-between">
-            <label class="text-sm text-gray-600 dark:text-gray-400">{{
+            <label for="groups-edit-form-allow-messages-dispatch" class="text-sm text-gray-600 dark:text-gray-400">{{
               t("admin.groups.openaiMessages.allowDispatch")
             }}</label>
-            <Toggle v-model="editForm.allow_messages_dispatch" />
+            <Toggle id="groups-edit-form-allow-messages-dispatch" v-model="editForm.allow_messages_dispatch" />
           </div>
           <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
             {{ t("admin.groups.openaiMessages.allowDispatchHint") }}
@@ -3341,10 +3341,10 @@
               <div class="p-4">
                 <div class="grid gap-4 md:grid-cols-3">
                   <div>
-                    <label class="input-label">{{
+                    <label for="groups-edit-form-opus-mapped-model" class="input-label">{{
                       t("admin.groups.openaiMessages.opusModel")
                     }}</label>
-                    <input
+                    <input id="groups-edit-form-opus-mapped-model"
                       v-model="editForm.opus_mapped_model"
                       type="text"
                       :placeholder="
@@ -3354,10 +3354,10 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="groups-edit-form-sonnet-mapped-model" class="input-label">{{
                       t("admin.groups.openaiMessages.sonnetModel")
                     }}</label>
-                    <input
+                    <input id="groups-edit-form-sonnet-mapped-model"
                       v-model="editForm.sonnet_mapped_model"
                       type="text"
                       :placeholder="
@@ -3367,10 +3367,10 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="groups-edit-form-haiku-mapped-model" class="input-label">{{
                       t("admin.groups.openaiMessages.haikuModel")
                     }}</label>
-                    <input
+                    <input id="groups-edit-form-haiku-mapped-model"
                       v-model="editForm.haiku_mapped_model"
                       type="text"
                       :placeholder="
@@ -3438,10 +3438,10 @@
                         class="grid flex-1 gap-4 md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] md:items-start"
                       >
                         <div>
-                          <label class="input-label">{{
+                          <label :for="`groups-edit-dispatch-source-${getEditMessagesDispatchRowKey(row)}`" class="input-label">{{
                             t("admin.groups.openaiMessages.claudeModel")
                           }}</label>
-                          <input
+                          <input :id="`groups-edit-dispatch-source-${getEditMessagesDispatchRowKey(row)}`"
                             v-model="row.claude_model"
                             type="text"
                             :placeholder="
@@ -3462,10 +3462,10 @@
                           />
                         </div>
                         <div>
-                          <label class="input-label">{{
+                          <label :for="`groups-edit-dispatch-target-${getEditMessagesDispatchRowKey(row)}`" class="input-label">{{
                             t("admin.groups.openaiMessages.targetModel")
                           }}</label>
-                          <input
+                          <input :id="`groups-edit-dispatch-target-${getEditMessagesDispatchRowKey(row)}`"
                             v-model="row.target_model"
                             type="text"
                             :placeholder="
@@ -3520,7 +3520,7 @@
           <!-- require_oauth_only toggle -->
           <div class="flex items-center justify-between">
             <div>
-              <label class="text-sm text-gray-600 dark:text-gray-400"
+              <label for="groups-edit-form-require-oauth-only" class="text-sm text-gray-600 dark:text-gray-400"
                 >{{ t("admin.groups.accountFilters.oauthOnly") }}</label
               >
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -3531,13 +3531,13 @@
                 }}
               </p>
             </div>
-            <Toggle v-model="editForm.require_oauth_only" />
+            <Toggle id="groups-edit-form-require-oauth-only" v-model="editForm.require_oauth_only" />
           </div>
 
           <!-- require_privacy_set toggle -->
           <div class="flex items-center justify-between">
             <div>
-              <label class="text-sm text-gray-600 dark:text-gray-400"
+              <label for="groups-edit-form-require-privacy-set" class="text-sm text-gray-600 dark:text-gray-400"
                 >{{ t("admin.groups.accountFilters.privacySetOnly") }}</label
               >
               <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
@@ -3548,7 +3548,7 @@
                 }}
               </p>
             </div>
-            <Toggle v-model="editForm.require_privacy_set" />
+            <Toggle id="groups-edit-form-require-privacy-set" v-model="editForm.require_privacy_set" />
           </div>
         </div>
 
@@ -3560,10 +3560,10 @@
           "
           class="border-t pt-4"
         >
-          <label class="input-label">{{
+          <label for="groups-edit-form-fallback-group-id-on-invalid-request" class="input-label">{{
             t("admin.groups.invalidRequestFallback.title")
           }}</label>
-          <Select
+          <Select id="groups-edit-form-fallback-group-id-on-invalid-request"
             v-model="editForm.fallback_group_id_on_invalid_request"
             :options="invalidRequestFallbackOptionsForEdit"
             :placeholder="t('admin.groups.invalidRequestFallback.noFallback')"
@@ -3605,7 +3605,7 @@
           </div>
           <!-- 启用开关 -->
           <div class="flex items-center gap-3 mb-3">
-            <Toggle v-model="editForm.model_routing_enabled" />
+            <Toggle :aria-label="t('admin.groups.modelRouting.title')" v-model="editForm.model_routing_enabled" />
             <span class="text-sm text-gray-500 dark:text-gray-400">
               {{
                 editForm.model_routing_enabled
@@ -3633,10 +3633,10 @@
               <div class="flex items-start gap-3">
                 <div class="flex-1 space-y-2">
                   <div>
-                    <label class="input-label text-xs">{{
+                    <label :for="`groups-edit-routing-pattern-${getEditRuleRenderKey(rule)}`" class="input-label text-xs">{{
                       t("admin.groups.modelRouting.modelPattern")
                     }}</label>
-                    <input
+                    <input :id="`groups-edit-routing-pattern-${getEditRuleRenderKey(rule)}`"
                       v-model="rule.pattern"
                       type="text"
                       class="input text-sm"
@@ -3646,7 +3646,7 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label text-xs">{{
+                    <label :for="`groups-edit-routing-account-${getEditRuleRenderKey(rule)}`" class="input-label text-xs">{{
                       t("admin.groups.modelRouting.accounts")
                     }}</label>
                     <!-- 已选账号标签 -->
@@ -3671,7 +3671,7 @@
                     </div>
                     <!-- 账号搜索输入框 -->
                     <div class="relative account-search-container">
-                      <input
+                      <input :id="`groups-edit-routing-account-${getEditRuleRenderKey(rule)}`"
                         v-model="
                           accountSearchKeyword[getEditRuleSearchKey(rule)]
                         "
@@ -3799,7 +3799,7 @@
       :cancel-text="t('common.cancel')"
       :danger="true"
       @confirm="confirmDelete"
-      @cancel="showDeleteDialog = false"
+      @cancel="closeDeleteDialog"
     />
 
     <ConfirmDialog
@@ -4069,10 +4069,10 @@
             </div>
 
             <div>
-              <label class="input-label">{{
+              <label for="groups-composite-route-form-public-model" class="input-label">{{
                 t("admin.groups.compositeRoutes.publicModel")
               }}</label>
-              <input
+              <input id="groups-composite-route-form-public-model"
                 v-model.trim="compositeRouteForm.public_model"
                 type="text"
                 class="input"
@@ -4083,19 +4083,19 @@
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label class="input-label">{{
+                <label for="groups-composite-route-form-match-type" class="input-label">{{
                   t("admin.groups.compositeRoutes.matchType")
                 }}</label>
-                <Select
+                <Select id="groups-composite-route-form-match-type"
                   v-model="compositeRouteForm.match_type"
                   :options="compositeRouteMatchOptions"
                 />
               </div>
               <div>
-                <label class="input-label">{{
+                <label for="groups-composite-route-form-endpoint" class="input-label">{{
                   t("admin.groups.compositeRoutes.endpoint")
                 }}</label>
-                <Select
+                <Select id="groups-composite-route-form-endpoint"
                   v-model="compositeRouteForm.endpoint"
                   :options="compositeRouteEndpointOptions"
                 />
@@ -4104,19 +4104,19 @@
 
             <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div>
-                <label class="input-label">{{
+                <label for="groups-composite-route-form-target-platform" class="input-label">{{
                   t("admin.groups.compositeRoutes.targetPlatform")
                 }}</label>
-                <Select
+                <Select id="groups-composite-route-form-target-platform"
                   v-model="compositeRouteForm.target_platform"
                   :options="compositeRoutePlatformOptions"
                 />
               </div>
               <div>
-                <label class="input-label">{{
+                <label for="groups-composite-route-form-priority" class="input-label">{{
                   t("admin.groups.compositeRoutes.priority")
                 }}</label>
-                <input
+                <input id="groups-composite-route-form-priority"
                   v-model.number="compositeRouteForm.priority"
                   type="number"
                   min="1"
@@ -4127,10 +4127,10 @@
             </div>
 
             <div>
-              <label class="input-label">{{
+              <label for="groups-composite-route-form-upstream-model" class="input-label">{{
                 t("admin.groups.compositeRoutes.upstreamModel")
               }}</label>
-              <input
+              <input id="groups-composite-route-form-upstream-model"
                 v-model.trim="compositeRouteForm.upstream_model"
                 type="text"
                 class="input"
@@ -4142,10 +4142,10 @@
             </div>
 
             <div>
-              <label class="input-label">{{
+              <label for="groups-composite-route-form-notes" class="input-label">{{
                 t("admin.groups.compositeRoutes.notes")
               }}</label>
-              <textarea
+              <textarea id="groups-composite-route-form-notes"
                 v-model.trim="compositeRouteForm.notes"
                 rows="2"
                 class="input"
@@ -4182,7 +4182,7 @@
               {{ t("admin.groups.compositeRoutes.preview") }}
             </h3>
             <div class="space-y-3">
-              <input
+              <input :aria-label="t('admin.groups.compositeRoutes.preview')"
                 v-model.trim="compositePreviewModel"
                 type="text"
                 class="input"
@@ -4190,7 +4190,7 @@
                 @keyup.enter="previewCompositeRoute"
               />
               <div class="flex gap-2">
-                <Select
+                <Select :aria-label="t('admin.groups.compositeRoutes.endpoint')"
                   v-model="compositePreviewEndpoint"
                   :options="compositeRouteEndpointOptions"
                   class="min-w-0 flex-1"
@@ -4295,7 +4295,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, defineAsyncComponent, onMounted, onUnmounted, watch } from "vue";
+import { ref, reactive, computed, defineAsyncComponent, onBeforeUnmount, onMounted, onUnmounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useAppStore } from "@/stores/app";
 import { useAuthStore } from "@/stores/auth";
@@ -4352,6 +4352,7 @@ import type { ChannelModelPricing } from "@/api/admin/channels";
 const VueDraggable = defineAsyncComponent(() => import("vue-draggable-plus").then(module => module.VueDraggable));
 import { createStableObjectKeyResolver } from "@/utils/stableObjectKey";
 import { extractApiErrorMessage } from "@/utils/apiError";
+import { createSessionTasks } from "@/utils/sessionTasks";
 import { useKeyedDebouncedSearch } from "@/composables/useKeyedDebouncedSearch";
 import { getPersistedPageSize } from "@/composables/usePersistedPageSize";
 import {
@@ -4484,6 +4485,8 @@ const groupPricingToAPI = (
 
 const { t } = useI18n();
 const appStore = useAppStore();
+const pageTasks = createSessionTasks();
+onBeforeUnmount(() => pageTasks.dispose());
 const authStore = useAuthStore();
 const onboardingStore = useOnboardingStore();
 
@@ -4855,6 +4858,10 @@ const sortState = reactive({
 let abortController: AbortController | null = null;
 
 const showCreateModal = ref(false);
+let createModalRevision = 0;
+let deleteModalRevision = 0;
+let sortModalRevision = 0;
+const deleteSubmitting = ref(false);
 const showEditModal = ref(false);
 const showDeleteDialog = ref(false);
 const pendingLiveForm = ref<"create" | "edit" | null>(null);
@@ -4870,6 +4877,7 @@ const showSortModal = ref(false);
 const submitting = ref(false);
 const sortSubmitting = ref(false);
 const editingGroup = ref<AdminGroup | null>(null);
+let editRequestId = 0;
 const deletingGroup = ref<AdminGroup | null>(null);
 const duplicatingGroupIds = reactive(new Set<number>());
 const showRateMultipliersModal = ref(false);
@@ -4890,6 +4898,8 @@ type CompositeRouteFormState = {
 };
 
 const showCompositeRoutesModal = ref(false);
+let compositeModalRevision = 0;
+const compositeDeletingRouteIds = reactive(new Set<number>());
 const compositeRoutesGroup = ref<AdminGroup | null>(null);
 const compositeRoutes = ref<CompositeModelRoute[]>([]);
 const compositeRoutesLoading = ref(false);
@@ -5642,12 +5652,16 @@ const cancelUnsupportedLive = () => {
 };
 
 const loadGroups = async () => {
+  if (!pageTasks.current()) return;
+  const task = pageTasks.begin("groups:list");
   if (abortController) {
     abortController.abort();
   }
   const currentController = new AbortController();
   abortController = currentController;
   const { signal } = currentController;
+  const abort = () => currentController.abort();
+  task.signal.addEventListener("abort", abort, { once: true });
   loading.value = true;
   try {
     const response = await adminAPI.groups.list(
@@ -5665,7 +5679,7 @@ const loadGroups = async () => {
       },
       { signal },
     );
-    if (signal.aborted) return;
+    if (signal.aborted || !task.active()) return;
     groups.value = response.items;
     pagination.total = response.total;
     pagination.pages = response.pages;
@@ -5679,7 +5693,7 @@ const loadGroups = async () => {
     }
   } catch (error: any) {
     if (
-      signal.aborted ||
+      !task.active() || signal.aborted ||
       error?.name === "AbortError" ||
       error?.code === "ERR_CANCELED"
     ) {
@@ -5691,6 +5705,8 @@ const loadGroups = async () => {
     if (abortController === currentController && !signal.aborted) {
       loading.value = false;
     }
+    task.signal.removeEventListener("abort", abort);
+    task.finish();
   }
 };
 
@@ -5805,11 +5821,16 @@ const handleSort = (key: string, order: 'asc' | 'desc') => {
 };
 
 const openCreateModal = () => {
+  if (!pageTasks.current()) return;
+  createModalRevision += 1;
+  submitting.value = false;
   showCreateModal.value = true;
   loadModelAllowlistCandidates("create", 0, createForm.platform);
 };
 
 const closeCreateModal = () => {
+  createModalRevision += 1;
+  submitting.value = false;
   showCreateModal.value = false;
   createModelRoutingRules.value.forEach((rule) => {
     accountSearchRunner.clearKey(getCreateRuleSearchKey(rule));
@@ -5873,6 +5894,7 @@ const closeCreateModal = () => {
   createForm.reasoning_effort_mappings = [];
   createReasoningEffortPolicyRef.value?.resetValidation();
   resetModelAllowlistState(createModelAllowlistState);
+  createForm.model_routing_enabled = false;
   createModelRoutingRules.value = [];
 };
 
@@ -5929,7 +5951,17 @@ const validateGroupReasoningMultipliers = (pricing: PricingFormEntry[]): boolean
   return true;
 };
 
+function groupFormDraft(mode: "create" | "edit") {
+  return JSON.stringify({
+    form: mode === "create" ? createForm : editForm,
+    routing: mode === "create" ? createModelRoutingRules.value : editModelRoutingRules.value,
+    allowlist: buildModelAllowlistConfig(mode === "create" ? createModelAllowlistState : editModelAllowlistState),
+    manifest: mode === "edit" ? editCodexManifestConfig.value : undefined,
+  });
+}
+
 const handleCreateGroup = async () => {
+  if (!pageTasks.current() || submitting.value || !showCreateModal.value) return;
   if (!createForm.name.trim()) {
     appStore.showError(t("admin.groups.nameRequired"));
     return;
@@ -5953,6 +5985,11 @@ const handleCreateGroup = async () => {
     appStore.showError(t("admin.groups.modelAllowlist.emptySelectionError"));
     return;
   }
+  const revision = createModalRevision;
+  const draft = groupFormDraft("create");
+  const task = pageTasks.begin("group:submit", () =>
+    showCreateModal.value && revision === createModalRevision && groupFormDraft("create") === draft,
+  );
   submitting.value = true;
   try {
     const {
@@ -6079,6 +6116,7 @@ const handleCreateGroup = async () => {
         }
       : requestData;
     await adminAPI.groups.create(payload);
+    if (!task.active()) return;
     appStore.showSuccess(t("admin.groups.groupCreated"));
     closeCreateModal();
     loadGroups();
@@ -6087,145 +6125,160 @@ const handleCreateGroup = async () => {
       onboardingStore.nextStep(500);
     }
   } catch (error: any) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(error, t("admin.groups.failedToCreate")),
     );
     console.error("Error creating group:", error);
     // Don't advance tour on error
   } finally {
-    submitting.value = false;
+    if (task.owned()) submitting.value = false;
+    task.finish();
   }
 };
 
 const handleEdit = async (group: AdminGroup) => {
-  editingGroup.value = group;
-  editForm.name = group.name;
-  editForm.description = group.description || "";
-  editForm.i18n = Object.fromEntries(
-    Object.entries(group.i18n ?? {}).map(([locale, text]) => [
-      locale,
-      { ...text },
-    ]),
-  );
-  editForm.platform = group.platform;
-  editForm.rate_multiplier = group.rate_multiplier;
-  editForm.is_exclusive = group.is_exclusive;
-  editForm.status = group.status;
-  editForm.subscription_type = group.subscription_type || "standard";
-  editForm.daily_limit_usd = group.daily_limit_usd;
-  editForm.weekly_limit_usd = group.weekly_limit_usd;
-  editForm.monthly_limit_usd = group.monthly_limit_usd;
-  editForm.long_context_pricing_enabled =
-    group.long_context_pricing_enabled ?? true;
-  editForm.force_openai_fast = group.force_openai_fast ?? false;
-  editForm.free_openai_fast = group.free_openai_fast ?? false;
-  editForm.model_pricing = groupPricingFromAPI(group.model_pricing);
-  editForm.allow_image_generation = group.allow_image_generation ?? false;
-  editForm.allow_batch_image_generation =
-    group.allow_batch_image_generation ?? false;
-  editForm.image_count_billing = group.image_count_billing ?? false;
-  editForm.image_rate_independent = group.image_rate_independent ?? false;
-  editForm.image_rate_multiplier = group.image_rate_multiplier ?? 1;
-  editForm.batch_image_discount_multiplier =
-    group.batch_image_discount_multiplier ?? 0.5;
-  editForm.batch_image_hold_multiplier = group.batch_image_hold_multiplier ?? 0.6;
-  editForm.image_price_1k = group.image_price_1k;
-  editForm.image_price_2k = group.image_price_2k;
-  editForm.image_price_4k = group.image_price_4k;
-  editForm.video_rate_independent = group.video_rate_independent ?? false;
-  editForm.video_rate_multiplier = group.video_rate_multiplier ?? 1;
-  editForm.video_price_480p = group.video_price_480p;
-  editForm.video_price_720p = group.video_price_720p;
-  editForm.video_price_1080p = group.video_price_1080p;
-  editForm.video_model_prices = createVideoModelPricesForm(
-    group.video_model_prices,
-  );
-  editForm.web_search_price_per_call = group.web_search_price_per_call ?? null;
-  editForm.search_price_per_1k = group.search_price_per_1k ?? null;
-  editForm.audio_realtime_price_per_min = group.audio_realtime_price_per_min ?? null;
-  editForm.audio_tts_price_per_million_chars = group.audio_tts_price_per_million_chars ?? null;
-  editForm.audio_stt_price_per_hour = group.audio_stt_price_per_hour ?? null;
-  editForm.peak_rate_enabled = group.peak_rate_enabled ?? false;
-  editForm.peak_start = group.peak_start ?? "";
-  editForm.peak_end = group.peak_end ?? "";
-  editForm.peak_rate_multiplier = group.peak_rate_multiplier ?? 1.0;
-  editForm.profit_control_enabled = group.profit_control_enabled ?? false;
-  editForm.profit_min_margin_percent = decimalToPercent(
-    group.profit_min_margin ?? 0,
-  );
-  editForm.profit_safety_buffer_percent = decimalToPercent(
-    group.profit_safety_buffer ?? 0,
-  );
-  editForm.claude_code_only = group.claude_code_only || false;
-  editForm.fallback_group_id = group.fallback_group_id;
-  editForm.fallback_group_id_on_invalid_request =
-    group.fallback_group_id_on_invalid_request;
-  const messagesDispatchFormState = messagesDispatchConfigToFormState(
-    group.messages_dispatch_model_config,
-  );
-  editForm.allow_messages_dispatch =
-    group.allow_messages_dispatch ||
-    messagesDispatchFormState.allow_messages_dispatch;
-  editForm.allow_live = group.allow_live ?? false;
-  editForm.opus_mapped_model = messagesDispatchFormState.opus_mapped_model;
-  editForm.sonnet_mapped_model = messagesDispatchFormState.sonnet_mapped_model;
-  editForm.haiku_mapped_model = messagesDispatchFormState.haiku_mapped_model;
-  editForm.exact_model_mappings =
-    messagesDispatchFormState.exact_model_mappings;
-  editForm.require_oauth_only = group.require_oauth_only ?? false;
-  editForm.require_privacy_set = group.require_privacy_set ?? false;
-  editForm.model_routing_enabled = group.model_routing_enabled || false;
-  editForm.supported_model_scopes = group.supported_model_scopes || [
-    "claude",
-    "gemini_text",
-    "gemini_image",
-  ];
-  editForm.mcp_xml_inject = group.mcp_xml_inject ?? true;
-  editForm.copy_accounts_from_group_ids = []; // 复制账号字段每次编辑时重置为空
-  editForm.rpm_limit = group.rpm_limit ?? 0;
-  editForm.max_reasoning_effort = normalizeReasoningEffortForPlatform(
-    group.platform,
-    group.max_reasoning_effort,
-  );
-  editForm.max_reasoning_effort_over_limit = normalizeReasoningEffortOverLimit(
-    group.max_reasoning_effort_over_limit,
-  );
-  editForm.reasoning_effort_mappings = reasoningEffortMappingsToRows(
-    group.reasoning_effort_mappings,
-    group.platform,
-  );
-  resetModelAllowlistState(editModelAllowlistState, group.model_allowlist);
-  // 固定账号 manifest 配置：回显配置并异步解析已存账号名称（失败显示 #<id>）
-  const savedCodexManifestConfig =
-    group.codex_models_manifest_config ?? createCodexManifestDefaults();
-  editCodexManifestConfig.value = {
-    enabled: savedCodexManifestConfig.enabled ?? false,
-    account_ids: [...(savedCodexManifestConfig.account_ids ?? [])],
-    fallback_to_scheduler: savedCodexManifestConfig.fallback_to_scheduler ?? false,
-  };
-  editCodexManifestAccountNames.value = {};
-  for (const id of editCodexManifestConfig.value.account_ids) {
-    adminAPI.accounts
-      .getById(id)
-      .then((account) => {
-        editCodexManifestAccountNames.value = {
-          ...editCodexManifestAccountNames.value,
-          [id]: account.name,
-        };
-      })
-      .catch(() => {
-        // 无法解析名称时由组件回退展示 #<id>，提示管理员清理脏 ID。
-      });
+  if (!pageTasks.current()) return;
+  const requestId = ++editRequestId;
+  const task = pageTasks.begin("group:edit-load", () => requestId === editRequestId);
+  submitting.value = false;
+  try {
+    editingGroup.value = group;
+    editForm.name = group.name;
+    editForm.description = group.description || "";
+    editForm.i18n = Object.fromEntries(
+      Object.entries(group.i18n ?? {}).map(([locale, text]) => [
+        locale,
+        { ...text },
+      ]),
+    );
+    editForm.platform = group.platform;
+    editForm.rate_multiplier = group.rate_multiplier;
+    editForm.is_exclusive = group.is_exclusive;
+    editForm.status = group.status;
+    editForm.subscription_type = group.subscription_type || "standard";
+    editForm.daily_limit_usd = group.daily_limit_usd;
+    editForm.weekly_limit_usd = group.weekly_limit_usd;
+    editForm.monthly_limit_usd = group.monthly_limit_usd;
+    editForm.long_context_pricing_enabled =
+      group.long_context_pricing_enabled ?? true;
+    editForm.force_openai_fast = group.force_openai_fast ?? false;
+    editForm.free_openai_fast = group.free_openai_fast ?? false;
+    editForm.model_pricing = groupPricingFromAPI(group.model_pricing);
+    editForm.allow_image_generation = group.allow_image_generation ?? false;
+    editForm.allow_batch_image_generation =
+      group.allow_batch_image_generation ?? false;
+    editForm.image_count_billing = group.image_count_billing ?? false;
+    editForm.image_rate_independent = group.image_rate_independent ?? false;
+    editForm.image_rate_multiplier = group.image_rate_multiplier ?? 1;
+    editForm.batch_image_discount_multiplier =
+      group.batch_image_discount_multiplier ?? 0.5;
+    editForm.batch_image_hold_multiplier = group.batch_image_hold_multiplier ?? 0.6;
+    editForm.image_price_1k = group.image_price_1k;
+    editForm.image_price_2k = group.image_price_2k;
+    editForm.image_price_4k = group.image_price_4k;
+    editForm.video_rate_independent = group.video_rate_independent ?? false;
+    editForm.video_rate_multiplier = group.video_rate_multiplier ?? 1;
+    editForm.video_price_480p = group.video_price_480p;
+    editForm.video_price_720p = group.video_price_720p;
+    editForm.video_price_1080p = group.video_price_1080p;
+    editForm.video_model_prices = createVideoModelPricesForm(
+      group.video_model_prices,
+    );
+    editForm.web_search_price_per_call = group.web_search_price_per_call ?? null;
+    editForm.search_price_per_1k = group.search_price_per_1k ?? null;
+    editForm.audio_realtime_price_per_min = group.audio_realtime_price_per_min ?? null;
+    editForm.audio_tts_price_per_million_chars = group.audio_tts_price_per_million_chars ?? null;
+    editForm.audio_stt_price_per_hour = group.audio_stt_price_per_hour ?? null;
+    editForm.peak_rate_enabled = group.peak_rate_enabled ?? false;
+    editForm.peak_start = group.peak_start ?? "";
+    editForm.peak_end = group.peak_end ?? "";
+    editForm.peak_rate_multiplier = group.peak_rate_multiplier ?? 1.0;
+    editForm.profit_control_enabled = group.profit_control_enabled ?? false;
+    editForm.profit_min_margin_percent = decimalToPercent(
+      group.profit_min_margin ?? 0,
+    );
+    editForm.profit_safety_buffer_percent = decimalToPercent(
+      group.profit_safety_buffer ?? 0,
+    );
+    editForm.claude_code_only = group.claude_code_only || false;
+    editForm.fallback_group_id = group.fallback_group_id;
+    editForm.fallback_group_id_on_invalid_request =
+      group.fallback_group_id_on_invalid_request;
+    const messagesDispatchFormState = messagesDispatchConfigToFormState(
+      group.messages_dispatch_model_config,
+    );
+    editForm.allow_messages_dispatch =
+      group.allow_messages_dispatch ||
+      messagesDispatchFormState.allow_messages_dispatch;
+    editForm.allow_live = group.allow_live ?? false;
+    editForm.opus_mapped_model = messagesDispatchFormState.opus_mapped_model;
+    editForm.sonnet_mapped_model = messagesDispatchFormState.sonnet_mapped_model;
+    editForm.haiku_mapped_model = messagesDispatchFormState.haiku_mapped_model;
+    editForm.exact_model_mappings =
+      messagesDispatchFormState.exact_model_mappings;
+    editForm.require_oauth_only = group.require_oauth_only ?? false;
+    editForm.require_privacy_set = group.require_privacy_set ?? false;
+    editForm.model_routing_enabled = group.model_routing_enabled || false;
+    editForm.supported_model_scopes = group.supported_model_scopes || [
+      "claude",
+      "gemini_text",
+      "gemini_image",
+    ];
+    editForm.mcp_xml_inject = group.mcp_xml_inject ?? true;
+    editForm.copy_accounts_from_group_ids = []; // 复制账号字段每次编辑时重置为空
+    editForm.rpm_limit = group.rpm_limit ?? 0;
+    editForm.max_reasoning_effort = normalizeReasoningEffortForPlatform(
+      group.platform,
+      group.max_reasoning_effort,
+    );
+    editForm.max_reasoning_effort_over_limit = normalizeReasoningEffortOverLimit(
+      group.max_reasoning_effort_over_limit,
+    );
+    editForm.reasoning_effort_mappings = reasoningEffortMappingsToRows(
+      group.reasoning_effort_mappings,
+      group.platform,
+    );
+    resetModelAllowlistState(editModelAllowlistState, group.model_allowlist);
+    // 固定账号 manifest 配置：回显配置并异步解析已存账号名称（失败显示 #<id>）
+    const savedCodexManifestConfig =
+      group.codex_models_manifest_config ?? createCodexManifestDefaults();
+    editCodexManifestConfig.value = {
+      enabled: savedCodexManifestConfig.enabled ?? false,
+      account_ids: [...(savedCodexManifestConfig.account_ids ?? [])],
+      fallback_to_scheduler: savedCodexManifestConfig.fallback_to_scheduler ?? false,
+    };
+    editCodexManifestAccountNames.value = {};
+    for (const id of editCodexManifestConfig.value.account_ids) {
+      adminAPI.accounts
+        .getById(id)
+        .then((account) => {
+          if (!pageTasks.current() || requestId !== editRequestId) return;
+          editCodexManifestAccountNames.value = {
+            ...editCodexManifestAccountNames.value,
+            [id]: account.name,
+          };
+        })
+        .catch(() => {
+          // 无法解析名称时由组件回退展示 #<id>，提示管理员清理脏 ID。
+        });
+    }
+    // 加载模型路由规则（异步加载账号名称）
+    const routingRules = await convertApiFormatToRoutingRules(
+      group.model_routing,
+    );
+    if (!task.active()) return;
+    editModelRoutingRules.value = routingRules;
+    loadModelAllowlistCandidates("edit", group.id, group.platform);
+    showEditModal.value = true;
+  } finally {
+    task.finish();
   }
-  // 加载模型路由规则（异步加载账号名称）
-  editModelRoutingRules.value = await convertApiFormatToRoutingRules(
-    group.model_routing,
-  );
-  loadModelAllowlistCandidates("edit", group.id, group.platform);
-  showEditModal.value = true;
 };
 
 const closeEditModal = () => {
+  submitting.value = false;
+  editRequestId += 1;
   editModelRoutingRules.value.forEach((rule) => {
     accountSearchRunner.clearKey(getEditRuleSearchKey(rule));
   });
@@ -6269,6 +6322,7 @@ const closeEditModal = () => {
 };
 
 const handleUpdateGroup = async () => {
+  if (!pageTasks.current() || submitting.value || !showEditModal.value) return;
   if (!editingGroup.value) return;
   if (!editForm.name.trim()) {
     appStore.showError(t("admin.groups.nameRequired"));
@@ -6304,6 +6358,12 @@ const handleUpdateGroup = async () => {
     return;
   }
 
+  const id = editingGroup.value.id;
+  const revision = editRequestId;
+  const draft = groupFormDraft("edit");
+  const task = pageTasks.begin("group:submit", () =>
+    showEditModal.value && revision === editRequestId && editingGroup.value?.id === id && groupFormDraft("edit") === draft,
+  );
   submitting.value = true;
   try {
     // 转换 fallback_group_id: null -> 0 (后端使用 0 表示清除)
@@ -6436,17 +6496,20 @@ const handleUpdateGroup = async () => {
           i18n: editForm.i18n,
         }
       : payload;
-    await adminAPI.groups.update(editingGroup.value.id, requestData);
+    await adminAPI.groups.update(id, requestData);
+    if (!task.active()) return;
     appStore.showSuccess(t("admin.groups.groupUpdated"));
     closeEditModal();
     loadGroups();
   } catch (error: any) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(error, t("admin.groups.failedToUpdate")),
     );
     console.error("Error updating group:", error);
   } finally {
-    submitting.value = false;
+    if (task.owned()) submitting.value = false;
+    task.finish();
   }
 };
 
@@ -6485,21 +6548,25 @@ const handleRPMOverrides = (group: AdminGroup) => {
 };
 
 const handleDuplicate = async (group: AdminGroup) => {
-  if (duplicatingGroupIds.has(group.id)) return;
+  if (!pageTasks.current() || duplicatingGroupIds.has(group.id)) return;
 
+  const task = pageTasks.begin(`group:duplicate:${group.id}`);
   duplicatingGroupIds.add(group.id);
   try {
     const duplicate = await adminAPI.groups.duplicate(group.id);
+    if (!task.active()) return;
     appStore.showSuccess(
       t("admin.groups.duplicateSuccess", { name: duplicate.name }),
     );
     await loadGroups();
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(error, t("admin.groups.duplicateFailed")),
     );
   } finally {
     duplicatingGroupIds.delete(group.id);
+    task.finish();
   }
 };
 
@@ -6548,17 +6615,24 @@ const toCompositeRouteInput = (): CompositeModelRouteInput => ({
 });
 
 const loadCompositeRoutes = async () => {
-  if (!compositeRoutesGroup.value) return;
+  if (!pageTasks.current() || !showCompositeRoutesModal.value || !compositeRoutesGroup.value) return;
+  const id = compositeRoutesGroup.value.id;
+  const revision = compositeModalRevision;
+  const task = pageTasks.begin("composite:list", () =>
+    showCompositeRoutesModal.value && revision === compositeModalRevision && compositeRoutesGroup.value?.id === id,
+  );
   compositeRoutesLoading.value = true;
   try {
     const routes = await adminAPI.groups.listCompositeRoutes(
-      compositeRoutesGroup.value.id,
+      id,
     );
+    if (!task.active()) return;
     compositeRoutes.value = routes.sort((a, b) => {
       if (a.priority !== b.priority) return a.priority - b.priority;
       return a.id - b.id;
     });
   } catch (error: any) {
+    if (!task.active()) return;
     appStore.showError(
       error.response?.data?.detail ||
         error.response?.data?.message ||
@@ -6566,11 +6640,17 @@ const loadCompositeRoutes = async () => {
     );
     console.error("Error loading composite routes:", error);
   } finally {
-    compositeRoutesLoading.value = false;
+    if (task.owned()) compositeRoutesLoading.value = false;
+    task.finish();
   }
 };
 
 const handleCompositeRoutes = async (group: AdminGroup) => {
+  if (!pageTasks.current()) return;
+  compositeModalRevision += 1;
+  pageTasks.cancel("composite:");
+  compositeRouteSaving.value = false;
+  compositePreviewLoading.value = false;
   compositeRoutesGroup.value = group;
   compositePreviewModel.value = "";
   compositePreviewEndpoint.value = "any";
@@ -6581,6 +6661,11 @@ const handleCompositeRoutes = async (group: AdminGroup) => {
 };
 
 const closeCompositeRoutesModal = () => {
+  compositeModalRevision += 1;
+  pageTasks.cancel("composite:");
+  compositeRouteSaving.value = false;
+  compositeRoutesLoading.value = false;
+  compositePreviewLoading.value = false;
   showCompositeRoutesModal.value = false;
   compositeRoutesGroup.value = null;
   compositeRoutes.value = [];
@@ -6601,31 +6686,42 @@ const editCompositeRoute = (route: CompositeModelRoute) => {
 };
 
 const saveCompositeRoute = async () => {
-  if (!compositeRoutesGroup.value) return;
+  if (!pageTasks.current() || !compositeRoutesGroup.value || !showCompositeRoutesModal.value || compositeRouteSaving.value) return;
   if (!compositeRouteForm.public_model.trim()) {
     appStore.showError(t("admin.groups.compositeRoutes.publicModelRequired"));
     return;
   }
+  const groupId = compositeRoutesGroup.value.id;
+  const routeId = compositeRouteEditingId.value;
+  const revision = compositeModalRevision;
+  const draft = JSON.stringify(compositeRouteForm);
+  const task = pageTasks.begin("composite:save", () =>
+    showCompositeRoutesModal.value && revision === compositeModalRevision && compositeRoutesGroup.value?.id === groupId &&
+    compositeRouteEditingId.value === routeId && JSON.stringify(compositeRouteForm) === draft,
+  );
   compositeRouteSaving.value = true;
   try {
     const payload = toCompositeRouteInput();
-    if (compositeRouteEditingId.value) {
+    if (routeId) {
       await adminAPI.groups.updateCompositeRoute(
-        compositeRoutesGroup.value.id,
-        compositeRouteEditingId.value,
+        groupId,
+        routeId,
         payload,
       );
+      if (!task.active()) return;
       appStore.showSuccess(t("admin.groups.compositeRoutes.routeUpdated"));
     } else {
       await adminAPI.groups.createCompositeRoute(
-        compositeRoutesGroup.value.id,
+        groupId,
         payload,
       );
+      if (!task.active()) return;
       appStore.showSuccess(t("admin.groups.compositeRoutes.routeCreated"));
     }
     resetCompositeRouteForm();
     await loadCompositeRoutes();
   } catch (error: any) {
+    if (!task.active()) return;
     appStore.showError(
       error.response?.data?.detail ||
         error.response?.data?.message ||
@@ -6633,47 +6729,71 @@ const saveCompositeRoute = async () => {
     );
     console.error("Error saving composite route:", error);
   } finally {
-    compositeRouteSaving.value = false;
+    if (task.owned()) compositeRouteSaving.value = false;
+    task.finish();
   }
 };
 
 const deleteCompositeRoute = async (route: CompositeModelRoute) => {
-  if (!compositeRoutesGroup.value) return;
+  if (!pageTasks.current() || !compositeRoutesGroup.value || compositeDeletingRouteIds.has(route.id)) return;
+  const groupId = compositeRoutesGroup.value.id;
+  const revision = compositeModalRevision;
   if (!window.confirm(t("admin.groups.compositeRoutes.deleteConfirm"))) return;
+  const task = pageTasks.begin(`composite:delete:${route.id}`, () =>
+    showCompositeRoutesModal.value && revision === compositeModalRevision && compositeRoutesGroup.value?.id === groupId,
+  );
+  if (!task.active()) { task.finish(); return; }
+  compositeDeletingRouteIds.add(route.id);
   try {
     await adminAPI.groups.deleteCompositeRoute(
-      compositeRoutesGroup.value.id,
+      groupId,
       route.id,
     );
+    if (!task.active()) return;
     if (compositeRouteEditingId.value === route.id) {
       resetCompositeRouteForm();
     }
     appStore.showSuccess(t("admin.groups.compositeRoutes.routeDeleted"));
     await loadCompositeRoutes();
   } catch (error: any) {
+    if (!task.active()) return;
     appStore.showError(
       error.response?.data?.detail ||
         error.response?.data?.message ||
         t("admin.groups.compositeRoutes.failedToDelete"),
     );
     console.error("Error deleting composite route:", error);
+  } finally {
+    compositeDeletingRouteIds.delete(route.id);
+    task.finish();
   }
 };
 
 const previewCompositeRoute = async () => {
-  if (!compositeRoutesGroup.value || !compositePreviewModel.value.trim()) {
+  if (!pageTasks.current() || !showCompositeRoutesModal.value || !compositeRoutesGroup.value || !compositePreviewModel.value.trim()) {
     return;
   }
+  const groupId = compositeRoutesGroup.value.id;
+  const revision = compositeModalRevision;
+  const model = compositePreviewModel.value.trim();
+  const endpoint = compositePreviewEndpoint.value;
+  const task = pageTasks.begin("composite:preview", () =>
+    showCompositeRoutesModal.value && revision === compositeModalRevision && compositeRoutesGroup.value?.id === groupId &&
+    compositePreviewModel.value.trim() === model && compositePreviewEndpoint.value === endpoint,
+  );
   compositePreviewLoading.value = true;
   try {
-    compositePreviewDecision.value = await adminAPI.groups.previewCompositeRoute(
-      compositeRoutesGroup.value.id,
+    const result = await adminAPI.groups.previewCompositeRoute(
+      groupId,
       {
-        model: compositePreviewModel.value.trim(),
-        endpoint: compositePreviewEndpoint.value,
+        model,
+        endpoint,
       },
     );
+    if (!task.active()) return;
+    compositePreviewDecision.value = result;
   } catch (error: any) {
+    if (!task.active()) return;
     appStore.showError(
       error.response?.data?.detail ||
         error.response?.data?.message ||
@@ -6681,29 +6801,49 @@ const previewCompositeRoute = async () => {
     );
     console.error("Error previewing composite route:", error);
   } finally {
-    compositePreviewLoading.value = false;
+    if (task.owned()) compositePreviewLoading.value = false;
+    task.finish();
   }
 };
 
 const handleDelete = (group: AdminGroup) => {
+  if (!pageTasks.current()) return;
+  deleteModalRevision += 1;
+  deleteSubmitting.value = false;
   deletingGroup.value = group;
   showDeleteDialog.value = true;
 };
 
+const closeDeleteDialog = () => {
+  deleteModalRevision += 1;
+  deleteSubmitting.value = false;
+  showDeleteDialog.value = false;
+  deletingGroup.value = null;
+};
+
 const confirmDelete = async () => {
-  if (!deletingGroup.value) return;
+  if (!pageTasks.current() || !deletingGroup.value || !showDeleteDialog.value || deleteSubmitting.value) return;
+  const id = deletingGroup.value.id;
+  const revision = deleteModalRevision;
+  const task = pageTasks.begin("group:delete", () => revision === deleteModalRevision);
+  deleteSubmitting.value = true;
 
   try {
-    await adminAPI.groups.delete(deletingGroup.value.id);
+    await adminAPI.groups.delete(id);
+    if (!task.active()) return;
     appStore.showSuccess(t("admin.groups.groupDeleted"));
     showDeleteDialog.value = false;
     deletingGroup.value = null;
     loadGroups();
   } catch (error: any) {
+    if (!task.active()) return;
     appStore.showError(
       error.response?.data?.detail || t("admin.groups.failedToDelete"),
     );
     console.error("Error deleting group:", error);
+  } finally {
+    if (task.owned()) deleteSubmitting.value = false;
+    task.finish();
   }
 };
 
@@ -6885,28 +7025,44 @@ const handleClickOutside = (event: MouseEvent) => {
 
 // 打开排序弹窗
 const openSortModal = async () => {
+  if (!pageTasks.current()) return;
+  const revision = ++sortModalRevision;
+  sortSubmitting.value = false;
+  const task = pageTasks.begin("group:sort-load", () => revision === sortModalRevision);
   try {
     // 获取所有分组（不分页）
     const allGroups = await adminAPI.groups.getAll();
+    if (!task.active()) return;
     // 按 sort_order 排序
     sortableGroups.value = [...allGroups].sort(
       (a, b) => a.sort_order - b.sort_order,
     );
     showSortModal.value = true;
   } catch (error) {
+    if (!task.active()) return;
     appStore.showError(t("admin.groups.failedToLoad"));
     console.error("Error loading groups for sorting:", error);
+  } finally {
+    task.finish();
   }
 };
 
 // 关闭排序弹窗
 const closeSortModal = () => {
+  sortModalRevision += 1;
+  sortSubmitting.value = false;
   showSortModal.value = false;
   sortableGroups.value = [];
 };
 
 // 保存排序
 const saveSortOrder = async () => {
+  if (!pageTasks.current() || sortSubmitting.value || !showSortModal.value) return;
+  const revision = sortModalRevision;
+  const order = JSON.stringify(sortableGroups.value.map(group => group.id));
+  const task = pageTasks.begin("group:sort-save", () =>
+    showSortModal.value && revision === sortModalRevision && JSON.stringify(sortableGroups.value.map(group => group.id)) === order,
+  );
   sortSubmitting.value = true;
   try {
     const updates = sortableGroups.value.map((g, index) => ({
@@ -6914,16 +7070,19 @@ const saveSortOrder = async () => {
       sort_order: index * 10,
     }));
     await adminAPI.groups.updateSortOrder(updates);
+    if (!task.active()) return;
     appStore.showSuccess(t("admin.groups.sortOrderUpdated"));
     closeSortModal();
     loadGroups();
   } catch (error: any) {
+    if (!task.active()) return;
     appStore.showError(
       error.response?.data?.detail || t("admin.groups.failedToUpdateSortOrder"),
     );
     console.error("Error updating sort order:", error);
   } finally {
-    sortSubmitting.value = false;
+    if (task.owned()) sortSubmitting.value = false;
+    task.finish();
   }
 };
 
@@ -6937,6 +7096,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  editRequestId += 1;
   document.removeEventListener("click", handleClickOutside);
   accountSearchRunner.clearAll();
   clearAllAccountSearchState();

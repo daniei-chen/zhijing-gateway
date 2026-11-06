@@ -23,6 +23,20 @@ function mountField(props: { platform?: string; type?: string; modelValue?: stri
 }
 
 describe('UpstreamRequestIdHeaderField', () => {
+  it('connects its visible label to the editable header field', () => {
+    const wrapper = mountField({ platform: 'openai', type: 'apikey' })
+    const input = wrapper.get('input')
+    expect(input.attributes('id')).toBeTruthy()
+    expect(wrapper.get(`label[for="${input.attributes('id')}"]`).text()).toBe('admin.accounts.upstreamRequestIdHeader')
+  })
+
+  it('propagates disabled to the native input without changing its stored header', async () => {
+    const wrapper = mountField({ modelValue: 'synthetic-header' })
+    await wrapper.setProps({ disabled: true } as any)
+    expect(wrapper.get('input').element.matches(':disabled')).toBe(true)
+    expect((wrapper.get('input').element as HTMLInputElement).value).toBe('synthetic-header')
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  })
   it('lists relay and official header examples for API key accounts', () => {
     const wrapper = mountField({ platform: 'openai', type: 'apikey' })
     const text = wrapper.text()

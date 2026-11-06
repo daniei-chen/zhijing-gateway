@@ -44,10 +44,12 @@
       id="create-account-form"
       @submit.prevent="handleSubmit"
       class="space-y-5"
+      :aria-busy="submitting"
     >
+      <fieldset :disabled="submitting" class="min-w-0 space-y-5 border-0 p-0">
       <div>
-        <label class="input-label">{{ t('admin.accounts.accountName') }}</label>
-        <input
+        <label :for="`${fieldId}-form-name`" class="input-label">{{ t('admin.accounts.accountName') }}</label>
+        <input :id="`${fieldId}-form-name`"
           v-model="form.name"
           type="text"
           :required="!isGrokSSOInputMethod"
@@ -57,8 +59,8 @@
         />
       </div>
       <div>
-        <label class="input-label">{{ t('admin.accounts.notes') }}</label>
-        <textarea
+        <label :for="`${fieldId}-form-notes`" class="input-label">{{ t('admin.accounts.notes') }}</label>
+        <textarea :id="`${fieldId}-form-notes`"
           v-model="form.notes"
           rows="3"
           class="input"
@@ -709,12 +711,12 @@
         </div>
         <div class="mt-2 grid gap-4 sm:grid-cols-2">
           <div>
-            <label class="input-label">{{ t('admin.accounts.cnProviders.zhipuTeam.organization') }}</label>
-            <input v-model="zhipuOrganization" type="text" class="input" :placeholder="t('admin.accounts.cnProviders.zhipuTeam.organizationPlaceholder')" />
+            <label :for="`${fieldId}-zhipu-organization`" class="input-label">{{ t('admin.accounts.cnProviders.zhipuTeam.organization') }}</label>
+            <input :id="`${fieldId}-zhipu-organization`" v-model="zhipuOrganization" type="text" class="input" :placeholder="t('admin.accounts.cnProviders.zhipuTeam.organizationPlaceholder')" />
           </div>
           <div>
-            <label class="input-label">{{ t('admin.accounts.cnProviders.zhipuTeam.project') }}</label>
-            <input v-model="zhipuProject" type="text" class="input" :placeholder="t('admin.accounts.cnProviders.zhipuTeam.projectPlaceholder')" />
+            <label :for="`${fieldId}-zhipu-project`" class="input-label">{{ t('admin.accounts.cnProviders.zhipuTeam.project') }}</label>
+            <input :id="`${fieldId}-zhipu-project`" v-model="zhipuProject" type="text" class="input" :placeholder="t('admin.accounts.cnProviders.zhipuTeam.projectPlaceholder')" />
           </div>
         </div>
         <p class="input-hint mt-2">{{ t('admin.accounts.cnProviders.zhipuTeam.hint') }}</p>
@@ -1070,9 +1072,9 @@
 
         <!-- Tier selection (used as fallback when auto-detection is unavailable/fails) -->
         <div v-if="accountCategory === 'oauth-based'" class="mt-4" data-testid="gemini-oauth-tier">
-          <label class="input-label">{{ t('admin.accounts.gemini.tier.label') }}</label>
+          <label :for="`${fieldId}-gemini-tier-google-one`" class="input-label">{{ t('admin.accounts.gemini.tier.label') }}</label>
           <div class="mt-2">
-            <select
+            <select :id="`${fieldId}-gemini-tier-google-one`"
               v-if="geminiOAuthType === 'google_one'"
               v-model="geminiTierGoogleOne"
               class="input"
@@ -1082,7 +1084,7 @@
               <option value="google_ai_ultra">{{ t('admin.accounts.gemini.tier.googleOne.ultra') }}</option>
             </select>
 
-            <select
+            <select :id="`${fieldId}-gemini-tier-google-one`"
               v-else-if="geminiOAuthType === 'code_assist'"
               v-model="geminiTierGcp"
               class="input"
@@ -1091,7 +1093,7 @@
               <option value="gcp_enterprise">{{ t('admin.accounts.gemini.tier.gcp.enterprise') }}</option>
             </select>
 
-            <select
+            <select :id="`${fieldId}-gemini-tier-google-one`"
               v-else
               v-model="geminiTierAIStudio"
               class="input"
@@ -1163,8 +1165,8 @@
       </div>
 
       <div v-if="form.platform === 'antigravity' && antigravityAccountType === 'oauth'">
-        <label class="input-label">{{ t('admin.accounts.antigravityProjectIdLabel') }}</label>
-        <input
+        <label :for="`${fieldId}-antigravity-project-id`" class="input-label">{{ t('admin.accounts.antigravityProjectIdLabel') }}</label>
+        <input :id="`${fieldId}-antigravity-project-id`"
           v-model="antigravityProjectId"
           data-testid="antigravity-project-id-input"
           type="text"
@@ -1177,8 +1179,8 @@
       <!-- Upstream config (only for Antigravity upstream type) -->
       <div v-if="form.platform === 'antigravity' && antigravityAccountType === 'upstream'" class="space-y-4">
         <div>
-          <label class="input-label">{{ t('admin.accounts.upstream.baseUrl') }}</label>
-          <input
+          <label :for="`${fieldId}-upstream-base-url`" class="input-label">{{ t('admin.accounts.upstream.baseUrl') }}</label>
+          <input :id="`${fieldId}-upstream-base-url`"
             v-model="upstreamBaseUrl"
             type="text"
             required
@@ -1188,8 +1190,8 @@
           <p class="input-hint">{{ t('admin.accounts.upstream.baseUrlHint') }}</p>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.upstream.apiKey') }}</label>
-          <input
+          <label :for="`${fieldId}-upstream-api-key`" class="input-label">{{ t('admin.accounts.upstream.apiKey') }}</label>
+          <input :id="`${fieldId}-upstream-api-key`"
             v-model="upstreamApiKey"
             type="password"
             required
@@ -1206,7 +1208,7 @@
               {{ t('admin.accounts.upstreamBilling.autoProbeHint') }}
             </p>
           </div>
-          <Toggle
+          <Toggle :id="`${fieldId}-upstream-billing-auto-probe-enabled`"
             v-model="upstreamBillingAutoProbeEnabled"
             data-testid="upstream-billing-auto-probe-antigravity"
             :aria-label="t('admin.accounts.upstreamBilling.autoProbe')"
@@ -1220,7 +1222,7 @@
           <label class="input-label">{{ t('admin.accounts.vertexAuthMode') }}</label>
           <div class="mt-2 flex gap-4">
             <label class="flex cursor-pointer items-center">
-              <input
+              <input :name="`${fieldId}-vertexauthmode`"
                 v-model="vertexAuthMode"
                 type="radio"
                 value="service_account"
@@ -1229,7 +1231,7 @@
               <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('admin.accounts.vertexAuthModeServiceAccount') }}</span>
             </label>
             <label class="flex cursor-pointer items-center">
-              <input
+              <input :name="`${fieldId}-vertexauthmode`"
                 v-model="vertexAuthMode"
                 type="radio"
                 value="apikey"
@@ -1243,8 +1245,8 @@
 
         <template v-if="vertexUsesApiKey">
           <div>
-            <label class="input-label">API Key</label>
-            <input
+            <label :for="`${fieldId}-vertex-api-key`" class="input-label">API Key</label>
+            <input :id="`${fieldId}-vertex-api-key`"
               v-model="vertexApiKey"
               type="password"
               required
@@ -1255,8 +1257,8 @@
           </div>
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label class="input-label">Project ID</label>
-              <input
+              <label :for="`${fieldId}-vertex-project-id`" class="input-label">Project ID</label>
+              <input :id="`${fieldId}-vertex-project-id`"
                 v-model="vertexProjectId"
                 type="text"
                 class="input font-mono"
@@ -1266,8 +1268,8 @@
               <p class="input-hint">{{ t('admin.accounts.vertexApiKeyProjectIdHint') }}</p>
             </div>
             <div v-if="vertexProjectId.trim()">
-              <label class="input-label">Location</label>
-              <select
+              <label :for="`${fieldId}-vertex-location`" class="input-label">Location</label>
+              <select :id="`${fieldId}-vertex-location`"
                 v-model="vertexLocation"
                 required
                 class="input font-mono"
@@ -1293,8 +1295,8 @@
 
         <template v-else>
           <div>
-            <label class="input-label">Service Account JSON</label>
-            <input
+            <label :for="`${fieldId}-vertex-service-account-file-input`" class="input-label">Service Account JSON</label>
+            <input :id="`${fieldId}-vertex-service-account-file-input`"
               ref="vertexServiceAccountFileInput"
               type="file"
               accept="application/json,.json"
@@ -1345,8 +1347,8 @@
 
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label class="input-label">Project ID</label>
-              <input
+              <label :for="`${fieldId}-vertex-project-id-2`" class="input-label">Project ID</label>
+              <input :id="`${fieldId}-vertex-project-id-2`"
                 v-model="vertexProjectId"
                 type="text"
                 class="input font-mono"
@@ -1355,8 +1357,8 @@
               />
             </div>
             <div>
-              <label class="input-label">Location</label>
-              <select
+              <label :for="`${fieldId}-vertex-location-2`" class="input-label">Location</label>
+              <select :id="`${fieldId}-vertex-location-2`"
                 v-model="vertexLocation"
                 required
                 class="input font-mono"
@@ -1401,7 +1403,7 @@
               class="space-y-1"
             >
               <div class="flex items-center gap-2">
-                <input
+                <input :aria-label="t('admin.accounts.requestModel')" :id="`${fieldId}-mapping-from-${getAntigravityModelMappingKey(mapping)}`"
                   v-model="mapping.from"
                   type="text"
                   :class="[
@@ -1413,7 +1415,7 @@
                 <svg class="h-4 w-4 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
-                <input
+                <input :aria-label="t('admin.accounts.actualModel')" :id="`${fieldId}-mapping-to-${getAntigravityModelMappingKey(mapping)}`"
                   v-model="mapping.to"
                   type="text"
                   :class="[
@@ -1422,7 +1424,7 @@
                   ]"
                   :placeholder="t('admin.accounts.actualModel')"
                 />
-                <button
+                <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })"
                   type="button"
                   @click="removeAntigravityModelMapping(index)"
                   class="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
@@ -1477,7 +1479,7 @@
         <label class="input-label">{{ t('admin.accounts.addMethod') }}</label>
         <div class="mt-2 flex gap-4">
           <label class="flex cursor-pointer items-center">
-            <input
+            <input :name="`${fieldId}-addmethod`"
               v-model="addMethod"
               type="radio"
               value="oauth"
@@ -1486,7 +1488,7 @@
             <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('admin.accounts.types.oauth') }}</span>
           </label>
           <label class="flex cursor-pointer items-center">
-            <input
+            <input :name="`${fieldId}-addmethod`"
               v-model="addMethod"
               type="radio"
               value="setup-token"
@@ -1502,8 +1504,8 @@
       <!-- API Key input (only for apikey type, excluding Antigravity which has its own fields) -->
       <div v-if="form.type === 'apikey' && form.platform !== 'antigravity'" class="space-y-4">
         <div v-if="!isMultiProtocolPlatform || apiProtocol !== 'adaptive'">
-          <label class="input-label">{{ t('admin.accounts.baseUrl') }}</label>
-          <input
+          <label :for="`${fieldId}-api-key-base-url`" class="input-label">{{ t('admin.accounts.baseUrl') }}</label>
+          <input :id="`${fieldId}-api-key-base-url`"
             v-model="apiKeyBaseUrl"
             type="text"
             class="input"
@@ -1529,10 +1531,10 @@
           <label class="input-label">{{ t('admin.accounts.cnProviders.apiProtocol.endpoints') }}</label>
           <div class="mt-2 space-y-3">
             <div v-for="item in cnAdaptiveProtocolOptions" :key="item.value">
-              <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+              <label :for="`${fieldId}-adaptive-base-urls-item-value--${item.value}`" class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
                 {{ t(`admin.accounts.cnProviders.apiProtocol.${item.labelKey}`) }}
               </label>
-              <input
+              <input :id="`${fieldId}-adaptive-base-urls-item-value--${item.value}`"
                 v-model="adaptiveBaseUrls[item.value]"
                 type="text"
                 class="input"
@@ -1551,8 +1553,8 @@
           :plan="currentOpenCodeOrCNMode()"
         />
         <div>
-          <label class="input-label">{{ t('admin.accounts.apiKeyRequired') }}</label>
-          <input
+          <label :for="`${fieldId}-api-key-value`" class="input-label">{{ t('admin.accounts.apiKeyRequired') }}</label>
+          <input :id="`${fieldId}-api-key-value`"
             v-model="apiKeyValue"
             type="password"
             required
@@ -1572,7 +1574,7 @@
               {{ t('admin.accounts.upstreamBilling.autoProbeHint') }}
             </p>
           </div>
-          <Toggle
+          <Toggle :id="`${fieldId}-upstream-billing-auto-probe-enabled-2`"
             v-model="upstreamBillingAutoProbeEnabled"
             data-testid="upstream-billing-auto-probe"
             :aria-label="t('admin.accounts.upstreamBilling.autoProbe')"
@@ -1581,8 +1583,8 @@
 
         <!-- Gemini API Key tier selection -->
         <div v-if="form.platform === 'gemini' && isOfficialGeminiBaseUrl(apiKeyBaseUrl)">
-          <label class="input-label">{{ t('admin.accounts.gemini.tier.label') }}</label>
-          <select v-model="geminiTierAIStudio" class="input" data-testid="gemini-apikey-tier">
+          <label :for="`${fieldId}-gemini-tier-a-i-studio-2`" class="input-label">{{ t('admin.accounts.gemini.tier.label') }}</label>
+          <select :id="`${fieldId}-gemini-tier-a-i-studio-2`" v-model="geminiTierAIStudio" class="input" data-testid="gemini-apikey-tier">
             <option value="aistudio_free">{{ t('admin.accounts.gemini.tier.aiStudio.free') }}</option>
             <option value="aistudio_paid">{{ t('admin.accounts.gemini.tier.aiStudio.paid') }}</option>
           </select>
@@ -1702,7 +1704,7 @@
                 :key="getModelMappingKey(mapping)"
                 class="flex items-center gap-2"
               >
-                <input
+                <input :aria-label="t('admin.accounts.requestModel')" :id="`${fieldId}-mapping-from-2-${getModelMappingKey(mapping)}`"
                   v-model="mapping.from"
                   type="text"
                   class="input flex-1"
@@ -1721,13 +1723,13 @@
                     d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </svg>
-                <input
+                <input :aria-label="t('admin.accounts.actualModel')" :id="`${fieldId}-mapping-to-2-${getModelMappingKey(mapping)}`"
                   v-model="mapping.to"
                   type="text"
                   class="input flex-1"
                   :placeholder="t('admin.accounts.actualModel')"
                 />
-                <button
+                <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })"
                   type="button"
                   @click="removeModelMapping(index)"
                   class="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
@@ -1790,7 +1792,7 @@
                 {{ t('admin.accounts.poolModeHint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="poolModeEnabled" :aria-label="t('admin.accounts.poolMode')"
               type="button"
               @click="poolModeEnabled = !poolModeEnabled"
               :class="[
@@ -1813,8 +1815,8 @@
             </p>
           </div>
           <div v-if="poolModeEnabled" class="mt-3">
-            <label class="input-label">{{ t('admin.accounts.poolModeRetryCount') }}</label>
-            <input
+            <label :for="`${fieldId}-pool-mode-retry-count`" class="input-label">{{ t('admin.accounts.poolModeRetryCount') }}</label>
+            <input :id="`${fieldId}-pool-mode-retry-count`"
               v-model.number="poolModeRetryCount"
               type="number"
               min="0"
@@ -1832,8 +1834,8 @@
             </p>
           </div>
           <div v-if="poolModeEnabled" class="mt-3">
-            <label class="input-label">{{ t('admin.accounts.poolModeRetryStatusCodes') }}</label>
-            <input
+            <label :for="`${fieldId}-pool-mode-retry-status-codes-input`" class="input-label">{{ t('admin.accounts.poolModeRetryStatusCodes') }}</label>
+            <input :id="`${fieldId}-pool-mode-retry-status-codes-input`"
               v-model="poolModeRetryStatusCodesInput"
               type="text"
               class="input"
@@ -1858,7 +1860,7 @@
                 {{ t('admin.accounts.explicitCacheUpstreamHint') }}
               </p>
             </div>
-            <Toggle
+            <Toggle :id="`${fieldId}-explicit-cache-upstream-enabled`"
               v-model="explicitCacheUpstreamEnabled"
               data-testid="explicit-cache-upstream-toggle"
               :aria-label="t('admin.accounts.explicitCacheUpstream')"
@@ -1871,8 +1873,8 @@
             </p>
           </div>
           <div v-if="explicitCacheUpstreamEnabled" class="mt-3">
-            <label class="input-label">{{ t('admin.accounts.explicitCacheUpstreamMaxTTL') }}</label>
-            <input
+            <label :for="`${fieldId}-explicit-cache-upstream-max-t-t-l`" class="input-label">{{ t('admin.accounts.explicitCacheUpstreamMaxTTL') }}</label>
+            <input :id="`${fieldId}-explicit-cache-upstream-max-t-t-l`"
               v-model="explicitCacheUpstreamMaxTTL"
               data-testid="explicit-cache-upstream-max-ttl"
               type="number"
@@ -1891,12 +1893,12 @@
         <div class="border-t border-gray-200 pt-4 dark:border-dark-600">
           <div class="mb-3 flex items-center justify-between">
             <div>
-              <label class="input-label mb-0">{{ t('admin.accounts.customErrorCodes') }}</label>
+              <label :for="`${fieldId}-custom-error-code-input`" class="input-label mb-0">{{ t('admin.accounts.customErrorCodes') }}</label>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.accounts.customErrorCodesHint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="customErrorCodesEnabled" :aria-label="t('admin.accounts.customErrorCodes')"
               type="button"
               @click="customErrorCodesEnabled = !customErrorCodesEnabled"
               :class="[
@@ -1941,7 +1943,7 @@
 
             <!-- Manual input -->
             <div class="flex items-center gap-2">
-              <input
+              <input :id="`${fieldId}-custom-error-code-input`"
                 v-model.number="customErrorCodeInput"
                 type="number"
                 min="100"
@@ -1950,7 +1952,7 @@
                 :placeholder="t('admin.accounts.enterErrorCode')"
                 @keyup.enter="addCustomErrorCode"
               />
-              <button type="button" @click="addCustomErrorCode" class="btn btn-secondary px-3">
+              <button :aria-label="t('common.add')" type="button" @click="addCustomErrorCode" class="btn btn-secondary px-3">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -1970,7 +1972,7 @@
                 class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400"
               >
                 {{ code }}
-                <button
+                <button :aria-label="t('common.delete') + ' ' + code"
                   type="button"
                   @click="removeErrorCode(code)"
                   class="hover:text-red-900 dark:hover:text-red-300"
@@ -1997,7 +1999,7 @@
                 {{ t('admin.accounts.headerOverride.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="headerOverrideEnabled" :aria-label="t('admin.accounts.headerOverride.title')"
               type="button"
               @click="headerOverrideEnabled = !headerOverrideEnabled"
               :class="[
@@ -2038,7 +2040,7 @@
           <label class="input-label">{{ t('admin.accounts.bedrockAuthMode') }}</label>
           <div class="mt-2 flex gap-4">
             <label class="flex cursor-pointer items-center">
-              <input
+              <input :name="`${fieldId}-bedrockauthmode`"
                 v-model="bedrockAuthMode"
                 type="radio"
                 value="sigv4"
@@ -2047,7 +2049,7 @@
               <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('admin.accounts.bedrockAuthModeSigv4') }}</span>
             </label>
             <label class="flex cursor-pointer items-center">
-              <input
+              <input :name="`${fieldId}-bedrockauthmode`"
                 v-model="bedrockAuthMode"
                 type="radio"
                 value="apikey"
@@ -2061,8 +2063,8 @@
         <!-- SigV4 fields -->
         <template v-if="bedrockAuthMode === 'sigv4'">
           <div>
-            <label class="input-label">{{ t('admin.accounts.bedrockAccessKeyId') }}</label>
-            <input
+            <label :for="`${fieldId}-bedrock-access-key-id`" class="input-label">{{ t('admin.accounts.bedrockAccessKeyId') }}</label>
+            <input :id="`${fieldId}-bedrock-access-key-id`"
               v-model="bedrockAccessKeyId"
               type="text"
               required
@@ -2071,8 +2073,8 @@
             />
           </div>
           <div>
-            <label class="input-label">{{ t('admin.accounts.bedrockSecretAccessKey') }}</label>
-            <input
+            <label :for="`${fieldId}-bedrock-secret-access-key`" class="input-label">{{ t('admin.accounts.bedrockSecretAccessKey') }}</label>
+            <input :id="`${fieldId}-bedrock-secret-access-key`"
               v-model="bedrockSecretAccessKey"
               type="password"
               required
@@ -2080,8 +2082,8 @@
             />
           </div>
           <div>
-            <label class="input-label">{{ t('admin.accounts.bedrockSessionToken') }}</label>
-            <input
+            <label :for="`${fieldId}-bedrock-session-token`" class="input-label">{{ t('admin.accounts.bedrockSessionToken') }}</label>
+            <input :id="`${fieldId}-bedrock-session-token`"
               v-model="bedrockSessionToken"
               type="password"
               class="input font-mono"
@@ -2092,8 +2094,8 @@
 
         <!-- API Key field -->
         <div v-if="bedrockAuthMode === 'apikey'">
-          <label class="input-label">{{ t('admin.accounts.bedrockApiKeyInput') }}</label>
-          <input
+          <label :for="`${fieldId}-bedrock-api-key-value`" class="input-label">{{ t('admin.accounts.bedrockApiKeyInput') }}</label>
+          <input :id="`${fieldId}-bedrock-api-key-value`"
             v-model="bedrockApiKeyValue"
             type="password"
             required
@@ -2103,8 +2105,8 @@
 
         <!-- Shared: Region -->
         <div>
-          <label class="input-label">{{ t('admin.accounts.bedrockRegion') }}</label>
-          <select v-model="bedrockRegion" class="input">
+          <label :for="`${fieldId}-bedrock-region`" class="input-label">{{ t('admin.accounts.bedrockRegion') }}</label>
+          <select :id="`${fieldId}-bedrock-region`" v-model="bedrockRegion" class="input">
             <optgroup label="US">
               <option value="us-east-1">us-east-1 (N. Virginia)</option>
               <option value="us-east-2">us-east-2 (Ohio)</option>
@@ -2205,10 +2207,10 @@
           <!-- Mapping Mode -->
           <div v-else class="space-y-3">
             <div v-for="(mapping, index) in modelMappings" :key="index" class="flex items-center gap-2">
-              <input v-model="mapping.from" type="text" class="input flex-1" :placeholder="t('admin.accounts.fromModel')" />
+              <input :aria-label="t('admin.accounts.fromModel')" :id="`${fieldId}-mapping-from-3-${getModelMappingKey(mapping)}`" v-model="mapping.from" type="text" class="input flex-1" :placeholder="t('admin.accounts.fromModel')" />
               <span class="text-gray-400">→</span>
-              <input v-model="mapping.to" type="text" class="input flex-1" :placeholder="t('admin.accounts.toModel')" />
-              <button type="button" @click="modelMappings.splice(index, 1)" class="text-red-500 hover:text-red-700">
+              <input :aria-label="t('admin.accounts.toModel')" :id="`${fieldId}-mapping-to-3-${getModelMappingKey(mapping)}`" v-model="mapping.to" type="text" class="input flex-1" :placeholder="t('admin.accounts.toModel')" />
+              <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })" type="button" @click="modelMappings.splice(index, 1)" class="text-red-500 hover:text-red-700">
                 <Icon name="trash" size="sm" />
               </button>
             </div>
@@ -2239,7 +2241,7 @@
                 {{ t('admin.accounts.poolModeHint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="poolModeEnabled" :aria-label="t('admin.accounts.poolMode')"
               type="button"
               @click="poolModeEnabled = !poolModeEnabled"
               :class="[
@@ -2262,8 +2264,8 @@
             </p>
           </div>
           <div v-if="poolModeEnabled" class="mt-3">
-            <label class="input-label">{{ t('admin.accounts.poolModeRetryCount') }}</label>
-            <input
+            <label :for="`${fieldId}-pool-mode-retry-count-2`" class="input-label">{{ t('admin.accounts.poolModeRetryCount') }}</label>
+            <input :id="`${fieldId}-pool-mode-retry-count-2`"
               v-model.number="poolModeRetryCount"
               type="number"
               min="0"
@@ -2281,8 +2283,8 @@
             </p>
           </div>
           <div v-if="poolModeEnabled" class="mt-3">
-            <label class="input-label">{{ t('admin.accounts.poolModeRetryStatusCodes') }}</label>
-            <input
+            <label :for="`${fieldId}-pool-mode-retry-status-codes-input-2`" class="input-label">{{ t('admin.accounts.poolModeRetryStatusCodes') }}</label>
+            <input :id="`${fieldId}-pool-mode-retry-status-codes-input-2`"
               v-model="poolModeRetryStatusCodesInput"
               type="text"
               class="input"
@@ -2406,12 +2408,12 @@
       >
         <div class="mb-3 flex items-center justify-between">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.grokCustomBaseUrl.title') }}</label>
+            <label :for="`${fieldId}-grok-o-auth-base-url`" class="input-label mb-0">{{ t('admin.accounts.grokCustomBaseUrl.title') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.grokCustomBaseUrl.hint') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="grokOAuthCustomBaseUrlEnabled" :aria-label="t('admin.accounts.grokCustomBaseUrl.title')"
             type="button"
             data-testid="grok-custom-base-url-toggle"
             @click="grokOAuthCustomBaseUrlEnabled = !grokOAuthCustomBaseUrlEnabled"
@@ -2429,7 +2431,7 @@
           </button>
         </div>
         <div v-if="grokOAuthCustomBaseUrlEnabled" class="space-y-2">
-          <input
+          <input :id="`${fieldId}-grok-o-auth-base-url`"
             v-model="grokOAuthBaseUrl"
             type="text"
             class="input"
@@ -2452,7 +2454,7 @@
               {{ t('admin.accounts.headerOverride.hint') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="headerOverrideEnabled" :aria-label="t('admin.accounts.headerOverride.title')"
             type="button"
             @click="headerOverrideEnabled = !headerOverrideEnabled"
             :class="[
@@ -2560,7 +2562,7 @@
                 :key="'oauth-' + getModelMappingKey(mapping)"
                 class="flex items-center gap-2"
               >
-                <input
+                <input :aria-label="t('admin.accounts.requestModel')" :id="`${fieldId}-mapping-from-4-${getModelMappingKey(mapping)}`"
                   v-model="mapping.from"
                   type="text"
                   class="input flex-1"
@@ -2579,13 +2581,13 @@
                     d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </svg>
-                <input
+                <input :aria-label="t('admin.accounts.actualModel')" :id="`${fieldId}-mapping-to-4-${getModelMappingKey(mapping)}`"
                   v-model="mapping.to"
                   type="text"
                   class="input flex-1"
                   :placeholder="t('admin.accounts.actualModel')"
                 />
-                <button
+                <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })"
                   type="button"
                   @click="removeModelMapping(index)"
                   class="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
@@ -2635,7 +2637,7 @@
               {{ t('admin.accounts.tempUnschedulable.hint') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="tempUnschedEnabled" :aria-label="t('admin.accounts.tempUnschedulable.title')"
             type="button"
             @click="tempUnschedEnabled = !tempUnschedEnabled"
             :class="[
@@ -2683,7 +2685,7 @@
                   {{ t('admin.accounts.tempUnschedulable.ruleIndex', { index: index + 1 }) }}
                 </span>
                 <div class="flex items-center gap-2">
-                  <button
+                  <button :aria-label="t('admin.settings.customMenu.moveUp')"
                     type="button"
                     :disabled="index === 0"
                     @click="moveTempUnschedRule(index, -1)"
@@ -2691,7 +2693,7 @@
                   >
                     <Icon name="chevronUp" size="sm" :stroke-width="2" />
                   </button>
-                  <button
+                  <button :aria-label="t('admin.settings.customMenu.moveDown')"
                     type="button"
                     :disabled="index === tempUnschedRules.length - 1"
                     @click="moveTempUnschedRule(index, 1)"
@@ -2701,7 +2703,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  <button
+                  <button :aria-label="t('common.delete') + ' ' + (index + 1)"
                     type="button"
                     @click="removeTempUnschedRule(index)"
                     class="rounded p-1 text-red-500 transition-colors hover:text-red-600"
@@ -2713,8 +2715,8 @@
 
               <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label class="input-label">{{ t('admin.accounts.tempUnschedulable.errorCode') }}</label>
-                  <input
+                  <label :for="`${fieldId}-rule-error-code-${getTempUnschedRuleKey(rule)}`" class="input-label">{{ t('admin.accounts.tempUnschedulable.errorCode') }}</label>
+                  <input :id="`${fieldId}-rule-error-code-${getTempUnschedRuleKey(rule)}`"
                     v-model.number="rule.error_code"
                     type="number"
                     min="100"
@@ -2724,8 +2726,8 @@
                   />
                 </div>
                 <div>
-                  <label class="input-label">{{ t('admin.accounts.tempUnschedulable.durationMinutes') }}</label>
-                  <input
+                  <label :for="`${fieldId}-rule-duration-minutes-${getTempUnschedRuleKey(rule)}`" class="input-label">{{ t('admin.accounts.tempUnschedulable.durationMinutes') }}</label>
+                  <input :id="`${fieldId}-rule-duration-minutes-${getTempUnschedRuleKey(rule)}`"
                     v-model.number="rule.duration_minutes"
                     type="number"
                     min="1"
@@ -2772,8 +2774,8 @@
                   <p class="input-hint">{{ t('admin.accounts.tempUnschedulable.scopeHint') }}</p>
                 </div>
                 <div class="sm:col-span-2">
-                  <label class="input-label">{{ t('admin.accounts.tempUnschedulable.keywords') }}</label>
-                  <input
+                  <label :for="`${fieldId}-rule-keywords-${getTempUnschedRuleKey(rule)}`" class="input-label">{{ t('admin.accounts.tempUnschedulable.keywords') }}</label>
+                  <input :id="`${fieldId}-rule-keywords-${getTempUnschedRuleKey(rule)}`"
                     v-model="rule.keywords"
                     type="text"
                     class="input"
@@ -2782,8 +2784,8 @@
                   <p class="input-hint">{{ t('admin.accounts.tempUnschedulable.keywordsHint') }}</p>
                 </div>
                 <div class="sm:col-span-2">
-                  <label class="input-label">{{ t('admin.accounts.tempUnschedulable.description') }}</label>
-                  <input
+                  <label :for="`${fieldId}-rule-description-${getTempUnschedRuleKey(rule)}`" class="input-label">{{ t('admin.accounts.tempUnschedulable.description') }}</label>
+                  <input :id="`${fieldId}-rule-description-${getTempUnschedRuleKey(rule)}`"
                     v-model="rule.description"
                     type="text"
                     class="input"
@@ -2826,7 +2828,7 @@
               {{ t('admin.accounts.interceptWarmupRequestsDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="interceptWarmupRequests" :aria-label="t('admin.accounts.interceptWarmupRequests')"
             type="button"
             @click="interceptWarmupRequests = !interceptWarmupRequests"
             :class="[
@@ -2865,7 +2867,7 @@
                 {{ t('admin.accounts.quotaControl.windowCost.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="windowCostEnabled" :aria-label="t('admin.accounts.quotaControl.windowCost.label')"
               type="button"
               @click="windowCostEnabled = !windowCostEnabled"
               :class="[
@@ -2884,10 +2886,10 @@
 
           <div v-if="windowCostEnabled" class="grid grid-cols-2 gap-4">
             <div>
-              <label class="input-label">{{ t('admin.accounts.quotaControl.windowCost.limit') }}</label>
+              <label :for="`${fieldId}-window-cost-limit`" class="input-label">{{ t('admin.accounts.quotaControl.windowCost.limit') }}</label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
-                <input
+                <input :id="`${fieldId}-window-cost-limit`"
                   v-model.number="windowCostLimit"
                   type="number"
                   min="0"
@@ -2899,10 +2901,10 @@
               <p class="input-hint">{{ t('admin.accounts.quotaControl.windowCost.limitHint') }}</p>
             </div>
             <div>
-              <label class="input-label">{{ t('admin.accounts.quotaControl.windowCost.stickyReserve') }}</label>
+              <label :for="`${fieldId}-window-cost-sticky-reserve`" class="input-label">{{ t('admin.accounts.quotaControl.windowCost.stickyReserve') }}</label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
-                <input
+                <input :id="`${fieldId}-window-cost-sticky-reserve`"
                   v-model.number="windowCostStickyReserve"
                   type="number"
                   min="0"
@@ -2925,7 +2927,7 @@
                 {{ t('admin.accounts.quotaControl.sessionLimit.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="sessionLimitEnabled" :aria-label="t('admin.accounts.quotaControl.sessionLimit.label')"
               type="button"
               @click="sessionLimitEnabled = !sessionLimitEnabled"
               :class="[
@@ -2944,8 +2946,8 @@
 
           <div v-if="sessionLimitEnabled" class="grid grid-cols-2 gap-4">
             <div>
-              <label class="input-label">{{ t('admin.accounts.quotaControl.sessionLimit.maxSessions') }}</label>
-              <input
+              <label :for="`${fieldId}-max-sessions`" class="input-label">{{ t('admin.accounts.quotaControl.sessionLimit.maxSessions') }}</label>
+              <input :id="`${fieldId}-max-sessions`"
                 v-model.number="maxSessions"
                 type="number"
                 min="1"
@@ -2956,9 +2958,9 @@
               <p class="input-hint">{{ t('admin.accounts.quotaControl.sessionLimit.maxSessionsHint') }}</p>
             </div>
             <div>
-              <label class="input-label">{{ t('admin.accounts.quotaControl.sessionLimit.idleTimeout') }}</label>
+              <label :for="`${fieldId}-session-idle-timeout`" class="input-label">{{ t('admin.accounts.quotaControl.sessionLimit.idleTimeout') }}</label>
               <div class="relative">
-                <input
+                <input :id="`${fieldId}-session-idle-timeout`"
                   v-model.number="sessionIdleTimeout"
                   type="number"
                   min="1"
@@ -2982,7 +2984,7 @@
                 {{ t('admin.accounts.quotaControl.rpmLimit.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="rpmLimitEnabled" :aria-label="t('admin.accounts.quotaControl.rpmLimit.label')"
               type="button"
               @click="rpmLimitEnabled = !rpmLimitEnabled"
               :class="[
@@ -3001,8 +3003,8 @@
 
           <div v-if="rpmLimitEnabled" class="space-y-4">
             <div>
-              <label class="input-label">{{ t('admin.accounts.quotaControl.rpmLimit.baseRpm') }}</label>
-              <input
+              <label :for="`${fieldId}-base-rpm`" class="input-label">{{ t('admin.accounts.quotaControl.rpmLimit.baseRpm') }}</label>
+              <input :id="`${fieldId}-base-rpm`"
                 v-model.number="baseRpm"
                 type="number"
                 min="1"
@@ -3051,8 +3053,8 @@
             </div>
 
             <div v-if="rpmStrategy === 'tiered'">
-              <label class="input-label">{{ t('admin.accounts.quotaControl.rpmLimit.stickyBuffer') }}</label>
-              <input
+              <label :for="`${fieldId}-rpm-sticky-buffer`" class="input-label">{{ t('admin.accounts.quotaControl.rpmLimit.stickyBuffer') }}</label>
+              <input :id="`${fieldId}-rpm-sticky-buffer`"
                 v-model.number="rpmStickyBuffer"
                 type="number"
                 min="1"
@@ -3090,12 +3092,12 @@
         <div class="rounded-lg border border-gray-200 p-4 dark:border-dark-600">
           <div class="flex items-center justify-between">
             <div>
-              <label class="input-label mb-0">{{ t('admin.accounts.quotaControl.tlsFingerprint.label') }}</label>
+              <label :for="`${fieldId}-tls-fingerprint-profile-id`" class="input-label mb-0">{{ t('admin.accounts.quotaControl.tlsFingerprint.label') }}</label>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.accounts.quotaControl.tlsFingerprint.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="tlsFingerprintEnabled" :aria-label="t('admin.accounts.quotaControl.tlsFingerprint.label')"
               type="button"
               @click="tlsFingerprintEnabled = !tlsFingerprintEnabled"
               :class="[
@@ -3113,7 +3115,7 @@
           </div>
           <!-- Profile selector -->
           <div v-if="tlsFingerprintEnabled" class="mt-3">
-            <select v-model="tlsFingerprintProfileId" class="input">
+            <select :id="`${fieldId}-tls-fingerprint-profile-id`" v-model="tlsFingerprintProfileId" class="input">
               <option :value="null">{{ t('admin.accounts.quotaControl.tlsFingerprint.defaultProfile') }}</option>
               <option v-if="tlsFingerprintProfiles.length > 0" :value="-1">{{ t('admin.accounts.quotaControl.tlsFingerprint.randomProfile') }}</option>
               <option v-for="p in tlsFingerprintProfiles" :key="p.id" :value="p.id">{{ p.name }}</option>
@@ -3130,7 +3132,7 @@
                 {{ t('admin.accounts.quotaControl.sessionIdMasking.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="sessionIdMaskingEnabled" :aria-label="t('admin.accounts.quotaControl.sessionIdMasking.label')"
               type="button"
               @click="sessionIdMaskingEnabled = !sessionIdMaskingEnabled"
               :class="[
@@ -3157,7 +3159,7 @@
                 {{ t('admin.accounts.quotaControl.cacheTTLOverride.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="cacheTTLOverrideEnabled" :aria-label="t('admin.accounts.quotaControl.cacheTTLOverride.label')"
               type="button"
               @click="cacheTTLOverrideEnabled = !cacheTTLOverrideEnabled"
               :class="[
@@ -3174,8 +3176,8 @@
             </button>
           </div>
           <div v-if="cacheTTLOverrideEnabled" class="mt-3">
-            <label class="input-label text-xs">{{ t('admin.accounts.quotaControl.cacheTTLOverride.target') }}</label>
-            <select
+            <label :for="`${fieldId}-cache-t-t-l-override-target`" class="input-label text-xs">{{ t('admin.accounts.quotaControl.cacheTTLOverride.target') }}</label>
+            <select :id="`${fieldId}-cache-t-t-l-override-target`"
               v-model="cacheTTLOverrideTarget"
               class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-dark-500 dark:bg-dark-700 dark:text-white"
             >
@@ -3192,12 +3194,12 @@
         <div class="rounded-lg border border-gray-200 p-4 dark:border-dark-600">
           <div class="flex items-center justify-between">
             <div>
-              <label class="input-label mb-0">{{ t('admin.accounts.quotaControl.customBaseUrl.label') }}</label>
+              <label :for="`${fieldId}-custom-base-url`" class="input-label mb-0">{{ t('admin.accounts.quotaControl.customBaseUrl.label') }}</label>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.accounts.quotaControl.customBaseUrl.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="customBaseUrlEnabled" :aria-label="t('admin.accounts.quotaControl.customBaseUrl.label')"
               type="button"
               @click="customBaseUrlEnabled = !customBaseUrlEnabled"
               :class="[
@@ -3214,7 +3216,7 @@
             </button>
           </div>
           <div v-if="customBaseUrlEnabled" class="mt-3">
-            <input
+            <input :id="`${fieldId}-custom-base-url`"
               v-model="customBaseUrl"
               type="text"
               class="input"
@@ -3226,10 +3228,10 @@
 
       <div>
         <div class="mb-1 flex items-center gap-2">
-          <label class="input-label mb-0">{{ t('admin.accounts.proxy') }}</label>
+          <label :for="`${fieldId}-proxy`" class="input-label mb-0">{{ t('admin.accounts.proxy') }}</label>
           <ProxyAdBanner />
         </div>
-        <ProxySelector v-model="form.proxy_id" :proxies="proxies" />
+        <ProxySelector :id="`${fieldId}-proxy`" v-model="form.proxy_id" :proxies="proxies" :disabled="submitting" />
       </div>
 
       <UpstreamRequestIdHeaderField
@@ -3240,20 +3242,20 @@
 
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div>
-          <label class="input-label">{{ t('admin.accounts.concurrency') }}</label>
-          <input v-model.number="form.concurrency" type="number" min="1" class="input"
+          <label :for="`${fieldId}-form-concurrency`" class="input-label">{{ t('admin.accounts.concurrency') }}</label>
+          <input :id="`${fieldId}-form-concurrency`" v-model.number="form.concurrency" type="number" min="1" class="input"
             @input="form.concurrency = Math.max(1, form.concurrency || 1)" />
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.loadFactor') }}</label>
-          <input v-model.number="form.load_factor" type="number" min="1"
+          <label :for="`${fieldId}-form-load-factor`" class="input-label">{{ t('admin.accounts.loadFactor') }}</label>
+          <input :id="`${fieldId}-form-load-factor`" v-model.number="form.load_factor" type="number" min="1"
             class="input" :placeholder="String(form.concurrency || 1)"
             @input="form.load_factor = (form.load_factor &amp;&amp; form.load_factor >= 1) ? form.load_factor : null" />
           <p class="input-hint">{{ t('admin.accounts.loadFactorHint') }}</p>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.priority') }}</label>
-          <input
+          <label :for="`${fieldId}-form-priority`" class="input-label">{{ t('admin.accounts.priority') }}</label>
+          <input :id="`${fieldId}-form-priority`"
             v-model.number="form.priority"
             type="number"
             min="1"
@@ -3263,14 +3265,14 @@
           <p class="input-hint">{{ t('admin.accounts.priorityHint') }}</p>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.billingRateMultiplier') }}</label>
-          <input v-model.number="form.rate_multiplier" type="number" min="0" step="0.001" class="input" />
+          <label :for="`${fieldId}-form-rate-multiplier`" class="input-label">{{ t('admin.accounts.billingRateMultiplier') }}</label>
+          <input :id="`${fieldId}-form-rate-multiplier`" v-model.number="form.rate_multiplier" type="number" min="0" step="0.001" class="input" />
           <p class="input-hint">{{ t('admin.accounts.billingRateMultiplierHint') }}</p>
         </div>
       </div>
       <div class="border-t border-gray-200 pt-4 dark:border-dark-600">
-        <label class="input-label">{{ t('admin.accounts.expiresAt') }}</label>
-        <input v-model="expiresAtInput" type="datetime-local" class="input" />
+        <label :for="`${fieldId}-expires-at-input`" class="input-label">{{ t('admin.accounts.expiresAt') }}</label>
+        <input :id="`${fieldId}-expires-at-input`" v-model="expiresAtInput" type="datetime-local" class="input" />
         <div class="mt-2 flex gap-2">
           <button type="button" class="btn btn-secondary btn-sm" @click="form.expires_at = getAccountExpiryTimestamp(1)">
             {{ t('payment.oneMonth') }}
@@ -3297,7 +3299,7 @@
               {{ t('admin.accounts.openai.oauthPassthroughDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="openaiPassthroughEnabled" :aria-label="t('admin.accounts.openai.oauthPassthrough')"
             type="button"
             @click="openaiPassthroughEnabled = !openaiPassthroughEnabled"
             :class="[
@@ -3327,7 +3329,7 @@
               {{ t('admin.accounts.openai.flattenNamespacesDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="openaiFlattenNamespacesEnabled" :aria-label="t('admin.accounts.openai.flattenNamespaces')"
             type="button"
             data-testid="create-openai-flatten-namespaces-toggle"
             @click="openaiFlattenNamespacesEnabled = !openaiFlattenNamespacesEnabled"
@@ -3354,7 +3356,7 @@
       >
         <div class="flex items-center justify-between">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.openai.wsMode') }}</label>
+            <label :for="`${fieldId}-openai-responses-web-socket-v2-mode`" class="input-label mb-0">{{ t('admin.accounts.openai.wsMode') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.openai.wsModeDesc') }}
             </p>
@@ -3363,7 +3365,7 @@
             </p>
           </div>
           <div class="w-52">
-            <Select v-model="openaiResponsesWebSocketV2Mode" :options="openAIWSModeOptions" />
+            <Select :id="`${fieldId}-openai-responses-web-socket-v2-mode`" v-model="openaiResponsesWebSocketV2Mode" :options="openAIWSModeOptions" :disabled="submitting" />
           </div>
         </div>
       </div>
@@ -3380,7 +3382,7 @@
               {{ t('admin.accounts.anthropic.apiKeyPassthroughDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="anthropicPassthroughEnabled" :aria-label="t('admin.accounts.anthropic.apiKeyPassthrough')"
             type="button"
             @click="anthropicPassthroughEnabled = !anthropicPassthroughEnabled"
             :class="[
@@ -3404,12 +3406,12 @@
       >
         <div class="flex items-center justify-between gap-4">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.anthropic.apiKeyAuthScheme') }}</label>
+            <label :for="`${fieldId}-anthropic-a-p-i-key-auth-scheme`" class="input-label mb-0">{{ t('admin.accounts.anthropic.apiKeyAuthScheme') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.anthropic.apiKeyAuthSchemeDesc') }}
             </p>
           </div>
-          <select v-model="anthropicAPIKeyAuthScheme" class="input w-52 text-sm">
+          <select :id="`${fieldId}-anthropic-a-p-i-key-auth-scheme`" v-model="anthropicAPIKeyAuthScheme" class="input w-52 text-sm">
             <option value="x_api_key">{{ t('admin.accounts.anthropic.apiKeyAuthSchemeXApiKey') }}</option>
             <option value="authorization_bearer">{{ t('admin.accounts.anthropic.apiKeyAuthSchemeBearer') }}</option>
           </select>
@@ -3423,12 +3425,12 @@
       >
         <div class="flex items-center justify-between">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.anthropic.webSearchEmulation') }}</label>
+            <label :for="`${fieldId}-web-search-emulation-mode`" class="input-label mb-0">{{ t('admin.accounts.anthropic.webSearchEmulation') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.anthropic.webSearchEmulationDesc') }}
             </p>
           </div>
-          <select v-model="webSearchEmulationMode" class="input w-24 text-sm">
+          <select :id="`${fieldId}-web-search-emulation-mode`" v-model="webSearchEmulationMode" class="input w-24 text-sm">
             <option value="default">{{ t('admin.accounts.anthropic.webSearchDefault') }}</option>
             <option value="enabled">{{ t('admin.accounts.anthropic.webSearchEnabled') }}</option>
             <option value="disabled">{{ t('admin.accounts.anthropic.webSearchDisabled') }}</option>
@@ -3452,6 +3454,7 @@
             type="button"
             data-testid="openai-long-context-billing-toggle"
             role="switch"
+            :aria-label="t('admin.accounts.openai.longContextBilling')"
             :aria-checked="openAILongContextBillingEnabled"
             @click="toggleOpenAILongContextBilling"
             :class="[
@@ -3480,7 +3483,7 @@
               {{ t('admin.accounts.openai.codexCLIOnlyDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="codexCLIOnlyEnabled" :aria-label="t('admin.accounts.openai.codexCLIOnly')"
             type="button"
             @click="codexCLIOnlyEnabled = !codexCLIOnlyEnabled"
             :class="[
@@ -3506,7 +3509,7 @@
               {{ t('admin.accounts.openai.codexCLIOnlyAppServerDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="codexCLIOnlyAppServerEnabled" :aria-label="t('admin.accounts.openai.codexCLIOnlyAppServer')"
             type="button"
             @click="codexCLIOnlyAppServerEnabled = !codexCLIOnlyAppServerEnabled"
             :class="[
@@ -3531,13 +3534,13 @@
       >
         <div class="flex items-center justify-between gap-4">
           <div class="min-w-0">
-            <label class="input-label mb-0">{{ t('admin.accounts.openai.codexFingerprintMode') }}</label>
+            <label :for="`${fieldId}-codex-fingerprint-mode`" class="input-label mb-0">{{ t('admin.accounts.openai.codexFingerprintMode') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.openai.codexFingerprintModeDesc') }}
             </p>
           </div>
           <div class="w-52 flex-shrink-0">
-            <Select v-model="codexFingerprintMode" data-testid="create-codex-fingerprint-mode-select" :options="codexFingerprintModeOptions" />
+            <Select :id="`${fieldId}-codex-fingerprint-mode`" v-model="codexFingerprintMode" data-testid="create-codex-fingerprint-mode-select" :options="codexFingerprintModeOptions" :disabled="submitting" />
           </div>
         </div>
       </div>
@@ -3549,13 +3552,13 @@
       >
         <div class="flex items-center justify-between">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.openai.compactMode') }}</label>
+            <label :for="`${fieldId}-open-a-i-compact-mode`" class="input-label mb-0">{{ t('admin.accounts.openai.compactMode') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.openai.compactModeDesc') }}
             </p>
           </div>
           <div class="w-44">
-            <Select v-model="openAICompactMode" :options="openAICompactModeOptions" />
+            <Select :id="`${fieldId}-open-a-i-compact-mode`" v-model="openAICompactMode" :options="openAICompactModeOptions" :disabled="submitting" />
           </div>
         </div>
         <div>
@@ -3567,10 +3570,10 @@
               :key="getOpenAICompactModelMappingKey(mapping)"
               class="flex items-center gap-2"
             >
-              <input v-model="mapping.from" type="text" class="input flex-1" :placeholder="t('admin.accounts.fromModel')" />
+              <input :aria-label="t('admin.accounts.fromModel')" :id="`${fieldId}-mapping-from-5-${getOpenAICompactModelMappingKey(mapping)}`" v-model="mapping.from" type="text" class="input flex-1" :placeholder="t('admin.accounts.fromModel')" />
               <span class="text-gray-400">→</span>
-              <input v-model="mapping.to" type="text" class="input flex-1" :placeholder="t('admin.accounts.toModel')" />
-              <button type="button" @click="removeOpenAICompactModelMapping(index)" class="text-red-500 hover:text-red-700">
+              <input :aria-label="t('admin.accounts.toModel')" :id="`${fieldId}-mapping-to-5-${getOpenAICompactModelMappingKey(mapping)}`" v-model="mapping.to" type="text" class="input flex-1" :placeholder="t('admin.accounts.toModel')" />
+              <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })" type="button" @click="removeOpenAICompactModelMapping(index)" class="text-red-500 hover:text-red-700">
                 <Icon name="trash" size="sm" />
               </button>
             </div>
@@ -3588,16 +3591,16 @@
       >
         <div class="flex items-center justify-between gap-4">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.openai.responsesMode') }}</label>
+            <label :for="`${fieldId}-open-a-i-responses-mode`" class="input-label mb-0">{{ t('admin.accounts.openai.responsesMode') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.openai.responsesModeDesc') }}
             </p>
           </div>
           <div class="w-56">
-            <Select
+            <Select :id="`${fieldId}-open-a-i-responses-mode`"
               v-model="openAIResponsesMode"
               :options="openAIResponsesModeOptions"
-              :disabled="!openAITextGenerationCapabilityEnabled"
+              :disabled="submitting || !openAITextGenerationCapabilityEnabled"
               data-testid="openai-responses-mode-select"
             />
           </div>
@@ -3642,7 +3645,7 @@
             {{ t('admin.accounts.openai.imagesUrlToB64JsonDesc') }}
           </p>
         </div>
-        <button
+        <button :aria-label="t('admin.accounts.openai.imagesUrlToB64Json')"
           type="button"
           data-testid="openai-images-url-to-b64-json-toggle"
           role="switch"
@@ -3672,7 +3675,7 @@
               {{ t('admin.accounts.autoPauseOnExpiredDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="autoPauseOnExpired" :aria-label="t('admin.accounts.autoPauseOnExpired')"
             type="button"
             @click="autoPauseOnExpired = !autoPauseOnExpired"
             :class="[
@@ -3751,6 +3754,7 @@
         <!-- Group Selection - 仅标准模式显示 -->
         <GroupSelector
           v-model="form.group_ids"
+          :disabled="submitting"
           :groups="groups"
           :platform="form.platform"
           :mixed-scheduling="mixedScheduling"
@@ -3758,6 +3762,7 @@
         />
       </div>
 
+      </fieldset>
     </form>
 
     <!-- Step 2: OAuth Authorization -->
@@ -4112,7 +4117,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onBeforeUnmount, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 
@@ -4126,6 +4131,7 @@ import {
   isValidWildcardPattern
 } from '@/composables/useModelWhitelist'
 import { adminAPI } from '@/api/admin'
+import { extractApiErrorMessage } from '@/utils/apiError'
 import { useQuotaNotifyState } from '@/composables/useQuotaNotifyState'
 import {
   useAccountOAuth,
@@ -4203,6 +4209,7 @@ import {
   parseDateTimeLocalInput
 } from '@/utils/format'
 import { createStableObjectKeyResolver } from '@/utils/stableObjectKey'
+import { captureAuthSession, isAuthSessionCurrent, subscribeAuthSession } from '@/api/authSession'
 import { supportsAccountQuota } from '@/utils/accountQuota'
 import { getAccountExpiryTimestamp } from '@/components/account/accountExpiry'
 import { VERTEX_LOCATION_OPTIONS } from '@/constants/account'
@@ -4234,6 +4241,7 @@ interface OAuthFlowExposed {
 }
 
 const { t } = useI18n()
+const fieldId = `create-account-${useId()}`
 const browserTimeZone = getBrowserTimeZone()
 
 const oauthStepTitle = computed(() => {
@@ -4331,11 +4339,11 @@ const hideAccountLongContextBilling = computed(() => {
 })
 
 // OAuth composables
-const oauth = useAccountOAuth() // For Anthropic OAuth
-const openaiOAuth = useOpenAIOAuth() // For OpenAI OAuth
-const geminiOAuth = useGeminiOAuth() // For Gemini OAuth
-const antigravityOAuth = useAntigravityOAuth() // For Antigravity OAuth
-const grokOAuth = useGrokOAuth() // For Grok OAuth
+const oauth = useAccountOAuth(() => editGeneration) // For Anthropic OAuth
+const openaiOAuth = useOpenAIOAuth(() => editGeneration) // For OpenAI OAuth
+const geminiOAuth = useGeminiOAuth(() => editGeneration) // For Gemini OAuth
+const antigravityOAuth = useAntigravityOAuth(() => editGeneration) // For Antigravity OAuth
+const grokOAuth = useGrokOAuth(() => editGeneration) // For Grok OAuth
 
 // Computed: current OAuth state for template binding
 const currentAuthUrl = computed(() => {
@@ -4391,6 +4399,19 @@ interface TempUnschedRuleForm {
 // State
 const step = ref(1)
 const submitting = ref(false)
+let editGeneration = 0
+const createSession = captureAuthSession()
+const isCurrentEdit = (generation: number) => generation === editGeneration && props.show && isAuthSessionCurrent(createSession)
+const invalidateEdit = () => {
+  editGeneration++
+  submitting.value = false
+  antigravityMixedChannelConfirmed.value = false
+  clearMixedChannelDialog()
+}
+const stopAuthWatch = subscribeAuthSession(() => {
+  if (!isAuthSessionCurrent(createSession)) invalidateEdit()
+})
+onBeforeUnmount(() => { stopAuthWatch(); invalidateEdit() })
 const accountCategory = ref<'oauth-based' | 'apikey' | 'bedrock' | 'service_account'>('oauth-based') // UI selection for account category
 const addMethod = ref<AddMethod>('oauth') // For oauth-based: 'oauth' or 'setup-token'
 const apiKeyBaseUrl = ref('https://api.anthropic.com')
@@ -5079,6 +5100,12 @@ const canExchangeCode = computed(() => {
 
 // Watchers
 watch(
+  () => JSON.stringify([props.show, form.platform, accountCategory.value, addMethod.value, antigravityAccountType.value, form.group_ids]),
+  invalidateEdit,
+  { flush: 'sync' }
+)
+
+watch(
   () => props.show,
   (newVal) => {
     if (newVal) {
@@ -5258,11 +5285,13 @@ watch(
 watch(
   [() => props.show, () => form.platform, accountCategory],
   async ([show, platform, category]) => {
+    const generation = editGeneration
     if (!show || platform !== 'gemini' || category !== 'oauth-based') {
       geminiAIStudioOAuthEnabled.value = false
       return
     }
     const caps = await geminiOAuth.getCapabilities()
+    if (!isCurrentEdit(generation)) return
     geminiAIStudioOAuthEnabled.value = !!caps?.ai_studio_oauth_enabled
     if (!geminiAIStudioOAuthEnabled.value && geminiOAuthType.value === 'ai_studio') {
       geminiOAuthType.value = 'code_assist'
@@ -5524,6 +5553,7 @@ const withAntigravityConfirmFlag = (payload: CreateAccountRequest): CreateAccoun
 }
 
 const ensureAntigravityMixedChannelConfirmed = async (onConfirm: () => Promise<void>): Promise<boolean> => {
+  const generation = editGeneration
   if (!needsMixedChannelCheck(form.platform)) {
     return true
   }
@@ -5536,27 +5566,34 @@ const ensureAntigravityMixedChannelConfirmed = async (onConfirm: () => Promise<v
       platform: form.platform,
       group_ids: form.group_ids
     })
+    if (!isCurrentEdit(generation)) return false
     if (!result.has_risk) {
       return true
     }
     openMixedChannelDialog({
       response: result,
       onConfirm: async () => {
+        if (!isCurrentEdit(generation)) return
         antigravityMixedChannelConfirmed.value = true
         await onConfirm()
       }
     })
     return false
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return false
     appStore.showError(error.response?.data?.message || error.response?.data?.detail || t('admin.accounts.failedToCreate'))
     return false
   }
 }
 
 const submitCreateAccount = async (payload: CreateAccountRequest) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(generation)) return
+  const modelsPreviewed = upstreamModelsPreviewed.value
   submitting.value = true
   try {
     const account = await adminAPI.accounts.create(withAntigravityConfirmFlag(payload))
+    if (!isCurrentEdit(generation)) return
     const modelMapping = payload.credentials.model_mapping
     const hasConcreteMappedTarget = payload.type === 'apikey' &&
       typeof modelMapping === 'object' &&
@@ -5564,19 +5601,20 @@ const submitCreateAccount = async (payload: CreateAccountRequest) => {
       Object.values(modelMapping).some((target) =>
         typeof target === 'string' && target.trim() !== '' && !target.includes('*')
       )
-    if (upstreamModelsPreviewed.value || hasConcreteMappedTarget) {
+    if (modelsPreviewed || hasConcreteMappedTarget) {
       try {
         const result = await adminAPI.accounts.syncUpstreamModels(account.id)
         const warnings = result.warnings ?? []
-        if (warnings.some(warning => warning.code === 'upstream_model_metadata_incomplete')) {
+        if (isCurrentEdit(generation) && warnings.some(warning => warning.code === 'upstream_model_metadata_incomplete')) {
           appStore.showWarning(t('admin.accounts.syncUpstreamModelsMetadataIncomplete'))
-        } else if (warnings.some(warning => warning.code === 'upstream_model_metadata_partial')) {
+        } else if (isCurrentEdit(generation) && warnings.some(warning => warning.code === 'upstream_model_metadata_partial')) {
           appStore.showWarning(t('admin.accounts.syncUpstreamModelsMetadataPartial'))
         }
       } catch {
-        appStore.showWarning(t('admin.accounts.syncUpstreamModelsFailed'))
+        if (isCurrentEdit(generation)) appStore.showWarning(t('admin.accounts.syncUpstreamModelsFailed'))
       }
     }
+    if (!isCurrentEdit(generation)) return
     if (
       payload.type === 'apikey' &&
       payload.upstream_billing_probe_enabled === true
@@ -5584,16 +5622,20 @@ const submitCreateAccount = async (payload: CreateAccountRequest) => {
       try {
         await adminAPI.accounts.probeUpstreamBilling(account.id)
       } catch {
-        appStore.showWarning(t('admin.accounts.upstreamBilling.probeFailed'))
+        if (isCurrentEdit(generation)) appStore.showWarning(t('admin.accounts.upstreamBilling.probeFailed'))
       }
     }
+    if (!isCurrentEdit(generation)) return
     appStore.showSuccess(t('admin.accounts.accountCreated'))
     emit('created')
     handleClose()
   } catch (error: any) {
-    if (error.response?.status === 409 && error.response?.data?.error === 'mixed_channel_warning' && needsMixedChannelCheck(form.platform)) {
+    if (!isCurrentEdit(generation)) return
+    const status = error.status ?? error.response?.status
+    const errorCode = error.error ?? error.response?.data?.error
+    if (status === 409 && errorCode === 'mixed_channel_warning' && needsMixedChannelCheck(payload.platform)) {
       openMixedChannelDialog({
-        message: error.response?.data?.message,
+        message: extractApiErrorMessage(error, t('admin.accounts.failedToCreate')),
         onConfirm: async () => {
           antigravityMixedChannelConfirmed.value = true
           await submitCreateAccount(payload)
@@ -5601,9 +5643,9 @@ const submitCreateAccount = async (payload: CreateAccountRequest) => {
       })
       return
     }
-    appStore.showError(error.response?.data?.message || error.response?.data?.detail || t('admin.accounts.failedToCreate'))
+    appStore.showError(extractApiErrorMessage(error, t('admin.accounts.failedToCreate')))
   } finally {
-    submitting.value = false
+    if (isCurrentEdit(generation)) submitting.value = false
   }
 }
 
@@ -5730,8 +5772,7 @@ const resetForm = () => {
 }
 
 const handleClose = () => {
-  antigravityMixedChannelConfirmed.value = false
-  clearMixedChannelDialog()
+  invalidateEdit()
   emit('close')
 }
 
@@ -5849,17 +5890,24 @@ const buildAnthropicExtra = (base?: Record<string, unknown>): Record<string, unk
 
 // Helper function to create account with mixed channel warning handling
 const doCreateAccount = async (payload: CreateAccountRequest) => {
-  const canContinue = await ensureAntigravityMixedChannelConfirmed(async () => {
+  const generation = editGeneration
+  if (!isCurrentEdit(generation)) return
+  submitting.value = true
+  try {
+    const canContinue = await ensureAntigravityMixedChannelConfirmed(async () => {
+      await submitCreateAccount(payload)
+    })
+    if (!canContinue || !isCurrentEdit(generation)) return
     await submitCreateAccount(payload)
-  })
-  if (!canContinue) {
-    return
+  } finally {
+    if (isCurrentEdit(generation)) submitting.value = false
   }
-  await submitCreateAccount(payload)
 }
 
 // Handle mixed channel warning confirmation
 const handleMixedChannelConfirm = async () => {
+  if (submitting.value || !isCurrentEdit(editGeneration)) return
+  const generation = editGeneration
   const action = mixedChannelWarningAction.value
   if (!action) {
     clearMixedChannelDialog()
@@ -5870,7 +5918,7 @@ const handleMixedChannelConfirm = async () => {
   try {
     await action()
   } finally {
-    submitting.value = false
+    if (isCurrentEdit(generation)) submitting.value = false
   }
 }
 
@@ -5921,37 +5969,52 @@ const applyVertexServiceAccountJson = (value: string) => {
 const parseVertexServiceAccountJson = () => applyVertexServiceAccountJson(vertexServiceAccountJson.value)
 
 const handleVertexServiceAccountFile = async (event: Event) => {
+  const generation = editGeneration
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
   if (!file) return
   try {
-    applyVertexServiceAccountJson(await file.text())
+    const content = await file.text()
+    if (isCurrentEdit(generation)) applyVertexServiceAccountJson(content)
+  } catch {
+    if (isCurrentEdit(generation)) appStore.showError(t('admin.accounts.vertexSaJsonInvalid'))
   } finally {
     input.value = ''
   }
 }
 
 const handleVertexServiceAccountDrop = async (event: DragEvent) => {
+  const generation = editGeneration
   vertexServiceAccountDragActive.value = false
   const file = event.dataTransfer?.files?.[0]
   if (!file) return
-  applyVertexServiceAccountJson(await file.text())
+  try {
+    const content = await file.text()
+    if (isCurrentEdit(generation)) applyVertexServiceAccountJson(content)
+  } catch {
+    if (isCurrentEdit(generation)) appStore.showError(t('admin.accounts.vertexSaJsonInvalid'))
+  }
 }
 
 const handleSubmit = async () => {
+  if (submitting.value || !isCurrentEdit(editGeneration)) return
   // For OAuth-based type, handle OAuth flow (goes to step 2)
   if (isOAuthFlow.value) {
     if (!isGrokSSOInputMethod.value && !form.name.trim()) {
       appStore.showError(t('admin.accounts.pleaseEnterAccountName'))
       return
     }
-    const canContinue = await ensureAntigravityMixedChannelConfirmed(async () => {
+    const generation = editGeneration
+    submitting.value = true
+    try {
+      const canContinue = await ensureAntigravityMixedChannelConfirmed(async () => {
+        step.value = 2
+      })
+      if (!canContinue || !isCurrentEdit(generation)) return
       step.value = 2
-    })
-    if (!canContinue) {
-      return
+    } finally {
+      if (isCurrentEdit(generation)) submitting.value = false
     }
-    step.value = 2
     return
   }
 
@@ -6128,8 +6191,8 @@ const handleSubmit = async () => {
   }
 
   // 国产供应商：账号模式 + 协议 + 对应端点写入凭据；后端按 account_mode 路由
-  // 额度/余额探测，按 api_protocol 路由转发端点与格式。注意 CN apikey 走本函数
-  // 的通用路径（直接 doCreateAccount），不经过 createAccountAndFinish。
+  // 额度/余额探测，按 api_protocol 路由转发端点与格式；最终通过共用创建路径
+  // 合并界面中配置的账号额度、重置计划与通知设置。
   if (isMultiProtocolApiKeyPlatform(form.platform)) {
     credentials.account_mode = form.platform === 'opencode_go' ? openCodeAccountMode.value : accountMode.value
     credentials.api_protocol = apiProtocol.value
@@ -6218,16 +6281,11 @@ const handleSubmit = async () => {
   form.credentials = credentials
   const extra = buildAnthropicExtra(buildOpenAIExtra())
 
-  await doCreateAccount({
-    ...form,
-    group_ids: form.group_ids,
-    extra: withUpstreamRequestIdHeader(extra),
-    upstream_billing_probe_enabled: upstreamBillingAutoProbeEnabled.value,
-    auto_pause_on_expired: autoPauseOnExpired.value
-  })
+  await createAccountAndFinish(form.platform, 'apikey', credentials, extra)
 }
 
 const goBackToBasicInfo = () => {
+  invalidateEdit()
   step.value = 1
   oauth.resetState()
   openaiOAuth.resetState()
@@ -6238,6 +6296,7 @@ const goBackToBasicInfo = () => {
 }
 
 const handleGenerateUrl = async () => {
+  if (!isCurrentEdit(editGeneration) || currentOAuthLoading.value) return
   if (form.platform === 'openai') {
     await openaiOAuth.generateAuthUrl(form.proxy_id)
   } else if (form.platform === 'gemini') {
@@ -6360,6 +6419,8 @@ const createAccountAndFinish = async (
 
 // Grok 手动 RT 批量验证和创建
 const handleGrokValidateRT = async (refreshTokenInput: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   if (!refreshTokenInput.trim()) return
 
   const refreshTokens = refreshTokenInput
@@ -6373,6 +6434,7 @@ const handleGrokValidateRT = async (refreshTokenInput: string) => {
   }
   if (!validateGrokOAuthUpstreamConfig()) return
 
+  submitting.value = true
   grokOAuth.loading.value = true
   grokOAuth.error.value = ''
 
@@ -6384,6 +6446,7 @@ const handleGrokValidateRT = async (refreshTokenInput: string) => {
     for (let i = 0; i < refreshTokens.length; i++) {
       try {
         const tokenInfo = await grokOAuth.validateRefreshToken(refreshTokens[i], form.proxy_id)
+        if (!isCurrentEdit(generation)) return
         if (!tokenInfo) {
           failedCount++
           errors.push(`#${i + 1}: ${grokOAuth.error.value || 'Validation failed'}`)
@@ -6420,8 +6483,10 @@ const handleGrokValidateRT = async (refreshTokenInput: string) => {
           expires_at: form.expires_at,
           auto_pause_on_expired: autoPauseOnExpired.value
         })
+        if (!isCurrentEdit(generation)) return
         successCount++
       } catch (error: any) {
+        if (!isCurrentEdit(generation)) return
         failedCount++
         const errMsg = error.response?.data?.detail || error.message || 'Unknown error'
         errors.push(`#${i + 1}: ${errMsg}`)
@@ -6445,11 +6510,16 @@ const handleGrokValidateRT = async (refreshTokenInput: string) => {
       appStore.showError(t('admin.accounts.oauth.batchFailed'))
     }
   } finally {
-    grokOAuth.loading.value = false
+    if (isCurrentEdit(generation)) {
+      grokOAuth.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
 const handleGrokImportSSO = async (ssoInput: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   // Align with OpenAI/Grok RT batch import: one token per line, no client-side dedupe.
   const ssoTokens = ssoInput
     .split('\n')
@@ -6458,6 +6528,7 @@ const handleGrokImportSSO = async (ssoInput: string) => {
   if (ssoTokens.length === 0) return
   if (!validateGrokOAuthUpstreamConfig()) return
 
+  submitting.value = true
   grokOAuth.loading.value = true
   grokOAuth.error.value = ''
 
@@ -6468,7 +6539,10 @@ const handleGrokImportSSO = async (ssoInput: string) => {
     credentials.model_mapping = modelMapping
   }
   if (!applyTempUnschedConfig(credentials)) {
-    grokOAuth.loading.value = false
+    if (isCurrentEdit(generation)) {
+      grokOAuth.loading.value = false
+      submitting.value = false
+    }
     return
   }
 
@@ -6487,6 +6561,7 @@ const handleGrokImportSSO = async (ssoInput: string) => {
       expires_at: form.expires_at,
       auto_pause_on_expired: autoPauseOnExpired.value
     })
+    if (!isCurrentEdit(generation)) return
 
     const successCount = result.created?.length || 0
     const failedCount = result.failed?.length || 0
@@ -6514,10 +6589,14 @@ const handleGrokImportSSO = async (ssoInput: string) => {
       appStore.showError(t('admin.accounts.oauth.batchFailed'))
     }
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     grokOAuth.error.value = error.response?.data?.detail || error.message || t('admin.accounts.oauth.grok.failedToConvertSSO')
     appStore.showError(grokOAuth.error.value)
   } finally {
-    grokOAuth.loading.value = false
+    if (isCurrentEdit(generation)) {
+      grokOAuth.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
@@ -6526,6 +6605,8 @@ const handleGrokImportSSO = async (ssoInput: string) => {
  * Password is only used for the authorize API call; buildCredentials never stores it.
  */
 const handleGrokAuthorizePassword = async (emailPasswordInput: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   if (!emailPasswordInput.trim()) return
   if (!validateGrokOAuthUpstreamConfig()) return
 
@@ -6543,6 +6624,7 @@ const handleGrokAuthorizePassword = async (emailPasswordInput: string) => {
     return
   }
 
+  submitting.value = true
   grokOAuth.loading.value = true
   grokOAuth.error.value = ''
 
@@ -6554,6 +6636,7 @@ const handleGrokAuthorizePassword = async (emailPasswordInput: string) => {
     for (let i = 0; i < lines.length; i++) {
       try {
         const tokenInfo = await grokOAuth.authorizePassword(lines[i], form.proxy_id)
+        if (!isCurrentEdit(generation)) return
         if (!tokenInfo) {
           failedCount++
           errors.push(`#${i + 1}: ${grokOAuth.error.value || 'Authorization failed'}`)
@@ -6597,8 +6680,10 @@ const handleGrokAuthorizePassword = async (emailPasswordInput: string) => {
           expires_at: form.expires_at,
           auto_pause_on_expired: autoPauseOnExpired.value
         })
+        if (!isCurrentEdit(generation)) return
         successCount++
       } catch (error: any) {
+        if (!isCurrentEdit(generation)) return
         failedCount++
         const errMsg = error.response?.data?.detail || error.message || 'Unknown error'
         errors.push(`#${i + 1}: ${errMsg}`)
@@ -6627,15 +6712,21 @@ const handleGrokAuthorizePassword = async (emailPasswordInput: string) => {
       appStore.showError(t('admin.accounts.oauth.batchFailed'))
     }
   } finally {
-    grokOAuth.loading.value = false
+    if (isCurrentEdit(generation)) {
+      grokOAuth.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
 // OpenAI OAuth 授权码兑换
 const handleOpenAIExchange = async (authCode: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   const oauthClient = openaiOAuth
   if (!authCode.trim() || !oauthClient.sessionId.value) return
 
+  submitting.value = true
   oauthClient.loading.value = true
   oauthClient.error.value = ''
 
@@ -6653,6 +6744,7 @@ const handleOpenAIExchange = async (authCode: string) => {
       stateToUse,
       form.proxy_id
     )
+    if (!isCurrentEdit(generation)) return
     if (!tokenInfo) return
 
     const credentials = oauthClient.buildCredentials(tokenInfo)
@@ -6696,16 +6788,21 @@ const handleOpenAIExchange = async (authCode: string) => {
         expires_at: form.expires_at,
         auto_pause_on_expired: autoPauseOnExpired.value
       })
+      if (!isCurrentEdit(generation)) return
       appStore.showSuccess(t('admin.accounts.accountCreated'))
     }
 
     emit('created')
     handleClose()
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     oauthClient.error.value = error.response?.data?.detail || t('admin.accounts.oauth.authFailed')
     appStore.showError(oauthClient.error.value)
   } finally {
-    oauthClient.loading.value = false
+    if (isCurrentEdit(generation)) {
+      oauthClient.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
@@ -6767,6 +6864,8 @@ const isAgentIdentityImportContent = (content: string) => {
 }
 
 const handleOpenAIImportCodexSession = async (content: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   const oauthClient = openaiOAuth
   const trimmed = content.trim()
   if (!trimmed) {
@@ -6783,6 +6882,7 @@ const handleOpenAIImportCodexSession = async (content: string) => {
     return
   }
 
+  submitting.value = true
   oauthClient.loading.value = true
   oauthClient.error.value = ''
 
@@ -6804,6 +6904,7 @@ const handleOpenAIImportCodexSession = async (content: string) => {
       extra: withUpstreamRequestIdHeader(extra),
       update_existing: true
     })
+    if (!isCurrentEdit(generation)) return
 
     const successCount = result.created + result.updated
     const params = {
@@ -6837,6 +6938,7 @@ const handleOpenAIImportCodexSession = async (content: string) => {
 
     appStore.showError(t('admin.accounts.oauth.openai.codexSessionImportFailed'))
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     oauthClient.error.value =
       error.response?.data?.detail ||
       error.response?.data?.message ||
@@ -6844,11 +6946,16 @@ const handleOpenAIImportCodexSession = async (content: string) => {
       t('admin.accounts.oauth.openai.codexSessionImportFailed')
     appStore.showError(oauthClient.error.value)
   } finally {
-    oauthClient.loading.value = false
+    if (isCurrentEdit(generation)) {
+      oauthClient.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
 const handleOpenAIImportCodexPAT = async (accessToken: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   const oauthClient = openaiOAuth
   const trimmed = accessToken.trim()
   if (!trimmed) {
@@ -6861,6 +6968,7 @@ const handleOpenAIImportCodexPAT = async (accessToken: string) => {
     return
   }
 
+  submitting.value = true
   oauthClient.loading.value = true
   oauthClient.error.value = ''
 
@@ -6881,11 +6989,13 @@ const handleOpenAIImportCodexPAT = async (accessToken: string) => {
       credential_extras: Object.keys(credentialExtras).length > 0 ? credentialExtras : undefined,
       extra: withUpstreamRequestIdHeader(extra)
     })
+    if (!isCurrentEdit(generation)) return
 
     appStore.showSuccess(t('admin.accounts.accountCreated'))
     emit('created')
     handleClose()
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     oauthClient.error.value =
       error.response?.data?.detail ||
       error.response?.data?.message ||
@@ -6893,12 +7003,17 @@ const handleOpenAIImportCodexPAT = async (accessToken: string) => {
       t('admin.accounts.oauth.openai.codexPatImportFailed')
     appStore.showError(oauthClient.error.value)
   } finally {
-    oauthClient.loading.value = false
+    if (isCurrentEdit(generation)) {
+      oauthClient.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
 // OpenAI RT 批量验证和创建（共享逻辑）
 const handleOpenAIBatchRT = async (refreshTokenInput: string, clientId?: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   const oauthClient = openaiOAuth
   if (!refreshTokenInput.trim()) return
 
@@ -6912,6 +7027,7 @@ const handleOpenAIBatchRT = async (refreshTokenInput: string, clientId?: string)
     return
   }
 
+  submitting.value = true
   oauthClient.loading.value = true
   oauthClient.error.value = ''
 
@@ -6928,6 +7044,7 @@ const handleOpenAIBatchRT = async (refreshTokenInput: string, clientId?: string)
           form.proxy_id,
           clientId
         )
+        if (!isCurrentEdit(generation)) return
         if (!tokenInfo) {
           failedCount++
           errors.push(`#${i + 1}: ${oauthClient.error.value || 'Validation failed'}`)
@@ -6977,10 +7094,12 @@ const handleOpenAIBatchRT = async (refreshTokenInput: string, clientId?: string)
             expires_at: form.expires_at,
             auto_pause_on_expired: autoPauseOnExpired.value
           })
+          if (!isCurrentEdit(generation)) return
         }
 
         successCount++
       } catch (error: any) {
+        if (!isCurrentEdit(generation)) return
         failedCount++
         const errMsg = error.response?.data?.detail || error.message || 'Unknown error'
         errors.push(`#${i + 1}: ${errMsg}`)
@@ -7007,7 +7126,10 @@ const handleOpenAIBatchRT = async (refreshTokenInput: string, clientId?: string)
       appStore.showError(t('admin.accounts.oauth.batchFailed'))
     }
   } finally {
-    oauthClient.loading.value = false
+    if (isCurrentEdit(generation)) {
+      oauthClient.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
@@ -7019,6 +7141,8 @@ const handleOpenAIValidateMobileRT = (rt: string) => handleOpenAIBatchRT(rt, OPE
 
 // Antigravity 手动 RT 批量验证和创建
 const handleAntigravityValidateRT = async (refreshTokenInput: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   if (!refreshTokenInput.trim()) return
 
   // Parse multiple refresh tokens (one per line)
@@ -7032,6 +7156,7 @@ const handleAntigravityValidateRT = async (refreshTokenInput: string) => {
     return
   }
 
+  submitting.value = true
   antigravityOAuth.loading.value = true
   antigravityOAuth.error.value = ''
 
@@ -7046,6 +7171,7 @@ const handleAntigravityValidateRT = async (refreshTokenInput: string) => {
           refreshTokens[i],
           form.proxy_id
         )
+        if (!isCurrentEdit(generation)) return
         if (!tokenInfo) {
           failedCount++
           errors.push(`#${i + 1}: ${antigravityOAuth.error.value || 'Validation failed'}`)
@@ -7077,8 +7203,10 @@ const handleAntigravityValidateRT = async (refreshTokenInput: string) => {
           auto_pause_on_expired: autoPauseOnExpired.value
         })
         await adminAPI.accounts.create(createPayload)
+        if (!isCurrentEdit(generation)) return
         successCount++
       } catch (error: any) {
+        if (!isCurrentEdit(generation)) return
         failedCount++
         const errMsg = error.response?.data?.detail || error.message || 'Unknown error'
         errors.push(`#${i + 1}: ${errMsg}`)
@@ -7105,14 +7233,20 @@ const handleAntigravityValidateRT = async (refreshTokenInput: string) => {
       appStore.showError(t('admin.accounts.oauth.batchFailed'))
     }
   } finally {
-    antigravityOAuth.loading.value = false
+    if (isCurrentEdit(generation)) {
+      antigravityOAuth.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
 // Gemini OAuth 授权码兑换
 const handleGeminiExchange = async (authCode: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   if (!authCode.trim() || !geminiOAuth.sessionId.value) return
 
+  submitting.value = true
   geminiOAuth.loading.value = true
   geminiOAuth.error.value = ''
 
@@ -7133,23 +7267,32 @@ const handleGeminiExchange = async (authCode: string) => {
       oauthType: geminiOAuthType.value,
       tierId: geminiSelectedTier.value
     })
+    if (!isCurrentEdit(generation)) return
     if (!tokenInfo) return
 
     const credentials = geminiOAuth.buildCredentials(tokenInfo)
     const extra = geminiOAuth.buildExtraInfo(tokenInfo)
     await createAccountAndFinish('gemini', 'oauth', credentials, extra)
+    if (!isCurrentEdit(generation)) return
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     geminiOAuth.error.value = error.response?.data?.detail || t('admin.accounts.oauth.authFailed')
     appStore.showError(geminiOAuth.error.value)
   } finally {
-    geminiOAuth.loading.value = false
+    if (isCurrentEdit(generation)) {
+      geminiOAuth.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
 // Antigravity OAuth 授权码兑换
 const handleAntigravityExchange = async (authCode: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   if (!authCode.trim() || !antigravityOAuth.sessionId.value) return
 
+  submitting.value = true
   antigravityOAuth.loading.value = true
   antigravityOAuth.error.value = ''
 
@@ -7168,6 +7311,7 @@ const handleAntigravityExchange = async (authCode: string) => {
       state: stateToUse,
       proxyId: form.proxy_id
     })
+    if (!isCurrentEdit(generation)) return
 		if (!tokenInfo) return
 
 		const credentials = antigravityOAuth.buildCredentials(tokenInfo)
@@ -7184,19 +7328,27 @@ const handleAntigravityExchange = async (authCode: string) => {
 		}
 		const extra = buildAntigravityExtra()
 		await createAccountAndFinish('antigravity', 'oauth', credentials, extra)
+		if (!isCurrentEdit(generation)) return
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     antigravityOAuth.error.value = error.response?.data?.detail || t('admin.accounts.oauth.authFailed')
     appStore.showError(antigravityOAuth.error.value)
   } finally {
-    antigravityOAuth.loading.value = false
+    if (isCurrentEdit(generation)) {
+      antigravityOAuth.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
 // Grok OAuth 授权码兑换
 const handleGrokExchange = async (authCode: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   if (!authCode.trim() || !grokOAuth.sessionId.value) return
   if (!validateGrokOAuthUpstreamConfig()) return
 
+  submitting.value = true
   grokOAuth.loading.value = true
   grokOAuth.error.value = ''
 
@@ -7215,24 +7367,33 @@ const handleGrokExchange = async (authCode: string) => {
       state: stateToUse,
       proxyId: form.proxy_id
     })
+    if (!isCurrentEdit(generation)) return
     if (!tokenInfo) return
 
     const credentials = grokOAuth.buildCredentials(tokenInfo)
     applyGrokOAuthUpstreamConfig(credentials)
     const extra = grokOAuth.buildExtraInfo(tokenInfo)
     await createAccountAndFinish('grok', 'oauth', credentials, extra)
+    if (!isCurrentEdit(generation)) return
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     grokOAuth.error.value = error.response?.data?.detail || t('admin.accounts.oauth.authFailed')
     appStore.showError(grokOAuth.error.value)
   } finally {
-    grokOAuth.loading.value = false
+    if (isCurrentEdit(generation)) {
+      grokOAuth.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
 // Anthropic OAuth 授权码兑换
 const handleAnthropicExchange = async (authCode: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
   if (!authCode.trim() || !oauth.sessionId.value) return
 
+  submitting.value = true
   oauth.loading.value = true
   oauth.error.value = ''
 
@@ -7248,6 +7409,7 @@ const handleAnthropicExchange = async (authCode: string) => {
       code: authCode.trim(),
       ...proxyConfig
     })
+    if (!isCurrentEdit(generation)) return
 
     // Build extra with quota control settings
     const baseExtra = oauth.buildExtraInfo(tokenInfo) || {}
@@ -7310,11 +7472,16 @@ const handleAnthropicExchange = async (authCode: string) => {
     const credentials: Record<string, unknown> = { ...tokenInfo }
     applyInterceptWarmup(credentials, interceptWarmupRequests.value, 'create')
     await createAccountAndFinish(form.platform, addMethod.value as AccountType, credentials, extra)
+    if (!isCurrentEdit(generation)) return
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     oauth.error.value = error.response?.data?.detail || t('admin.accounts.oauth.authFailed')
     appStore.showError(oauth.error.value)
   } finally {
-    oauth.loading.value = false
+    if (isCurrentEdit(generation)) {
+      oauth.loading.value = false
+      submitting.value = false
+    }
   }
 }
 
@@ -7337,6 +7504,9 @@ const handleExchangeCode = async () => {
 }
 
 const handleCookieAuth = async (sessionKey: string) => {
+  const generation = editGeneration
+  if (!isCurrentEdit(editGeneration) || submitting.value) return
+  submitting.value = true
   oauth.loading.value = true
   oauth.error.value = ''
 
@@ -7373,6 +7543,7 @@ const handleCookieAuth = async (sessionKey: string) => {
           code: keys[i],
           ...proxyConfig
         })
+        if (!isCurrentEdit(generation)) return
 
         // Build extra with quota control settings
         const baseExtra = oauth.buildExtraInfo(tokenInfo) || {}
@@ -7457,9 +7628,11 @@ const handleCookieAuth = async (sessionKey: string) => {
           expires_at: form.expires_at,
           auto_pause_on_expired: autoPauseOnExpired.value
         })
+        if (!isCurrentEdit(generation)) return
 
         successCount++
       } catch (error: any) {
+        if (!isCurrentEdit(generation)) return
         failedCount++
         errors.push(
           t('admin.accounts.oauth.keyAuthFailed', {
@@ -7484,9 +7657,13 @@ const handleCookieAuth = async (sessionKey: string) => {
       oauth.error.value = errors.join('\n')
     }
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     oauth.error.value = error.response?.data?.detail || t('admin.accounts.oauth.cookieAuthFailed')
   } finally {
-    oauth.loading.value = false
+    if (isCurrentEdit(generation)) {
+      oauth.loading.value = false
+      submitting.value = false
+    }
   }
 }
 </script>

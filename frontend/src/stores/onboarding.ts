@@ -10,11 +10,13 @@ import type { Driver } from 'driver.js'
 type VoidCallback = () => void
 type NextStepCallback = (delay?: number) => Promise<void>
 type IsCurrentStepCallback = (selector: string) => boolean
+type ControlMethods = { nextStep: NextStepCallback; isCurrentStep: IsCurrentStepCallback }
 
 export const useOnboardingStore = defineStore('onboarding', () => {
   const replayCallback = ref<VoidCallback | null>(null)
   const nextStepCallback = ref<NextStepCallback | null>(null)
   const isCurrentStepCallback = ref<IsCurrentStepCallback | null>(null)
+  const controlOwners: ControlMethods[] = []
 
   // 全局 driver 实例，跨组件保持
   const driverInstance = shallowRef<Driver | null>(null)
@@ -23,17 +25,25 @@ export const useOnboardingStore = defineStore('onboarding', () => {
     replayCallback.value = callback
   }
 
-  function setControlMethods(methods: {
-    nextStep: NextStepCallback,
-    isCurrentStep: IsCurrentStepCallback
-  }): void {
+  function setControlMethods(methods: ControlMethods): void {
+    const existing = controlOwners.findIndex(owner => owner.nextStep === methods.nextStep && owner.isCurrentStep === methods.isCurrentStep)
+    if (existing >= 0) controlOwners.splice(existing, 1)
+    controlOwners.push(methods)
     nextStepCallback.value = methods.nextStep
     isCurrentStepCallback.value = methods.isCurrentStep
   }
 
-  function clearControlMethods(): void {
-    nextStepCallback.value = null
-    isCurrentStepCallback.value = null
+  function clearControlMethods(owner?: ControlMethods): void {
+    if (owner) {
+      const index = controlOwners.findIndex(methods => methods.nextStep === owner.nextStep && methods.isCurrentStep === owner.isCurrentStep)
+      if (index < 0) return
+      controlOwners.splice(index, 1)
+    } else {
+      controlOwners.length = 0
+    }
+    const current = controlOwners.at(-1)
+    nextStepCallback.value = current?.nextStep ?? null
+    isCurrentStepCallback.value = current?.isCurrentStep ?? null
   }
 
   function setDriverInstance(driver: Driver | null): void {

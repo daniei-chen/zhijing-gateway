@@ -109,6 +109,33 @@ class FrontendContractTests(unittest.TestCase):
             self.assertNotEqual(result.returncode, 0, result.stdout)
             self.assertIn('audit_baseline_mismatch', result.stderr)
 
+    def test_v003_followup_requires_the_entire_prior_chain_and_matching_commit(self):
+        self.write_json('docs/security-changes-audit-20261105.json', self.delta)
+        repair = json.loads(json.dumps(self.delta))
+        repair['baseline_commit'] = '06b62f9536373265879b14023270299dc79e1874'
+        repair['files'][0].update(before_sha256=sha('reviewed source'), after_sha256=sha('repaired source'))
+        self.write_json('docs/security-changes-v0.0.3.json', repair)
+        followup = json.loads(json.dumps(repair))
+        followup['baseline_commit'] = '331948dc2d0cb0e2f3c2fca1a19547c35c6fb0b2'
+        followup['files'][0].update(before_sha256=sha('repaired source'), after_sha256=sha('followup source'))
+        self.write_json('docs/security-changes-v0.0.3-followup.json', followup)
+        (self.root / SOURCE).write_text('followup source')
+        result = self.run_check(optimized=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('"reviewed_v003_followup_files": 1', result.stdout)
+        for invalid in (sha('old source'), sha('reviewed source'), sha('followup source')):
+            followup['files'][0]['before_sha256'] = invalid
+            self.write_json('docs/security-changes-v0.0.3-followup.json', followup)
+            result = self.run_check(optimized=True)
+            self.assertNotEqual(result.returncode, 0, result.stdout)
+            self.assertIn('audit_baseline_mismatch', result.stderr)
+        followup['files'][0]['before_sha256'] = sha('repaired source')
+        followup['baseline_commit'] = '0' * 40
+        self.write_json('docs/security-changes-v0.0.3-followup.json', followup)
+        result = self.run_check(optimized=True)
+        self.assertNotEqual(result.returncode, 0, result.stdout)
+        self.assertIn('invalid_audit_baseline', result.stderr)
+
 
 if __name__ == '__main__':
     unittest.main()

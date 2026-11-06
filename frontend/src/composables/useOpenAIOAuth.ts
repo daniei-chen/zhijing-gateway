@@ -27,7 +27,13 @@ export interface OpenAITokenInfo {
 
 export type OpenAIOAuthPlatform = 'openai'
 
-export function useOpenAIOAuth() {
+export function useOpenAIOAuth(getRequestOwner?: () => unknown) {
+  let requestVersion = 0
+  const beginRequest = () => {
+    const version = ++requestVersion
+    const owner = getRequestOwner?.()
+    return () => version === requestVersion && owner === getRequestOwner?.()
+  }
   const appStore = useAppStore()
   const { t } = useI18n()
   const endpointPrefix = '/admin/openai'
@@ -41,6 +47,7 @@ export function useOpenAIOAuth() {
 
   // Reset state
   const resetState = () => {
+    requestVersion++
     authUrl.value = ''
     sessionId.value = ''
     oauthState.value = ''
@@ -53,6 +60,7 @@ export function useOpenAIOAuth() {
     proxyId?: number | null,
     redirectUri?: string
   ): Promise<boolean> => {
+    const isCurrent = beginRequest()
     loading.value = true
     authUrl.value = ''
     sessionId.value = ''
@@ -72,6 +80,7 @@ export function useOpenAIOAuth() {
         `${endpointPrefix}/generate-auth-url`,
         payload
       )
+      if (!isCurrent()) return false
       authUrl.value = response.auth_url
       sessionId.value = response.session_id
       try {
@@ -82,11 +91,12 @@ export function useOpenAIOAuth() {
       }
       return true
     } catch (err: any) {
+      if (!isCurrent()) return false
       error.value = extractApiErrorMessage(err, t('admin.accounts.oauth.openai.failedToGenerateUrl'))
       appStore.showError(error.value)
       return false
     } finally {
-      loading.value = false
+      if (isCurrent()) loading.value = false
     }
   }
 
@@ -97,6 +107,7 @@ export function useOpenAIOAuth() {
     state: string,
     proxyId?: number | null
   ): Promise<OpenAITokenInfo | null> => {
+    const isCurrent = beginRequest()
     if (!code.trim() || !currentSessionId || !state.trim()) {
       error.value = 'Missing auth code, session ID, or state'
       return null
@@ -116,8 +127,10 @@ export function useOpenAIOAuth() {
       }
 
       const tokenInfo = await adminAPI.accounts.exchangeCode(`${endpointPrefix}/exchange-code`, payload)
+      if (!isCurrent()) return null
       return tokenInfo as OpenAITokenInfo
     } catch (err: any) {
+      if (!isCurrent()) return null
       error.value = extractI18nErrorMessage(
         err,
         t,
@@ -127,7 +140,7 @@ export function useOpenAIOAuth() {
       appStore.showError(error.value)
       return null
     } finally {
-      loading.value = false
+      if (isCurrent()) loading.value = false
     }
   }
 
@@ -138,6 +151,7 @@ export function useOpenAIOAuth() {
     proxyId?: number | null,
     clientId?: string
   ): Promise<OpenAITokenInfo | null> => {
+    const isCurrent = beginRequest()
     if (!refreshToken.trim()) {
       error.value = 'Missing refresh token'
       return null
@@ -154,8 +168,10 @@ export function useOpenAIOAuth() {
         `${endpointPrefix}/refresh-token`,
         clientId
       )
+      if (!isCurrent()) return null
       return tokenInfo as OpenAITokenInfo
     } catch (err: any) {
+      if (!isCurrent()) return null
       error.value = extractI18nErrorMessage(
         err,
         t,
@@ -165,7 +181,7 @@ export function useOpenAIOAuth() {
       appStore.showError(error.value)
       return null
     } finally {
-      loading.value = false
+      if (isCurrent()) loading.value = false
     }
   }
 

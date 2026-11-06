@@ -1,14 +1,16 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import HelpTooltip from '@/components/common/HelpTooltip.vue'
 
 const props = defineProps<{
   platform?: string
   type?: string
+  disabled?: boolean
 }>()
 const model = defineModel<string>({ default: '' })
 const { t } = useI18n()
+const fieldId = `upstream-request-id-header-${useId()}`
 
 interface HeaderExample {
   label: string
@@ -50,7 +52,7 @@ const examples = computed<HeaderExample[]>(() => {
 <template>
   <div>
     <div class="flex items-center">
-      <label class="input-label">{{ t('admin.accounts.upstreamRequestIdHeader') }}</label>
+      <label :for="fieldId" class="input-label">{{ t('admin.accounts.upstreamRequestIdHeader') }}</label>
       <HelpTooltip width-class="w-80">
         <p>{{ t('admin.accounts.upstreamRequestIdHeaderHelp.intro') }}</p>
         <template v-if="examples.length">
@@ -68,7 +70,9 @@ const examples = computed<HeaderExample[]>(() => {
       </HelpTooltip>
     </div>
     <input
+      :id="fieldId"
       v-model="model"
+      :disabled="disabled"
       data-testid="upstream-request-id-header"
       type="text"
       class="input"

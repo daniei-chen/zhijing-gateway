@@ -76,6 +76,8 @@ def verify():
     audit_count = reviewed_delta(expected)
     repair_count = reviewed_delta(expected, 'docs/security-changes-v0.0.3.json',
                                   '06b62f9536373265879b14023270299dc79e1874')
+    followup_count = reviewed_delta(expected, 'docs/security-changes-v0.0.3-followup.json',
+                                    '331948dc2d0cb0e2f3c2fca1a19547c35c6fb0b2')
     for name, expected_digest in expected.items():
         require(digest(expected_digest) and hashlib.sha256(source_bytes(name)).hexdigest() == expected_digest,
                 'contract_changed:' + name)
@@ -100,6 +102,7 @@ def verify():
                   approved_security_files=len(security['files']),
                   reviewed_audit_files=audit_count,
                   reviewed_v003_files=repair_count,
+                  reviewed_v003_followup_files=followup_count,
                   runtime_documents=len(baseline['runtime_documents']), routes=len(routes),
                   built_files=len(files), qa_code_in_build=False, static_frontend_build=True)
     print(json.dumps(report, indent=2))

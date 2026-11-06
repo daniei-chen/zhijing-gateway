@@ -18,7 +18,7 @@
 .z-workspace-chrome .sidebar-brand-title { color: var(--z-ink); font-size: 18px; }
 .z-workspace-chrome .z-mobile-close { color: var(--z-muted); background: var(--z-canvas); border-radius: 8px; }
 .z-workspace-chrome .sidebar-brand > div, .z-workspace-chrome .sidebar-brand > button { color: var(--z-subtle); }
-.z-workspace-chrome .sidebar-brand button { color: var(--z-subtle); background: transparent; font-size: 8px; }
+.z-workspace-chrome .sidebar-brand > .version-badge > button { color: var(--z-subtle); background: transparent; font-size: 8px; }
 .z-workspace-chrome .sidebar-nav { padding: 22px 0; scrollbar-color: var(--z-line) transparent; }
 .z-workspace-chrome .z-nav-island { margin-bottom: 14px; padding: 10px 7px 7px; border: 1px solid var(--z-line); border-radius: 17px; background: var(--z-surface); box-shadow: 0 4px 20px #30294303; }
 .z-nav-island-title { padding: 3px 13px 10px; color: var(--z-subtle); font-size: 9px; letter-spacing: .08em; white-space: nowrap; overflow: hidden; }

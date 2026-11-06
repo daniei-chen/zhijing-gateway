@@ -38,6 +38,7 @@ export default {
     restartRequired: '请重启服务以应用更新',
     restartNow: '立即重启',
     restarting: '正在重启...',
+    restartFailed: '重启请求未成功，请重试',
     retry: '重试',
     rollback: '版本回退',
     rollbackSelectVersion: '选择要回退到的版本（近 3 个版本）',
