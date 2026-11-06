@@ -22,9 +22,9 @@
 
 智境提供登录、成员工作台与管理员控制台的统一前端。业务能力沿用 [Sub2API](https://github.com/Wei-Shaw/sub2api)，权限、计费与功能开关继续由后端决定。公开前端源码、合成预览、验证工具及明确版本的通用后端差异补丁。
 
-> **上线状态**：v0.0.2 前端与后端已于 2026-11-05 完成上线，采用并行 API 实例与热切流量，保留在途请求和回退入口。GitHub 发布与生产验证分别记录，详见 [Release](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2)。本页截图继续使用合成数据，额度、价格、指标与有效期均为演示样例。
+> **上线状态**：v0.0.4 前端与匹配后端已于 2026-11-06 完成上线，认证存储升级后采用并行 API 实例切流，保留旧实例、静态资源与回退材料。详见[线上部署记录](docs/deployments/v0.0.4-2026-11-06.zh-CN.md)。本页截图继续使用合成数据，额度、价格、指标与有效期均为演示样例。
 
-**版本下载**：[v0.0.4 · 交互有序，发布有据](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.4)，提供静态前端、配套源码差异、构建清单和 SHA256；[更新说明](docs/releases/v0.0.4.zh-CN.md)。GitHub 发布与线上部署分开记录，当前线上仍为 v0.0.2。
+**版本下载**：[v0.0.4 · 交互有序，发布有据](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.4)，提供静态前端、配套源码差异、构建清单和 SHA256；[更新说明](docs/releases/v0.0.4.zh-CN.md)。GitHub 发布与线上部署分开记录，当前线上为 v0.0.4。
 
 ## v0.0.4 · 交互有序，发布有据
 
@@ -40,7 +40,7 @@
 
 合并此前未正式发布的 v0.0.3 会话与资源生命周期修复：匹配后端支持 HttpOnly Cookie、OAuth 一次性交接、图片资源清理、按需加载、设置草稿保留与更细的首响应诊断。原 TTFT、模型、权限、计费与额度口径保持。
 
-先验收并升级[匹配后端](integrations/sub2api/v0.0.4/README.zh-CN.md)，再更新前端；本轮没有替换生产。覆盖率和回归通过不代表每条路径都已验证，也没有生产 TTFT 长尾消除的测量结论。详见[机器可读验证摘要](docs/validation-v0.0.4.json)、[逐项运行修复](docs/proofs/v0.0.4/frontend-runtime-fixes.json)和[完整回归证据](docs/proofs/v0.0.4/frontend-validation-final.json)。历史 [v0.0.3 候选](docs/releases/v0.0.3.zh-CN.md)保留当时门禁与范围。
+先验收并升级[匹配后端](integrations/sub2api/v0.0.4/README.zh-CN.md)，再更新前端；现已完成[匹配版本的生产升级](docs/deployments/v0.0.4-2026-11-06.zh-CN.md)。覆盖率和回归通过不代表每条路径都已验证，也没有生产 TTFT 长尾消除的测量结论。详见[机器可读验证摘要](docs/validation-v0.0.4.json)、[逐项运行修复](docs/proofs/v0.0.4/frontend-runtime-fixes.json)和[完整回归证据](docs/proofs/v0.0.4/frontend-validation-final.json)。历史 [v0.0.3 候选](docs/releases/v0.0.3.zh-CN.md)保留当时门禁与范围。
 
 ## v0.0.2 · 已发布的工作台基础
 
