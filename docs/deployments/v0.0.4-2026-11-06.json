@@ -1,0 +1,50 @@
+{
+  "version": "0.0.4",
+  "production_deployed": true,
+  "deployed_at": "2026-11-06T16:40:40+08:00",
+  "frontend": {
+    "source_commit": "fec037fab33d517fcedb04b0003b522c92ed6927",
+    "static_files": 346
+  },
+  "backend": {
+    "source_commit": "dcaf707cad583955873ed94097d63c9a4be12e82",
+    "binary_sha256": "5aaeefa2de006a58a41025f8fa81931c085d6f3bf079090b5227fb6a97e30091",
+    "api_only": true,
+    "healthy": true
+  },
+  "authentication_storage": {
+    "appendonly": "yes",
+    "appendfsync": "always",
+    "maxmemory_policy": "noeviction",
+    "startup_and_compose_persisted": true,
+    "same_aof_volume": true,
+    "acknowledged_synthetic_marker_survived": true
+  },
+  "cutover": {
+    "health_samples": 25,
+    "failed_health_samples": 0,
+    "max_health_probe_ms": 59,
+    "successful_storage_maintenance_seconds": null,
+    "final_model_drain_seconds": 50.48,
+    "maintenance_duration_kind": "exact cumulative duration not claimed; initial post-reload probe returned 503 and subsequent readiness passed",
+    "post_reload_readiness_recovered": true,
+    "earlier_guarded_drain_attempts_restored_original_ingress": true,
+    "maintenance_returned_retryable_503": true,
+    "existing_model_connections_forcibly_closed": false
+  },
+  "preservation": {
+    "business_policy_unchanged": true,
+    "homepage_unchanged": true,
+    "old_static_assets_retained": true,
+    "old_api_singleton_database_not_restarted": true,
+    "old_peers_retained_for_inflight_and_ledger": true
+  },
+  "rollback": {
+    "materials_verified": true,
+    "frontend_can_be_restored_with_matching_auth_backend": true,
+    "automatic_old_auth_backend_rollback_allowed": false,
+    "database_or_redis_data_restore_performed": false
+  },
+  "provider_inference_probes_sent": 0,
+  "scope": "Deployment health and integrity checks; not an inference latency benchmark. Build-time manifest remains immutable."
+}
