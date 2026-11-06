@@ -488,13 +488,6 @@ const matchModeOptions = computed(() => [
 
 const platformOptions = CONCRETE_PLATFORM_OPTIONS
 
-// Load rules when dialog opens
-watch(() => props.show, (newVal) => {
-  if (newVal) {
-    loadRules()
-  }
-})
-
 const loadRules = async () => {
   loading.value = true
   try {
@@ -643,4 +636,10 @@ const confirmDelete = async () => {
     console.error('Error deleting rule:', error)
   }
 }
+
+// Accounts mounts this dialog conditionally with show already true. Register
+// after loadRules is initialized so that initial opening is loaded as well.
+watch(() => props.show, (visible) => {
+  if (visible) void loadRules()
+}, { immediate: true })
 </script>

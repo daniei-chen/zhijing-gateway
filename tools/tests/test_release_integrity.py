@@ -154,6 +154,35 @@ class PatchVerificationTests(unittest.TestCase):
 
 
 class PackageProvenanceTests(unittest.TestCase):
+    def test_corepack_pins_the_reviewed_package_manager_instead_of_global_pnpm(self):
+        module = load_module('package_corepack_for_test', ROOT / 'tools/package_release.py')
+        with patch.object(module.shutil, 'which', return_value='/synthetic/corepack.cmd'):
+            self.assertEqual(module.package_manager_command(), ['/synthetic/corepack.cmd', 'pnpm@9.15.9'])
+
+    def test_without_corepack_resolves_the_pnpm_executable_for_the_existing_version_check(self):
+        module = load_module('package_pnpm_fallback_for_test', ROOT / 'tools/package_release.py')
+        with patch.object(module.shutil, 'which', side_effect=[None, '/synthetic/pnpm.cmd']):
+            self.assertEqual(module.package_manager_command(), ['/synthetic/pnpm.cmd'])
+
+    def test_v004_bundle_is_selected_and_missing_version_never_falls_back(self):
+        module = load_module('package_v004_bundle_for_test', ROOT / 'tools/package_release.py')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            base = root / 'integrations/sub2api'
+            nested = base / 'v0.0.4'
+            nested.mkdir(parents=True)
+            (base / 'INTEGRATION-MANIFEST.json').write_text(json.dumps(dict(version='0.0.2')))
+            manifest = nested / 'INTEGRATION-MANIFEST.json'
+            manifest.write_text(json.dumps(dict(version='0.0.4')))
+            with patch.object(module, 'ROOT', root):
+                self.assertEqual(module.integration_bundle('0.0.4')[0], nested)
+                manifest.write_text(json.dumps(dict(version='0.0.3')))
+                with self.assertRaisesRegex(ValueError, 'Backend bundle version'):
+                    module.integration_bundle('0.0.4')
+                manifest.unlink()
+                with self.assertRaises(FileNotFoundError):
+                    module.integration_bundle('0.0.4')
+
     def test_v003_selects_its_own_backend_bundle_without_falling_back_to_v002(self):
         module = load_module('package_bundle_for_test', ROOT / 'tools/package_release.py')
         with tempfile.TemporaryDirectory() as directory:
@@ -226,7 +255,7 @@ class PackageProvenanceTests(unittest.TestCase):
                 return '' if args[0] == 'status' else 'a' * 40
 
             def command(args, **kwargs):
-                if args[:3] == ['pnpm', '--dir', 'frontend'] and 'build' in args:
+                if args[-3:] == ['--dir', 'frontend', 'build']:
                     (root / 'frontend/dist/index.html').write_text('fresh build from reviewed source')
                 return subprocess.CompletedProcess(args, 0)
 

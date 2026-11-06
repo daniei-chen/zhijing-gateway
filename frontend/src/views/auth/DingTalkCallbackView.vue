@@ -551,20 +551,28 @@ function getRequestErrorMessage(error: unknown, fallback: string): string {
 }
 
 function isCreateAccountRecoveryError(error: unknown): boolean {
-  const data = (error as {
+  const err = error as {
+    reason?: unknown
+    error?: unknown
+    code?: unknown
+    message?: unknown
     response?: {
       data?: {
-        reason?: string
-        error?: string
-        code?: string
-        step?: string
-        intent?: string
+        reason?: unknown
+        error?: unknown
+        code?: unknown
+        step?: unknown
+        intent?: unknown
       }
     }
-  }).response?.data
-  const states = [data?.reason, data?.error, data?.code, data?.step, data?.intent]
-    .map(value => value?.trim().toLowerCase())
-    .filter((value): value is string => Boolean(value))
+  }
+  const data = err?.response?.data
+  const states = [
+    err?.reason, err?.error, err?.code, err?.message,
+    data?.reason, data?.error, data?.code, data?.step, data?.intent
+  ]
+    .filter((value): value is string => typeof value === 'string')
+    .map(value => value.trim().toLowerCase())
 
   return states.includes('email_exists') ||
     states.includes('bind_login_required') ||

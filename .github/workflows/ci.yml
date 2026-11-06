@@ -49,5 +49,6 @@ jobs:
         run: |
           python3 integrations/sub2api/check_patch.py --artifact-only
           python3 integrations/sub2api/check_patch.py --bundle v0.0.3 --artifact-only
+          python3 integrations/sub2api/check_patch.py --bundle v0.0.4 --artifact-only
       - name: Run regressions and enforce all four global 80 percent coverage gates
         run: pnpm --dir frontend test:coverage --maxWorkers=4

@@ -457,7 +457,7 @@
       :cancel-text="t('common.cancel')"
       :danger="true"
       @confirm="handleDelete"
-      @cancel="showDeleteConfirm = false"
+      @cancel="cancelDelete"
     />
   </BaseDialog>
 </template>
@@ -475,10 +475,17 @@ import { Icon } from '@/components/icons'
 import { adminAPI } from '@/api/admin'
 import { useAppStore } from '@/stores/app'
 import { formatDateTime } from '@/utils/format'
+import { createSessionTasks } from '@/utils/sessionTasks'
+import { trackAuthRequest } from '@/api/authSession'
 import type { ScheduledTestPlan, ScheduledTestResult } from '@/types'
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const pageTasks = createSessionTasks()
+let panelRevision = 0
+let editRevision = 0
+let deleteRevision = 0
+let createRevision = 0
 
 const props = defineProps<{
   show: boolean
@@ -503,13 +510,14 @@ watch(expandedPlanId, () => {
   results.value = []
   loadingResults.value = false
 }, { flush: 'sync' })
-onBeforeUnmount(() => { resultsRequestId++ })
 const expandedResultIds = reactive(new Set<number>())
 const showAddForm = ref(false)
 const showDeleteConfirm = ref(false)
 const deletingPlan = ref<ScheduledTestPlan | null>(null)
 const editingPlanId = ref<number | null>(null)
 const updating = ref(false)
+const deleting = ref(false)
+const togglingPlans = new Set<number>()
 const editForm = reactive({
   model_id: '' as string,
   cron_expression: '' as string,
@@ -534,73 +542,108 @@ const resetNewPlan = () => {
   newPlan.auto_recover = false
 }
 
-// Load plans when dialog opens
-watch(
-  () => props.show,
-  async (visible) => {
-    if (visible && props.accountId) {
-      await loadPlans()
-    } else {
-      plans.value = []
-      results.value = []
-      expandedPlanId.value = null
-      expandedResultIds.clear()
-      showAddForm.value = false
-      showDeleteConfirm.value = false
-    }
-  }
-)
+const panelCurrent = () => pageTasks.current() && props.show && props.accountId != null
+
+const resetPanel = () => {
+  panelRevision++
+  editRevision++
+  deleteRevision++
+  pageTasks.cancel()
+  resultsRequestId++
+  plans.value = []
+  results.value = []
+  expandedPlanId.value = null
+  expandedResultIds.clear()
+  showAddForm.value = false
+  showDeleteConfirm.value = false
+  deletingPlan.value = null
+  editingPlanId.value = null
+  creating.value = false
+  updating.value = false
+  deleting.value = false
+  loading.value = false
+  loadingResults.value = false
+  togglingPlans.clear()
+  resetNewPlan()
+}
 
 const loadPlans = async () => {
-  if (!props.accountId) return
+  if (!panelCurrent() || !props.accountId) return
+  const accountId = props.accountId
+  const revision = panelRevision
+  const task = pageTasks.begin('plans:list', () => props.show && props.accountId === accountId && panelRevision === revision)
   loading.value = true
   try {
-    plans.value = await adminAPI.scheduledTests.listByAccount(props.accountId)
+    const loaded = await adminAPI.scheduledTests.listByAccount(accountId)
+    if (!task.active()) return
+    plans.value = loaded
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error?.message || 'Failed to load plans')
   } finally {
-    loading.value = false
+    if (task.active()) loading.value = false
+    task.finish()
   }
 }
 
 const handleCreate = async () => {
-  if (!props.accountId || !newPlan.model_id || !newPlan.cron_expression) return
+  if (!panelCurrent() || creating.value || !props.accountId || !newPlan.model_id || !newPlan.cron_expression) return
+  const accountId = props.accountId
+  const panel = panelRevision
+  const revision = createRevision
+  const task = pageTasks.begin('plans:create', () => panelRevision === panel && createRevision === revision && props.show && props.accountId === accountId)
   creating.value = true
   try {
     const maxResults = Number(newPlan.max_results) || 100
     await adminAPI.scheduledTests.create({
-      account_id: props.accountId,
+      account_id: accountId,
       model_id: newPlan.model_id,
       cron_expression: newPlan.cron_expression,
       enabled: newPlan.enabled,
       max_results: maxResults,
       auto_recover: newPlan.auto_recover
     })
+    if (!task.active()) return
     appStore.showSuccess(t('admin.scheduledTests.createSuccess'))
     showAddForm.value = false
     resetNewPlan()
     await loadPlans()
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error?.message || 'Failed to create plan')
   } finally {
-    creating.value = false
+    if (task.active()) creating.value = false
+    task.finish()
   }
 }
 
 const handleToggleEnabled = async (plan: ScheduledTestPlan, enabled: boolean) => {
+  if (!panelCurrent() || togglingPlans.has(plan.id)) return
+  const panel = panelRevision
+  const task = pageTasks.begin(`plans:toggle:${plan.id}`, () => panelRevision === panel && props.show)
+  togglingPlans.add(plan.id)
   try {
     const updated = await adminAPI.scheduledTests.update(plan.id, { enabled })
+    if (!task.active()) return
     const index = plans.value.findIndex((p) => p.id === plan.id)
     if (index !== -1) {
       plans.value[index] = updated
     }
     appStore.showSuccess(t('admin.scheduledTests.updateSuccess'))
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error?.message || 'Failed to update plan')
+  } finally {
+    if (task.active()) togglingPlans.delete(plan.id)
+    task.finish()
   }
 }
 
 const startEdit = (plan: ScheduledTestPlan) => {
+  if (!panelCurrent()) return
+  editRevision++
+  pageTasks.cancel('plans:edit')
+  updating.value = false
   editingPlanId.value = plan.id
   editForm.model_id = plan.model_id
   editForm.cron_expression = plan.cron_expression
@@ -610,57 +653,89 @@ const startEdit = (plan: ScheduledTestPlan) => {
 }
 
 const cancelEdit = () => {
+  editRevision++
+  pageTasks.cancel('plans:edit')
+  updating.value = false
   editingPlanId.value = null
 }
 
 const handleEdit = async () => {
-  if (!editingPlanId.value || !editForm.model_id || !editForm.cron_expression) return
+  if (!panelCurrent() || updating.value || !editingPlanId.value || !editForm.model_id || !editForm.cron_expression) return
+  const id = editingPlanId.value
+  const revision = editRevision
+  const panel = panelRevision
+  const task = pageTasks.begin('plans:edit', () => panelRevision === panel && editRevision === revision && editingPlanId.value === id && props.show)
   updating.value = true
   try {
-    const updated = await adminAPI.scheduledTests.update(editingPlanId.value, {
+    const updated = await adminAPI.scheduledTests.update(id, {
       model_id: editForm.model_id,
       cron_expression: editForm.cron_expression,
       max_results: Number(editForm.max_results) || 100,
       enabled: editForm.enabled,
       auto_recover: editForm.auto_recover
     })
-    const index = plans.value.findIndex((p) => p.id === editingPlanId.value)
+    if (!task.active()) return
+    const index = plans.value.findIndex((p) => p.id === id)
     if (index !== -1) {
       plans.value[index] = updated
     }
     appStore.showSuccess(t('admin.scheduledTests.updateSuccess'))
     editingPlanId.value = null
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error?.message || 'Failed to update plan')
   } finally {
-    updating.value = false
+    if (task.owned() && panelRevision === panel && editRevision === revision) updating.value = false
+    task.finish()
   }
 }
 
 const confirmDeletePlan = (plan: ScheduledTestPlan) => {
+  if (!panelCurrent()) return
+  cancelDelete()
   deletingPlan.value = plan
   showDeleteConfirm.value = true
 }
 
+const cancelDelete = () => {
+  deleteRevision++
+  pageTasks.cancel('plans:delete')
+  deleting.value = false
+  showDeleteConfirm.value = false
+  deletingPlan.value = null
+}
+
 const handleDelete = async () => {
-  if (!deletingPlan.value) return
+  if (!panelCurrent() || deleting.value || !showDeleteConfirm.value || !deletingPlan.value) return
+  const id = deletingPlan.value.id
+  const revision = deleteRevision
+  const panel = panelRevision
+  const task = pageTasks.begin('plans:delete', () => panelRevision === panel && deleteRevision === revision && deletingPlan.value?.id === id && showDeleteConfirm.value && props.show)
+  deleting.value = true
   try {
-    await adminAPI.scheduledTests.delete(deletingPlan.value.id)
+    await adminAPI.scheduledTests.delete(id)
+    if (!task.active()) return
     appStore.showSuccess(t('admin.scheduledTests.deleteSuccess'))
-    plans.value = plans.value.filter((p) => p.id !== deletingPlan.value!.id)
-    if (expandedPlanId.value === deletingPlan.value.id) {
+    plans.value = plans.value.filter((p) => p.id !== id)
+    if (expandedPlanId.value === id) {
       expandedPlanId.value = null
       results.value = []
     }
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error?.message || 'Failed to delete plan')
   } finally {
-    showDeleteConfirm.value = false
-    deletingPlan.value = null
+    if (task.owned() && panelRevision === panel && deleteRevision === revision) {
+      showDeleteConfirm.value = false
+      deletingPlan.value = null
+      deleting.value = false
+    }
+    task.finish()
   }
 }
 
 const toggleExpand = async (planId: number) => {
+  if (!panelCurrent()) return
   if (expandedPlanId.value === planId) {
     expandedPlanId.value = null
     results.value = []
@@ -672,16 +747,19 @@ const toggleExpand = async (planId: number) => {
   expandedResultIds.clear()
   loadingResults.value = true
   const requestId = resultsRequestId
+  const panel = panelRevision
+  const task = pageTasks.begin('plans:results', () => panelRevision === panel && props.show && expandedPlanId.value === planId)
   try {
     const data = await adminAPI.scheduledTests.listResults(planId, 20)
-    if (requestId !== resultsRequestId) return
+    if (!task.active() || requestId !== resultsRequestId) return
     results.value = data
   } catch (error: any) {
-    if (requestId !== resultsRequestId) return
+    if (!task.active() || requestId !== resultsRequestId) return
     appStore.showError(error?.message || 'Failed to load results')
     results.value = []
   } finally {
-    if (requestId === resultsRequestId) loadingResults.value = false
+    if (task.active() && requestId === resultsRequestId) loadingResults.value = false
+    task.finish()
   }
 }
 
@@ -692,4 +770,23 @@ const toggleResultDetail = (resultId: number) => {
     expandedResultIds.add(resultId)
   }
 }
+
+watch(showAddForm, () => {
+  createRevision++
+  pageTasks.cancel('plans:create')
+  creating.value = false
+}, { flush: 'sync' })
+
+// Register after the handlers: an initially visible conditional mount must load
+// once, and changing account/closing invalidates every previous operation.
+watch(() => [props.show, props.accountId] as const, () => {
+  resetPanel()
+  if (panelCurrent()) void loadPlans()
+}, { immediate: true, flush: 'sync' })
+const stopSessionReset = trackAuthRequest(pageTasks.session, resetPanel)
+onBeforeUnmount(() => {
+  resetPanel()
+  stopSessionReset()
+  pageTasks.dispose()
+})
 </script>

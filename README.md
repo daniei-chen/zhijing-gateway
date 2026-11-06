@@ -4,15 +4,14 @@
 </picture>
 
 <p align="center">
-  <b>智境网关 · 会话稳固，等待可见</b><br>
+  <b>智境网关 · 交互有序，发布有据</b><br>
   <sub>以液态玻璃、清晰排版和细腻交互，连接你的工具与创造。</sub>
 </p>
 
 <p align="center">
   <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat-square">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-638bdf?style=flat-square">
-  <a href="https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2"><img alt="Release v0.0.2" src="https://img.shields.io/badge/Release-v0.0.2-8b6ad5?style=flat-square"></a>
-  <a href="docs/releases/v0.0.3.zh-CN.md"><img alt="v0.0.3 review candidate" src="https://img.shields.io/badge/Candidate-v0.0.3-638bdf?style=flat-square"></a>
+  <a href="https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.4"><img alt="Release v0.0.4" src="https://img.shields.io/badge/Release-v0.0.4-8b6ad5?style=flat-square"></a>
   <a href="https://github.com/daniei-chen/zhijing-gateway/actions/workflows/ci.yml"><img alt="Frontend verification" src="https://github.com/daniei-chen/zhijing-gateway/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="LGPL v3" src="https://img.shields.io/badge/License-LGPL--3.0-868093?style=flat-square"></a>
 </p>
@@ -25,19 +24,23 @@
 
 > **上线状态**：v0.0.2 前端与后端已于 2026-11-05 完成上线，采用并行 API 实例与热切流量，保留在途请求和回退入口。GitHub 发布与生产验证分别记录，详见 [Release](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2)。本页截图继续使用合成数据，额度、价格、指标与有效期均为演示样例。
 
-**版本下载**：[v0.0.2 · 会话有界，诊断有据](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2)，提供静态构建包、可选诊断源码包、构建清单和 SHA256；[更新说明](docs/releases/v0.0.2.zh-CN.md)。
+**版本下载**：[v0.0.4 · 交互有序，发布有据](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.4)，提供静态前端、配套源码差异、构建清单和 SHA256；[更新说明](docs/releases/v0.0.4.zh-CN.md)。GitHub 发布与线上部署分开记录，当前线上仍为 v0.0.2。
 
-## v0.0.3 候选 · 会话稳固，等待可见
+## v0.0.4 · 交互有序，发布有据
 
-<p align="center"><sub>SESSION / 持有有界　·　WORKSPACE / 按需展开　·　OBSERVABILITY / 等待可见</sub></p>
+<p align="center"><sub>SESSION / 操作有归属　·　WORKSPACE / 首次即就绪　·　RELEASE / 验证可复现</sub></p>
 
-| 更稳固的会话 | 更从容的工作台 | 更细的首响应诊断 |
+| 细节更稳 | 流程连贯 | 发布有据 |
 | :--- | :--- | :--- |
-| 匹配后端支持 HttpOnly Cookie；OAuth 不再通过 URL 返回登录凭据，晚到结果绑定发起会话。 | 账号弹窗与重组件按需加载，设置草稿保留；图片轮询、缓存、下载和预览及时清理。 | 分开上游请求写完、首字节、首事件与有内容输出，保留原 TTFT 口径。 |
+| 首次打开加载模型、TLS 与错误规则；MiniMax 国际预设保持准确，定时测试防重复与迟到写回。 | OAuth 邮箱冲突正确进入绑定；支付成功后继续有限跟进至入账，余额完成后刷新一次。 | **542 个文件、6,739 项测试全通过**；原四项全局 80% 覆盖率门槛全部通过，干净提交独立打包与摘要校验。 |
 
-**当前修复候选已交付，后续扩项审查按用户要求暂停；未部署 v0.0.3、未发布正式 Release。** 检查点 11 的 492 个文件、5,168 项测试中 5,167 通过、1 项弹窗键盘检查失败；该项单独复验通过，整仓结果仍记为失败。应用源类型、全仓 ESLint 和静态构建通过。最新有效覆盖率仍是检查点 10（80.97% / 78.40% / 72.00% / 69.84%），后三项未达原 80% 门槛；附加类型配置与独审夹具缺口见验证摘要。
+| 行覆盖率 | 语句覆盖率 | 函数覆盖率 | 分支覆盖率 |
+| :---: | :---: | :---: | :---: |
+| **89.40%** | **86.66%** | **84.50%** | **80.24%** |
 
-配套认证升级需要**先匹配后端，再更新前端**。新增原子撤销、认证存储启动检查及可选本机上传压缩；保留原 TTFT 口径，尚无生产长尾消除的实测结论。详见[最新修复与门禁](docs/reviews/2026-11-06-v003-followup.zh-CN.md)、[候选更新说明](docs/releases/v0.0.3.zh-CN.md)、[匹配后端补丁](integrations/sub2api/v0.0.3/README.zh-CN.md)。
+合并此前未正式发布的 v0.0.3 会话与资源生命周期修复：匹配后端支持 HttpOnly Cookie、OAuth 一次性交接、图片资源清理、按需加载、设置草稿保留与更细的首响应诊断。原 TTFT、模型、权限、计费与额度口径保持。
+
+先验收并升级[匹配后端](integrations/sub2api/v0.0.4/README.zh-CN.md)，再更新前端；本轮没有替换生产。覆盖率和回归通过不代表每条路径都已验证，也没有生产 TTFT 长尾消除的测量结论。详见[机器可读验证摘要](docs/validation-v0.0.4.json)、[逐项运行修复](docs/proofs/v0.0.4/frontend-runtime-fixes.json)和[完整回归证据](docs/proofs/v0.0.4/frontend-validation-final.json)。历史 [v0.0.3 候选](docs/releases/v0.0.3.zh-CN.md)保留当时门禁与范围。
 
 ## v0.0.2 · 已发布的工作台基础
 
@@ -119,7 +122,7 @@ python qa/preview_server.py --port 18872
 
 ## 验证与兼容
 
-当前 v0.0.3 候选的结果见[机器可读验证摘要](docs/validation-v0.0.3.json)。[严格审计报告](docs/reviews/2026-11-05-strict-audit.zh-CN.md)记录继承的安全、依赖与性能修复；其历史计数不改写为本轮结果。下面的 v0.0.2 数据保留原发布口径。
+当前 v0.0.4 的完整结果见[机器可读验证摘要](docs/validation-v0.0.4.json)。[严格审计报告](docs/reviews/2026-11-05-strict-audit.zh-CN.md)记录继承的安全、依赖与性能修复；其历史计数不改写为本轮结果。下面的 v0.0.2 数据保留原发布口径。
 
 v0.0.2 前端全量回归 **392 个文件、3,139 项测试通过**；原四条失败的安全验收全部转为通过。真实客户端、认证 API 与状态仓库的合成往返覆盖不同 HTTP 方法、晚到结果、同账号重新登录、刷新与会话切换。本地浏览器验证双标签管理员到成员切换、浅/深色时序面板、320/390px 和关闭后焦点恢复。
 
@@ -130,13 +133,12 @@ cd frontend
 pnpm typecheck
 pnpm lint:check
 pnpm test:coverage --maxWorkers=4
-# 当前四项覆盖率不足会退出 1；构建和下列检查可以分别执行。
 pnpm build
 cd ..
 python tools/verify_frontend.py
 node tools/verify_ops_contract.mjs
 python integrations/sub2api/check_patch.py --artifact-only
-python integrations/sub2api/check_patch.py --bundle v0.0.3 --artifact-only
+python integrations/sub2api/check_patch.py --bundle v0.0.4 --artifact-only
 ```
 
 - 原 227 文件兼容基线保留；v0.0.2、严格审计与 v0.0.3 的变更分别通过明确摘要链登记，未静默重建基线。Ops 契约明确包含已批准的运行时变化。
@@ -153,12 +155,12 @@ frontend/              Vue、TypeScript、样式与组件测试
   src/styles/          智境设计语言与各版本表现层
   public/app-assets/   本地托管字体与品牌资源
 qa/                    本机合成数据预览
-integrations/sub2api/  历史诊断补丁、v0.0.3 配套会话补丁与摘要核验
+integrations/sub2api/  历史诊断补丁、v0.0.4 配套会话补丁与摘要核验
 tools/                 契约、构建、发布包及下载校验
 docs/                  设计、验证、界面图片和字体许可
 ```
 
-接入既有网关时保持原 API 路由，先验证匹配后端与静态资源，再选择发布窗口并保留旧哈希资源。更新安全版本时应完整刷新旧标签；v0.0.3 认证变更要求后端先升级。完整后端不包含在本工程中，补丁只适用于明确匹配的自定义源码，不应直接套用原版 Sub2API。
+接入既有网关时保持原 API 路由，先验证匹配后端与静态资源，再选择发布窗口并保留旧哈希资源。更新安全版本时应完整刷新旧标签；v0.0.4 延续的认证变更要求后端先升级。完整后端不包含在本工程中，补丁只适用于明确匹配的自定义源码，不应直接套用原版 Sub2API。
 
 ## 来源与许可
 

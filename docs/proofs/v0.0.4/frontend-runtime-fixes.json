@@ -1,0 +1,295 @@
+{
+  "schema_version": 1,
+  "version": "0.0.4",
+  "proof_type": "frontend-runtime-fixes",
+  "before_commit": "3aef526659e96ee6c2a7ec28c6a3cfd6feb30b76",
+  "after_source": "current working-tree candidate; per-file hashes below",
+  "sha256_normalization": "Decode UTF-8 and normalize CRLF and bare CR to LF. Preserve all other characters and final newlines; do not trim or reformat.",
+  "validation_status": {
+    "full_regression": "passed; see frontend-validation-final.json for integrated scope and exact results",
+    "four_global_80_percent_gates": "passed in the separate complete integrated run; this assembly remains a source/local-regression record",
+    "production_deployed": false,
+    "new_tests_run_for_evidence_assembly": false,
+    "local_observations": "Historical local synthetic regressions supplied by the implementing tasks. The assembly checks hashes and public references only; it does not rerun those tests or certify a final integrated candidate.",
+    "integrated_validation": "frontend-validation-final.json"
+  },
+  "files": [
+    {
+      "path": "frontend/src/components/account/CreateAccountModal.vue",
+      "before_sha256": "ee98722b874d821a223b66fd771118dec0b7383cc55972c56714636600241ebb",
+      "after_sha256": "d9f850e51f6666459a6eb836ac025eadc899d0fb57f91b6434463d652cb693e9",
+      "fix_ids": [
+        "minimax-explicit-preset",
+        "create-initial-tls"
+      ],
+      "regression_ids": [
+        "account-modal"
+      ]
+    },
+    {
+      "path": "frontend/src/components/account/EditAccountModal.vue",
+      "before_sha256": "606d3dc5cefdc998ed8d19a07fb6c62c0135c839d8da553f834851e651afb095",
+      "after_sha256": "b6408d41d62cffea9547fafd9b2af5d0e0b8a31eba2b409f0e9c819d8205adaf",
+      "fix_ids": [
+        "minimax-explicit-preset"
+      ],
+      "regression_ids": [
+        "account-modal"
+      ]
+    },
+    {
+      "path": "frontend/src/components/admin/account/AccountTestModal.vue",
+      "before_sha256": "9858d485190a77896e57baabe355d3639ed8cb9e0ad43b9577c8fc9b83e110de",
+      "after_sha256": "81b22895cf9841f4fa4f0fd46fcc252ad37ea5d3f9b58881ad6a71e27c30ad6c",
+      "fix_ids": [
+        "account-test-initial-models"
+      ],
+      "regression_ids": [
+        "account-test"
+      ]
+    },
+    {
+      "path": "frontend/src/components/admin/account/ScheduledTestsPanel.vue",
+      "before_sha256": "698c3e56ebb618005456cb473524f64b1f7ecfdf3cdc7f4a8c35af3657171bfa",
+      "after_sha256": "f20ae6a4ceec2b2f2da39415cc88e4da0b96e388b1d0c7b93f5ccd72e0436d12",
+      "fix_ids": [
+        "scheduled-tests-owner"
+      ],
+      "regression_ids": [
+        "scheduled-tests"
+      ]
+    },
+    {
+      "path": "frontend/src/components/admin/ErrorPassthroughRulesModal.vue",
+      "before_sha256": "0f2f1af6bd49a2fb1abcf2555a3e925106a8152881a4408f7a529ecddde5c54b",
+      "after_sha256": "e42f8712b50c3d404dc3db33dadbb7a66820e0c080304623a6ed141fa2c22dd7",
+      "fix_ids": [
+        "error-rules-initial-load"
+      ],
+      "regression_ids": [
+        "error-rules"
+      ]
+    },
+    {
+      "path": "frontend/src/views/auth/DingTalkCallbackView.vue",
+      "before_sha256": "f7a13176861e7574f73289b206dd724c22e1a94cd4841197080cec7f9f71ba2b",
+      "after_sha256": "bd18ddb36af58b3da0e8027bae1521d0c85dfb91538f3345021a43909b106579",
+      "fix_ids": [
+        "oauth-normalized-recovery"
+      ],
+      "regression_ids": [
+        "oauth-callbacks"
+      ]
+    },
+    {
+      "path": "frontend/src/views/auth/LinuxDoCallbackView.vue",
+      "before_sha256": "fa5f159927e55694a16788a0fa36aed9b63cfb2f27f092a21b0681cdf408e0c5",
+      "after_sha256": "4b399468c909d3e5970e5f52f2f1d642a629f06fbb5bfaab1acd66276b95874a",
+      "fix_ids": [
+        "oauth-normalized-recovery"
+      ],
+      "regression_ids": [
+        "oauth-callbacks"
+      ]
+    },
+    {
+      "path": "frontend/src/views/auth/OidcCallbackView.vue",
+      "before_sha256": "e7f1c230c489b67e07c6f32edd788a1af07db2c543550c91a7d84e6153e6cb92",
+      "after_sha256": "99b301c81e94a849dd0903650ab7aff8b0b072817cc4eeb5f16d6782c7a5cf7f",
+      "fix_ids": [
+        "oauth-normalized-recovery"
+      ],
+      "regression_ids": [
+        "oauth-callbacks"
+      ]
+    },
+    {
+      "path": "frontend/src/views/auth/WechatCallbackView.vue",
+      "before_sha256": "a5292526f1e71d3470c1bc8d2ee6644c51ae52a7ac8682132f84e1120494712e",
+      "after_sha256": "239766dc43e1b77b4434f1cfe4454b08c45d7cafa2b34f41a4a40d6f5c1d73ab",
+      "fix_ids": [
+        "oauth-normalized-recovery"
+      ],
+      "regression_ids": [
+        "oauth-callbacks"
+      ]
+    },
+    {
+      "path": "frontend/src/views/user/PaymentResultView.vue",
+      "before_sha256": "12b00d327041107423ac48e6dfb08f88a8c947d11732543d9b6e66bd523c10dd",
+      "after_sha256": "aa0a77881c1e0144a31c32f5f1d10b4af91b8637165581e2cd7b3487859c13a9",
+      "fix_ids": [
+        "payment-result-fulfillment-polling"
+      ],
+      "regression_ids": [
+        "payment-result"
+      ]
+    }
+  ],
+  "fixes": [
+    {
+      "id": "minimax-explicit-preset",
+      "reason": "Selecting a MiniMax Coding International preset also changes mode/protocol; the queued default watcher could overwrite the explicitly selected International URL.",
+      "minimal_change": "Let the existing mode/protocol watchers settle with nextTick, then apply the explicit preset URL only if the captured edit generation still owns the visible modal. Keep existing domestic presets and normal payg-to-coding defaults.",
+      "recorded_before": {
+        "failed_cases": 2,
+        "scope": "One actual-DOM International-preset regression in each of Create and Edit."
+      },
+      "local_followup": "The preset, normal-mode and close/target ownership regressions passed in the local account-modal suite."
+    },
+    {
+      "id": "create-initial-tls",
+      "reason": "The parent conditionally mounts CreateAccountModal with show already true, so the non-immediate show watcher did not load its TLS choices on that first opening.",
+      "minimal_change": "Run the existing show watcher immediately for initial TLS loading; retain first-open model defaults, avoid invoking later reset declarations during initial false mounting, and reject profile completions after the opening/session owner changes.",
+      "recorded_before": {
+        "failed_cases": 5,
+        "scope": "The synthetic account-modal suite at the time of the first-opening TLS regression; later cases were added."
+      },
+      "local_followup": "First-visible TLS, cancellation/reopening, session/dispose and existing configured-token flows passed locally. Final current commands are broader than the historical failure selection."
+    },
+    {
+      "id": "account-test-initial-models",
+      "reason": "The conditionally mounted first-visible probe modal did not load its available model list, leaving the normal text probe unavailable.",
+      "minimal_change": "Move the unchanged show/account watcher below its dependent const declarations and register it with immediate:true. Retain existing reset, abort, model selection and stream protocol behavior.",
+      "recorded_before": {
+        "failed_cases": 1,
+        "scope": "Actual-DOM initial visible mount and synthetic actual model API."
+      },
+      "local_followup": "The first-visible, normal reopen, visible-close and replacement-target model regressions passed locally."
+    },
+    {
+      "id": "scheduled-tests-owner",
+      "reason": "Initial conditional mounting, visible account changes and in-flight create/edit/delete/list completions lacked consistent modal/account/session ownership; duplicate native submits could start duplicate work.",
+      "minimal_change": "Use the existing session task mechanism plus panel/create/edit/delete revisions, capture account/plan targets, add synchronous mutation locks, invalidate pending work on close/target/session/dispose, and initialize the visible panel after its declarations. Preserve plan API paths and literal cron/model/count/boolean payloads.",
+      "recorded_before": {
+        "selected_cases": 15,
+        "failed_cases": 9,
+        "passed_cases": 6,
+        "scope": "Synthetic native scheduled-plan suite using the actual client."
+      },
+      "local_followup": "The same 15 native plan cases passed locally; existing result expansion regression coverage was retained."
+    },
+    {
+      "id": "error-rules-initial-load",
+      "reason": "The account page mounts the rules dialog conditionally with show already true; its non-immediate watcher did not fetch the first rule list.",
+      "minimal_change": "Register the existing show watcher with immediate:true after loadRules is initialized. Rule matching, editing payloads and backend behavior are unchanged.",
+      "recorded_before": {
+        "selected_cases": 1,
+        "failed_cases": 1,
+        "unselected_cases": 10,
+        "scope": "Actual-DOM initial visible mount and synthetic actual rules client."
+      },
+      "local_followup": "The initial visible-load regression passed in the local native rules suite."
+    },
+    {
+      "id": "oauth-normalized-recovery",
+      "reason": "The actual Axios error path normalizes HTTP 409 EMAIL_EXISTS fields onto the error object; four callback recovery helpers inspected only response.data and did not switch into existing-account recovery.",
+      "minimal_change": "Read exact recovery states from both normalized top-level fields and retained response.data fields; filter string values before trim/lowercase. Preserve exact-state matching and the existing password/TOTP recovery flow, without treating a descriptive substring as a recovery state.",
+      "recorded_before": {
+        "failed_cases": 4,
+        "scope": "One real-client synthetic HTTP409 EMAIL_EXISTS case for each of DingTalk, LinuxDo, OIDC and Wechat."
+      },
+      "local_followup": "The four actual-client EMAIL_EXISTS cases passed locally. Unrelated error descriptions remain covered by rejection tests."
+    },
+    {
+      "id": "payment-result-fulfillment-polling",
+      "reason": "PAID and RECHARGING are displayed as successful payment states but can still precede COMPLETED fulfillment. Ending status refresh there could miss the final account-balance refresh. An in-flight lookup could also schedule another timer after unmount.",
+      "minimal_change": "Keep the existing success display and recovery-snapshot clearing semantics. Add PAID/RECHARGING only to a separate status-refresh set, retain the 2000ms interval and 15-attempt limit, refresh auth/me once after COMPLETED, and suppress state/timer work after disposal. Preserve payment amounts, endpoints and server settlement behavior.",
+      "recorded_before": {
+        "selected_cases": 15,
+        "passed_cases": 14,
+        "failed_cases": 1,
+        "scope": "Synthetic actual-wire payment-result cohort; the pending-to-PAID-to-COMPLETED regression failed."
+      },
+      "recorded_additional_before": {
+        "selected_cases": 1,
+        "failed_cases": 1,
+        "expected_order_get_count_after_dispose": 2,
+        "observed_order_get_count_after_dispose": 4,
+        "scope": "A synthetic in-flight order response arriving after unmount restarted status polling."
+      },
+      "local_followup": "The unchanged original 15-case selection passed with 7 later cases unselected. The 22 new cases plus 14 existing cases passed (36 total), including the disposal regression, PAID/RECHARGING cache contract, bounded refresh and once-only balance refresh. This is a local synthetic result, not payment-provider or transaction verification.",
+      "local_checks": {
+        "new_case_count": 22,
+        "retained_case_count": 14,
+        "passed_cases": 36,
+        "explicit_strict_typecheck": "passed",
+        "scoped_eslint": "passed",
+        "final_source_and_spec_hashes_confirmed_by_implementing_task": true
+      }
+    }
+  ],
+  "public_regressions": [
+    {
+      "id": "account-modal",
+      "spec": "frontend/src/components/account/__tests__/AccountModal.release-coverage.spec.ts",
+      "spec_sha256": "d8d00e3d1a8f9d47c1192e1aee7e33d7553df9c51e3f30a3b54da22bd2c78cd5",
+      "working_directory": "frontend",
+      "command": "node node_modules/vitest/vitest.mjs run src/components/account/__tests__/AccountModal.release-coverage.spec.ts --maxWorkers=1 --testNamePattern \"uses the native MiniMax preset|native preset selected just before cancellation|loads TLS choices|TLS profile|first-open profile\""
+    },
+    {
+      "id": "account-test",
+      "spec": "frontend/src/components/admin/account/__tests__/AccountTestModal.release-coverage.spec.ts",
+      "spec_sha256": "4c363a34e7e233d6f56ade083741033c237a2d1c87b0f1331d93a8d0aa74398f",
+      "working_directory": "frontend",
+      "command": "node node_modules/vitest/vitest.mjs run src/components/admin/account/__tests__/AccountTestModal.release-coverage.spec.ts --maxWorkers=1 --testNamePattern \"first visible conditional mount|false-to-true reopening|visible close command|newest target model choices\""
+    },
+    {
+      "id": "scheduled-tests",
+      "spec": "frontend/src/components/admin/account/__tests__/ScheduledTestsPanel.release-coverage.spec.ts",
+      "spec_sha256": "5e97f0dc6b756a6aa3903d6d659684378c44ca6cad1c776083725b67632b88d8",
+      "working_directory": "frontend",
+      "command": "node node_modules/vitest/vitest.mjs run src/components/admin/account/__tests__/ScheduledTestsPanel.release-coverage.spec.ts --maxWorkers=1"
+    },
+    {
+      "id": "error-rules",
+      "spec": "frontend/src/components/admin/__tests__/ErrorPassthroughRulesModal.release-coverage.spec.ts",
+      "spec_sha256": "9217f5329f760bf5eb431d5c1f0fcc702af22feafa10768f46b859f1168a0f80",
+      "working_directory": "frontend",
+      "command": "node node_modules/vitest/vitest.mjs run src/components/admin/__tests__/ErrorPassthroughRulesModal.release-coverage.spec.ts --maxWorkers=1 --testNamePattern \"loads on the initially visible conditional mount\""
+    },
+    {
+      "id": "oauth-callbacks",
+      "spec": "frontend/src/views/auth/__tests__/OAuthCallbacks.release-coverage.spec.ts",
+      "spec_sha256": "06fb1ae7072f256a635ab0a9b1ddddcebf18fdc6c9799123481809c4a5e07c5a",
+      "working_directory": "frontend",
+      "command": "node node_modules/vitest/vitest.mjs run src/views/auth/__tests__/OAuthCallbacks.release-coverage.spec.ts --maxWorkers=1 --testNamePattern \"recovers an exact server recovery state.*EMAIL_EXISTS\""
+    },
+    {
+      "id": "payment-result",
+      "spec": "frontend/src/views/user/__tests__/PaymentResultView.release-coverage.spec.ts",
+      "spec_sha256": "a9b5e3f474e80d956e01b202236b17f09b8cbcbba4e6ed40a5e72183d3991cb1",
+      "retained_spec": "frontend/src/views/user/__tests__/PaymentResultView.spec.ts",
+      "retained_spec_sha256": "f7684c9d2e37a702b8ae9a2e20b32995bd7ec707379552273a11fcb7fd970590",
+      "retained_spec_unchanged_from_before_commit": true,
+      "working_directory": "frontend",
+      "command": "node node_modules/vitest/vitest.mjs run src/views/user/__tests__/PaymentResultView.release-coverage.spec.ts src/views/user/__tests__/PaymentResultView.spec.ts --maxWorkers=1",
+      "key_test_titles": [
+        "continues a pending status through a transient lookup refusal and stops after completed fulfillment",
+        "does not reschedule a status query whose in-flight response arrives after unmount",
+        "keeps the existing %s cache-clearing contract while polling until COMPLETED and refreshing balance once"
+      ]
+    }
+  ],
+  "reproduction_notes": [
+    "Run the listed commands from frontend with the candidate locked dependencies already installed. All endpoints and identities in these tests are synthetic; no real provider, email, payment or production access is required.",
+    "Commands select the current public regression cases. Historical before counts describe the development-time selection, which can differ after additional behavior cases were appended.",
+    "To investigate a historical before failure, use an isolated fixture checkout, retain the candidate regression spec and dependency lock, and replace only the listed runtime source with its before_commit git blob. Do not replace a live service or modify the main working tree.",
+    "These are public-DOM/jsdom and synthetic HTTP checks, not visual browser acceptance, production performance measurements, transaction/permission proofs or a claim of defect-free behavior."
+  ],
+  "old_tests": {
+    "criterion": "Every frontend .spec.ts/.test.ts tracked in before_commit remains present.",
+    "tracked_before_count": 492,
+    "all_paths_retained": true,
+    "deleted_paths": [],
+    "modified_existing_paths_outside_this_proof": [
+      "frontend/src/views/admin/__tests__/RedeemView.dialog-keyboard.spec.ts"
+    ],
+    "note": "The assembly and these runtime fixes delete no old test. Presence is distinct from assertion-equivalence verification; unrelated existing test changes are listed transparently and are not attributed to these fixes."
+  },
+  "scope_boundaries": [
+    "Only the explicitly listed frontend runtime sources are described here. No compatibility manifest is regenerated or amended by this proof.",
+    "No backend/API/billing/quota/model multiplier or protocol change is asserted. Client cancellation does not undo writes already accepted by a server.",
+    "Local validation and GitHub publication are distinct from deployment; this record makes no production TTFT or reliability claim."
+  ]
+}

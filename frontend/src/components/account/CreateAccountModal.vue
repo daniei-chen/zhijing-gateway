@@ -4117,7 +4117,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, onBeforeUnmount, useId } from 'vue'
+import { ref, reactive, computed, watch, nextTick, onBeforeUnmount, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 
@@ -4614,9 +4614,12 @@ watch(apiProtocol, (protocol) => {
   apiKeyBaseUrl.value = defaultCNBaseUrl(form.platform, currentOpenCodeOrCNMode(), protocol)
 })
 // 点击预设端点：同时回填 base url、账号类型与协议。
-function onCnPresetSelect(preset: { mode: CnAccountMode; protocol: CnApiProtocol; url: string }) {
+async function onCnPresetSelect(preset: { mode: CnAccountMode; protocol: CnApiProtocol; url: string }) {
+  const generation = editGeneration
   accountMode.value = preset.mode
   apiProtocol.value = preset.protocol
+  await nextTick()
+  if (!isCurrentEdit(generation)) return
   apiKeyBaseUrl.value = preset.url
 }
 
@@ -5107,12 +5110,19 @@ watch(
 
 watch(
   () => props.show,
-  (newVal) => {
+  (newVal, previousShow) => {
     if (newVal) {
       // Load TLS fingerprint profiles
+      const generation = editGeneration
       adminAPI.tlsFingerprintProfiles.list()
-        .then(profiles => { tlsFingerprintProfiles.value = profiles.map(p => ({ id: p.id, name: p.name })) })
-        .catch(() => { tlsFingerprintProfiles.value = [] })
+        .then(profiles => {
+          if (isCurrentEdit(generation)) tlsFingerprintProfiles.value = profiles.map(p => ({ id: p.id, name: p.name }))
+        })
+        .catch(() => {
+          if (isCurrentEdit(generation)) tlsFingerprintProfiles.value = []
+        })
+      // Initial conditional mounting only needs TLS choices; retain the existing model defaults.
+      if (previousShow === undefined) return
       // Modal opened - fill related models
       allowedModels.value = [...getModelsByPlatform(form.platform)]
       // Antigravity: 默认使用映射模式并填充默认映射
@@ -5127,10 +5137,11 @@ watch(
         antigravityModelMappings.value = []
         antigravityModelRestrictionMode.value = 'mapping'
       }
-    } else {
+    } else if (previousShow !== undefined) {
       resetForm()
     }
-  }
+  },
+  { immediate: true }
 )
 
 // Sync form.type based on accountCategory, addMethod, and platform-specific type

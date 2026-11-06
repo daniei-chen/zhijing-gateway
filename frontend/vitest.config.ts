@@ -5,6 +5,9 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   cacheDir: '.cache/vitest',
   plugins: [vue()],
+  // Real lazy-page imports include the public compliance Markdown outside
+  // frontend/. Keep that narrow source directory available in the test server.
+  server: { fs: { allow: [resolve(__dirname), resolve(__dirname, '../docs/legal')] } },
   resolve: {
     alias: {
       '@': resolve(__dirname, 'src'),

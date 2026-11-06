@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path
 import re
+import shutil
 import stat
 import subprocess
 import sys
@@ -44,6 +45,15 @@ def integration_bundle(version):
     return root, manifest
 
 
+def package_manager_command():
+    # Resolve Windows .cmd shims explicitly. Prefer the reviewed package-manager
+    # version through Corepack; a newer global pnpm must not change the build.
+    corepack = shutil.which('corepack')
+    if corepack:
+        return [corepack, 'pnpm@9.15.9']
+    return [shutil.which('pnpm') or 'pnpm']
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
@@ -59,18 +69,19 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     require(not list(output.iterdir()), 'Release output must be empty; existing releases are never overwritten.')
     node_version = subprocess.check_output(['node', '--version'], text=True).strip()
-    pnpm_version = subprocess.check_output(['pnpm', '--version'], text=True).strip()
+    pnpm = package_manager_command()
+    pnpm_version = subprocess.check_output([*pnpm, '--version'], text=True).strip()
     require(re.fullmatch(r'v24\.\d+\.\d+', node_version), 'Use the reviewed Node.js 24 toolchain.')
     require(pnpm_version == '9.15.9', 'Use the reviewed pnpm 9.15.9 toolchain.')
     # dist is ignored by Git. A clean worktree alone cannot establish its provenance.
     commands = [
-        ['pnpm', '--dir', 'frontend', 'install', '--frozen-lockfile'],
-        ['pnpm', '--dir', 'frontend', 'lint:check'],
-        ['pnpm', '--dir', 'frontend', 'build'],
+        [*pnpm, '--dir', 'frontend', 'install', '--frozen-lockfile'],
+        [*pnpm, '--dir', 'frontend', 'lint:check'],
+        [*pnpm, '--dir', 'frontend', 'build'],
         [sys.executable, str(ROOT/'tools/verify_frontend.py')],
         ['node', str(ROOT/'tools/verify_ops_contract.mjs')],
         [sys.executable, str(integration_base/'check_patch.py'), '--bundle', f'v{version}', '--artifact-only'],
-        ['pnpm', '--dir', 'frontend', 'test:coverage', '--maxWorkers=4'],
+        [*pnpm, '--dir', 'frontend', 'test:coverage', '--maxWorkers=4'],
     ]
     for command in commands:
         subprocess.run(command, cwd=ROOT, check=True)
@@ -113,7 +124,7 @@ def main():
                     'dist/ contains the static frontend only. Keep the existing API origin and routes.\n'
                     'Original login tokens are no longer forwarded to embedded pages.\n'
                     'The matching backend source patch is in the companion source ZIP and is not deployed.\n'
-                    'For v0.0.3, install the matching backend before publishing the frontend (OAuth exchange and cookies).\n'
+                    'Install the matching backend before publishing the frontend (OAuth exchange and cookies).\n'
                     'Retain old hashed assets when an operator later chooses to publish an entry page.\n'
                     'No QA identities, server configuration, credentials or production logs are included.\n')
     with zipfile.ZipFile(archive, 'x', zipfile.ZIP_DEFLATED, compresslevel=9) as z:

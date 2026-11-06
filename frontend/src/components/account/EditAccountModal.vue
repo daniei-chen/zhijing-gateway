@@ -3836,9 +3836,12 @@ const cnProtocolDescKey = computed(
   () => cnProtocolOptions.value.find(o => o.value === editApiProtocol.value)?.labelKey ?? 'chatCompletions'
 )
 // 点击预设端点：回填 base url 与对应模式/协议。
-function onCnPresetSelect(preset: { mode: CnAccountMode; protocol: CnApiProtocol; url: string }) {
+async function onCnPresetSelect(preset: { mode: CnAccountMode; protocol: CnApiProtocol; url: string }) {
+  const generation = editGeneration
   editAccountMode.value = preset.mode
   editApiProtocol.value = preset.protocol
+  await nextTick()
+  if (!isCurrentEdit(generation)) return
   editBaseUrl.value = preset.url
 }
 // Bedrock credentials
