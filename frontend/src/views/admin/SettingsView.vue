@@ -10473,11 +10473,11 @@ async function loadWebSearchConfig() {
   } finally { task.finish(); }
 }
 
-async function saveWebSearchConfig(): Promise<boolean> {
+async function saveWebSearchConfig(config: WebSearchEmulationConfig = webSearchConfig): Promise<boolean> {
   if (!pageTasks.current()) return false;
   const task = pageTasks.begin("search:save");
   try {
-    for (const p of webSearchConfig.providers) {
+    for (const p of config.providers) {
       const raw = p.quota_limit;
       if (raw != null && Number(raw) !== 0 && Number(raw) < 1) {
         appStore.showError(
@@ -10486,14 +10486,14 @@ async function saveWebSearchConfig(): Promise<boolean> {
         return false;
       }
     }
-    const providers = webSearchConfig.providers.map(
+    const providers = config.providers.map(
       (p: WebSearchProviderConfig) => ({
         ...p,
         quota_limit: Number(p.quota_limit) > 0 ? Number(p.quota_limit) : null,
       }),
     );
     await adminAPI.settings.updateWebSearchEmulationConfig({
-      enabled: webSearchConfig.enabled,
+      enabled: config.enabled,
       providers,
     });
     return task.active();
@@ -11364,7 +11364,6 @@ async function saveSettings() {
     // Keep the confirmed recipients independent of edits made while step-up or
     // the write is pending. Those later inputs remain a draft for the next save.
     const notificationRecipients = (form.account_quota_notify_emails || []).map(entry => ({ ...entry }));
-    const notificationDraftAtSubmit = JSON.stringify(notificationRecipients);
     const normalizedTableDefaultPageSize = Math.floor(
       Number(form.table_default_page_size),
     );
@@ -11559,7 +11558,7 @@ async function saveSettings() {
       login_agreement_enabled: form.login_agreement_enabled,
       login_agreement_mode: form.login_agreement_mode,
       login_agreement_updated_at: form.login_agreement_updated_at,
-      login_agreement_documents: form.login_agreement_documents,
+      login_agreement_documents: form.login_agreement_documents.map(doc => ({ ...doc })),
       default_balance: form.default_balance,
       affiliate_rebate_rate: Math.min(
         100,
@@ -11585,7 +11584,7 @@ async function saveSettings() {
       hide_ccs_import_button: form.hide_ccs_import_button,
       table_default_page_size: form.table_default_page_size,
       table_page_size_options: form.table_page_size_options,
-      custom_menu_items: form.custom_menu_items,
+      custom_menu_items: form.custom_menu_items.map(item => ({ ...item })),
       custom_endpoints: form.custom_endpoints,
       frontend_url: form.frontend_url,
       smtp_host: form.smtp_host,
@@ -11900,78 +11899,115 @@ async function saveSettings() {
     );
     appendAuthSourceDefaultsToUpdateRequest(payload, authSourceDefaults);
 
+    // Capture exactly the JSON wire values once, after all validation and
+    // normalization. Verification must replay this intent, not a live draft.
+    const request = JSON.parse(JSON.stringify(payload)) as UpdateSettingsRequest;
+    const submittedForm = JSON.parse(JSON.stringify(form)) as Record<string, unknown>;
+    const submittedAuthSources = JSON.parse(JSON.stringify(authSourceDefaults)) as AuthSourceDefaultsState;
+    const submittedRegistrationTags = JSON.stringify(registrationEmailSuffixWhitelistTags.value);
+    const submittedRegistrationDraft = registrationEmailSuffixWhitelistDraft.value;
+    const submittedHeaderDraft = forwardedClientIpHeaderDraft.value;
+    const submittedTableOptions = tablePageSizeOptionsInput.value;
+    const submittedFastRules = JSON.stringify(openaiFastPolicyForm.rules);
+    const submittedSmtpEdited = smtpPasswordManuallyEdited.value;
+    const submittedWebSearch = JSON.parse(JSON.stringify(webSearchConfig)) as WebSearchEmulationConfig;
     const updated = await settingsStepUp.run(() =>
-      adminAPI.settings.updateSettings(payload),
+      adminAPI.settings.updateSettings(request),
     );
     if (!task.active()) return;
+    // Compute every dirty boundary before applying any server field: aliases
+    // and derived controls must not compare against partially updated state.
+    const currentForm = form as Record<string, unknown>;
+    const dirtyKeys = new Set(Object.keys({ ...submittedForm, ...currentForm }).filter(key =>
+      JSON.stringify(currentForm[key]) !== JSON.stringify(submittedForm[key]),
+    ));
+    const dirtyAuthSources = new Set((Object.keys(authSourceDefaults) as AuthSourceType[]).filter(source =>
+      JSON.stringify(authSourceDefaults[source]) !== JSON.stringify(submittedAuthSources[source]),
+    ));
+    const registrationTagsUnchanged = JSON.stringify(registrationEmailSuffixWhitelistTags.value) === submittedRegistrationTags;
+    const registrationDraftUnchanged = registrationEmailSuffixWhitelistDraft.value === submittedRegistrationDraft;
+    const headerDraftUnchanged = forwardedClientIpHeaderDraft.value === submittedHeaderDraft;
+    const tableOptionsUnchanged = tablePageSizeOptionsInput.value === submittedTableOptions;
+    const fastRulesUnchanged = JSON.stringify(openaiFastPolicyForm.rules) === submittedFastRules;
+    const smtpDraftUnchanged = !dirtyKeys.has("smtp_password") && smtpPasswordManuallyEdited.value === submittedSmtpEdited;
+    if (!registrationTagsUnchanged) dirtyKeys.add("registration_email_suffix_whitelist");
+    if (!tableOptionsUnchanged) dirtyKeys.add("table_page_size_options");
+    for (const source of dirtyAuthSources) {
+      for (const key of Object.keys(currentForm)) {
+        if (key.startsWith(`auth_source_default_${source}_`)) dirtyKeys.add(key);
+      }
+    }
+    const wechatModeKeys = ["wechat_connect_enabled", "wechat_connect_open_enabled", "wechat_connect_mp_enabled",
+      "wechat_connect_mobile_enabled", "wechat_connect_mode", "wechat_connect_scopes"];
+    const wechatModeUnchanged = !wechatModeKeys.some(key => dirtyKeys.has(key));
+    if (!wechatModeUnchanged) wechatModeKeys.forEach(key => dirtyKeys.add(key));
     for (const [key, value] of Object.entries(updated)) {
       if (key === "openai_fast_policy_settings") continue;
-      if (key === "account_quota_notify_emails" &&
-          JSON.stringify(form.account_quota_notify_emails || []) !== notificationDraftAtSubmit) continue;
+      if (dirtyKeys.has(key)) continue;
       if (value !== null && value !== undefined) {
         (form as Record<string, unknown>)[key] = value;
       }
     }
-    if (updated.openai_oauth_scheduling_rate_multiplier === null) {
+    if (!dirtyKeys.has("openai_oauth_scheduling_rate_multiplier") && updated.openai_oauth_scheduling_rate_multiplier === null) {
       form.openai_oauth_scheduling_rate_multiplier = null;
     }
-    Object.assign(authSourceDefaults, buildAuthSourceDefaultsState(updated));
-    form.default_platform_quotas = normalizePlatformQuotasMap(updated.default_platform_quotas);
-    form.account_scheduling_thresholds = normalizeAccountSchedulingThresholdsMap(
-      updated.account_scheduling_thresholds,
-    );
-    registrationEmailSuffixWhitelistTags.value =
-      normalizeRegistrationEmailSuffixDomains(
-        updated.registration_email_suffix_whitelist,
+    const updatedAuthSources = buildAuthSourceDefaultsState(updated);
+    for (const source of Object.keys(updatedAuthSources) as AuthSourceType[]) {
+      if (!dirtyAuthSources.has(source)) authSourceDefaults[source] = updatedAuthSources[source];
+    }
+    if (!dirtyKeys.has("default_platform_quotas")) {
+      form.default_platform_quotas = normalizePlatformQuotasMap(updated.default_platform_quotas);
+    }
+    if (!dirtyKeys.has("account_scheduling_thresholds")) {
+      form.account_scheduling_thresholds = normalizeAccountSchedulingThresholdsMap(updated.account_scheduling_thresholds);
+    }
+    if (!dirtyKeys.has("registration_email_suffix_whitelist")) {
+      registrationEmailSuffixWhitelistTags.value = normalizeRegistrationEmailSuffixDomains(updated.registration_email_suffix_whitelist);
+    }
+    if (!dirtyKeys.has("forwarded_client_ip_headers")) {
+      form.forwarded_client_ip_headers = normalizeForwardedClientIpHeaders(updated.forwarded_client_ip_headers);
+    }
+    if (headerDraftUnchanged) forwardedClientIpHeaderDraft.value = "";
+    if (tableOptionsUnchanged) {
+      tablePageSizeOptionsInput.value = formatTablePageSizeOptions(
+        Array.isArray(updated.table_page_size_options) ? updated.table_page_size_options : [10, 20, 50, 100],
       );
-    form.forwarded_client_ip_headers = normalizeForwardedClientIpHeaders(
-      updated.forwarded_client_ip_headers,
-    );
-    forwardedClientIpHeaderDraft.value = "";
-    tablePageSizeOptionsInput.value = formatTablePageSizeOptions(
-      Array.isArray(updated.table_page_size_options)
-        ? updated.table_page_size_options
-        : [10, 20, 50, 100],
-    );
-    registrationEmailSuffixWhitelistDraft.value = "";
-    form.smtp_password = "";
-    smtpPasswordManuallyEdited.value = false;
-    form.turnstile_secret_key = "";
-    form.tencent_captcha_app_secret_key = "";
-    form.tencent_captcha_cloud_secret_id = "";
-    form.tencent_captcha_cloud_secret_key = "";
-    form.aliyun_captcha_access_key_secret = "";
-    form.linuxdo_connect_client_secret = "";
-    form.dingtalk_connect_client_secret = "";
-    form.github_oauth_client_secret = "";
-    form.google_oauth_client_secret = "";
-    form.wechat_connect_app_secret = "";
-    form.wechat_connect_open_app_secret = "";
-    form.wechat_connect_mp_app_secret = "";
-    form.wechat_connect_mobile_app_secret = "";
-    const updatedWechatCapabilities = resolveWeChatConnectModeCapabilities(
-      updated.wechat_connect_open_enabled,
-      updated.wechat_connect_mp_enabled,
-      updated.wechat_connect_mobile_enabled,
-      updated.wechat_connect_mode,
-    );
-    form.wechat_connect_open_enabled = updatedWechatCapabilities.openEnabled;
-    form.wechat_connect_mp_enabled = updatedWechatCapabilities.mpEnabled;
-    form.wechat_connect_mobile_enabled =
-      updatedWechatCapabilities.mobileEnabled;
-    form.wechat_connect_mode = deriveWeChatConnectStoredMode(
-      updatedWechatCapabilities.openEnabled,
-      updatedWechatCapabilities.mpEnabled,
-      updatedWechatCapabilities.mobileEnabled,
-      updated.wechat_connect_mode,
-    );
-    form.wechat_connect_scopes = defaultWeChatConnectScopesForMode(
-      form.wechat_connect_mode,
-    );
-    form.oidc_connect_client_secret = "";
+    }
+    if (registrationDraftUnchanged) registrationEmailSuffixWhitelistDraft.value = "";
+    if (smtpDraftUnchanged) {
+      form.smtp_password = "";
+      smtpPasswordManuallyEdited.value = false;
+    }
+    for (const key of ["turnstile_secret_key", "tencent_captcha_app_secret_key", "tencent_captcha_cloud_secret_id",
+      "tencent_captcha_cloud_secret_key", "aliyun_captcha_access_key_secret", "linuxdo_connect_client_secret",
+      "dingtalk_connect_client_secret", "github_oauth_client_secret", "google_oauth_client_secret", "wechat_connect_app_secret",
+      "wechat_connect_open_app_secret", "wechat_connect_mp_app_secret", "wechat_connect_mobile_app_secret", "oidc_connect_client_secret"] as const) {
+      if (!dirtyKeys.has(key)) form[key] = "";
+    }
+    if (wechatModeUnchanged) {
+      const updatedWechatCapabilities = resolveWeChatConnectModeCapabilities(
+        updated.wechat_connect_open_enabled,
+        updated.wechat_connect_mp_enabled,
+        updated.wechat_connect_mobile_enabled,
+        updated.wechat_connect_mode,
+      );
+      form.wechat_connect_open_enabled = updatedWechatCapabilities.openEnabled;
+      form.wechat_connect_mp_enabled = updatedWechatCapabilities.mpEnabled;
+      form.wechat_connect_mobile_enabled =
+        updatedWechatCapabilities.mobileEnabled;
+      form.wechat_connect_mode = deriveWeChatConnectStoredMode(
+        updatedWechatCapabilities.openEnabled,
+        updatedWechatCapabilities.mpEnabled,
+        updatedWechatCapabilities.mobileEnabled,
+        updated.wechat_connect_mode,
+      );
+      form.wechat_connect_scopes = defaultWeChatConnectScopesForMode(
+        form.wechat_connect_mode,
+      );
+    }
     // Refresh OpenAI fast/flex policy from server response
     if (
-      updated.openai_fast_policy_settings &&
+      fastRulesUnchanged && updated.openai_fast_policy_settings &&
       Array.isArray(updated.openai_fast_policy_settings.rules)
     ) {
       openaiFastPolicyForm.rules =
@@ -11985,7 +12021,7 @@ async function saveSettings() {
       openaiFastPolicyLoaded.value = true;
     }
     // Save web search emulation config separately (errors handled internally)
-    const wsOk = await saveWebSearchConfig();
+    const wsOk = await saveWebSearchConfig(submittedWebSearch);
     if (!task.active()) return;
     // Refresh cached settings so sidebar/header update immediately
     await appStore.fetchPublicSettings(true);

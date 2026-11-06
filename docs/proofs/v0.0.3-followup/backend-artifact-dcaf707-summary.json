@@ -1,0 +1,25 @@
+{
+  "candidate_source_commit": "dcaf707cad583955873ed94097d63c9a4be12e82",
+  "patch_sha256": "6c9f6ffa14ba4ecef094a36cfe26596955ea8711b35070ee5110b315114cf093",
+  "applied_and_result_hashes_verified": true,
+  "targeted_race_exit": 0,
+  "batch_exit_codes": [
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "requested_unique_top_level_names": 1252,
+  "all_requested_names_observed": true,
+  "passed_packages": 12,
+  "passed_package_invocations": 49,
+  "passed_top_level_tests": 1238,
+  "passed_test_events_including_subtests": 2338,
+  "skipped_test_events": 14,
+  "failed_events": 0,
+  "data_race_warnings": 0,
+  "counting": "Unique (package, test) results; package invocations repeat across four retained disjoint name batches plus the new admin-only batch.",
+  "previous_failed_0394540_evidence_preserved": true,
+  "previous_valid_869d91f_names_preserved_verified": true
+}

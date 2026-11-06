@@ -167,6 +167,7 @@ export default {
         backing: '备份中...',
         backupCreated: '备份创建成功',
         expireDays: '过期天数',
+        invalidExpiryDays: '过期天数须为非负整数；0 表示永不过期。',
         alreadyInProgress: '已有备份正在进行中',
         backupRunning: '备份进行中...',
         backupFailed: '备份失败',

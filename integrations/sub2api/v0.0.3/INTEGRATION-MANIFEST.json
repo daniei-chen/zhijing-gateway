@@ -1,16 +1,26 @@
 {
   "version": "0.0.3",
   "upstream_base": "4851ca95b134322c14ca9904bc82c550a3880a67",
-  "candidate_source_commit": "869d91f5cd24109d422f9b76980a2b50fa4d89b8",
+  "candidate_source_commit": "dcaf707cad583955873ed94097d63c9a4be12e82",
   "baseline": "Exact deployed v0.0.2 private source revision; not stock Sub2API. Only the listed generic delta is public.",
   "license": "LGPL-3.0",
   "patch": "v0.0.3-session-timing.patch",
-  "patch_sha256": "e8925573dfef1d5cb272c0d82081ebe1f78d4b430d2d118531503233f1f6a66e",
+  "patch_sha256": "6c9f6ffa14ba4ecef094a36cfe26596955ea8711b35070ee5110b315114cf093",
   "files": [
     {
       "path": "backend/cmd/server/wire_gen.go",
       "before_sha256": "a32b91c208b628e20d706cc952e1382c3e53eefc1d3aee0ec99bfe18dab1997d",
       "after_sha256": "0a4488f936edd0a10a7f70370ba1f0e77bbfb7566bdc6d5956169ee18b1ee9ca"
+    },
+    {
+      "path": "backend/internal/handler/admin/backup_handler.go",
+      "before_sha256": "40f7b18bf44cd7d2aabddd3a4b70ca6f022c4b26886b7436306646c28cf2c377",
+      "after_sha256": "b50c07ee80844728e115050c4fb3bd0f2ab95e63fb8025a330be14f2c1fbf78f"
+    },
+    {
+      "path": "backend/internal/handler/admin/backup_handler_validation_test.go",
+      "before_sha256": null,
+      "after_sha256": "307380df92de2f0e0ac74ca22cff6cb757106414868b23f4804472cc9e87331e"
     },
     {
       "path": "backend/internal/handler/admin/ops_ws_handler.go",
@@ -487,6 +497,22 @@
     {
       "path": "backend/internal/repository/batch_image_repo.go",
       "sha256": "e832b3291ae8afdf565efe019312cb2e6c1257b75948e28d1db0d1b74de9f770"
+    },
+    {
+      "path": "backend/internal/service/backup_service.go",
+      "sha256": "5935826973f21af9a74de07f2bc3ab74f8af2fa6b569773a8be3b89b08971e3f"
+    },
+    {
+      "path": "backend/internal/service/backup_archive.go",
+      "sha256": "d64ee44ad0a0180b9e7b1ff58dd5ba3520678f0acbcf68c9caf4a158d437927a"
+    },
+    {
+      "path": "backend/internal/service/backup_retention.go",
+      "sha256": "9393ffc0cc0dcaf539120029865bd648af0d1d9803685d7ee802b7276ab4e1ef"
+    },
+    {
+      "path": "backend/internal/service/backup_restore_state.go",
+      "sha256": "4300c13a2cba6cca391c4c3142c1738f0e8e93fff401971744890f161c2705ee"
     }
   ],
   "runtime_requirements": {
@@ -511,8 +537,8 @@
   "validation": {
     "go_toolchain": "1.27.3",
     "go_unit_short_packages": 64,
-    "go_unit_short_top_level_tests": 12557,
-    "go_unit_short_pass_events": 25189,
+    "go_unit_short_top_level_tests": 12561,
+    "go_unit_short_pass_events": 25214,
     "go_short_regression_passed": true,
     "go_unit_short_regression_passed": true,
     "targeted_race_passed": true,
@@ -534,7 +560,9 @@
     "gin_test_mode_initialization_parallel_race_repaired": true,
     "batch_retry_history_targeted_race_passed": true,
     "batch_retry_history_independent_http_passed": true,
-    "quota_test_fixture_repeated_race_passed": true
+    "quota_test_fixture_repeated_race_passed": true,
+    "backup_creation_request_validation_targeted_race_passed": true,
+    "backup_creation_request_validation_independent_race_passed": true
   },
   "api_peer_build_proof": "../../../docs/proofs/v0.0.3-followup/backend-api-peer-build.json"
 }

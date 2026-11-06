@@ -804,4 +804,3 @@ describe('Independent Keys DOM contract boundaries', () => {
     expect(view.get('[data-row="1"]').text()).toMatch(/\$0\.00\s*\/\s*\$100\.00/)
   })
 })
-

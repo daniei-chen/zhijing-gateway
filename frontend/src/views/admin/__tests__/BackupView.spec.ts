@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 
 import BackupView from '../BackupView.vue'
+import { replaceAuthSession } from '@/api/authSession'
 
 const {
   getS3Config,
@@ -92,6 +93,7 @@ function mountBackupView() {
 
 describe('admin BackupView', () => {
   beforeEach(() => {
+    replaceAuthSession({ accessToken: 'synthetic-backup-legacy-fixture-100', user: { id: 7, role: 'admin' } })
     getS3Config.mockResolvedValue({})
     getImageStorageConfig.mockResolvedValue({ config: {}, secret_configured: false })
     getSchedule.mockResolvedValue({ enabled: false, cron_expr: '', retain_days: 14, retain_count: 10 })

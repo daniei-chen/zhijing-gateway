@@ -167,6 +167,7 @@ export default {
         backing: 'Backing up...',
         backupCreated: 'Backup created successfully',
         expireDays: 'Expire Days',
+        invalidExpiryDays: 'Expiry days must be a non-negative whole number; 0 means never expires.',
         alreadyInProgress: 'A backup is already in progress',
         backupRunning: 'Backup in progress...',
         backupFailed: 'Backup failed',

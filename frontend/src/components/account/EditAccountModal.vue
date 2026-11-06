@@ -5456,7 +5456,9 @@ function loadQuotaControlSettings(account: Account) {
   if (account.enable_tls_fingerprint === true) {
     tlsFingerprintEnabled.value = true
   }
-  tlsFingerprintProfileId.value = account.tls_fingerprint_profile_id ?? null
+  // The DTO omits negative profile IDs; -1 remains the stored random-profile choice.
+  tlsFingerprintProfileId.value = account.tls_fingerprint_profile_id ??
+    (account.extra?.tls_fingerprint_profile_id === -1 ? -1 : null)
 
   // Load session ID masking setting
   if (account.session_id_masking_enabled === true) {

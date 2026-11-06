@@ -1,24 +1,24 @@
 {
   "version": "0.0.3",
-  "source_commit": "869d91f5cd24109d422f9b76980a2b50fa4d89b8",
+  "source_commit": "dcaf707cad583955873ed94097d63c9a4be12e82",
   "toolchain": "go1.27.3",
   "binary": {
-    "name": "zhijing-api-v003-api-peer-869d91f-linux-amd64",
-    "bytes": 169087061,
-    "sha256": "282c594a71fb0df0b6178de6c882f9a5fbf0e6e19ec0a9f3b71852069f5b0503"
+    "name": "zhijing-api-v003-api-peer-dcaf707-linux-amd64",
+    "bytes": 169092381,
+    "sha256": "089ae9537ff939beb7a80308c0b273ed527055159e8aa8ec33a06fde42690041"
   },
   "build_settings": {
     "-buildmode": "exe",
     "-compiler": "gc",
-    "-ldflags": "\"-X main.Version=0.0.3 -X main.Commit=869d91f5cd24109d422f9b76980a2b50fa4d89b8 -X main.Date=2026-11-06T01:25:08Z -X main.BuildType=source\"",
+    "-ldflags": "\"-X main.Version=0.0.3 -X main.Commit=dcaf707cad583955873ed94097d63c9a4be12e82 -X main.Date=2026-11-06T04:03:32Z -X main.BuildType=source\"",
     "-tags": "embed",
     "CGO_ENABLED": "0",
     "GOARCH": "amd64",
     "GOOS": "linux",
     "GOAMD64": "v1",
     "vcs": "git",
-    "vcs.revision": "869d91f5cd24109d422f9b76980a2b50fa4d89b8",
-    "vcs.time": "2026-11-06T01:25:07Z",
+    "vcs.revision": "dcaf707cad583955873ed94097d63c9a4be12e82",
+    "vcs.time": "2026-11-06T04:02:50Z",
     "vcs.modified": "false"
   },
   "embedded_web": {

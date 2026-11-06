@@ -317,4 +317,3 @@ describe('proxy URI credential import compatibility', () => {
     expect(api.batchCreate).toHaveBeenCalledExactlyOnceWith([{protocol: 'socks5', host: '::1', port: 1080, username, password}])
   })
 })
-

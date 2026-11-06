@@ -1,19 +1,19 @@
 {
   "schema_version": 2,
   "version": "0.0.3",
-  "status": "iteration_in_progress_with_open_quality_gates",
+  "status": "candidate_delivery_with_remaining_gates",
   "production_deployed": false,
   "formal_release_created": false,
-  "previous_checkpoint": "validation-v0.0.3-20261106-08.json",
+  "previous_checkpoint": "validation-v0.0.3-20261106-10.json",
   "frontend": {
-    "checkpoint": "2026-11-06-10",
-    "test_files": 486,
-    "passed_tests": 5015,
-    "failed_tests": 0,
+    "checkpoint": "2026-11-06-11",
+    "test_files": 492,
+    "passed_tests": 5167,
+    "failed_tests": 1,
     "pending_tests": 0,
-    "source_sha256_lf_manifest": "proofs/v0.0.3-followup/frontend-source-checkpoint-10.json",
-    "source_manifest_sha256": "b91a2c4d83b341155ec18bd911190fa03ccf2087d96f6b0e2b9f2b829127fbdf",
-    "source_files_in_checkpoint": 1106,
+    "source_sha256_lf_manifest": "proofs/v0.0.3-followup/frontend-source-checkpoint-11.json",
+    "source_manifest_sha256": "7c945171e1b9ca7aca88b671c3448dbacb06199b534695efbe0883b86c57ca67",
+    "source_files_in_checkpoint": 1112,
     "coverage": {
       "lines": {
         "total": 52187,
@@ -46,36 +46,41 @@
     "typecheck": true,
     "eslint": true,
     "vite_build_manifest": true,
-    "previous_vite_build_checkpoint": "2026-11-06-10",
+    "previous_vite_build_checkpoint": "2026-11-06-11",
     "current_tree_has_changes_after_checkpoint": false,
     "current_tree_full_regression_complete": true,
     "formal_release_zip_created": false,
     "previous_failed_checkpoint_evidence": "proofs/v0.0.3-followup/frontend-validation-checkpoint-09.json",
-    "protected_followup_entries": 14
+    "protected_followup_entries": 14,
+    "coverage_checkpoint": "2026-11-06-10",
+    "completed_standard_coverage_reports": false,
+    "current_tree_full_regression_passed": false,
+    "latest_result_evidence": "proofs/v0.0.3-followup/frontend-validation-checkpoint-11.json"
   },
   "backend": {
-    "source_commit": "869d91f5cd24109d422f9b76980a2b50fa4d89b8",
+    "source_commit": "dcaf707cad583955873ed94097d63c9a4be12e82",
     "base_commit": "4851ca95b134322c14ca9904bc82c550a3880a67",
-    "generic_patch_files": 83,
-    "patch_sha256": "e8925573dfef1d5cb272c0d82081ebe1f78d4b430d2d118531503233f1f6a66e",
+    "generic_patch_files": 85,
+    "patch_sha256": "6c9f6ffa14ba4ecef094a36cfe26596955ea8711b35070ee5110b315114cf093",
     "go_toolchain": "1.27.3",
     "unit_short": {
       "passed_packages": 64,
-      "passed_top_level_tests": 12557,
-      "passed_test_events_including_subtests": 25189,
+      "passed_top_level_tests": 12561,
+      "passed_test_events_including_subtests": 25214,
       "skipped_test_events": 39,
       "skipped_packages": 51,
       "failed_events": 0
     },
     "fresh_patch_targeted_race": {
       "passed_packages": 12,
-      "passed_package_invocations": 48,
-      "passed_top_level_tests": 1234,
-      "passed_test_events_including_subtests": 2313,
+      "passed_package_invocations": 49,
+      "passed_top_level_tests": 1238,
+      "passed_test_events_including_subtests": 2338,
       "skipped_test_events": 14,
       "failed_events": 0,
       "data_race_warnings": 0,
       "batch_exit_codes": [
+        0,
         0,
         0,
         0,
@@ -96,8 +101,8 @@
     "production_redis_policy_applied": false,
     "real_redis_capacity_test_executed": false,
     "isolated_redis_evidence": "proofs/v0.0.3-followup/isolated-redis-lab.json",
-    "unit_evidence": "proofs/v0.0.3-followup/backend-full-unit-checkpoint-08-summary.json",
-    "artifact_race_evidence": "proofs/v0.0.3-followup/backend-artifact-869d91f-summary.json"
+    "unit_evidence": "proofs/v0.0.3-followup/backend-full-unit-checkpoint-09-summary.json",
+    "artifact_race_evidence": "proofs/v0.0.3-followup/backend-artifact-dcaf707-summary.json"
   },
   "tools": {
     "python_test_cases": 51,
@@ -131,11 +136,15 @@
     "redeem_evidence": "proofs/v0.0.3-followup/redeem-dialog-browser-checkpoint-10.json"
   },
   "open_work": [
-    "Fix reproduced header logout/session-menu ownership and backup confirmation/draft/late-result problems; independently review and rerun the full frontend after source changes.",
-    "Finish bounded account advanced-configuration normal workflow verification against the actual backend DTO contracts.",
-    "Reach all four original global coverage gates without exclusions or reduced thresholds; checkpoint10 passes lines only.",
-    "Apply/read-back required Redis policy and monitor actual shared-store overhead during controlled cutover.",
-    "Verify actual client upload compression and matched upstream/output milestones; no TTFT improvement claim yet.",
-    "Rebuild and verify final frozen source, production drain/cutover, GitHub tag and release assets."
-  ]
+    "Resolve the retained keyboard regression/possible timing issue and rerun the full frontend.",
+    "Reach all four original80 coverage gates; latest valid coverage remains checkpoint10.",
+    "Resolve the independent Settings fixture and additional Backup test type configuration; finish interrupted scheduled-test review.",
+    "Complete Redis readback, upload/TTFT acceptance and guarded production cutover/release only after remaining gates."
+  ],
+  "further_audit_pause_requested_by_user": true,
+  "additional_verification_limits": {
+    "settings_independent_suite": "14 fixture setup failures before business assertions; not verified, no further retry at user request",
+    "backup_test_explicit_types": "Private configuration reported15 implicit-any errors; application typecheck passed; not resolved or rerun",
+    "redeem_keyboard_case": "Failed once in the full run, passed one isolated retry; remains an unresolved full-run failure"
+  }
 }
