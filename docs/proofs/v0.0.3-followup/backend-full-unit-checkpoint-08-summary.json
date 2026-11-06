@@ -1,0 +1,12 @@
+{
+  "source_commit": "869d91f5cd24109d422f9b76980a2b50fa4d89b8",
+  "command": "go test -tags unit -short -count=1 -p 2 -json ./...",
+  "previous_checkpoint_05_passed_top_level_subset_verified": true,
+  "passed_packages": 64,
+  "tested_packages": 64,
+  "passed_top_level_tests": 12557,
+  "passed_test_events_including_subtests": 25189,
+  "skipped_test_events": 39,
+  "skipped_packages": 51,
+  "failed_events": 0
+}

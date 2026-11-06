@@ -58,7 +58,8 @@ import { useI18n } from 'vue-i18n'
 import { useRoute } from 'vue-router'
 import { extractI18nErrorMessage } from '@/utils/apiError'
 import { isMobileDevice } from '@/utils/device'
-import { buildApiUrl } from '@/api/client'
+import { paymentAPI } from '@/api/payment'
+import { captureAuthSession, isAuthSessionCurrent, type AuthSessionSnapshot } from '@/api/authSession'
 
 interface StripeWithWechatPay {
   confirmWechatPayPayment(clientSecret: string, options: Record<string, unknown>): Promise<{ error?: { message?: string }; paymentIntent?: { status: string } }>
@@ -73,7 +74,7 @@ const DEFAULT_METHOD_COLOR = '#635bff'
 const { t } = useI18n()
 const route = useRoute()
 
-const orderId = String(route.query.order_id || '')
+const orderId = Number(route.query.order_id)
 const method = String(route.query.method || 'alipay')
 const amount = String(route.query.amount || '')
 
@@ -85,9 +86,29 @@ const hint = ref(t('payment.stripePopup.redirecting'))
 
 let pollTimer: ReturnType<typeof setInterval> | null = null
 let initTimeoutTimer: ReturnType<typeof setTimeout> | null = null
+let closeTimer: ReturnType<typeof setTimeout> | null = null
 let messageHandler: ((event: MessageEvent) => void) | null = null
+let disposed = false
+let session: AuthSessionSnapshot | null = null
+
+function isActive() { return !disposed && session !== null && isAuthSessionCurrent(session) }
 
 function closeWindow() { window.close() }
+
+function scheduleClose() {
+  if (!isActive() || closeTimer !== null) return
+  closeTimer = setTimeout(() => {
+    closeTimer = null
+    if (isActive()) closeWindow()
+  }, 2000)
+}
+
+function stopPolling() {
+  if (pollTimer !== null) {
+    clearInterval(pollTimer)
+    pollTimer = null
+  }
+}
 
 function clearInitTimeout() {
   if (initTimeoutTimer) {
@@ -97,9 +118,21 @@ function clearInitTimeout() {
 }
 
 onMounted(() => {
+  if (!Number.isSafeInteger(orderId) || orderId <= 0 || !['alipay', 'wechat_pay'].includes(method)) {
+    error.value = t('payment.stripeMissingParams')
+    return
+  }
+  try { session = captureAuthSession() } catch {
+    error.value = t('payment.stripeMissingParams')
+    return
+  }
+  const opener = window.opener
   messageHandler = (event: MessageEvent) => {
+    if (!isActive() || !opener || event.source !== opener) return
     if (event.origin !== window.location.origin) return
     if (event.data?.type !== 'STRIPE_POPUP_INIT') return
+    if (typeof event.data.clientSecret !== 'string' || !event.data.clientSecret.trim()
+      || typeof event.data.publishableKey !== 'string' || !event.data.publishableKey.trim()) return
     // INIT 已到达，取消兜底超时，避免长时间的扫码支付被误判为超时。
     clearInitTimeout()
     if (messageHandler) {
@@ -110,20 +143,22 @@ onMounted(() => {
   }
   window.addEventListener('message', messageHandler)
 
-  if (window.opener) {
-    window.opener.postMessage({ type: 'STRIPE_POPUP_READY' }, window.location.origin)
+  if (opener) {
+    opener.postMessage({ type: 'STRIPE_POPUP_READY' }, window.location.origin)
   }
 
   // 仅兜底“父窗口始终未发 STRIPE_POPUP_INIT”的场景。
   initTimeoutTimer = setTimeout(() => {
-    if (!error.value && !success.value) {
+    if (isActive() && !error.value && !success.value) {
       error.value = t('payment.stripePopup.timeout')
     }
   }, 15000)
 })
 
 onUnmounted(() => {
-  if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
+  disposed = true
+  stopPolling()
+  if (closeTimer !== null) clearTimeout(closeTimer)
   clearInitTimeout()
   if (messageHandler) {
     window.removeEventListener('message', messageHandler)
@@ -132,13 +167,16 @@ onUnmounted(() => {
 })
 
 async function initStripe(clientSecret: string, publishableKey: string) {
+  if (!isActive()) return
   if (!clientSecret || !publishableKey) {
     error.value = t('payment.stripeMissingParams')
     return
   }
   try {
     const { loadStripe } = await import('@stripe/stripe-js/pure')
+    if (!isActive()) return
     const stripe = await loadStripe(publishableKey)
+    if (!isActive()) return
     if (!stripe) { error.value = t('payment.stripeLoadFailed'); return }
 
     const returnUrl = window.location.origin + '/payment/result?order_id=' + orderId + '&status=success'
@@ -146,6 +184,7 @@ async function initStripe(clientSecret: string, publishableKey: string) {
     if (method === 'alipay') {
       // Alipay: redirect this popup to Alipay payment page
       const { error: err } = await stripe.confirmAlipayPayment(clientSecret, { return_url: returnUrl })
+      if (!isActive()) return
       if (err) error.value = err.message || t('payment.result.failed')
     } else if (method === 'wechat_pay') {
       // WeChat: Stripe shows its built-in QR dialog, user scans, promise resolves
@@ -153,42 +192,42 @@ async function initStripe(clientSecret: string, publishableKey: string) {
       const result = await (stripe as unknown as StripeWithWechatPay).confirmWechatPayPayment(clientSecret, {
         payment_method_options: { wechat_pay: { client: isMobileDevice() ? 'mobile_web' : 'web' } },
       })
+      if (!isActive()) return
       if (result.error) {
         error.value = result.error.message || t('payment.result.failed')
       } else if (result.paymentIntent?.status === 'succeeded') {
         success.value = true
-        setTimeout(closeWindow, 2000)
+        scheduleClose()
       } else {
         // Payment not completed (user closed QR dialog)
         startPolling()
       }
     }
   } catch (err: unknown) {
-    error.value = extractI18nErrorMessage(err, t, 'payment.errors', t('payment.stripeLoadFailed'))
+    if (isActive()) error.value = extractI18nErrorMessage(err, t, 'payment.errors', t('payment.stripeLoadFailed'))
   }
 }
 
 function startPolling() {
+  if (!isActive() || pollTimer !== null) return
   let inFlight = false
   pollTimer = setInterval(async () => {
+    if (!isActive()) { stopPolling(); return }
     // 防重入：接口响应慢于轮询间隔时避免并发重叠请求。
     if (inFlight) return
     inFlight = true
     try {
-      // access token 存储在 localStorage 的 'auth_token' 键下（见 api/client.ts），
-      // 之前误读 'token' 导致轮询请求不带认证、永远 401，支付成功无法被检测到。
-      const token = localStorage.getItem('auth_token') || ''
-      const res = await fetch(buildApiUrl(`/payment/orders/${orderId}`), {
-        headers: token ? { Authorization: 'Bearer ' + token } : {},
-        credentials: 'include',
-      })
-      if (!res.ok) return
-      const data = await res.json()
-      const status = data?.data?.status
+      // Keep refresh, cancellation and session ownership on the common client.
+      const { data } = await paymentAPI.getOrder(orderId)
+      if (!isActive() || pollTimer === null) return
+      const status = data.status
       if (status === 'COMPLETED' || status === 'PAID') {
-        if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
+        stopPolling()
         success.value = true
-        setTimeout(closeWindow, 2000)
+        scheduleClose()
+      } else if (status === 'EXPIRED' || status === 'CANCELLED' || status === 'FAILED') {
+        stopPolling()
+        error.value = t('payment.result.failed')
       }
     } catch { /* ignore */ } finally {
       inFlight = false

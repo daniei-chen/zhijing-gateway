@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from '../client'
+import { authSessionDigest } from '../authSessionDigest'
 import type {
   UserSubscription,
   SubscriptionProgress,
@@ -42,14 +43,24 @@ export interface BulkAssignSubscriptionResult {
 
 export async function bulkAction(
   request: SubscriptionBulkActionRequest,
-  idempotencyKey: string
+  idempotencyKey: string,
+  replayOnly = false
 ): Promise<SubscriptionBulkActionResult> {
-  const { data } = await apiClient.post<SubscriptionBulkActionResult>(
-    '/admin/subscriptions/bulk-action',
-    request,
-    { headers: { 'Idempotency-Key': idempotencyKey } }
-  )
-  return data
+  try {
+    const response = await apiClient.post<SubscriptionBulkActionResult>(
+      `/admin/subscriptions/bulk-action${replayOnly ? '/replay' : ''}`,
+      request,
+      { headers: { 'Idempotency-Key': idempotencyKey } }
+    )
+    if (replayOnly && String(response.headers?.['x-idempotency-replayed'] ?? response.headers?.['X-Idempotency-Replayed'] ?? '').toLowerCase() !== 'true') {
+      throw unconfirmedExtendResult()
+    }
+    return response.data
+  } catch (error) {
+    const failure = error as { status?: number; response?: { status?: number } } | null
+    if (replayOnly && (failure?.status ?? failure?.response?.status) === 404) throw unconfirmedExtendResult()
+    throw error
+  }
 }
 
 /**
@@ -133,8 +144,39 @@ export async function bulkAssign(
   return data
 }
 
+const extendOperationKeys = new Map<string, string>()
+
+function extendOperationScope(id: number, request: ExtendSubscriptionRequest) {
+  try {
+    const user: unknown = JSON.parse(globalThis.localStorage?.getItem('auth_user') ?? 'null')
+    const adminID = user && typeof user === 'object' ? (user as { id?: unknown }).id : null
+    if (typeof adminID !== 'number' || !Number.isSafeInteger(adminID) || adminID <= 0) return null
+    return { adminID, key: `sub2api:admin:subscription-extend:${adminID}:${id}:${authSessionDigest(JSON.stringify(request))}` }
+  } catch {
+    return null
+  }
+}
+
+function getStoredExtendOperationKey(storageKey: string): string | null {
+  try { return globalThis.sessionStorage?.getItem(storageKey) ?? null } catch { return null }
+}
+
+function storeExtendOperationKey(storageKey: string, key: string | null): void {
+  try {
+    if (key) globalThis.sessionStorage?.setItem(storageKey, key)
+    else globalThis.sessionStorage?.removeItem(storageKey)
+  } catch {
+    // Retain same-page retry identity in memory when browser storage is denied.
+  }
+}
+
+function unconfirmedExtendResult() {
+  return { status: 409, reason: 'IDEMPOTENCY_RESULT_UNCONFIRMED', message: 'The previous subscription adjustment result cannot be confirmed.' }
+}
+
 /**
- * Extend subscription validity
+ * Extend subscription validity. An uncertain write is checked through a
+ * read-only replay endpoint; it is never executed again after retention expiry.
  * @param id - Subscription ID
  * @param request - Extension request with days
  * @returns Updated subscription
@@ -143,10 +185,35 @@ export async function extend(
   id: number,
   request: ExtendSubscriptionRequest
 ): Promise<UserSubscription> {
-  const { data } = await apiClient.post<UserSubscription>(
-    `/admin/subscriptions/${id}/extend`,
-    request
-  )
+  const payload = { days: request.days }
+  const scope = extendOperationScope(id, payload)
+  let idempotencyKey = scope ? extendOperationKeys.get(scope.key) ?? getStoredExtendOperationKey(scope.key) : null
+  const replayOnly = Boolean(idempotencyKey)
+  if (!idempotencyKey) {
+    const requestID = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    idempotencyKey = `subscription-extend-${scope?.adminID ?? 'unknown-admin'}-${id}-${requestID}`
+  }
+  if (scope) {
+    extendOperationKeys.set(scope.key, idempotencyKey)
+    storeExtendOperationKey(scope.key, idempotencyKey)
+  }
+  let data: UserSubscription
+  try {
+    const response = await apiClient.post<UserSubscription>(`/admin/subscriptions/${id}/extend${replayOnly ? '/replay' : ''}`, payload, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    })
+    if (replayOnly && String(response.headers?.['x-idempotency-replayed'] ?? response.headers?.['X-Idempotency-Replayed'] ?? '').toLowerCase() !== 'true') {
+      throw unconfirmedExtendResult()
+    }
+    data = response.data
+  } catch (error) {
+    if (replayOnly && (error as { status?: number })?.status === 404) throw unconfirmedExtendResult()
+    throw error
+  }
+  if (scope) {
+    if (extendOperationKeys.get(scope.key) === idempotencyKey) extendOperationKeys.delete(scope.key)
+    if (getStoredExtendOperationKey(scope.key) === idempotencyKey) storeExtendOperationKey(scope.key, null)
+  }
   return data
 }
 

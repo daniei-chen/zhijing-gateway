@@ -159,7 +159,7 @@
             >
               <Icon name="questionCircle" size="md" />
             </button>
-            <button @click="showAssignModal = true" class="btn btn-primary">
+            <button @click="openAssignModal" class="btn btn-primary">
               <Icon name="plus" size="md" class="mr-2" />
               {{ t('admin.subscriptions.assignSubscription') }}
             </button>
@@ -421,6 +421,7 @@
               <button
                 v-if="row.status === 'active' || row.status === 'expired'"
                 @click="handleExtend(row)"
+                :disabled="pendingWrites.has(`extend:${row.id}`)"
                 class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/20 dark:hover:text-blue-400"
               >
                 <Icon name="calendar" size="sm" />
@@ -429,7 +430,7 @@
               <button
                 v-if="row.status === 'active'"
                 @click="handleResetQuota(row)"
-                :disabled="resettingQuota && resettingSubscription?.id === row.id"
+                :disabled="pendingWrites.has(`reset:${row.id}`)"
                 class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-orange-50 hover:text-orange-600 dark:hover:bg-orange-900/20 dark:hover:text-orange-400 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <Icon name="refresh" size="sm" />
@@ -438,6 +439,7 @@
               <button
                 v-if="row.status === 'active'"
                 @click="handleRevoke(row)"
+                :disabled="pendingWrites.has(`revoke:${row.id}`)"
                 class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
               >
                 <Icon name="ban" size="sm" />
@@ -446,6 +448,7 @@
               <button
                 v-if="row.status === 'revoked'"
                 @click="handleRestore(row)"
+                :disabled="pendingWrites.has(`restore:${row.id}`)"
                 class="flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-900/20 dark:hover:text-green-400"
               >
                 <Icon name="refresh" size="sm" />
@@ -459,7 +462,7 @@
               :title="t('admin.subscriptions.noSubscriptionsYet')"
               :description="t('admin.subscriptions.assignFirstSubscription')"
               :action-text="t('admin.subscriptions.assignSubscription')"
-              @action="showAssignModal = true"
+              @action="openAssignModal"
             />
           </template>
         </DataTable>
@@ -492,8 +495,8 @@
       :show="showAssignModal"
       :title="t('admin.subscriptions.assignSubscription')"
       width="normal"
-      :show-close-button="!submitting"
-      :close-on-escape="!submitting"
+      :show-close-button="!assigning"
+      :close-on-escape="!assigning"
       @close="closeAssignModal"
     >
       <form
@@ -502,7 +505,7 @@
         class="space-y-5"
       >
         <label class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-          <input v-model="batchAssignEnabled" type="checkbox" :disabled="submitting" @change="resetAssignUsers" />
+          <input v-model="batchAssignEnabled" type="checkbox" :disabled="assigning" @change="resetAssignUsers" />
           {{ t('admin.subscriptions.batchAssign.enable') }}
         </label>
         <p v-if="batchAssignEnabled" class="input-hint">{{ t('admin.subscriptions.batchAssign.hint') }}</p>
@@ -512,7 +515,7 @@
             <input
               v-model="userSearchKeyword"
               type="text"
-              :disabled="submitting || (batchAssignEnabled && assignUsers.length >= 100)"
+              :disabled="assigning || (batchAssignEnabled && assignUsers.length >= 100)"
               class="input pr-8"
               :placeholder="t('admin.usage.searchUserPlaceholder')"
               @input="debounceSearchUsers"
@@ -547,7 +550,7 @@
                 v-for="user in userSearchResults"
                 :key="user.id"
                 type="button"
-                :disabled="submitting || (batchAssignEnabled && assignUsers.some((selected) => selected.id === user.id))"
+                :disabled="assigning || (batchAssignEnabled && assignUsers.some((selected) => selected.id === user.id))"
                 @click="selectUser(user)"
                 class="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 disabled:opacity-50 dark:hover:bg-dark-700"
               >
@@ -565,7 +568,7 @@
                 <span class="truncate">{{ user.email }} <span class="text-gray-500">#{{ user.id }}</span></span>
                 <button
                   type="button"
-                  :disabled="submitting"
+                  :disabled="assigning"
                   :aria-label="t('admin.subscriptions.batchAssign.removeUser', { email: user.email })"
                   @click="assignUsers = assignUsers.filter((selected) => selected.id !== user.id)"
                 >
@@ -579,7 +582,7 @@
           <label class="input-label">{{ t('admin.subscriptions.form.group') }}</label>
           <Select
             v-model="assignForm.group_id"
-            :disabled="submitting"
+            :disabled="assigning"
             :options="subscriptionGroupOptions"
             :placeholder="t('admin.subscriptions.selectGroup')"
           >
@@ -608,7 +611,7 @@
         </div>
         <div>
           <label class="input-label">{{ t('admin.subscriptions.form.validityDays') }}</label>
-          <input v-model.number="assignForm.validity_days" type="number" min="1" max="36500" step="1" :disabled="submitting" class="input" />
+          <input v-model.number="assignForm.validity_days" type="number" min="1" max="36500" step="1" :disabled="assigning" class="input" />
           <p class="input-hint">{{ t('admin.subscriptions.validityHint') }}</p>
         </div>
         <div v-if="batchAssignResult" class="space-y-2 text-sm" role="status" data-test="batch-assign-result">
@@ -621,17 +624,17 @@
       </form>
       <template #footer>
         <div class="flex justify-end gap-3">
-          <button @click="closeAssignModal" type="button" :disabled="submitting" class="btn btn-secondary">
+          <button @click="closeAssignModal" type="button" :disabled="assigning" class="btn btn-secondary">
             {{ batchAssignResult ? t('common.close') : t('common.cancel') }}
           </button>
           <button
             type="submit"
             form="assign-subscription-form"
-            :disabled="submitting || (batchAssignEnabled && assignUsers.length === 0)"
+            :disabled="assigning || (batchAssignEnabled && assignUsers.length === 0)"
             class="btn btn-primary"
           >
             <svg
-              v-if="submitting"
+              v-if="assigning"
               class="-ml-1 mr-2 h-4 w-4 animate-spin"
               fill="none"
               viewBox="0 0 24 24"
@@ -650,7 +653,7 @@
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            {{ submitting ? t('admin.subscriptions.assigning') : t('admin.subscriptions.assign') }}
+            {{ assigning ? t('admin.subscriptions.assigning') : t('admin.subscriptions.assign') }}
           </button>
         </div>
       </template>
@@ -715,10 +718,10 @@
           <button
             type="submit"
             form="extend-subscription-form"
-            :disabled="submitting"
+            :disabled="extending"
             class="btn btn-primary"
           >
-            {{ submitting ? t('admin.subscriptions.adjusting') : t('admin.subscriptions.adjust') }}
+            {{ extending ? t('admin.subscriptions.adjusting') : t('admin.subscriptions.adjust') }}
           </button>
         </div>
       </template>
@@ -733,7 +736,7 @@
       :cancel-text="t('common.cancel')"
       :danger="true"
       @confirm="confirmRevoke"
-      @cancel="showRevokeDialog = false"
+      @cancel="closeRevokeDialog"
     />
 
     <!-- Restore Confirmation Dialog -->
@@ -744,7 +747,7 @@
       :confirm-text="t('admin.subscriptions.restore')"
       :cancel-text="t('common.cancel')"
       @confirm="confirmRestore"
-      @cancel="showRestoreDialog = false"
+      @cancel="closeRestoreDialog"
     />
 
     <!-- Reset Quota Confirmation Dialog -->
@@ -755,7 +758,7 @@
       :confirm-text="t('admin.subscriptions.resetQuota')"
       :cancel-text="t('common.cancel')"
       @confirm="confirmResetQuota"
-      @cancel="showResetQuotaConfirm = false"
+      @cancel="closeResetQuotaDialog"
     />
     <!-- Subscription Guide Modal -->
     <teleport to="body">
@@ -840,7 +843,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { adminAPI } from '@/api/admin'
@@ -870,9 +873,13 @@ import {
   type RemainingDurationParts
 } from '@/utils/subscriptionQuota'
 import { GROUP_PLATFORM_OPTIONS } from '@/constants/platforms'
+import { createSessionTasks } from '@/utils/sessionTasks'
+import { trackAuthRequest } from '@/api/authSession'
+import { extractApiErrorMessage } from '@/utils/apiError'
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const pageTasks = createSessionTasks()
 
 interface GroupOption {
   value: number
@@ -1010,7 +1017,6 @@ const statusOptions = computed(() => [
 const subscriptions = ref<UserSubscription[]>([])
 const groups = ref<Group[]>([])
 const loading = ref(false)
-let abortController: AbortController | null = null
 
 const { selectedIds, selectedCount, setSelectedIds, clear: clearSelection, removeMany: removeSelectedIds } =
   useTableSelection<UserSubscription>({ rows: subscriptions, getId: (subscription) => subscription.id })
@@ -1033,11 +1039,12 @@ const handleSelectedKeysUpdate = (keys: Array<string | number>) => {
   setSelectedIds(keys.filter((key): key is number => typeof key === 'number' && visibleIds.has(key)))
 }
 const openBulkAction = (action: SubscriptionBulkAction) => {
-  if (loading.value || bulkTargets.value[action].length === 0) return
+  if (!pageTasks.current() || loading.value || bulkTargets.value[action].length === 0) return
   bulkSubscriptions.value = [...bulkTargets.value[action]]
   bulkAction.value = action
 }
 const handleBulkCompleted = async (result: SubscriptionBulkActionResult) => {
+  if (!pageTasks.current()) return
   removeSelectedIds(result.results.filter((item) => item.success).map((item) => item.subscription_id))
   await loadSubscriptions()
 }
@@ -1086,7 +1093,14 @@ const showExtendModal = ref(false)
 const showRevokeDialog = ref(false)
 const showRestoreDialog = ref(false)
 const showResetQuotaConfirm = ref(false)
-const submitting = ref(false)
+const assigning = ref(false)
+const extending = ref(false)
+const pendingWrites = reactive(new Set<string>())
+let assignGeneration = 0
+let extendGeneration = 0
+let revokeGeneration = 0
+let restoreGeneration = 0
+let resetGeneration = 0
 const resettingSubscription = ref<UserSubscription | null>(null)
 const resettingQuota = ref(false)
 const extendingSubscription = ref<UserSubscription | null>(null)
@@ -1135,13 +1149,8 @@ const applyFilters = () => {
 }
 
 const loadSubscriptions = async () => {
-  if (abortController) {
-    abortController.abort()
-  }
-  const requestController = new AbortController()
-  abortController = requestController
-  const { signal } = requestController
-
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('list')
   loading.value = true
   try {
     const response = await adminAPI.subscriptions.list(
@@ -1156,39 +1165,51 @@ const loadSubscriptions = async () => {
         sort_order: sortState.sort_order
       },
       {
-        signal
+        signal: task.signal
       }
     )
-    if (signal.aborted || abortController !== requestController) return
+    if (!task.active()) return
     subscriptions.value = response.items
     const visibleIds = new Set(response.items.map((subscription) => subscription.id))
     setSelectedIds(selectedIds.value.filter((id) => visibleIds.has(id)))
     pagination.total = response.total
     pagination.pages = response.pages
   } catch (error: any) {
-    if (signal.aborted || error?.name === 'AbortError' || error?.code === 'ERR_CANCELED') {
+    if (!task.active() || error?.name === 'AbortError' || error?.code === 'ERR_CANCELED') {
       return
     }
     appStore.showError(t('admin.subscriptions.failedToLoad'))
     console.error('Error loading subscriptions:', error)
   } finally {
-    if (abortController === requestController) {
-      loading.value = false
-      abortController = null
-    }
+    if (task.owned()) loading.value = false
+    task.finish()
   }
 }
 
 const loadGroups = async () => {
+  const task = pageTasks.begin('groups')
+  if (!task.active()) return
   try {
-    groups.value = await adminAPI.groups.getAll()
+    const result = await adminAPI.groups.getAll()
+    if (task.active()) groups.value = result
   } catch (error) {
-    console.error('Error loading groups:', error)
+    if (task.active()) console.error('Error loading groups:', error)
+  } finally {
+    task.finish()
   }
 }
 
 // Toolbar user filter search with debounce
 const debounceSearchFilterUsers = () => {
+  if (!pageTasks.current()) return
+  pageTasks.cancel('filter-search')
+  filterUserLoading.value = false
+  filterUserResults.value = []
+  if (selectedFilterUser.value && filterUserKeyword.value.trim() !== selectedFilterUser.value.email) {
+    selectedFilterUser.value = null
+    filters.user_id = null
+    applyFilters()
+  }
   if (filterUserSearchTimeout) {
     clearTimeout(filterUserSearchTimeout)
   }
@@ -1196,6 +1217,7 @@ const debounceSearchFilterUsers = () => {
 }
 
 const searchFilterUsers = async () => {
+  if (!pageTasks.current()) return
   const keyword = filterUserKeyword.value.trim()
 
   // Clear active user filter if user modified the search keyword
@@ -1211,17 +1233,23 @@ const searchFilterUsers = async () => {
   }
 
   filterUserLoading.value = true
+  const task = pageTasks.begin('filter-search', () => filterUserKeyword.value.trim() === keyword)
   try {
-    filterUserResults.value = await adminAPI.usage.searchUsers(keyword)
+    const result = await adminAPI.usage.searchUsers(keyword)
+    if (task.active()) filterUserResults.value = result
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to search users:', error)
     filterUserResults.value = []
   } finally {
-    filterUserLoading.value = false
+    if (task.owned()) filterUserLoading.value = false
+    task.finish()
   }
 }
 
 const selectFilterUser = (user: SimpleUser) => {
+  if (!pageTasks.current()) return
+  pageTasks.cancel('filter-search')
   selectedFilterUser.value = user
   filterUserKeyword.value = user.email
   showFilterUserDropdown.value = false
@@ -1230,6 +1258,10 @@ const selectFilterUser = (user: SimpleUser) => {
 }
 
 const clearFilterUser = () => {
+  if (!pageTasks.current()) return
+  if (filterUserSearchTimeout) clearTimeout(filterUserSearchTimeout)
+  pageTasks.cancel('filter-search')
+  filterUserLoading.value = false
   selectedFilterUser.value = null
   filterUserKeyword.value = ''
   filterUserResults.value = []
@@ -1240,6 +1272,10 @@ const clearFilterUser = () => {
 
 // User search with debounce
 const debounceSearchUsers = () => {
+  if (!pageTasks.current() || !showAssignModal.value) return
+  pageTasks.cancel('assign-search')
+  userSearchResults.value = []
+  userSearchLoading.value = false
   // Invalidate the assignment target before the debounced search runs.
   if (selectedUser.value && userSearchKeyword.value.trim() !== selectedUser.value.email) {
     selectedUser.value = null
@@ -1252,6 +1288,7 @@ const debounceSearchUsers = () => {
 }
 
 const searchUsers = async () => {
+  if (!pageTasks.current() || !showAssignModal.value) return
   const keyword = userSearchKeyword.value.trim()
 
   if (!keyword) {
@@ -1260,21 +1297,26 @@ const searchUsers = async () => {
   }
 
   userSearchLoading.value = true
+  const generation = assignGeneration
+  const task = pageTasks.begin('assign-search', () => showAssignModal.value && assignGeneration === generation && userSearchKeyword.value.trim() === keyword)
   try {
     const result = await adminAPI.users.list(1, 30, {
       search: keyword, sort_by: 'email', sort_order: 'asc'
     })
-    userSearchResults.value = result.items
+    if (task.active()) userSearchResults.value = result.items
   } catch (error) {
+    if (!task.active()) return
     console.error('Failed to search users:', error)
     userSearchResults.value = []
   } finally {
-    userSearchLoading.value = false
+    if (task.owned()) userSearchLoading.value = false
+    task.finish()
   }
 }
 
 const selectUser = (user: AdminUser) => {
-  if (submitting.value) return
+  if (!pageTasks.current() || !showAssignModal.value || assigning.value) return
+  pageTasks.cancel('assign-search')
   if (batchAssignEnabled.value) {
     if (assignUsers.value.length < 100 && !assignUsers.value.some((selected) => selected.id === user.id)) {
       assignUsers.value = [...assignUsers.value, user]
@@ -1291,6 +1333,7 @@ const selectUser = (user: AdminUser) => {
 }
 
 const clearUserSelection = () => {
+  pageTasks.cancel('assign-search')
   selectedUser.value = null
   userSearchKeyword.value = ''
   userSearchResults.value = []
@@ -1324,8 +1367,18 @@ const handleSort = (key: string, order: 'asc' | 'desc') => {
   loadSubscriptions()
 }
 
+const openAssignModal = () => {
+  if (!pageTasks.current() || assigning.value) return
+  closeAssignModal()
+  showAssignModal.value = true
+}
+
 const closeAssignModal = () => {
-  if (submitting.value) return
+  if (assigning.value) return
+  assignGeneration++
+  pageTasks.cancel('assign')
+  if (userSearchTimeout) clearTimeout(userSearchTimeout)
+  userSearchLoading.value = false
   showAssignModal.value = false
   batchAssignEnabled.value = false
   assignUsers.value = []
@@ -1341,7 +1394,7 @@ const closeAssignModal = () => {
 }
 
 const handleAssignSubscription = async () => {
-  if (submitting.value) return
+  if (!pageTasks.current() || !showAssignModal.value || assigning.value) return
   if (batchAssignEnabled.value ? assignUsers.value.length === 0 : !assignForm.user_id) {
     appStore.showError(t('admin.subscriptions.pleaseSelectUser'))
     return
@@ -1355,15 +1408,18 @@ const handleAssignSubscription = async () => {
     return
   }
 
-  submitting.value = true
+  const generation = assignGeneration
+  const task = pageTasks.begin('assign:write', () => showAssignModal.value && assignGeneration === generation)
+  const batch = batchAssignEnabled.value
+  const payload = { group_id: assignForm.group_id, validity_days: assignForm.validity_days }
+  const userId = assignForm.user_id!
+  const userIds = assignUsers.value.map(user => user.id)
+  assigning.value = true
   try {
-    if (batchAssignEnabled.value) {
-      batchAssignResult.value = await adminAPI.subscriptions.bulkAssign({
-        user_ids: assignUsers.value.map((user) => user.id),
-        group_id: assignForm.group_id,
-        validity_days: assignForm.validity_days
-      })
-      const result = batchAssignResult.value
+    if (batch) {
+      const result = await adminAPI.subscriptions.bulkAssign({ ...payload, user_ids: userIds })
+      if (!task.active()) return
+      batchAssignResult.value = result
       const successIds = new Set(result.subscriptions.map((subscription) => subscription.user_id))
       assignUsers.value = assignUsers.value.filter((user) => !successIds.has(user.id))
       if (result.success_count > 0) {
@@ -1373,122 +1429,195 @@ const handleAssignSubscription = async () => {
       return
     }
     await adminAPI.subscriptions.assign({
-      user_id: assignForm.user_id!,
-      group_id: assignForm.group_id,
-      validity_days: assignForm.validity_days
+      ...payload,
+      user_id: userId,
     })
+    if (!task.active()) return
     appStore.showSuccess(t('admin.subscriptions.subscriptionAssigned'))
-    submitting.value = false
+    assigning.value = false
     closeAssignModal()
     loadSubscriptions()
   } catch (error: any) {
-    appStore.showError(error.response?.data?.detail || t('admin.subscriptions.failedToAssign'))
+    if (!task.active()) return
+    appStore.showError(extractApiErrorMessage(error, t('admin.subscriptions.failedToAssign')))
     console.error('Error assigning subscription:', error)
   } finally {
-    submitting.value = false
+    if (task.owned()) assigning.value = false
+    task.finish()
   }
 }
 
 const handleExtend = (subscription: UserSubscription) => {
+  if (!pageTasks.current() || pendingWrites.has(`extend:${subscription.id}`)) return
+  closeExtendModal()
   extendingSubscription.value = subscription
   extendForm.days = 30
   showExtendModal.value = true
 }
 
 const closeExtendModal = () => {
+  extendGeneration++
+  pageTasks.cancel('extend:')
+  extending.value = false
   showExtendModal.value = false
   extendingSubscription.value = null
 }
 
 const handleExtendSubscription = async () => {
-  if (!extendingSubscription.value) return
+  const target = extendingSubscription.value
+  if (!pageTasks.current() || !showExtendModal.value || !target || extending.value || pendingWrites.has(`extend:${target.id}`)) return
+  const days = Number(extendForm.days)
+  if (!Number.isInteger(days) || days === 0 || Math.abs(days) > 36500) {
+    appStore.showError(t('admin.subscriptions.bulk.invalidDays'))
+    return
+  }
 
   // 前端验证：调整后的过期时间必须在未来
-  if (extendingSubscription.value.expires_at) {
-    const expiresAt = new Date(extendingSubscription.value.expires_at)
-    const newExpiresAt = new Date(expiresAt.getTime() + extendForm.days * 24 * 60 * 60 * 1000)
-    if (newExpiresAt <= new Date()) {
+  if (target.expires_at) {
+    const expiresAt = new Date(target.expires_at).getTime()
+    const now = Date.now()
+    const newExpiresAt = Math.max(expiresAt, now) + days * 24 * 60 * 60 * 1000
+    if ((expiresAt <= now && days < 0) || newExpiresAt <= now) {
       appStore.showError(t('admin.subscriptions.adjustWouldExpire'))
       return
     }
   }
 
-  submitting.value = true
+  const generation = extendGeneration
+  const task = pageTasks.begin('extend:write', () => showExtendModal.value && generation === extendGeneration && extendingSubscription.value?.id === target.id)
+  const key = `extend:${target.id}`
+  pendingWrites.add(key)
+  extending.value = true
   try {
-    await adminAPI.subscriptions.extend(extendingSubscription.value.id, {
-      days: extendForm.days
-    })
+    await adminAPI.subscriptions.extend(target.id, { days })
+    if (!task.active()) return
     appStore.showSuccess(t('admin.subscriptions.subscriptionAdjusted'))
     closeExtendModal()
     loadSubscriptions()
   } catch (error: any) {
-    appStore.showError(error.response?.data?.detail || t('admin.subscriptions.failedToAdjust'))
+    if (!task.active()) return
+    appStore.showError(error?.reason === 'IDEMPOTENCY_RESULT_UNCONFIRMED'
+      ? t('admin.subscriptions.adjustResultUnconfirmed')
+      : extractApiErrorMessage(error, t('admin.subscriptions.failedToAdjust')))
     console.error('Error adjusting subscription:', error)
   } finally {
-    submitting.value = false
+    pendingWrites.delete(key)
+    if (task.owned()) extending.value = false
+    task.finish()
   }
 }
 
 const handleRevoke = (subscription: UserSubscription) => {
+  if (!pageTasks.current() || pendingWrites.has(`revoke:${subscription.id}`)) return
+  closeRevokeDialog()
   revokingSubscription.value = subscription
   showRevokeDialog.value = true
 }
 
-const confirmRevoke = async () => {
-  if (!revokingSubscription.value) return
+const closeRevokeDialog = () => {
+  revokeGeneration++
+  pageTasks.cancel('revoke:')
+  showRevokeDialog.value = false
+  revokingSubscription.value = null
+}
 
+const confirmRevoke = async () => {
+  const target = revokingSubscription.value
+  if (!pageTasks.current() || !showRevokeDialog.value || !target || pendingWrites.has(`revoke:${target.id}`)) return
+  const generation = revokeGeneration
+  const task = pageTasks.begin('revoke:write', () => showRevokeDialog.value && generation === revokeGeneration && revokingSubscription.value?.id === target.id)
+  const key = `revoke:${target.id}`
+  pendingWrites.add(key)
   try {
-    await adminAPI.subscriptions.revoke(revokingSubscription.value.id)
+    await adminAPI.subscriptions.revoke(target.id)
+    if (!task.active()) return
     appStore.showSuccess(t('admin.subscriptions.subscriptionRevoked'))
-    showRevokeDialog.value = false
-    revokingSubscription.value = null
+    closeRevokeDialog()
     loadSubscriptions()
   } catch (error: any) {
-    appStore.showError(error.response?.data?.detail || t('admin.subscriptions.failedToRevoke'))
+    if (!task.active()) return
+    appStore.showError(extractApiErrorMessage(error, t('admin.subscriptions.failedToRevoke')))
     console.error('Error revoking subscription:', error)
+  } finally {
+    pendingWrites.delete(key)
+    task.finish()
   }
 }
 
 const handleRestore = (subscription: UserSubscription) => {
+  if (!pageTasks.current() || pendingWrites.has(`restore:${subscription.id}`)) return
+  closeRestoreDialog()
   restoringSubscription.value = subscription
   showRestoreDialog.value = true
 }
 
-const confirmRestore = async () => {
-  if (!restoringSubscription.value) return
+const closeRestoreDialog = () => {
+  restoreGeneration++
+  pageTasks.cancel('restore:')
+  showRestoreDialog.value = false
+  restoringSubscription.value = null
+}
 
+const confirmRestore = async () => {
+  const target = restoringSubscription.value
+  if (!pageTasks.current() || !showRestoreDialog.value || !target || pendingWrites.has(`restore:${target.id}`)) return
+  const generation = restoreGeneration
+  const task = pageTasks.begin('restore:write', () => showRestoreDialog.value && generation === restoreGeneration && restoringSubscription.value?.id === target.id)
+  const key = `restore:${target.id}`
+  pendingWrites.add(key)
   try {
-    await adminAPI.subscriptions.restore(restoringSubscription.value.id)
+    await adminAPI.subscriptions.restore(target.id)
+    if (!task.active()) return
     appStore.showSuccess(t('admin.subscriptions.subscriptionRestored'))
-    showRestoreDialog.value = false
-    restoringSubscription.value = null
+    closeRestoreDialog()
     loadSubscriptions()
   } catch (error: any) {
-    appStore.showError(error.response?.data?.detail || t('admin.subscriptions.failedToRestore'))
+    if (!task.active()) return
+    appStore.showError(extractApiErrorMessage(error, t('admin.subscriptions.failedToRestore')))
     console.error('Error restoring subscription:', error)
+  } finally {
+    pendingWrites.delete(key)
+    task.finish()
   }
 }
 
 const handleResetQuota = (subscription: UserSubscription) => {
+  if (!pageTasks.current() || pendingWrites.has(`reset:${subscription.id}`)) return
+  closeResetQuotaDialog()
   resettingSubscription.value = subscription
   showResetQuotaConfirm.value = true
 }
 
+const closeResetQuotaDialog = () => {
+  resetGeneration++
+  pageTasks.cancel('reset:')
+  resettingQuota.value = false
+  showResetQuotaConfirm.value = false
+  resettingSubscription.value = null
+}
+
 const confirmResetQuota = async () => {
-  if (!resettingSubscription.value) return
-  if (resettingQuota.value) return
+  const target = resettingSubscription.value
+  if (!pageTasks.current() || !showResetQuotaConfirm.value || !target || resettingQuota.value || pendingWrites.has(`reset:${target.id}`)) return
+  const generation = resetGeneration
+  const task = pageTasks.begin('reset:write', () => showResetQuotaConfirm.value && generation === resetGeneration && resettingSubscription.value?.id === target.id)
+  const key = `reset:${target.id}`
+  pendingWrites.add(key)
   resettingQuota.value = true
   try {
-    await adminAPI.subscriptions.resetQuota(resettingSubscription.value.id, { daily: true, weekly: true, monthly: true })
+    await adminAPI.subscriptions.resetQuota(target.id, { daily: true, weekly: true, monthly: true })
+    if (!task.active()) return
     appStore.showSuccess(t('admin.subscriptions.quotaResetSuccess'))
-    showResetQuotaConfirm.value = false
-    resettingSubscription.value = null
+    closeResetQuotaDialog()
     await loadSubscriptions()
   } catch (error: any) {
-    appStore.showError(error.response?.data?.detail || t('admin.subscriptions.failedToResetQuota'))
+    if (!task.active()) return
+    appStore.showError(extractApiErrorMessage(error, t('admin.subscriptions.failedToResetQuota')))
     console.error('Error resetting quota:', error)
   } finally {
-    resettingQuota.value = false
+    pendingWrites.delete(key)
+    if (task.owned()) resettingQuota.value = false
+    task.finish()
   }
 }
 
@@ -1614,7 +1743,23 @@ onMounted(() => {
   document.addEventListener('click', handleClickOutside)
 })
 
-onUnmounted(() => {
+const stopSessionTracking = trackAuthRequest(pageTasks.session, () => {
+  assigning.value = false
+  closeAssignModal()
+  closeExtendModal()
+  closeRevokeDialog()
+  closeRestoreDialog()
+  closeResetQuotaDialog()
+  bulkAction.value = null
+  if (filterUserSearchTimeout) clearTimeout(filterUserSearchTimeout)
+  if (userSearchTimeout) clearTimeout(userSearchTimeout)
+  filterUserResults.value = []
+  userSearchResults.value = []
+})
+
+onBeforeUnmount(() => {
+  stopSessionTracking()
+  pageTasks.dispose()
   document.removeEventListener('click', handleClickOutside)
   if (filterUserSearchTimeout) {
     clearTimeout(filterUserSearchTimeout)

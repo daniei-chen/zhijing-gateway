@@ -157,13 +157,13 @@ export async function createBackup(req?: CreateBackupRequest): Promise<BackupRec
   return data
 }
 
-export async function listBackups(): Promise<{ items: BackupRecord[] }> {
-  const { data } = await apiClient.get<{ items: BackupRecord[] }>('/admin/backups')
+export async function listBackups(signal?: AbortSignal): Promise<{ items: BackupRecord[] }> {
+  const { data } = await apiClient.get<{ items: BackupRecord[] }>('/admin/backups', { signal })
   return data
 }
 
-export async function getBackup(id: string): Promise<BackupRecord> {
-  const { data } = await apiClient.get<BackupRecord>(`/admin/backups/${id}`)
+export async function getBackup(id: string, signal?: AbortSignal): Promise<BackupRecord> {
+  const { data } = await apiClient.get<BackupRecord>(`/admin/backups/${id}`, { signal })
   return data
 }
 

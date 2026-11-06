@@ -1,0 +1,32 @@
+
+ RUN  v2.1.9 baseline/frontend
+
+ ❯ src/stores/__tests__/auth.hydrationRace.audit-regression.spec.ts (1 test | 1 failed) 143ms
+   × authentication hydration snapshot > rejects cached user A if another tab commits B while the cached keys are being read 142ms
+     → expected true to be false // Object.is equality
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/stores/__tests__/auth.hydrationRace.audit-regression.spec.ts > authentication hydration snapshot > rejects cached user A if another tab commits B while the cached keys are being read
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/stores/__tests__/auth.hydrationRace.audit-regression.spec.ts:55:35
+     53|     ])
+     54|     store.checkAuth()
+     55|     expect(store.isAuthenticated).toBe(false)
+       |                                   ^
+     56|     expect(store.isAdmin).toBe(false)
+     57|     expect(store.user).toBeNull()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+ Test Files  1 failed (1)
+      Tests  1 failed (1)
+   Start at  19:59:11
+   Duration  1.32s (transform 162ms, setup 136ms, collect 45ms, tests 143ms, environment 414ms, prepare 87ms)

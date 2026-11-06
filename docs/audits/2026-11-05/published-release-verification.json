@@ -1,0 +1,129 @@
+{
+  "release": "v0.0.2",
+  "release_url": "https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2",
+  "operation": "Read-only HTTPS download, SHA-256 and ZIP verification; no package contents executed.",
+  "download_policy": {
+    "max_total_seconds_per_download": 45,
+    "connect_timeout_seconds": 20,
+    "retries": 0,
+    "https_only": true
+  },
+  "assets": [
+    {
+      "name": "BUILD-MANIFEST.json",
+      "url": "https://github.com/daniei-chen/zhijing-gateway/releases/download/v0.0.2/BUILD-MANIFEST.json",
+      "local_path": "${AUDIT_WORKSPACE}/release-v0.0.2-published-audit/BUILD-MANIFEST.json",
+      "http_status": 200,
+      "curl_exit_code": 0,
+      "download_seconds": 9.989535,
+      "bytes": 42338,
+      "github_expected_sha256": "44ef6702a5da0e496acb5338645882f4b871dc883f3a485c9f5bd41abb737fb6",
+      "actual_sha256": "44ef6702a5da0e496acb5338645882f4b871dc883f3a485c9f5bd41abb737fb6",
+      "github_digest_matches": true
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "url": "https://github.com/daniei-chen/zhijing-gateway/releases/download/v0.0.2/SHA256SUMS.txt",
+      "local_path": "${AUDIT_WORKSPACE}/release-v0.0.2-published-audit/SHA256SUMS.txt",
+      "http_status": 200,
+      "curl_exit_code": 0,
+      "download_seconds": 13.027929,
+      "bytes": 303,
+      "github_expected_sha256": "94158cc606f9a866d12cbf05391cfa0066b6fd97b4f10c62ab64d9df1ff6a144",
+      "actual_sha256": "94158cc606f9a866d12cbf05391cfa0066b6fd97b4f10c62ab64d9df1ff6a144",
+      "github_digest_matches": true
+    },
+    {
+      "name": "zhijing-gateway-v0.0.2-frontend.zip",
+      "url": "https://github.com/daniei-chen/zhijing-gateway/releases/download/v0.0.2/zhijing-gateway-v0.0.2-frontend.zip",
+      "local_path": "${AUDIT_WORKSPACE}/release-v0.0.2-published-audit/zhijing-gateway-v0.0.2-frontend.zip",
+      "http_status": 200,
+      "curl_exit_code": 0,
+      "download_seconds": 12.597488,
+      "bytes": 6912018,
+      "github_expected_sha256": "a69eb9857e02755620c46ca0975166f34ed6ff66bb1b62b4d92a21ccabefc392",
+      "actual_sha256": "a69eb9857e02755620c46ca0975166f34ed6ff66bb1b62b4d92a21ccabefc392",
+      "github_digest_matches": true
+    },
+    {
+      "name": "zhijing-gateway-v0.0.2-diagnostics-source.zip",
+      "url": "https://github.com/daniei-chen/zhijing-gateway/releases/download/v0.0.2/zhijing-gateway-v0.0.2-diagnostics-source.zip",
+      "local_path": "${AUDIT_WORKSPACE}/release-v0.0.2-published-audit/zhijing-gateway-v0.0.2-diagnostics-source.zip",
+      "http_status": 200,
+      "curl_exit_code": 0,
+      "download_seconds": 15.52495,
+      "bytes": 18188,
+      "github_expected_sha256": "348edc7f9f1bccb1e5117c8ec47a798aa29daee421aef01ee791465b27157a23",
+      "actual_sha256": "348edc7f9f1bccb1e5117c8ec47a798aa29daee421aef01ee791465b27157a23",
+      "github_digest_matches": true
+    }
+  ],
+  "all_github_digests_match": true,
+  "published_checksum_entries": [
+    {
+      "name": "zhijing-gateway-v0.0.2-frontend.zip",
+      "declared_sha256": "a69eb9857e02755620c46ca0975166f34ed6ff66bb1b62b4d92a21ccabefc392",
+      "actual_sha256": "a69eb9857e02755620c46ca0975166f34ed6ff66bb1b62b4d92a21ccabefc392",
+      "matches": true
+    },
+    {
+      "name": "zhijing-gateway-v0.0.2-diagnostics-source.zip",
+      "declared_sha256": "348edc7f9f1bccb1e5117c8ec47a798aa29daee421aef01ee791465b27157a23",
+      "actual_sha256": "348edc7f9f1bccb1e5117c8ec47a798aa29daee421aef01ee791465b27157a23",
+      "matches": true
+    },
+    {
+      "name": "BUILD-MANIFEST.json",
+      "declared_sha256": "44ef6702a5da0e496acb5338645882f4b871dc883f3a485c9f5bd41abb737fb6",
+      "actual_sha256": "44ef6702a5da0e496acb5338645882f4b871dc883f3a485c9f5bd41abb737fb6",
+      "matches": true
+    }
+  ],
+  "published_checksum_entries_match": true,
+  "current_verifier": {
+    "path": "tools/verify_release.py",
+    "command": [
+      "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+      "tools/verify_release.py",
+      "${AUDIT_WORKSPACE}/release-v0.0.2-published-audit"
+    ],
+    "exit_code": 0,
+    "status": "passed",
+    "stdout": "{\"version\": \"0.0.2\", \"archives_verified\": true, \"static_files\": 310, \"source_commit\": \"c690c0dbb84b627dedabf85d7f0178fda28bb510\", \"production_deployed\": false}\n",
+    "stderr": "",
+    "evidence": "${AUDIT_WORKSPACE}/audit_evidence/backend_release/published_release_verifier.log"
+  },
+  "build_manifest": {
+    "version": "0.0.2",
+    "source_commit": "c690c0dbb84b627dedabf85d7f0178fda28bb510",
+    "frontend_tree": "c1628ad3efd1d4121cf90965b544b6d59c283162",
+    "created_at": "2026-11-05T05:49:14+00:00",
+    "static_files": 310,
+    "historical_production_deployed_flag": false
+  },
+  "archive_inventory": [
+    {
+      "name": "zhijing-gateway-v0.0.2-frontend.zip",
+      "members": 320,
+      "compressed_bytes": 6851914,
+      "uncompressed_bytes": 11861172
+    },
+    {
+      "name": "zhijing-gateway-v0.0.2-diagnostics-source.zip",
+      "members": 5,
+      "compressed_bytes": 17448,
+      "uncompressed_bytes": 56908,
+      "patch_sha256": "0c91c51befeaa9892d2490af313b52f844f31499ad3f6e4def121388e671d1f1",
+      "manifest_patch_sha256": "0c91c51befeaa9892d2490af313b52f844f31499ad3f6e4def121388e671d1f1",
+      "backend_changed_files": 17
+    }
+  ],
+  "historical_assets_modified": false,
+  "archive_code_executed": false,
+  "production_contacted": false,
+  "limitations": [
+    "Checks establish consistency with the provided GitHub asset digests and declared manifests, not a new signed provenance attestation.",
+    "Historical build/test/deployment statements in BUILD-MANIFEST are historical metadata, not newly re-run verification.",
+    "No complete private backend was compiled or deployed."
+  ]
+}

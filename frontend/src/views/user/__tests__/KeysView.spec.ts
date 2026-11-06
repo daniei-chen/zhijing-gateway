@@ -328,7 +328,7 @@ describe('user KeysView column settings', () => {
     expect((wrapper.get('[data-tour="key-form-name"]').element as HTMLInputElement).value)
       .toBe('Unsaved name')
 
-    await wrapper.get('#key-form').trigger('submit')
+    await wrapper.get('[data-test="key-form"]').trigger('submit')
     await flushPromises()
     expect(updateKey).toHaveBeenNthCalledWith(2, key.id, expect.objectContaining({ name: 'Unsaved name', status: formStatus }))
     wrapper.unmount()
@@ -570,7 +570,8 @@ describe('user KeysView column settings', () => {
       rate_multiplier: 1,
       subscription_type: 'standard',
     }))
-    const groupSelect = (wrapper: VueWrapper) => wrapper.findComponent('[data-tour="key-form-group"]')
+    const groupSelect = (wrapper: VueWrapper) => wrapper.findAllComponents({ name: 'Select' })
+      .find(select => select.attributes('data-tour') === 'key-form-group')!
     const optionIds = (wrapper: VueWrapper) => groupSelect(wrapper).props('options').map((option: { value: number }) => option.value)
     const chooseProvider = (wrapper: VueWrapper, value: string) => wrapper.get(`input[name="key-provider"][value="${value}"]`).setValue()
     const openCreate = async () => {
@@ -602,13 +603,13 @@ describe('user KeysView column settings', () => {
       await groupSelect(wrapper).vm.$emit('update:modelValue', 1)
       await chooseProvider(wrapper, 'domestic')
       expect(groupSelect(wrapper).props('modelValue')).toBeNull()
-      await wrapper.get('#key-form').trigger('submit')
+      await wrapper.get('[data-test="key-form"]').trigger('submit')
       expect(keysAPI.create).not.toHaveBeenCalled()
       expect(showError).toHaveBeenCalledWith('keys.groupRequired')
 
       await groupSelect(wrapper).vm.$emit('update:modelValue', 5)
       vi.mocked(keysAPI.create).mockResolvedValue({ ...createApiKey(), group_id: 5 })
-      await wrapper.get('#key-form').trigger('submit')
+      await wrapper.get('[data-test="key-form"]').trigger('submit')
       await flushPromises()
       expect(keysAPI.create).toHaveBeenCalledOnce()
       expect(vi.mocked(keysAPI.create).mock.calls[0].slice(0, 2)).toEqual(['My key', 5])

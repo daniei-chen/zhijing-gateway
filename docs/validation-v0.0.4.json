@@ -1,0 +1,125 @@
+{
+  "schema_version": 1,
+  "version": "0.0.4",
+  "status": "validated_source_for_formal_release",
+  "production_deployed": false,
+  "frontend": {
+    "test_files": 542,
+    "passed_tests": 6739,
+    "failed_tests": 0,
+    "pending_tests": 0,
+    "coverage": {
+      "lines": {
+        "total": 55365,
+        "covered": 49497,
+        "skipped": 0,
+        "pct": 89.4
+      },
+      "statements": {
+        "total": 62599,
+        "covered": 54253,
+        "skipped": 0,
+        "pct": 86.66
+      },
+      "functions": {
+        "total": 12894,
+        "covered": 10896,
+        "skipped": 0,
+        "pct": 84.5
+      },
+      "branches": {
+        "total": 48588,
+        "covered": 38988,
+        "skipped": 0,
+        "pct": 80.24
+      }
+    },
+    "global_coverage_threshold": 80,
+    "all_four_original_global_gates_passed": true,
+    "coverage_command_exit": 0,
+    "source_inputs_unchanged": true,
+    "evidence": "proofs/v0.0.4/frontend-validation-final.json",
+    "runtime_source_delta": "proofs/v0.0.4/frontend-runtime-fixes.json",
+    "original_compatibility_baseline_files": 227,
+    "routes": 68,
+    "new_test_files_use_explicit_strict_typechecks": true,
+    "tests_deleted_from_previous_candidate": 0,
+    "retained_test_adjustment": "Five existing Redeem dialog removal checks wait for their original DOM-null expectations to become true after real transitions. Expectations and native keyboard/Teleport flows remain."
+  },
+  "backend": {
+    "source_commit": "dcaf707cad583955873ed94097d63c9a4be12e82",
+    "base_commit": "4851ca95b134322c14ca9904bc82c550a3880a67",
+    "generic_patch_files": 85,
+    "patch_sha256": "6c9f6ffa14ba4ecef094a36cfe26596955ea8711b35070ee5110b315114cf093",
+    "go_toolchain": "1.27.3",
+    "unit_short": {
+      "passed_packages": 64,
+      "passed_top_level_tests": 12561,
+      "passed_test_events_including_subtests": 25214,
+      "skipped_test_events": 39,
+      "skipped_packages": 51,
+      "failed_events": 0
+    },
+    "fresh_patch_targeted_race": {
+      "passed_packages": 12,
+      "passed_package_invocations": 49,
+      "passed_top_level_tests": 1238,
+      "passed_test_events_including_subtests": 2338,
+      "skipped_test_events": 14,
+      "failed_events": 0,
+      "data_race_warnings": 0,
+      "batch_exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "all_requested_names_observed": true
+    },
+    "go_vet": true,
+    "linux_amd64_cross_build": true,
+    "fresh_patch_targeted_race_passed": true,
+    "worktree_has_later_changes": false,
+    "later_worktree_changes": [],
+    "artifact_apply_and_result_hashes": true,
+    "external_live_database_integration_executed": false,
+    "matching_api_peer_embed_cross_build": true,
+    "matching_api_peer_build_proof": "proofs/v0.0.3-followup/backend-api-peer-build.json",
+    "isolated_redis_durability_smoke_executed": true,
+    "production_redis_policy_applied": false,
+    "real_redis_capacity_test_executed": false,
+    "isolated_redis_evidence": "proofs/v0.0.3-followup/isolated-redis-lab.json",
+    "unit_evidence": "proofs/v0.0.3-followup/backend-full-unit-checkpoint-09-summary.json",
+    "artifact_race_evidence": "proofs/v0.0.3-followup/backend-artifact-dcaf707-summary.json",
+    "validation_reused_for_identical_source": true,
+    "new_backend_changes_in_v004": false,
+    "compiled_by_frontend_packager": false
+  },
+  "tools": {
+    "python_test_cases": 54,
+    "passed": 53,
+    "skipped": 1,
+    "failed": 0,
+    "skip_reason": "Windows symlink creation privilege; independent reparse-point rejection checks remain.",
+    "ops_contract_tests_passed": 3,
+    "original_frontend_contract_chain_preserved": true,
+    "matching_v004_backend_patch_artifact_verified": true
+  },
+  "delivery": {
+    "required_clean_commit_packaging": "tools/package_release.py independently installs the locked dependencies and reruns full lint, build, compatibility, operations contract, patch integrity and all four coverage gates before creating assets. The release BUILD-MANIFEST.json is the authoritative record for that committed packaging run.",
+    "assets": [
+      "zhijing-gateway-v0.0.4-frontend.zip",
+      "zhijing-gateway-v0.0.4-diagnostics-source.zip",
+      "BUILD-MANIFEST.json",
+      "SHA256SUMS.txt"
+    ],
+    "github_release": "https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.4"
+  },
+  "limits": [
+    "80% coverage and passing regressions do not prove every path or deployment is defect free.",
+    "No production cutover, Redis policy change, real payment/email or supplier inference was performed for this release.",
+    "Production TTFT improvement is unmeasured. The inherited timing and optional upload relay changes are not claimed as a measured fix for 30-second upstream tails.",
+    "Browser screenshots and real Chromium observations are inherited historical synthetic-preview evidence from v0.0.3; this run adds Vitest/jsdom coverage rather than new broad browser E2E."
+  ]
+}

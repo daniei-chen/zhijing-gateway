@@ -1,0 +1,1176 @@
+{
+  "schema_version": 1,
+  "generated_utc": "2026-11-05T11:06:30.105026+00:00",
+  "owner": "auth_security",
+  "baseline_commit": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+  "working_tree": "${AUDIT_WORKSPACE}/zhijing-gateway",
+  "status": "运行源码/测试已冻结；等待父代理统一全量构建/类型检查/集成验收。",
+  "claim_limits": [
+    "本报告只覆盖本分工的认证/会话/URL/store/router；列明手动精读、关键路径审查、语义差异审查及模式扫描，未宣称仓库每一行均逐行精审。",
+    "没有完整运行后端，无法证明服务端授权、OAuth state/PKCE/nonce、WebAuthn challenge/rpId/origin/signature、CSRF、撤销与限速；前端测试不等于这些安全控制。",
+    "没有生产探测、部署、线上配置更改或真实用户/支付操作。性能数字是受控 CPU 微基准，不是线上 API p95、TTFT 或吞吐量。"
+  ],
+  "findings": [
+    {
+      "id": "AUTH-01",
+      "severity": "high",
+      "status": "fixed",
+      "title": "异步验证码和原生 WebAuthn 操作未绑定发起会话，旧意图可在新登录后继续",
+      "evidence": [
+        "LoginView 原587/645/686行：先 await 验证码，再调用会清空并重建会话的 store；期间另一标签登录后，旧页面会继续。",
+        "RegisterView 原996行和 EmailVerifyView 原656行存在相同 await 缺口。",
+        "passkey.ts 原107/125行：begin 与 finish 各自捕获请求时的会话，中间原生 credential prompt 未绑定原始会话。"
+      ],
+      "impact": "可让旧登录/注册操作覆盖更新的会话，或把旧 WebAuthn ceremony 的后续请求送入新会话。测试覆盖同一 user id 但不同 generation；不声称已证明服务器权限绕过。",
+      "fix": "先设置 busy，再 capture；每个安全边界 await 后 assert 原会话；WebAuthn prompt 绑定 AbortController 与 trackAuthRequest，并在 finish 前后复验。组件卸载后不再续发注册/登录或晚跳转。",
+      "files": [
+        "frontend/src/views/auth/LoginView.vue",
+        "frontend/src/views/auth/RegisterView.vue",
+        "frontend/src/views/auth/EmailVerifyView.vue",
+        "frontend/src/api/passkey.ts"
+      ],
+      "regressions": [
+        "TencentCaptchaActionGate.spec.ts：重复点击、password/passkey/OAuth 跨会话和页面卸载",
+        "RegisterView.spec.ts：有/无邮箱验证两种跨会话、卸载路径",
+        "EmailVerifyView.spec.ts：验证码等待期间换会话与卸载后完成",
+        "passkey.spec.ts：login/register 原生 prompt 期间同用户新会话"
+      ]
+    },
+    {
+      "id": "AUTH-02",
+      "severity": "medium",
+      "status": "fixed",
+      "title": "启动恢复多键 localStorage 读取可把旧用户角色配到新会话",
+      "evidence": [
+        "stores/auth.ts 原110行：先读 token/user，再 adoptDocumentAuthSession 捕获当前身份。若另一标签在读取中途提交 B，则 UI A 身份与 B 会话可混合。",
+        "原版 auth.hydrationRace.audit-regression.spec.ts 1/1 失败：A 管理员 UI 仍被恢复；修复版通过。"
+      ],
+      "impact": "错误身份与管理员 UI 状态、前端鉴权/导航不一致；服务端是否拒绝越权请求仍由后端独立保证，不能称为已确认管理员提权。",
+      "fix": "在读缓存前 capture，同一 snapshot 在读完并解析后 assert；adopt 显式接收验证过的 snapshot；syncStoredSession 同样先读取所有字段再提交 refs。失败只清理仍属于原 generation 的凭据。",
+      "files": [
+        "frontend/src/stores/auth.ts",
+        "frontend/src/api/authSession.ts"
+      ],
+      "regressions": [
+        "frontend/src/stores/__tests__/auth.hydrationRace.spec.ts"
+      ]
+    },
+    {
+      "id": "AUTH-03",
+      "severity": "medium",
+      "status": "fixed",
+      "title": "邮箱验证注册流程把用户明文密码写入 sessionStorage",
+      "evidence": [
+        "RegisterView 原1059行写 register_data JSON，其中包含 password；EmailVerifyView 原330行读取，并在部分重试/刷新场景保留。",
+        "registration.secretStorage.audit-regression.spec.ts 在原版3/3失败；合成密码可从 Web Storage 直接读取。"
+      ],
+      "impact": "扩大密码暴露面与留存时间；同源脚本/浏览器页面状态恢复可读取明文。内存交接减少持久化暴露，并不能防止活动页面中的任意脚本执行。",
+      "fix": "引入单次消费、15分钟 TTL、绑定 session generation 的内存 draft；过期、换会话、消费后清理。启动删除旧 register_data。页面卸载清除 password/captcha refs；刷新/重建验证码页显示会话过期和返回注册恢复路径。API 请求字段和业务开关保留。",
+      "files": [
+        "frontend/src/utils/registrationDraft.ts",
+        "frontend/src/views/auth/RegisterView.vue",
+        "frontend/src/views/auth/EmailVerifyView.vue",
+        "frontend/src/api/authSession.ts"
+      ],
+      "regressions": [
+        "registration.secretStorage.spec.ts 三个完整交接/迁移/刷新场景",
+        "registrationDraft.spec.ts 六个同会话单次消费/过期/替换/旧 writer 不覆盖新 draft 场景",
+        "原 EmailVerifyView 全部既有接口 payload 断言迁移到内存 fixture 后通过"
+      ]
+    },
+    {
+      "id": "PERF-AUTH-01",
+      "severity": "high",
+      "status": "fixed",
+      "title": "固定提前120秒刷新会令短寿命 token 即时刷新循环，超长过期时间会溢出 setTimeout",
+      "evidence": [
+        "stores/auth.ts 原178/214行固定 buffer；新 token TTL <=120秒时下一刷新立即开始。",
+        "auth.refreshSchedule.spec.ts 原版5测试中4失败，分别覆盖短TTL、旋转重入、timeout溢出和store销毁前已提前触发请求。"
+      ],
+      "impact": "短TTL配置下产生不必要的认证请求和主线程/网络消耗；长TTL延迟溢出也会过早刷新。",
+      "fix": "buffer=min(120s,剩余寿命/2)，至少1秒异步延迟；同 generation/subject/expiry 保留已有定时器；最长延迟限制2^31-1并分段重设；定时器与请求结果绑定原会话；复用API已提交的过期时间。",
+      "files": [
+        "frontend/src/stores/auth.ts"
+      ],
+      "regressions": [
+        "frontend/src/stores/__tests__/auth.refreshSchedule.spec.ts"
+      ]
+    },
+    {
+      "id": "PERF-AUTH-02",
+      "severity": "medium",
+      "status": "fixed",
+      "title": "每次会话核验重复纯JS SHA-256 哈希同一对 token",
+      "evidence": [
+        "authSession.ts 原31行 pairDigest 每次重算；每请求多个核验、通知每个pending请求再次核验会放大CPU。"
+      ],
+      "fix": "仅缓存最近一个序列化凭据对与摘要；仍每次读取 Web Storage 并复验 generation/subject/phase/commit record；不缓存有效性、无无限增长 map。",
+      "files": [
+        "frontend/src/api/authSession.ts"
+      ],
+      "validation": "既有 authSession 11 integration +1 cross-tab +7 digest、client30、refresh7等兼容回归通过；微基准约10.01倍，具体限制见 performance。"
+    },
+    {
+      "id": "AUTH-04",
+      "severity": "low",
+      "status": "fixed",
+      "title": "嵌入URL凭据过滤遗漏 percent-encoded fragment key、userinfo 和解析失败分支",
+      "evidence": [
+        "embedded-url.ts 原16行：catch返回原URL，fragment 只匹配原始字符串；含username/password的http(s) URL未拒绝。",
+        "原版扩展embedded-url回归14项中6失败；修复版14/14通过。"
+      ],
+      "impact": "防御性URL校验不完整。CustomPageView 已另行校验http(s)，buildEmbeddedUrl 原来就不拼接登录token，不能据此宣称已发生用户token泄漏。",
+      "fix": "拒绝userinfo和非http(s)，URLSearchParams解析fragment及hash-route query以规范解码，解析异常返回空字符串。",
+      "files": [
+        "frontend/src/utils/embedded-url.ts"
+      ],
+      "regressions": [
+        "frontend/src/utils/__tests__/embedded-url.spec.ts"
+      ]
+    }
+  ],
+  "remaining_findings": [
+    {
+      "id": "AUTH-R01",
+      "severity": "high_conditional",
+      "status": "backend_verification_required",
+      "title": "兼容直接接受 fragment access_token/refresh_token 的OAuth回调",
+      "files": [
+        "frontend/src/views/auth/OAuthCallbackView.vue",
+        "frontend/src/views/auth/LinuxDoCallbackView.vue",
+        "frontend/src/views/auth/OidcCallbackView.vue",
+        "frontend/src/views/auth/DingTalkCallbackView.vue",
+        "frontend/src/views/auth/WechatCallbackView.vue"
+      ],
+      "detail": "前端可见 raw fragment token -> persistOAuthTokenContext -> setToken 路径。仓库不足以证明发起浏览器绑定、state/nonce/PKCE、一次性重放防御，存在需核实的登录CSRF/会话注入设计风险；未断言完整系统存在可远程利用漏洞。建议结合完整后端迁移为一次性服务器绑定 code 兑换并验证 state/PKCE，不能单方面改断既有协议。"
+    },
+    {
+      "id": "AUTH-R02",
+      "severity": "medium_architectural",
+      "status": "backend_coordination_required",
+      "title": "长期 access/refresh token 仍可由同源JavaScript读取",
+      "detail": "localStorage token 是当前API合同；建议配合后端短期 bearer / HttpOnly Secure SameSite cookie 与合理CSP。前端本轮注册密码修复不等于消除所有令牌的脚本可读性。"
+    },
+    {
+      "id": "AUTH-R03",
+      "severity": "low",
+      "status": "not_changed",
+      "title": "忘记密码页的验证码等待前未锁定提交，可能重复触发重置邮件",
+      "files": [
+        "frontend/src/views/auth/ForgotPasswordView.vue"
+      ],
+      "lines": [
+        290,
+        297
+      ],
+      "detail": "只读代码确认 handleSubmit 在 await acquireActionProof 后才设 isLoading，且无入口busy检查。未进行服务端重复邮件/限速实测，也不会像login/register一样覆盖用户会话。已告知父代理；本轮冻结补丁以外的低优先后续硬化。"
+    },
+    {
+      "id": "AUTH-R04",
+      "severity": "scope_limit",
+      "status": "not_verifiable",
+      "title": "服务端认证与访问控制实现缺失",
+      "detail": "不能审查密码哈希、数据库授权、租户隔离、OAuth state/PKCE、WebAuthn签名与challenge唯一性、验证码校验、CSRF、会话撤销、计费一致性和生产限速。纯前端路由/role检查不能替代这些控制。"
+    }
+  ],
+  "validation": {
+    "baseline_original_suite": "父代理独立结果：392 tracked test files /3139 passed，非本分工重新运行。",
+    "baseline_added_regressions": [
+      {
+        "log": "auth-baseline-regressions.log",
+        "files": 4,
+        "tests": 36,
+        "failed": 16,
+        "passed": 20
+      },
+      {
+        "log": "register-baseline-regressions.log",
+        "files": 1,
+        "tests": 13,
+        "failed": 2,
+        "passed": 11
+      },
+      {
+        "log": "registration-secrets-baseline.log",
+        "files": 1,
+        "tests": 3,
+        "failed": 3,
+        "passed": 0
+      },
+      {
+        "log": "auth-hydration-baseline.log",
+        "files": 1,
+        "tests": 1,
+        "failed": 1,
+        "passed": 0
+      }
+    ],
+    "baseline_note": "新增回归放在原版代码旁执行，不修改基线tracked源码；53项中22失败是测试用例数量，不是22个独立漏洞。原版使用Vitest2.1.9，新增候选最终验收使用4.1.12；早期修复亦在2.1.9验证。",
+    "candidate_runs": [
+      {
+        "log": "auth-fixed-regressions.log",
+        "files": 4,
+        "tests": 36,
+        "passed": 36,
+        "framework": "Vitest2.1.9"
+      },
+      {
+        "log": "register-fixed-regressions.log",
+        "files": 1,
+        "tests": 13,
+        "passed": 13,
+        "framework": "Vitest2.1.9"
+      },
+      {
+        "log": "auth-final-v4.log",
+        "files": 39,
+        "tests": 396,
+        "passed": 396,
+        "duration_seconds": 20.39,
+        "framework": "Vitest4.1.12"
+      },
+      {
+        "log": "auth-final-targeted.log",
+        "files": 6,
+        "tests": 59,
+        "passed": 59,
+        "duration_seconds": 5.19,
+        "framework": "Vitest4.1.12",
+        "note": "在39文件验收后追加6个页面卸载用例；运行代码未再变化。此轮包含新6用例，其余与39文件有重叠，不能把396与59直接相加。"
+      }
+    ],
+    "lint": {
+      "status": "passed",
+      "files": 17,
+      "log": "auth-lint.log"
+    },
+    "executed_test_files": [
+      "frontend/src/api/__tests__/auth-captcha-oauth-start.spec.ts",
+      "frontend/src/api/__tests__/auth-oauth-adoption.spec.ts",
+      "frontend/src/api/__tests__/authSession.cross-tab.spec.ts",
+      "frontend/src/api/__tests__/authSession.integration.spec.ts",
+      "frontend/src/api/__tests__/authSessionDigest.spec.ts",
+      "frontend/src/api/__tests__/client.spec.ts",
+      "frontend/src/api/__tests__/passkey.spec.ts",
+      "frontend/src/api/__tests__/tokenRefresh.spec.ts",
+      "frontend/src/router/__tests__/feature-access.spec.ts",
+      "frontend/src/router/__tests__/guards.spec.ts",
+      "frontend/src/router/__tests__/mcp-route.spec.ts",
+      "frontend/src/router/__tests__/title.spec.ts",
+      "frontend/src/router/__tests__/wechat-route.spec.ts",
+      "frontend/src/stores/__tests__/adminCompliance.reset.spec.ts",
+      "frontend/src/stores/__tests__/adminSettings.retry.spec.ts",
+      "frontend/src/stores/__tests__/announcements.fetch.spec.ts",
+      "frontend/src/stores/__tests__/announcements.markAll.spec.ts",
+      "frontend/src/stores/__tests__/app.spec.ts",
+      "frontend/src/stores/__tests__/auth.hydrationRace.spec.ts",
+      "frontend/src/stores/__tests__/auth.refreshSchedule.spec.ts",
+      "frontend/src/stores/__tests__/auth.spec.ts",
+      "frontend/src/stores/__tests__/payment.config.spec.ts",
+      "frontend/src/stores/__tests__/subscriptions.clear.spec.ts",
+      "frontend/src/stores/__tests__/subscriptions.spec.ts",
+      "frontend/src/utils/__tests__/embedded-url.spec.ts",
+      "frontend/src/utils/__tests__/registrationDraft.spec.ts",
+      "frontend/src/views/auth/__tests__/EmailVerifyView.spec.ts",
+      "frontend/src/views/auth/__tests__/LinuxDoCallbackView.spec.ts",
+      "frontend/src/views/auth/__tests__/LoginView.spec.ts",
+      "frontend/src/views/auth/__tests__/MCPLoginRedirect.spec.ts",
+      "frontend/src/views/auth/__tests__/MCPOAuthAuthorizeView.spec.ts",
+      "frontend/src/views/auth/__tests__/OAuthCallbackView.spec.ts",
+      "frontend/src/views/auth/__tests__/OidcCallbackView.spec.ts",
+      "frontend/src/views/auth/__tests__/RegisterView.spec.ts",
+      "frontend/src/views/auth/__tests__/TencentCaptchaActionGate.spec.ts",
+      "frontend/src/views/auth/__tests__/TencentCaptchaForgotPassword.spec.ts",
+      "frontend/src/views/auth/__tests__/WechatCallbackView.spec.ts",
+      "frontend/src/views/auth/__tests__/WechatPaymentCallbackView.spec.ts",
+      "frontend/src/views/auth/__tests__/registration.secretStorage.spec.ts"
+    ],
+    "cross_review": "frontend_performance 对凭据摘要缓存、刷新调度和注册 draft 进行了只读交叉审查；指出卸载续跑/晚跳转，已加入 guards 和6项回归。auth_security 额外复查同账号新generation、退出、草稿TTL/所有权及startup hydration。",
+    "not_run": [
+      "真实WebAuthn硬件/浏览器兼容矩阵",
+      "真实多浏览器生产登录/OAuth集成",
+      "服务端认证/授权/限速/负载压测"
+    ]
+  },
+  "performance": {
+    "schema_version": 2,
+    "benchmark": "authSession.captureAuthSession",
+    "measured_utc": "2026-11-05T11:30:12.670Z",
+    "runtime": "v24.22.1",
+    "v8": "13.6.233.17-node.58",
+    "platform": "linux",
+    "architecture": "x64",
+    "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+    "logical_cpu_count": 9,
+    "compiler": {
+      "name": "typescript",
+      "version": "5.6.3",
+      "target": "ES2022",
+      "module": "CommonJS"
+    },
+    "benchmark_script_sha256": "4cacd07795f01b2d565d9a5ff532b4976c5fb779e0266fdb47130731afe46f66",
+    "sources": {
+      "baseline": {
+        "checkout": "${AUDIT_WORKSPACE}/zhijing-baseline",
+        "git_commit": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+        "files": [
+          {
+            "path": "frontend/src/api/authSession.ts",
+            "bytes": 10144,
+            "sha256": "4e2f9249556608664125e2d5c697aba33ec6c4afd4886a3261cc23a66258860c",
+            "git_head_sha256": "4e2f9249556608664125e2d5c697aba33ec6c4afd4886a3261cc23a66258860c",
+            "matches_git_head": true
+          },
+          {
+            "path": "frontend/src/api/authSessionDigest.ts",
+            "bytes": 2549,
+            "sha256": "f146a52c90eb396a617b568b0861eb249df0a9b19ccda897d05c208908b89d51",
+            "git_head_sha256": "f146a52c90eb396a617b568b0861eb249df0a9b19ccda897d05c208908b89d51",
+            "matches_git_head": true
+          }
+        ]
+      },
+      "candidate": {
+        "checkout": "${AUDIT_WORKSPACE}/zhijing-gateway",
+        "git_commit": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+        "files": [
+          {
+            "path": "frontend/src/api/authSession.ts",
+            "bytes": 10900,
+            "sha256": "6261024f14e5b1a3148bf1bd4b3722a273456f49f8c234c053d56e08eb53fa2b",
+            "git_head_sha256": "4e2f9249556608664125e2d5c697aba33ec6c4afd4886a3261cc23a66258860c",
+            "matches_git_head": false
+          },
+          {
+            "path": "frontend/src/api/authSessionDigest.ts",
+            "bytes": 2549,
+            "sha256": "f146a52c90eb396a617b568b0861eb249df0a9b19ccda897d05c208908b89d51",
+            "git_head_sha256": "f146a52c90eb396a617b568b0861eb249df0a9b19ccda897d05c208908b89d51",
+            "matches_git_head": true
+          }
+        ]
+      }
+    },
+    "environment": "Node.js with in-memory Storage and EventTarget; no HTTP, browser rendering, real credentials, or production traffic",
+    "synthetic_tokens": {
+      "prefix": "SYNTHETIC-",
+      "prefix_characters": 10,
+      "access_payload_characters": 2048,
+      "access_total_characters": 2058,
+      "access_utf8_bytes": 2058,
+      "refresh_payload_characters": 128,
+      "refresh_total_characters": 138,
+      "refresh_utf8_bytes": 138
+    },
+    "iterations_per_trial": 10000,
+    "warmup_iterations_per_variant_per_trial": 2000,
+    "trial_count": 7,
+    "trials": [
+      {
+        "trial": 1,
+        "order": [
+          "baseline",
+          "candidate"
+        ],
+        "measurements": [
+          {
+            "label": "baseline",
+            "milliseconds": 569.9881620000001
+          },
+          {
+            "label": "candidate",
+            "milliseconds": 36.35871099999986
+          }
+        ]
+      },
+      {
+        "trial": 2,
+        "order": [
+          "candidate",
+          "baseline"
+        ],
+        "measurements": [
+          {
+            "label": "candidate",
+            "milliseconds": 37.77976600000011
+          },
+          {
+            "label": "baseline",
+            "milliseconds": 552.265234
+          }
+        ]
+      },
+      {
+        "trial": 3,
+        "order": [
+          "baseline",
+          "candidate"
+        ],
+        "measurements": [
+          {
+            "label": "baseline",
+            "milliseconds": 563.8431700000001
+          },
+          {
+            "label": "candidate",
+            "milliseconds": 34.666815999999926
+          }
+        ]
+      },
+      {
+        "trial": 4,
+        "order": [
+          "candidate",
+          "baseline"
+        ],
+        "measurements": [
+          {
+            "label": "candidate",
+            "milliseconds": 33.61470499999996
+          },
+          {
+            "label": "baseline",
+            "milliseconds": 508.88356999999996
+          }
+        ]
+      },
+      {
+        "trial": 5,
+        "order": [
+          "baseline",
+          "candidate"
+        ],
+        "measurements": [
+          {
+            "label": "baseline",
+            "milliseconds": 491.8951560000005
+          },
+          {
+            "label": "candidate",
+            "milliseconds": 34.754633999999896
+          }
+        ]
+      },
+      {
+        "trial": 6,
+        "order": [
+          "candidate",
+          "baseline"
+        ],
+        "measurements": [
+          {
+            "label": "candidate",
+            "milliseconds": 36.8503810000002
+          },
+          {
+            "label": "baseline",
+            "milliseconds": 504.683043
+          }
+        ]
+      },
+      {
+        "trial": 7,
+        "order": [
+          "baseline",
+          "candidate"
+        ],
+        "measurements": [
+          {
+            "label": "baseline",
+            "milliseconds": 479.4616409999999
+          },
+          {
+            "label": "candidate",
+            "milliseconds": 34.027132999999594
+          }
+        ]
+      }
+    ],
+    "results": {
+      "baseline": {
+        "milliseconds": [
+          569.9881620000001,
+          552.265234,
+          563.8431700000001,
+          508.88356999999996,
+          491.8951560000005,
+          504.683043,
+          479.4616409999999
+        ],
+        "median_total_ms": 508.88356999999996,
+        "median_microseconds_per_capture": 50.88835699999999
+      },
+      "candidate": {
+        "milliseconds": [
+          36.35871099999986,
+          37.77976600000011,
+          34.666815999999926,
+          33.61470499999996,
+          34.754633999999896,
+          36.8503810000002,
+          34.027132999999594
+        ],
+        "median_total_ms": 34.754633999999896,
+        "median_microseconds_per_capture": 3.4754633999999895
+      }
+    },
+    "ratio": 14.64217893936105,
+    "limitations": [
+      "All seven alternating trials are included; no best-run selection or discarded measurements.",
+      "The storage stub has no real browser cross-tab event delivery or persistent storage cost.",
+      "This is a CPU microbenchmark, not an API latency, TTFT, or throughput benchmark.",
+      "The historical benchmark called 2048/128-character payloads token lengths; the SYNTHETIC- prefix makes the actual lengths 2058/138 characters."
+    ]
+  },
+  "performance_scope": "最终源码可复现微基准：tools/benchmark_auth_session.mjs，Node v24.22.1，已安装TypeScript 5.6.3将两份不可变TS快照编译为ES2022/CommonJS，实际access token2058字符、refresh token138字符（均含10字符前缀）；7轮交替，每variant每轮2000预热+10000测量，保留全部14测量。中位50.888357µs -> 3.475463µs，约14.6422倍。SHA256与git HEAD匹配情况见sources；baseline两个源文件均等于HEAD。仅CPU微基准，不代表HTTP延迟/TTFT/吞吐。",
+  "reviewed_files": [
+    {
+      "path": "frontend/src/api/auth.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取认证/请求生命周期实现，审查 session capture/assert/commit、refresh single-flight/跨标签、凭据持久化、拦截器与重放、WebAuthn、MCP/TOTP 请求契约；不等于服务端验证。",
+      "lines": 710
+    },
+    {
+      "path": "frontend/src/api/authSession.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取认证/请求生命周期实现，审查 session capture/assert/commit、refresh single-flight/跨标签、凭据持久化、拦截器与重放、WebAuthn、MCP/TOTP 请求契约；不等于服务端验证。",
+      "lines": 185
+    },
+    {
+      "path": "frontend/src/api/authSessionDigest.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取认证/请求生命周期实现，审查 session capture/assert/commit、refresh single-flight/跨标签、凭据持久化、拦截器与重放、WebAuthn、MCP/TOTP 请求契约；不等于服务端验证。",
+      "lines": 40
+    },
+    {
+      "path": "frontend/src/api/tokenRefresh.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取认证/请求生命周期实现，审查 session capture/assert/commit、refresh single-flight/跨标签、凭据持久化、拦截器与重放、WebAuthn、MCP/TOTP 请求契约；不等于服务端验证。",
+      "lines": 244
+    },
+    {
+      "path": "frontend/src/api/client.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取认证/请求生命周期实现，审查 session capture/assert/commit、refresh single-flight/跨标签、凭据持久化、拦截器与重放、WebAuthn、MCP/TOTP 请求契约；不等于服务端验证。",
+      "lines": 313
+    },
+    {
+      "path": "frontend/src/api/passkey.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取认证/请求生命周期实现，审查 session capture/assert/commit、refresh single-flight/跨标签、凭据持久化、拦截器与重放、WebAuthn、MCP/TOTP 请求契约；不等于服务端验证。",
+      "lines": 194
+    },
+    {
+      "path": "frontend/src/api/totp.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取认证/请求生命周期实现，审查 session capture/assert/commit、refresh single-flight/跨标签、凭据持久化、拦截器与重放、WebAuthn、MCP/TOTP 请求契约；不等于服务端验证。",
+      "lines": 102
+    },
+    {
+      "path": "frontend/src/api/mcp.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取认证/请求生命周期实现，审查 session capture/assert/commit、refresh single-flight/跨标签、凭据持久化、拦截器与重放、WebAuthn、MCP/TOTP 请求契约；不等于服务端验证。",
+      "lines": 64
+    },
+    {
+      "path": "frontend/src/api/url.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取认证/请求生命周期实现，审查 session capture/assert/commit、refresh single-flight/跨标签、凭据持久化、拦截器与重放、WebAuthn、MCP/TOTP 请求契约；不等于服务端验证。",
+      "lines": 43
+    },
+    {
+      "path": "frontend/src/stores/auth.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取 store 实现及会话切换、并发请求、缓存、定时器、状态清理；对 auth startup/refresh 增加定向回归。",
+      "lines": 579
+    },
+    {
+      "path": "frontend/src/stores/adminCompliance.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取 store 实现及会话切换、并发请求、缓存、定时器、状态清理；对 auth startup/refresh 增加定向回归。",
+      "lines": 97
+    },
+    {
+      "path": "frontend/src/stores/adminSettings.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取 store 实现及会话切换、并发请求、缓存、定时器、状态清理；对 auth startup/refresh 增加定向回归。",
+      "lines": 149
+    },
+    {
+      "path": "frontend/src/stores/announcements.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取 store 实现及会话切换、并发请求、缓存、定时器、状态清理；对 auth startup/refresh 增加定向回归。",
+      "lines": 150
+    },
+    {
+      "path": "frontend/src/stores/subscriptions.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取 store 实现及会话切换、并发请求、缓存、定时器、状态清理；对 auth startup/refresh 增加定向回归。",
+      "lines": 141
+    },
+    {
+      "path": "frontend/src/stores/payment.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取 store 实现及会话切换、并发请求、缓存、定时器、状态清理；对 auth startup/refresh 增加定向回归。",
+      "lines": 108
+    },
+    {
+      "path": "frontend/src/stores/onboarding.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取 store 实现及会话切换、并发请求、缓存、定时器、状态清理；对 auth startup/refresh 增加定向回归。",
+      "lines": 88
+    },
+    {
+      "path": "frontend/src/stores/app.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取 store 实现及会话切换、并发请求、缓存、定时器、状态清理；对 auth startup/refresh 增加定向回归。",
+      "lines": 497
+    },
+    {
+      "path": "frontend/src/stores/index.ts",
+      "mode": "manual_critical_path_review",
+      "scope": "读取 store 实现及会话切换、并发请求、缓存、定时器、状态清理；对 auth startup/refresh 增加定向回归。",
+      "lines": 17
+    },
+    {
+      "path": "frontend/src/router/index.ts",
+      "mode": "manual_guards_plus_route_scan",
+      "scope": "手动审查 beforeEach/afterEach、认证/角色/feature guard、initialization 与重定向；路由声明表做结构及模式扫描，未宣称全部模板逐行审查。",
+      "lines": 1051
+    },
+    {
+      "path": "frontend/src/router/meta.d.ts",
+      "mode": "manual_source_review",
+      "scope": "读取路由类型、初始化重定向与标题逻辑。",
+      "lines": 74
+    },
+    {
+      "path": "frontend/src/router/setupRedirect.ts",
+      "mode": "manual_source_review",
+      "scope": "读取路由类型、初始化重定向与标题逻辑。",
+      "lines": 7
+    },
+    {
+      "path": "frontend/src/router/title.ts",
+      "mode": "manual_source_review",
+      "scope": "读取路由类型、初始化重定向与标题逻辑。",
+      "lines": 80
+    },
+    {
+      "path": "frontend/src/utils/embedded-url.ts",
+      "mode": "manual_source_review",
+      "scope": "读取 URL/HTML/错误文本/affiliate storage/注册 draft 实现及调用关系。",
+      "lines": 60
+    },
+    {
+      "path": "frontend/src/utils/sanitize.ts",
+      "mode": "manual_source_review",
+      "scope": "读取 URL/HTML/错误文本/affiliate storage/注册 draft 实现及调用关系。",
+      "lines": 6
+    },
+    {
+      "path": "frontend/src/utils/url.ts",
+      "mode": "manual_source_review",
+      "scope": "读取 URL/HTML/错误文本/affiliate storage/注册 draft 实现及调用关系。",
+      "lines": 43
+    },
+    {
+      "path": "frontend/src/utils/registrationDraft.ts",
+      "mode": "manual_source_review",
+      "scope": "读取 URL/HTML/错误文本/affiliate storage/注册 draft 实现及调用关系。",
+      "lines": 60
+    },
+    {
+      "path": "frontend/src/utils/oauthAffiliate.ts",
+      "mode": "manual_source_review",
+      "scope": "读取 URL/HTML/错误文本/affiliate storage/注册 draft 实现及调用关系。",
+      "lines": 133
+    },
+    {
+      "path": "frontend/src/utils/authError.ts",
+      "mode": "manual_source_review",
+      "scope": "读取 URL/HTML/错误文本/affiliate storage/注册 draft 实现及调用关系。",
+      "lines": 25
+    },
+    {
+      "path": "frontend/src/views/auth/LoginView.vue",
+      "mode": "manual_script_and_flow_review",
+      "scope": "重点完整读 script setup 与安全相关模板、交互条件；修改并运行挂载组件回归。模板布局/CSS 不是逐行安全认证。",
+      "lines": 814
+    },
+    {
+      "path": "frontend/src/views/auth/RegisterView.vue",
+      "mode": "manual_script_and_flow_review",
+      "scope": "重点完整读 script setup 与安全相关模板、交互条件；修改并运行挂载组件回归。模板布局/CSS 不是逐行安全认证。",
+      "lines": 1144
+    },
+    {
+      "path": "frontend/src/views/auth/EmailVerifyView.vue",
+      "mode": "manual_script_and_flow_review",
+      "scope": "重点完整读 script setup 与安全相关模板、交互条件；修改并运行挂载组件回归。模板布局/CSS 不是逐行安全认证。",
+      "lines": 816
+    },
+    {
+      "path": "frontend/src/views/auth/OAuthCallbackView.vue",
+      "mode": "manual_script_review",
+      "scope": "读取 script setup 认证/回调/URL/创建账号/绑定/验证码/恢复流程；模板仅按安全敏感插值与事件模式扫描。",
+      "lines": 413
+    },
+    {
+      "path": "frontend/src/views/auth/LinuxDoCallbackView.vue",
+      "mode": "manual_script_review",
+      "scope": "读取 script setup 认证/回调/URL/创建账号/绑定/验证码/恢复流程；模板仅按安全敏感插值与事件模式扫描。",
+      "lines": 837
+    },
+    {
+      "path": "frontend/src/views/auth/WechatCallbackView.vue",
+      "mode": "manual_script_review",
+      "scope": "读取 script setup 认证/回调/URL/创建账号/绑定/验证码/恢复流程；模板仅按安全敏感插值与事件模式扫描。",
+      "lines": 1109
+    },
+    {
+      "path": "frontend/src/views/auth/DingTalkEmailCompletionView.vue",
+      "mode": "manual_script_review",
+      "scope": "读取 script setup 认证/回调/URL/创建账号/绑定/验证码/恢复流程；模板仅按安全敏感插值与事件模式扫描。",
+      "lines": 139
+    },
+    {
+      "path": "frontend/src/views/auth/WechatPaymentCallbackView.vue",
+      "mode": "manual_script_review",
+      "scope": "读取 script setup 认证/回调/URL/创建账号/绑定/验证码/恢复流程；模板仅按安全敏感插值与事件模式扫描。",
+      "lines": 150
+    },
+    {
+      "path": "frontend/src/views/auth/MCPOAuthAuthorizeView.vue",
+      "mode": "manual_script_review",
+      "scope": "读取 script setup 认证/回调/URL/创建账号/绑定/验证码/恢复流程；模板仅按安全敏感插值与事件模式扫描。",
+      "lines": 203
+    },
+    {
+      "path": "frontend/src/views/auth/ForgotPasswordView.vue",
+      "mode": "manual_script_review",
+      "scope": "读取 script setup 认证/回调/URL/创建账号/绑定/验证码/恢复流程；模板仅按安全敏感插值与事件模式扫描。",
+      "lines": 346
+    },
+    {
+      "path": "frontend/src/views/auth/ResetPasswordView.vue",
+      "mode": "manual_script_review",
+      "scope": "读取 script setup 认证/回调/URL/创建账号/绑定/验证码/恢复流程；模板仅按安全敏感插值与事件模式扫描。",
+      "lines": 346
+    },
+    {
+      "path": "frontend/src/views/auth/OidcCallbackView.vue",
+      "mode": "manual_semantic_diff_review",
+      "scope": "与完整读过的 LinuxDoCallbackView 的 script setup 做语义 diff，并读各 provider 独有分支；非每一行模板重复精读。",
+      "lines": 863
+    },
+    {
+      "path": "frontend/src/views/auth/DingTalkCallbackView.vue",
+      "mode": "manual_semantic_diff_review",
+      "scope": "与完整读过的 LinuxDoCallbackView 的 script setup 做语义 diff，并读各 provider 独有分支；非每一行模板重复精读。",
+      "lines": 859
+    },
+    {
+      "path": "frontend/src/views/auth/index.ts",
+      "mode": "pattern_and_export_scan",
+      "scope": "检查认证视图导出；没有运行逻辑修改。",
+      "lines": 7
+    }
+  ],
+  "pattern_scan": {
+    "scope": [
+      "frontend/src/api/{auth*,client*,tokenRefresh*,passkey*,totp*,mcp*}",
+      "frontend/src/stores/",
+      "frontend/src/router/",
+      "frontend/src/views/auth/",
+      "frontend/src/utils/{embedded-url,sanitize,url,oauthAffiliate,authError}.ts"
+    ],
+    "patterns": [
+      "WebStorage token/password",
+      "window.location/redirect/postMessage",
+      "v-html/HTML sanitization",
+      "abort/signal/session snapshot",
+      "setInterval/setTimeout",
+      "async busy guards and await boundaries"
+    ],
+    "limit": "模式扫描是发现入口，不等同所有匹配文件逐行人工审查。"
+  },
+  "modified_files": [
+    {
+      "path": "frontend/src/api/authSession.ts",
+      "sha256": "6261024f14e5b1a3148bf1bd4b3722a273456f49f8c234c053d56e08eb53fa2b"
+    },
+    {
+      "path": "frontend/src/api/passkey.ts",
+      "sha256": "215009c3c2922a2ccade3bb9ee4a7886a55d9c350e8466ba2916863643f244f4"
+    },
+    {
+      "path": "frontend/src/api/__tests__/passkey.spec.ts",
+      "sha256": "fdaf8f25bc27d4dce514b26e75171d4ee25d0f850723cb8da4e4a0c72ae1a831"
+    },
+    {
+      "path": "frontend/src/stores/auth.ts",
+      "sha256": "d9aacbc8c0cfffb8e98961dc74867468b515e10c22780406e9e61c92641500a1"
+    },
+    {
+      "path": "frontend/src/stores/__tests__/auth.hydrationRace.spec.ts",
+      "sha256": "4d17a05cfa45d82d544bcaef3fad64fb59d85038bead34807829995a9f837d21"
+    },
+    {
+      "path": "frontend/src/stores/__tests__/auth.refreshSchedule.spec.ts",
+      "sha256": "ad931b79b37dc9a119aa001c93e34257c8cc8a3030ded40a6d5ccf235f9d147e"
+    },
+    {
+      "path": "frontend/src/utils/embedded-url.ts",
+      "sha256": "b2321ed6d6ca4a66c4788006b55e5f15dedfaa1fb544d4673358b5f225c7ef01"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/embedded-url.spec.ts",
+      "sha256": "db7c6bf80ed52ce31ec27cc7dd74b694a41f91ab69b0def58751b8e77fbb71ca"
+    },
+    {
+      "path": "frontend/src/utils/registrationDraft.ts",
+      "sha256": "d4102a21284117184a175cc980993228609d6754fa9addd9257cf97c8a12131e"
+    },
+    {
+      "path": "frontend/src/utils/__tests__/registrationDraft.spec.ts",
+      "sha256": "1a4745143e6e109d190af2753cfbd107e9bf70210da65fdb26f0ab2fff10f304"
+    },
+    {
+      "path": "frontend/src/views/auth/LoginView.vue",
+      "sha256": "226610f6f27cd728271f13bd3a6fb6d9eaaa187eecb9173f76b8089ff614a0f4"
+    },
+    {
+      "path": "frontend/src/views/auth/RegisterView.vue",
+      "sha256": "4dfb2fa29c75ee19e33f034925949e340f5f789f94d532b0b59c4e1712f0b9c8"
+    },
+    {
+      "path": "frontend/src/views/auth/EmailVerifyView.vue",
+      "sha256": "64bfc71c4e2831cd66c4fd4e6b3e831ccd3b87b73c58794e7ef39ac1bca595d8"
+    },
+    {
+      "path": "frontend/src/views/auth/__tests__/TencentCaptchaActionGate.spec.ts",
+      "sha256": "514a7d8a2810b146f807c55f99ae3274f13390716564974fd7baa64461db7783"
+    },
+    {
+      "path": "frontend/src/views/auth/__tests__/RegisterView.spec.ts",
+      "sha256": "45419a3b64e3a3c3305c83856040fa62ca3ea99309b9011ff837583295e5d514"
+    },
+    {
+      "path": "frontend/src/views/auth/__tests__/EmailVerifyView.spec.ts",
+      "sha256": "0ad4055385213dfdfd45e9b6315ebe9b8ba456d31756b7957751bb8fe216b616"
+    },
+    {
+      "path": "frontend/src/views/auth/__tests__/registration.secretStorage.spec.ts",
+      "sha256": "61bdd27d9a6c6e993ffa7ad73c81a8247c9e91ae14e480b2a2817cbe639bf82f"
+    }
+  ],
+  "evidence_lines": {
+    "frontend/src/api/authSession.ts": {
+      "baseline": {
+        "function pairDigest": [
+          31
+        ],
+        "function captureAuthSession": [
+          47
+        ],
+        "function adoptDocumentAuthSession": [
+          90
+        ],
+        "register_data": []
+      },
+      "candidate": {
+        "function pairDigest": [
+          36
+        ],
+        "function captureAuthSession": [
+          59
+        ],
+        "function adoptDocumentAuthSession": [
+          107
+        ],
+        "register_data": [
+          101
+        ]
+      }
+    },
+    "frontend/src/api/passkey.ts": {
+      "baseline": {
+        "async function login": [
+          107
+        ],
+        "async function register": [
+          125
+        ],
+        "waitForCredential": []
+      },
+      "candidate": {
+        "async function login": [
+          127
+        ],
+        "async function register": [
+          148
+        ],
+        "waitForCredential": [
+          108,
+          133,
+          155
+        ]
+      }
+    },
+    "frontend/src/stores/auth.ts": {
+      "baseline": {
+        "function checkAuth": [
+          110
+        ],
+        "function scheduleTokenRefreshAt": [
+          178
+        ],
+        "async function performTokenRefresh": [
+          214
+        ],
+        "function syncStoredSession": [
+          511
+        ]
+      },
+      "candidate": {
+        "function checkAuth": [
+          114
+        ],
+        "function scheduleTokenRefreshAt": [
+          178
+        ],
+        "async function performTokenRefresh": [
+          229
+        ],
+        "function syncStoredSession": [
+          527
+        ]
+      }
+    },
+    "frontend/src/utils/embedded-url.ts": {
+      "baseline": {
+        "export function buildEmbeddedUrl": [
+          16
+        ],
+        "hashParams": [],
+        "username": []
+      },
+      "candidate": {
+        "export function buildEmbeddedUrl": [
+          16
+        ],
+        "hashParams": [],
+        "username": [
+          26
+        ]
+      }
+    },
+    "frontend/src/views/auth/LoginView.vue": {
+      "baseline": {
+        "async function handleLogin": [
+          587
+        ],
+        "async function handlePasskeyLogin": [
+          645
+        ],
+        "async function handleOAuthStart": [
+          686
+        ],
+        "onUnmounted": []
+      },
+      "candidate": {
+        "async function handleLogin": [
+          598
+        ],
+        "async function handlePasskeyLogin": [
+          658
+        ],
+        "async function handleOAuthStart": [
+          703
+        ],
+        "onUnmounted": [
+          226,
+          443
+        ]
+      }
+    },
+    "frontend/src/views/auth/RegisterView.vue": {
+      "baseline": {
+        "async function handleRegister": [
+          996
+        ],
+        "register_data": [
+          1059
+        ],
+        "saveRegistrationDraft": [],
+        "onUnmounted": [
+          368,
+          619
+        ]
+      },
+      "candidate": {
+        "async function handleRegister": [
+          1007
+        ],
+        "register_data": [],
+        "saveRegistrationDraft": [
+          391,
+          1074
+        ],
+        "onUnmounted": [
+          368,
+          623
+        ]
+      }
+    },
+    "frontend/src/views/auth/EmailVerifyView.vue": {
+      "baseline": {
+        "register_data": [
+          330,
+          569,
+          605,
+          613,
+          708,
+          739,
+          763
+        ],
+        "takeRegistrationDraft": [],
+        "async function handleVerify": [
+          656
+        ],
+        "onUnmounted": [
+          181,
+          390
+        ]
+      },
+      "candidate": {
+        "register_data": [],
+        "takeRegistrationDraft": [
+          198,
+          333
+        ],
+        "async function handleVerify": [
+          667
+        ],
+        "onUnmounted": [
+          181,
+          389
+        ]
+      }
+    },
+    "frontend/src/views/auth/ForgotPasswordView.vue": {
+      "baseline": {
+        "async function handleSubmit": [
+          290
+        ],
+        "await acquireActionProof": [
+          297
+        ]
+      },
+      "candidate": {
+        "async function handleSubmit": [
+          290
+        ],
+        "await acquireActionProof": [
+          297
+        ]
+      }
+    },
+    "frontend/src/views/auth/WechatCallbackView.vue": {
+      "baseline": {
+        "function readLegacyFragmentLogin": [
+          449
+        ],
+        "async function finalizeCompletion": [
+          806
+        ],
+        "if (legacyLogin)": [
+          1033
+        ]
+      },
+      "candidate": {
+        "function readLegacyFragmentLogin": [
+          449
+        ],
+        "async function finalizeCompletion": [
+          806
+        ],
+        "if (legacyLogin)": [
+          1033
+        ]
+      }
+    },
+    "frontend/src/views/auth/OAuthCallbackView.vue": {
+      "baseline": {
+        "access_token": [
+          229,
+          232,
+          276,
+          286
+        ],
+        "persistOAuthTokenContext": [
+          158,
+          275
+        ]
+      },
+      "candidate": {
+        "access_token": [
+          229,
+          232,
+          276,
+          286
+        ],
+        "persistOAuthTokenContext": [
+          158,
+          275
+        ]
+      }
+    }
+  },
+  "log_directory": "${AUDIT_WORKSPACE}",
+  "follow_up": "父代理处理整体typecheck/full-suite/build、发布包与持久化审计报告；此代理没有push、PR或部署。",
+  "performance_history": {
+    "artifact": "auth-session-benchmark.json",
+    "result": {
+      "runtime": "v24.22.1",
+      "environment": "Node.js in-memory storage, synthetic 2048-character access token and 128-character refresh token; no HTTP, browser rendering, or production data",
+      "iterations_per_trial": 10000,
+      "trials": 7,
+      "warmup_iterations": 2000,
+      "results": {
+        "baseline": {
+          "milliseconds": [
+            619.673896,
+            594.569982,
+            644.3232390000003,
+            647.6291150000002,
+            570.3832469999998,
+            516.3204089999999,
+            562.6182800000006
+          ],
+          "median_total_ms": 594.569982,
+          "median_microseconds_per_capture": 59.456998199999994
+        },
+        "candidate": {
+          "milliseconds": [
+            34.829155000000014,
+            37.29538100000002,
+            45.031776000000264,
+            60.82966600000009,
+            59.382974000000104,
+            61.13928100000021,
+            60.25881500000014
+          ],
+          "median_total_ms": 59.382974000000104,
+          "median_microseconds_per_capture": 5.93829740000001
+        }
+      },
+      "ratio": 10.012465559572664
+    },
+    "status": "historical_early_candidate_not_final_source",
+    "correction": "原 environment 中2048/128指payload字符数；SYNTHETIC-前缀另占10字符，实际token长度2058/138。历史JSON原样保留。"
+  },
+  "benchmark_tool": "tools/benchmark_auth_session.mjs",
+  "final_benchmark_artifact": "auth-session-benchmark-final.json"
+}

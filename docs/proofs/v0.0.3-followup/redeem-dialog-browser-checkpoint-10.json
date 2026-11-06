@@ -1,0 +1,22 @@
+{
+  "recorded_at": "2026-11-06T11:28:00+08:00",
+  "source_checkpoint": "10",
+  "site": "http://127.0.0.1:18875/admin/redeem",
+  "synthetic_preview_only": true,
+  "backend_or_production_operations": false,
+  "observations": [
+    "Opening Generate moved focus from its toolbar trigger to the BaseDialog close button.",
+    "Native Shift+Tab wrapped the first close button to the last Generate action; Tab wrapped back to the close button.",
+    "Opening the actual type Select moved focus to its portal listbox. First native Escape closed only the portal and returned focus to the type trigger; second Escape closed the parent and returned focus to Generate.",
+    "At 390x844 the page scrollWidth and viewport were both390; the full form and actions were visible in the screenshot.",
+    "At 320x568 page scrollWidth and viewport were both320; the panel bounds were left12,right308,top16,bottom552. Body clientHeight455, scrollHeight530, overflow auto.",
+    "At 320x568 native Shift+Tab reached the bottom Generate action and automatically scrolled it into view; the header close action remained visible.",
+    "After Escape the original toolbar trigger regained focus; the viewport override was reset and hidden-dialog state was awaited."
+  ],
+  "screenshots": "Observed in native CUA output only; no local screenshot artifact was saved.",
+  "limits": [
+    "Finite actual browser checks of the Generate shell and nested type Select only.",
+    "Batch/results business and pending behavior rely on their separate synthetic component tests; not certified here.",
+    "No whole accessibility or visual compliance certification."
+  ]
+}

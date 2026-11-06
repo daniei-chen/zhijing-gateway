@@ -1,0 +1,2381 @@
+{
+  "schema_version": 1,
+  "generated_at_utc": "2026-11-05T11:05:06.691351+00:00",
+  "repository": "daniei-chen/zhijing-gateway",
+  "base_commit": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+  "agent": "frontend_performance",
+  "scope": "Frontend composables, user/admin views, two usage utilities, Vite chunking/public-settings injection, delegated payment components and compatible backup GET cancellation.",
+  "coverage_summary": {
+    "files_structurally_screened": 234,
+    "production_files": 121,
+    "lines": 92682,
+    "syntax_parse_failures": 0,
+    "manual_complete_files": 39,
+    "manual_targeted_files": 13,
+    "remaining_automated_only_files": 182
+  },
+  "coverage_definition": {
+    "manual_complete_file": "Entire available file read and relevant data/control flow reviewed; not formal correctness proof.",
+    "manual_targeted_sections": "Specific lifecycle/request/security portions read; does not assert every template or branch was reviewed.",
+    "automated_syntax_and_pattern_scan_only": "TypeScript AST / Vue SFC parse, timers/listeners/async calls/storage/HTML sink inventory. Structural screening only, no manual every-line claim."
+  },
+  "coverage": [
+    {
+      "path": "frontend/build/serializePublicSettings.ts",
+      "sha256": "16f89a26759257164a819b4ae89dc8c99fe6afbcedb4a85dc7b2ae2c1969cda4",
+      "lines": 12,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/__tests__/publicSettingsSerialization.spec.ts",
+      "sha256": "0ea203b21a2f42bace123063454be2c4e07add05c288b1d7a04305c95e73b06c",
+      "lines": 21,
+      "test": true,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/api/admin/backup.ts",
+      "sha256": "4ccb26d5bc07c51af899ad8f4ae764593c12f3bf2a6a96c2cc45fbd4dbee0872",
+      "lines": 203,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/components/payment/PaymentQRDialog.vue",
+      "sha256": "c21fafdfa2c84a1744eb6c48c5591bed828dd80d57565bf13bc4ce3db75fd0e7",
+      "lines": 349,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/components/payment/PaymentStatusPanel.vue",
+      "sha256": "11273262f20a8c882f88b103bc4a8d381669ae7c16553230f7d2bb3fab20b6cd",
+      "lines": 555,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts",
+      "sha256": "01d47f9ecc2180bf4b853245f1fe954254dee0347a0b2aa8f273cf82f6c73829",
+      "lines": 126,
+      "test": true,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/antigravityMappings.retry.spec.ts",
+      "sha256": "7080c09ac62ade293847a3a3a6751e6b5b45dc864d0c674242fb389343096907",
+      "lines": 51,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useAntigravityOAuth.spec.ts",
+      "sha256": "e86dcd55497d56ed9a03b1bce811df2447f593da626f75afd987edb5aa0ecbea",
+      "lines": 71,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useBatchImageAccess.retry.spec.ts",
+      "sha256": "dbe5a32f3f62f3ae921180bbffc5e4c45679be84809b62b88cb18e82b80427c8",
+      "lines": 33,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useBatchImageAccess.session.spec.ts",
+      "sha256": "db6cf3a9117a756def695b6f26351e1f6c4b2335c272d2765ae9b15b4c3764ba",
+      "lines": 84,
+      "test": true,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useClipboard.spec.ts",
+      "sha256": "ecf585dbcc942adb347f3f0aae1a027f5277fd76d6acb399d3f02a3584d1569f",
+      "lines": 159,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useForm.spec.ts",
+      "sha256": "ef10f27527a527d160a949532756c9c16a999c63f7777c82c801c1a29195eaa0",
+      "lines": 144,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useGeminiOAuth.errors.spec.ts",
+      "sha256": "b2149548925a70959250fa89535684d06bb0aa54f3f5746634ce4af6073cd4f3",
+      "lines": 40,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useGrokOAuth.spec.ts",
+      "sha256": "a2b966ea59b506b400dec4787dc9941bd518ba3f71f785af43342813009b32c0",
+      "lines": 84,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useKeyedDebouncedSearch.spec.ts",
+      "sha256": "a6a2978c1f0bd82c8501af937313669f9bb40d05fe9643846b00febf9cb0fbe7",
+      "lines": 101,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useModelWhitelist.spec.ts",
+      "sha256": "44f79fa6b2846ccf4873abc90821e5bd9a6c26c4b9eb92cafe612d2f707551ac",
+      "lines": 269,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useNavigationLoading.spec.ts",
+      "sha256": "bac8803fc075e3addea722dc2ae9ed80112dc6fd47d8e248b0b318733852deac",
+      "lines": 177,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useOpenAIOAuth.spec.ts",
+      "sha256": "d731c2ef62ffbde77ba3b7f9d70188d636ab8f762615eee8062e38fd1859ddbb",
+      "lines": 95,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/usePersistedPageSize.spec.ts",
+      "sha256": "bb8163e09b6489eff7053408f942552876ad8bb4d76134d021d0b63aab5ebd0a",
+      "lines": 22,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useRoutePrefetch.spec.ts",
+      "sha256": "d418206377ab286d669db567d022e58b0dae111b6d9e7b53f6e6463f0e76e126",
+      "lines": 245,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useStepUp.session.spec.ts",
+      "sha256": "c62c3e18f29b44e5f30b8a5bd112b8ff86e67f6e55280602f5970524d9f444f6",
+      "lines": 52,
+      "test": true,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useStepUp.spec.ts",
+      "sha256": "eff0143c6ba3d64613f4f612a446926eaa80e96cbfe1bd3db8e84efea6ccb8d9",
+      "lines": 109,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useSwipeSelect.spec.ts",
+      "sha256": "a3848a7913bbd3d63f7168d7597b9a3dc89d9a88d77467d7550989895d83e290",
+      "lines": 75,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useTableLoader.race.spec.ts",
+      "sha256": "6fd3c5597d6fa639a443cfdd21b7442fc2df7cd310fc34623d6fada02b3f96a0",
+      "lines": 80,
+      "test": true,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useTableLoader.spec.ts",
+      "sha256": "ce7fafebd195e1f5c7d8844728e89ddc6e6af609b0e241626c9a5d36d3a68f0b",
+      "lines": 252,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/composables/useAccountOAuth.ts",
+      "sha256": "a0f13132f3a671614b52c414bc097ab01577e45c18649ebb31c81b10f437146f",
+      "lines": 198,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useAntigravityOAuth.ts",
+      "sha256": "58466c632fbe6852e739234a9dcae4238f8d012d94f157551cca8c5ca50b0620",
+      "lines": 153,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useAutoRefresh.ts",
+      "sha256": "ae607fb43630768779b09a5b67a74d8bae0b4c7d94f6075a7a6b0020adcec550",
+      "lines": 114,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useBatchImageAccess.ts",
+      "sha256": "5719f6b02ee634fd131fac200a438d9a24b5dde538a614dd2caf047d79e197d2",
+      "lines": 126,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useChannelMonitorFormat.ts",
+      "sha256": "44ea114987653252b9f9ac6e795e726625012fe115ad22a253882df891f928aa",
+      "lines": 283,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useClipboard.ts",
+      "sha256": "9f5b01c2b5a5f35cb16a5b63e0e2e323e5c11acd84e0a770447d00d46aec9da4",
+      "lines": 74,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useForm.ts",
+      "sha256": "825c1a2006b940929913c51d6966eedb74338ae414c50f83bbfacd3a33381552",
+      "lines": 44,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useGeminiOAuth.ts",
+      "sha256": "6a86bdabac076a31f738563119d88bf48f1134269a3c5db80271af808ac827d0",
+      "lines": 167,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useGrokOAuth.ts",
+      "sha256": "911eba898ee437e5f8293134134b6d6e845af8b24d6fbbf0c8b002cfc490add0",
+      "lines": 218,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useKeyedDebouncedSearch.ts",
+      "sha256": "5dfef9a4abb88833baee7947628775c32a586c43faca4ccdf9122cbe86852660",
+      "lines": 104,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useModelWhitelist.ts",
+      "sha256": "2aaf57d3e0bd6d8e74d79b5530a60cbb8a51c458702bb8dba43162e47a1ad289",
+      "lines": 648,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "Whitelist transformations and cache; large embedded constants not manually reviewed in full."
+    },
+    {
+      "path": "frontend/src/composables/useNavigationLoading.ts",
+      "sha256": "0d544fc5cd439c9e7eecc8393e1802e92e28bacc0593f721bca5571062517d46",
+      "lines": 133,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useOnboardingTour.ts",
+      "sha256": "42d227d9d23f87d40d3a022d169445d696ffbc4000ee9a7cf3f3d7669fc3b775",
+      "lines": 570,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "Lifecycle, asynchronous handler registration and cleanup."
+    },
+    {
+      "path": "frontend/src/composables/useOpenAIOAuth.ts",
+      "sha256": "da8198599fd35bd95d697b70bce9d5c0ff5692c232b77bc574ec54b721b99c4a",
+      "lines": 242,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/usePersistedPageSize.ts",
+      "sha256": "ea52e70880a243d13662dd3fa424121e0a2e67f4482cfe425790c3d7ce567b28",
+      "lines": 34,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useQuotaNotifyState.ts",
+      "sha256": "14577e43424a5b85954614502c85f33cf8f5cb623eead7b580d56dee53af52cf",
+      "lines": 70,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useRoutePrefetch.ts",
+      "sha256": "0f1e3c19245dd1629e7e1c1a3408ab5a8b904adb92dce9a60ff2c7848e2403fa",
+      "lines": 203,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useStepUp.ts",
+      "sha256": "5c5c88ae55953d636bce27b06152a4579fe069b05b42a65137147eb19593e3a5",
+      "lines": 162,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useSwipeSelect.ts",
+      "sha256": "20de2340c4bd7951597fbdaf88b67d7b24f61eca775048e99acb38442ec67bc7",
+      "lines": 598,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "Pointer event, requestAnimationFrame and listener cleanup."
+    },
+    {
+      "path": "frontend/src/composables/useTableLoader.ts",
+      "sha256": "2c138c91271f17071a289148cbff1a542d5c0166ca5532f2c0eec874d6ef0804",
+      "lines": 123,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useTableSelection.ts",
+      "sha256": "b48ab3ad61bbcbc8521af0437c3c0669a5b57485dd1f8ad30e0341672bed7981",
+      "lines": 106,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/composables/useWorkspaceAppearance.ts",
+      "sha256": "b6d8dca3181ad6785a5ff5e3bffbfc1ff3c407ab33ee6096e8a961570051d4b4",
+      "lines": 19,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/utils/accountUsageRefresh.ts",
+      "sha256": "3f2f4d83e0655b332a0246ffa6c920b03192824786b101ea53920499fb25903b",
+      "lines": 72,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/utils/usageLoadQueue.ts",
+      "sha256": "9e21783487000c85c7b1260283af7d6bcac6dd52a389fdbc65b45cecdd1a2134",
+      "lines": 19,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/views/admin/AccountsView.vue",
+      "sha256": "888cbf05d976c6314486af2a37fa0b8ac551e1cdd58d171671e3a994b0bf5334",
+      "lines": 2665,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "List loader, auto-refresh ownership/ETag context, usage batches, selection, initialization/unmount. Not all UI/template branches."
+    },
+    {
+      "path": "frontend/src/views/admin/AnnouncementsView.vue",
+      "sha256": "8b5d6c913d52b4ff12374ebe7c2fc273ee88e4a1af8e8fa62203a6a3e45d64de",
+      "lines": 626,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/AuditLogView.vue",
+      "sha256": "eb61ce8cf6297fe0cd4574e260dedb21354f7993e3610c555a9375427eae7903",
+      "lines": 687,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/BackupView.vue",
+      "sha256": "0a4a83b4d4de59bb9ba6629ba9c7603838c420bf402ac001356dc8c7fb999067",
+      "lines": 996,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "Polling/create/restore/list flows, visibility resume and cleanup, existing sensitive-action wrapper. Not all form/template branches."
+    },
+    {
+      "path": "frontend/src/views/admin/ChannelMonitorView.vue",
+      "sha256": "513b7f12904e360008e43633a337180ac69cb64d3fc80ab4b634aced6b7ea32a",
+      "lines": 396,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "List loading, request cancellation and polling."
+    },
+    {
+      "path": "frontend/src/views/admin/ChannelsView.vue",
+      "sha256": "99691057dd9d257431d88ea0ae00898b97e4d68920a8855870c858db7571b7d8",
+      "lines": 1737,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/DashboardView.vue",
+      "sha256": "c06bd20d75e56c47827ff0a746e3cf4e704eca4c89b78b60eb25f11ed777a8bc",
+      "lines": 782,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/GroupsView.vue",
+      "sha256": "0ee4b70865ebefb59ef089f18de9e0b20164d399419d9bb562b394941db7c1af",
+      "lines": 6943,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/PluginsView.vue",
+      "sha256": "79d419e49bcfe0f799fb9a9a1f79155086a81bfcf4800228e68f51bb9f805451",
+      "lines": 735,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/PromoCodesView.vue",
+      "sha256": "24a22c1bbfc4dd2c82ac5aeced3e60d90a164ae9e325ad05ac2721a553b10f8b",
+      "lines": 748,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ProxiesView.vue",
+      "sha256": "384c29deaf80ba70b505ced8da9017ec21af1168f0c2819e355a26bfc2775b28",
+      "lines": 2090,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/RedeemView.vue",
+      "sha256": "02957ebcab12862d40a4e9239091b97fe8c95fb2868fe2158edae216a88bdec0",
+      "lines": 1198,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/RiskControlView.vue",
+      "sha256": "bb1972a13cffa2c37fe9df8fcf8aa4aa36c588f32dfcf9699376d9b795891c0a",
+      "lines": 2473,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/SettingsView.vue",
+      "sha256": "ff924ea2f42c81cc047e46436702def5bffc3fb8b79f603af523c49b8807d3ae",
+      "lines": 13395,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/SubscriptionsView.vue",
+      "sha256": "d7116a7f626afe8afc4beb43c9ac7281f951bfde0163db949a5475efbf67faee",
+      "lines": 1645,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/UsageView.vue",
+      "sha256": "88732ecf5d18a4e5d46fedf3096285143e8247ce25bf045feda062cde76150c5",
+      "lines": 908,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/UsersView.vue",
+      "sha256": "07f905293a3e8a9ea35c226057286dba470a8d9812f1d499857d154402df1421",
+      "lines": 1915,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/AccountsView.bulkEdit.spec.ts",
+      "sha256": "c5da69fc3d092065ff377f6cf59b3afd801ef95680d099b9b8cc04d7ab966425",
+      "lines": 631,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/AccountsView.lite.spec.ts",
+      "sha256": "871c506365535f0baaa08abfc1edbc3f5ebefddce5676dc6960b1c8e88b4e561",
+      "lines": 339,
+      "test": true,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/AccountsView.priorityColumn.spec.ts",
+      "sha256": "97a9c45a3222f7c7a23fe0444ee9259b86bf793b74a436e28db337c67c0dd87a",
+      "lines": 153,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/AccountsView.schedulerScore.spec.ts",
+      "sha256": "581a54bcfc0c1016a965ae9b0f39fb8c4dc6d1af2e3488129d9cc4b7904a6347",
+      "lines": 254,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/AccountsView.selectAllResults.spec.ts",
+      "sha256": "2db1bf1c24f14da603723eb03dea764a660f97fd9b43b971be078a007ead8858",
+      "lines": 268,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/AccountsView.sparkShadow.spec.ts",
+      "sha256": "c4fa74ce0bcea68ccf464fb4a8d6e8db0ceb1f137691cba0193e451a20d572d4",
+      "lines": 583,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/AccountsView.usageWindowsHint.spec.ts",
+      "sha256": "506962cd4c1bb006a782ed810b4b0eb1e48635980f1bcb576298d2afbfa663f2",
+      "lines": 240,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/BackupView.polling.spec.ts",
+      "sha256": "53644e7e149324e9632d40e80f4944af574f5659fedc745dd92e1fc39cc2be94",
+      "lines": 109,
+      "test": true,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/BackupView.spec.ts",
+      "sha256": "10d90d4bbc8c16dbd96c3541d2a134ca05374035c127316b43fc0e41d7dadf90",
+      "lines": 303,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/ChannelMonitorView.checkModeBadge.spec.ts",
+      "sha256": "0d742c18ad4a0257dc09cf658e943bb191e1e9fd71dabbb662e688a3c5fba71d",
+      "lines": 160,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/ChannelMonitorView.duplicate.spec.ts",
+      "sha256": "f5bea8e2e7f054571433730e5033bbbae46cc2cb2230a16b0a1f6816cd4217d4",
+      "lines": 231,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/ChannelMonitorView.grok.spec.ts",
+      "sha256": "3ca619fa25284144600e3a9d0ea30d379f66f629d197b4a9bed2ffa7c4ca1b0c",
+      "lines": 156,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/ChannelsView.modelSync.spec.ts",
+      "sha256": "e9e1a5699654789f0d84dd69b7637a292820f20eeb190c406a0731c42dcda047",
+      "lines": 156,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/ChannelsView.webSearchEmulation.spec.ts",
+      "sha256": "d9169ea361116a7d14b8c9616d12b8307f5f47508ea144c4a93ebdf0f6014a8a",
+      "lines": 42,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/DashboardView.spec.ts",
+      "sha256": "f4d69fdae5592c05cada6ad35b80065561311c106df10898deee26269d7678f4",
+      "lines": 175,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/GroupsView.codexManifest.spec.ts",
+      "sha256": "742af4a3049a2d984fdfbab7f7aaaec5bec8b79689c93eddc50534dbe8828ae5",
+      "lines": 289,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/GroupsView.columnSettings.spec.ts",
+      "sha256": "cb4aaab54a673620070f475faea97cd131380e65847d889dcfdb45a817a30526",
+      "lines": 435,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/GroupsView.compositePlatforms.spec.ts",
+      "sha256": "963efc56596c3dead0f191a55c27e193a67b7f15a1db9d0b68dcb1d94eae3bad",
+      "lines": 11,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/GroupsView.duplicate.spec.ts",
+      "sha256": "249a5963d80229f340ce9c9b9e0887597615a18bfe5a89fad398dd17e1574cef",
+      "lines": 453,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/MonitorFormDialog.accountSelector.spec.ts",
+      "sha256": "ebe2a15dea14ea1eaf904133d13f10f97017e7f3256de60f7c47870e25a54131",
+      "lines": 377,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/PluginsView.spec.ts",
+      "sha256": "10b795f7771e8ef0982db924a36cb66b9c017d8cadae6946d14310fa06a2d998",
+      "lines": 228,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/ProxiesView.credentials.spec.ts",
+      "sha256": "dd19d43d7ed1bb555750627dac354df6dd2f385ca7190c1a5aeb6718eadb2c62",
+      "lines": 67,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/ProxiesView.filters.spec.ts",
+      "sha256": "98f7eae395a2459956e993955c5efa5ebe948666e9cc88ee9b83520c31d284db",
+      "lines": 105,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/ProxiesView.ipv6.spec.ts",
+      "sha256": "620d4d1c6590ef7fa8ffb8d8788525a31dfd3926234b44ef863cb2aed037ed44",
+      "lines": 52,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/RedeemView.batchUpdate.spec.ts",
+      "sha256": "511c475cf326d30f72021bd095d2ca45b083201ebad89e28e05dff102e1bdb0c",
+      "lines": 188,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/RiskControlView.spec.ts",
+      "sha256": "decdb05797192c9beda24d77931632e97f3c02c9390d34efd2e48e3363d21f61",
+      "lines": 539,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/SettingsView.spec.ts",
+      "sha256": "f0d52c3eaf1fd0c3e01fa2f6c52c35469a10014d93a16656d29ece7ff8edd4ab",
+      "lines": 2130,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/SubscriptionsView.bulkActions.spec.ts",
+      "sha256": "c85840aed086b534d5e8e22302c5bb4936e398414e05457f510285d2dc116419",
+      "lines": 144,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/SubscriptionsView.userUsageLink.spec.ts",
+      "sha256": "d05e65b7a1001140fbca476fce64f4f76b6cc389085e38cb06a016cd794f84ac",
+      "lines": 260,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security.",
+      "path": "frontend/src/views/admin/__tests__/UsageView.exportLifecycle.spec.ts",
+      "sha256": "95d9c19647e3eecd8062496ee5bfe57a05616613fd65871737f77baaf710aade",
+      "lines": 130,
+      "test": true
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/UsageView.spec.ts",
+      "sha256": "e220008c96c0ee1a8ecc67475669a13bf99bb127b7028a948aba28419f6ccfb6",
+      "lines": 810,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/UsersView.spec.ts",
+      "sha256": "14886509537f64c8f3f77f3094ce9116e69ff8ba2520eb1992c7acf5be76b964",
+      "lines": 576,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/apiKeyGroupFilterOptions.spec.ts",
+      "sha256": "a90ef99370c79ffc003525ba67c65e7f8facee15fc2c2c7af51efd855727b0a6",
+      "lines": 94,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/channelPlatformOptions.spec.ts",
+      "sha256": "79b3a55a141930f6771c4418530ccb33f25788a4e0f9c070bd121f017742eca3",
+      "lines": 18,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/codexFingerprintSignals.spec.ts",
+      "sha256": "22822b50edf09877566b764720b0493d81ae18b99428cbd3c8c7208e26ba9ae3",
+      "lines": 32,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/groupModelAllowlist.spec.ts",
+      "sha256": "748597851aebb09883366f063734bfd39a4dd371d67462568f8c545759cf5097",
+      "lines": 165,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/groupModelAllowlistLayout.spec.ts",
+      "sha256": "ab738587dd51df9e6cd538e7dbdd16a9d493b4319f207b54d01e020f74bcf99f",
+      "lines": 27,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/groupsImagePricing.spec.ts",
+      "sha256": "97bc73ecd21205648d04e27764140a2e849de081a61be7d58c6ffa2569c6c2b4",
+      "lines": 67,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/groupsMessagesDispatch.spec.ts",
+      "sha256": "f5a860aabadb60f7d8393a9f1a377f4973b0c755d3cc567a1c46871a5e81584f",
+      "lines": 102,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/groupsOpenAIFast.spec.ts",
+      "sha256": "0ca1e36051cfa35f8a25c6407e005513c2b2569493c5c835966017ac6d31ef25",
+      "lines": 41,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/groupsProfitControl.spec.ts",
+      "sha256": "cc30c4a6d9b3950ed45834356ddc4c2651f314e311ad861ea27c5dabaa7d1126",
+      "lines": 182,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/groupsReasoningEffort.spec.ts",
+      "sha256": "879cc34c9eef373db93a91ca260b0ff2175396279461789dfc14e09174216a24",
+      "lines": 348,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/groupsSupportedModelScopes.spec.ts",
+      "sha256": "09a9319b6a92398a380ede7d9f4a252b7319c5ce4079bc106be8c6965673a43a",
+      "lines": 32,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/groupsVideoModelPricing.spec.ts",
+      "sha256": "fa88cd7752094ccd30536c2b3715597d08ba1acf53b2c6b6420f05974b42fc72",
+      "lines": 48,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/modelAllowlistCandidates.spec.ts",
+      "sha256": "618d72589fea83ccbceab773bfe499b829ca9fcfab9933fe3224041d37a1e004",
+      "lines": 66,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/__tests__/platformFilterCatalogUsage.spec.ts",
+      "sha256": "1b242d1ab4bc1953ae6c1a82259c9e3894c8dff6d09bfee023433ae3511232ff",
+      "lines": 34,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/affiliates/AdminAffiliateInvitesView.vue",
+      "sha256": "3d1d8fa091905c7457f068eae4c7b01067ddc2a4f9bcc8454a6d4821c9b3e907",
+      "lines": 8,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/affiliates/AdminAffiliateRebatesView.vue",
+      "sha256": "09c08019f128572165a23e73e8087b97cf53adcf08460e00a74e5fbce1683e67",
+      "lines": 8,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/affiliates/AdminAffiliateRecordsTable.vue",
+      "sha256": "695e1945ecf2cfb9d7ca5989084fd3adec4da4fefa2dd8f98e0d43fa5632c021",
+      "lines": 449,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/affiliates/AdminAffiliateTransfersView.vue",
+      "sha256": "9a57b84356c8d25c91e0f118553e4d3f86836c44e427c3993f3099fa72989356",
+      "lines": 8,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/affiliates/AffiliateOfflineWithdrawDialog.vue",
+      "sha256": "1bd770cfb1274c4ee4f100d455d83eb9aebd58e340c5037dd0b9cd22d214402d",
+      "lines": 358,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/affiliates/__tests__/AdminAffiliateRecordsTable.spec.ts",
+      "sha256": "e9a052f47c181049fb7aa7bf75b0034db2a4bbbb5444ec850104dab7fbdeb072",
+      "lines": 180,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/affiliates/__tests__/AffiliateOfflineWithdrawDialog.spec.ts",
+      "sha256": "e431ad24612d15d7396fe8b2861775b1731947b41b00c4f00c728bb13cdcdad9",
+      "lines": 226,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/affiliates/__tests__/affiliateWithdrawOperation.spec.ts",
+      "sha256": "a46503c985b0fee3c94b5f84b6eefcf7aa15516e42cb427f98c80ade625db56f",
+      "lines": 51,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/affiliates/affiliateWithdrawOperation.ts",
+      "sha256": "c1febb550d7279545b64d9942e060997af6fc5a8523475f85aac2b8b301b7211",
+      "lines": 69,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/apiKeyGroupFilterOptions.ts",
+      "sha256": "b7b494ba627b194bdccb5d283c51470df81f898f1b61b325b4b571ec7592cea9",
+      "lines": 76,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/codexFingerprintSignals.ts",
+      "sha256": "1769e04b34c39f49c063ab56fd2dd77fd8e30ae0b49c65aaa249240294402df4",
+      "lines": 59,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/groupModelAllowlist.ts",
+      "sha256": "08fbbfc7869764f629b7f2a92fb6467cfdb1ad4da122343723d56b016874c8cb",
+      "lines": 153,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/groupsImagePricing.ts",
+      "sha256": "de3d621e02b55cb3e04d0f0e636135c838d5a9846c3fe0508b9f08067021db77",
+      "lines": 101,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/groupsMessagesDispatch.ts",
+      "sha256": "5b452b90a17c32797ea9770c8fc90d39665baf46ac690a3f9f944fd79f7a205f",
+      "lines": 77,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/groupsOpenAIFast.ts",
+      "sha256": "e9405a14c8f1ac100cc5f4b4193036b9ab561b2ff6b08dbbb95f5aa9272a8941",
+      "lines": 11,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/groupsProfitControl.ts",
+      "sha256": "5b4b7556ca3d57fe45ec1a0347ceccbabb61ca381fc52a07255b557f95a0fbbb",
+      "lines": 70,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/groupsReasoningEffort.ts",
+      "sha256": "651f5bda0af206de231639b56a3ec4dada2c00b88f74851b5221dc151518006f",
+      "lines": 318,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/groupsSupportedModelScopes.ts",
+      "sha256": "4b122a8d084250931e4ecf8c0b8b7f9001b3d6c70be42db3e6b7a6350b205762",
+      "lines": 8,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/groupsVideoModelPricing.ts",
+      "sha256": "3e9a886b25f5922ffb453f1af48afdf111e38c76f9c69f54014f0814d3a0cbcf",
+      "lines": 78,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/modelAllowlistCandidates.ts",
+      "sha256": "2fe8e0ec29caae44116132e86aea13274be222be58f815a2c3a7713b50bcab8f",
+      "lines": 42,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/OpsDashboard.vue",
+      "sha256": "0d1e28a4c5a413ba00b4ffa6d3f84b36f5d7f15f4a76f8fe13442f4eefa818e7",
+      "lines": 868,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "Request sequencing and mounted initialization; specialized child panels are outside this manual scope."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/LogRetentionSelect.vue",
+      "sha256": "11f9cf37a542f2443f171535fa07911837aa114209e9a4b1faba64231c685d7f",
+      "lines": 44,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsAdmissionNotice.vue",
+      "sha256": "578d46bc252e9ffb49edabbcb4d460d0152be3d62b8e0e6956469f4d4e863280",
+      "lines": 31,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsAlertEventsCard.vue",
+      "sha256": "5521f7b7c06ee34e60c3f4ba6ae177432999bcf906cf9297588aff3a65e1f33a",
+      "lines": 705,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsAlertRulesCard.vue",
+      "sha256": "15ea44a07f400706bd426678d48ad655fcadc65bde0f5558166d97cef603051e",
+      "lines": 634,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsConcurrencyCard.vue",
+      "sha256": "fbf06e90b10c50a7e48468b499d6a13eaa75883df441f826059a4b7f080bcb69",
+      "lines": 626,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsDashboardHeader.vue",
+      "sha256": "067f92452172ef5824426fe79fc0229117522503d917804575fe3a5ad9db8796",
+      "lines": 1632,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsDashboardSkeleton.vue",
+      "sha256": "e3d1140792bdf4a434241ebf8462241cfd9acce66a02e9a7639dda4c759abbee",
+      "lines": 103,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsEmailNotificationCard.vue",
+      "sha256": "f7ccb7bb71cdf89df729e7f8a0afea4891c7d168ded1ef65720ca78a10897e92",
+      "lines": 442,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsErrorDetailModal.vue",
+      "sha256": "7180e54376bc834bf98f1e9c4dd4068e95684f79e9b6809d0041f04b62061cd1",
+      "lines": 442,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsErrorDetailsModal.vue",
+      "sha256": "05935f143fdd49fa68907ef2d4b3bcedf3f3770e088c049f424ff730fb85f35a",
+      "lines": 303,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsErrorDistributionChart.vue",
+      "sha256": "67e68c62ac1976716c0b77d30384cbefc270cf67b0358d7824d1d68d562e1ecf",
+      "lines": 162,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsErrorLogTable.vue",
+      "sha256": "2afa6586ba09eef95f2e06270c9a8f2b9aaa10e2794a5ba1330aaef2564484d5",
+      "lines": 352,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsErrorTrendChart.vue",
+      "sha256": "4b43480a24946e7c6cb2810245525ceba4702df85bad809313bfe54383a9c9a7",
+      "lines": 199,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsLatencyChart.vue",
+      "sha256": "0b91182c45bd12871cc3229c04978aeac953c92e6bd59b5d622f7712fe162e82",
+      "lines": 102,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsOpenAITokenStatsCard.vue",
+      "sha256": "f818074508d63f1101fa89cbb2f4caf376b6c60f2942c92586e59811753d0002",
+      "lines": 285,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsRequestDetailsModal.vue",
+      "sha256": "eb6ec8a1c34f922b45da29136808684abd24ef06713248ffb0c81b11d8849f0e",
+      "lines": 403,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsRequestDiagnostics.vue",
+      "sha256": "4d73d471121862616134acf4d94294bec9c701cd5fd76ac7d0369d067a5d4971",
+      "lines": 98,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsRuntimeSettingsCard.vue",
+      "sha256": "2bb7050e41a47914e89a98da3338e29a83b2eb9822949cf5a9408f66d1bff463",
+      "lines": 537,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsSettingsDialog.vue",
+      "sha256": "242e1eea6adb50c46efa3d4794741f4f770249898fd4aca85e1f6ac11f6c15b1",
+      "lines": 655,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsSwitchRateTrendChart.vue",
+      "sha256": "0b9d4babd47b252fec19be23634cf95112e88f5508f436cd04f15a35c7057593",
+      "lines": 151,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsSystemLogTable.vue",
+      "sha256": "a990cfaf86c2f17f82cff239b9fe0599ce5c3d17db0d63a47552f8c008043f7b",
+      "lines": 602,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/OpsThroughputTrendChart.vue",
+      "sha256": "df3ad36095f78d3b618d48a9bd0b85ca4abf4625fbdf1fb4ee04b82383ff61d0",
+      "lines": 262,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsAlertEventsCard.pagination.spec.ts",
+      "sha256": "74b653611bf9ab8174bab17b541bf782b1aaa7fa8657ef5d0d754712a995736c",
+      "lines": 73,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsAlertRulesCard.duration.spec.ts",
+      "sha256": "f673fc394158ca14396060c172a123be42a6e9e8f85b98ae9e940b3eac0a383f",
+      "lines": 51,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsDashboardHeader.spec.ts",
+      "sha256": "f0a0e1a44480d54b024e4fd847036e2c5eb6b5439cda6534f6fc53ebc28fb4b7",
+      "lines": 52,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsDashboardHeader.timezone.spec.ts",
+      "sha256": "a00461636cd991a2e40a029e8fe85f841568a2756b929c77db700f31942f7101",
+      "lines": 55,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsErrorDetailModal.spec.ts",
+      "sha256": "5ab1fb9a456b903f0efe0e8646f3f57775392ace13942d02fe9490d5a0b01e40",
+      "lines": 80,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsErrorLogTable.spec.ts",
+      "sha256": "a591ad00646e1debb521107e99c061afa7c9717f5505a9997fa0be13ad003f90",
+      "lines": 125,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsErrorScopeCharts.spec.ts",
+      "sha256": "f67731f46a1f22a817945b95d25c2c39503d0c4bdeeecfeb78928ecc1380484e",
+      "lines": 148,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsOpenAITokenStatsCard.spec.ts",
+      "sha256": "f1273b47e225fc321d4c21e5e6f11b0ac701a32eb8c7d0667f5c481a23637e7c",
+      "lines": 312,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsRequestDetailsModal.spec.ts",
+      "sha256": "a57bcaf9c7d253133dd72c0099eafb73e2abab6aa13389afbda225b81426aa76",
+      "lines": 166,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsRequestDiagnostics.spec.ts",
+      "sha256": "bb0a90a054856aecc26a4775b4c2438f359c20aa069372a0ebcc6d894abb97eb",
+      "lines": 47,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsSettingsDialog.loading.spec.ts",
+      "sha256": "77648608489eb705bd280032ecfbd2e32aa57f8bb46812f7c31f4fb80d358bf5",
+      "lines": 87,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsSystemLogTable.spec.ts",
+      "sha256": "a7f7d5d4bf85868d1439d88e2ed334414d03940ec489d91f8e803cde331999f1",
+      "lines": 216,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/components/__tests__/OpsThroughputTrendChart.spec.ts",
+      "sha256": "5d8a3d0debce5d60d472f641847385d99f7ea5fb767da673f46a75e15edae34b",
+      "lines": 51,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/types.ts",
+      "sha256": "b4dfef53945c96557341f7ba4eefc08853c156408397fae48aec6c305891632f",
+      "lines": 25,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/utils/__tests__/errorDetailResponse.spec.ts",
+      "sha256": "5c8c4def06c084e0365c46fa235e94e508493c46d2def83744dd4aad57fef2b0",
+      "lines": 135,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/utils/__tests__/opsErrorParams.spec.ts",
+      "sha256": "7eae4ead4af8e33f0e67faa0bd894f43d2f772fd580723c1a9432541d1d432ab",
+      "lines": 17,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/utils/__tests__/opsFormatters.spec.ts",
+      "sha256": "e10b61431ac636b2b1f509fc2d220bbc27dc9a90ea0171c0bb5e53d55e15dce6",
+      "lines": 26,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/utils/__tests__/requestDiagnostics.spec.ts",
+      "sha256": "a9502c2819bc8469c1847ce033ff4389881806bde879499d1b2af50fef3dee2c",
+      "lines": 38,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/utils/accountNameMap.ts",
+      "sha256": "929902cd2726b3d2f8d5f4cca1e35b4f3b8a4709adaf73f014fef09b6dc9517a",
+      "lines": 34,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/utils/errorDetailResponse.ts",
+      "sha256": "19f35542f506e44583e17c1e9bcd6f8efbaffea7de9374587845787bf6d0a8cb",
+      "lines": 92,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/utils/opsErrorParams.ts",
+      "sha256": "0a1ba7a6228ee5f446b0cd7b1473447a20e1100a7e37574b95b2a425e3ba9cdc",
+      "lines": 12,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/utils/opsFormatters.ts",
+      "sha256": "799b304854bb2775a35487335cfd7582dd099e5bf92224454ea19325850b2808",
+      "lines": 89,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/ops/utils/requestDiagnostics.ts",
+      "sha256": "55d9cf46468585b9c322b21f77f4aca1f48b7459b7a7ce962aab47d47f6a7c94",
+      "lines": 85,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/orders/AdminOrdersView.vue",
+      "sha256": "00cef2f9fa4efe773ac9669096cac2f5adaa5942ebffefa62b4b86670b77e28b",
+      "lines": 312,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "List request/debounce and lifecycle."
+    },
+    {
+      "path": "frontend/src/views/admin/orders/AdminPaymentDashboardView.vue",
+      "sha256": "d0cee7a6119953759dc1e4e7afdea01bb8b2acb95450d73b85168af9b9023756",
+      "lines": 141,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/orders/AdminPaymentPlansView.vue",
+      "sha256": "651d4b2519093ebcf1fc1e67733b5382534a151ecf64d7e2c938ae7c2886ab2d",
+      "lines": 203,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/orders/PlanEditDialog.vue",
+      "sha256": "995d9a995923ab3bbb70ef8aa2b7ea2648d56cd9755fb36e952d52703ae95563",
+      "lines": 229,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/orders/__tests__/AdminPaymentPlansView.spec.ts",
+      "sha256": "0bf6f0cb08af7571ced269485bb4d0428485e7b252dad165ecf193a89423a772",
+      "lines": 107,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/orders/__tests__/PlanEditDialog.spec.ts",
+      "sha256": "56afb5a217dea03260efe8704c6e3b03b6d5b3d4574486f5b4e39367d06c39de",
+      "lines": 197,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/settings/EmailTemplateEditor.vue",
+      "sha256": "7c6abe13f58bb14658bed11eb7eec65d8706f5a16b73fc63f2470b4acb4d1980",
+      "lines": 725,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/settings/OpenAIFastPolicyUserSelector.vue",
+      "sha256": "f1b928af1a74d8526cee81f81b2eaadadf9a84073a111ed2e4445a85eeac2d23",
+      "lines": 230,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/admin/settings/__tests__/OpenAIFastPolicyUserSelector.spec.ts",
+      "sha256": "a7c6c4fbf9546481da8e0daa1f06272dc04c6e7638a62da90b66172cdb3f4633",
+      "lines": 113,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/AffiliateView.vue",
+      "sha256": "0f6bffa0a82f450e94023b462c7282a0b2fbd5d086c0877685eda42a676d66ca",
+      "lines": 228,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/AirwallexPaymentView.vue",
+      "sha256": "03c0854854d4a551753508f10c304843aa080c5b673d2a133c760dfec5a3bae6",
+      "lines": 139,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/AvailableChannelsView.vue",
+      "sha256": "fe5b8b2df1b7d75a563541b38e12dccbe743be47ce2e922a48331b225c74efb3",
+      "lines": 128,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/BatchImageGuideView.vue",
+      "sha256": "c4c5331ef5d810f6842529fa9d06dc9506571cad76fc81c59f524c83a16ce6dd",
+      "lines": 2694,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "Job refresh/polling, detail selection, IndexedDB previews, Blob URL lifecycle and cleanup; large component not exhaustively manually read."
+    },
+    {
+      "path": "frontend/src/views/user/ChannelStatusV1View.vue",
+      "sha256": "9844d1a8aefce9cc37caa118ad8339446de17c2ee6e8bf1311a40a0707af695e",
+      "lines": 174,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/views/user/ChannelStatusV2View.vue",
+      "sha256": "93cecadfb97a08c55495cdfb7e182b00e92c2f919478b4d49438036ce1d3fa29",
+      "lines": 1002,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "Snapshot/dimensions/tab requests, filters, automatic refresh, cancellation and unmount. Not every cell/template/CSS rule."
+    },
+    {
+      "path": "frontend/src/views/user/ChannelStatusView.vue",
+      "sha256": "f4831a7a6de216964b11054e93ce83968a0e14d207bf0932bff895095f4bdcdb",
+      "lines": 23,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/CustomPageView.vue",
+      "sha256": "50b487b1e2267c24b273861427748abdb9c4744caccaa06c59c88c87a94d8b3c",
+      "lines": 586,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "Markdown fetch/render, HTML/iframe URL sinks and cleanup."
+    },
+    {
+      "path": "frontend/src/views/user/DashboardView.vue",
+      "sha256": "6c679915609f3f11aac8eaa9faf7d3607ade39d9b6911e7fd9e518b48692b0a9",
+      "lines": 50,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/views/user/KeysView.vue",
+      "sha256": "70905f5909a540b8c65804e51217002f15c357740998a8635360d3b1b1cbf737",
+      "lines": 2114,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/MCPView.vue",
+      "sha256": "bc28988199edfbe2296d847da44d57c1948fd217cee82b4794c815fb8b73e609",
+      "lines": 180,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/PaymentQRCodeView.vue",
+      "sha256": "cb95bd1ad74e76b6a7cd6e0038f8478fece96fc587e9c333b38c5a3d9de8bc62",
+      "lines": 216,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/PaymentResultView.vue",
+      "sha256": "12b00d327041107423ac48e6dfb08f88a8c947d11732543d9b6e66bd523c10dd",
+      "lines": 474,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/PaymentView.vue",
+      "sha256": "6d671262c0939531cdefb9399ec7b647b87a6ce3d80bb44dce2e0de7a72e13a0",
+      "lines": 1227,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "Computed HTML sinks and payment integration flow."
+    },
+    {
+      "path": "frontend/src/views/user/ProfileView.vue",
+      "sha256": "b311363964bd393fab5b19853cb36dccab22fc52ca5f736fb0b5ef9042bbc99b",
+      "lines": 44,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/RedeemView.vue",
+      "sha256": "0615ae2f1b19aef1607ed7ddc395e37e870a90cf8152562d0c4248c869107a7e",
+      "lines": 549,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/StripePaymentView.vue",
+      "sha256": "5722401242a3dcfd3b7a06ac73c4a4948dfc4bd148f99c588ed74e46c9adddc2",
+      "lines": 329,
+      "test": false,
+      "review_mode": "manual_targeted_sections",
+      "notes": "SDK initialization, payment confirmation, polling and unmount lifecycle."
+    },
+    {
+      "path": "frontend/src/views/user/StripePopupView.vue",
+      "sha256": "20b340e9af425b358345a38b1cc7c0d64e1861bd1578be45e6f4b055efc013c9",
+      "lines": 238,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/views/user/SubscriptionsView.vue",
+      "sha256": "babeb16fe163113c4fd8b3c09cc5114dd7d001297472004fbc9151a08b396c97",
+      "lines": 69,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/UsageView.vue",
+      "sha256": "f912e9bae2b02a61af9204638d4b20c1a5650ad8bf87e033abcfcdac31fe2074",
+      "lines": 921,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/UserOrdersView.vue",
+      "sha256": "b1eface6ee193f835d7bb6e638041130c8658517dfe7ff42353f264b917f5680",
+      "lines": 190,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/AffiliateView.spec.ts",
+      "sha256": "0be297660ce8d4c07bb9e5bbe152960820403cc0842746550950a63ae37724e2",
+      "lines": 117,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/AirwallexPaymentView.lifecycle.spec.ts",
+      "sha256": "e88c36df68c3238ce7eaf901ef4304c7ad1b8a6cf86cb109abc4aabdb2ee5645",
+      "lines": 55,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/AirwallexPaymentView.spec.ts",
+      "sha256": "e92fa06e78aa49785c775bb86ecba99cccf65101871493b51c01f92dbcb5b96e",
+      "lines": 135,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/ChannelStatusV1View.details.spec.ts",
+      "sha256": "62a9b5cade7e253d87d175f2b3450c7166ec2924c76b545db632ab8f18e0253b",
+      "lines": 78,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/ChannelStatusV1View.refresh.spec.ts",
+      "sha256": "40944413225dd871133c475aee86722ed257775c4e36a625ff62949e6ae7ddc6",
+      "lines": 82,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/ChannelStatusV2View.race.spec.ts",
+      "sha256": "e8cf567dfdfa64eaa37837f54e0b6acad7ef01144d8f675e7a0ee65536688423",
+      "lines": 117,
+      "test": true,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/ChannelStatusView.mode.spec.ts",
+      "sha256": "f64a7f548db625f2bae80582b2cb615dc342bd29313cce4ee297f911030fa667",
+      "lines": 53,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/CustomPageView.race.spec.ts",
+      "sha256": "6a281b8f1024335f4ff7d615ce7909243c583d484384270bf084a66923843473",
+      "lines": 97,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/CustomPageView.spec.ts",
+      "sha256": "992cbbdd1a2418beb4572187217c87ec0070c9820f3c735ad6fe5122497cdb83",
+      "lines": 171,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/KeysView.spec.ts",
+      "sha256": "f65c5c2e93702940bef2a97b1a2b78db5f2d55b2fa7b425a54a669493feb7108",
+      "lines": 658,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/MCPView.spec.ts",
+      "sha256": "f4100ab1b434c1bee14ace6d4211f9b172f817aa72cdb0e2cb18fc4e9d017035",
+      "lines": 151,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/PaymentResultView.spec.ts",
+      "sha256": "f7684c9d2e37a702b8ae9a2e20b32995bd7ec707379552273a11fcb7fd970590",
+      "lines": 539,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/PaymentView.spec.ts",
+      "sha256": "6fd3b4bcc4d3a4d63e90bb8a89fa7083749f6a2a0e500902bd8f6cf1a5a0045d",
+      "lines": 890,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/ProfileView.spec.ts",
+      "sha256": "cf5f0d369152c58f60cced6981dbc2581af62d297e700ee41cbc1bc97f6aa1ec",
+      "lines": 107,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/RedeemView.spec.ts",
+      "sha256": "a328216dec9f61accfb2928b0cf3699d6ce0b22a7547ad35b4a03d360c82d670",
+      "lines": 242,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/StripePaymentView.spec.ts",
+      "sha256": "834ab845a21f5e8418a5d642b7e26fa186315cf3813e9fcaff59fc8613d8850c",
+      "lines": 284,
+      "test": true,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/StripePopupView.lifecycle.spec.ts",
+      "sha256": "5f079fb3f3466a7c019212694b09de3c46f12cca48c8502d804fe45c632d5843",
+      "lines": 120,
+      "test": true,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/SubscriptionsView.membership.spec.ts",
+      "sha256": "5ccb0f2be97bc0d4f8bc67fefdbe9cce36f9ca99e5323bae85b46fa8f998c9af",
+      "lines": 50,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/UsageView.spec.ts",
+      "sha256": "a5e6a11266b6f6e95d5a984c4dbb1cbdb5f84c2008911a41de184db8a04456bd",
+      "lines": 599,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/UserOrdersView.filters.spec.ts",
+      "sha256": "c2b897dfb9f00dd73607dced52594156c22230d040132fb63930506d939b8fa7",
+      "lines": 55,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/paymentUx.spec.ts",
+      "sha256": "c9be534f11ac217bf60be013fe7c993a0936a7c3ce85c56b7a9f521fecaa2265",
+      "lines": 83,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/paymentWechatResume.spec.ts",
+      "sha256": "03978b30f5de14103285a00941b4e75d55154ba169578df3bbdf693e2ef9083a",
+      "lines": 58,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/__tests__/stripeLazyLoading.spec.ts",
+      "sha256": "009c20419841cde4cd625ecf7178d3b07f29f46063adec5bbee754b0f4441c4c",
+      "lines": 34,
+      "test": true,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/paymentUx.ts",
+      "sha256": "4c9a50b3db490605f2b538da4aed8e40db74571a7720425e23ceb6b5a7e28d70",
+      "lines": 114,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/src/views/user/paymentWechatResume.ts",
+      "sha256": "4b0e049b945881618f19a4fbe2c16d40a2c6d94c972e76f029d367e62e2d7e1c",
+      "lines": 91,
+      "test": false,
+      "review_mode": "automated_syntax_and_pattern_scan_only",
+      "notes": "Automated parsing is structural screening; it does not prove correctness or security."
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "sha256": "092dd3644b10082ba1dbb96bbd25fdaa50e334d21c5786763036058f44ad2be9",
+      "lines": 188,
+      "test": false,
+      "review_mode": "manual_complete_file",
+      "notes": "Read the file and checked relevant request, state, lifecycle and data-flow behavior; this is not formal verification."
+    }
+  ],
+  "findings": [
+    {
+      "id": "PERF-001",
+      "priority": "P2",
+      "status": "fixed",
+      "title": "Latest-request ownership in shared table loader",
+      "files": [
+        "frontend/src/composables/useTableLoader.ts"
+      ],
+      "before": "Aborting alone did not prevent a slow adapter from committing stale rows/errors, and a delayed debounced callback could run after unmount.",
+      "change": "Snapshot params, disposed guard, AbortController ownership before commits and error propagation; page handlers return the load promise.",
+      "baseline_failing_tests": 3,
+      "tests": [
+        "frontend/src/composables/__tests__/useTableLoader.race.spec.ts"
+      ]
+    },
+    {
+      "id": "PERF-002",
+      "priority": "P2",
+      "status": "fixed",
+      "title": "Batch image access cache/session and paginated lookup ownership",
+      "files": [
+        "frontend/src/composables/useBatchImageAccess.ts"
+      ],
+      "before": "Shared privilege/access cache was not bound to login generation; an old pagination/finalizer could continue or replace newer state. This UI gate is not a replacement for backend authorization.",
+      "change": "Session-stamped cache, login notifications, per-lookup generation, assertions around each page, finite page count and shared in-flight force refresh.",
+      "baseline_failing_tests": 4,
+      "tests": [
+        "frontend/src/composables/__tests__/useBatchImageAccess.session.spec.ts"
+      ]
+    },
+    {
+      "id": "PERF-003",
+      "priority": "P1 conditional",
+      "status": "fixed_in_development_plugin",
+      "title": "Public settings could close the inline development script element",
+      "files": [
+        "frontend/vite.config.ts",
+        "frontend/build/serializePublicSettings.ts"
+      ],
+      "before": "Raw JSON.stringify interpolation admitted a literal </script> sequence from a malicious string in public settings. Exploit requires control of such settings delivered to the development server.",
+      "change": "Escape HTML-significant characters and U+2028/U+2029 before interpolation; DOMParser regression verifies exactly one script and lossless JSON roundtrip.",
+      "tests": [
+        "frontend/src/__tests__/publicSettingsSerialization.spec.ts"
+      ],
+      "limitation": "Production backend HTML injection is not present in this repository and is not verified by this fix."
+    },
+    {
+      "id": "PERF-004",
+      "priority": "P2",
+      "status": "fixed",
+      "title": "Optional spreadsheet/payment SDKs forced into common vendor chunks",
+      "files": [
+        "frontend/vite.config.ts"
+      ],
+      "before": "The manualChunks rules placed XLSX in vendor-ui and Airwallex in vendor-misc despite their dynamic usage. Unrelated routes downloaded these packages in their static import graph.",
+      "change": "Dedicated vendor-xlsx and vendor-airwallex chunks preserve deferred loading.",
+      "measurement": "Same Vite 5.4.21 build-tool comparison retained; static import graph, not browser/network latency or TPS."
+    },
+    {
+      "id": "PERF-005",
+      "priority": "P2",
+      "status": "fixed",
+      "title": "Account automatic refresh can replace a completed newer search",
+      "files": [
+        "frontend/src/views/admin/AccountsView.vue"
+      ],
+      "before": "Automatic ETag response lacked page/filter/generation ownership; async initialization could install global listeners after unmount.",
+      "change": "Abort and generation invalidation, captured page/filter context, current-operation finalizer, disposed checks for usage batches and startup.",
+      "baseline_failing_tests": 2,
+      "tests": [
+        "frontend/src/views/admin/__tests__/AccountsView.lite.spec.ts"
+      ]
+    },
+    {
+      "id": "PERF-006",
+      "priority": "P2",
+      "status": "fixed",
+      "title": "Stripe popup bypassed shared client and accepted unrelated same-origin messages",
+      "files": [
+        "frontend/src/views/user/StripePopupView.vue"
+      ],
+      "before": "Status fetch read bearer storage itself, asynchronous SDK/poll work could continue after exit, and INIT checked origin without validating opener/type.",
+      "change": "Shared paymentAPI; opener, schema and order validation; captured auth session; single-flight polling; post-await guards; tracked close timer.",
+      "baseline_failing_tests": 3,
+      "tests": [
+        "frontend/src/views/user/__tests__/StripePopupView.lifecycle.spec.ts"
+      ]
+    },
+    {
+      "id": "PERF-007",
+      "priority": "P2",
+      "status": "fixed",
+      "title": "Stripe payment slow polls overlap",
+      "files": [
+        "frontend/src/views/user/StripePaymentView.vue"
+      ],
+      "change": "Single in-flight status request, post-await disposed checks, terminal failed/cancelled/expired stop polling.",
+      "baseline_failing_tests": 1,
+      "tests": [
+        "frontend/src/views/user/__tests__/StripePaymentView.spec.ts"
+      ]
+    },
+    {
+      "id": "PERF-008",
+      "priority": "P2",
+      "status": "fixed",
+      "title": "Payment components allow stale order completion/cancel/verification",
+      "files": [
+        "frontend/src/components/payment/PaymentQRDialog.vue",
+        "frontend/src/components/payment/PaymentStatusPanel.vue"
+      ],
+      "before": "Clearing timers alone did not invalidate pending get/verify/cancel results. Slow dialog polls overlapped, old orders could emit success for replacement orders, and expired UI could continue polling.",
+      "change": "Order/session/generation ownership; single-flight through get and verify; suppress stale cancel completion; expired initialization creates no poll; QR/deep-link callbacks observe operation lifetime.",
+      "baseline_failing_tests": 9,
+      "tests": [
+        "frontend/src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts"
+      ],
+      "limitation": "No payment-provider end-to-end charge or settlement was performed; server billing remains unchanged."
+    },
+    {
+      "id": "PERF-009",
+      "priority": "P1",
+      "status": "fixed",
+      "title": "Step-up callback can replay after authentication session replacement",
+      "files": [
+        "frontend/src/composables/useStepUp.ts"
+      ],
+      "before": "A pending TOTP confirmation was not bound to login generation or component scope; it could replay under a replacement login or hang after navigation.",
+      "change": "Captured auth session and tracked cancellation, checks before/after each asynchronous boundary; scope disposal settles the prompt; prevents stale action replay.",
+      "baseline_failing_tests": 3,
+      "tests": [
+        "frontend/src/composables/__tests__/useStepUp.session.spec.ts"
+      ],
+      "limitation": "This fixes frontend replay ownership; server enforcement of step-up remains outside available backend source."
+    },
+    {
+      "id": "PERF-010",
+      "priority": "P2",
+      "status": "fixed",
+      "title": "Monitoring tabs commit obsolete filter/tab results and restart after exit",
+      "files": [
+        "frontend/src/views/user/ChannelStatusV2View.vue"
+      ],
+      "change": "Independent tab AbortController, filter snapshot, tab/sequence/controller ownership, stale error suppression, and disposed checks across dimensions/metrics/timer creation.",
+      "baseline_failing_tests": 4,
+      "tests": [
+        "frontend/src/views/user/__tests__/ChannelStatusV2View.race.spec.ts"
+      ]
+    },
+    {
+      "id": "PERF-011",
+      "priority": "P2",
+      "status": "fixed",
+      "title": "Backup/restore status polling overlaps and notifies after navigation",
+      "files": [
+        "frontend/src/views/admin/BackupView.vue",
+        "frontend/src/api/admin/backup.ts"
+      ],
+      "change": "One in-flight request per active poll; AbortController ownership across visibility restart, completion and unmount; latest-list ownership; compatible optional signals on two GET helpers. The restore POST and password semantics are unchanged.",
+      "baseline_failing_tests": 6,
+      "tests": [
+        "frontend/src/views/admin/__tests__/BackupView.polling.spec.ts"
+      ]
+    },
+    {
+      "id": "PERF-012",
+      "priority": "P2 follow-up",
+      "status": "reported_not_fixed",
+      "title": "Batch image preview/job lifecycle needs a dedicated follow-up",
+      "files": [
+        "frontend/src/views/user/BatchImageGuideView.vue"
+      ],
+      "evidence": {
+        "job_refresh": 1663,
+        "polling": 1702,
+        "cache_key": 2001,
+        "cache_db_open": 2016,
+        "cached_blob_url": 2063,
+        "load_items": 2190,
+        "blob_urls": [
+          2247,
+          2252
+        ]
+      },
+      "details": "Selected job/details and preview hydration lack one shared operation generation. IndexedDB thumbnails use a shared database and a batch/custom/image key without an explicit user namespace, and late preview hydration can create Blob URLs after teardown.",
+      "recommendation": "Bind job/preview work to auth generation and selected batch, introduce per-user cache namespace and logout/retention policy, invalidate queued tasks before cleanup, and test ignored-abort/IndexedDB races.",
+      "limitation": "This is a code-level follow-up, not a demonstrated unauthorized server-data disclosure; backend ID uniqueness/authorization and actual shared-device privacy policy were not available. Parent intentionally deferred broad changes."
+    },
+    {
+      "id": "PERF-013",
+      "priority": "P2 architectural follow-up",
+      "status": "reported_not_fixed",
+      "title": "Large administrator/page components remain costly to maintain and load",
+      "files": [
+        "frontend/src/views/admin/AccountsView.vue",
+        "frontend/src/views/admin/SettingsView.vue",
+        "frontend/src/views/admin/GroupsView.vue",
+        "frontend/src/views/user/BatchImageGuideView.vue"
+      ],
+      "details": "Settings and Groups contain many thousands of source lines, Accounts retains a large generated route chunk. Domain/modal-level asynchronous decomposition and state ownership need incremental integration tests. The route prefetch adjacency also schedules neighboring routes during idle time without an explicit saveData/slow-network budget; a real browser waterfall is needed before describing static graph totals as actual bytes downloaded.",
+      "limitation": "A large source file alone is not a measured rendering bottleneck; no production flamegraph, browser INP/LCP, CPU budget or realistic large-data profile was available."
+    }
+  ],
+  "validation": {
+    "latest_targeted": {
+      "framework": "Vitest 4.1.12",
+      "test_files_passed": 17,
+      "tests_passed": 109,
+      "log": "${AUDIT_WORKSPACE}/performance-final-targeted.log",
+      "workers": 2
+    },
+    "baseline_new_regressions": {
+      "framework": "Vitest 2.1.9",
+      "confirmed_failed_tests": 35,
+      "breakdown": {
+        "PERF-001": 3,
+        "PERF-002": 4,
+        "PERF-005": 2,
+        "PERF-006": 3,
+        "PERF-007": 1,
+        "PERF-008": 9,
+        "PERF-009": 3,
+        "PERF-010": 4,
+        "PERF-011": 6
+      },
+      "logs": [
+        "${AUDIT_WORKSPACE}/performance-regression-before.log",
+        "${AUDIT_WORKSPACE}/stripe-popup-before.log",
+        "${AUDIT_WORKSPACE}/stepup-before.log",
+        "${AUDIT_WORKSPACE}/monitor-backup-before.log"
+      ],
+      "notes": "The first StripePopup run failed to collect due to a test mock; a corrected isolated run produced 3 assertion failures. Initial StepUp run had an incompatible worker configuration and no tests; rerun with minWorkers/maxWorkers=1 produced 1 assertion failure and 2 hung-scope timeouts. Only real corrected failures count."
+    },
+    "vue_tsc": {
+      "result": "passed",
+      "command": "./node_modules/.bin/vue-tsc --noEmit",
+      "log": "${AUDIT_WORKSPACE}/performance-typecheck.log"
+    },
+    "eslint": {
+      "result": "passed for changed sections (earlier payment/table/cache/vite gates; latest StepUp/monitor/backup/API gate)",
+      "latest_log": "${AUDIT_WORKSPACE}/performance-lint.log"
+    },
+    "git_diff_check": "passed",
+    "production_build_before_after": {
+      "result": "both passed",
+      "toolchain": "Vite 5.4.21 before dependency upgrade",
+      "before_directory": "${AUDIT_WORKSPACE}/perf-build-before",
+      "after_directory": "${AUDIT_WORKSPACE}/perf-build-after",
+      "method": "Union of index.html and requested route static manifest imports; excludes dynamicImports, CSS/images, HTTP headers and transport timing. gzip bytes use Python gzip.compress with mtime=0.",
+      "caveat": "These intermediate snapshots were built using the same Vite 5.4.21 version while parallel agents edited application source. Retained only for explaining vendor splitting, not a pure original-release baseline or isolated causal experiment. Use original_release_comparison for exact tracked release source versus candidate. Existing idle route prefetch and dynamic imports are excluded.",
+      "metrics": {
+        "before": {
+          "index.html": {
+            "js_bytes": 656029,
+            "gzip_js_bytes": 219171
+          },
+          "src/views/auth/LoginView.vue": {
+            "js_bytes": 1148847,
+            "gzip_js_bytes": 385549
+          },
+          "src/views/user/DashboardView.vue": {
+            "js_bytes": 1446125,
+            "gzip_js_bytes": 479346
+          },
+          "src/views/admin/UsageView.vue": {
+            "js_bytes": 1612360,
+            "gzip_js_bytes": 528271
+          },
+          "src/views/user/AirwallexPaymentView.vue": {
+            "js_bytes": 1223054,
+            "gzip_js_bytes": 403321
+          }
+        },
+        "after": {
+          "index.html": {
+            "js_bytes": 613719,
+            "gzip_js_bytes": 206671
+          },
+          "src/views/auth/LoginView.vue": {
+            "js_bytes": 677010,
+            "gzip_js_bytes": 231458
+          },
+          "src/views/user/DashboardView.vue": {
+            "js_bytes": 974177,
+            "gzip_js_bytes": 325225
+          },
+          "src/views/admin/UsageView.vue": {
+            "js_bytes": 1140232,
+            "gzip_js_bytes": 374075
+          },
+          "src/views/user/AirwallexPaymentView.vue": {
+            "js_bytes": 750887,
+            "gzip_js_bytes": 249101
+          }
+        }
+      },
+      "full_graph": "${AUDIT_WORKSPACE}/perf-chunk-comparison.json"
+    },
+    "final_upgraded_build": {
+      "result": "passed",
+      "vite": "6.4.5",
+      "vitest": "4.1.12",
+      "xlsx": "0.20.3",
+      "log": "${AUDIT_WORKSPACE}/perf-build-final.log",
+      "directory": "${AUDIT_WORKSPACE}/perf-build-final",
+      "preview_copy": "frontend/dist",
+      "input_files_verified_unchanged_during_build": 733,
+      "artifact_files_copied_and_sha256_verified": 314,
+      "input_hashes": "${AUDIT_WORKSPACE}/perf-build-final.source-hashes.json",
+      "artifact_hashes": "${AUDIT_WORKSPACE}/perf-build-final.artifact-hashes.json",
+      "metrics": "${AUDIT_WORKSPACE}/perf-build-final.metrics.json",
+      "reproduce_metrics": "${AUDIT_WORKSPACE}/measure_frontend_bundle.py",
+      "static_route_metrics": {
+        "index.html": {
+          "js_bytes": 615927,
+          "gzip_js_bytes": 207301
+        },
+        "src/views/auth/LoginView.vue": {
+          "js_bytes": 679382,
+          "gzip_js_bytes": 232131
+        },
+        "src/views/user/DashboardView.vue": {
+          "js_bytes": 976385,
+          "gzip_js_bytes": 325829
+        },
+        "src/views/admin/UsageView.vue": {
+          "js_bytes": 1142624,
+          "gzip_js_bytes": 374763
+        },
+        "src/views/user/AirwallexPaymentView.vue": {
+          "js_bytes": 753087,
+          "gzip_js_bytes": 249715
+        },
+        "src/views/admin/AccountsView.vue": {
+          "js_bytes": 1993493,
+          "gzip_js_bytes": 559401
+        },
+        "src/views/admin/SettingsView.vue": {
+          "js_bytes": 1254997,
+          "gzip_js_bytes": 361272
+        }
+      },
+      "vendor_chunks": {
+        "vendor-airwallex-DfdtCo4_.js": {
+          "bytes": 41987,
+          "gzip_bytes": 12822
+        },
+        "vendor-chart-Dc57SmKv.js": {
+          "bytes": 178344,
+          "gzip_bytes": 61252
+        },
+        "vendor-i18n-CiNGTo9G.js": {
+          "bytes": 56997,
+          "gzip_bytes": 19116
+        },
+        "vendor-misc-8hxHCCDN.js": {
+          "bytes": 239658,
+          "gzip_bytes": 83248
+        },
+        "vendor-stripe-DSy-tJeT.js": {
+          "bytes": 3308,
+          "gzip_bytes": 1520
+        },
+        "vendor-ui-ClhMSMq2.js": {
+          "bytes": 7301,
+          "gzip_bytes": 3133
+        },
+        "vendor-vue-Cj0O_yEB.js": {
+          "bytes": 114318,
+          "gzip_bytes": 44276
+        },
+        "vendor-xlsx-D9UGuzH6.js": {
+          "bytes": 500050,
+          "gzip_bytes": 161399
+        }
+      },
+      "large_chunk_warning": "AccountsView ~857 KB and vendor-xlsx ~500 KB minified remain; warning not suppressed.",
+      "optional_chunk_boundary_check": "XLSX/Airwallex/Stripe absent from static index/Login/Dashboard/admin Usage graphs.",
+      "caveat": "This final build uses upgraded dependencies and all agents changes; it is acceptance evidence, not the same-toolchain causal experiment. Existing idle route prefetch and dynamic imports are excluded from static route totals."
+    },
+    "original_release_comparison": {
+      "result": "passed",
+      "proof": "${AUDIT_WORKSPACE}/release-baseline-source-proof.json",
+      "comparison": "${AUDIT_WORKSPACE}/release-vs-final-comparison.json",
+      "baseline_metrics": "${AUDIT_WORKSPACE}/perf-build-release.metrics.json",
+      "baseline_log": "${AUDIT_WORKSPACE}/perf-build-release.log",
+      "baseline_tracked_files_verified": 1182,
+      "route_comparison": {
+        "index.html": {
+          "original_js_bytes": 654907,
+          "candidate_js_bytes": 615927,
+          "js_bytes_reduction": 38980,
+          "js_reduction_percent": 5.952,
+          "original_gzip_js_bytes": 218779,
+          "candidate_gzip_js_bytes": 207301,
+          "gzip_bytes_reduction": 11478,
+          "gzip_reduction_percent": 5.246
+        },
+        "src/views/auth/LoginView.vue": {
+          "original_js_bytes": 1147730,
+          "candidate_js_bytes": 679382,
+          "js_bytes_reduction": 468348,
+          "js_reduction_percent": 40.806,
+          "original_gzip_js_bytes": 385159,
+          "candidate_gzip_js_bytes": 232131,
+          "gzip_bytes_reduction": 153028,
+          "gzip_reduction_percent": 39.731
+        },
+        "src/views/user/DashboardView.vue": {
+          "original_js_bytes": 1444582,
+          "candidate_js_bytes": 976385,
+          "js_bytes_reduction": 468197,
+          "js_reduction_percent": 32.411,
+          "original_gzip_js_bytes": 478612,
+          "candidate_gzip_js_bytes": 325829,
+          "gzip_bytes_reduction": 152783,
+          "gzip_reduction_percent": 31.922
+        },
+        "src/views/admin/UsageView.vue": {
+          "original_js_bytes": 1610823,
+          "candidate_js_bytes": 1142624,
+          "js_bytes_reduction": 468199,
+          "js_reduction_percent": 29.066,
+          "original_gzip_js_bytes": 527546,
+          "candidate_gzip_js_bytes": 374763,
+          "gzip_bytes_reduction": 152783,
+          "gzip_reduction_percent": 28.961
+        },
+        "src/views/user/AirwallexPaymentView.vue": {
+          "original_js_bytes": 1221517,
+          "candidate_js_bytes": 753087,
+          "js_bytes_reduction": 468430,
+          "js_reduction_percent": 38.348,
+          "original_gzip_js_bytes": 402578,
+          "candidate_gzip_js_bytes": 249715,
+          "gzip_bytes_reduction": 152863,
+          "gzip_reduction_percent": 37.971
+        },
+        "src/views/admin/AccountsView.vue": {
+          "original_js_bytes": 2459773,
+          "candidate_js_bytes": 1993493,
+          "js_bytes_reduction": 466280,
+          "js_reduction_percent": 18.956,
+          "original_gzip_js_bytes": 711319,
+          "candidate_gzip_js_bytes": 559401,
+          "gzip_bytes_reduction": 151918,
+          "gzip_reduction_percent": 21.357
+        },
+        "src/views/admin/SettingsView.vue": {
+          "original_js_bytes": 1722183,
+          "candidate_js_bytes": 1254997,
+          "js_bytes_reduction": 467186,
+          "js_reduction_percent": 27.128,
+          "original_gzip_js_bytes": 513645,
+          "candidate_gzip_js_bytes": 361272,
+          "gzip_bytes_reduction": 152373,
+          "gzip_reduction_percent": 29.665
+        }
+      },
+      "dependency_versions_differ": true
+    }
+  },
+  "cross_review": {
+    "files": [
+      "frontend/src/api/authSession.ts",
+      "frontend/src/stores/auth.ts",
+      "frontend/src/utils/registrationDraft.ts",
+      "frontend/src/views/auth/RegisterView.vue",
+      "frontend/src/views/auth/EmailVerifyView.vue"
+    ],
+    "mode": "Read-only focused diff and ownership review for auth agent.",
+    "result": "No new issue found in one-entry digest cache or draft replacement/TTL ownership; reported remaining page-disposal guards across RegisterView action proof and EmailVerifyView post-registration navigation to owning agent. Owning agent confirmed added disposal guards and 6 passing regressions; final auth code frozen before final build."
+  },
+  "limitations": [
+    "The complete backend/server implementation is absent, so upstream scheduling/rate limits/SQL/Redis/billing/authorization are not audited by this frontend work.",
+    "No live network/backend TPS, p50/p95 latency, provider integration charge, browser LCP/INP or realistic memory profile was measured.",
+    "Structural inventory is not equivalent to reading and proving every line. See per-file review_mode.",
+    "No deployment, production-data mutation, push, PR, API route/role/billing/feature-flag behavior change by this agent.",
+    "BatchImageGuide lifecycle/cache namespace and broad architecture decomposition are recorded follow-ups, not claimed resolved."
+  ],
+  "artifacts": {
+    "scan": "${AUDIT_WORKSPACE}/performance_source_scan.json",
+    "reproduce_scan": "${AUDIT_WORKSPACE}/performance_source_scan.cjs"
+  }
+}

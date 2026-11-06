@@ -1,0 +1,55 @@
+{
+  "numTotalTests": 4,
+  "numPassedTests": 0,
+  "numFailedTests": 4,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "success": false,
+  "startTime": 1793876621604,
+  "test_files": 1,
+  "raw_report_sha256": "718bd54e52cef444e30c02fd325e66f852cfac81f1f9e97aea08ae8b5c2c404f",
+  "files": [
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/UsageView.exportLifecycle.spec.ts",
+      "status": "failed",
+      "test_count": 4,
+      "status_counts": {
+        "failed": 4
+      },
+      "tests": [
+        {
+          "name": "admin spreadsheet export ownership keeps its initial filters, ordering and filename across all pages",
+          "status": "failed",
+          "duration_ms": 3363.0622319999998,
+          "failures": [
+            "AssertionError: expected [ …(2) ] to deeply equal [ …(2) ]\n    at baseline/frontend/src/views/admin/__tests__/UsageView.exportLifecycle.spec.ts:83:56\n    at file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file://baseline/frontend/node_modules/.pnpm/vitest@2.1.9_@types+node@20.19.27_jsdom@24.1.3/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file://baseline/frontend/node_modules/.pnpm/vitest@2.1.9_@types+node@20.19.27_jsdom@24.1.3/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file://baseline/frontend/node_modules/.pnpm/vitest@2.1.9_@types+node@20.19.27_jsdom@24.1.3/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        },
+        {
+          "name": "admin spreadsheet export ownership aborts and discards the old export when even the same administrator starts a new session",
+          "status": "failed",
+          "duration_ms": 157.2452599999997,
+          "failures": [
+            "AssertionError: expected false to be true // Object.is equality\n    at baseline/frontend/src/views/admin/__tests__/UsageView.exportLifecycle.spec.ts:98:23\n    at file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)\n    at file://baseline/frontend/node_modules/.pnpm/vitest@2.1.9_@types+node@20.19.27_jsdom@24.1.3/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:126:11\n    at withEnv (file://baseline/frontend/node_modules/.pnpm/vitest@2.1.9_@types+node@20.19.27_jsdom@24.1.3/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:90:5)\n    at run (file://baseline/frontend/node_modules/.pnpm/vitest@2.1.9_@types+node@20.19.27_jsdom@24.1.3/node_modules/vitest/dist/chunks/runBaseTests.3qpJUEJM.js:112:3)"
+          ]
+        },
+        {
+          "name": "admin spreadsheet export ownership does not show a late export error after leaving the page",
+          "status": "failed",
+          "duration_ms": 135.3785429999998,
+          "failures": [
+            "AssertionError: expected \"spy\" to not be called at all, but actually been called 1 times\n\nReceived: \n\n  1st spy call:\n\n    Array [\n      \"Export Failed\",\n    ]\n\n\nNumber of calls: 1\n\n    at Proxy.<anonymous> (file://baseline/frontend/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1448:13)\n    at Proxy.<anonymous> (file://baseline/frontend/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file://baseline/frontend/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at baseline/frontend/src/views/admin/__tests__/UsageView.exportLifecycle.spec.ts:114:27\n    at file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+          ]
+        },
+        {
+          "name": "admin spreadsheet export ownership checks ownership again after synchronous workbook serialization",
+          "status": "failed",
+          "duration_ms": 138.65714900000057,
+          "failures": [
+            "AssertionError: expected \"spy\" to not be called at all, but actually been called 1 times\n\nReceived: \n\n  1st spy call:\n\n    Array [\n      Blob {},\n      \"usage_2026-11-01_to_2026-11-05.xlsx\",\n    ]\n\n\nNumber of calls: 1\n\n    at Proxy.<anonymous> (file://baseline/frontend/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:1448:13)\n    at Proxy.<anonymous> (file://baseline/frontend/node_modules/.pnpm/@vitest+expect@2.1.9/node_modules/@vitest/expect/dist/index.js:972:17)\n    at Proxy.methodWrapper (file://baseline/frontend/node_modules/.pnpm/chai@5.3.3/node_modules/chai/index.js:1686:25)\n    at baseline/frontend/src/views/admin/__tests__/UsageView.exportLifecycle.spec.ts:127:24\n    at file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:5\n    at runTest (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:11)\n    at runSuite (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runSuite (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)\n    at runFiles (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)\n    at startTests (file://baseline/frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)"
+          ]
+        }
+      ]
+    }
+  ]
+}

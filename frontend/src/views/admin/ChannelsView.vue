@@ -25,7 +25,7 @@
               :options="statusFilterOptions"
               :placeholder="t('admin.channels.allStatus', 'All Status')"
               class="w-40"
-              @change="loadChannels"
+              @change="handleStatusFilterChange"
             />
           </div>
 
@@ -68,6 +68,7 @@
           <template #cell-status="{ row }">
             <Toggle
               :modelValue="row.status === 'active'"
+              :disabled="pendingStatusIds.has(row.id)"
               @update:modelValue="toggleChannelStatus(row)"
             />
           </template>
@@ -275,6 +276,7 @@
           <div
             v-for="(section, sIdx) in form.platforms"
             :key="'tab-' + section.platform"
+            :data-channel-platform="section.platform"
             v-show="section.enabled && activeTab === section.platform"
             class="space-y-4"
           >
@@ -395,7 +397,7 @@
                     class="input flex-1 text-xs"
                     :class="platformTextClass(section.platform)"
                     :placeholder="t('admin.channels.form.mappingSource', 'Source model')"
-                    @change="renameMappingKey(sIdx, srcModel, ($event.target as HTMLInputElement).value)"
+                    @change="renameMappingKey(sIdx, srcModel, $event)"
                   />
                   <span class="text-gray-400 text-xs">→</span>
                   <input
@@ -446,6 +448,7 @@
                 <PricingEntryCard
                   v-for="(entry, idx) in section.model_pricing"
                   :key="idx"
+                  :data-channel-pricing="idx"
                   :entry="entry"
                   :platform="section.platform"
                   enable-time-pricing
@@ -482,6 +485,7 @@
               <div
                 v-for="(rule, ruleIndex) in section.account_stats_pricing_rules"
                 :key="ruleIndex"
+                :data-channel-rule="ruleIndex"
                 class="space-y-3 rounded-lg border border-gray-200 p-4 dark:border-dark-600"
               >
                 <div class="flex items-center justify-between">
@@ -578,6 +582,7 @@
                     <PricingEntryCard
                       v-for="(entry, pIdx) in rule.pricing"
                       :key="pIdx"
+                      :data-rule-pricing="pIdx"
                       :entry="entry"
                       :platform="section.platform"
                       @update="rule.pricing.splice(pIdx, 1, $event)"
@@ -618,11 +623,11 @@
       :show="showDeleteDialog"
       :title="t('admin.channels.deleteChannel', 'Delete Channel')"
       :message="deleteConfirmMessage"
-      :confirm-text="t('common.delete', 'Delete')"
+      :confirm-text="deletingChannel && pendingDeleteIds.has(deletingChannel.id) ? t('common.submitting', 'Submitting...') : t('common.delete', 'Delete')"
       :cancel-text="t('common.cancel', 'Cancel')"
       :danger="true"
       @confirm="confirmDelete"
-      @cancel="showDeleteDialog = false"
+      @cancel="closeDeleteDialog"
     />
   </AppLayout>
 </template>
@@ -654,9 +659,13 @@ import Toggle from '@/components/common/Toggle.vue'
 import PricingEntryCard from '@/components/admin/channel/PricingEntryCard.vue'
 import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
 import { useKeyedDebouncedSearch } from '@/composables/useKeyedDebouncedSearch'
+import { createSessionTasks } from '@/utils/sessionTasks'
+import { bindAuthSignal } from '@/api/authSession'
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const pageTasks = createSessionTasks()
+type PageTask = ReturnType<typeof pageTasks.begin>
 
 // Web Search global enabled state (loaded once on mount)
 // Platforms that support the account-level Web Search emulation toggle
@@ -675,12 +684,18 @@ const WEB_SEARCH_EMULATION_PLATFORMS: ReadonlySet<string> = new Set([
 
 const webSearchGlobalEnabled = ref(false)
 async function loadWebSearchGlobalState() {
+  const task = pageTasks.begin('web-search-config')
+  if (!task.active()) return
   try {
     const cfg = await adminAPI.settings.getWebSearchEmulationConfig()
+    if (!task.active()) return
     webSearchGlobalEnabled.value = cfg?.enabled === true && (cfg?.providers?.length ?? 0) > 0
   } catch (err: unknown) {
+    if (!task.active()) return
     console.warn('Failed to load web search global state:', err)
     webSearchGlobalEnabled.value = false
+  } finally {
+    task.finish()
   }
 }
 
@@ -689,7 +704,8 @@ interface FormPricingRule {
   name: string
   group_ids: number[]
   account_ids: number[]
-  pricing: PricingFormEntry[]
+  pricing: (PricingFormEntry & { platform?: string })[]
+  order: number
 }
 
 // ── Platform Section type ──
@@ -757,6 +773,13 @@ const submitting = ref(false)
 const showDeleteDialog = ref(false)
 const deletingChannel = ref<Channel | null>(null)
 const activeTab = ref<string>('basic')
+let dialogVersion = 0
+let deleteVersion = 0
+let nextRuleOrder = 0
+const pendingStatusIds = reactive(new Set<number>())
+let statusMutationVersion = 0
+const pendingDeleteIds = reactive(new Set<number>())
+let preservedRules: { order: number; rule: AccountStatsPricingRule }[] = []
 
 // Groups
 const allGroups = ref<AdminGroup[]>([])
@@ -775,8 +798,6 @@ const form = reactive({
   platforms: [] as PlatformSection[],
   apply_pricing_to_account_stats: false,
 })
-
-let abortController: AbortController | null = null
 
 // ── Platform config ──
 // 平台清单中的全部具体平台（展示顺序）。
@@ -812,6 +833,10 @@ function togglePlatform(platform: GroupPlatform) {
   const section = form.platforms.find(s => s.platform === platform)
   if (section) {
     section.enabled = !section.enabled
+    if (!section.enabled && syncingPlatform.value === platform) {
+      pageTasks.cancel('dialog:sync')
+      syncingPlatform.value = null
+    }
     if (!section.enabled && activeTab.value === platform) {
       activeTab.value = 'basic'
     }
@@ -895,17 +920,22 @@ const syncingPlatform = ref<string | null>(null)
 
 async function syncLatestModels(sectionIdx: number) {
   const section = form.platforms[sectionIdx]
-  if (!section || syncingPlatform.value || !supportsPricingModelSync(section.platform)) return
+  if (!showDialog.value || !pageTasks.current() || !section?.enabled || syncingPlatform.value || !supportsPricingModelSync(section.platform)) return
   const platform = section.platform
+  const version = dialogVersion
+  const task = pageTasks.begin('dialog:sync', () =>
+    showDialog.value && dialogVersion === version && section.enabled && form.platforms.includes(section))
   syncingPlatform.value = platform
   try {
     const result = await adminAPI.channels.syncPricingModels(platform)
+    if (!task.active()) return
     // Collect all model names already present in this platform's pricing entries
-    const existingModels = new Set<string>()
-    for (const entry of section.model_pricing) {
-      for (const m of entry.models) existingModels.add(m)
-    }
-    const newModels = result.models.filter(m => !existingModels.has(m))
+    const existingModels = section.model_pricing.flatMap(entry => entry.models)
+    const newModels = result.models.filter(model => {
+      if (existingModels.some(existing => findModelConflict([existing, model]))) return false
+      existingModels.push(model)
+      return true
+    })
     if (newModels.length === 0) {
       appStore.showSuccess(t('admin.channels.form.syncModelsAlreadyUpToDate'))
       return
@@ -930,9 +960,11 @@ async function syncLatestModels(sectionIdx: number) {
     })
     appStore.showSuccess(t('admin.channels.form.syncModelsSuccess', { count: newModels.length }))
   } catch (error) {
+    if (!task.active()) return
     appStore.showError(extractApiErrorMessage(error, t('admin.channels.form.syncModelsError')))
   } finally {
-    syncingPlatform.value = null
+    if (task.owned()) syncingPlatform.value = null
+    task.finish()
   }
 }
 
@@ -960,11 +992,14 @@ function removeMappingEntry(sectionIdx: number, key: string) {
   delete form.platforms[sectionIdx].model_mapping[key]
 }
 
-function renameMappingKey(sectionIdx: number, oldKey: string, newKey: string) {
-  newKey = newKey.trim()
-  if (!newKey || newKey === oldKey) return
+function renameMappingKey(sectionIdx: number, oldKey: string, event: Event) {
+  const input = event.target as HTMLInputElement
+  const newKey = input.value.trim()
   const mapping = form.platforms[sectionIdx].model_mapping
-  if (newKey in mapping) return
+  if (!newKey || newKey === oldKey || newKey in mapping) {
+    input.value = oldKey
+    return
+  }
   const value = mapping[oldKey]
   delete mapping[oldKey]
   mapping[newKey] = value
@@ -976,7 +1011,8 @@ function addAccountStatsRule(sectionIdx: number) {
     name: '',
     group_ids: [],
     account_ids: [],
-    pricing: []
+    pricing: [],
+    order: nextRuleOrder++,
   })
 }
 
@@ -1025,21 +1061,31 @@ const ruleAccountNameCache = ref<Record<number, string>>({})
 const ruleAccountSearchRunner = useKeyedDebouncedSearch<SimpleAccount[]>({
   delay: 300,
   search: async (keyword, { key, signal }) => {
-    const platform = key.split('-')[0]
+    if (!pageTasks.current() || !showDialog.value || signal.aborted) return []
+    const version = dialogVersion
+    const platform = key.slice(0, key.lastIndexOf('-'))
+    bindAuthSignal(signal, pageTasks.session)
     const res = await adminAPI.accounts.list(1, 20, { platform, search: keyword }, { signal })
+    if (!pageTasks.current() || dialogVersion !== version || signal.aborted) return []
     return res.items.map(a => ({ id: a.id, name: a.name, platform: a.platform }))
   },
-  onSuccess: (key, result) => { ruleAccountSearchResults.value[key] = result },
-  onError: (key) => { ruleAccountSearchResults.value[key] = [] },
+  onSuccess: (key, result) => {
+    if (pageTasks.current() && showDialog.value) ruleAccountSearchResults.value[key] = result
+  },
+  onError: (key) => {
+    if (pageTasks.current() && showDialog.value) ruleAccountSearchResults.value[key] = []
+  },
 })
 
 function onRuleAccountSearchInput(platform: string, ruleIndex: number) {
+  if (!pageTasks.current() || !showDialog.value) return
   const key = `${platform}-${ruleIndex}`
   showRuleAccountDropdown.value[key] = true
   ruleAccountSearchRunner.trigger(key, ruleAccountSearchKeyword.value[key] || '')
 }
 
 function onRuleAccountSearchFocus(platform: string, ruleIndex: number) {
+  if (!pageTasks.current() || !showDialog.value) return
   const key = `${platform}-${ruleIndex}`
   showRuleAccountDropdown.value[key] = true
   if (!ruleAccountSearchResults.value[key]?.length) {
@@ -1053,11 +1099,14 @@ function selectRuleAccount(
   platform: string,
   ruleIndex: number,
 ) {
+  if (!pageTasks.current() || !showDialog.value) return
   if (!rule.account_ids.includes(account.id)) {
     rule.account_ids.push(account.id)
     ruleAccountNameCache.value[account.id] = account.name
   }
   const key = `${platform}-${ruleIndex}`
+  ruleAccountSearchRunner.clearKey(key)
+  ruleAccountSearchResults.value[key] = []
   ruleAccountSearchKeyword.value[key] = ''
   showRuleAccountDropdown.value[key] = false
 }
@@ -1088,36 +1137,39 @@ function clearAllRuleAccountSearchState() {
 }
 
 function accountStatsRulesToAPI(): AccountStatsPricingRule[] {
-  const rules: AccountStatsPricingRule[] = []
+  const rules: { order: number; rule: AccountStatsPricingRule }[] = [...preservedRules]
   for (const section of form.platforms) {
     if (!section.enabled) continue
     for (const rule of section.account_stats_pricing_rules) {
-      rules.push({
+      rules.push({ order: rule.order, rule: {
         name: rule.name,
-        group_ids: rule.group_ids,
-        account_ids: rule.account_ids,
+        group_ids: [...rule.group_ids],
+        account_ids: [...rule.account_ids],
         pricing: rule.pricing
           .filter(p => p.models.length > 0)
           .map(p => ({
-            platform: section.platform,
-            models: p.models,
+            // Existing empty platforms match all platforms; new UI entries omit this field.
+            platform: p.platform ?? section.platform,
+            models: [...p.models],
             billing_mode: p.billing_mode,
             input_price: mTokToPerToken(p.input_price),
             output_price: mTokToPerToken(p.output_price),
             cache_write_price: mTokToPerToken(p.cache_write_price),
             cache_write_1h_price: mTokToPerToken(p.cache_write_1h_price),
             cache_read_price: mTokToPerToken(p.cache_read_price),
+            fast_multiplier: p.fast_multiplier != null && p.fast_multiplier !== '' ? Number(p.fast_multiplier) : null,
+            flex_multiplier: p.flex_multiplier != null && p.flex_multiplier !== '' ? Number(p.flex_multiplier) : null,
             reasoning_effort_multipliers: formReasoningEffortMultipliersToAPI(p.reasoning_effort_multipliers),
             image_input_price: mTokToPerToken(p.image_input_price),
             image_output_price: mTokToPerToken(p.image_output_price),
             per_request_price: p.per_request_price != null && p.per_request_price !== '' ? Number(p.per_request_price) : null,
             intervals: formIntervalsToAPI(p.intervals || []),
-            time_pricing: null
+            time_pricing: formTimePricingToAPI(p.time_pricing)
           }))
-      })
+      } })
     }
   }
-  return rules
+  return rules.sort((a, b) => a.order - b.order).map(item => item.rule)
 }
 
 // ── Form ↔ API conversion ──
@@ -1144,7 +1196,7 @@ function formToAPI(): { group_ids: number[], model_pricing: ChannelModelPricing[
       if (entry.models.length === 0) continue
       model_pricing.push({
         platform: section.platform,
-        models: entry.models,
+        models: [...entry.models],
         billing_mode: entry.billing_mode,
         input_price: mTokToPerToken(entry.input_price),
         output_price: mTokToPerToken(entry.output_price),
@@ -1191,15 +1243,9 @@ function formToAPI(): { group_ids: number[], model_pricing: ChannelModelPricing[
     delete featuresConfig.codex_image_generation_bridge
   }
 
-  const bedrockCCCompat: Record<string, boolean> = {}
-  for (const section of form.platforms) {
-    if (!section.enabled) continue
-    if (section.platform === 'anthropic') {
-      bedrockCCCompat[section.platform] = !!section.bedrock_cc_compat
-    }
-  }
-  if (Object.keys(bedrockCCCompat).length > 0) {
-    featuresConfig.bedrock_cc_compat = bedrockCCCompat
+  const anthropicSection = form.platforms.find(section => section.platform === 'anthropic')
+  if (anthropicSection) {
+    featuresConfig.bedrock_cc_compat = anthropicSection.enabled && !!anthropicSection.bedrock_cc_compat
   } else {
     delete featuresConfig.bedrock_cc_compat
   }
@@ -1225,7 +1271,7 @@ function apiToForm(channel: Channel): PlatformSection[] {
     }
   }
   for (const p of channel.model_pricing || []) {
-    if (p.platform) activePlatforms.add(p.platform as GroupPlatform)
+    activePlatforms.add((p.platform || 'anthropic') as GroupPlatform)
   }
   for (const p of Object.keys(channel.model_mapping || {})) {
     if (platformOrder.value.includes(p as GroupPlatform)) activePlatforms.add(p as GroupPlatform)
@@ -1245,7 +1291,7 @@ function apiToForm(channel: Channel): PlatformSection[] {
     const pricing = (channel.model_pricing || [])
       .filter(p => (p.platform || 'anthropic') === platform)
       .map(p => ({
-        models: p.models || [],
+        models: [...(p.models || [])],
         billing_mode: p.billing_mode,
         input_price: perTokenToMTok(p.input_price),
         output_price: perTokenToMTok(p.output_price),
@@ -1289,9 +1335,9 @@ function apiToForm(channel: Channel): PlatformSection[] {
 
 // ── Load data ──
 async function loadChannels() {
-  if (abortController) abortController.abort()
-  const ctrl = new AbortController()
-  abortController = ctrl
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('list')
+  const mutationVersion = statusMutationVersion
   loading.value = true
 
   try {
@@ -1300,41 +1346,58 @@ async function loadChannels() {
       search: searchQuery.value || undefined,
       sort_by: sortState.sort_by,
       sort_order: sortState.sort_order
-    }, { signal: ctrl.signal })
+    }, { signal: task.signal })
 
-    if (ctrl.signal.aborted || abortController !== ctrl) return
+    if (!task.active()) return
+    // A request that began before a successful status change may carry an old
+    // server snapshot. Refresh from the current filters before installing it.
+    if (mutationVersion !== statusMutationVersion) {
+      void loadChannels()
+      return
+    }
     channels.value = response.items || []
     pagination.total = response.total
   } catch (error: unknown) {
+    if (!task.active()) return
     const e = error as { name?: string; code?: string }
     if (e?.name === 'AbortError' || e?.code === 'ERR_CANCELED') return
     appStore.showError(extractApiErrorMessage(error, t('admin.channels.loadError', 'Failed to load channels')))
   } finally {
-    if (abortController === ctrl) {
+    if (task.owned()) {
       loading.value = false
-      abortController = null
     }
+    task.finish()
   }
 }
 
 async function loadGroups() {
+  const task = pageTasks.begin('groups')
+  if (!task.active()) return
   groupsLoading.value = true
   try {
-    allGroups.value = await adminAPI.groups.getAll()
+    const groups = await adminAPI.groups.getAll()
+    if (task.active()) allGroups.value = groups
   } catch (error) {
-    console.error('Error loading groups:', error)
+    if (task.active()) console.error('Error loading groups:', error)
   } finally {
-    groupsLoading.value = false
+    if (task.owned()) groupsLoading.value = false
+    task.finish()
   }
 }
 
-async function loadAllChannelsForConflict() {
+async function loadDialogOptions(task: PageTask) {
+  pageTasks.cancel('groups')
+  groupsLoading.value = true
   try {
-    const response = await adminAPI.channels.list(1, 1000)
+    const [groups, response] = await Promise.all([
+      adminAPI.groups.getAll(),
+      adminAPI.channels.list(1, 1000, undefined, { signal: task.signal }),
+    ])
+    if (!task.active()) return
+    allGroups.value = groups
     allChannelsForConflict.value = response.items || []
-  } catch (error) {
-    // Fallback to current page data
-    allChannelsForConflict.value = channels.value
+  } finally {
+    if (task.owned()) groupsLoading.value = false
   }
 }
 
@@ -1349,6 +1412,11 @@ function handleSearch() {
 
 function handlePageChange(page: number) {
   pagination.page = page
+  loadChannels()
+}
+
+function handleStatusFilterChange() {
+  pagination.page = 1
   loadChannels()
 }
 
@@ -1378,34 +1446,50 @@ function resetForm() {
   ruleAccountSearchRunner.clearAll()
   clearAllRuleAccountSearchState()
   ruleAccountNameCache.value = {}
+  preservedRules = []
+  nextRuleOrder = 0
 }
 
 async function openCreateDialog() {
-  editingChannel.value = null
-  resetForm()
-  await Promise.all([loadGroups(), loadAllChannelsForConflict()])
-  showDialog.value = true
+  if (!pageTasks.current()) return
+  closeDialog()
+  const version = dialogVersion
+  const task = pageTasks.begin('dialog:open', () => dialogVersion === version)
+  try {
+    await loadDialogOptions(task)
+    if (task.active()) showDialog.value = true
+  } catch (error) {
+    if (task.active()) appStore.showError(extractApiErrorMessage(error, t('admin.channels.loadError', 'Failed to load channels')))
+  } finally {
+    task.finish()
+  }
 }
 
 async function openEditDialog(channel: Channel) {
-  editingChannel.value = channel
-  form.name = channel.name
-  form.description = channel.description || ''
-  form.status = channel.status
-  form.restrict_models = channel.restrict_models || false
-  form.billing_model_source = channel.billing_model_source || 'channel_mapped'
-  form.apply_pricing_to_account_stats = channel.apply_pricing_to_account_stats || false
-  // Must load groups first so apiToForm can map groupID → platform
-  await Promise.all([loadGroups(), loadAllChannelsForConflict()])
-  form.platforms = apiToForm(channel)
-
-  // Distribute channel-level rules into per-platform sections
-  distributeRulesToPlatforms(channel.account_stats_pricing_rules || [])
-
-  // Populate ruleAccountNameCache for existing rule accounts
-  await populateRuleAccountNameCache()
-
-  showDialog.value = true
+  if (!pageTasks.current()) return
+  closeDialog()
+  const version = dialogVersion
+  const task = pageTasks.begin('dialog:open', () => dialogVersion === version)
+  try {
+    // Install a single target's draft only after its own options have loaded.
+    await loadDialogOptions(task)
+    if (!task.active()) return
+    editingChannel.value = channel
+    form.name = channel.name
+    form.description = channel.description || ''
+    form.status = channel.status
+    form.restrict_models = channel.restrict_models || false
+    form.billing_model_source = channel.billing_model_source || 'channel_mapped'
+    form.apply_pricing_to_account_stats = channel.apply_pricing_to_account_stats || false
+    form.platforms = apiToForm(channel)
+    distributeRulesToPlatforms(channel.account_stats_pricing_rules || [])
+    await populateRuleAccountNameCache(task)
+    if (task.active()) showDialog.value = true
+  } catch (error) {
+    if (task.active()) appStore.showError(extractApiErrorMessage(error, t('admin.channels.loadError', 'Failed to load channels')))
+  } finally {
+    task.finish()
+  }
 }
 
 /** Distribute flat channel-level rules into the matching platform section based on group_ids */
@@ -1416,7 +1500,8 @@ function distributeRulesToPlatforms(apiRules: AccountStatsPricingRule[]) {
     groupPlatformMap.set(g.id, g.platform)
   }
 
-  for (const apiRule of apiRules) {
+  nextRuleOrder = apiRules.length
+  for (const [order, apiRule] of apiRules.entries()) {
     // Infer platform from group_ids
     const platforms = new Set<GroupPlatform>()
     for (const gid of apiRule.group_ids || []) {
@@ -1429,16 +1514,20 @@ function distributeRulesToPlatforms(apiRules: AccountStatsPricingRule[]) {
       if (p) platforms.add(p)
     }
     const targetPlatform = platforms.size >= 1 ? [...platforms][0] : null
-    if (!targetPlatform) continue
-
     const section = form.platforms.find(s => s.platform === targetPlatform)
-    if (!section) continue
+    if (!section) {
+      // Keep rules that this platform catalog cannot render rather than deleting them on save.
+      preservedRules.push({ order, rule: JSON.parse(JSON.stringify(apiRule)) as AccountStatsPricingRule })
+      continue
+    }
 
     const formRule: FormPricingRule = {
+      order,
       name: apiRule.name || '',
       group_ids: [...(apiRule.group_ids || [])],
       account_ids: [...(apiRule.account_ids || [])],
       pricing: (apiRule.pricing || []).map(p => ({
+        platform: p.platform ?? targetPlatform,
         models: [...(p.models || [])],
         billing_mode: p.billing_mode,
         input_price: perTokenToMTok(p.input_price),
@@ -1446,12 +1535,14 @@ function distributeRulesToPlatforms(apiRules: AccountStatsPricingRule[]) {
         cache_write_price: perTokenToMTok(p.cache_write_price),
         cache_write_1h_price: perTokenToMTok(p.cache_write_1h_price),
         cache_read_price: perTokenToMTok(p.cache_read_price),
+        fast_multiplier: p.fast_multiplier,
+        flex_multiplier: p.flex_multiplier,
         reasoning_effort_multipliers: p.reasoning_effort_multipliers ? { ...p.reasoning_effort_multipliers } : null,
         image_input_price: perTokenToMTok(p.image_input_price),
         image_output_price: perTokenToMTok(p.image_output_price),
         per_request_price: p.per_request_price,
         intervals: apiIntervalsToForm(p.intervals || []),
-        time_pricing: createDefaultTimePricingForm()
+        time_pricing: apiTimePricingToForm(p.time_pricing)
       } as PricingFormEntry))
     }
     section.account_stats_pricing_rules.push(formRule)
@@ -1459,7 +1550,7 @@ function distributeRulesToPlatforms(apiRules: AccountStatsPricingRule[]) {
 }
 
 /** Populate ruleAccountNameCache by fetching account details for all account_ids in rules */
-async function populateRuleAccountNameCache() {
+async function populateRuleAccountNameCache(task: PageTask) {
   const allAccountIds = new Set<number>()
   for (const section of form.platforms) {
     for (const rule of section.account_stats_pricing_rules) {
@@ -1475,6 +1566,7 @@ async function populateRuleAccountNameCache() {
   const results = await Promise.allSettled(
     ids.map(id => adminAPI.accounts.getById(id))
   )
+  if (!task.active()) return
   for (let i = 0; i < ids.length; i++) {
     const result = results[i]
     if (result.status === 'fulfilled') {
@@ -1485,13 +1577,17 @@ async function populateRuleAccountNameCache() {
 }
 
 function closeDialog() {
+  dialogVersion++
+  pageTasks.cancel('dialog:')
   showDialog.value = false
   editingChannel.value = null
+  submitting.value = false
+  syncingPlatform.value = null
   resetForm()
 }
 
 async function handleSubmit() {
-  if (submitting.value) return
+  if (!showDialog.value || !pageTasks.current() || submitting.value) return
   if (!form.name.trim()) {
     appStore.showError(t('admin.channels.nameRequired', 'Please enter a channel name'))
     return
@@ -1614,13 +1710,16 @@ async function handleSubmit() {
   }
 
   const { group_ids, model_pricing, model_mapping, features_config } = formToAPI()
-
+  const target = editingChannel.value
+  const version = dialogVersion
+  const task = pageTasks.begin('dialog:save', () => showDialog.value && dialogVersion === version)
+  if (!task.active()) return
   submitting.value = true
   try {
-    if (editingChannel.value) {
+    if (target) {
       const req: UpdateChannelRequest = {
         name: form.name.trim(),
-        description: form.description.trim() || undefined,
+        description: form.description.trim(),
         status: form.status,
         group_ids,
         model_pricing,
@@ -1631,7 +1730,8 @@ async function handleSubmit() {
         apply_pricing_to_account_stats: form.apply_pricing_to_account_stats,
         account_stats_pricing_rules: accountStatsRulesToAPI()
       }
-      await adminAPI.channels.update(editingChannel.value.id, req)
+      await adminAPI.channels.update(target.id, req)
+      if (!task.active()) return
       appStore.showSuccess(t('admin.channels.updateSuccess', 'Channel updated'))
     } else {
       const req: CreateChannelRequest = {
@@ -1647,53 +1747,82 @@ async function handleSubmit() {
         account_stats_pricing_rules: accountStatsRulesToAPI()
       }
       await adminAPI.channels.create(req)
+      if (!task.active()) return
       appStore.showSuccess(t('admin.channels.createSuccess', 'Channel created'))
     }
     closeDialog()
     loadChannels()
   } catch (error: unknown) {
-    appStore.showError(extractApiErrorMessage(error, editingChannel.value
+    if (!task.active()) return
+    appStore.showError(extractApiErrorMessage(error, target
       ? t('admin.channels.updateError', 'Failed to update channel')
       : t('admin.channels.createError', 'Failed to create channel')))
   } finally {
-    submitting.value = false
+    if (task.owned()) submitting.value = false
+    task.finish()
   }
 }
 
 // ── Toggle status ──
 async function toggleChannelStatus(channel: Channel) {
+  if (!pageTasks.current() || pendingStatusIds.has(channel.id)) return
+  const task = pageTasks.begin(`status:${channel.id}`)
+  pendingStatusIds.add(channel.id)
   const newStatus = channel.status === 'active' ? 'disabled' : 'active'
   try {
     await adminAPI.channels.update(channel.id, { status: newStatus })
+    if (!task.active()) return
+    statusMutationVersion++
     if (filters.status && filters.status !== newStatus) {
       // Item no longer matches the active filter — reload list
       await loadChannels()
     } else {
-      channel.status = newStatus
+      const currentRow = channels.value.find(item => item.id === channel.id)
+      if (currentRow) currentRow.status = newStatus
     }
   } catch (error) {
+    if (!task.active()) return
     appStore.showError(t('admin.channels.updateError', 'Failed to update channel'))
     console.error('Error toggling channel status:', error)
+  } finally {
+    pendingStatusIds.delete(channel.id)
+    task.finish()
   }
 }
 
 // ── Delete ──
 function handleDelete(channel: Channel) {
+  if (!pageTasks.current()) return
+  closeDeleteDialog()
   deletingChannel.value = channel
   showDeleteDialog.value = true
 }
 
-async function confirmDelete() {
-  if (!deletingChannel.value) return
+function closeDeleteDialog() {
+  deleteVersion++
+  pageTasks.cancel('delete:')
+  showDeleteDialog.value = false
+  deletingChannel.value = null
+}
 
+async function confirmDelete() {
+  const target = deletingChannel.value
+  if (!pageTasks.current() || !showDeleteDialog.value || !target || pendingDeleteIds.has(target.id)) return
+  const version = deleteVersion
+  const task = pageTasks.begin(`delete:${target.id}`, () => showDeleteDialog.value && deleteVersion === version)
+  pendingDeleteIds.add(target.id)
   try {
-    await adminAPI.channels.remove(deletingChannel.value.id)
+    await adminAPI.channels.remove(target.id)
+    if (!task.active()) return
     appStore.showSuccess(t('admin.channels.deleteSuccess', 'Channel deleted'))
-    showDeleteDialog.value = false
-    deletingChannel.value = null
+    closeDeleteDialog()
     loadChannels()
   } catch (error: unknown) {
+    if (!task.active()) return
     appStore.showError(extractApiErrorMessage(error, t('admin.channels.deleteError', 'Failed to delete channel')))
+  } finally {
+    pendingDeleteIds.delete(target.id)
+    task.finish()
   }
 }
 
@@ -1706,8 +1835,8 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  pageTasks.dispose()
   clearTimeout(searchTimeout)
-  abortController?.abort()
   document.removeEventListener('click', handleRuleAccountClickOutside)
   ruleAccountSearchRunner.clearAll()
   clearAllRuleAccountSearchState()

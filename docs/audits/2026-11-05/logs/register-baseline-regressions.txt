@@ -1,0 +1,31 @@
+
+ RUN  v2.1.9 baseline/frontend
+
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ❯ src/views/auth/__tests__/RegisterView.audit-regression.spec.ts (13 tests | 2 failed) 430ms
+   × RegisterView > does not resume stale registration after captcha (email verification: false) 92ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × RegisterView > does not resume stale registration after captcha (email verification: true) 58ms
+     → expected "spy" to be called 1 times, but got 2 times
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/views/auth/__tests__/RegisterView.audit-regression.spec.ts > RegisterView > does not resume stale registration after captcha (email verification: false)
+ FAIL  src/views/auth/__tests__/RegisterView.audit-regression.spec.ts > RegisterView > does not resume stale registration after captcha (email verification: true)
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/views/auth/__tests__/RegisterView.audit-regression.spec.ts:129:30
+    127|     await wrapper.get('form').trigger('submit')
+    128|     await wrapper.get('form').trigger('submit')
+    129|     expect(verifyActionMock).toHaveBeenCalledTimes(1)
+       |                              ^
+    130|
+    131|     replaceAuthSession({ accessToken: 'SYNTHETIC-new-session', user: {…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 11 passed (13)
+   Start at  19:43:39
+   Duration  5.67s (transform 2.94s, setup 139ms, collect 3.61s, tests 430ms, environment 676ms, prepare 206ms)

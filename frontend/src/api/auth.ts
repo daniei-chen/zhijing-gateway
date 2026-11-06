@@ -149,12 +149,12 @@ export async function login(credentials: LoginRequest): Promise<LoginResponse> {
  * @param request - Temp token and TOTP code
  * @returns Authentication response with token and user data
  */
-export async function login2FA(request: TotpLogin2FARequest): Promise<AuthResponse> {
+export async function login2FA(request: TotpLogin2FARequest, options?: { persist?: boolean }): Promise<AuthResponse> {
   const expected = captureAuthSession()
   const { data } = await apiClient.post<AuthResponse>('/auth/login/2fa', request)
 
   // Store token and user data
-  persistAuthResponse(data, expected)
+  if (options?.persist !== false) persistAuthResponse(data, expected)
 
   return data
 }
@@ -292,10 +292,12 @@ export function hasPendingOAuthSuggestedProfile(
   return Boolean(completion.suggested_display_name || completion.suggested_avatar_url)
 }
 
-export function persistOAuthTokenContext(tokens: Partial<OAuthTokenResponse>): void {
+export function persistOAuthTokenContext(tokens: Partial<OAuthTokenResponse>, expected = captureAuthSession()): AuthSessionSnapshot {
+  assertAuthSession(expected)
   if (tokens.access_token) {
-    replaceAuthSession({ accessToken: tokens.access_token, refreshToken: tokens.refresh_token, expiresIn: tokens.expires_in })
-    return
+    const established = replaceAuthSession({ accessToken: tokens.access_token, refreshToken: tokens.refresh_token, expiresIn: tokens.expires_in }, expected)
+    markAuthResponse(tokens, established)
+    return established
   }
   if (tokens.refresh_token) {
     setRefreshToken(tokens.refresh_token)
@@ -303,6 +305,7 @@ export function persistOAuthTokenContext(tokens: Partial<OAuthTokenResponse>): v
   if (tokens.expires_in) {
     setTokenExpiresAt(tokens.expires_in)
   }
+  return captureAuthSession()
 }
 
 export async function prepareOAuthBindAccessTokenCookie(): Promise<void> {

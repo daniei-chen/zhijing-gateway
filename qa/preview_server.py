@@ -19,7 +19,7 @@ SETTINGS.update(site_name='Sub2API', version='local-ui-preview', password_reset_
                 balance_low_notify_enabled=True, balance_low_notify_threshold=5,
                 payment_enabled=True, risk_control_enabled=True,
                 affiliate_enabled=True, plugin_management_enabled=True)
-SETTINGS['version'] = 'v0.0.2-local-preview'
+SETTINGS['version'] = 'v' + (ROOT / 'VERSION').read_text(encoding='utf-8').strip() + '-local-preview'
 STATS.update(total_users=6, today_new_users=1, total_accounts=2, normal_accounts=2,
              error_accounts=0, active_users=3, today_account_cost=12.84, total_account_cost=391.25,
              active_requests=0, avg_response_time=18320)
@@ -58,6 +58,8 @@ MONITORS = [dict(id=31+i, name=name, provider=provider, group_name='本地合成
 
 
 class Handler(BaseHTTPRequestHandler):
+    timeout = 10
+    max_request_bytes = 16384
     fail_next_snapshot = False
     fail_member_read = False
     def log_message(self, *args):
@@ -92,11 +94,15 @@ class Handler(BaseHTTPRequestHandler):
         return [sample]
 
     def respond(self, value, status=200):
+        messages = {200: '本地合成数据', 400: '本地预览：请求格式错误',
+                    401: '本地预览：账户或密码错误', 408: '本地预览：请求读取超时',
+                    413: '本地预览：请求正文过大'}
         body = json.dumps(dict(code=0 if status == 200 else status,
-                               message='本地合成数据' if status == 200 else '本地预览：账户或密码错误' if status == 401 else '本地预览：模拟读取失败',
+                               message=messages.get(status, '本地预览：模拟读取失败'),
                                data=value), ensure_ascii=False).encode()
         self.send_response(status)
         self.send_header('Content-Type', 'application/json; charset=utf-8')
+        self.send_header('Content-Length', str(len(body)))
         self.send_header('Cache-Control', 'no-store')
         self.end_headers()
         self.wfile.write(body)
@@ -126,7 +132,8 @@ class Handler(BaseHTTPRequestHandler):
                         balance_disabled=True, balance_recharge_multiplier=1, subscription_usd_to_cny_rate=0,
                         recharge_fee_rate=0, help_text='本地合成预览，支付未接通', help_image_url='', stripe_publishable_key='')
         if p == '/admin/system/check-updates':
-            return dict(current_version='0.0.2-local-preview', latest_version='0.0.2-local-preview', has_update=False, cached=True, build_type='source')
+            version = SETTINGS['version'].removeprefix('v')
+            return dict(current_version=version, latest_version=version, has_update=False, cached=True, build_type='source')
         if p == '/announcements': return []
         if p.startswith('/subscriptions'):
             if p == '/subscriptions' and self.scenario == 'error' and Handler.fail_member_read:
@@ -196,7 +203,11 @@ class Handler(BaseHTTPRequestHandler):
         raise KeyError(p)
 
     def do_GET(self):
-        url = urlsplit(self.path)
+        try:
+            url = urlsplit(self.path)
+            query = parse_qs(url.query, max_num_fields=100)
+        except ValueError:
+            return self.respond(dict(error='invalid_request_query'), 400)
         if url.path == '/__preview':
             body = '''<!doctype html><meta charset="utf-8"><title>智境 · 本地隔离预览</title><style>body{font:16px system-ui;max-width:720px;margin:80px auto;padding:24px;line-height:2;color:#293047}a{color:#7656ce;margin-right:24px}code{background:#f1edfa;padding:4px}</style><h1>智境 · 本地隔离预览</h1><p>页面全部使用合成数据，无生产权限，不连接服务器、模型或支付。</p><p><a href="/login">查看登录页</a><a href="/__preview/member">体验成员工作台</a><a href="/__preview/admin">体验管理员控制台</a></p><p>也可在登录页使用：<code>member@preview.local</code> 或 <code>admin@preview.local</code>，密码 <code>Preview2026!</code>。</p>'''.encode()
             self.send_response(200); self.send_header('Content-Type', 'text/html; charset=utf-8'); self.end_headers(); self.wfile.write(body); return
@@ -207,16 +218,17 @@ class Handler(BaseHTTPRequestHandler):
                 role = 'admin'
             self.send_response(303)
             self.send_header('Set-Cookie', f'preview_seed={role}; Path=/; SameSite=Strict; HttpOnly')
-            scenario = parse_qs(url.query).get('scenario', ['normal'])[0]
+            scenario = query.get('scenario', ['normal'])[0]
             if scenario not in ('normal', 'empty', 'unlimited', 'over', 'expired', 'missing', 'multi', 'error'): scenario = 'normal'
             Handler.fail_member_read = scenario == 'error'
             self.send_header('Set-Cookie', f'preview_scenario={scenario}; Path=/; SameSite=Strict; HttpOnly')
-            self.send_header('Location', '/subscriptions' if role == 'member' and 'scenario' in parse_qs(url.query) else '/admin/dashboard' if role == 'admin' else '/dashboard' if role == 'member' else '/login')
+            self.send_header('Location', '/subscriptions' if role == 'member' and 'scenario' in query else '/admin/dashboard' if role == 'admin' else '/dashboard' if role == 'member' else '/login')
             self.end_headers(); return
         if url.path.startswith('/api/') or url.path == '/setup/status':
-            try: self.respond(self.api(url.path, parse_qs(url.query)))
+            try: self.respond(self.api(url.path, query))
             except PermissionError: self.respond(None, 401)
             except ConnectionError: self.respond(dict(error='synthetic_one_time_failure'), 503)
+            except (ValueError, OverflowError): self.respond(dict(error='invalid_request_query'), 400)
             except KeyError:
                 print('UNMAPPED GET', url.path, flush=True)
                 self.respond(dict(error='not_in_local_fixture_scope'), 404)
@@ -258,10 +270,34 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers(); self.wfile.write(data)
 
     def do_POST(self):
-        path = urlsplit(self.path).path
-        raw = self.rfile.read(min(int(self.headers.get('Content-Length', 0)), 16384))
-        try: body = json.loads(raw or b'{}')
-        except ValueError: body = {}
+        try:
+            path = urlsplit(self.path).path
+        except ValueError:
+            return self.respond(dict(error='invalid_request_path'), 400)
+        lengths = self.headers.get_all('Content-Length', [])
+        if len(lengths) > 1 or self.headers.get('Transfer-Encoding') is not None:
+            self.close_connection = True
+            return self.respond(dict(error='ambiguous_request_framing'), 400)
+        length = lengths[0] if lengths else '0'
+        if not re.fullmatch(r'[0-9]+', length):
+            self.close_connection = True
+            return self.respond(dict(error='invalid_content_length'), 400)
+        if len(length) > 8 or int(length) > self.max_request_bytes:
+            self.close_connection = True
+            return self.respond(dict(error='request_body_too_large'), 413)
+        try:
+            raw = self.rfile.read(int(length))
+        except TimeoutError:
+            self.close_connection = True
+            return self.respond(dict(error='request_read_timeout'), 408)
+        if len(raw) != int(length):
+            return self.respond(dict(error='incomplete_request_body'), 400)
+        try:
+            body = json.loads(raw or b'{}')
+        except ValueError:
+            return self.respond(dict(error='invalid_json'), 400)
+        if not isinstance(body, dict):
+            return self.respond(dict(error='json_object_required'), 400)
         if path == '/api/v1/user' and self.command == 'PUT' and set(body) == {'balance_notify_enabled'} and isinstance(body['balance_notify_enabled'], bool):
             # In-memory synthetic preference only. No email or production service is contacted.
             self.identity['balance_notify_enabled'] = body['balance_notify_enabled']

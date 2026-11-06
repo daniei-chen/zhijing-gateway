@@ -1,0 +1,25 @@
+test_optimized_python_still_rejects_unreviewed_source (test_frontend_contract.FrontendContractTests.test_optimized_python_still_rejects_unreviewed_source) ... FAIL
+
+======================================================================
+FAIL: test_optimized_python_still_rejects_unreviewed_source (test_frontend_contract.FrontendContractTests.test_optimized_python_still_rejects_unreviewed_source)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_frontend_contract.py", line 58, in test_optimized_python_still_rejects_unreviewed_source
+    self.assertNotEqual(result.returncode, 0, result.stdout)
+AssertionError: 0 == 0 : {
+  "checked_at": "2026-11-05T19:03:42+08:00",
+  "protected_files": 1,
+  "optional_contract_extensions": 0,
+  "approved_security_files": 0,
+  "runtime_documents": 0,
+  "routes": 68,
+  "built_files": 2,
+  "qa_code_in_build": false,
+  "static_frontend_build": true
+}
+
+
+----------------------------------------------------------------------
+Ran 1 test in 0.234s
+
+FAILED (failures=1)

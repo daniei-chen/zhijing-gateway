@@ -1,6 +1,8 @@
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import RegisterView from '@/views/auth/RegisterView.vue'
+import { replaceAuthSession } from '@/api/authSession'
+import { clearRegistrationDraft, takeRegistrationDraft } from '@/utils/registrationDraft'
 
 const {
   getPublicSettingsMock,
@@ -97,6 +99,8 @@ function mountRegister() {
 
 describe('RegisterView', () => {
   beforeEach(() => {
+    clearRegistrationDraft()
+    localStorage.clear()
     getPublicSettingsMock.mockReset()
     registerMock.mockReset()
     showErrorMock.mockReset()
@@ -107,6 +111,55 @@ describe('RegisterView', () => {
     verifyActionMock.mockResolvedValue({ token: 'ticket', randstr: 'randstr' })
     getPublicSettingsMock.mockResolvedValue(publicSettings)
     registerMock.mockResolvedValue({})
+  })
+
+  it.each([false, true])('does not resume stale registration after captcha (email verification: %s)', async emailVerification => {
+    getPublicSettingsMock.mockResolvedValueOnce({
+      ...publicSettings, email_verify_enabled: emailVerification,
+      turnstile_enabled: false, tencent_captcha_enabled: true,
+      tencent_captcha_app_id: 'SYNTHETIC-app'
+    })
+    let complete!: (proof: { token: string; randstr: string }) => void
+    verifyActionMock.mockReturnValue(new Promise(resolve => { complete = resolve }))
+    const wrapper = mountRegister()
+    await flushPromises()
+    await wrapper.get('#email').setValue('user@example.test')
+    await wrapper.get('#password').setValue('SYNTHETIC-password')
+    await wrapper.get('#confirmPassword').setValue('SYNTHETIC-password')
+    await wrapper.get('form').trigger('submit')
+    await wrapper.get('form').trigger('submit')
+    expect(verifyActionMock).toHaveBeenCalledTimes(1)
+
+    replaceAuthSession({ accessToken: 'SYNTHETIC-new-session', user: { id: 809 } })
+    complete({ token: 'SYNTHETIC-proof', randstr: '@SYNTHETIC' })
+    await flushPromises()
+    expect(registerMock).not.toHaveBeenCalled()
+    expect(pushMock).not.toHaveBeenCalled()
+    expect(sessionStorage.getItem('register_data')).toBeNull()
+    expect(localStorage.getItem('auth_token')).toBe('SYNTHETIC-new-session')
+    wrapper.unmount()
+  })
+
+  it.each([false, true])('does not resume registration after leaving the captcha page (email verification: %s)', async emailVerification => {
+    getPublicSettingsMock.mockResolvedValueOnce({
+      ...publicSettings, email_verify_enabled: emailVerification,
+      turnstile_enabled: false, tencent_captcha_enabled: true,
+      tencent_captcha_app_id: 'SYNTHETIC-app'
+    })
+    let complete!: (proof: { token: string; randstr: string }) => void
+    verifyActionMock.mockReturnValue(new Promise(resolve => { complete = resolve }))
+    const wrapper = mountRegister()
+    await flushPromises()
+    await wrapper.get('#email').setValue('user@example.test')
+    await wrapper.get('#password').setValue('SYNTHETIC-password')
+    await wrapper.get('#confirmPassword').setValue('SYNTHETIC-password')
+    await wrapper.get('form').trigger('submit')
+    wrapper.unmount()
+    complete({ token: 'SYNTHETIC-proof', randstr: '@SYNTHETIC' })
+    await flushPromises()
+    expect(registerMock).not.toHaveBeenCalled()
+    expect(pushMock).not.toHaveBeenCalled()
+    expect(takeRegistrationDraft()).toBeNull()
   })
 
   it('does not flash the promo-code field before disabled settings finish loading', async () => {
@@ -179,7 +232,7 @@ describe('RegisterView', () => {
     expect(pushMock).toHaveBeenCalledWith('/dashboard')
   })
 
-  it('requires matching confirmation before storing only the registration fields for email verification', async () => {
+  it('requires matching confirmation before handing a memory-only draft to email verification', async () => {
     getPublicSettingsMock.mockResolvedValueOnce({
       ...publicSettings,
       turnstile_enabled: false,
@@ -200,7 +253,8 @@ describe('RegisterView', () => {
     await wrapper.get('form').trigger('submit.prevent')
     await flushPromises()
 
-    expect(JSON.parse(sessionStorage.getItem('register_data')!)).toEqual({
+    expect(sessionStorage.getItem('register_data')).toBeNull()
+    expect(takeRegistrationDraft()).toMatchObject({
       email: 'user@example.com',
       password: 'secret-123'
     })

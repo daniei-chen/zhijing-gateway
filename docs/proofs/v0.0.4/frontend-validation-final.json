@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "version": "0.0.4",
+  "started_at": "2026-11-06T06:40:01.019025+00:00",
+  "ended_at": "2026-11-06T06:43:46.349701+00:00",
+  "test_files": 542,
+  "passed_tests": 6739,
+  "failed_tests": 0,
+  "pending_tests": 0,
+  "coverage": {
+    "lines": {
+      "total": 55365,
+      "covered": 49497,
+      "skipped": 0,
+      "pct": 89.4
+    },
+    "statements": {
+      "total": 62599,
+      "covered": 54253,
+      "skipped": 0,
+      "pct": 86.66
+    },
+    "functions": {
+      "total": 12894,
+      "covered": 10896,
+      "skipped": 0,
+      "pct": 84.5
+    },
+    "branches": {
+      "total": 48588,
+      "covered": 38988,
+      "skipped": 0,
+      "pct": 80.24
+    }
+  },
+  "coverage_command_exit": 0,
+  "all_four_original_global_80_gates_passed": true,
+  "source_inputs_unchanged": true,
+  "source_input_files": 1295,
+  "source_manifest": "frontend-inputs-final.json",
+  "source_manifest_sha256": "63edd0a0f1ba6c1f870618977591994710be3257bd79d58e65bf8f228e1cb547",
+  "reproduce_from_frontend": "node node_modules/vitest/vitest.mjs run --coverage --maxWorkers=4",
+  "environment": {
+    "node": "24.19.0",
+    "package_manager_used_for_locked_dependencies": "pnpm 9.15.9",
+    "test_framework": "Vitest 4.1.12",
+    "platform": "Windows",
+    "timezone": "Asia/Shanghai"
+  },
+  "scope": "Complete configured Vitest/jsdom suite and V8 coverage, including native DOM and synthetic HTTP cases. No real payment, mail, supplier inference or production deployment.",
+  "retained_checkpoint": {
+    "test_files": 539,
+    "passed_tests": 6678,
+    "coverage_command_exit": 1,
+    "branches": {
+      "pct": 79.66,
+      "covered": 38709,
+      "total": 48588
+    },
+    "meaning": "The earlier complete run passed all tests but failed the unchanged branch threshold; it was not published as a successful gate."
+  }
+}

@@ -1,0 +1,44 @@
+
+ RUN  v2.1.9 baseline/frontend
+
+ ❯ src/composables/__tests__/useStepUp.session.spec.ts (3 tests | 3 failed) 20073ms
+   × step-up operation ownership > does not retry a sensitive action after the same user starts a new session 64ms
+     → promise resolved "'done'" instead of rejecting
+   × step-up operation ownership > settles a pending confirmation when its component scope is disposed 10002ms
+     → Test timed out in 10000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+   × step-up operation ownership > does not open a dialog for a delayed challenge after leaving the page 10005ms
+     → Test timed out in 10000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/composables/__tests__/useStepUp.session.spec.ts > step-up operation ownership > does not retry a sensitive action after the same user starts a new session
+AssertionError: promise resolved "'done'" instead of rejecting
+
+- Expected:
+[Error: rejected promise]
+
++ Received:
+"done"
+
+ ❯ src/composables/__tests__/useStepUp.session.spec.ts:16:34
+     14|     const action = vi.fn().mockRejectedValueOnce({ code: 'STEP_UP_REQU…
+     15|     const running = stepUp.run(action)
+     16|     const result = expect(running).rejects.toBeInstanceOf(StepUpCancel…
+       |                                  ^
+     17|     await vi.waitFor(() => expect(stepUp.visible.value).toBe(true))
+     18|     replaceAuthSession({ accessToken: 'synthetic-b', user: { id: 1 } })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/composables/__tests__/useStepUp.session.spec.ts > step-up operation ownership > settles a pending confirmation when its component scope is disposed
+ FAIL  src/composables/__tests__/useStepUp.session.spec.ts > step-up operation ownership > does not open a dialog for a delayed challenge after leaving the page
+Error: Test timed out in 10000ms.
+If this is a long-running test, pass a timeout value as the last argument or configure it globally with "testTimeout".
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+ Test Files  1 failed (1)
+      Tests  3 failed (3)
+   Start at  19:54:12
+   Duration  21.10s (transform 89ms, setup 100ms, collect 66ms, tests 20.07s, environment 383ms, prepare 71ms)

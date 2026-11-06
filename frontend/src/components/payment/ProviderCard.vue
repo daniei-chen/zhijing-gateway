@@ -6,8 +6,8 @@
     ]"
     :title="!enabled ? t('admin.settings.payment.typeDisabled') + ' — ' + t('admin.settings.payment.enableTypesFirst') : undefined"
   >
-    <div :class="[
-      'flex items-center justify-between px-4 py-2.5',
+    <fieldset :disabled="!enabled" :aria-label="provider.name" :class="[
+      'm-0 flex min-w-0 items-center justify-between border-0 px-4 py-2.5',
       !enabled && 'pointer-events-none',
     ]">
       <!-- Left: icon + name + key badge + type badges -->
@@ -58,7 +58,7 @@
           </button>
         </div>
       </div>
-    </div>
+    </fieldset>
   </div>
 </template>
 

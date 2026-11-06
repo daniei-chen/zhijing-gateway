@@ -56,6 +56,35 @@ const choose = async (wrapper: Wrapper, locale: string) => {
 }
 
 describe('GroupI18nField', () => {
+  it.each([false, true])('associates the field label with the actual control (multiline=%s)', async (multiline) => {
+    const { wrapper, state } = mountField({ text: 'Default name', i18n: { en: { name: 'English name' } } }, { id: 'group-edit-name', multiline })
+    const control = wrapper.get<HTMLInputElement | HTMLTextAreaElement>(multiline ? 'textarea' : 'input')
+    const label = wrapper.get<HTMLLabelElement>('label')
+    expect(label.attributes('for')).toBe('group-edit-name')
+    expect(label.element.control).toBe(control.element)
+    expect(trigger(wrapper).attributes('aria-label')).toBe('Name · admin.groups.i18nField.default')
+    await choose(wrapper, 'en')
+    expect(label.element.control).toBe(control.element)
+    expect(document.activeElement).toBe(control.element)
+    expect(trigger(wrapper).attributes('aria-label')).toBe('Name · English')
+    await control.setValue('Edited translation')
+    expect(state.text).toBe('Default name')
+    expect(state.i18n.en?.name).toBe('Edited translation')
+  })
+
+  it('generates unique label targets for repeated fields in the same form', () => {
+    const host = defineComponent({
+      components: { GroupI18nField },
+      template: '<form><GroupI18nField label="Name" field="name" model-value="One" :i18n="{}" /><GroupI18nField label="Name" field="name" model-value="Two" :i18n="{}" /></form>'
+    })
+    const wrapper = mount(host)
+    const inputs = wrapper.findAll<HTMLInputElement>('input')
+    expect(new Set(inputs.map(input => input.element.id)).size).toBe(2)
+    wrapper.findAll<HTMLLabelElement>('label').forEach((label, index) => {
+      expect(label.element.control).toBe(inputs[index].element)
+    })
+  })
+
   it('renders the label and the switcher on one row above a single input', () => {
     const { wrapper } = mountField({ text: '标准', i18n: { en: { name: 'Standard' } } })
 

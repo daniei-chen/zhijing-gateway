@@ -1,0 +1,83 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "06b62f9536373265879b14023270299dc79e1874",
+  "authorization": "2026-11-05 用户要求“开始全部修复”，并补充“TTFT 延迟好高也解决全都解决”；本轮在本地隔离实现、验证并同步 GitHub，生产只读排查，未部署 v0.0.3。",
+  "files": [
+    {
+      "path": "frontend/src/api/auth.ts",
+      "before_sha256": "af7d5a19b1f4b1e7c59567707688fdb18034715f5c23cdcbdc137f847556d2d8",
+      "after_sha256": "e0fe53de5465c9198076c9f9480370f4aa67a9054968663631ac6a2e1b33649f",
+      "reason": "OAuth installation is owned by the initiating callback; 2FA can defer persistence until the live callback validates ownership.",
+      "tests": [
+        "frontend/src/utils/__tests__/oauthCallbackSession.spec.ts",
+        "frontend/src/views/auth/__tests__/MCPLoginRedirect.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/api/batchImage.ts",
+      "before_sha256": "7ef62a9b82a505aa22c9966ca555a92508e599f2b198df99bc218278963f5eb5",
+      "after_sha256": "9b77477627c836c88e1f350ab642eacda7f62f4aa0f87df8819ea0e3dae51332",
+      "reason": "Raw API-key requests, full response-body reads and cancellation retain the original browser session.",
+      "tests": [
+        "frontend/src/api/__tests__/batchImage.session.spec.ts",
+        "frontend/src/views/user/__tests__/BatchImageGuideView.lifecycle.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/api/client.ts",
+      "before_sha256": "495f1f15813f0d9138a270fe2cb51956116a40cff93bf1cc20c566ae2d6b9bee",
+      "after_sha256": "d59fca9a60c960a3e85335a6ae6bd9c6a6a3026101c15979b7c5de0e06f5f67e",
+      "reason": "Same-origin public selectors replace browser bearer headers; advertised backend support enables legacy credential migration.",
+      "tests": [
+        "frontend/src/api/__tests__/browserSession.spec.ts",
+        "frontend/src/api/__tests__/client.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/api/tokenRefresh.ts",
+      "before_sha256": "a4862d87be391ad3d2f8a39532b707faa609881982125c17ac78f9f578a705cb",
+      "after_sha256": "d923fc3489d5aea6434fc6e99652741934971b58b569e30fe872364699ec9a83",
+      "reason": "Cookie selector and credentialed refresh retain existing session ownership, singleflight and cross-tab coordination.",
+      "tests": [
+        "frontend/src/api/__tests__/tokenRefresh.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/composables/__tests__/useRoutePrefetch.spec.ts",
+      "before_sha256": "d418206377ab286d669db567d022e58b0dae111b6d9e7b53f6e6463f0e76e126",
+      "after_sha256": "4963ad8325705404665544e3215ef93393d1a1f0624077faea4174de551e7dab",
+      "reason": "Assert visible-page and genuine idle-budget behavior; an expired idle callback must not prefetch.",
+      "tests": [
+        "frontend/src/composables/__tests__/useRoutePrefetch.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/composables/useRoutePrefetch.ts",
+      "before_sha256": "0f1e3c19245dd1629e7e1c1a3408ab5a8b904adb92dce9a60ff2c7848e2403fa",
+      "after_sha256": "13799469a72791c0ce8ea9f8c0e69547c4c90b16dc0db99c331e2bb132a5c72b",
+      "reason": "One speculative target per navigation; skip weak networks, save-data, offline, hidden tabs and expired idle budgets.",
+      "tests": [
+        "frontend/src/composables/__tests__/useRoutePrefetch.budget.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/stores/auth.ts",
+      "before_sha256": "d9aacbc8c0cfffb8e98961dc74867468b515e10c22780406e9e61c92641500a1",
+      "after_sha256": "e4c5f9867833e97c791ce31f7a5697e3cc62e6a2ee7daaaca710c612df25dc65",
+      "reason": "OAuth adoption validates its expected session and preserves a just-committed generation while hydrating /auth/me.",
+      "tests": [
+        "frontend/src/utils/__tests__/oauthCallbackSession.spec.ts",
+        "frontend/src/stores/__tests__/auth.spec.ts"
+      ]
+    },
+    {
+      "path": "frontend/src/api/authSession.ts",
+      "before_sha256": "6261024f14e5b1a3148bf1bd4b3722a273456f49f8c234c053d56e08eb53fa2b",
+      "after_sha256": "7ea7868d4518be4290a689a636ff6eb48dc71ff878e314d29242dbad07d7fc5e",
+      "reason": "Bind raw-request AbortSignals to their original session before dispatch.",
+      "tests": [
+        "frontend/src/api/__tests__/batchImage.session.spec.ts"
+      ]
+    }
+  ]
+}

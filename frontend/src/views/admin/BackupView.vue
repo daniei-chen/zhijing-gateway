@@ -48,7 +48,7 @@
           <button type="button" class="btn btn-secondary btn-sm" :disabled="testingS3" @click="testS3">
             {{ testingS3 ? t('common.loading') : t('admin.backup.s3.testConnection') }}
           </button>
-          <button type="button" class="btn btn-primary btn-sm" :disabled="savingS3" @click="saveS3Config">
+          <button type="button" class="btn btn-primary btn-sm" :disabled="savingS3 || loadingS3" @click="saveS3Config">
             {{ savingS3 ? t('common.loading') : t('common.save') }}
           </button>
         </div>
@@ -123,7 +123,7 @@
           <button type="button" class="btn btn-secondary btn-sm" :disabled="testingImageStorage" @click="testImageStorage">
             {{ testingImageStorage ? t('common.loading') : t('admin.backup.s3.testConnection') }}
           </button>
-          <button type="button" class="btn btn-primary btn-sm" :disabled="savingImageStorage" @click="saveImageStorageConfig">
+          <button type="button" class="btn btn-primary btn-sm" :disabled="savingImageStorage || loadingImageStorage" @click="saveImageStorageConfig">
             {{ savingImageStorage ? t('common.loading') : t('common.save') }}
           </button>
         </div>
@@ -169,7 +169,7 @@
           <p>{{ retentionPreview }}</p>
         </div>
         <div class="mt-4">
-          <button type="button" class="btn btn-primary btn-sm" :disabled="savingSchedule || !!scheduleValidationError" @click="saveSchedule">
+          <button type="button" class="btn btn-primary btn-sm" :disabled="savingSchedule || loadingSchedule || !!scheduleValidationError" @click="saveSchedule">
             {{ savingSchedule ? t('common.loading') : t('common.save') }}
           </button>
         </div>
@@ -189,7 +189,7 @@
           <div class="flex flex-wrap items-center gap-2">
             <div class="flex items-center gap-1">
               <label class="text-xs text-gray-600 dark:text-gray-400">{{ t('admin.backup.operations.expireDays') }}</label>
-              <input v-model.number="manualExpireDays" type="number" min="0" class="input w-20 text-xs" />
+              <input ref="manualExpireDaysInput" v-model.number="manualExpireDays" type="number" min="0" step="1" required class="input w-20 text-xs" />
             </div>
             <button type="button" class="btn btn-primary btn-sm" :disabled="creatingBackup" @click="createBackup">
               {{ creatingBackup ? t('admin.backup.operations.backing') : t('admin.backup.operations.createBackup') }}
@@ -250,6 +250,7 @@
                       v-if="record.status === 'completed'"
                       type="button"
                       class="btn btn-secondary btn-xs"
+                      :disabled="downloadingIds.has(record.id)"
                       @click="downloadBackup(record.id)"
                     >
                       {{ t('admin.backup.actions.download') }}
@@ -258,15 +259,16 @@
                       v-if="record.status === 'completed'"
                       type="button"
                       class="btn btn-secondary btn-xs"
-                      :disabled="restoringId === record.id"
+                      :disabled="restoringId === record.id || restoringRequests.has(record.id)"
                       @click="restoreBackup(record.id)"
                     >
-                      {{ restoringId === record.id ? t('common.loading') : t('admin.backup.actions.restore') }}
+                      {{ restoringId === record.id || restoringRequests.has(record.id) ? t('common.loading') : t('admin.backup.actions.restore') }}
                     </button>
                     <button
                       v-if="record.status !== 'running'"
                       type="button"
                       class="btn btn-danger btn-xs"
+                      :disabled="deletingIds.has(record.id)"
                       @click="removeBackup(record.id)"
                     >
                       {{ t('common.delete') }}
@@ -426,13 +428,40 @@ import type {
   BackupDownloadPart,
   ImageStorageConfig,
 } from '@/api/admin/backup'
-import { useStepUp, isStepUpBlocked, isStepUpCancelled, stepUpBlockReason } from '@/composables/useStepUp'
+import { useStepUp, isStepUpBlocked, isStepUpCancelled, stepUpBlockReason, StepUpCancelledError } from '@/composables/useStepUp'
+import { createSessionTasks } from '@/utils/sessionTasks'
 import TotpStepUpDialog from '@/components/auth/TotpStepUpDialog.vue'
 import BackupArchiveSettings from '@/components/admin/BackupArchiveSettings.vue'
 
 const { t } = useI18n()
 const appStore = useAppStore()
 const backupStepUp = useStepUp()
+const pageTasks = createSessionTasks()
+type BackupTask = ReturnType<typeof pageTasks.begin>
+
+function cloneConfig<T>(config: T): T {
+  return JSON.parse(JSON.stringify(config)) as T
+}
+
+function sameDraft(current: unknown, initial: unknown): boolean {
+  return JSON.stringify(current) === JSON.stringify(initial)
+}
+
+/** Hydrate persisted fields without replacing input entered during the request. */
+function mergeUneditedFields<T extends object>(current: T, initial: T, received: T): T {
+  const merged = { ...current }
+  for (const key of Object.keys(received) as Array<keyof T>) {
+    if (sameDraft(current[key], initial[key])) merged[key] = received[key]
+  }
+  return merged
+}
+
+function runBackupStepUp<T>(task: BackupTask, action: () => Promise<T>): Promise<T> {
+  return backupStepUp.run(() => {
+    if (!task.active()) throw new StepUpCancelledError()
+    return action()
+  })
+}
 
 // 敏感操作被 2FA 门控拦截时的统一提示。
 function reportStepUpBlocked(error: unknown): boolean {
@@ -456,6 +485,7 @@ const s3Form = ref<BackupS3Config>({
   force_path_style: false,
 })
 const s3SecretConfigured = ref(false)
+const loadingS3 = ref(false)
 const savingS3 = ref(false)
 const testingS3 = ref(false)
 
@@ -476,6 +506,7 @@ const imageStorageForm = ref<ImageStorageConfig>({
   force_path_style: false,
 })
 const imageStorageSecretConfigured = ref(false)
+const loadingImageStorage = ref(false)
 const savingImageStorage = ref(false)
 const testingImageStorage = ref(false)
 
@@ -487,6 +518,7 @@ const scheduleForm = ref<BackupScheduleConfig>({
   retain_count: 10,
 })
 const savingSchedule = ref(false)
+const loadingSchedule = ref(false)
 const archiveForm = ref<BackupMonthlyArchiveConfig>({ enabled: false, days: [1], include_month_end: false, retain_count: 0 })
 // Disabling hides the archive parameters, so a save while disabled keeps the
 // persisted parameters and only turns the rule off.
@@ -530,14 +562,37 @@ const loadingBackups = ref(false)
 const creatingBackup = ref(false)
 const restoringId = ref('')
 const manualExpireDays = ref(14)
+const manualExpireDaysInput = ref<HTMLInputElement | null>(null)
 const downloadParts = ref<BackupDownloadPart[]>([])
 const downloadPartsModalOpen = ref(false)
+const downloadingIds = ref(new Set<string>())
+const restoringRequests = ref(new Set<string>())
+const deletingIds = ref(new Set<string>())
+let downloadRevision = 0
+let restoreRevision = 0
+let createRequestPending = false
+const downloadOwners = new Map<string, object>()
+const restoreOwners = new Map<string, object>()
+const deleteOwners = new Map<string, object>()
+
+function addPending(ids: Set<string>, id: string): Set<string> {
+  return new Set([...ids, id])
+}
+
+function removePending(ids: Set<string>, id: string): Set<string> {
+  const next = new Set(ids)
+  next.delete(id)
+  return next
+}
 
 // Polling
 const pollingTimer = ref<ReturnType<typeof setInterval> | null>(null)
 const restoringPollingTimer = ref<ReturnType<typeof setInterval> | null>(null)
 const MAX_POLL_COUNT = 900
 let disposed = false
+let pollingTask: BackupTask | null = null
+let restorePollingTask: BackupTask | null = null
+let listTask: BackupTask | null = null
 
 function updateRecordInList(updated: BackupRecord) {
   const idx = backups.value.findIndex(r => r.id === updated.id)
@@ -547,18 +602,33 @@ function updateRecordInList(updated: BackupRecord) {
 }
 
 function startPolling(backupId: string) {
-  if (disposed) return
+  if (disposed || !pageTasks.current() || document.hidden) return
   stopPolling()
+  const request = pageTasks.begin('poll:backup')
+  pollingTask = request
+  request.signal.addEventListener('abort', () => {
+    if (pollingTask !== request) return
+    pollingTask = null
+    if (pollingTimer.value) clearInterval(pollingTimer.value)
+    pollingTimer.value = null
+    request.finish()
+  }, { once: true })
+  const ownsPoll = () => !disposed && pollingTask === request && request.active()
+  let inFlight = false
   let count = 0
   pollingTimer.value = setInterval(async () => {
+    if (!ownsPoll()) return
     if (count++ >= MAX_POLL_COUNT) {
       stopPolling()
       creatingBackup.value = false
       appStore.showWarning(t('admin.backup.operations.backupRunning'))
       return
     }
+    if (inFlight) return
+    inFlight = true
     try {
-      const record = await adminAPI.backup.getBackup(backupId)
+      const record = await adminAPI.backup.getBackup(backupId, request.signal)
+      if (!ownsPoll() || record.id !== backupId) return
       updateRecordInList(record)
       if (record.status === 'completed' || record.status === 'failed') {
         stopPolling()
@@ -572,11 +642,16 @@ function startPolling(backupId: string) {
       }
     } catch {
       // 轮询失败时不中断
+    } finally {
+      inFlight = false
     }
   }, 2000)
 }
 
 function stopPolling() {
+  pageTasks.cancel('poll:backup')
+  pollingTask?.finish()
+  pollingTask = null
   if (pollingTimer.value) {
     clearInterval(pollingTimer.value)
     pollingTimer.value = null
@@ -584,36 +659,60 @@ function stopPolling() {
 }
 
 function startRestorePolling(backupId: string) {
-  if (disposed) return
+  if (disposed || !pageTasks.current() || document.hidden) return
   stopRestorePolling()
+  const request = pageTasks.begin('poll:restore')
+  restorePollingTask = request
+  request.signal.addEventListener('abort', () => {
+    if (restorePollingTask !== request) return
+    restorePollingTask = null
+    if (restoringPollingTimer.value) clearInterval(restoringPollingTimer.value)
+    restoringPollingTimer.value = null
+    request.finish()
+  }, { once: true })
+  const ownsPoll = () => !disposed && restorePollingTask === request && request.active()
+  let inFlight = false
   let count = 0
   restoringPollingTimer.value = setInterval(async () => {
+    if (!ownsPoll()) return
     if (count++ >= MAX_POLL_COUNT) {
       stopRestorePolling()
-      restoringId.value = ''
-      appStore.showWarning(t('admin.backup.operations.restoreRunning'))
+      if (restoringId.value === backupId) {
+        restoringId.value = ''
+        appStore.showWarning(t('admin.backup.operations.restoreRunning'))
+      }
       return
     }
+    if (inFlight) return
+    inFlight = true
     try {
-      const record = await adminAPI.backup.getBackup(backupId)
+      const record = await adminAPI.backup.getBackup(backupId, request.signal)
+      if (!ownsPoll() || record.id !== backupId) return
       updateRecordInList(record)
       if (record.restore_status === 'completed' || record.restore_status === 'failed') {
         stopRestorePolling()
-        restoringId.value = ''
-        if (record.restore_status === 'completed') {
-          appStore.showSuccess(t('admin.backup.actions.restoreSuccess'))
-        } else {
-          appStore.showError(record.restore_error || t('admin.backup.operations.restoreFailed'))
+        if (restoringId.value === backupId) {
+          restoringId.value = ''
+          if (record.restore_status === 'completed') {
+            appStore.showSuccess(t('admin.backup.actions.restoreSuccess'))
+          } else {
+            appStore.showError(record.restore_error || t('admin.backup.operations.restoreFailed'))
+          }
         }
         await loadBackups()
       }
     } catch {
       // 轮询失败时不中断
+    } finally {
+      inFlight = false
     }
   }, 2000)
 }
 
 function stopRestorePolling() {
+  pageTasks.cancel('poll:restore')
+  restorePollingTask?.finish()
+  restorePollingTask = null
   if (restoringPollingTimer.value) {
     clearInterval(restoringPollingTimer.value)
     restoringPollingTimer.value = null
@@ -621,19 +720,21 @@ function stopRestorePolling() {
 }
 
 function handleVisibilityChange() {
+  if (disposed || !pageTasks.current()) return
   if (document.hidden) {
     stopPolling()
     stopRestorePolling()
   } else {
     // 标签页恢复时刷新列表，检查是否仍有活跃操作
-    loadBackups().then(() => {
+    loadBackups().then((loaded) => {
+      if (!loaded || disposed || !pageTasks.current() || document.hidden) return
       const running = backups.value.find(r => r.status === 'running')
-      if (running) {
+      if (running && !createRequestPending) {
         creatingBackup.value = true
         startPolling(running.id)
       }
       const restoring = backups.value.find(r => r.restore_status === 'running')
-      if (restoring) {
+      if (restoring && restoreOwners.size === 0) {
         restoringId.value = restoring.id
         startRestorePolling(restoring.id)
       }
@@ -654,9 +755,14 @@ const r2ConfigRows = computed(() => [
 ])
 
 async function loadS3Config() {
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('load:s3')
+  const initial = cloneConfig(s3Form.value)
+  loadingS3.value = true
   try {
     const cfg = await adminAPI.backup.getS3Config()
-    s3Form.value = {
+    if (!task.active()) return
+    const received: BackupS3Config = {
       endpoint: cfg.endpoint || '',
       region: cfg.region || 'auto',
       bucket: cfg.bucket || '',
@@ -665,169 +771,248 @@ async function loadS3Config() {
       prefix: cfg.prefix || 'backups/',
       force_path_style: cfg.force_path_style,
     }
+    s3Form.value = mergeUneditedFields(s3Form.value, initial, received)
     s3SecretConfigured.value = Boolean(cfg.access_key_id)
   } catch (error) {
-    appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+    if (task.active()) appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+  } finally {
+    if (task.owned()) loadingS3.value = false
+    task.finish()
   }
 }
 
 async function saveS3Config() {
+  if (!pageTasks.current() || savingS3.value || loadingS3.value) return
+  const task = pageTasks.begin('save:s3')
+  const request = cloneConfig(s3Form.value)
   savingS3.value = true
   try {
-    await backupStepUp.run(() => adminAPI.backup.updateS3Config(s3Form.value))
-    appStore.showSuccess(t('admin.backup.s3.saved'))
-    await loadS3Config()
-  } catch (error) {
-    if (isStepUpCancelled(error)) {
-      savingS3.value = false
-      return
+    await runBackupStepUp(task, () => adminAPI.backup.updateS3Config(request))
+    if (!task.active()) return
+    if (sameDraft(s3Form.value, request)) {
+      appStore.showSuccess(t('admin.backup.s3.saved'))
+      await loadS3Config()
     }
+  } catch (error) {
+    if (!task.active() || isStepUpCancelled(error)) return
     appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
   } finally {
-    savingS3.value = false
+    if (task.owned()) savingS3.value = false
+    task.finish()
   }
 }
 
 async function loadImageStorageConfig() {
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('load:image-storage')
+  const initial = cloneConfig(imageStorageForm.value)
+  loadingImageStorage.value = true
   try {
     const { config, secret_configured } = await adminAPI.backup.getImageStorageConfig()
-    imageStorageForm.value = {
+    if (!task.active()) return
+    const received: ImageStorageConfig = {
       ...config,
       prefix: config.prefix || 'images/',
       region: config.region || 'auto',
       secret_access_key: '',
     }
+    imageStorageForm.value = mergeUneditedFields(imageStorageForm.value, initial, received)
     imageStorageSecretConfigured.value = secret_configured
   } catch (error) {
-    appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+    if (task.active()) appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+  } finally {
+    if (task.owned()) loadingImageStorage.value = false
+    task.finish()
   }
 }
 
 async function saveImageStorageConfig() {
+  if (!pageTasks.current() || savingImageStorage.value || loadingImageStorage.value) return
+  const task = pageTasks.begin('save:image-storage')
+  const request = cloneConfig(imageStorageForm.value)
   savingImageStorage.value = true
   try {
-    await backupStepUp.run(() => adminAPI.backup.updateImageStorageConfig(imageStorageForm.value))
-    appStore.showSuccess(t('admin.backup.imageStorage.saved'))
-    await loadImageStorageConfig()
-  } catch (error) {
-    if (isStepUpCancelled(error)) {
-      savingImageStorage.value = false
-      return
+    await runBackupStepUp(task, () => adminAPI.backup.updateImageStorageConfig(request))
+    if (!task.active()) return
+    if (sameDraft(imageStorageForm.value, request)) {
+      appStore.showSuccess(t('admin.backup.imageStorage.saved'))
+      await loadImageStorageConfig()
     }
+  } catch (error) {
+    if (!task.active() || isStepUpCancelled(error)) return
     appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
   } finally {
-    savingImageStorage.value = false
+    if (task.owned()) savingImageStorage.value = false
+    task.finish()
   }
 }
 
 async function testImageStorage() {
+  if (!pageTasks.current() || testingImageStorage.value) return
+  const task = pageTasks.begin('test:image-storage')
+  const request = cloneConfig(imageStorageForm.value)
   testingImageStorage.value = true
   try {
-    const result = await adminAPI.backup.testImageStorageConnection(imageStorageForm.value)
+    const result = await adminAPI.backup.testImageStorageConnection(request)
+    if (!task.active() || !sameDraft(imageStorageForm.value, request)) return
     if (result.ok) {
       appStore.showSuccess(result.message || t('admin.backup.s3.testSuccess'))
     } else {
       appStore.showError(result.message || t('admin.backup.s3.testFailed'))
     }
   } catch (error) {
-    appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+    if (task.active() && sameDraft(imageStorageForm.value, request)) appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
   } finally {
-    testingImageStorage.value = false
+    if (task.owned()) testingImageStorage.value = false
+    task.finish()
   }
 }
 
 async function testS3() {
+  if (!pageTasks.current() || testingS3.value) return
+  const task = pageTasks.begin('test:s3')
+  const request = cloneConfig(s3Form.value)
   testingS3.value = true
   try {
-    const result = await adminAPI.backup.testS3Connection(s3Form.value)
+    const result = await adminAPI.backup.testS3Connection(request)
+    if (!task.active() || !sameDraft(s3Form.value, request)) return
     if (result.ok) {
       appStore.showSuccess(result.message || t('admin.backup.s3.testSuccess'))
     } else {
       appStore.showError(result.message || t('admin.backup.s3.testFailed'))
     }
   } catch (error) {
-    appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+    if (task.active() && sameDraft(s3Form.value, request)) appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
   } finally {
-    testingS3.value = false
+    if (task.owned()) testingS3.value = false
+    task.finish()
   }
 }
 
 async function loadSchedule() {
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('load:schedule')
+  const initial = cloneConfig(scheduleForm.value)
+  const initialArchive = cloneArchive(archiveForm.value)
+  loadingSchedule.value = true
   try {
     const cfg = await adminAPI.backup.getSchedule()
-    scheduleForm.value = {
+    if (!task.active()) return
+    const received: BackupScheduleConfig = {
       enabled: cfg.enabled,
       cron_expr: cfg.cron_expr || '0 2 * * *',
       retain_days: cfg.retain_days ?? 14,
       retain_count: cfg.retain_count ?? 10,
     }
-    archiveForm.value = {
+    const receivedArchive: BackupMonthlyArchiveConfig = {
       enabled: cfg.monthly_archive?.enabled ?? false,
       days: cfg.monthly_archive?.days ?? [1],
       include_month_end: cfg.monthly_archive?.include_month_end ?? false,
       retain_count: cfg.monthly_archive?.retain_count ?? 0,
     }
-    savedArchive.value = cloneArchive(archiveForm.value)
+    scheduleForm.value = mergeUneditedFields(scheduleForm.value, initial, received)
+    archiveForm.value = mergeUneditedFields(archiveForm.value, initialArchive, receivedArchive)
+    savedArchive.value = cloneArchive(receivedArchive)
   } catch (error) {
-    appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+    if (task.active()) appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+  } finally {
+    if (task.owned()) loadingSchedule.value = false
+    task.finish()
   }
 }
 
 async function saveSchedule() {
-  if (scheduleValidationError.value) return
+  if (!pageTasks.current() || savingSchedule.value || loadingSchedule.value || scheduleValidationError.value) return
+  const task = pageTasks.begin('save:schedule')
+  const request = { ...cloneConfig(scheduleForm.value), monthly_archive: cloneArchive(archivePayload.value) }
+  const draft = JSON.stringify({ config: scheduleForm.value, archive: archiveForm.value })
   savingSchedule.value = true
   try {
-    const archive = archivePayload.value
-    await adminAPI.backup.updateSchedule({ ...scheduleForm.value, monthly_archive: archive })
-    savedArchive.value = cloneArchive(archive)
-    appStore.showSuccess(t('admin.backup.schedule.saved'))
+    await adminAPI.backup.updateSchedule(request)
+    if (!task.active()) return
+    savedArchive.value = cloneArchive(request.monthly_archive)
+    if (draft === JSON.stringify({ config: scheduleForm.value, archive: archiveForm.value })) {
+      appStore.showSuccess(t('admin.backup.schedule.saved'))
+    }
   } catch (error) {
-    appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+    if (task.active()) appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
   } finally {
-    savingSchedule.value = false
+    if (task.owned()) savingSchedule.value = false
+    task.finish()
   }
 }
 
 async function loadBackups() {
+  if (disposed || !pageTasks.current()) return false
+  const request = pageTasks.begin('load:list')
+  listTask = request
+  const ownsRequest = () => !disposed && listTask === request && request.active()
   loadingBackups.value = true
   try {
-    const result = await adminAPI.backup.listBackups()
+    const result = await adminAPI.backup.listBackups(request.signal)
+    if (!ownsRequest()) return false
     backups.value = result.items || []
+    return true
   } catch (error) {
-    appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+    if (ownsRequest()) appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+    return false
   } finally {
-    loadingBackups.value = false
+    if (listTask === request) {
+      listTask = null
+      if (pageTasks.current()) loadingBackups.value = false
+    }
+    request.finish()
   }
 }
 
 async function createBackup() {
+  if (!pageTasks.current() || creatingBackup.value) return
+  if (!Number.isSafeInteger(manualExpireDays.value) || manualExpireDays.value < 0) {
+    manualExpireDaysInput.value?.reportValidity()
+    appStore.showError(t('admin.backup.operations.invalidExpiryDays'))
+    return
+  }
+  const task = pageTasks.begin('command:create')
+  const request = { expire_days: manualExpireDays.value }
+  let accepted = false
+  createRequestPending = true
   creatingBackup.value = true
   try {
-    const record = await backupStepUp.run(() => adminAPI.backup.createBackup({ expire_days: manualExpireDays.value }))
+    const record = await runBackupStepUp(task, () => adminAPI.backup.createBackup(request))
+    if (!task.active()) return
     // 插入到列表顶部
     backups.value.unshift(record)
+    accepted = true
     startPolling(record.id)
   } catch (error: any) {
-    if (isStepUpCancelled(error)) {
-      creatingBackup.value = false
-      return
-    }
-    if (reportStepUpBlocked(error)) {
-      creatingBackup.value = false
-      return
-    }
-    if (error?.response?.status === 409) {
+    if (!task.active() || isStepUpCancelled(error)) return
+    if (reportStepUpBlocked(error)) return
+    if (error?.status === 409 || error?.response?.status === 409) {
       appStore.showWarning(t('admin.backup.operations.alreadyInProgress'))
     } else {
       appStore.showError(error?.message || t('errors.networkError'))
     }
-    creatingBackup.value = false
+  } finally {
+    if (task.owned()) {
+      createRequestPending = false
+      if (!accepted) creatingBackup.value = false
+    }
+    task.finish()
   }
 }
 
 async function downloadBackup(id: string) {
+  if (!pageTasks.current() || downloadOwners.has(id)) return
+  const revision = ++downloadRevision
+  const owner = {}
+  downloadOwners.set(id, owner)
+  downloadingIds.value = addPending(downloadingIds.value, id)
+  downloadPartsModalOpen.value = false
+  downloadParts.value = []
+  const task = pageTasks.begin(`download:${id}`, () => revision === downloadRevision)
   try {
-    const result = await backupStepUp.run(() => adminAPI.backup.getDownloadURL(id))
+    const result = await runBackupStepUp(task, () => adminAPI.backup.getDownloadURL(id))
+    if (!task.active()) return
     if (result.parts && result.parts.length > 0) {
       downloadParts.value = result.parts
       downloadPartsModalOpen.value = true
@@ -843,28 +1028,47 @@ async function downloadBackup(id: string) {
     link.rel = 'noopener'
     link.click()
   } catch (error) {
-    if (isStepUpCancelled(error)) return
+    if (!task.active() || isStepUpCancelled(error)) return
     if (reportStepUpBlocked(error)) return
     appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+  } finally {
+    if (downloadOwners.get(id) === owner) {
+      downloadOwners.delete(id)
+      if (pageTasks.current()) downloadingIds.value = removePending(downloadingIds.value, id)
+    }
+    task.finish()
   }
 }
 
 function closeDownloadParts() {
+  downloadRevision += 1
+  pageTasks.cancel('download:')
+  downloadOwners.clear()
+  downloadingIds.value = new Set()
   downloadPartsModalOpen.value = false
   downloadParts.value = []
 }
 
 async function restoreBackup(id: string) {
+  if (!pageTasks.current() || restoreOwners.has(id) || restoringId.value === id) return
   if (!window.confirm(t('admin.backup.actions.restoreConfirm'))) return
+  if (!pageTasks.current()) return
   const password = window.prompt(t('admin.backup.actions.restorePasswordPrompt'))
-  if (!password) return
+  if (!password || !pageTasks.current()) return
+  const revision = ++restoreRevision
+  const owner = {}
+  restoreOwners.set(id, owner)
+  restoringRequests.value = addPending(restoringRequests.value, id)
+  const task = pageTasks.begin(`restore:${id}`, () => revision === restoreRevision)
   restoringId.value = id
   try {
-    const record = await backupStepUp.run(() => adminAPI.backup.restoreBackup(id, password))
+    const record = await runBackupStepUp(task, () => adminAPI.backup.restoreBackup(id, password))
+    if (!task.active()) return
     updateRecordInList(record)
     startRestorePolling(id)
   } catch (error: any) {
-    restoringId.value = ''
+    if (!task.active()) return
+    if (restoringId.value === id) restoringId.value = ''
     if (isStepUpCancelled(error)) return
     if (reportStepUpBlocked(error)) return
     // apiClient 拦截器把 HTTP 错误归一化为顶层 { status } 平面对象（无 response 字段）
@@ -873,18 +1077,37 @@ async function restoreBackup(id: string) {
     } else {
       appStore.showError(error?.message || t('errors.networkError'))
     }
+  } finally {
+    if (restoreOwners.get(id) === owner) {
+      restoreOwners.delete(id)
+      if (pageTasks.current()) restoringRequests.value = removePending(restoringRequests.value, id)
+    }
+    task.finish()
   }
 }
 
 async function removeBackup(id: string) {
+  if (!pageTasks.current() || deleteOwners.has(id)) return
   const archived = !!backups.value.find(record => record.id === id)?.monthly_archive
   if (!window.confirm(t(archived ? 'admin.backup.archive.deleteConfirm' : 'admin.backup.actions.deleteConfirm'))) return
+  if (!pageTasks.current()) return
+  const owner = {}
+  deleteOwners.set(id, owner)
+  deletingIds.value = addPending(deletingIds.value, id)
+  const task = pageTasks.begin(`delete:${id}`)
   try {
     await adminAPI.backup.deleteBackup(id, archived)
+    if (!task.active()) return
     appStore.showSuccess(t('admin.backup.actions.deleted'))
     await loadBackups()
   } catch (error) {
-    appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+    if (task.active()) appStore.showError((error as { message?: string })?.message || t('errors.networkError'))
+  } finally {
+    if (deleteOwners.get(id) === owner) {
+      deleteOwners.delete(id)
+      if (pageTasks.current()) deletingIds.value = removePending(deletingIds.value, id)
+    }
+    task.finish()
   }
 }
 
@@ -918,15 +1141,16 @@ function formatDate(value?: string): string {
 onMounted(async () => {
   document.addEventListener('visibilitychange', handleVisibilityChange)
   await Promise.all([loadS3Config(), loadImageStorageConfig(), loadSchedule(), loadBackups()])
+  if (disposed || !pageTasks.current() || document.hidden) return
 
   // 如果有正在 running 的备份，恢复轮询
   const runningBackup = backups.value.find(r => r.status === 'running')
-  if (runningBackup) {
+  if (runningBackup && !createRequestPending) {
     creatingBackup.value = true
     startPolling(runningBackup.id)
   }
   const restoringBackup = backups.value.find(r => r.restore_status === 'running')
-  if (restoringBackup) {
+  if (restoringBackup && restoreOwners.size === 0) {
     restoringId.value = restoringBackup.id
     startRestorePolling(restoringBackup.id)
   }
@@ -934,8 +1158,13 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   disposed = true
+  pageTasks.dispose()
   stopPolling()
   stopRestorePolling()
+  listTask = null
+  downloadOwners.clear()
+  restoreOwners.clear()
+  deleteOwners.clear()
   document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 </script>

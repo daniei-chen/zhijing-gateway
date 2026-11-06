@@ -19,6 +19,7 @@ vi.mock('@/api/client', () => ({
 }))
 
 import { passkeyAPI } from '@/api/passkey'
+import { replaceAuthSession } from '@/api/authSession'
 
 class FakePublicKeyCredential {
   id = 'credential-id'
@@ -50,6 +51,7 @@ class FakeRegistrationCredential extends FakePublicKeyCredential {
 
 describe('passkey api', () => {
   beforeEach(() => {
+    localStorage.clear()
     get.mockReset()
     post.mockReset()
     patch.mockReset()
@@ -196,5 +198,36 @@ describe('passkey api', () => {
     expect(remove).toHaveBeenCalledWith('/user/passkeys/12', {
       data: { password: 'hunter2' }
     })
+  })
+
+  it.each(['login', 'register'] as const)('does not finish an old %s ceremony after the session is replaced', async mode => {
+    replaceAuthSession({ accessToken: 'SYNTHETIC-old', user: { id: 41 } })
+    post.mockResolvedValueOnce({
+      data: {
+        session_token: 'SYNTHETIC-ceremony',
+        options: { publicKey: {
+          challenge: 'AQID',
+          user: { id: 'BAU', name: 'user@example.test', displayName: 'SYNTHETIC' }
+        } }
+      }
+    }).mockResolvedValueOnce({ data: {} })
+    let complete!: (credential: FakePublicKeyCredential) => void
+    let signal: AbortSignal | undefined
+    const request = mode === 'login' ? credentialGet : credentialCreate
+    request.mockImplementation((options: { signal?: AbortSignal }) => {
+      signal = options.signal
+      return new Promise(resolve => { complete = resolve })
+    })
+
+    const result = (mode === 'login' ? passkeyAPI.login() : passkeyAPI.register('SYNTHETIC device', 'SYNTHETIC password'))
+      .catch(error => error)
+    await vi.waitFor(() => expect(request).toHaveBeenCalledTimes(1))
+    // Even a second login for the same account has a new session generation.
+    replaceAuthSession({ accessToken: 'SYNTHETIC-new-login', user: { id: 41 } })
+    complete(mode === 'login' ? new FakePublicKeyCredential() : new FakeRegistrationCredential())
+
+    await expect(result).resolves.toMatchObject({ code: 'AUTH_SESSION_CHANGED' })
+    expect(signal?.aborted).toBe(true)
+    expect(post).toHaveBeenCalledTimes(1)
   })
 })

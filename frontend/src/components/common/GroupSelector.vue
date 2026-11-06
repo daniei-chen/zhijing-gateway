@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <label class="input-label">
+  <div role="group" :aria-labelledby="`${fieldId}-label`">
+    <label :id="`${fieldId}-label`" :for="isSearchable ? `${fieldId}-search` : undefined" class="input-label">
       {{ t('admin.users.groups') }}
       <span class="font-normal text-gray-400">{{ t('common.selectedCount', { count: modelValue.length }) }}</span>
     </label>
@@ -10,6 +10,9 @@
     >
       <Icon name="search" size="sm" class="shrink-0 text-gray-400" />
       <input
+        :id="`${fieldId}-search`"
+        :aria-labelledby="`${fieldId}-label`"
+        :disabled="disabled"
         v-model="searchText"
         type="text"
         :placeholder="t('common.searchPlaceholder')"
@@ -27,10 +30,13 @@
       <label
         v-for="group in filteredGroups"
         :key="group.id"
+        :for="`${fieldId}-group-${group.id}`"
         class="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 transition-colors hover:bg-white dark:hover:bg-dark-700"
         :title="group.rate_multiplier == null ? group.name : t('admin.groups.rateAndAccounts', { rate: group.rate_multiplier, count: group.account_count || 0 })"
       >
         <input
+          :id="`${fieldId}-group-${group.id}`"
+          :disabled="disabled"
           type="checkbox"
           :value="group.id"
           :checked="modelValue.includes(group.id)"
@@ -57,7 +63,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import GroupBadge from './GroupBadge.vue'
 import Icon from '@/components/icons/Icon.vue'
@@ -65,6 +71,7 @@ import type { Group, GroupPlatform } from '@/types'
 import { useAuthStore } from '@/stores'
 
 const { t } = useI18n()
+const fieldId = `group-selector-${useId()}`
 const authStore = useAuthStore()
 
 interface Props {
@@ -73,10 +80,12 @@ interface Props {
   platform?: GroupPlatform // Optional platform filter
   mixedScheduling?: boolean // For antigravity accounts: allow anthropic/gemini groups
   searchable?: boolean | 'auto'
+  disabled?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  searchable: 'auto'
+  searchable: 'auto',
+  disabled: false
 })
 const emit = defineEmits<{
   'update:modelValue': [value: number[]]
@@ -126,6 +135,7 @@ watch(
 )
 
 const handleChange = (groupId: number, checked: boolean) => {
+  if (props.disabled) return
   const newValue = checked
     ? [...props.modelValue, groupId]
     : props.modelValue.filter((id) => id !== groupId)

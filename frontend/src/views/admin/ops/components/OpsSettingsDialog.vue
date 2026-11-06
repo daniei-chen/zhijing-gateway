@@ -1,15 +1,20 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, onBeforeUnmount, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { opsAPI } from '@/api/admin/ops'
 import BaseDialog from '@/components/common/BaseDialog.vue'
 import Select from '@/components/common/Select.vue'
 import Toggle from '@/components/common/Toggle.vue'
+import { createSessionTasks } from '@/utils/sessionTasks'
+import { extractApiErrorMessage } from '@/utils/apiError'
 import type { OpsAlertRuntimeSettings, EmailNotificationConfig, AlertSeverity, OpsAdvancedSettings, OpsMetricThresholds } from '../types'
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const pageTasks = createSessionTasks()
+let dialogRevision = 0
+onBeforeUnmount(() => pageTasks.dispose())
 
 const props = defineProps<{
   show: boolean
@@ -37,9 +42,14 @@ const metricThresholds = ref<OpsMetricThresholds>({
   request_error_rate_percent_max: 5,
   upstream_error_rate_percent_max: 5
 })
+const alertRecipientInput = ref('')
+const reportRecipientInput = ref('')
 
 // 加载所有配置
 async function loadAllSettings() {
+  if (!pageTasks.current() || !props.show) return
+  const revision = dialogRevision
+  const task = pageTasks.begin('load', () => props.show && revision === dialogRevision)
   settingsLoaded.value = false
   loading.value = true
   try {
@@ -49,6 +59,7 @@ async function loadAllSettings() {
       opsAPI.getAdvancedSettings(),
       opsAPI.getMetricThresholds()
     ])
+    if (!task.active()) return
     runtimeSettings.value = runtime
     emailConfig.value = email
     advancedSettings.value = advanced
@@ -56,34 +67,37 @@ async function loadAllSettings() {
     if (advancedSettings.value && !advancedSettings.value.openai_account_quota_auto_pause) {
       advancedSettings.value.openai_account_quota_auto_pause = { default_threshold_5h: 0, default_threshold_7d: 0 }
     }
-    // 如果后端返回了阈值，使用后端的值；否则保持默认值
-    if (thresholds && Object.keys(thresholds).length > 0) {
-        metricThresholds.value = {
-          sla_percent_min: thresholds.sla_percent_min ?? 99.5,
-          ttft_p99_ms_max: thresholds.ttft_p99_ms_max ?? 500,
-          request_error_rate_percent_max: thresholds.request_error_rate_percent_max ?? 5,
-          upstream_error_rate_percent_max: thresholds.upstream_error_rate_percent_max ?? 5
-        }
+    // Omitted nullable fields restore the existing display defaults on every load.
+    metricThresholds.value = {
+      sla_percent_min: thresholds?.sla_percent_min ?? 99.5,
+      ttft_p99_ms_max: thresholds?.ttft_p99_ms_max ?? 500,
+      request_error_rate_percent_max: thresholds?.request_error_rate_percent_max ?? 5,
+      upstream_error_rate_percent_max: thresholds?.upstream_error_rate_percent_max ?? 5
     }
     settingsLoaded.value = true
   } catch (err: any) {
+    if (!task.active()) return
     console.error('[OpsSettingsDialog] Failed to load settings', err)
-    appStore.showError(err?.response?.data?.detail || t('admin.ops.settings.loadFailed'))
+    appStore.showError(extractApiErrorMessage(err, t('admin.ops.settings.loadFailed')))
   } finally {
-    loading.value = false
+    if (task.owned()) loading.value = false
+    task.finish()
   }
 }
 
 // 监听弹窗打开
 watch(() => props.show, (show) => {
+  dialogRevision += 1
+  pageTasks.cancel()
+  loading.value = false
+  saving.value = false
+  settingsLoaded.value = false
   if (show) {
+    alertRecipientInput.value = ''
+    reportRecipientInput.value = ''
     loadAllSettings()
   }
-})
-
-// 邮件输入
-const alertRecipientInput = ref('')
-const reportRecipientInput = ref('')
+}, { immediate: true })
 
 // 严重级别选项
 const severityOptions: Array<{ value: AlertSeverity | ''; label: string }> = [
@@ -149,13 +163,18 @@ const quotaAutoPause7dPercent = computed<number | null>({
 })
 
 // 验证
+function setMetricThreshold(key: keyof OpsMetricThresholds, event: Event) {
+  const raw = (event.target as HTMLInputElement).value
+  metricThresholds.value[key] = raw === '' ? null : Number(raw)
+}
+
 const validation = computed(() => {
   const errors: string[] = []
 
   // 验证运行时设置
   if (runtimeSettings.value) {
     const evalSeconds = runtimeSettings.value.evaluation_interval_seconds
-    if (!Number.isFinite(evalSeconds) || evalSeconds < 1 || evalSeconds > 86400) {
+    if (!Number.isInteger(evalSeconds) || evalSeconds < 1 || evalSeconds > 86400) {
       errors.push(t('admin.ops.runtime.validation.evalIntervalRange'))
     }
   }
@@ -165,13 +184,13 @@ const validation = computed(() => {
   // 验证高级设置
   if (advancedSettings.value) {
     const { error_log_retention_days, minute_metrics_retention_days, hourly_metrics_retention_days } = advancedSettings.value.data_retention
-    if (error_log_retention_days < 0 || error_log_retention_days > 365) {
+    if (!Number.isInteger(error_log_retention_days) || error_log_retention_days < 0 || error_log_retention_days > 365) {
       errors.push(t('admin.ops.settings.validation.retentionDaysRange'))
     }
-    if (minute_metrics_retention_days < 0 || minute_metrics_retention_days > 365) {
+    if (!Number.isInteger(minute_metrics_retention_days) || minute_metrics_retention_days < 0 || minute_metrics_retention_days > 365) {
       errors.push(t('admin.ops.settings.validation.retentionDaysRange'))
     }
-    if (hourly_metrics_retention_days < 0 || hourly_metrics_retention_days > 365) {
+    if (!Number.isInteger(hourly_metrics_retention_days) || hourly_metrics_retention_days < 0 || hourly_metrics_retention_days > 365) {
       errors.push(t('admin.ops.settings.validation.retentionDaysRange'))
     }
 
@@ -199,38 +218,60 @@ const validation = computed(() => {
 })
 
 // 保存所有配置
+function settingsDraft() {
+  return JSON.stringify({
+    runtime: runtimeSettings.value, email: emailConfig.value,
+    advanced: advancedSettings.value, thresholds: metricThresholds.value,
+    alertRecipient: alertRecipientInput.value, reportRecipient: reportRecipientInput.value
+  })
+}
+
 async function saveAllSettings() {
-  if (loading.value || !settingsLoaded.value || saving.value) return
+  if (!pageTasks.current() || !props.show || loading.value || !settingsLoaded.value || saving.value) return
   if (!validation.value.valid) {
     appStore.showError(validation.value.errors[0])
     return
   }
 
+  // Normalize the same visible email choices before capturing this submission.
+  if (emailConfig.value) {
+    if (emailConfig.value.alert.enabled && emailConfig.value.alert.recipients.length === 0) {
+      emailConfig.value.alert.enabled = false
+    }
+    if (emailConfig.value.report.enabled && emailConfig.value.report.recipients.length === 0) {
+      emailConfig.value.report.enabled = false
+    }
+  }
+  const revision = dialogRevision
+  const draft = settingsDraft()
+  const payload = JSON.parse(draft) as {
+    runtime: OpsAlertRuntimeSettings | null
+    email: EmailNotificationConfig | null
+    advanced: OpsAdvancedSettings | null
+    thresholds: OpsMetricThresholds
+  }
+  const task = pageTasks.begin('save', () => props.show && revision === dialogRevision && settingsDraft() === draft)
   saving.value = true
   try {
-    // 无收件人时自动禁用邮件通知
-    if (emailConfig.value) {
-      if (emailConfig.value.alert.enabled && emailConfig.value.alert.recipients.length === 0) {
-        emailConfig.value.alert.enabled = false
-      }
-      if (emailConfig.value.report.enabled && emailConfig.value.report.recipients.length === 0) {
-        emailConfig.value.report.enabled = false
-      }
-    }
-    await Promise.all([
-      runtimeSettings.value ? opsAPI.updateAlertRuntimeSettings(runtimeSettings.value) : Promise.resolve(),
-      emailConfig.value ? opsAPI.updateEmailNotificationConfig(emailConfig.value) : Promise.resolve(),
-      advancedSettings.value ? opsAPI.updateAdvancedSettings(advancedSettings.value) : Promise.resolve(),
-      opsAPI.updateMetricThresholds(metricThresholds.value)
+    const results = await Promise.allSettled([
+      payload.runtime ? opsAPI.updateAlertRuntimeSettings(payload.runtime) : Promise.resolve(),
+      payload.email ? opsAPI.updateEmailNotificationConfig(payload.email) : Promise.resolve(),
+      payload.advanced ? opsAPI.updateAdvancedSettings(payload.advanced) : Promise.resolve(),
+      opsAPI.updateMetricThresholds(payload.thresholds)
     ])
+    const failure = results.find(result => result.status === 'rejected')
+    if (failure?.status === 'rejected') throw failure.reason
+    if (!task.active()) return
     appStore.showSuccess(t('admin.ops.settings.saveSuccess'))
     emit('saved')
     emit('close')
   } catch (err: any) {
+    if (!task.active()) return
     console.error('[OpsSettingsDialog] Failed to save settings', err)
-    appStore.showError(err?.response?.data?.message || err?.response?.data?.detail || t('admin.ops.settings.saveFailed'))
+    appStore.showError(extractApiErrorMessage(err, t('admin.ops.settings.saveFailed')))
   } finally {
-    saving.value = false
+    if (task.owned()) saving.value = false
+    task.finish()
   }
 }
 </script>
@@ -383,7 +424,8 @@ async function saveAllSettings() {
           <div>
             <label class="input-label">{{ t('admin.ops.settings.slaMinPercent') }}</label>
             <input
-              v-model.number="metricThresholds.sla_percent_min"
+              :value="metricThresholds.sla_percent_min"
+              @input="setMetricThreshold('sla_percent_min', $event)"
               type="number"
               min="0"
               max="100"
@@ -397,7 +439,8 @@ async function saveAllSettings() {
           <div>
             <label class="input-label">{{ t('admin.ops.settings.ttftP99MaxMs') }}</label>
             <input
-              v-model.number="metricThresholds.ttft_p99_ms_max"
+              :value="metricThresholds.ttft_p99_ms_max"
+              @input="setMetricThreshold('ttft_p99_ms_max', $event)"
               type="number"
               min="0"
               step="50"
@@ -409,7 +452,8 @@ async function saveAllSettings() {
           <div>
             <label class="input-label">{{ t('admin.ops.settings.requestErrorRateMaxPercent') }}</label>
             <input
-              v-model.number="metricThresholds.request_error_rate_percent_max"
+              :value="metricThresholds.request_error_rate_percent_max"
+              @input="setMetricThreshold('request_error_rate_percent_max', $event)"
               type="number"
               min="0"
               max="100"
@@ -422,7 +466,8 @@ async function saveAllSettings() {
           <div>
             <label class="input-label">{{ t('admin.ops.settings.upstreamErrorRateMaxPercent') }}</label>
             <input
-              v-model.number="metricThresholds.upstream_error_rate_percent_max"
+              :value="metricThresholds.upstream_error_rate_percent_max"
+              @input="setMetricThreshold('upstream_error_rate_percent_max', $event)"
               type="number"
               min="0"
               max="100"

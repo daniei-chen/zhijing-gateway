@@ -1,0 +1,147 @@
+
+ RUN  v4.1.12 ${AUDIT_WORKSPACE}/zhijing-audit-baseline/frontend
+
+ ❯ src/api/__tests__/admin.duplicateConcurrency.spec.ts (6 tests | 4 failed) 99ms
+     × keeps each administrator's failed operation available for that administrator only 74ms
+     × does not let an older concurrent completion erase a newer ambiguous operation 4ms
+     × does not let an older concurrent completion erase a newer ambiguous operation 4ms
+     × does not let an older concurrent completion erase a newer ambiguous operation 2ms
+ ❯ src/api/__tests__/admin.accounts.duplicate.spec.ts (5 tests | 3 failed) 19ms
+     × sends a stable idempotency key with the duplicate request 10ms
+     × does not adopt an old account-only operation key with no recorded administrator 2ms
+     × does not persist or reuse keys when the current administrator cannot be parsed 2ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/api/__tests__/admin.accounts.duplicate.spec.ts > admin account duplicate API > sends a stable idempotency key with the duplicate request
+AssertionError: expected "vi.fn()" to be called with arguments: [ Array(3) ]
+
+Received:
+
+  1st vi.fn() call:
+
+  [
+    "/admin/accounts/42/duplicate",
+    undefined,
+    {
+      "headers": {
+-       "Idempotency-Key": "account-duplicate-7-42-11111111-1111-4111-8111-111111111111",
++       "Idempotency-Key": "account-duplicate-42-11111111-1111-4111-8111-111111111111",
+      },
+    },
+  ]
+
+
+Number of calls: 1
+
+ ❯ src/api/__tests__/admin.accounts.duplicate.spec.ts:28:18
+     26|     const account = await duplicate(42)
+     27|
+     28|     expect(post).toHaveBeenCalledWith('/admin/accounts/42/duplicate', …
+       |                  ^
+     29|       headers: {
+     30|         'Idempotency-Key': 'account-duplicate-7-42-11111111-1111-4111-…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/7]⎯
+
+ FAIL  src/api/__tests__/admin.accounts.duplicate.spec.ts > admin account duplicate API > does not adopt an old account-only operation key with no recorded administrator
+AssertionError: expected 'legacy-unknown-admin' not to be 'legacy-unknown-admin' // Object.is equality
+ ❯ src/api/__tests__/admin.accounts.duplicate.spec.ts:67:66
+     65|     sessionStorage.setItem('sub2api:admin:account-duplicate:88', 'lega…
+     66|     await duplicate(88)
+     67|     expect(post.mock.calls[0][2].headers['Idempotency-Key']).not.toBe(…
+       |                                                                  ^
+     68|   })
+     69|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/7]⎯
+
+ FAIL  src/api/__tests__/admin.accounts.duplicate.spec.ts > admin account duplicate API > does not persist or reuse keys when the current administrator cannot be parsed
+AssertionError: expected { Object (Idempotency-Key) } to not deeply equal { Object (Idempotency-Key) }
+
+Compared values have no visual difference.
+
+ ❯ src/api/__tests__/admin.accounts.duplicate.spec.ts:77:47
+     75|     vi.mocked(globalThis.crypto.randomUUID).mockReturnValueOnce('33333…
+     76|     await duplicate(66)
+     77|     expect(post.mock.calls[1][2].headers).not.toEqual(firstHeaders)
+       |                                               ^
+     78|     expect(sessionStorage.length).toBe(0)
+     79|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/7]⎯
+
+ FAIL  src/api/__tests__/admin.duplicateConcurrency.spec.ts > 'account' duplicate operation ownership > keeps each administrator's failed operation available for that administrator only
+AssertionError: expected 'account-duplicate-55-11111111-1111-41…' not to be 'account-duplicate-55-11111111-1111-41…' // Object.is equality
+ ❯ src/api/__tests__/admin.duplicateConcurrency.spec.ts:39:66
+     37|     vi.mocked(globalThis.crypto.randomUUID).mockReturnValueOnce('22222…
+     38|     await duplicate(55)
+     39|     expect(post.mock.calls[1][2].headers['Idempotency-Key']).not.toBe(…
+       |                                                                  ^
+     40|     expect(sessionStorage.getItem(`sub2api:admin:${prefix}:7:55`)).toB…
+     41|     expect(sessionStorage.getItem(`sub2api:admin:${prefix}:8:55`)).toB…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/7]⎯
+
+ FAIL  src/api/__tests__/admin.duplicateConcurrency.spec.ts > 'account' duplicate operation ownership > does not let an older concurrent completion erase a newer ambiguous operation
+AssertionError: expected null to be 'account-duplicate-61-22222222-2222-42…' // Object.is equality
+
+- Expected:
+"account-duplicate-61-22222222-2222-4222-8222-222222222222"
+
++ Received:
+null
+
+ ❯ src/api/__tests__/admin.duplicateConcurrency.spec.ts:69:68
+     67|     newer.reject(new Error('newer timeout'))
+     68|     await rejection
+     69|     expect(sessionStorage.getItem(`sub2api:admin:${prefix}:7:61`)).toB…
+       |                                                                    ^
+     70|
+     71|     await duplicate(61)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/7]⎯
+
+ FAIL  src/api/__tests__/admin.duplicateConcurrency.spec.ts > 'group' duplicate operation ownership > does not let an older concurrent completion erase a newer ambiguous operation
+AssertionError: expected null to be 'group-duplicate-7-61-22222222-2222-42…' // Object.is equality
+
+- Expected:
+"group-duplicate-7-61-22222222-2222-4222-8222-222222222222"
+
++ Received:
+null
+
+ ❯ src/api/__tests__/admin.duplicateConcurrency.spec.ts:69:68
+     67|     newer.reject(new Error('newer timeout'))
+     68|     await rejection
+     69|     expect(sessionStorage.getItem(`sub2api:admin:${prefix}:7:61`)).toB…
+       |                                                                    ^
+     70|
+     71|     await duplicate(61)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/7]⎯
+
+ FAIL  src/api/__tests__/admin.duplicateConcurrency.spec.ts > 'monitor' duplicate operation ownership > does not let an older concurrent completion erase a newer ambiguous operation
+AssertionError: expected null to be 'channel-monitor-duplicate-7-61-222222…' // Object.is equality
+
+- Expected:
+"channel-monitor-duplicate-7-61-22222222-2222-4222-8222-222222222222"
+
++ Received:
+null
+
+ ❯ src/api/__tests__/admin.duplicateConcurrency.spec.ts:69:68
+     67|     newer.reject(new Error('newer timeout'))
+     68|     await rejection
+     69|     expect(sessionStorage.getItem(`sub2api:admin:${prefix}:7:61`)).toB…
+       |                                                                    ^
+     70|
+     71|     await duplicate(61)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/7]⎯
+
+
+ Test Files  2 failed | 2 passed (4)
+      Tests  7 failed | 14 passed (21)
+   Start at  20:03:42
+   Duration  3.32s (transform 272ms, setup 378ms, import 187ms, tests 146ms, environment 1.71s)

@@ -703,7 +703,8 @@ export default {
         restoreHint: '恢复后将重新启用这些订阅。原有效期已结束的订阅将显示为已过期。',
         confirm: '确认执行',
         retry: '重试原操作',
-        retryHint: '暂未确认操作结果。重试会继续原操作，避免重复处理。也可关闭后重新选择相同订阅和参数重试。',
+        retryHint: '暂未确认操作结果。重试只核对已保存的结果，不会再次执行。也可关闭后重新选择相同订阅和参数核对。',
+        resultUnconfirmed: '已保存的批次结果缺失或过期，请先核对订阅变更记录，再发起新批次。本次核对未重复执行任何项目。',
         requestFailed: '批量操作请求失败，请重试',
         result: '处理完成：成功 {success} 条，失败 {failed} 条',
         itemFailed: '操作失败'
@@ -783,6 +784,7 @@ export default {
       failedToLoad: '加载订阅列表失败',
       failedToAssign: '分配订阅失败',
       failedToAdjust: '调整订阅失败',
+      adjustResultUnconfirmed: '上次订阅调整结果尚未确认，请先核对订阅变更记录，再决定是否发起新操作。本次查询不会再次调整订阅。',
       failedToRevoke: '撤销订阅失败',
       failedToRestore: '恢复订阅失败',
       adjustWouldExpire: '调整后剩余天数必须大于0',

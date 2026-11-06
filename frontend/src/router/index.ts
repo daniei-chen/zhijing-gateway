@@ -896,22 +896,20 @@ router.beforeEach(async (to, _from, next) => {
     return
   }
 
-  // Route requires authentication
-  if (!authStore.isAuthenticated) {
-    // Not authenticated, redirect to login
-    next({
-      path: '/login',
-      query: { redirect: to.fullPath } // Save intended destination
-    })
-    return
+  // Permissions can change while compliance or public settings are loading.
+  // Recheck before continuing navigation, including rejected requests.
+  const mayEnterProtectedRoute = () => {
+    if (!authStore.isAuthenticated) {
+      next({ path: '/login', query: { redirect: to.fullPath } })
+      return false
+    }
+    if (requiresAdmin && !authStore.isAdmin) {
+      next('/dashboard')
+      return false
+    }
+    return true
   }
-
-  // Check admin requirement
-  if (requiresAdmin && !authStore.isAdmin) {
-    // User is authenticated but not admin, redirect to user dashboard
-    next('/dashboard')
-    return
-  }
+  if (!mayEnterProtectedRoute()) return
 
   if (requiresAdmin && authStore.isAdmin) {
     const adminComplianceStore = useAdminComplianceStore()
@@ -920,13 +918,14 @@ router.beforeEach(async (to, _from, next) => {
         await adminComplianceStore.fetchStatus()
       } catch (error) {
         const err = error as { status?: number; code?: string; metadata?: Record<string, string> }
-        if (err.status === 423 && err.code === 'ADMIN_COMPLIANCE_ACK_REQUIRED') {
+        if (authStore.isAuthenticated && authStore.isAdmin && err.status === 423 && err.code === 'ADMIN_COMPLIANCE_ACK_REQUIRED') {
           adminComplianceStore.requireAcknowledgement(err.metadata)
         }
       }
     }
   }
 
+  if (!mayEnterProtectedRoute()) return
 
   // 公共设置可能尚未加载（App.vue 的 onMounted 异步拉取晚于首次导航，且纯静态部署
   // 无 __APP_CONFIG__ 注入）。此时 cachedPublicSettings 为空会把 payment/risk_control
@@ -938,6 +937,8 @@ router.beforeEach(async (to, _from, next) => {
       console.warn('Failed to load public settings in route guard', error)
     }
   }
+
+  if (!mayEnterProtectedRoute()) return
 
   // Only an explicit value from successfully loaded settings can disable a route.
   // A transient settings failure is unknown state, not a confirmed feature toggle.

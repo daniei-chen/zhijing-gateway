@@ -57,6 +57,49 @@ function mountForgotPassword() {
 }
 
 describe('忘记密码腾讯验证码门禁', () => {
+  it('locks submission before awaiting captcha and keeps the original email', async () => {
+    let finish!: (value: { token: string; randstr: string }) => void
+    verifyActionMock.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+    const wrapper = mountForgotPassword()
+    await flushPromises()
+    await wrapper.get('#email').setValue('first@example.test')
+    await wrapper.get('form').trigger('submit')
+    await wrapper.get('#email').setValue('changed@example.test')
+    await wrapper.get('form').trigger('submit')
+    expect(verifyActionMock).toHaveBeenCalledOnce()
+    finish({ token: 'proof', randstr: 'random' })
+    await flushPromises()
+    expect(forgotPasswordMock).toHaveBeenCalledOnce()
+    expect(forgotPasswordMock.mock.calls[0][0].email).toBe('first@example.test')
+    wrapper.unmount()
+  })
+
+  it('does not send email after leaving during captcha', async () => {
+    let finish!: (value: { token: string; randstr: string }) => void
+    verifyActionMock.mockImplementationOnce(() => new Promise(resolve => { finish = resolve }))
+    const wrapper = mountForgotPassword()
+    await flushPromises()
+    await wrapper.get('#email').setValue('member@example.test')
+    await wrapper.get('form').trigger('submit')
+    wrapper.unmount()
+    finish({ token: 'proof', randstr: 'random' })
+    await flushPromises()
+    expect(forgotPasswordMock).not.toHaveBeenCalled()
+  })
+
+  it('allows another submission after cancelled captcha', async () => {
+    verifyActionMock.mockResolvedValueOnce(null)
+    const wrapper = mountForgotPassword()
+    await flushPromises()
+    await wrapper.get('#email').setValue('member@example.test')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(forgotPasswordMock).not.toHaveBeenCalled()
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(forgotPasswordMock).toHaveBeenCalledOnce()
+    wrapper.unmount()
+  })
   beforeEach(() => {
     getPublicSettingsMock.mockReset()
     forgotPasswordMock.mockReset()

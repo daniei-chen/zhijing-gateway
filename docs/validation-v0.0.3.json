@@ -1,0 +1,150 @@
+{
+  "schema_version": 2,
+  "version": "0.0.3",
+  "status": "candidate_delivery_with_remaining_gates",
+  "production_deployed": false,
+  "formal_release_created": false,
+  "previous_checkpoint": "validation-v0.0.3-20261106-10.json",
+  "frontend": {
+    "checkpoint": "2026-11-06-11",
+    "test_files": 492,
+    "passed_tests": 5167,
+    "failed_tests": 1,
+    "pending_tests": 0,
+    "source_sha256_lf_manifest": "proofs/v0.0.3-followup/frontend-source-checkpoint-11.json",
+    "source_manifest_sha256": "7c945171e1b9ca7aca88b671c3448dbacb06199b534695efbe0883b86c57ca67",
+    "source_files_in_checkpoint": 1112,
+    "coverage": {
+      "lines": {
+        "total": 52187,
+        "covered": 42258,
+        "skipped": 0,
+        "pct": 80.97
+      },
+      "statements": {
+        "total": 58945,
+        "covered": 46216,
+        "skipped": 0,
+        "pct": 78.4
+      },
+      "functions": {
+        "total": 12187,
+        "covered": 8775,
+        "skipped": 0,
+        "pct": 72
+      },
+      "branches": {
+        "total": 45919,
+        "covered": 32073,
+        "skipped": 0,
+        "pct": 69.84
+      }
+    },
+    "global_coverage_threshold": 80,
+    "global_coverage_gate_passed": false,
+    "coverage_command_exit": 1,
+    "typecheck": true,
+    "eslint": true,
+    "vite_build_manifest": true,
+    "previous_vite_build_checkpoint": "2026-11-06-11",
+    "current_tree_has_changes_after_checkpoint": false,
+    "current_tree_full_regression_complete": true,
+    "formal_release_zip_created": false,
+    "previous_failed_checkpoint_evidence": "proofs/v0.0.3-followup/frontend-validation-checkpoint-09.json",
+    "protected_followup_entries": 14,
+    "coverage_checkpoint": "2026-11-06-10",
+    "completed_standard_coverage_reports": false,
+    "current_tree_full_regression_passed": false,
+    "latest_result_evidence": "proofs/v0.0.3-followup/frontend-validation-checkpoint-11.json"
+  },
+  "backend": {
+    "source_commit": "dcaf707cad583955873ed94097d63c9a4be12e82",
+    "base_commit": "4851ca95b134322c14ca9904bc82c550a3880a67",
+    "generic_patch_files": 85,
+    "patch_sha256": "6c9f6ffa14ba4ecef094a36cfe26596955ea8711b35070ee5110b315114cf093",
+    "go_toolchain": "1.27.3",
+    "unit_short": {
+      "passed_packages": 64,
+      "passed_top_level_tests": 12561,
+      "passed_test_events_including_subtests": 25214,
+      "skipped_test_events": 39,
+      "skipped_packages": 51,
+      "failed_events": 0
+    },
+    "fresh_patch_targeted_race": {
+      "passed_packages": 12,
+      "passed_package_invocations": 49,
+      "passed_top_level_tests": 1238,
+      "passed_test_events_including_subtests": 2338,
+      "skipped_test_events": 14,
+      "failed_events": 0,
+      "data_race_warnings": 0,
+      "batch_exit_codes": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "all_requested_names_observed": true
+    },
+    "go_vet": true,
+    "linux_amd64_cross_build": true,
+    "fresh_patch_targeted_race_passed": true,
+    "worktree_has_later_changes": false,
+    "later_worktree_changes": [],
+    "artifact_apply_and_result_hashes": true,
+    "external_live_database_integration_executed": false,
+    "matching_api_peer_embed_cross_build": true,
+    "matching_api_peer_build_proof": "proofs/v0.0.3-followup/backend-api-peer-build.json",
+    "isolated_redis_durability_smoke_executed": true,
+    "production_redis_policy_applied": false,
+    "real_redis_capacity_test_executed": false,
+    "isolated_redis_evidence": "proofs/v0.0.3-followup/isolated-redis-lab.json",
+    "unit_evidence": "proofs/v0.0.3-followup/backend-full-unit-checkpoint-09-summary.json",
+    "artifact_race_evidence": "proofs/v0.0.3-followup/backend-artifact-dcaf707-summary.json"
+  },
+  "tools": {
+    "python_test_cases": 51,
+    "python_passed": 50,
+    "python_skipped": 1,
+    "python_failed": 0,
+    "skip_reason": "Windows test symlink creation privilege; separate reparse-point rejection remains tested.",
+    "upload_relay_real_http_tests": 24,
+    "upload_relay_supplier_inference_benchmark": false,
+    "checkpoint": "2026-11-06-10",
+    "ops_contract_tests": 3,
+    "frontend_contract_passed": true,
+    "backend_artifacts_verified": true
+  },
+  "browser": {
+    "data": "synthetic_local_preview_only",
+    "member_dark_view_observed": true,
+    "proxy_mobile_390x844_observed": true,
+    "protocol_select_keyboard_and_return_focus_observed": true,
+    "real_payments_or_emails_sent": false,
+    "version_panel_320px_rebuilt_verified": true,
+    "version_panel_evidence": "proofs/v0.0.3-followup/version-mobile-visual-044.json",
+    "screenshots": [
+      "images/v0.0.3-member-dark.jpg",
+      "images/v0.0.3-proxy-mobile-dark.jpg"
+    ],
+    "redeem_generate_initial_focus_and_tab_loop_observed": true,
+    "redeem_nested_select_then_parent_escape_observed": true,
+    "redeem_390x844_and_320x568_scroll_observed": true,
+    "viewport_override_reset": true,
+    "redeem_evidence": "proofs/v0.0.3-followup/redeem-dialog-browser-checkpoint-10.json"
+  },
+  "open_work": [
+    "Resolve the retained keyboard regression/possible timing issue and rerun the full frontend.",
+    "Reach all four original80 coverage gates; latest valid coverage remains checkpoint10.",
+    "Resolve the independent Settings fixture and additional Backup test type configuration; finish interrupted scheduled-test review.",
+    "Complete Redis readback, upload/TTFT acceptance and guarded production cutover/release only after remaining gates."
+  ],
+  "further_audit_pause_requested_by_user": true,
+  "additional_verification_limits": {
+    "settings_independent_suite": "14 fixture setup failures before business assertions; not verified, no further retry at user request",
+    "backup_test_explicit_types": "Private configuration reported15 implicit-any errors; application typecheck passed; not resolved or rerun",
+    "redeem_keyboard_case": "Failed once in the full run, passed one isolated retry; remains an unresolved full-run failure"
+  }
+}

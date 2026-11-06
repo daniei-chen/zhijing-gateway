@@ -33,6 +33,8 @@
             <div v-if="visibleFilters.has('role')" class="w-full sm:w-32">
               <Select
                 v-model="filters.role"
+                :id="`${fieldId}-role-filter`"
+                :aria-label="t('admin.users.columns.role')"
                 :options="[
                   { value: '', label: t('admin.users.allRoles') },
                   { value: 'admin', label: t('admin.users.admin') },
@@ -46,6 +48,8 @@
             <div v-if="visibleFilters.has('status')" class="w-full sm:w-32">
               <Select
                 v-model="filters.status"
+                :id="`${fieldId}-status-filter`"
+                :aria-label="t('admin.users.columns.status')"
                 :options="[
                   { value: '', label: t('admin.users.allStatus') },
                   { value: 'active', label: t('common.active') },
@@ -59,6 +63,8 @@
             <div v-if="visibleFilters.has('group')" class="w-full sm:w-44">
               <Select
                 v-model="filters.group"
+                :id="`${fieldId}-group-filter`"
+                :aria-label="t('admin.users.authorizedGroupFilter')"
                 :options="groupFilterOptions"
                 searchable
                 creatable
@@ -72,6 +78,8 @@
             <div v-if="visibleFilters.has('apiKeyGroup')" class="w-full sm:w-44">
               <Select
                 v-model="filters.apiKeyGroup"
+                :id="`${fieldId}-api-key-group-filter`"
+                :aria-label="t('admin.users.apiKeyGroupFilter')"
                 :options="apiKeyGroupFilterOptions"
                 searchable
                 :search-placeholder="t('admin.users.searchApiKeyGroups')"
@@ -88,6 +96,8 @@
                 <!-- Text/Email/URL/Textarea/Date type: styled input -->
                 <input
                   v-if="['text', 'textarea', 'email', 'url', 'date'].includes(getAttributeDefinition(Number(attrId))?.type || 'text')"
+                  :id="`${fieldId}-attribute-filter-${attrId}`"
+                  :aria-label="getAttributeDefinitionName(Number(attrId))"
                   :value="value"
                   @input="(e) => updateAttributeFilter(Number(attrId), (e.target as HTMLInputElement).value)"
                   @keyup.enter="applyFilter"
@@ -97,6 +107,8 @@
                 <!-- Number type: number input -->
                 <input
                   v-else-if="getAttributeDefinition(Number(attrId))?.type === 'number'"
+                  :id="`${fieldId}-attribute-filter-${attrId}`"
+                  :aria-label="getAttributeDefinitionName(Number(attrId))"
                   :value="value"
                   type="number"
                   @input="(e) => updateAttributeFilter(Number(attrId), (e.target as HTMLInputElement).value)"
@@ -108,6 +120,8 @@
                 <template v-else-if="['select', 'multi_select'].includes(getAttributeDefinition(Number(attrId))?.type || '')">
                   <div class="w-full">
                     <Select
+                      :id="`${fieldId}-attribute-filter-${attrId}`"
+                      :aria-label="getAttributeDefinitionName(Number(attrId))"
                       :model-value="value"
                       :options="[
                         { value: '', label: getAttributeDefinitionName(Number(attrId)) },
@@ -120,6 +134,8 @@
                 <!-- Fallback -->
                 <input
                   v-else
+                  :id="`${fieldId}-attribute-filter-${attrId}`"
+                  :aria-label="getAttributeDefinitionName(Number(attrId))"
                   :value="value"
                   @input="(e) => updateAttributeFilter(Number(attrId), (e.target as HTMLInputElement).value)"
                   @keyup.enter="applyFilter"
@@ -144,9 +160,11 @@
                 <Icon name="refresh" size="md" :class="loading ? 'animate-spin' : ''" />
               </button>
               <!-- Filter Settings Dropdown -->
-              <div class="relative" ref="filterDropdownRef">
+              <div class="relative" ref="filterDropdownRef" @keydown="handleSettingsEscape">
                 <button
                   @click="showFilterDropdown = !showFilterDropdown"
+                  :aria-expanded="showFilterDropdown"
+                  :aria-controls="`${fieldId}-filter-settings`"
                   class="btn btn-secondary px-2 md:px-3"
                   :title="t('admin.users.filterSettings')"
                 >
@@ -156,6 +174,7 @@
                 <!-- Dropdown menu -->
                 <div
                   v-if="showFilterDropdown"
+                  :id="`${fieldId}-filter-settings`"
                   class="absolute right-0 top-full z-50 mt-1 w-48 rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-dark-600 dark:bg-dark-800"
                 >
                   <!-- Built-in filters -->
@@ -163,6 +182,7 @@
                     v-for="filter in builtInFilters"
                     :key="filter.key"
                     @click="toggleBuiltInFilter(filter.key)"
+                    :aria-pressed="visibleFilters.has(filter.key)"
                     class="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
                   >
                     <span>{{ filter.name }}</span>
@@ -184,6 +204,7 @@
                     v-for="attr in filterableAttributes"
                     :key="attr.id"
                     @click="toggleAttributeFilter(attr)"
+                    :aria-pressed="visibleFilters.has(`attr_${attr.id}`)"
                     class="flex w-full items-center justify-between px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-dark-700"
                   >
                     <span>{{ attr.name }}</span>
@@ -198,9 +219,11 @@
                 </div>
               </div>
               <!-- Column Settings Dropdown -->
-              <div class="relative" ref="columnDropdownRef">
+              <div class="relative" ref="columnDropdownRef" @keydown="handleSettingsEscape">
                 <button
                   @click="showColumnDropdown = !showColumnDropdown"
+                  :aria-expanded="showColumnDropdown"
+                  :aria-controls="`${fieldId}-column-settings`"
                   class="btn btn-secondary px-2 md:px-3"
                   :title="t('admin.users.columnSettings')"
                 >
@@ -212,6 +235,7 @@
                 <!-- Dropdown menu -->
                 <div
                   v-if="showColumnDropdown"
+                  :id="`${fieldId}-column-settings`"
                   class="absolute right-0 top-full z-50 mt-1 max-h-80 w-48 overflow-y-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg dark:border-dark-600 dark:bg-dark-800"
                 >
                   <button
@@ -347,11 +371,18 @@
           <template #cell-groups="{ row }">
             <div v-if="allGroups.length > 0" class="flex flex-col gap-1">
               <!-- 专属分组行 -->
-              <span
+              <div
                 v-if="getUserGroups(row).exclusive.length > 0"
                 class="group/ex relative inline-flex cursor-pointer items-center gap-1 whitespace-nowrap text-xs"
-                @click.stop="toggleExpandedGroup(row.id)"
+                @keydown="handleGroupEscape"
               >
+                <button
+                  type="button"
+                  class="inline-flex items-center gap-1"
+                  :aria-expanded="expandedGroupUserId === row.id"
+                  :aria-controls="`${fieldId}-group-options-${row.id}`"
+                  @click.stop="toggleExpandedGroup(row.id)"
+                >
                 <Icon name="shield" size="xs" class="h-3.5 w-3.5 text-purple-500 dark:text-purple-400" />
                 <span class="font-medium text-purple-600 dark:text-purple-400">{{ getUserGroups(row).exclusive.length }}</span>
                 <span class="text-gray-500 dark:text-dark-400">{{ t('admin.users.exclusiveLabel') }}</span>
@@ -365,25 +396,28 @@
                     <span v-for="g in getUserGroups(row).exclusive" :key="g.id">{{ g.name }}</span>
                   </div>
                 </div>
+                </button>
                 <!-- 点击展开分组操作菜单 -->
                 <div
                   v-if="expandedGroupUserId === row.id"
+                  :id="`${fieldId}-group-options-${row.id}`"
                   class="absolute left-0 top-full z-50 mt-1.5 min-w-[160px] overflow-hidden rounded-lg border border-gray-200 bg-white py-1 text-xs shadow-xl dark:border-dark-600 dark:bg-dark-700"
                 >
                   <div class="border-b border-gray-100 px-3 py-1.5 text-[10px] font-medium uppercase tracking-wider text-gray-400 dark:border-dark-600 dark:text-dark-400">
                     {{ t('admin.users.clickToReplace') }}
                   </div>
-                  <div
+                  <button
                     v-for="g in getUserGroups(row).exclusive"
                     :key="g.id"
-                    class="flex cursor-pointer items-center gap-2 px-3 py-2 text-gray-700 transition-colors hover:bg-primary-50 hover:text-primary-600 dark:text-dark-200 dark:hover:bg-primary-900/30 dark:hover:text-primary-400"
+                    type="button"
+                    class="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-gray-700 transition-colors hover:bg-primary-50 hover:text-primary-600 dark:text-dark-200 dark:hover:bg-primary-900/30 dark:hover:text-primary-400"
                     @click.stop="openGroupReplace(row, g)"
                   >
                     <Icon name="swap" size="xs" class="h-3.5 w-3.5 flex-shrink-0 opacity-50" />
                     <span class="flex-1">{{ g.name }}</span>
-                  </div>
+                  </button>
                 </div>
-              </span>
+              </div>
               <!-- 公开分组行 -->
               <span
                 v-if="getUserGroups(row).publicGroups.length > 0"
@@ -626,6 +660,7 @@
               <!-- Toggle Status Button (not for admin) -->
               <button
                 v-if="row.role !== 'admin'"
+                :disabled="pendingStatusUserIds.has(row.id)"
                 @click="handleToggleStatus(row)"
                 :class="[
                   'flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors',
@@ -642,6 +677,9 @@
               <!-- More Actions Menu Trigger -->
               <button
                 @click="openActionMenu(row, $event)"
+                @keydown="handleActionMenuKeydown"
+                :aria-expanded="activeMenuId === row.id"
+                :aria-controls="`${fieldId}-actions-${row.id}`"
                 class="action-menu-trigger flex flex-col items-center gap-0.5 rounded-lg p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:hover:bg-dark-700 dark:hover:text-white"
                 :class="{ 'bg-gray-100 text-gray-900 dark:bg-dark-700 dark:text-white': activeMenuId === row.id }"
               >
@@ -679,6 +717,10 @@
     <Teleport to="body">
       <div
         v-if="activeMenuId !== null && menuPosition"
+        :id="`${fieldId}-actions-${activeMenuId}`"
+        role="group"
+        :aria-label="t('common.more')"
+        @keydown="handleActionMenuKeydown"
         class="action-menu-content fixed z-[9999] w-48 overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-black/5 dark:bg-dark-800 dark:ring-white/10"
         :style="{ top: menuPosition.top + 'px', left: menuPosition.left + 'px' }"
       >
@@ -760,7 +802,9 @@
       </div>
     </Teleport>
 
-    <ConfirmDialog :show="showDeleteDialog" :title="t('admin.users.deleteUser')" :message="t('admin.users.deleteConfirm', { email: deletingUser?.email })" :danger="true" @confirm="confirmDelete" @cancel="showDeleteDialog = false" />
+    <ConfirmDialog :show="showDeleteDialog" :title="t('admin.users.deleteUser')" :message="t('admin.users.deleteConfirm', { email: deletingUser?.email })" :danger="true" @confirm="confirmDelete" @cancel="closeDeleteDialog">
+      <p v-if="deleting" role="status" class="text-sm text-gray-500">{{ t('common.loading') }}</p>
+    </ConfirmDialog>
     <ConfirmDialog
       :show="bulkDeleteIds.length > 0"
       :title="t('admin.users.bulkDelete.title')"
@@ -794,7 +838,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, onUnmounted, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 import { getPersistedPageSize } from '@/composables/usePersistedPageSize'
@@ -832,8 +876,12 @@ import UserAllowedGroupsModal from '@/components/admin/user/UserAllowedGroupsMod
 import UserBalanceModal from '@/components/admin/user/UserBalanceModal.vue'
 import UserBalanceHistoryModal from '@/components/admin/user/UserBalanceHistoryModal.vue'
 import GroupReplaceModal from '@/components/admin/user/GroupReplaceModal.vue'
+import { createSessionTasks } from '@/utils/sessionTasks'
 
 const appStore = useAppStore()
+const fieldId = `users-${useId()}`
+const pageTasks = createSessionTasks()
+onBeforeUnmount(() => pageTasks.dispose())
 
 // Generate dynamic attribute columns from enabled definitions
 const attributeColumns = computed<Column[]>(() =>
@@ -1067,24 +1115,28 @@ const sortState = reactive(loadInitialSortState())
 // Groups data for the groups column and the existing "authorised group" filter (active only)
 const allGroups = ref<AdminGroup[]>([])
 const loadAllGroups = async () => {
-  if (allGroups.value.length > 0) return
+  if (!pageTasks.current() || allGroups.value.length > 0) return
+  const task = pageTasks.begin('groups')
   try {
-    allGroups.value = await adminAPI.groups.getAll()
+    const groups = await adminAPI.groups.getAll()
+    if (task.active()) allGroups.value = groups
   } catch (e) {
-    console.error('Failed to load groups:', e)
-  }
+    if (task.active()) console.error('Failed to load groups:', e)
+  } finally { task.finish() }
 }
 
 // Groups for the API Key group filter — includes disabled groups so admins can
 // filter users whose keys are still bound to a now-disabled group.
 const allGroupsForApiKeyFilter = ref<AdminGroup[]>([])
 const loadAllGroupsForApiKeyFilter = async () => {
-  if (allGroupsForApiKeyFilter.value.length > 0) return
+  if (!pageTasks.current() || allGroupsForApiKeyFilter.value.length > 0) return
+  const task = pageTasks.begin('api-key-groups')
   try {
-    allGroupsForApiKeyFilter.value = await adminAPI.groups.getAllIncludingInactive()
+    const groups = await adminAPI.groups.getAllIncludingInactive()
+    if (task.active()) allGroupsForApiKeyFilter.value = groups
   } catch (e) {
-    console.error('Failed to load groups for API key filter:', e)
-  }
+    if (task.active()) console.error('Failed to load groups for API key filter:', e)
+  } finally { task.finish() }
 }
 // Resolve user's accessible groups: exclusive groups first, then public groups
 const getUserGroups = (user: AdminUser) => {
@@ -1147,6 +1199,15 @@ const showColumnDropdown = ref(false)
 // Dropdown refs for click outside detection
 const filterDropdownRef = ref<HTMLElement | null>(null)
 const columnDropdownRef = ref<HTMLElement | null>(null)
+const handleSettingsEscape = (event: KeyboardEvent) => {
+  if (event.key !== 'Escape' || (!showFilterDropdown.value && !showColumnDropdown.value)) return
+  event.preventDefault()
+  event.stopPropagation()
+  const container = showFilterDropdown.value ? filterDropdownRef.value : columnDropdownRef.value
+  showFilterDropdown.value = false
+  showColumnDropdown.value = false
+  container?.querySelector('button')?.focus()
+}
 
 // localStorage keys
 const FILTER_VALUES_KEY = 'user-filter-values'
@@ -1345,6 +1406,9 @@ const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showBulkEditModal = ref(false)
 const showDeleteDialog = ref(false)
+const deleting = ref(false)
+let deleteGeneration = 0
+const pendingStatusUserIds = reactive(new Set<number>())
 const bulkDeleteIds = ref<number[]>([])
 const bulkDeleting = ref(false)
 const showApiKeysModal = ref(false)
@@ -1364,15 +1428,17 @@ const closePlatformQuotaModal = () => {
   showPlatformQuotaModal.value = false
   platformQuotaUser.value = null
 }
-let abortController: AbortController | null = null
 let secondaryDataSeq = 0
+let secondaryDataTimer: ReturnType<typeof setTimeout> | null = null
 
 const loadUsersSecondaryData = async (
   userIds: number[],
   signal?: AbortSignal,
   expectedSeq?: number
 ) => {
-  if (userIds.length === 0) return
+  if (!pageTasks.current() || userIds.length === 0 || signal?.aborted) return
+  const task = pageTasks.begin('secondary', () => !signal?.aborted && (expectedSeq === undefined || expectedSeq === secondaryDataSeq))
+  if (!task.active()) { task.finish(); return }
 
   const tasks: Promise<void>[] = []
 
@@ -1381,11 +1447,10 @@ const loadUsersSecondaryData = async (
       (async () => {
         try {
           const usageResponse = await adminAPI.dashboard.getBatchUsersUsage(userIds)
-          if (signal?.aborted) return
-          if (typeof expectedSeq === 'number' && expectedSeq !== secondaryDataSeq) return
+          if (!task.active()) return
           usageStats.value = usageResponse.stats
         } catch (e) {
-          if (signal?.aborted) return
+          if (!task.active()) return
           console.error('Failed to load usage stats:', e)
         }
       })()
@@ -1397,11 +1462,10 @@ const loadUsersSecondaryData = async (
       (async () => {
         try {
           const attrResponse = await adminAPI.userAttributes.getBatchUserAttributes(userIds)
-          if (signal?.aborted) return
-          if (typeof expectedSeq === 'number' && expectedSeq !== secondaryDataSeq) return
+          if (!task.active()) return
           userAttributeValues.value = attrResponse.attributes
         } catch (e) {
-          if (signal?.aborted) return
+          if (!task.active()) return
           console.error('Failed to load user attribute values:', e)
         }
       })()
@@ -1415,14 +1479,12 @@ const loadUsersSecondaryData = async (
           // 无批量端点：对当前页用户逐个拉取，分块并发（每批 6），批间检查中止条件，避免大 pageSize 时请求洪峰
           const CHUNK = 6
           for (let i = 0; i < userIds.length; i += CHUNK) {
-            if (signal?.aborted) return
-            if (typeof expectedSeq === 'number' && expectedSeq !== secondaryDataSeq) return
+            if (!task.active()) return
             const chunk = userIds.slice(i, i + CHUNK)
             const results = await Promise.allSettled(
               chunk.map((id) => adminAPI.users.getPlatformQuotas(id))
             )
-            if (signal?.aborted) return
-            if (typeof expectedSeq === 'number' && expectedSeq !== secondaryDataSeq) return
+            if (!task.active()) return
             const merged = { ...platformQuotaStats.value }
             results.forEach((r, idx) => {
               if (r.status === 'fulfilled') {
@@ -1432,7 +1494,7 @@ const loadUsersSecondaryData = async (
             platformQuotaStats.value = merged
           }
         } catch (e) {
-          if (signal?.aborted) return
+          if (!task.active()) return
           console.error('Failed to load platform quotas:', e)
         }
       })()
@@ -1442,9 +1504,11 @@ const loadUsersSecondaryData = async (
   if (tasks.length > 0) {
     await Promise.allSettled(tasks)
   }
+  task.finish()
 }
 
 const refreshCurrentPageSecondaryData = () => {
+  if (!pageTasks.current()) return
   const userIds = users.value.map((u) => u.id)
   if (userIds.length === 0) return
   const seq = ++secondaryDataSeq
@@ -1454,6 +1518,7 @@ const refreshCurrentPageSecondaryData = () => {
 // Action Menu State
 const activeMenuId = ref<number | null>(null)
 const menuPosition = ref<{ top: number; left: number } | null>(null)
+let actionMenuTrigger: HTMLElement | null = null
 
 const openActionMenu = (user: AdminUser, e: MouseEvent) => {
   if (activeMenuId.value === user.id) {
@@ -1466,6 +1531,7 @@ const openActionMenu = (user: AdminUser, e: MouseEvent) => {
     }
 
     const rect = target.getBoundingClientRect()
+    actionMenuTrigger = target
     const menuWidth = 200
     const menuHeight = 240
     const padding = 8
@@ -1508,9 +1574,17 @@ const openActionMenu = (user: AdminUser, e: MouseEvent) => {
   }
 }
 
-const closeActionMenu = () => {
+const closeActionMenu = (restoreFocus = false) => {
   activeMenuId.value = null
   menuPosition.value = null
+  if (restoreFocus) actionMenuTrigger?.focus()
+}
+
+const handleActionMenuKeydown = (event: KeyboardEvent) => {
+  if (event.key !== 'Escape' || activeMenuId.value === null) return
+  event.preventDefault()
+  event.stopPropagation()
+  closeActionMenu(true)
 }
 
 // Close menu when clicking outside
@@ -1546,6 +1620,14 @@ const expandedGroupUserId = ref<number | null>(null)
 const toggleExpandedGroup = (userId: number) => {
   expandedGroupUserId.value = expandedGroupUserId.value === userId ? null : userId
 }
+const handleGroupEscape = (event: KeyboardEvent) => {
+  if (event.key !== 'Escape' || expandedGroupUserId.value === null) return
+  event.preventDefault()
+  event.stopPropagation()
+  expandedGroupUserId.value = null
+  const container = event.currentTarget as HTMLElement
+  container.querySelector('button')?.focus()
+}
 
 // Group replace modal state
 const showGroupReplaceModal = ref(false)
@@ -1570,25 +1652,31 @@ const getDaysRemaining = (expiresAt: string): number => {
 }
 
 const loadAttributeDefinitions = async () => {
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('attribute-definitions')
   try {
-    attributeDefinitions.value = await adminAPI.userAttributes.listEnabledDefinitions()
+    const definitions = await adminAPI.userAttributes.listEnabledDefinitions()
+    if (task.active()) attributeDefinitions.value = definitions
   } catch (e) {
-    console.error('Failed to load attribute definitions:', e)
-  }
+    if (task.active()) console.error('Failed to load attribute definitions:', e)
+  } finally { task.finish() }
 }
 
 // Handle attributes modal close - reload definitions and users
 const handleAttributesModalClose = async () => {
   showAttributesModal.value = false
   await loadAttributeDefinitions()
+  if (!pageTasks.current()) return
   loadUsers()
 }
 
 const loadUsers = async () => {
-  abortController?.abort()
-  const currentAbortController = new AbortController()
-  abortController = currentAbortController
-  const { signal } = currentAbortController
+  if (!pageTasks.current()) return
+  const task = pageTasks.begin('users-list')
+  const { signal } = task
+  pageTasks.cancel('secondary')
+  secondaryDataSeq++
+  if (secondaryDataTimer !== null) { clearTimeout(secondaryDataTimer); secondaryDataTimer = null }
   loading.value = true
   try {
     // Build attribute filters from active filters
@@ -1616,7 +1704,7 @@ const loadUsers = async () => {
       },
       { signal }
     )
-    if (signal.aborted) {
+    if (!task.active()) {
       return
     }
     users.value = response.items
@@ -1629,13 +1717,15 @@ const loadUsers = async () => {
     // Defer heavy secondary data so table can render first.
     if (response.items.length > 0) {
       const userIds = response.items.map((u) => u.id)
-      const seq = ++secondaryDataSeq
-      window.setTimeout(() => {
-        if (signal.aborted || seq !== secondaryDataSeq) return
+      const seq = secondaryDataSeq
+      secondaryDataTimer = setTimeout(() => {
+        secondaryDataTimer = null
+        if (!pageTasks.current() || signal.aborted || seq !== secondaryDataSeq) return
         void loadUsersSecondaryData(userIds, signal, seq)
       }, 50)
     }
   } catch (error: any) {
+    if (!task.active()) return
     const errorInfo = error as { name?: string; code?: string }
     if (errorInfo?.name === 'AbortError' || errorInfo?.name === 'CanceledError' || errorInfo?.code === 'ERR_CANCELED') {
       return
@@ -1644,9 +1734,10 @@ const loadUsers = async () => {
     appStore.showError(message)
     console.error('Error loading users:', error)
   } finally {
-    if (abortController === currentAbortController) {
+    if (task.active()) {
       loading.value = false
     }
+    task.finish()
   }
 }
 
@@ -1657,6 +1748,7 @@ const handleBulkLimitsSuccess = async () => {
 
 let searchTimeout: ReturnType<typeof setTimeout>
 const handleSearch = () => {
+  if (!pageTasks.current()) return
   clearTimeout(searchTimeout)
   searchTimeout = setTimeout(() => {
     pagination.page = 1
@@ -1730,6 +1822,7 @@ const updateAttributeFilter = (attrId: number, value: string) => {
 
 // Apply filter and save to localStorage
 const applyFilter = () => {
+  pagination.page = 1
   saveFiltersToStorage()
   loadUsers()
 }
@@ -1745,9 +1838,14 @@ const closeEditModal = () => {
 }
 
 const handleToggleStatus = async (user: AdminUser) => {
+  if (!pageTasks.current() || pendingStatusUserIds.has(user.id)) return
+  const userId = user.id
+  const task = pageTasks.begin(`status:${userId}`)
+  pendingStatusUserIds.add(userId)
   const newStatus = user.status === 'active' ? 'disabled' : 'active'
   try {
-    const updated = await adminAPI.users.toggleStatus(user.id, newStatus)
+    const updated = await adminAPI.users.toggleStatus(userId, newStatus)
+    if (!task.active()) return
     appStore.showSuccess(
       newStatus === 'active' ? t('admin.users.userEnabled') : t('admin.users.userDisabled')
     )
@@ -1757,14 +1855,18 @@ const handleToggleStatus = async (user: AdminUser) => {
       return
     }
     // 更新接口的响应不含 current_concurrency、subscriptions 等列表专属字段，只回写状态相关字段。
-    const row = users.value.find((u) => u.id === user.id)
+    const row = users.value.find((u) => u.id === userId)
     if (row) {
       row.status = updated.status
       row.updated_at = updated.updated_at
     }
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error.response?.data?.detail || t('admin.users.failedToToggle'))
     console.error('Error toggling user status:', error)
+  } finally {
+    if (task.active()) pendingStatusUserIds.delete(userId)
+    task.finish()
   }
 }
 
@@ -1802,46 +1904,74 @@ const closeGroupReplaceModal = () => {
 }
 
 const handleDelete = (user: AdminUser) => {
+  deleteGeneration++
+  pageTasks.cancel('delete-user')
+  deleting.value = false
   deletingUser.value = user
   showDeleteDialog.value = true
 }
 
+const closeDeleteDialog = () => {
+  deleteGeneration++
+  pageTasks.cancel('delete-user')
+  showDeleteDialog.value = false
+  deletingUser.value = null
+  deleting.value = false
+}
+
 const confirmDelete = async () => {
-  if (!deletingUser.value) return
+  if (!pageTasks.current() || !showDeleteDialog.value || !deletingUser.value || deleting.value) return
+  const userId = deletingUser.value.id
+  const generation = deleteGeneration
+  const task = pageTasks.begin('delete-user', () => showDeleteDialog.value && deleteGeneration === generation && deletingUser.value?.id === userId)
+  deleting.value = true
   try {
-    await adminAPI.users.delete(deletingUser.value.id)
+    await adminAPI.users.delete(userId)
+    if (!task.active()) return
     appStore.showSuccess(t('common.success'))
-    showDeleteDialog.value = false
-    deletingUser.value = null
+    closeDeleteDialog()
     loadUsers()
   } catch (error: any) {
+    if (!task.active()) return
     appStore.showError(error.response?.data?.detail || t('admin.users.failedToDelete'))
     console.error('Error deleting user:', error)
+  } finally {
+    if (task.active()) deleting.value = false
+    task.finish()
   }
 }
 
 const confirmBulkDelete = async () => {
-  const ids = bulkDeleteIds.value
+  if (!pageTasks.current() || bulkDeleting.value || bulkDeleteIds.value.length === 0) return
+  const ids = [...bulkDeleteIds.value]
+  const task = pageTasks.begin('bulk-delete')
   bulkDeleteIds.value = []
   bulkDeleting.value = true
   const deletedIds: number[] = []
-  for (const id of ids) {
-    try {
-      await adminAPI.users.delete(id)
-      deletedIds.push(id)
-    } catch (error) {
-      console.error('Error deleting user:', error)
+  try {
+    for (const id of ids) {
+      if (!task.active()) return
+      try {
+        await adminAPI.users.delete(id)
+        if (!task.active()) return
+        deletedIds.push(id)
+      } catch (error) {
+        if (!task.active()) return
+        console.error('Error deleting user:', error)
+      }
     }
+    removeSelectedIds(deletedIds)
+    if (deletedIds.length > 0) {
+      appStore.showSuccess(t('admin.users.bulkDelete.success', { count: deletedIds.length }))
+      pagination.page = 1
+    }
+    const failed = ids.length - deletedIds.length
+    if (failed > 0) appStore.showError(t('admin.users.bulkDelete.failed', { count: failed }))
+    await loadUsers()
+  } finally {
+    if (task.active()) bulkDeleting.value = false
+    task.finish()
   }
-  removeSelectedIds(deletedIds)
-  if (deletedIds.length > 0) {
-    appStore.showSuccess(t('admin.users.bulkDelete.success', { count: deletedIds.length }))
-    pagination.page = 1
-  }
-  const failed = ids.length - deletedIds.length
-  if (failed > 0) appStore.showError(t('admin.users.bulkDelete.failed', { count: failed }))
-  await loadUsers()
-  bulkDeleting.value = false
 }
 
 const handleDeposit = (user: AdminUser) => {
@@ -1891,7 +2021,10 @@ const handleScroll = () => {
 }
 
 onMounted(async () => {
+  document.addEventListener('click', handleClickOutside)
+  window.addEventListener('scroll', handleScroll, true)
   await loadAttributeDefinitions()
+  if (!pageTasks.current()) return
   loadSavedFilters()
   loadSavedColumns()
   loadUsers()
@@ -1901,14 +2034,12 @@ onMounted(async () => {
   if (visibleFilters.has('apiKeyGroup')) {
     loadAllGroupsForApiKeyFilter()
   }
-  document.addEventListener('click', handleClickOutside)
-  window.addEventListener('scroll', handleScroll, true)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
   window.removeEventListener('scroll', handleScroll, true)
   clearTimeout(searchTimeout)
-  abortController?.abort()
+  if (secondaryDataTimer !== null) clearTimeout(secondaryDataTimer)
 })
 </script>

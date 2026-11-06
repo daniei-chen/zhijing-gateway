@@ -379,7 +379,7 @@
         </div>
       </template>
 
-      <BaseDialog :show="settingsOpen" :title="t('admin.riskControl.settingsTitle')" width="extra-wide" @close="settingsOpen = false">
+      <BaseDialog :show="settingsOpen" :title="t('admin.riskControl.settingsTitle')" width="extra-wide" @close="closeSettings">
         <div class="space-y-6">
           <div class="flex gap-2 overflow-x-auto border-b border-gray-100 pb-3 dark:border-dark-700">
             <button
@@ -462,7 +462,7 @@
                   <button
                     type="button"
                     class="btn btn-secondary inline-flex items-center gap-2"
-                    :disabled="apiKeyTesting || inputApiKeyCount === 0 || configForm.clear_api_key"
+                    :disabled="apiKeyTesting || moderationImageReading || inputApiKeyCount === 0 || configForm.clear_api_key"
                     @click="testApiKeys(true)"
                   >
                     <Icon name="beaker" size="sm" :class="apiKeyTesting ? 'animate-pulse' : ''" />
@@ -471,7 +471,7 @@
                   <button
                     type="button"
                     class="btn btn-secondary inline-flex items-center gap-2"
-                    :disabled="apiKeyTesting || effectiveStoredApiKeyCount === 0 || pendingDeletedApiKeyCount > 0 || configForm.clear_api_key || configForm.api_keys_mode === 'replace'"
+                    :disabled="apiKeyTesting || moderationImageReading || effectiveStoredApiKeyCount === 0 || pendingDeletedApiKeyCount > 0 || configForm.clear_api_key || configForm.api_keys_mode === 'replace'"
                     @click="testApiKeys(false)"
                   >
                     <Icon name="shield" size="sm" />
@@ -579,9 +579,10 @@
                         <label class="btn btn-secondary inline-flex cursor-pointer items-center gap-2">
                           <Icon name="plus" size="sm" />
                           {{ t('admin.riskControl.addAuditTestImage') }}
-                          <input type="file" accept="image/*" multiple class="sr-only" @change="handleModerationImageUpload" />
+                          <input type="file" accept="image/*" multiple class="sr-only" :disabled="moderationImageReading" @change="handleModerationImageUpload" />
                         </label>
                       </div>
+                      <p v-if="moderationImageReading" class="mt-2 text-xs text-gray-500 dark:text-gray-400" role="status">{{ t('common.loading') }}</p>
                       <div v-if="moderationTestImages.length > 0" class="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
                         <div
                           v-for="(image, index) in moderationTestImages"
@@ -591,6 +592,7 @@
                           <img :src="image" alt="" class="h-full w-full object-cover" />
                           <button
                             type="button"
+                            :aria-label="t('common.delete')"
                             class="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100"
                             @click="removeModerationTestImage(index)"
                           >
@@ -1068,7 +1070,7 @@
 
         <template #footer>
           <div class="flex justify-end gap-2">
-            <button type="button" class="btn btn-secondary" @click="settingsOpen = false">{{ t('common.cancel') }}</button>
+            <button type="button" class="btn btn-secondary" @click="closeSettings">{{ t('common.cancel') }}</button>
             <button type="button" class="btn btn-primary inline-flex items-center gap-2" :disabled="saving" @click="saveConfig">
               <Icon v-if="saving" name="refresh" size="sm" class="animate-spin" />
               <Icon v-else name="check" size="sm" />
@@ -1177,6 +1179,11 @@ import type { AdminGroup, Proxy, SelectOption } from '@/types'
 import { useAppStore } from '@/stores/app'
 import { extractApiErrorMessage } from '@/utils/apiError'
 import { formatDateTime as formatDateTimeValue } from '@/utils/format'
+import { createSessionTasks } from '@/utils/sessionTasks'
+
+const pageTasks = createSessionTasks()
+let settingsRevision = 0
+let imageRevision = 0
 
 type SettingsTab = 'basic' | 'scope' | 'runtime' | 'response' | 'riskThresholds' | 'retention' | 'keywords'
 type WorkerSlotState = 'active' | 'idle' | 'disabled'
@@ -1234,6 +1241,7 @@ const saving = ref(false)
 const logsLoading = ref(false)
 const statusLoading = ref(false)
 const apiKeyTesting = ref(false)
+const moderationImageReading = ref(false)
 const hashActionLoading = ref(false)
 const unbanningUserID = ref<number | null>(null)
 const settingsOpen = ref(false)
@@ -1306,6 +1314,7 @@ function captureEngineDraft(): EngineDraft {
 
 function switchEngine(value: string | number | boolean | null) {
   if ((value !== 'openai' && value !== 'typesafe') || apiKeyTesting.value || saving.value) return
+  cancelModerationImageRead()
   engineDrafts.value[configForm.engine] = captureEngineDraft()
   configForm.engine = value
   const draft = engineDrafts.value[value]
@@ -1832,6 +1841,8 @@ function applyConfig(config: ContentModerationConfig) {
 }
 
 async function loadAll() {
+  const task = pageTasks.begin('loadAll')
+  if (!task.active()) return
   loading.value = true
   try {
     const [config, groupItems, runtimeStatus, proxyItems] = await Promise.all([
@@ -1841,6 +1852,7 @@ async function loadAll() {
       // 代理列表加载失败不阻塞风控页面（仅影响下拉可选项）
       adminAPI.proxies.getAll().catch(() => [] as Proxy[]),
     ])
+    if (!task.active()) return
     applyConfig(config)
     groups.value = groupItems
     status.value = runtimeStatus
@@ -1851,31 +1863,40 @@ async function loadAll() {
     }
     await loadLogs()
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.loadFailed')))
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.loadFailed')))
   } finally {
-    loading.value = false
+    if (task.owned()) loading.value = false
+    task.finish()
   }
 }
 
 async function loadStatus(silent = true) {
+  const task = pageTasks.begin('loadStatus')
+  if (!task.active()) return
+  const expectedEngine = configForm.engine
   statusLoading.value = true
   try {
     const runtimeStatus = await adminAPI.riskControl.getStatus()
+    if (!task.active()) return
     status.value = runtimeStatus
-    if ((runtimeStatus.engine ?? 'openai') === configForm.engine && Array.isArray(runtimeStatus.api_key_statuses)) {
+    if (expectedEngine === configForm.engine && (runtimeStatus.engine ?? 'openai') === configForm.engine && Array.isArray(runtimeStatus.api_key_statuses)) {
       configForm.api_key_statuses = [...runtimeStatus.api_key_statuses]
       prunePendingDeleteAPIKeyHashes()
     }
   } catch (err: unknown) {
-    if (!silent) {
+    if (task.active() && !silent) {
       appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.statusFailed')))
     }
   } finally {
-    statusLoading.value = false
+    if (task.owned()) statusLoading.value = false
+    task.finish()
   }
 }
 
 async function saveConfig() {
+  if (saving.value) return
+  const task = pageTasks.begin('saveConfig')
+  if (!task.active()) return
   saving.value = true
   try {
     const modelFilterPayload = buildModelFilterPayload()
@@ -1931,19 +1952,31 @@ async function saveConfig() {
 
     engineDrafts.value[configForm.engine] = captureEngineDraft()
     payload.engine_configs = Object.fromEntries(Object.entries(engineDrafts.value).map(([engine, draft]) => [engine, engineDraftPayload(draft)]))
+    const revision = settingsRevision
+    const submittedDraft = settingsDraftIdentity()
     const updated = await adminAPI.riskControl.updateConfig(payload)
-    applyConfig(updated)
-    settingsOpen.value = false
+    if (!task.active()) return
+    if (revision === settingsRevision && submittedDraft === settingsDraftIdentity()) {
+      applyConfig(updated)
+      closeSettings()
+    }
     appStore.showSuccess(t('admin.riskControl.saved'))
     await Promise.all([loadStatus(true), loadLogs()])
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.saveFailed')))
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.saveFailed')))
   } finally {
-    saving.value = false
+    if (task.owned()) saving.value = false
+    task.finish()
   }
 }
 
+function settingsDraftIdentity() {
+  return JSON.stringify({ form: toRaw(configForm), drafts: toRaw(engineDrafts.value), pendingDeletes: pendingDeleteApiKeyHashes.value })
+}
+
 async function loadLogs() {
+  const task = pageTasks.begin('loadLogs')
+  if (!task.active()) return
   logsLoading.value = true
   try {
     const params = {
@@ -1957,15 +1990,17 @@ async function loadLogs() {
       to: normalizeDateTimeLocal(filters.to),
     }
     const result = await adminAPI.riskControl.listLogs(params)
+    if (!task.active()) return
     logs.value = result.items
     pagination.total = result.total
     pagination.page = result.page
     pagination.page_size = result.page_size
     pagination.pages = result.pages
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.logsFailed')))
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.logsFailed')))
   } finally {
-    logsLoading.value = false
+    if (task.owned()) logsLoading.value = false
+    task.finish()
   }
 }
 
@@ -1987,55 +2022,80 @@ function closeInputDetail() {
 
 async function unbanUser(row: ContentModerationLog) {
   if (!row.user_id || unbanningUserID.value !== null) return
+  const task = pageTasks.begin('unbanUser')
+  if (!task.active()) return
   unbanningUserID.value = row.user_id
   try {
     const result = await adminAPI.riskControl.unbanUser(row.user_id)
+    if (!task.active()) return
     logs.value = logs.value.map((item) => {
       if (item.user_id !== row.user_id) return item
       return { ...item, user_status: result.status }
     })
     appStore.showSuccess(t('admin.riskControl.unbanSuccess'))
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.unbanFailed')))
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.unbanFailed')))
   } finally {
-    unbanningUserID.value = null
+    if (task.owned()) unbanningUserID.value = null
+    task.finish()
   }
 }
 
 async function deleteFlaggedHash() {
   if (!isFlaggedHashInputValid.value || hashActionLoading.value) return
+  const task = pageTasks.begin('hashAction')
+  if (!task.active()) return
+  const submittedHash = flaggedHashInput.value
   hashActionLoading.value = true
   try {
-    const result = await adminAPI.riskControl.deleteFlaggedHash(flaggedHashInput.value)
-    flaggedHashInput.value = ''
+    const result = await adminAPI.riskControl.deleteFlaggedHash(submittedHash)
+    if (!task.active()) return
+    if (flaggedHashInput.value === submittedHash) flaggedHashInput.value = ''
     await loadStatus(true)
+    if (!task.active()) return
     appStore.showSuccess(result.deleted ? t('admin.riskControl.flaggedHashDeleted') : t('admin.riskControl.flaggedHashNotFound'))
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.flaggedHashDeleteFailed')))
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.flaggedHashDeleteFailed')))
   } finally {
-    hashActionLoading.value = false
+    if (task.owned()) hashActionLoading.value = false
+    task.finish()
   }
 }
 
 async function clearFlaggedHashes() {
-  if (hashActionLoading.value) return
+  if (hashActionLoading.value || !pageTasks.current()) return
   const confirmed = window.confirm(t('admin.riskControl.clearFlaggedHashesConfirm'))
   if (!confirmed) return
+  const task = pageTasks.begin('hashAction')
+  if (!task.active()) return
   hashActionLoading.value = true
   try {
     const result = await adminAPI.riskControl.clearFlaggedHashes()
+    if (!task.active()) return
     await loadStatus(true)
+    if (!task.active()) return
     appStore.showSuccess(t('admin.riskControl.flaggedHashesCleared', { count: result.deleted }))
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.flaggedHashesClearFailed')))
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.flaggedHashesClearFailed')))
   } finally {
-    hashActionLoading.value = false
+    if (task.owned()) hashActionLoading.value = false
+    task.finish()
   }
 }
 
 function openSettings() {
+  if (!pageTasks.current()) return
+  settingsRevision++
   activeSettingsTab.value = 'basic'
   settingsOpen.value = true
+}
+
+function closeSettings() {
+  settingsRevision++
+  pageTasks.cancel('testApiKeys')
+  apiKeyTesting.value = false
+  cancelModerationImageRead()
+  settingsOpen.value = false
 }
 
 function reloadLogsFromFirstPage() {
@@ -2079,9 +2139,14 @@ function setModelFilterType(type: ContentModerationModelFilterType) {
 }
 
 async function testApiKeys(useInputKeys: boolean) {
+  if (apiKeyTesting.value || moderationImageReading.value) return
+  const expectedDraft = auditDraftIdentity()
+  const task = pageTasks.begin('testApiKeys', () => expectedDraft === auditDraftIdentity())
+  if (!task.active()) return
   const keys = useInputKeys ? parseApiKeys(configForm.api_keys_text) : []
   if (useInputKeys && keys.length === 0) {
     appStore.showError(t('admin.riskControl.apiKeyTestNoInput'))
+    task.finish()
     return
   }
   apiKeyTesting.value = true
@@ -2096,8 +2161,9 @@ async function testApiKeys(useInputKeys: boolean) {
       // 与保存语义一致：0 强制直连，>0 指定代理，确保测试与实际审计走同一条链路
       proxy_id: configForm.proxy_id ?? 0,
       prompt: moderationTestPrompt.value,
-      images: moderationTestImages.value,
+      images: [...moderationTestImages.value],
     })
+    if (!task.active()) return
     moderationTestResult.value = result.audit_result ?? null
     if (useInputKeys) {
       testedApiKeyStatuses.value = result.items.map((item) => ({ ...item, configured: false }))
@@ -2105,6 +2171,7 @@ async function testApiKeys(useInputKeys: boolean) {
       mergeConfiguredAPIKeyStatuses(result.items)
       testedApiKeyStatuses.value = []
       await loadStatus(true)
+      if (!task.active()) return
     }
     if (result.items.length === 0 || result.items.some(item => item.status === 'error' || item.status === 'frozen')) {
       appStore.showError(t('admin.riskControl.apiKeyTestFailed'))
@@ -2112,10 +2179,17 @@ async function testApiKeys(useInputKeys: boolean) {
       appStore.showSuccess(t('admin.riskControl.apiKeyTestDone', { count: result.items.length }))
     }
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.apiKeyTestFailed')))
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t('admin.riskControl.apiKeyTestFailed')))
   } finally {
-    apiKeyTesting.value = false
+    if (task.owned()) apiKeyTesting.value = false
+    task.finish()
   }
+}
+
+function auditDraftIdentity() {
+  return JSON.stringify({ revision: settingsRevision, engine: configForm.engine, base: configForm.base_url, model: configForm.model,
+    keys: configForm.api_keys_text, proxy: configForm.proxy_id, timeout: configForm.timeout_ms, thresholds: toRaw(configForm.thresholds),
+    prompt: moderationTestPrompt.value, images: moderationTestImages.value })
 }
 
 function mergeConfiguredAPIKeyStatuses(items: ContentModerationAPIKeyStatus[]) {
@@ -2147,12 +2221,14 @@ function prunePendingDeleteAPIKeyHashes() {
 }
 
 function clearModerationTestInput() {
+  cancelModerationImageRead()
   moderationTestPrompt.value = ''
   moderationTestImages.value = []
   moderationTestResult.value = null
 }
 
 function removeModerationTestImage(index: number) {
+  cancelModerationImageRead()
   moderationTestImages.value.splice(index, 1)
 }
 
@@ -2174,31 +2250,56 @@ async function handleModerationImagePaste(event: ClipboardEvent) {
 }
 
 async function addModerationTestFiles(files: FileList | File[] | null) {
-  if (!files) return
-  const items = Array.from(files).filter((file) => file.type.startsWith('image/'))
-  for (const file of items) {
-    if (moderationTestImages.value.length >= maxModerationTestImages) {
-      appStore.showError(t('admin.riskControl.auditTestImageLimit', { count: maxModerationTestImages }))
-      return
+  if (!files || moderationImageReading.value) return
+  const revision = imageRevision
+  const dialogRevision = settingsRevision
+  const engine = configForm.engine
+  const task = pageTasks.begin('auditFiles', () => revision === imageRevision && dialogRevision === settingsRevision && engine === configForm.engine)
+  if (!task.active()) return
+  moderationImageReading.value = true
+  try {
+    const items = Array.from(files).filter((file) => file.type.startsWith('image/'))
+    for (const file of items) {
+      if (!task.active()) return
+      if (moderationTestImages.value.length >= maxModerationTestImages) {
+        appStore.showError(t('admin.riskControl.auditTestImageLimit', { count: maxModerationTestImages }))
+        return
+      }
+      if (file.size > maxModerationTestImageSize) {
+        appStore.showError(t('admin.riskControl.auditTestImageTooLarge'))
+        continue
+      }
+      try {
+        const data = await fileToDataURL(file, task.signal)
+        if (!task.active()) return
+        moderationTestImages.value.push(data)
+      } catch {
+        if (task.active()) appStore.showError(t('admin.riskControl.auditTestImageReadFailed'))
+      }
     }
-    if (file.size > maxModerationTestImageSize) {
-      appStore.showError(t('admin.riskControl.auditTestImageTooLarge'))
-      continue
-    }
-    try {
-      moderationTestImages.value.push(await fileToDataURL(file))
-    } catch {
-      appStore.showError(t('admin.riskControl.auditTestImageReadFailed'))
-    }
+  } finally {
+    if (task.owned()) moderationImageReading.value = false
+    task.finish()
   }
 }
 
-function fileToDataURL(file: File): Promise<string> {
+function cancelModerationImageRead() {
+  imageRevision++
+  pageTasks.cancel('auditFiles')
+  moderationImageReading.value = false
+}
+
+function fileToDataURL(file: File, signal: AbortSignal): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
-    reader.onload = () => resolve(String(reader.result || ''))
-    reader.onerror = () => reject(reader.error)
-    reader.readAsDataURL(file)
+    const cleanup = () => signal.removeEventListener('abort', abort)
+    const abort = () => { cleanup(); reader.abort(); reject(new DOMException('Image read cancelled', 'AbortError')) }
+    reader.onload = () => { cleanup(); resolve(String(reader.result || '')) }
+    reader.onerror = () => { cleanup(); reject(reader.error) }
+    reader.onabort = () => { cleanup(); reject(new DOMException('Image read cancelled', 'AbortError')) }
+    if (signal.aborted) { abort(); return }
+    signal.addEventListener('abort', abort, { once: true })
+    try { reader.readAsDataURL(file) } catch (error) { cleanup(); reject(error) }
   })
 }
 
@@ -2464,6 +2565,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  pageTasks.dispose()
   if (statusTimer !== null) {
     window.clearInterval(statusTimer)
     statusTimer = null

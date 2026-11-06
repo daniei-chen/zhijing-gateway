@@ -1,0 +1,108 @@
+test_ambiguous_http_framing_is_rejected (test_preview_http.PreviewBoundaryTests.test_ambiguous_http_framing_is_rejected) ...
+  test_ambiguous_http_framing_is_rejected (test_preview_http.PreviewBoundaryTests.test_ambiguous_http_framing_is_rejected) (headers=['Content-Length: 2', 'Content-Length: 2']) ... FAIL
+  test_ambiguous_http_framing_is_rejected (test_preview_http.PreviewBoundaryTests.test_ambiguous_http_framing_is_rejected) (headers=['Content-Length: 2', 'Transfer-Encoding: chunked']) ... FAIL
+test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies (test_preview_http.PreviewBoundaryTests.test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies) ...
+  test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies (test_preview_http.PreviewBoundaryTests.test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies) (length='-1') ... FAIL
+  test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies (test_preview_http.PreviewBoundaryTests.test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies) (length='not-a-number') ... FAIL
+  test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies (test_preview_http.PreviewBoundaryTests.test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies) (length='+2') ... FAIL
+test_invalid_diagnostic_pagination_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_invalid_diagnostic_pagination_returns_a_client_error) ... FAIL
+test_malformed_or_nonobject_json_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_malformed_or_nonobject_json_returns_a_client_error) ...
+  test_malformed_or_nonobject_json_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_malformed_or_nonobject_json_returns_a_client_error) (body=b'{') ... FAIL
+  test_malformed_or_nonobject_json_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_malformed_or_nonobject_json_returns_a_client_error) (body=b'[]') ... FAIL
+  test_malformed_or_nonobject_json_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_malformed_or_nonobject_json_returns_a_client_error) (body=b'null') ... FAIL
+  test_malformed_or_nonobject_json_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_malformed_or_nonobject_json_returns_a_client_error) (body=b'"text"') ... FAIL
+test_oversized_body_is_rejected (test_preview_http.PreviewBoundaryTests.test_oversized_body_is_rejected) ... FAIL
+test_valid_synthetic_login_is_unchanged (test_preview_http.PreviewBoundaryTests.test_valid_synthetic_login_is_unchanged) ... ok
+
+======================================================================
+FAIL: test_ambiguous_http_framing_is_rejected (test_preview_http.PreviewBoundaryTests.test_ambiguous_http_framing_is_rejected) (headers=['Content-Length: 2', 'Content-Length: 2'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 62, in test_ambiguous_http_framing_is_rejected
+    self.assertEqual(self.request(b'{}', headers), 400)
+AssertionError: 401 != 400
+
+======================================================================
+FAIL: test_ambiguous_http_framing_is_rejected (test_preview_http.PreviewBoundaryTests.test_ambiguous_http_framing_is_rejected) (headers=['Content-Length: 2', 'Transfer-Encoding: chunked'])
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 62, in test_ambiguous_http_framing_is_rejected
+    self.assertEqual(self.request(b'{}', headers), 400)
+AssertionError: 401 != 400
+
+======================================================================
+FAIL: test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies (test_preview_http.PreviewBoundaryTests.test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies) (length='-1')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 53, in test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies
+    self.assertEqual(self.request(b'{}', [f'Content-Length: {value}']), 400)
+AssertionError: 401 != 400
+
+======================================================================
+FAIL: test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies (test_preview_http.PreviewBoundaryTests.test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies) (length='not-a-number')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 53, in test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies
+    self.assertEqual(self.request(b'{}', [f'Content-Length: {value}']), 400)
+AssertionError: 0 != 400
+
+======================================================================
+FAIL: test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies (test_preview_http.PreviewBoundaryTests.test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies) (length='+2')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 53, in test_invalid_content_lengths_are_rejected_without_reading_unbounded_bodies
+    self.assertEqual(self.request(b'{}', [f'Content-Length: {value}']), 400)
+AssertionError: 401 != 400
+
+======================================================================
+FAIL: test_invalid_diagnostic_pagination_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_invalid_diagnostic_pagination_returns_a_client_error)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 70, in test_invalid_diagnostic_pagination_returns_a_client_error
+    self.assertEqual(self.request(path='/api/v1/admin/ops/requests?page=bad', method='GET'), 400)
+AssertionError: 0 != 400
+
+======================================================================
+FAIL: test_malformed_or_nonobject_json_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_malformed_or_nonobject_json_returns_a_client_error) (body=b'{')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 67, in test_malformed_or_nonobject_json_returns_a_client_error
+    self.assertEqual(self.request(body), 400)
+AssertionError: 401 != 400
+
+======================================================================
+FAIL: test_malformed_or_nonobject_json_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_malformed_or_nonobject_json_returns_a_client_error) (body=b'[]')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 67, in test_malformed_or_nonobject_json_returns_a_client_error
+    self.assertEqual(self.request(body), 400)
+AssertionError: 0 != 400
+
+======================================================================
+FAIL: test_malformed_or_nonobject_json_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_malformed_or_nonobject_json_returns_a_client_error) (body=b'null')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 67, in test_malformed_or_nonobject_json_returns_a_client_error
+    self.assertEqual(self.request(body), 400)
+AssertionError: 0 != 400
+
+======================================================================
+FAIL: test_malformed_or_nonobject_json_returns_a_client_error (test_preview_http.PreviewBoundaryTests.test_malformed_or_nonobject_json_returns_a_client_error) (body=b'"text"')
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 67, in test_malformed_or_nonobject_json_returns_a_client_error
+    self.assertEqual(self.request(body), 400)
+AssertionError: 0 != 400
+
+======================================================================
+FAIL: test_oversized_body_is_rejected (test_preview_http.PreviewBoundaryTests.test_oversized_body_is_rejected)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "${AUDIT_WORKSPACE}/zhijing-audit-baseline/tools/tests/test_preview_http.py", line 56, in test_oversized_body_is_rejected
+    self.assertEqual(self.request(b' ' * 16385), 413)
+AssertionError: 401 != 413
+
+----------------------------------------------------------------------
+Ran 6 tests in 0.070s
+
+FAILED (failures=11)

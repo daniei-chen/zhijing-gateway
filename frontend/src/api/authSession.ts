@@ -4,6 +4,9 @@ export const AUTH_SESSION_KEY = 'auth_session_identity_v1'
 export const AUTH_SESSION_REPLACED_EVENT = 'auth-session-replaced'
 const storageKeys = new Set([AUTH_SESSION_KEY, 'auth_token', 'refresh_token', 'auth_user', 'token_expires_at'])
 export interface AuthSessionSnapshot { generation: string; subject: string | null }
+const signalSessions = new WeakMap<AbortSignal, AuthSessionSnapshot>()
+export function bindAuthSignal(signal: AbortSignal, session: AuthSessionSnapshot): void { signalSessions.set(signal, session) }
+export function authSignalSession(signal?: AbortSignal | null): AuthSessionSnapshot | undefined { return signal ? signalSessions.get(signal) : undefined }
 interface SessionRecord extends AuthSessionSnapshot { phase: 'ready' | 'transition'; credentials: string }
 const pending = new Set<{ session: AuthSessionSnapshot; abort: () => void }>()
 const subscribers = new Set<() => void>()
@@ -28,7 +31,19 @@ function readUser(): unknown {
 function credentialDigest(): string {
   return pairDigest(localStorage.getItem('auth_token'), localStorage.getItem('refresh_token'))
 }
-function pairDigest(access: string | null, refresh: string | null): string { return authSessionDigest(JSON.stringify([access, refresh])) }
+// Keep only the most recent pair. Requests still reread storage on every check,
+// but unchanged credentials need not be SHA-256 hashed repeatedly per request or
+// once for each in-flight request during a session notification.
+let lastCredentialPair: string | undefined
+let lastCredentialDigest = ''
+function pairDigest(access: string | null, refresh: string | null): string {
+  const pair = JSON.stringify([access, refresh])
+  if (pair !== lastCredentialPair) {
+    lastCredentialDigest = authSessionDigest(pair)
+    lastCredentialPair = pair
+  }
+  return lastCredentialDigest
+}
 function newGeneration(): string {
   return crypto.randomUUID?.() || Array.from(crypto.getRandomValues(new Uint8Array(16)), n => n.toString(16).padStart(2, '0')).join('')
 }
@@ -83,11 +98,20 @@ function notify(external = false): void {
   if (current.subject !== null) lastDocumentSubject = current.subject
   for (const listener of subscribers) listener()
 }
-if (typeof window !== 'undefined') window.addEventListener('storage', event => {
-  if (event.key === null || storageKeys.has(event.key)) notify(true)
-})
+if (typeof window !== 'undefined') {
+  // Older clients persisted a registration password here. Remove that legacy
+  // draft on startup; the current registration flow uses a one-use memory draft.
+  try { sessionStorage.removeItem('register_data') } catch { /* Storage may be disabled. */ }
+  window.addEventListener('storage', event => {
+    if (event.key === null || storageKeys.has(event.key)) notify(true)
+  })
+}
 export function subscribeAuthSession(listener: () => void): () => void { subscribers.add(listener); return () => subscribers.delete(listener) }
-export function adoptDocumentAuthSession(): void { documentSession = captureAuthSession(); if (documentSession.subject !== null) lastDocumentSubject = documentSession.subject }
+export function adoptDocumentAuthSession(session = captureAuthSession()): void {
+  assertAuthSession(session)
+  documentSession = session
+  if (documentSession.subject !== null) lastDocumentSubject = documentSession.subject
+}
 export function captureRequestAuthSession(): AuthSessionSnapshot {
   if (documentIsStale) throw new AuthSessionChangedError()
   let current: AuthSessionSnapshot

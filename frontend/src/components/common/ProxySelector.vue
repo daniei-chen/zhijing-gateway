@@ -1,9 +1,16 @@
 <template>
-  <div class="relative" ref="containerRef">
+  <div class="relative" ref="containerRef" @keydown="handleEscape">
     <button
+      ref="triggerRef"
+      :id="id || `${fieldId}-trigger`"
       type="button"
       @click="toggle"
+      @keydown.down.prevent="openSelector"
       :disabled="disabled"
+      :aria-label="ariaLabel ?? (id ? undefined : t('admin.accounts.proxy'))"
+      :aria-expanded="isOpen"
+      aria-haspopup="dialog"
+      :aria-controls="`${fieldId}-options`"
       :class="[
         'select-trigger',
         isOpen && 'select-trigger-open',
@@ -23,12 +30,15 @@
     </button>
 
     <Transition name="select-dropdown">
-      <div v-if="isOpen" class="select-dropdown">
+      <div v-if="isOpen" :id="`${fieldId}-options`" class="select-dropdown" role="dialog" :aria-label="t('admin.accounts.proxy')">
         <!-- Search and Batch Test Header -->
         <div class="select-header">
           <div class="select-search">
             <Icon name="search" size="sm" class="text-gray-400" />
             <input
+              :id="`${fieldId}-search`"
+              :aria-label="t('admin.proxies.searchProxies')"
+              :disabled="disabled"
               ref="searchInputRef"
               v-model="searchQuery"
               type="text"
@@ -41,9 +51,10 @@
             v-if="proxies.length > 0"
             type="button"
             @click.stop="handleBatchTest"
-            :disabled="batchTesting"
+            :disabled="disabled || batchTesting"
             class="batch-test-btn"
             :title="t('admin.proxies.batchTest')"
+            :aria-label="t('admin.proxies.batchTest')"
           >
             <svg v-if="batchTesting" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle
@@ -67,13 +78,16 @@
         <!-- Options list -->
         <div class="select-options">
           <!-- No Proxy option -->
-          <div
+          <button
+            type="button"
+            :disabled="disabled"
             @click="selectOption(null)"
-            :class="['select-option', modelValue === null && 'select-option-selected']"
+            :aria-pressed="modelValue === null"
+            :class="['select-option w-full text-left', modelValue === null && 'select-option-selected']"
           >
             <span class="select-option-label">{{ t('admin.accounts.noProxy') }}</span>
             <Icon v-if="modelValue === null" name="check" size="sm" class="text-primary-500" />
-          </div>
+          </button>
 
           <!-- Proxy options -->
           <div
@@ -82,7 +96,13 @@
             @click="selectOption(proxy.id)"
             :class="['select-option', modelValue === proxy.id && 'select-option-selected']"
           >
-            <div class="min-w-0 flex-1">
+            <button
+              type="button"
+              :disabled="disabled"
+              :aria-pressed="modelValue === proxy.id"
+              @click.stop="selectOption(proxy.id)"
+              class="min-w-0 flex-1 text-left"
+            >
               <div class="flex items-center gap-2">
                 <span class="truncate font-medium">{{ proxy.name }}</span>
                 <!-- Account count badge -->
@@ -116,15 +136,16 @@
               <div class="truncate text-xs text-gray-500 dark:text-gray-400">
                 {{ proxy.protocol }}://{{ proxy.host }}:{{ proxy.port }}
               </div>
-            </div>
+            </button>
 
             <!-- Individual test button -->
             <button
               type="button"
               @click.stop="handleTestProxy(proxy)"
-              :disabled="testingProxyIds.has(proxy.id)"
+              :disabled="disabled || testingProxyIds.has(proxy.id)"
               class="test-btn"
               :title="t('admin.proxies.testConnection')"
+              :aria-label="`${t('admin.proxies.testConnection')}: ${proxy.name}`"
             >
               <svg
                 v-if="testingProxyIds.has(proxy.id)"
@@ -168,13 +189,17 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, onUnmounted, nextTick, watch } from 'vue'
+import { ref, reactive, computed, onMounted, onBeforeUnmount, onUnmounted, nextTick, watch, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { adminAPI } from '@/api/admin'
 import Icon from '@/components/icons/Icon.vue'
 import type { Proxy } from '@/types'
+import { createSessionTasks } from '@/utils/sessionTasks'
 
 const { t } = useI18n()
+const fieldId = `proxy-selector-${useId()}`
+const proxyTasks = createSessionTasks()
+onBeforeUnmount(() => proxyTasks.dispose())
 
 interface ProxyTestResult {
   success: boolean
@@ -190,6 +215,8 @@ interface Props {
   modelValue: number | null
   proxies: Proxy[]
   disabled?: boolean
+  id?: string
+  ariaLabel?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -203,6 +230,7 @@ const emit = defineEmits<{
 const isOpen = ref(false)
 const searchQuery = ref('')
 const containerRef = ref<HTMLElement | null>(null)
+const triggerRef = ref<HTMLButtonElement | null>(null)
 const searchInputRef = ref<HTMLInputElement | null>(null)
 
 // Test state
@@ -245,6 +273,27 @@ const toggle = () => {
   }
 }
 
+const openSelector = () => {
+  if (!isOpen.value) toggle()
+}
+
+const resetPendingTests = () => {
+  proxyTasks.cancel()
+  testingProxyIds.clear()
+  batchTesting.value = false
+}
+watch(isOpen, (open) => {
+  if (!open) resetPendingTests()
+}, { flush: 'sync' })
+watch(
+  () => JSON.stringify(props.proxies.map(proxy => [proxy.id, proxy.protocol, proxy.host, proxy.port, proxy.username, proxy.password, proxy.updated_at])),
+  () => {
+    resetPendingTests()
+    for (const id of Object.keys(testResults)) delete testResults[Number(id)]
+  },
+  { flush: 'sync' }
+)
+
 watch(() => props.disabled, (disabled) => {
   if (disabled) {
     isOpen.value = false
@@ -253,38 +302,44 @@ watch(() => props.disabled, (disabled) => {
 })
 
 const selectOption = (value: number | null) => {
+  if (props.disabled || !proxyTasks.current()) return
   emit('update:modelValue', value)
   isOpen.value = false
   searchQuery.value = ''
+  triggerRef.value?.focus()
 }
 
 const handleTestProxy = async (proxy: Proxy) => {
-  if (testingProxyIds.has(proxy.id)) return
+  if (!proxyTasks.current() || props.disabled || !isOpen.value || testingProxyIds.has(proxy.id)) return
 
+  const task = proxyTasks.begin(`test:${proxy.id}`)
   testingProxyIds.add(proxy.id)
   try {
     const result = await adminAPI.proxies.testProxy(proxy.id)
-    testResults[proxy.id] = result
+    if (task.active()) testResults[proxy.id] = result
   } catch (error: any) {
-    testResults[proxy.id] = {
+    if (task.active()) testResults[proxy.id] = {
       success: false,
       message: error.response?.data?.detail || 'Test failed'
     }
   } finally {
-    testingProxyIds.delete(proxy.id)
+    if (task.active()) testingProxyIds.delete(proxy.id)
+    task.finish()
   }
 }
 
 const handleBatchTest = async () => {
-  if (batchTesting.value || props.proxies.length === 0) return
+  if (!proxyTasks.current() || props.disabled || !isOpen.value || batchTesting.value || props.proxies.length === 0) return
 
+  const task = proxyTasks.begin('batch')
   batchTesting.value = true
 
   // Test all proxies in parallel
-  const testPromises = props.proxies.map(handleTestProxy)
+  const testPromises = [...props.proxies].map(handleTestProxy)
 
   await Promise.all(testPromises)
-  batchTesting.value = false
+  if (task.active()) batchTesting.value = false
+  task.finish()
 }
 
 const handleClickOutside = (event: MouseEvent) => {
@@ -296,8 +351,11 @@ const handleClickOutside = (event: MouseEvent) => {
 
 const handleEscape = (event: KeyboardEvent) => {
   if (event.key === 'Escape' && isOpen.value) {
+    event.preventDefault()
+    event.stopPropagation()
     isOpen.value = false
     searchQuery.value = ''
+    triggerRef.value?.focus()
   }
 }
 

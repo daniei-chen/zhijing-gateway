@@ -39,7 +39,10 @@ function createEntry(models: string[] = []): PricingFormEntry {
 }
 
 function addModels(entry: PricingFormEntry, models: string[]) {
-  const wrapper = shallowMount(PricingEntryCard, { props: { entry } })
+  const wrapper = shallowMount(PricingEntryCard, { props: {
+    entry,
+    onUpdate: (updated: PricingFormEntry) => { void wrapper.setProps({ entry: updated }) },
+  } })
   wrapper.findComponent({ name: 'ModelTagInput' }).vm.$emit('update:models', models)
   return wrapper
 }

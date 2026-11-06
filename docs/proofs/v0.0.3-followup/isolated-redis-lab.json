@@ -1,0 +1,76 @@
+{
+  "lab_only": true,
+  "network": "none",
+  "production_configuration_writes": 0,
+  "supplier_calls": 0,
+  "requests_per_policy": 400,
+  "clients": 4,
+  "synthetic_value_bytes": 256,
+  "resource_limits": {
+    "memory_bytes": 67108864,
+    "nano_cpus": 250000000,
+    "pids": 64
+  },
+  "synthetic_benchmark_csv": {
+    "everysec": [
+      [
+        "test",
+        "rps",
+        "avg_latency_ms",
+        "min_latency_ms",
+        "p50_latency_ms",
+        "p95_latency_ms",
+        "p99_latency_ms",
+        "max_latency_ms"
+      ],
+      [
+        "SET",
+        "50000.00",
+        "0.070",
+        "0.024",
+        "0.063",
+        "0.127",
+        "0.191",
+        "0.231"
+      ]
+    ],
+    "always": [
+      [
+        "test",
+        "rps",
+        "avg_latency_ms",
+        "min_latency_ms",
+        "p50_latency_ms",
+        "p95_latency_ms",
+        "p99_latency_ms",
+        "max_latency_ms"
+      ],
+      [
+        "SET",
+        "1834.86",
+        "2.146",
+        "0.696",
+        "1.343",
+        "2.095",
+        "15.887",
+        "62.751"
+      ]
+    ]
+  },
+  "acknowledged_marker_survived_sigkill": true,
+  "policy_after_restart": {
+    "appendonly": "yes",
+    "maxmemory-policy": "noeviction",
+    "no-appendfsync-on-rewrite": "no",
+    "appendfsync": "always"
+  },
+  "persistence_after_restart": {
+    "loading": "0",
+    "aof_enabled": "1",
+    "aof_last_bgrewrite_status": "ok",
+    "aof_last_write_status": "ok",
+    "aof_pending_bio_fsync": "0",
+    "aof_delayed_fsync": "0"
+  },
+  "disposable_container_and_its_anonymous_volume_removed": true
+}

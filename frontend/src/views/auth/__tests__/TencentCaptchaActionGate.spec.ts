@@ -2,6 +2,7 @@ import { defineComponent, h } from 'vue'
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import LoginView from '@/views/auth/LoginView.vue'
+import { replaceAuthSession } from '@/api/authSession'
 
 const loginMock = vi.fn()
 const loginWithPasskeyMock = vi.fn()
@@ -98,6 +99,7 @@ function mountLogin() {
 
 describe('Tencent captcha action gate', () => {
   beforeEach(() => {
+    localStorage.clear()
     loginMock.mockReset()
     loginWithPasskeyMock.mockReset()
     getPublicSettingsMock.mockReset()
@@ -226,5 +228,64 @@ describe('Tencent captcha action gate', () => {
     await flushPromises()
 
     expect(loginWithPasskeyMock).not.toHaveBeenCalled()
+  })
+
+  it('does not start a second login while the first captcha is pending', async () => {
+    verifyActionMock.mockReturnValue(new Promise(() => {}))
+    const wrapper = mountLogin()
+    await flushPromises()
+    await wrapper.get('#email').setValue('user@example.test')
+    await wrapper.get('#password').setValue('SYNTHETIC-password')
+    await wrapper.get('form').trigger('submit')
+    await wrapper.get('form').trigger('submit')
+    expect(verifyActionMock).toHaveBeenCalledTimes(1)
+    expect(loginMock).not.toHaveBeenCalled()
+    wrapper.unmount()
+  })
+
+  it.each(['password', 'passkey', 'oauth'] as const)('does not resume stale %s login after a captcha wait', async mode => {
+    let complete!: (proof: { token: string; randstr: string }) => void
+    verifyActionMock.mockReturnValue(new Promise(resolve => { complete = resolve }))
+    const wrapper = mountLogin()
+    await flushPromises()
+    if (mode === 'password') {
+      await wrapper.get('#email').setValue('user@example.test')
+      await wrapper.get('#password').setValue('SYNTHETIC-password')
+      await wrapper.get('form').trigger('submit')
+    } else {
+      await wrapper.get(mode === 'passkey' ? 'button.btn-secondary.w-full' : '[data-testid="oauth-start"]').trigger('click')
+    }
+    expect(verifyActionMock).toHaveBeenCalledTimes(1)
+    replaceAuthSession({ accessToken: 'SYNTHETIC-new-session', user: { id: 808 } })
+    complete({ token: 'SYNTHETIC-proof', randstr: '@SYNTHETIC' })
+    await flushPromises()
+    expect(loginMock).not.toHaveBeenCalled()
+    expect(loginWithPasskeyMock).not.toHaveBeenCalled()
+    expect(startOAuthLoginMock).not.toHaveBeenCalled()
+    expect(localStorage.getItem('auth_token')).toBe('SYNTHETIC-new-session')
+    expect(locationState.href).toBe('http://localhost/login')
+    wrapper.unmount()
+  })
+
+  it.each(['password', 'passkey', 'oauth'] as const)('does not resume %s login after leaving the page during captcha', async mode => {
+    let complete!: (proof: { token: string; randstr: string }) => void
+    verifyActionMock.mockReturnValue(new Promise(resolve => { complete = resolve }))
+    const wrapper = mountLogin()
+    await flushPromises()
+    if (mode === 'password') {
+      await wrapper.get('#email').setValue('user@example.test')
+      await wrapper.get('#password').setValue('SYNTHETIC-password')
+      await wrapper.get('form').trigger('submit')
+    } else {
+      await wrapper.get(mode === 'passkey' ? 'button.btn-secondary.w-full' : '[data-testid="oauth-start"]').trigger('click')
+    }
+    expect(verifyActionMock).toHaveBeenCalledTimes(1)
+    wrapper.unmount()
+    complete({ token: 'SYNTHETIC-proof', randstr: '@SYNTHETIC' })
+    await flushPromises()
+    expect(loginMock).not.toHaveBeenCalled()
+    expect(loginWithPasskeyMock).not.toHaveBeenCalled()
+    expect(startOAuthLoginMock).not.toHaveBeenCalled()
+    expect(locationState.href).toBe('http://localhost/login')
   })
 })

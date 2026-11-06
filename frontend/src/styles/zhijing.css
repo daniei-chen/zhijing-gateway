@@ -57,7 +57,7 @@ code, pre, .font-mono { font-family: var(--z-mono); }
 .z-console .sidebar-logo { box-shadow: none; border-radius: 0; width: 32px; height: 32px; flex-basis: 32px; min-width: 32px; }
 .z-console .sidebar-brand-title { color: #f4f2f8; font-size: 18px; letter-spacing: .07em; font-weight: 650; }
 .z-console .sidebar-brand > div, .z-console .sidebar-brand > button { color: #b2aabf; }
-.z-console .sidebar-brand button { background: #ffffff08; color: #b7afc6; box-shadow: none; font-size: 9px; }
+.z-console .sidebar-brand > .version-badge > button { background: #ffffff08; color: #b7afc6; box-shadow: none; font-size: 9px; }
 .z-console .sidebar-nav { padding: 22px 12px; scrollbar-color: #ffffff24 transparent; }
 .z-console .sidebar-link { position: relative; color: #bbb5ca; font-size: 12px; font-weight: 450; border-radius: 7px; padding-top: 11px; padding-bottom: 11px; min-height: 42px; transition: background-color 140ms ease, color 140ms ease; }
 .z-console .sidebar-link > svg, .z-console .sidebar-svg-icon { width: 18px; height: 18px; }

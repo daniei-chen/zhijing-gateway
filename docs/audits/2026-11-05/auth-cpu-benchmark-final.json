@@ -1,0 +1,230 @@
+{
+  "schema_version": 2,
+  "benchmark": "authSession.captureAuthSession",
+  "measured_utc": "2026-11-05T11:30:12.670Z",
+  "runtime": "v24.22.1",
+  "v8": "13.6.233.17-node.58",
+  "platform": "linux",
+  "architecture": "x64",
+  "cpu_model": "AMD EPYC 9V74 80-Core Processor",
+  "logical_cpu_count": 9,
+  "compiler": {
+    "name": "typescript",
+    "version": "5.6.3",
+    "target": "ES2022",
+    "module": "CommonJS"
+  },
+  "benchmark_script_sha256": "4cacd07795f01b2d565d9a5ff532b4976c5fb779e0266fdb47130731afe46f66",
+  "sources": {
+    "baseline": {
+      "checkout": "${AUDIT_WORKSPACE}/zhijing-baseline",
+      "git_commit": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+      "files": [
+        {
+          "path": "frontend/src/api/authSession.ts",
+          "bytes": 10144,
+          "sha256": "4e2f9249556608664125e2d5c697aba33ec6c4afd4886a3261cc23a66258860c",
+          "git_head_sha256": "4e2f9249556608664125e2d5c697aba33ec6c4afd4886a3261cc23a66258860c",
+          "matches_git_head": true
+        },
+        {
+          "path": "frontend/src/api/authSessionDigest.ts",
+          "bytes": 2549,
+          "sha256": "f146a52c90eb396a617b568b0861eb249df0a9b19ccda897d05c208908b89d51",
+          "git_head_sha256": "f146a52c90eb396a617b568b0861eb249df0a9b19ccda897d05c208908b89d51",
+          "matches_git_head": true
+        }
+      ]
+    },
+    "candidate": {
+      "checkout": "${AUDIT_WORKSPACE}/zhijing-gateway",
+      "git_commit": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+      "files": [
+        {
+          "path": "frontend/src/api/authSession.ts",
+          "bytes": 10900,
+          "sha256": "6261024f14e5b1a3148bf1bd4b3722a273456f49f8c234c053d56e08eb53fa2b",
+          "git_head_sha256": "4e2f9249556608664125e2d5c697aba33ec6c4afd4886a3261cc23a66258860c",
+          "matches_git_head": false
+        },
+        {
+          "path": "frontend/src/api/authSessionDigest.ts",
+          "bytes": 2549,
+          "sha256": "f146a52c90eb396a617b568b0861eb249df0a9b19ccda897d05c208908b89d51",
+          "git_head_sha256": "f146a52c90eb396a617b568b0861eb249df0a9b19ccda897d05c208908b89d51",
+          "matches_git_head": true
+        }
+      ]
+    }
+  },
+  "environment": "Node.js with in-memory Storage and EventTarget; no HTTP, browser rendering, real credentials, or production traffic",
+  "synthetic_tokens": {
+    "prefix": "SYNTHETIC-",
+    "prefix_characters": 10,
+    "access_payload_characters": 2048,
+    "access_total_characters": 2058,
+    "access_utf8_bytes": 2058,
+    "refresh_payload_characters": 128,
+    "refresh_total_characters": 138,
+    "refresh_utf8_bytes": 138
+  },
+  "iterations_per_trial": 10000,
+  "warmup_iterations_per_variant_per_trial": 2000,
+  "trial_count": 7,
+  "trials": [
+    {
+      "trial": 1,
+      "order": [
+        "baseline",
+        "candidate"
+      ],
+      "measurements": [
+        {
+          "label": "baseline",
+          "milliseconds": 569.9881620000001
+        },
+        {
+          "label": "candidate",
+          "milliseconds": 36.35871099999986
+        }
+      ]
+    },
+    {
+      "trial": 2,
+      "order": [
+        "candidate",
+        "baseline"
+      ],
+      "measurements": [
+        {
+          "label": "candidate",
+          "milliseconds": 37.77976600000011
+        },
+        {
+          "label": "baseline",
+          "milliseconds": 552.265234
+        }
+      ]
+    },
+    {
+      "trial": 3,
+      "order": [
+        "baseline",
+        "candidate"
+      ],
+      "measurements": [
+        {
+          "label": "baseline",
+          "milliseconds": 563.8431700000001
+        },
+        {
+          "label": "candidate",
+          "milliseconds": 34.666815999999926
+        }
+      ]
+    },
+    {
+      "trial": 4,
+      "order": [
+        "candidate",
+        "baseline"
+      ],
+      "measurements": [
+        {
+          "label": "candidate",
+          "milliseconds": 33.61470499999996
+        },
+        {
+          "label": "baseline",
+          "milliseconds": 508.88356999999996
+        }
+      ]
+    },
+    {
+      "trial": 5,
+      "order": [
+        "baseline",
+        "candidate"
+      ],
+      "measurements": [
+        {
+          "label": "baseline",
+          "milliseconds": 491.8951560000005
+        },
+        {
+          "label": "candidate",
+          "milliseconds": 34.754633999999896
+        }
+      ]
+    },
+    {
+      "trial": 6,
+      "order": [
+        "candidate",
+        "baseline"
+      ],
+      "measurements": [
+        {
+          "label": "candidate",
+          "milliseconds": 36.8503810000002
+        },
+        {
+          "label": "baseline",
+          "milliseconds": 504.683043
+        }
+      ]
+    },
+    {
+      "trial": 7,
+      "order": [
+        "baseline",
+        "candidate"
+      ],
+      "measurements": [
+        {
+          "label": "baseline",
+          "milliseconds": 479.4616409999999
+        },
+        {
+          "label": "candidate",
+          "milliseconds": 34.027132999999594
+        }
+      ]
+    }
+  ],
+  "results": {
+    "baseline": {
+      "milliseconds": [
+        569.9881620000001,
+        552.265234,
+        563.8431700000001,
+        508.88356999999996,
+        491.8951560000005,
+        504.683043,
+        479.4616409999999
+      ],
+      "median_total_ms": 508.88356999999996,
+      "median_microseconds_per_capture": 50.88835699999999
+    },
+    "candidate": {
+      "milliseconds": [
+        36.35871099999986,
+        37.77976600000011,
+        34.666815999999926,
+        33.61470499999996,
+        34.754633999999896,
+        36.8503810000002,
+        34.027132999999594
+      ],
+      "median_total_ms": 34.754633999999896,
+      "median_microseconds_per_capture": 3.4754633999999895
+    }
+  },
+  "ratio": 14.64217893936105,
+  "limitations": [
+    "All seven alternating trials are included; no best-run selection or discarded measurements.",
+    "The storage stub has no real browser cross-tab event delivery or persistent storage cost.",
+    "This is a CPU microbenchmark, not an API latency, TTFT, or throughput benchmark.",
+    "The historical benchmark called 2048/128-character payloads token lengths; the SYNTHETIC- prefix makes the actual lengths 2058/138 characters."
+  ]
+}

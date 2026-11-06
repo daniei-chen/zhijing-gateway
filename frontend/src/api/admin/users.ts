@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from '../client'
+import { authSessionDigest } from '../authSessionDigest'
 import { listPlatformIds } from '@/constants/platformCatalog'
 import type { AccountPlatform, AdminUser, UpdateUserRequest, PaginatedResponse, ApiKey } from '@/types'
 
@@ -164,8 +165,45 @@ export async function deleteUser(id: number): Promise<{ message: string }> {
   return data
 }
 
+// Keep unresolved financial writes retryable across modal close/reopen and page
+// reload. The scope includes the administrator, target and exact wire payload;
+// only the random operation key is sent to the server.
+const balanceOperationKeys = new Map<string, string>()
+
+function balanceOperationScope(id: number, payload: { balance: number; operation: string; notes: string }) {
+  try {
+    const user: unknown = JSON.parse(globalThis.localStorage?.getItem('auth_user') ?? 'null')
+    const adminID = user && typeof user === 'object' ? (user as { id?: unknown }).id : null
+    if (typeof adminID !== 'number' || !Number.isSafeInteger(adminID) || adminID <= 0) return null
+    return {
+      adminID,
+      key: `sub2api:admin:user-balance:${adminID}:${id}:${authSessionDigest(JSON.stringify(payload))}`,
+    }
+  } catch {
+    return null
+  }
+}
+
+function getStoredBalanceOperationKey(storageKey: string): string | null {
+  try {
+    return globalThis.sessionStorage?.getItem(storageKey) ?? null
+  } catch {
+    return null
+  }
+}
+
+function storeBalanceOperationKey(storageKey: string, key: string | null): void {
+  try {
+    if (key) globalThis.sessionStorage?.setItem(storageKey, key)
+    else globalThis.sessionStorage?.removeItem(storageKey)
+  } catch {
+    // In-memory retry protection remains available when storage is denied.
+  }
+}
+
 /**
- * Update user balance
+ * Update user balance. Reuse the operation identity after an uncertain failure
+ * so an explicit retry cannot apply an accepted balance change twice.
  * @param id - User ID
  * @param balance - New balance
  * @param operation - Operation type ('set', 'add', 'subtract')
@@ -178,11 +216,47 @@ export async function updateBalance(
   operation: 'set' | 'add' | 'subtract' = 'set',
   notes?: string
 ): Promise<AdminUser> {
-  const { data } = await apiClient.post<AdminUser>(`/admin/users/${id}/balance`, {
+  const payload = {
     balance,
     operation,
-    notes: notes || ''
-  })
+    notes: notes || '',
+  }
+  const scope = balanceOperationScope(id, payload)
+  let idempotencyKey = scope
+    ? balanceOperationKeys.get(scope.key) ?? getStoredBalanceOperationKey(scope.key)
+    : null
+  const replayOnly = Boolean(idempotencyKey)
+  if (!idempotencyKey) {
+    const requestID = globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    idempotencyKey = `user-balance-${scope?.adminID ?? 'unknown-admin'}-${id}-${requestID}`
+  }
+  if (scope) {
+    balanceOperationKeys.set(scope.key, idempotencyKey)
+    storeBalanceOperationKey(scope.key, idempotencyKey)
+  }
+  // A retained key represents an uncertain write, not permission to execute it
+  // again after the server's configurable retention window. The distinct
+  // endpoint only returns a saved result and fails safely on older backends.
+  let data: AdminUser
+  try {
+    const response = await apiClient.post<AdminUser>(`/admin/users/${id}/balance${replayOnly ? '/replay' : ''}`, payload, {
+      headers: { 'Idempotency-Key': idempotencyKey },
+    })
+    if (replayOnly && String(response.headers?.['x-idempotency-replayed'] ?? response.headers?.['X-Idempotency-Replayed'] ?? '').toLowerCase() !== 'true') {
+      throw { status: 409, reason: 'IDEMPOTENCY_RESULT_UNCONFIRMED', message: 'The previous balance operation result cannot be confirmed.' }
+    }
+    data = response.data
+  } catch (error) {
+    if (replayOnly && (error as { status?: number })?.status === 404) {
+      throw { status: 409, reason: 'IDEMPOTENCY_RESULT_UNCONFIRMED', message: 'The previous balance operation result cannot be confirmed.' }
+    }
+    throw error
+  }
+  if (scope) {
+    // An older concurrent acknowledgment must not erase a newer operation.
+    if (balanceOperationKeys.get(scope.key) === idempotencyKey) balanceOperationKeys.delete(scope.key)
+    if (getStoredBalanceOperationKey(scope.key) === idempotencyKey) storeBalanceOperationKey(scope.key, null)
+  }
   return data
 }
 

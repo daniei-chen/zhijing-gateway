@@ -38,6 +38,7 @@ export default {
     restartRequired: 'Please restart the service to apply the update',
     restartNow: 'Restart Now',
     restarting: 'Restarting...',
+    restartFailed: 'The restart request failed. Please retry.',
     retry: 'Retry',
     rollback: 'Version Rollback',
     rollbackSelectVersion: 'Select a version to roll back to (last 3 versions)',

@@ -233,6 +233,7 @@
               <div class="border-t border-gray-100 py-1 dark:border-dark-700">
                 <button
                   @click="handleLogout"
+                  :disabled="logoutPending"
                   class="dropdown-item w-full text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20"
                 >
                   <svg
@@ -273,6 +274,7 @@ import { sanitizeUrl } from '@/utils/url'
 import { FeatureFlags, isFeatureFlagEnabled } from '@/utils/featureFlags'
 import { resolveRouteMetaKeys } from '@/router/title'
 import { resolveSiteBillingMode } from '@/utils/siteBillingMode'
+import { captureAuthSession, isAuthSessionCurrent, subscribeAuthSession, type AuthSessionSnapshot } from '@/api/authSession'
 
 const router = useRouter()
 const route = useRoute()
@@ -285,6 +287,10 @@ const onboardingStore = useOnboardingStore()
 const user = computed(() => authStore.user)
 const dropdownOpen = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
+const logoutPending = ref(false)
+let disposed = false
+let dropdownSession: AuthSessionSnapshot | null = null
+let logoutOwner: { session: AuthSessionSnapshot } | null = null
 const contactInfo = computed(() => appStore.contactInfo)
 const docUrl = computed(() => sanitizeUrl(appStore.docUrl))
 const modelPlazaEnabled = computed(() => isFeatureFlagEnabled(FeatureFlags.modelPlaza))
@@ -358,28 +364,81 @@ function toggleMobileSidebar() {
 }
 
 function toggleDropdown() {
-  dropdownOpen.value = !dropdownOpen.value
+  if (dropdownOpen.value) {
+    closeDropdown()
+    return
+  }
+  if (disposed || !user.value) return
+  try {
+    const current = captureAuthSession()
+    if (current.subject !== String(user.value.id)) return
+    dropdownSession = current
+    dropdownOpen.value = true
+  } catch {
+    closeDropdown()
+  }
 }
 
 function closeDropdown() {
   dropdownOpen.value = false
+  dropdownSession = null
+}
+
+function currentMenuSession(): AuthSessionSnapshot | null {
+  return !disposed && dropdownOpen.value && dropdownSession && isAuthSessionCurrent(dropdownSession)
+    && dropdownSession.subject === String(user.value?.id) ? dropdownSession : null
+}
+
+function ownsLogoutFeedback(owner: { session: AuthSessionSnapshot }): boolean {
+  if (disposed || logoutOwner !== owner) return false
+  try {
+    // A successful logout deliberately advances to an anonymous generation.
+    return isAuthSessionCurrent(owner.session) || captureAuthSession().subject === null
+  } catch {
+    return false
+  }
 }
 
 async function handleLogout() {
+  const expected = currentMenuSession()
+  if (!expected || logoutOwner) return
+  const owner = { session: expected }
+  logoutOwner = owner
+  logoutPending.value = true
   closeDropdown()
   try {
-    await authStore.logout()
-  } catch (error) {
-    // Ignore logout errors - still redirect to login
-    console.error('Logout error:', error)
+    try {
+      await authStore.logout()
+    } catch (error) {
+      // Keep local logout usable while discarding feedback for a replaced view.
+      if (ownsLogoutFeedback(owner)) console.error('Logout error:', error)
+    }
+    if (ownsLogoutFeedback(owner)) await router.push('/login')
+  } finally {
+    if (logoutOwner === owner) {
+      logoutOwner = null
+      logoutPending.value = false
+    }
   }
-  await router.push('/login')
 }
 
 function handleReplayGuide() {
+  if (!currentMenuSession() || !showOnboardingButton.value) return
   closeDropdown()
   onboardingStore.replay()
 }
+
+const unsubscribeSession = subscribeAuthSession(() => {
+  if (dropdownSession && !isAuthSessionCurrent(dropdownSession)) closeDropdown()
+  if (!logoutOwner || isAuthSessionCurrent(logoutOwner.session)) return
+  try {
+    // A new signed-in session can start its own logout while the old one drains.
+    if (captureAuthSession().subject !== null) {
+      logoutOwner = null
+      logoutPending.value = false
+    }
+  } catch { /* Wait for a complete session commit before admitting a new intent. */ }
+})
 
 function formatHeaderMoney(value: number) {
   if (!Number.isFinite(value)) return '$0.00'
@@ -397,6 +456,8 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  disposed = true
+  unsubscribeSession()
   document.removeEventListener('click', handleClickOutside)
 })
 </script>

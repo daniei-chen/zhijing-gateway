@@ -146,7 +146,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { createOAuthCallbackSession } from '@/utils/oauthCallbackSession'
+import { readOAuthCallbackFragment } from '@/utils/oauthCallbackFragment'
+import { computed, onMounted, ref, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRoute, useRouter } from 'vue-router'
 import { useClipboard } from '@/composables/useClipboard'
@@ -155,7 +157,6 @@ import { apiClient } from '@/api/client'
 import { buildApiUrl } from '@/api/url'
 import {
   exchangePendingOAuthCompletion,
-  persistOAuthTokenContext,
   type OAuthTokenResponse
 } from '@/api/auth'
 import {
@@ -170,6 +171,12 @@ const { t } = useI18n()
 const { copyToClipboard } = useClipboard()
 const appStore = useAppStore()
 const authStore = useAuthStore()
+const callbackSession = createOAuthCallbackSession()
+onBeforeUnmount(() => {
+  callbackSession.dispose()
+  password.value = ''
+  confirmPassword.value = ''
+})
 const isProcessing = ref(false)
 const isSubmitting = ref(false)
 const needsRegistrationCompletion = ref(false)
@@ -220,9 +227,7 @@ const canSubmitRegistration = computed(() => {
 })
 
 function parseFragmentParams(): URLSearchParams {
-  const raw = typeof window !== 'undefined' ? window.location.hash : ''
-  const hash = raw.startsWith('#') ? raw.slice(1) : raw
-  return new URLSearchParams(hash)
+  return readOAuthCallbackFragment(t('auth.oauth.invalidCallbackHint'))
 }
 
 function readTokenResponse(params: URLSearchParams): OAuthTokenResponse | null {
@@ -272,14 +277,14 @@ function redirectProviderCallbackToBackend(provider: 'github' | 'google'): void 
 }
 
 async function finalizeTokenResponse(tokenResponse: OAuthTokenResponse, redirect: string) {
-  persistOAuthTokenContext(tokenResponse)
-  await authStore.setToken(tokenResponse.access_token)
+  if (!callbackSession.isCurrent()) return
+  await callbackSession.wait(callbackSession.login(tokenResponse, (token, expected) => authStore.setToken(token, expected)))
   if (typeof window !== 'undefined') {
     window.sessionStorage.removeItem(EMAIL_OAUTH_PENDING_PROVIDER_KEY)
   }
   clearAllAffiliateReferralCodes()
   appStore.showSuccess(t('auth.loginSuccess'))
-  await router.replace(sanitizeRedirectPath(redirect))
+  await callbackSession.wait(router.replace(sanitizeRedirectPath(redirect)))
 }
 
 function hasOAuthTokenResponse(value: Partial<OAuthTokenResponse>): value is OAuthTokenResponse {
@@ -287,12 +292,13 @@ function hasOAuthTokenResponse(value: Partial<OAuthTokenResponse>): value is OAu
 }
 
 async function resumePendingEmailOAuth() {
+  if (!callbackSession.isCurrent()) return
   isProcessing.value = true
   try {
-    const completion = await exchangePendingOAuthCompletion() as EmailOAuthPendingCompletion
+    const completion = await callbackSession.wait(exchangePendingOAuthCompletion()) as EmailOAuthPendingCompletion
     const completionRedirect = completion.redirect || '/dashboard'
     if (hasOAuthTokenResponse(completion)) {
-      await finalizeTokenResponse(completion, completionRedirect)
+      await callbackSession.wait(finalizeTokenResponse(completion, completionRedirect))
       return
     }
 
@@ -312,18 +318,23 @@ async function resumePendingEmailOAuth() {
 
     appStore.showError(completion.error || t('auth.loginFailed'))
   } catch (e: unknown) {
+    if (!callbackSession.isCurrent()) return
     const err = e as { message?: string; response?: { data?: { message?: string } } }
     const message = err.response?.data?.message || err.message || t('auth.loginFailed')
     appStore.showError(message)
     invalidCallback.value = true
   } finally {
+    if (callbackSession.isCurrent()) {
     if (!needsRegistrationCompletion.value) {
       isProcessing.value = false
+    }
+
     }
   }
 }
 
 async function handleSubmitRegistration() {
+  if (!callbackSession.isCurrent()) return
   registrationError.value = ''
   if (!registrationEmail.value.trim()) {
     registrationError.value = t('auth.emailRequired')
@@ -349,17 +360,21 @@ async function handleSubmitRegistration() {
     if (invitationRequired.value) {
       payload.invitation_code = code
     }
-    const { data } = await apiClient.post<OAuthTokenResponse>(
+    const { data } = await callbackSession.wait(apiClient.post<OAuthTokenResponse>(
       `/auth/oauth/${pendingProvider.value}/complete-registration`,
       payload
-    )
-    await finalizeTokenResponse(data, redirectTo.value)
+    ))
+    await callbackSession.wait(finalizeTokenResponse(data, redirectTo.value))
   } catch (e: unknown) {
+    if (!callbackSession.isCurrent()) return
     const err = e as { message?: string; response?: { data?: { message?: string } } }
     registrationError.value =
       err.response?.data?.message || err.message || t('auth.oidc.completeRegistrationFailed')
   } finally {
+    if (callbackSession.isCurrent()) {
     isSubmitting.value = false
+
+    }
   }
 }
 
@@ -381,15 +396,16 @@ onMounted(async () => {
         redirectProviderCallbackToBackend(pendingEmailOAuthProvider)
         return
       }
-      await resumePendingEmailOAuth()
+      await callbackSession.wait(resumePendingEmailOAuth())
     }
     return
   }
 
   isProcessing.value = true
   try {
-    await finalizeTokenResponse(tokenResponse, params.get('redirect') || '/dashboard')
+    await callbackSession.wait(finalizeTokenResponse(tokenResponse, params.get('redirect') || '/dashboard'))
   } catch (error: unknown) {
+    if (!callbackSession.isCurrent()) return
     const message = (error as { message?: string })?.message || t('auth.loginFailed')
     appStore.showError(message)
     isProcessing.value = false

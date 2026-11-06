@@ -78,6 +78,7 @@ import Icon from '@/components/icons/Icon.vue'
 import { usePaymentStore } from '@/stores/payment'
 import { useAppStore } from '@/stores'
 import { paymentAPI } from '@/api/payment'
+import { captureAuthSession, isAuthSessionCurrent, subscribeAuthSession, type AuthSessionSnapshot } from '@/api/authSession'
 import { extractI18nErrorMessage } from '@/utils/apiError'
 import { getPaymentPopupFeatures, isBuiltInAlipayMethod, isBuiltInWxpayMethod } from '@/components/payment/providerConfig'
 import type { PaymentOrder } from '@/types/payment'
@@ -118,6 +119,20 @@ let pollTimer: ReturnType<typeof setInterval> | null = null
 let countdownTimer: ReturnType<typeof setInterval> | null = null
 let verifyAttempts = 0
 let lastVerifyAt = 0
+let generation = 0
+let active = false
+let disposed = false
+let pollInFlight = false
+let session: AuthSessionSnapshot | null = null
+
+function ownsOperation(version: number, orderId: number): boolean {
+  return !disposed && active && props.show && version === generation && orderId === props.orderId
+    && session !== null && isAuthSessionCurrent(session)
+}
+
+const unsubscribeSession = subscribeAuthSession(() => {
+  if (session && !isAuthSessionCurrent(session)) cleanup()
+})
 
 const VERIFY_RETRY_INTERVAL_MS = 15000
 const VERIFY_RETRY_MAX_ATTEMPTS = 6
@@ -163,21 +178,24 @@ function reopenPopup() {
 }
 
 async function renderQR() {
+  const version = generation
+  const orderId = props.orderId
   await nextTick()
-  if (!qrCanvas.value || !qrUrl.value) return
+  if (!ownsOperation(version, orderId) || !qrCanvas.value || !qrUrl.value) return
+  const canvas = qrCanvas.value
   const logoSrc = getLogoForType()
-  await QRCode.toCanvas(qrCanvas.value, qrUrl.value, {
+  await QRCode.toCanvas(canvas, qrUrl.value, {
     width: 220,
     margin: 2,
     errorCorrectionLevel: logoSrc ? 'M' : 'L',
   })
-  if (!logoSrc) return
-  const canvas = qrCanvas.value
+  if (!logoSrc || !ownsOperation(version, orderId) || qrCanvas.value !== canvas) return
   const ctx = canvas.getContext('2d')
   if (!ctx) return
   const img = new Image()
   img.src = logoSrc
   img.onload = () => {
+    if (!ownsOperation(version, orderId) || qrCanvas.value !== canvas) return
     const logoSize = 40
     const x = (canvas.width - logoSize) / 2
     const y = (canvas.height - logoSize) / 2
@@ -196,18 +214,26 @@ async function renderQR() {
 }
 
 async function pollStatus() {
-  if (!props.orderId) return
-  let order = await paymentStore.pollOrderStatus(props.orderId)
-  if (!order) return
-  order = await tryRecoverPendingOrder(order)
-  if (order.status === 'COMPLETED' || order.status === 'PAID') {
-    cleanup()
-    paidOrder.value = order
-    success.value = true
-    emit('success')
-  } else if (order.status === 'EXPIRED' || order.status === 'CANCELLED' || order.status === 'FAILED') {
-    cleanup()
-    expired.value = true
+  const version = generation
+  const orderId = props.orderId
+  if (!orderId || !ownsOperation(version, orderId) || pollInFlight || cancelling.value) return
+  pollInFlight = true
+  try {
+    let order = await paymentStore.pollOrderStatus(orderId)
+    if (!ownsOperation(version, orderId) || !order || order.id !== orderId || cancelling.value) return
+    order = await tryRecoverPendingOrder(order)
+    if (!ownsOperation(version, orderId) || order.id !== orderId || cancelling.value) return
+    if (order.status === 'COMPLETED' || order.status === 'PAID') {
+      cleanup()
+      paidOrder.value = order
+      success.value = true
+      emit('success')
+    } else if (order.status === 'EXPIRED' || order.status === 'CANCELLED' || order.status === 'FAILED') {
+      cleanup()
+      expired.value = true
+    }
+  } finally {
+    if (version === generation) pollInFlight = false
   }
 }
 
@@ -249,16 +275,19 @@ function startCountdown(seconds: number) {
 }
 
 async function handleCancel() {
-  if (!props.orderId || cancelling.value) return
+  const version = generation
+  const orderId = props.orderId
+  if (!orderId || cancelling.value || !ownsOperation(version, orderId)) return
   cancelling.value = true
   try {
-    await paymentAPI.cancelOrder(props.orderId)
+    await paymentAPI.cancelOrder(orderId)
+    if (!ownsOperation(version, orderId)) return
     cleanup()
     emit('close')
   } catch (err: unknown) {
-    appStore.showError(extractI18nErrorMessage(err, t, 'payment.errors', t('common.error')))
+    if (ownsOperation(version, orderId)) appStore.showError(extractI18nErrorMessage(err, t, 'payment.errors', t('common.error')))
   } finally {
-    cancelling.value = false
+    if (version === generation) cancelling.value = false
   }
 }
 
@@ -273,11 +302,18 @@ function handleDone() {
 }
 
 function cleanup() {
+  generation += 1
+  active = false
+  pollInFlight = false
   if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
   if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null }
 }
 
 function init() {
+  cleanup()
+  if (disposed) return
+  try { session = captureAuthSession() } catch { return }
+  active = true
   // Reset state
   success.value = false
   paidOrder.value = null
@@ -290,23 +326,23 @@ function init() {
   let seconds = 30 * 60
   if (props.expiresAt) {
     const expiresAt = new Date(props.expiresAt)
-    seconds = Math.floor((expiresAt.getTime() - Date.now()) / 1000)
+    seconds = Number.isFinite(expiresAt.getTime()) ? Math.floor((expiresAt.getTime() - Date.now()) / 1000) : 0
   }
   startCountdown(seconds)
-  pollTimer = setInterval(pollStatus, 3000)
+  if (!expired.value) pollTimer = setInterval(pollStatus, 3000)
   renderQR()
 }
 
 // Watch for dialog open/close
-watch(() => props.show, (isOpen) => {
+watch([() => props.show, () => props.orderId, () => props.qrCode, () => props.expiresAt, () => props.paymentType], ([isOpen]) => {
   if (isOpen) {
     init()
   } else {
     cleanup()
   }
-})
+}, { immediate: true })
 
 watch(qrUrl, () => renderQR())
 
-onUnmounted(() => cleanup())
+onUnmounted(() => { disposed = true; cleanup(); unsubscribeSession() })
 </script>

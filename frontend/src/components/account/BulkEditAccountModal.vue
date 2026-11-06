@@ -49,7 +49,7 @@
               {{ t('admin.accounts.openai.oauthPassthroughDesc') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.openai.oauthPassthrough')"
             v-model="enableOpenAIPassthrough"
             id="bulk-edit-openai-passthrough-enabled"
             type="checkbox"
@@ -57,13 +57,13 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableOpenAIPassthrough"
           id="bulk-edit-openai-passthrough-body"
           :class="!enableOpenAIPassthrough && 'pointer-events-none opacity-50'"
           role="group"
           aria-labelledby="bulk-edit-openai-passthrough-label"
         >
-          <button
+          <button role="switch" :aria-checked="openaiPassthroughEnabled" :aria-label="t('admin.accounts.openai.oauthPassthrough')"
             id="bulk-edit-openai-passthrough-toggle"
             type="button"
             :class="[
@@ -79,7 +79,7 @@
               ]"
             />
           </button>
-        </div>
+        </fieldset>
       </div>
 
       <!-- OpenAI Codex namespace 工具摊平（兼容开关，仅 OAuth） -->
@@ -100,7 +100,7 @@
               {{ t('admin.accounts.openai.flattenNamespacesDesc') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.openai.flattenNamespaces')"
             v-model="enableOpenAIFlattenNamespaces"
             id="bulk-edit-openai-flatten-namespaces-enabled"
             type="checkbox"
@@ -108,13 +108,13 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableOpenAIFlattenNamespaces"
           id="bulk-edit-openai-flatten-namespaces-body"
           :class="!enableOpenAIFlattenNamespaces && 'pointer-events-none opacity-50'"
           role="group"
           aria-labelledby="bulk-edit-openai-flatten-namespaces-label"
         >
-          <button
+          <button role="switch" :aria-checked="openaiFlattenNamespacesEnabled" :aria-label="t('admin.accounts.openai.flattenNamespaces')"
             id="bulk-edit-openai-flatten-namespaces-toggle"
             type="button"
             :class="[
@@ -130,7 +130,7 @@
               ]"
             />
           </button>
-        </div>
+        </fieldset>
       </div>
 
       <!-- OpenAI API long-context billing -->
@@ -151,7 +151,7 @@
               {{ t('admin.accounts.openai.longContextBillingDesc') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.openai.longContextBilling')"
             v-model="enableOpenAILongContextBilling"
             id="bulk-edit-openai-long-context-billing-enabled"
             type="checkbox"
@@ -159,13 +159,13 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableOpenAILongContextBilling"
           id="bulk-edit-openai-long-context-billing-body"
           :class="!enableOpenAILongContextBilling && 'pointer-events-none opacity-50'"
           role="group"
           aria-labelledby="bulk-edit-openai-long-context-billing-label"
         >
-          <button
+          <button :aria-label="t('admin.accounts.openai.longContextBilling')"
             type="button"
             data-testid="bulk-edit-openai-long-context-billing-toggle"
             role="switch"
@@ -184,7 +184,7 @@
               ]"
             />
           </button>
-        </div>
+        </fieldset>
         <p
           class="mt-3 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-700 dark:bg-amber-900/20 dark:text-amber-300"
           data-testid="bulk-edit-openai-long-context-shadow-hint"
@@ -203,7 +203,7 @@
           >
             {{ t('admin.accounts.baseUrl') }}
           </label>
-          <input
+          <input :aria-label="t('admin.accounts.baseUrl')"
             v-model="enableBaseUrl"
             id="bulk-edit-base-url-enabled"
             type="checkbox"
@@ -241,7 +241,7 @@
           >
             {{ t('admin.accounts.modelRestriction') }}
           </label>
-          <input
+          <input :aria-label="t('admin.accounts.modelRestriction')"
             v-model="enableModelRestriction"
             id="bulk-edit-model-restriction-enabled"
             type="checkbox"
@@ -250,7 +250,7 @@
           />
         </div>
 
-        <div
+        <fieldset :disabled="!enableModelRestriction"
           id="bulk-edit-model-restriction-body"
           :class="!enableModelRestriction && 'pointer-events-none opacity-50'"
           role="group"
@@ -383,7 +383,7 @@
                   :key="index"
                   class="flex items-center gap-2"
                 >
-                  <input
+                  <input :aria-label="t('admin.accounts.requestModel')" :id="`${fieldId}-mapping-from-${getModelMappingKey(mapping)}`"
                     v-model="mapping.from"
                     type="text"
                     class="input flex-1"
@@ -402,13 +402,13 @@
                       d="M14 5l7 7m0 0l-7 7m7-7H3"
                     />
                   </svg>
-                  <input
+                  <input :aria-label="t('admin.accounts.actualModel')" :id="`${fieldId}-mapping-to-${getModelMappingKey(mapping)}`"
                     v-model="mapping.to"
                     type="text"
                     class="input flex-1"
                     :placeholder="t('admin.accounts.actualModel')"
                   />
-                  <button
+                  <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })"
                     type="button"
                     class="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
                     @click="removeModelMapping(index)"
@@ -460,7 +460,7 @@
               </div>
             </div>
           </template>
-        </div>
+        </fieldset>
       </div>
 
       <!-- Custom error codes -->
@@ -478,7 +478,7 @@
               {{ t('admin.accounts.customErrorCodesHint') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.customErrorCodes')"
             v-model="enableCustomErrorCodes"
             id="bulk-edit-custom-error-codes-enabled"
             type="checkbox"
@@ -526,7 +526,7 @@
               aria-labelledby="bulk-edit-custom-error-codes-label"
               @keyup.enter="addCustomErrorCode"
             />
-            <button type="button" class="btn btn-secondary px-3" @click="addCustomErrorCode">
+            <button :aria-label="t('common.add')" type="button" class="btn btn-secondary px-3" @click="addCustomErrorCode">
               <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
                   stroke-linecap="round"
@@ -546,7 +546,7 @@
               class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400"
             >
               {{ code }}
-              <button
+              <button :aria-label="t('common.delete') + ' ' + code"
                 type="button"
                 class="hover:text-red-900 dark:hover:text-red-300"
                 @click="removeErrorCode(code)"
@@ -576,7 +576,7 @@
               {{ t('admin.accounts.interceptWarmupRequestsDesc') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.interceptWarmupRequests')"
             v-model="enableInterceptWarmup"
             id="bulk-edit-intercept-warmup-enabled"
             type="checkbox"
@@ -585,7 +585,7 @@
           />
         </div>
         <div v-if="enableInterceptWarmup" id="bulk-edit-intercept-warmup-body" class="mt-3">
-          <button
+          <button role="switch" :aria-checked="interceptWarmupRequests" :aria-label="t('admin.accounts.interceptWarmupRequests')"
             type="button"
             :class="[
               'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
@@ -618,7 +618,7 @@
               {{ t('admin.accounts.headerOverride.hint') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.headerOverride.title')"
             v-model="enableHeaderOverride"
             id="bulk-edit-header-override-enabled"
             type="checkbox"
@@ -627,7 +627,7 @@
           />
         </div>
         <div v-if="enableHeaderOverride" id="bulk-edit-header-override-body" class="mt-3 space-y-3">
-          <button
+          <button role="switch" :aria-checked="headerOverrideEnabled" :aria-label="t('admin.accounts.headerOverride.title')"
             type="button"
             :class="[
               'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
@@ -676,7 +676,7 @@
           >
             {{ t('admin.accounts.proxy') }}
           </label>
-          <input
+          <input :aria-label="t('admin.accounts.proxy')"
             v-model="enableProxy"
             id="bulk-edit-proxy-enabled"
             type="checkbox"
@@ -684,13 +684,14 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div id="bulk-edit-proxy-body" :class="!enableProxy && 'pointer-events-none opacity-50'">
+        <fieldset :disabled="!enableProxy" id="bulk-edit-proxy-body" :class="!enableProxy && 'pointer-events-none opacity-50'">
           <ProxySelector
+            :disabled="!enableProxy"
             v-model="proxyId"
             :proxies="proxies"
             aria-labelledby="bulk-edit-proxy-label"
           />
-        </div>
+        </fieldset>
       </div>
 
       <!-- Concurrency & Priority -->
@@ -704,7 +705,7 @@
             >
               {{ t('admin.accounts.concurrency') }}
             </label>
-            <input
+            <input :aria-label="t('admin.accounts.concurrency')"
               v-model="enableConcurrency"
               id="bulk-edit-concurrency-enabled"
               type="checkbox"
@@ -733,7 +734,7 @@
             >
               {{ t('admin.accounts.loadFactor') }}
             </label>
-            <input
+            <input :aria-label="t('admin.accounts.loadFactor')"
               v-model="enableLoadFactor"
               id="bulk-edit-load-factor-enabled"
               type="checkbox"
@@ -763,7 +764,7 @@
             >
               {{ t('admin.accounts.priority') }}
             </label>
-            <input
+            <input :aria-label="t('admin.accounts.priority')"
               v-model="enablePriority"
               id="bulk-edit-priority-enabled"
               type="checkbox"
@@ -791,7 +792,7 @@
             >
               {{ t('admin.accounts.billingRateMultiplier') }}
             </label>
-            <input
+            <input :aria-label="t('admin.accounts.billingRateMultiplier')"
               v-model="enableRateMultiplier"
               id="bulk-edit-rate-multiplier-enabled"
               type="checkbox"
@@ -832,7 +833,7 @@
           >
             {{ t('common.status') }}
           </label>
-          <input
+          <input :aria-label="t('common.status')"
             v-model="enableStatus"
             id="bulk-edit-status-enabled"
             type="checkbox"
@@ -840,13 +841,13 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div id="bulk-edit-status" :class="!enableStatus && 'pointer-events-none opacity-50'">
-          <Select
+        <fieldset :disabled="!enableStatus" id="bulk-edit-status" :class="!enableStatus && 'pointer-events-none opacity-50'">
+          <Select :id="`${fieldId}-status`"
             v-model="status"
             :options="statusOptions"
             aria-labelledby="bulk-edit-status-label"
           />
-        </div>
+        </fieldset>
       </div>
 
       <!-- OpenAI OAuth WS mode -->
@@ -859,7 +860,7 @@
           >
             {{ t('admin.accounts.openai.wsMode') }}
           </label>
-          <input
+          <input :aria-label="t('admin.accounts.openai.wsMode')"
             v-model="enableOpenAIWSMode"
             id="bulk-edit-openai-ws-mode-enabled"
             type="checkbox"
@@ -867,7 +868,7 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableOpenAIWSMode"
           id="bulk-edit-openai-ws-mode"
           :class="!enableOpenAIWSMode && 'pointer-events-none opacity-50'"
         >
@@ -877,13 +878,13 @@
           <p v-if="openAIWSModeHintKey" class="mb-3 text-xs text-gray-500 dark:text-gray-400">
             {{ t(openAIWSModeHintKey) }}
           </p>
-          <Select
+          <Select :id="`${fieldId}-openai-o-auth-responses-web-socket-v2-mode`"
             v-model="openaiOAuthResponsesWebSocketV2Mode"
             data-testid="bulk-edit-openai-ws-mode-select"
             :options="openAIWSModeOptions"
             aria-labelledby="bulk-edit-openai-ws-mode-label"
           />
-        </div>
+        </fieldset>
       </div>
 
       <!-- OpenAI OAuth Codex CLI only -->
@@ -896,7 +897,7 @@
           >
             {{ t('admin.accounts.openai.codexCLIOnly') }}
           </label>
-          <input
+          <input :aria-label="t('admin.accounts.openai.codexCLIOnly')"
             v-model="enableCodexCLIOnly"
             id="bulk-edit-openai-codex-cli-only-enabled"
             type="checkbox"
@@ -904,14 +905,14 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableCodexCLIOnly"
           id="bulk-edit-openai-codex-cli-only"
           :class="!enableCodexCLIOnly && 'pointer-events-none opacity-50'"
         >
           <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">
             {{ t('admin.accounts.openai.codexCLIOnlyDesc') }}
           </p>
-          <button
+          <button role="switch" :aria-checked="codexCLIOnlyEnabled" :aria-label="t('admin.accounts.openai.codexCLIOnly')"
             id="bulk-edit-openai-codex-cli-only-toggle"
             type="button"
             :class="[
@@ -927,7 +928,7 @@
               ]"
             />
           </button>
-        </div>
+        </fieldset>
       </div>
 
       <!-- OpenAI OAuth: Codex app-server -->
@@ -940,7 +941,7 @@
           >
             {{ t('admin.accounts.openai.codexCLIOnlyAppServer') }}
           </label>
-          <input
+          <input :aria-label="t('admin.accounts.openai.codexCLIOnlyAppServer')"
             v-model="enableCodexCLIOnlyAppServer"
             id="bulk-edit-openai-codex-app-server-enabled"
             type="checkbox"
@@ -948,14 +949,14 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableCodexCLIOnlyAppServer"
           id="bulk-edit-openai-codex-app-server"
           :class="!enableCodexCLIOnlyAppServer && 'pointer-events-none opacity-50'"
         >
           <p class="mb-3 text-xs text-gray-500 dark:text-gray-400">
             {{ t('admin.accounts.openai.codexCLIOnlyAppServerDesc') }}
           </p>
-          <button
+          <button role="switch" :aria-checked="codexCLIOnlyAppServerEnabled" :aria-label="t('admin.accounts.openai.codexCLIOnlyAppServer')"
             id="bulk-edit-openai-codex-app-server-toggle"
             type="button"
             :class="[
@@ -971,13 +972,13 @@
               ]"
             />
           </button>
-        </div>
+        </fieldset>
       </div>
 
       <!-- Codex 指纹收敛模式（仅 OpenAI OAuth） -->
       <div v-if="allOpenAIOAuth" class="border-t border-gray-200 pt-4 dark:border-dark-600">
         <div class="mb-3 flex items-center justify-between">
-          <label class="input-label mb-0">{{ t('admin.accounts.openai.codexFingerprintMode') }}</label>
+          <label :for="'bulk-edit-openai-codex-fingerprint-mode-enabled'" class="input-label mb-0">{{ t('admin.accounts.openai.codexFingerprintMode') }}</label>
           <input
             id="bulk-edit-openai-codex-fingerprint-mode-enabled"
             v-model="enableCodexFingerprintMode"
@@ -985,12 +986,12 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div :class="!enableCodexFingerprintMode && 'pointer-events-none opacity-50'">
+        <fieldset :disabled="!enableCodexFingerprintMode" :class="!enableCodexFingerprintMode && 'pointer-events-none opacity-50'">
           <p class="mb-2 text-xs text-gray-500 dark:text-gray-400">
             {{ t('admin.accounts.openai.codexFingerprintModeDesc') }}
           </p>
-          <Select v-model="codexFingerprintMode" data-testid="bulk-codex-fingerprint-mode-select" :options="codexFingerprintModeOptions" />
-        </div>
+          <Select :aria-label="t('admin.accounts.openai.codexFingerprintMode')" :id="`${fieldId}-codex-fingerprint-mode`" v-model="codexFingerprintMode" data-testid="bulk-codex-fingerprint-mode-select" :options="codexFingerprintModeOptions" />
+        </fieldset>
       </div>
 
       <!-- Upstream billing auto probe (any API-key platform) -->
@@ -1008,7 +1009,7 @@
               {{ t('admin.accounts.upstreamBilling.autoProbeHint') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.upstreamBilling.autoProbe')"
             v-model="enableUpstreamBillingAutoProbe"
             id="bulk-edit-upstream-billing-auto-probe-enabled"
             type="checkbox"
@@ -1016,20 +1017,20 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableUpstreamBillingAutoProbe"
           id="bulk-edit-upstream-billing-auto-probe"
           :class="!enableUpstreamBillingAutoProbe && 'pointer-events-none opacity-50'"
           role="group"
           aria-labelledby="bulk-edit-upstream-billing-auto-probe-label"
         >
-          <Select
+          <Select :id="`${fieldId}-upstream-billing-auto-probe-mode`"
             v-model="upstreamBillingAutoProbeMode"
             :disabled="!enableUpstreamBillingAutoProbe"
             data-testid="bulk-edit-upstream-billing-auto-probe-select"
             :options="upstreamBillingAutoProbeOptions"
             aria-labelledby="bulk-edit-upstream-billing-auto-probe-label"
           />
-        </div>
+        </fieldset>
       </div>
 
       <!-- OpenAI API Key endpoint capabilities -->
@@ -1047,7 +1048,7 @@
               {{ t('admin.accounts.openai.endpointCapabilitiesDesc') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.openai.endpointCapabilities')"
             v-model="enableOpenAIEndpointCapabilities"
             id="bulk-edit-openai-endpoint-capabilities-enabled"
             type="checkbox"
@@ -1055,7 +1056,7 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableOpenAIEndpointCapabilities"
           id="bulk-edit-openai-endpoint-capabilities-body"
           :class="!enableOpenAIEndpointCapabilities && 'pointer-events-none opacity-50'"
           role="group"
@@ -1078,7 +1079,7 @@
               <span class="text-gray-700 dark:text-gray-200">{{ option.label }}</span>
             </label>
           </div>
-        </div>
+        </fieldset>
       </div>
 
       <!-- OpenAI API Key Responses route -->
@@ -1096,7 +1097,7 @@
               {{ t('admin.accounts.openai.responsesModeDesc') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.openai.responsesMode')"
             v-model="enableOpenAIResponsesMode"
             id="bulk-edit-openai-responses-mode-enabled"
             type="checkbox"
@@ -1104,13 +1105,13 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableOpenAIResponsesMode"
           id="bulk-edit-openai-responses-mode-body"
           :class="!enableOpenAIResponsesMode && 'pointer-events-none opacity-50'"
           role="group"
           aria-labelledby="bulk-edit-openai-responses-mode-label"
         >
-          <Select
+          <Select :id="`${fieldId}-open-a-i-responses-mode`"
             v-model="openAIResponsesMode"
             :disabled="!enableOpenAIResponsesMode || !openAIResponsesModeApplicable"
             data-testid="bulk-edit-openai-responses-mode-select"
@@ -1124,7 +1125,7 @@
           >
             {{ t('admin.accounts.openai.responsesModeTextDisabledHint') }}
           </p>
-        </div>
+        </fieldset>
       </div>
 
       <!-- OpenAI API Key WS mode -->
@@ -1137,7 +1138,7 @@
           >
             {{ t('admin.accounts.openai.wsMode') }}
           </label>
-          <input
+          <input :aria-label="t('admin.accounts.openai.wsMode')"
             v-model="enableOpenAIAPIKeyWSMode"
             id="bulk-edit-openai-apikey-ws-mode-enabled"
             type="checkbox"
@@ -1145,7 +1146,7 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableOpenAIAPIKeyWSMode"
           id="bulk-edit-openai-apikey-ws-mode"
           :class="!enableOpenAIAPIKeyWSMode && 'pointer-events-none opacity-50'"
         >
@@ -1155,13 +1156,13 @@
           <p v-if="openAIAPIKeyWSModeHintKey" class="mb-3 text-xs text-gray-500 dark:text-gray-400">
             {{ t(openAIAPIKeyWSModeHintKey) }}
           </p>
-          <Select
+          <Select :id="`${fieldId}-openai-a-p-i-key-responses-web-socket-v2-mode`"
             v-model="openaiAPIKeyResponsesWebSocketV2Mode"
             data-testid="bulk-edit-openai-apikey-ws-mode-select"
             :options="openAIWSModeOptions"
             aria-labelledby="bulk-edit-openai-apikey-ws-mode-label"
           />
-        </div>
+        </fieldset>
       </div>
 
       <!-- OpenAI Compact mode -->
@@ -1179,7 +1180,7 @@
               {{ t('admin.accounts.openai.compactModeDesc') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.openai.compactMode')"
             v-model="enableOpenAICompactMode"
             id="bulk-edit-openai-compact-mode-enabled"
             type="checkbox"
@@ -1187,17 +1188,17 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableOpenAICompactMode"
           id="bulk-edit-openai-compact-mode"
           :class="!enableOpenAICompactMode && 'pointer-events-none opacity-50'"
         >
-          <Select
+          <Select :id="`${fieldId}-open-a-i-compact-mode`"
             v-model="openAICompactMode"
             data-testid="bulk-edit-openai-compact-mode-select"
             :options="openAICompactModeOptions"
             aria-labelledby="bulk-edit-openai-compact-mode-label"
           />
-        </div>
+        </fieldset>
       </div>
 
       <!-- OpenAI Compact model mapping -->
@@ -1215,7 +1216,7 @@
               {{ t('admin.accounts.openai.compactModelMappingDesc') }}
             </p>
           </div>
-          <input
+          <input :aria-label="t('admin.accounts.openai.compactModelMapping')"
             v-model="enableOpenAICompactModelMapping"
             id="bulk-edit-openai-compact-model-mapping-enabled"
             type="checkbox"
@@ -1223,7 +1224,7 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div
+        <fieldset :disabled="!enableOpenAICompactModelMapping"
           id="bulk-edit-openai-compact-model-mapping"
           :class="!enableOpenAICompactModelMapping && 'pointer-events-none opacity-50'"
         >
@@ -1233,7 +1234,7 @@
               :key="index"
               class="flex items-center gap-2"
             >
-              <input
+              <input :aria-label="t('admin.accounts.fromModel')" :id="`${fieldId}-mapping-from-2-${getOpenAICompactModelMappingKey(mapping)}`"
                 v-model="mapping.from"
                 type="text"
                 class="input flex-1"
@@ -1241,14 +1242,14 @@
                 data-testid="bulk-edit-openai-compact-model-mapping-input"
               />
               <span class="text-gray-400">→</span>
-              <input
+              <input :aria-label="t('admin.accounts.toModel')" :id="`${fieldId}-mapping-to-2-${getOpenAICompactModelMappingKey(mapping)}`"
                 v-model="mapping.to"
                 type="text"
                 class="input flex-1"
                 :placeholder="t('admin.accounts.toModel')"
                 data-testid="bulk-edit-openai-compact-model-mapping-input"
               />
-              <button
+              <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })"
                 type="button"
                 class="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
                 @click="removeOpenAICompactModelMapping(index)"
@@ -1265,7 +1266,7 @@
           >
             + {{ t('admin.accounts.addMapping') }}
           </button>
-        </div>
+        </fieldset>
       </div>
 
       <!-- RPM Limit (仅全部为 Anthropic OAuth/SetupToken 时显示) -->
@@ -1278,7 +1279,7 @@
           >
             {{ t('admin.accounts.quotaControl.rpmLimit.label') }}
           </label>
-          <input
+          <input :aria-label="t('admin.accounts.quotaControl.rpmLimit.label')"
             v-model="enableRpmLimit"
             id="bulk-edit-rpm-limit-enabled"
             type="checkbox"
@@ -1287,7 +1288,7 @@
           />
         </div>
 
-        <div
+        <fieldset :disabled="!enableRpmLimit"
           id="bulk-edit-rpm-limit-body"
           :class="!enableRpmLimit && 'pointer-events-none opacity-50'"
           role="group"
@@ -1295,7 +1296,7 @@
         >
           <div class="mb-3 flex items-center justify-between">
             <span class="text-sm text-gray-700 dark:text-gray-300">{{ t('admin.accounts.quotaControl.rpmLimit.hint') }}</span>
-            <button
+            <button role="switch" :aria-checked="rpmLimitEnabled" :aria-label="t('admin.accounts.quotaControl.rpmLimit.label')"
               type="button"
               @click="rpmLimitEnabled = !rpmLimitEnabled"
               :class="[
@@ -1314,8 +1315,8 @@
 
           <div v-if="rpmLimitEnabled" class="space-y-3">
             <div>
-              <label class="input-label text-xs">{{ t('admin.accounts.quotaControl.rpmLimit.baseRpm') }}</label>
-              <input
+              <label :for="`${fieldId}-bulk-base-rpm`" class="input-label text-xs">{{ t('admin.accounts.quotaControl.rpmLimit.baseRpm') }}</label>
+              <input :id="`${fieldId}-bulk-base-rpm`"
                 v-model.number="bulkBaseRpm"
                 type="number"
                 min="1"
@@ -1358,8 +1359,8 @@
             </div>
 
             <div v-if="bulkRpmStrategy === 'tiered'">
-              <label class="input-label text-xs">{{ t('admin.accounts.quotaControl.rpmLimit.stickyBuffer') }}</label>
-              <input
+              <label :for="`${fieldId}-bulk-rpm-sticky-buffer`" class="input-label text-xs">{{ t('admin.accounts.quotaControl.rpmLimit.stickyBuffer') }}</label>
+              <input :id="`${fieldId}-bulk-rpm-sticky-buffer`"
                 v-model.number="bulkRpmStickyBuffer"
                 type="number"
                 min="1"
@@ -1371,7 +1372,7 @@
             </div>
 
             </div>
-          </div>
+          </fieldset>
 
         <!-- 用户消息限速模式（独立于 RPM 开关，始终可见） -->
         <div class="mt-4">
@@ -1404,7 +1405,7 @@
           >
             {{ t('nav.groups') }}
           </label>
-          <input
+          <input :aria-label="t('nav.groups')"
             v-model="enableGroups"
             id="bulk-edit-groups-enabled"
             type="checkbox"
@@ -1412,13 +1413,14 @@
             class="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
           />
         </div>
-        <div id="bulk-edit-groups" :class="!enableGroups && 'pointer-events-none opacity-50'">
+        <fieldset :disabled="!enableGroups" id="bulk-edit-groups" :class="!enableGroups && 'pointer-events-none opacity-50'">
           <GroupSelector
+            :disabled="!enableGroups"
             v-model="groupIds"
             :groups="groups"
             aria-labelledby="bulk-edit-groups-label"
           />
-        </div>
+        </fieldset>
       </div>
     </form>
 
@@ -1474,8 +1476,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, onBeforeUnmount, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
+import { createStableObjectKeyResolver } from '@/utils/stableObjectKey'
 import { useAppStore } from '@/stores/app'
 import { adminAPI } from '@/api/admin'
 import type {
@@ -1540,6 +1543,9 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const fieldId = `bulk-edit-account-${useId()}`
+const getModelMappingKey = createStableObjectKeyResolver<object>('bulk-model-mapping')
+const getOpenAICompactModelMappingKey = createStableObjectKeyResolver<object>('bulk-compact-mapping')
 const appStore = useAppStore()
 
 // Platform awareness
@@ -1677,6 +1683,22 @@ const submitting = ref(false)
 const showMixedChannelWarning = ref(false)
 const mixedChannelWarningMessage = ref('')
 const pendingUpdatesForConfirm = ref<Record<string, unknown> | null>(null)
+let editGeneration = 0
+const isCurrentEdit = (generation: number) => generation === editGeneration && props.show
+const invalidateEdit = () => {
+  editGeneration++
+  submitting.value = false
+  showMixedChannelWarning.value = false
+  mixedChannelWarningMessage.value = ''
+  pendingUpdatesForConfirm.value = null
+  mixedChannelConfirmed.value = false
+}
+watch(
+  () => JSON.stringify([props.show, props.accountIds, props.target, props.selectedPlatforms, props.selectedTypes]),
+  invalidateEdit,
+  { flush: 'sync' }
+)
+onBeforeUnmount(invalidateEdit)
 const baseUrl = ref('')
 const modelRestrictionMode = ref<'whitelist' | 'mapping'>('whitelist')
 const allowedModels = ref<string[]>([])
@@ -1977,7 +1999,7 @@ const buildUpdatePayload = (): Record<string, unknown> | null => {
     }
   }
 
-  if (enableOpenAIPassthrough.value) {
+  if (enableOpenAIPassthrough.value && allOpenAIPassthroughCapable.value) {
     const extra = ensureExtra()
     extra.openai_passthrough = openaiPassthroughEnabled.value
     if (!openaiPassthroughEnabled.value) {
@@ -2045,7 +2067,7 @@ const buildUpdatePayload = (): Record<string, unknown> | null => {
     credentialsChanged = true
   }
 
-  if (enableHeaderOverride.value) {
+  if (enableHeaderOverride.value && allHeaderOverrideCapable.value) {
     // 后端使用 JSONB || merge 语义：关闭时显式写入 false + 空对象以清除旧配置
     credentials[HEADER_OVERRIDE_ENABLED_CREDENTIAL_KEY] = headerOverrideEnabled.value
     credentials[HEADER_OVERRIDES_CREDENTIAL_KEY] = headerOverrideEnabled.value
@@ -2054,7 +2076,7 @@ const buildUpdatePayload = (): Record<string, unknown> | null => {
     credentialsChanged = true
   }
 
-  if (enableOpenAIWSMode.value) {
+  if (enableOpenAIWSMode.value && allOpenAIOAuth.value) {
     const extra = ensureExtra()
     extra.openai_oauth_responses_websockets_v2_mode = openaiOAuthResponsesWebSocketV2Mode.value
     extra.openai_oauth_responses_websockets_v2_enabled = isOpenAIWSModeEnabled(
@@ -2062,7 +2084,7 @@ const buildUpdatePayload = (): Record<string, unknown> | null => {
     )
   }
 
-  if (enableOpenAIAPIKeyWSMode.value) {
+  if (enableOpenAIAPIKeyWSMode.value && allOpenAIAPIKey.value) {
     const extra = ensureExtra()
     extra.openai_apikey_responses_websockets_v2_mode = openaiAPIKeyResponsesWebSocketV2Mode.value
     extra.openai_apikey_responses_websockets_v2_enabled = isOpenAIWSModeEnabled(
@@ -2070,11 +2092,11 @@ const buildUpdatePayload = (): Record<string, unknown> | null => {
     )
   }
 
-  if (enableUpstreamBillingAutoProbe.value) {
+  if (enableUpstreamBillingAutoProbe.value && allBillingProbeCapable.value) {
     updates.upstream_billing_probe_enabled = upstreamBillingAutoProbeMode.value === 'enabled'
   }
 
-  if (enableCodexCLIOnly.value) {
+  if (enableCodexCLIOnly.value && allOpenAIOAuth.value) {
     const extra = ensureExtra()
     extra.codex_cli_only = codexCLIOnlyEnabled.value
   }
@@ -2083,6 +2105,7 @@ const buildUpdatePayload = (): Record<string, unknown> | null => {
   // 与 Create/Edit 语义对齐，避免在父开关关闭的账号上写入无意义的孤立字段。
   if (
     enableCodexCLIOnlyAppServer.value &&
+    allOpenAIOAuth.value &&
     enableCodexCLIOnly.value &&
     codexCLIOnlyEnabled.value
   ) {
@@ -2090,7 +2113,7 @@ const buildUpdatePayload = (): Record<string, unknown> | null => {
     extra.codex_cli_only_allow_app_server = codexCLIOnlyAppServerEnabled.value
   }
 
-  if (enableCodexFingerprintMode.value) {
+  if (enableCodexFingerprintMode.value && allOpenAIOAuth.value) {
     const extra = ensureExtra()
     // off 必须显式落键，不能靠删本地键表达。批量更新走 JSONB 顶层合并
     // （extra = COALESCE(extra,'{}') || payload），删掉 payload 里的键只表示
@@ -2111,18 +2134,18 @@ const buildUpdatePayload = (): Record<string, unknown> | null => {
     extra.codex_fingerprint_mode = codexFingerprintMode.value
   }
 
-  if (enableOpenAICompactMode.value) {
+  if (enableOpenAICompactMode.value && allOpenAIPassthroughCapable.value) {
     const extra = ensureExtra()
     extra.openai_compact_mode = openAICompactMode.value
   }
 
-  if (enableOpenAICompactModelMapping.value) {
+  if (enableOpenAICompactModelMapping.value && allOpenAIPassthroughCapable.value) {
     credentials.compact_model_mapping = buildOpenAICompactModelMapping() ?? {}
     credentialsChanged = true
   }
 
   // RPM limit settings (写入 extra 字段)
-  if (enableRpmLimit.value) {
+  if (enableRpmLimit.value && allAnthropicOAuthOrSetupToken.value) {
     const extra = ensureExtra()
     if (rpmLimitEnabled.value && bulkBaseRpm.value != null && bulkBaseRpm.value > 0) {
       extra.base_rpm = bulkBaseRpm.value
@@ -2142,7 +2165,7 @@ const buildUpdatePayload = (): Record<string, unknown> | null => {
   }
 
   // UMQ mode（独立于 RPM 保存）
-  if (userMsgQueueMode.value !== null) {
+  if (userMsgQueueMode.value !== null && allAnthropicOAuthOrSetupToken.value) {
     const umqExtra = ensureExtra()
     umqExtra.user_msg_queue_mode = userMsgQueueMode.value  // '' = 清除账号级覆盖
     umqExtra.user_msg_queue_enabled = false  // 清理旧字段（JSONB merge）
@@ -2166,15 +2189,12 @@ const canPreCheck = () =>
   (targetSelectedPlatforms.value[0] === 'antigravity' || targetSelectedPlatforms.value[0] === 'anthropic')
 
 const handleClose = () => {
-  showMixedChannelWarning.value = false
-  mixedChannelWarningMessage.value = ''
-  pendingUpdatesForConfirm.value = null
-  mixedChannelConfirmed.value = false
+  invalidateEdit()
   emit('close')
 }
 
 // 预检查：提交前调接口检测，有风险就弹窗阻止，返回 false 表示需要用户确认
-const preCheckMixedChannelRisk = async (built: Record<string, unknown>): Promise<boolean> => {
+const preCheckMixedChannelRisk = async (built: Record<string, unknown>, generation: number): Promise<boolean> => {
   if (!canPreCheck()) return true
   if (mixedChannelConfirmed.value) return true
 
@@ -2183,6 +2203,7 @@ const preCheckMixedChannelRisk = async (built: Record<string, unknown>): Promise
       platform: targetSelectedPlatforms.value[0],
       group_ids: groupIds.value
     })
+    if (!isCurrentEdit(generation)) return false
     if (!result.has_risk) return true
 
     pendingUpdatesForConfirm.value = built
@@ -2190,12 +2211,14 @@ const preCheckMixedChannelRisk = async (built: Record<string, unknown>): Promise
     showMixedChannelWarning.value = true
     return false
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return false
     appStore.showError(error.message || t('admin.accounts.bulkEdit.failed'))
     return false
   }
 }
 
 const handleSubmit = async () => {
+  if (submitting.value || !props.show) return
   if (targetMode.value === 'selected' && props.accountIds.length === 0) {
     appStore.showError(t('admin.accounts.bulkEdit.noSelection'))
     return
@@ -2245,7 +2268,7 @@ const handleSubmit = async () => {
     }
   }
 
-  if (enableHeaderOverride.value && headerOverrideEnabled.value) {
+  if (enableHeaderOverride.value && allHeaderOverrideCapable.value && headerOverrideEnabled.value) {
     // 批量保存对 header_overrides 是整键替换：开启但没有任何有效行会把所选账号的
     // 既有覆写配置静默清空，必须显式拦截（清空请走关闭开关的路径，有专门提示）
     if (!headerOverrideRows.value.some((row) => row.name.trim())) {
@@ -2265,13 +2288,19 @@ const handleSubmit = async () => {
     return
   }
 
-  const canContinue = await preCheckMixedChannelRisk(built)
-  if (!canContinue) return
-
-  await submitBulkUpdate(built)
+  const generation = editGeneration
+  submitting.value = true
+  try {
+    const canContinue = await preCheckMixedChannelRisk(built, generation)
+    if (!canContinue || !isCurrentEdit(generation)) return
+    await submitBulkUpdate(built)
+  } finally {
+    if (isCurrentEdit(generation)) submitting.value = false
+  }
 }
 
 const submitBulkUpdate = async (baseUpdates: Record<string, unknown>) => {
+  const generation = editGeneration
   // 无论是预检查确认还是 409 兜底确认，只要 mixedChannelConfirmed 为 true 就带上 flag
   const updates = mixedChannelConfirmed.value
     ? { ...baseUpdates, confirm_mixed_channel_risk: true }
@@ -2286,6 +2315,7 @@ const submitBulkUpdate = async (baseUpdates: Record<string, unknown>) => {
         ...updates
       })
       : await adminAPI.accounts.bulkUpdate(props.accountIds, updates)
+    if (!isCurrentEdit(generation)) return
     const success = res.success || 0
     const failed = res.failed || 0
     const inherited = res.long_context_inherited_count || 0
@@ -2314,6 +2344,7 @@ const submitBulkUpdate = async (baseUpdates: Record<string, unknown>) => {
       handleClose()
     }
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     // 兜底：多平台混合场景下，预检查跳过，由后端 409 触发确认框
     if (error.status === 409 && error.error === 'mixed_channel_warning') {
       pendingUpdatesForConfirm.value = baseUpdates
@@ -2330,11 +2361,12 @@ const submitBulkUpdate = async (baseUpdates: Record<string, unknown>) => {
       console.error('Error bulk updating accounts:', error)
     }
   } finally {
-    submitting.value = false
+    if (isCurrentEdit(generation)) submitting.value = false
   }
 }
 
 const handleMixedChannelConfirm = async () => {
+  if (submitting.value || !props.show) return
   showMixedChannelWarning.value = false
   mixedChannelConfirmed.value = true
   if (pendingUpdatesForConfirm.value) {

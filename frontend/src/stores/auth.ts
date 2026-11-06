@@ -22,6 +22,8 @@ const TOKEN_EXPIRES_AT_KEY = 'token_expires_at' // 存储过期时间戳而非�
 const PENDING_AUTH_SESSION_KEY = 'pending_auth_session'
 const AUTO_REFRESH_INTERVAL = 60 * 1000 // 60 seconds for user data refresh
 const TOKEN_REFRESH_BUFFER = 120 * 1000 // 120 seconds before expiry to refresh token
+const MIN_TOKEN_REFRESH_DELAY = 1_000
+const MAX_TIMEOUT_DELAY = 2_147_483_647
 
 type PendingAuthTokenField = 'pending_auth_token' | 'pending_oauth_token'
 
@@ -86,6 +88,8 @@ export const useAuthStore = defineStore('auth', () => {
   const pendingAuthSession = ref<PendingAuthSessionSummary | null>(null)
   let refreshIntervalId: ReturnType<typeof setInterval> | null = null
   let tokenRefreshTimeoutId: ReturnType<typeof setTimeout> | null = null
+  let scheduledTokenExpiresAt: number | null = null
+  let scheduledTokenSession: AuthSessionSnapshot | null = null
 
   // ==================== Computed ====================
 
@@ -109,38 +113,34 @@ export const useAuthStore = defineStore('auth', () => {
    */
   function checkAuth(): void {
     let expected: AuthSessionSnapshot | undefined
-    const savedToken = localStorage.getItem(AUTH_TOKEN_KEY)
-    const savedUser = localStorage.getItem(AUTH_USER_KEY)
-    const savedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
-    const savedExpiresAt = localStorage.getItem(TOKEN_EXPIRES_AT_KEY)
-    pendingAuthSession.value = getPersistedPendingAuthSession()
+    try {
+      // Read the cached identity and credentials between checks of the same
+      // session. Another tab must not make an old user look like the new login.
+      expected = captureAuthSession()
+      const savedToken = localStorage.getItem(AUTH_TOKEN_KEY)
+      const savedUser = localStorage.getItem(AUTH_USER_KEY)
+      const savedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY)
+      const savedExpiresAt = localStorage.getItem(TOKEN_EXPIRES_AT_KEY)
+      pendingAuthSession.value = getPersistedPendingAuthSession()
+      if (!savedToken || !savedUser) return
+      const parsedUser = JSON.parse(savedUser) as User
+      assertAuthSession(expected)
+      adoptDocumentAuthSession(expected)
+      token.value = savedToken
+      user.value = parsedUser
+      refreshTokenValue.value = savedRefreshToken
+      tokenExpiresAt.value = savedExpiresAt ? parseInt(savedExpiresAt, 10) : null
 
-    if (savedToken && savedUser) {
-      try {
-        expected = captureAuthSession()
-        adoptDocumentAuthSession()
-        token.value = savedToken
-        user.value = JSON.parse(savedUser)
-        refreshTokenValue.value = savedRefreshToken
-        tokenExpiresAt.value = savedExpiresAt ? parseInt(savedExpiresAt, 10) : null
-
-        // Immediately refresh user data from backend (async, don't block)
-        refreshUser().catch((error) => {
-          console.error('Failed to refresh user on init:', error)
-        })
-
-        // Start auto-refresh interval for user data
-        startAutoRefresh()
-
-        // Start proactive token refresh if we have refresh token and expiry info
-        // Note: use !== null to handle case when tokenExpiresAt.value is 0 (expired)
-        if (savedRefreshToken && tokenExpiresAt.value !== null) {
-          scheduleTokenRefreshAt(tokenExpiresAt.value)
-        }
-      } catch (error) {
-        console.error('Failed to parse saved user data:', error)
-        if (expected) clearAuth({ preservePendingAuthSession: true }, expected)
+      refreshUser().catch((error) => {
+        console.error('Failed to refresh user on init:', error)
+      })
+      startAutoRefresh()
+      if (savedRefreshToken && tokenExpiresAt.value !== null) {
+        scheduleTokenRefreshAt(tokenExpiresAt.value, expected)
       }
+    } catch (error) {
+      console.error('Failed to restore saved authentication:', error)
+      if (expected) clearAuth({ preservePendingAuthSession: true }, expected)
     }
   }
 
@@ -175,49 +175,64 @@ export const useAuthStore = defineStore('auth', () => {
    * Schedule proactive token refresh before expiry (based on expiry timestamp)
    * @param expiresAtMs - Token expiry timestamp in milliseconds
    */
-  function scheduleTokenRefreshAt(expiresAtMs: number): void {
-    // Clear any existing timeout
-    if (tokenRefreshTimeoutId) {
-      clearTimeout(tokenRefreshTimeoutId)
-      tokenRefreshTimeoutId = null
-    }
-
-    // Calculate remaining time until refresh (buffer time before expiry)
-    const now = Date.now()
-    const refreshInMs = Math.max(0, expiresAtMs - now - TOKEN_REFRESH_BUFFER)
-
-    if (refreshInMs <= 0) {
-      // Token is about to expire or already expired, refresh immediately
-      performTokenRefresh()
+  function scheduleTokenRefreshAt(expiresAtMs: number, expected = captureAuthSession()): void {
+    assertAuthSession(expected)
+    if (!Number.isFinite(expiresAtMs)) {
+      stopTokenRefresh()
       return
     }
 
+    // Profile synchronization does not change a token's expiry. Keep its existing
+    // deadline instead of postponing it on every storage notification.
+    if (tokenRefreshTimeoutId !== null && scheduledTokenExpiresAt === expiresAtMs &&
+      scheduledTokenSession?.generation === expected.generation &&
+      scheduledTokenSession.subject === expected.subject) return
+    stopTokenRefresh()
+
+    const remainingMs = Math.max(0, expiresAtMs - Date.now())
+    // A fixed two-minute buffer immediately refreshes every newly issued token
+    // whose lifetime is <= two minutes. Use at most half of its remaining life
+    // and always yield through a timer, including for already expired tokens.
+    const bufferMs = Math.min(TOKEN_REFRESH_BUFFER, remainingMs / 2)
+    const refreshInMs = Math.max(MIN_TOKEN_REFRESH_DELAY, remainingMs - bufferMs)
+    scheduledTokenExpiresAt = expiresAtMs
+    scheduledTokenSession = expected
     tokenRefreshTimeoutId = setTimeout(() => {
-      performTokenRefresh()
-    }, refreshInMs)
+      tokenRefreshTimeoutId = null
+      scheduledTokenExpiresAt = null
+      scheduledTokenSession = null
+      if (!isAuthSessionCurrent(expected)) return
+      // Browsers clamp delays above a signed 32-bit integer to ~1 ms.
+      if (refreshInMs > MAX_TIMEOUT_DELAY) scheduleTokenRefreshAt(expiresAtMs, expected)
+      else void performTokenRefresh(expected)
+    }, Math.min(refreshInMs, MAX_TIMEOUT_DELAY))
   }
 
   /**
    * Schedule proactive token refresh before expiry (based on expires_in seconds)
    * @param expiresInSeconds - Token expiry time in seconds from now
    */
-  function scheduleTokenRefresh(expiresInSeconds: number): void {
-    const expiresAtMs = Date.now() + expiresInSeconds * 1000
+  function scheduleTokenRefresh(expiresInSeconds: number, expected: AuthSessionSnapshot): void {
+    assertAuthSession(expected)
+    const storedExpiry = Number(localStorage.getItem(TOKEN_EXPIRES_AT_KEY))
+    const expiresAtMs = Number.isFinite(storedExpiry) && storedExpiry > 0
+      ? storedExpiry
+      : Date.now() + expiresInSeconds * 1000
+    assertAuthSession(expected)
     tokenExpiresAt.value = expiresAtMs
-    localStorage.setItem(TOKEN_EXPIRES_AT_KEY, String(expiresAtMs))
-    scheduleTokenRefreshAt(expiresAtMs)
+    scheduleTokenRefreshAt(expiresAtMs, expected)
   }
 
   /**
    * Perform the actual token refresh
    */
-  async function performTokenRefresh(): Promise<void> {
+  async function performTokenRefresh(expected: AuthSessionSnapshot): Promise<void> {
     if (!refreshTokenValue.value) {
       return
     }
 
     try {
-      const expected = captureAuthSession()
+      assertAuthSession(expected)
       const response = await authAPI.refreshToken()
       assertAuthSession(expected)
 
@@ -225,8 +240,8 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = response.access_token
       refreshTokenValue.value = response.refresh_token
 
-      // Schedule next refresh (this also updates tokenExpiresAt and localStorage)
-      scheduleTokenRefresh(response.expires_in)
+      // The auth API already committed the expiry with the rotated credentials.
+      scheduleTokenRefresh(response.expires_in, expected)
     } catch (error) {
       console.error('Token refresh failed:', error)
       // Don't clear auth here - the interceptor will handle 401 errors
@@ -237,10 +252,12 @@ export const useAuthStore = defineStore('auth', () => {
    * Stop token refresh timeout
    */
   function stopTokenRefresh(): void {
-    if (tokenRefreshTimeoutId) {
+    if (tokenRefreshTimeoutId !== null) {
       clearTimeout(tokenRefreshTimeoutId)
       tokenRefreshTimeoutId = null
     }
+    scheduledTokenExpiresAt = null
+    scheduledTokenSession = null
   }
 
   /**
@@ -335,9 +352,8 @@ export const useAuthStore = defineStore('auth', () => {
     startAutoRefresh()
 
     // Start proactive token refresh if we have refresh token and expiry info
-    // scheduleTokenRefresh will also store the expiry timestamp
     if (response.refresh_token && response.expires_in) {
-      scheduleTokenRefresh(response.expires_in)
+      scheduleTokenRefresh(response.expires_in, active)
     }
   }
 
@@ -369,12 +385,13 @@ export const useAuthStore = defineStore('auth', () => {
    * 会自动读取 localStorage 中已设置的 refresh_token 和 token_expires_in
    * @param newToken - 后端签发的 JWT access token
    */
-  async function setToken(newToken: string): Promise<User> {
+  async function setToken(newToken: string, expected = captureAuthSession()): Promise<User> {
+    assertAuthSession(expected)
     const previousToken = localStorage.getItem(AUTH_TOKEN_KEY)
     const mayAdoptCallback = !previousToken || previousToken === newToken
     const savedRefresh = mayAdoptCallback ? localStorage.getItem(REFRESH_TOKEN_KEY) : null
     const savedExpiry = mayAdoptCallback ? Number(localStorage.getItem(TOKEN_EXPIRES_AT_KEY)) : 0
-    const established = replaceAuthSession({ accessToken: newToken, refreshToken: savedRefresh, expiresIn: savedExpiry > Date.now() ? (savedExpiry - Date.now()) / 1000 : undefined })
+    const established = previousToken === newToken ? expected : replaceAuthSession({ accessToken: newToken, refreshToken: savedRefresh, expiresIn: savedExpiry > Date.now() ? (savedExpiry - Date.now()) / 1000 : undefined }, expected)
     // Clear any previous state first (avoid mixing sessions)
     // Note: Don't clear localStorage here as OAuth callback may have set refresh_token
     stopAutoRefresh()
@@ -510,19 +527,23 @@ export const useAuthStore = defineStore('auth', () => {
 
   function syncStoredSession(): void {
     try {
-      captureAuthSession()
+      const expected = captureAuthSession()
       const savedToken = localStorage.getItem(AUTH_TOKEN_KEY)
       const savedUser = JSON.parse(localStorage.getItem(AUTH_USER_KEY) || 'null') as User | null
-      stopAutoRefresh()
-      stopTokenRefresh()
+      const savedRefresh = localStorage.getItem(REFRESH_TOKEN_KEY)
+      const expiry = localStorage.getItem(TOKEN_EXPIRES_AT_KEY)
+      assertAuthSession(expected)
       token.value = savedToken
       user.value = savedUser
-      refreshTokenValue.value = localStorage.getItem(REFRESH_TOKEN_KEY)
-      const expiry = localStorage.getItem(TOKEN_EXPIRES_AT_KEY)
+      refreshTokenValue.value = savedRefresh
       tokenExpiresAt.value = expiry ? Number(expiry) : null
       if (savedToken && savedUser) {
-        startAutoRefresh()
-        if (refreshTokenValue.value && tokenExpiresAt.value !== null) scheduleTokenRefreshAt(tokenExpiresAt.value)
+        if (refreshIntervalId === null) startAutoRefresh()
+        if (refreshTokenValue.value && tokenExpiresAt.value !== null) scheduleTokenRefreshAt(tokenExpiresAt.value, expected)
+        else stopTokenRefresh()
+      } else {
+        stopAutoRefresh()
+        stopTokenRefresh()
       }
     } catch { stopAutoRefresh(); stopTokenRefresh() }
   }

@@ -38,4 +38,36 @@ describe('bulk subscription operation identity', () => {
     expect(sessionStorage.getItem(scope)).toBeNull()
     expect(prepareBulkSubscriptionOperation(request).key).not.toBe(resumed.key)
   })
+
+  it('does not erase a newer pending operation when an older concurrent result finishes', () => {
+    const request = { action: 'extend' as const, subscription_ids: [1], days: 7 }
+    const first = prepareBulkSubscriptionOperation(request)
+    const oldReplay = prepareBulkSubscriptionOperation(request)
+    completeBulkSubscriptionOperation(first)
+    const newer = prepareBulkSubscriptionOperation(request)
+    expect(newer.key).not.toBe(first.key)
+    completeBulkSubscriptionOperation(oldReplay)
+    expect(sessionStorage.getItem(newer.storageKey!)).toBe(newer.key)
+    const retry = prepareBulkSubscriptionOperation(request)
+    expect(retry.key).toBe(newer.key)
+    expect(retry.outcomeUncertain).toBe(true)
+  })
+
+  it('clears its matching memory key without deleting a newer persisted identity', () => {
+    const first = prepareBulkSubscriptionOperation({ action: 'extend', subscription_ids: [1], days: 7 })
+    sessionStorage.setItem(first.storageKey!, 'synthetic-newer-persisted-key')
+    completeBulkSubscriptionOperation(first)
+    expect(sessionStorage.getItem(first.storageKey!)).toBe('synthetic-newer-persisted-key')
+    expect(prepareBulkSubscriptionOperation(first.request).key).toBe('synthetic-newer-persisted-key')
+  })
+
+  it('clears its matching persisted key without deleting a newer memory identity', () => {
+    const first = prepareBulkSubscriptionOperation({ action: 'extend', subscription_ids: [1], days: 7 })
+    completeBulkSubscriptionOperation(first)
+    const newer = prepareBulkSubscriptionOperation(first.request)
+    sessionStorage.setItem(first.storageKey!, first.key)
+    completeBulkSubscriptionOperation(first)
+    expect(sessionStorage.getItem(first.storageKey!)).toBeNull()
+    expect(prepareBulkSubscriptionOperation(first.request).key).toBe(newer.key)
+  })
 })

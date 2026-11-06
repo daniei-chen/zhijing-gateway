@@ -67,11 +67,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores'
 import { totpAPI } from '@/api'
 import type { StepUpController } from '@/composables/useStepUp'
+import { captureAuthSession, isAuthSessionCurrent, subscribeAuthSession, type AuthSessionSnapshot } from '@/api/authSession'
 
 const props = defineProps<{
   controller: StepUpController
@@ -84,17 +85,71 @@ const verifying = ref(false)
 const code = ref<string[]>(['', '', '', '', '', ''])
 const inputRefs = ref<(HTMLInputElement | null)[]>([])
 const hiddenOtpInputRef = ref<HTMLInputElement | null>(null)
+type PromptOwner = { controller: StepUpController; session: AuthSessionSnapshot }
+type VerificationOwner = { prompt: PromptOwner }
+let promptOwner: PromptOwner | null = null
+let verificationOwner: VerificationOwner | null = null
+let disposed = false
 
-// Focus the first cell whenever the dialog opens.
+function ownsPrompt(owner: PromptOwner): boolean {
+  return !disposed && promptOwner === owner && props.controller === owner.controller
+    && owner.controller.visible.value && isAuthSessionCurrent(owner.session)
+}
+
+function ownsVerification(owner: VerificationOwner): boolean {
+  return verificationOwner === owner && ownsPrompt(owner.prompt)
+}
+
+function focusCell(owner: PromptOwner, index: number, verification?: VerificationOwner) {
+  nextTick(() => {
+    if (!ownsPrompt(owner) || verifying.value || (verification && !ownsVerification(verification))) return
+    const input = inputRefs.value[index]
+    if (input?.isConnected) input.focus()
+  })
+}
+
+function invalidatePrompt() {
+  promptOwner = null
+  verificationOwner = null
+  verifying.value = false
+  resetInputs()
+}
+
+// Visibility and controller identity define one prompt. Invalidate synchronously
+// so a response from the preceding prompt cannot touch the next one.
 watch(
-  () => props.controller.visible.value,
-  (open) => {
-    if (open) {
-      resetInputs()
-      nextTick(() => inputRefs.value[0]?.focus())
+  () => [props.controller, props.controller.visible.value] as const,
+  () => {
+    const previous = promptOwner
+    invalidatePrompt()
+    if (previous && previous.controller !== props.controller && previous.controller.visible.value) previous.controller.onCancel()
+    if (disposed || !props.controller.visible.value) return
+    try {
+      const owner = { controller: props.controller, session: captureAuthSession() }
+      promptOwner = owner
+      focusCell(owner, 0)
+    } catch {
+      props.controller.onCancel()
     }
-  }
+  },
+  { immediate: true, flush: 'sync' },
 )
+
+const unsubscribeSession = subscribeAuthSession(() => {
+  const owner = promptOwner
+  if (owner && !isAuthSessionCurrent(owner.session)) {
+    invalidatePrompt()
+    if (owner.controller.visible.value) owner.controller.onCancel()
+  }
+})
+
+onBeforeUnmount(() => {
+  const controller = promptOwner?.controller ?? props.controller
+  disposed = true
+  unsubscribeSession()
+  invalidatePrompt()
+  if (controller.visible.value) controller.onCancel()
+})
 
 // Auto-submit once 6 digits are entered.
 watch(
@@ -107,17 +162,24 @@ watch(
 )
 
 async function submit(otp: string) {
+  const prompt = promptOwner
+  if (!prompt || !ownsPrompt(prompt) || verifying.value) return
+  const owner = { prompt }
+  verificationOwner = owner
   verifying.value = true
   try {
     await totpAPI.stepUp(otp)
-    verifying.value = false
+    if (!ownsVerification(owner)) return
     resetInputs()
-    props.controller.onVerified()
+    prompt.controller.onVerified()
   } catch (err: any) {
-    verifying.value = false
+    if (!ownsVerification(owner)) return
     appStore.showError(err?.message || t('stepUp.verifyFailed'))
+    if (!ownsVerification(owner)) return
     resetInputs()
-    nextTick(() => inputRefs.value[0]?.focus())
+    focusCell(prompt, 0, owner)
+  } finally {
+    if (ownsVerification(owner)) verifying.value = false
   }
 }
 
@@ -130,8 +192,9 @@ function resetInputs() {
 }
 
 function handleCancel() {
-  if (verifying.value) return
-  props.controller.onCancel()
+  const owner = promptOwner
+  if (!owner || !ownsPrompt(owner) || verifying.value) return
+  owner.controller.onCancel()
 }
 
 const setInputRef = (el: any, index: number) => {
@@ -139,15 +202,18 @@ const setInputRef = (el: any, index: number) => {
 }
 
 const handleCodeInput = (event: Event, index: number) => {
+  const owner = promptOwner
+  if (!owner || !ownsPrompt(owner) || verifying.value) return
   const input = event.target as HTMLInputElement
   const value = input.value.replace(/[^0-9]/g, '')
   code.value[index] = value
   if (value && index < 5) {
-    nextTick(() => inputRefs.value[index + 1]?.focus())
+    focusCell(owner, index + 1)
   }
 }
 
 const handleHiddenOtpInput = (event: Event) => {
+  if (!promptOwner || !ownsPrompt(promptOwner) || verifying.value) return
   const input = event.target as HTMLInputElement
   const digits = input.value.replace(/[^0-9]/g, '').slice(0, 6).split('')
   for (let i = 0; i < 6; i++) {
@@ -157,6 +223,7 @@ const handleHiddenOtpInput = (event: Event) => {
 }
 
 const handleKeydown = (event: KeyboardEvent, index: number) => {
+  if (!promptOwner || !ownsPrompt(promptOwner) || verifying.value) return
   if (event.key === 'Backspace') {
     const input = event.target as HTMLInputElement
     if (!input.value && index > 0) {
@@ -168,6 +235,8 @@ const handleKeydown = (event: KeyboardEvent, index: number) => {
 
 const handlePaste = (event: ClipboardEvent) => {
   event.preventDefault()
+  const owner = promptOwner
+  if (!owner || !ownsPrompt(owner) || verifying.value) return
   const pastedData = event.clipboardData?.getData('text') || ''
   const digits = pastedData.replace(/[^0-9]/g, '').slice(0, 6).split('')
   for (let i = 0; i < 6; i++) {
@@ -175,6 +244,6 @@ const handlePaste = (event: ClipboardEvent) => {
     if (inputRefs.value[i]) inputRefs.value[i]!.value = digits[i] || ''
   }
   const focusIndex = Math.min(digits.length, 5)
-  nextTick(() => inputRefs.value[focusIndex]?.focus())
+  focusCell(owner, focusIndex)
 }
 </script>

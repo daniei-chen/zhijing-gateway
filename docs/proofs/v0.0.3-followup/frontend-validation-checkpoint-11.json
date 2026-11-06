@@ -1,0 +1,31 @@
+{
+  "recorded_at": "2026-11-06T04:32:44.496090+00:00",
+  "source_files": 1112,
+  "test_files": 492,
+  "tests": 5168,
+  "passed_tests": 5167,
+  "failed_tests": 1,
+  "pending_tests": 0,
+  "test_assertions_passed": false,
+  "coverage_command_exit": 1,
+  "completed_standard_coverage_reports": false,
+  "latest_valid_coverage_checkpoint": "10",
+  "original_four_global_thresholds": 80,
+  "all_global_coverage_gates_passed": false,
+  "failures": [
+    {
+      "file": "src/views/admin/__tests__/RedeemView.dialog-keyboard.spec.ts",
+      "test": "Redeem manual-shell migration: actual native keyboard contracts lets Select consume the first Escape and only the second Escape dismiss Generate",
+      "message": "AssertionError: expected <input \u2026(6)></input> to be null"
+    }
+  ],
+  "targeted_same_case_retry": {
+    "passed": 1,
+    "skipped": 18,
+    "full_run_remains_failed": true
+  },
+  "typecheck": "passed",
+  "whole_eslint": "passed",
+  "vite_manifest_build": "passed",
+  "production_deployed": false
+}

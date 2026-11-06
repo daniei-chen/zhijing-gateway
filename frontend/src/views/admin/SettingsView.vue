@@ -45,7 +45,7 @@
         </div>
 
         <!-- Tab: Security — Admin API Key -->
-        <div v-show="activeTab === 'security'" class="space-y-6">
+        <div v-if="visitedSettingsTabs.has('security')" v-show="activeTab === 'security'" class="space-y-6">
           <AdminAccessKeysSettings />
           <!-- 已有全权密钥只提供轮换和删除入口。 -->
           <details v-if="adminApiKeyExists" class="card">
@@ -162,7 +162,7 @@
         <!-- /Tab: Security — Admin API Key -->
 
         <!-- Tab: Gateway -->
-        <div v-show="activeTab === 'gateway'" class="space-y-6">
+        <div v-if="visitedSettingsTabs.has('gateway')" v-show="activeTab === 'gateway'" class="space-y-6">
           <!-- Overload Cooldown (529) Settings -->
           <div class="card">
             <div
@@ -189,14 +189,14 @@
               <template v-else>
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="font-medium text-gray-900 dark:text-white">{{
+                    <label for="settings-overload-cooldown-form-enabled" class="font-medium text-gray-900 dark:text-white">{{
                       t("admin.settings.overloadCooldown.enabled")
                     }}</label>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ t("admin.settings.overloadCooldown.enabledHint") }}
                     </p>
                   </div>
-                  <Toggle v-model="overloadCooldownForm.enabled" />
+                  <Toggle id="settings-overload-cooldown-form-enabled" v-model="overloadCooldownForm.enabled" />
                 </div>
 
                 <div
@@ -204,12 +204,12 @@
                   class="space-y-4 border-t border-gray-100 pt-4 dark:border-dark-700"
                 >
                   <div>
-                    <label
+                    <label for="settings-overload-cooldown-form-cooldown-minutes"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.overloadCooldown.cooldownMinutes") }}
                     </label>
-                    <input
+                    <input id="settings-overload-cooldown-form-cooldown-minutes"
                       v-model.number="overloadCooldownForm.cooldown_minutes"
                       type="number"
                       min="1"
@@ -290,14 +290,14 @@
               <template v-else>
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="font-medium text-gray-900 dark:text-white">{{
+                    <label for="settings-rate-limit429-cooldown-form-enabled" class="font-medium text-gray-900 dark:text-white">{{
                       t("admin.settings.rateLimit429Cooldown.enabled")
                     }}</label>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ t("admin.settings.rateLimit429Cooldown.enabledHint") }}
                     </p>
                   </div>
-                  <Toggle v-model="rateLimit429CooldownForm.enabled" />
+                  <Toggle id="settings-rate-limit429-cooldown-form-enabled" v-model="rateLimit429CooldownForm.enabled" />
                 </div>
 
                 <div
@@ -305,7 +305,7 @@
                   class="space-y-4 border-t border-gray-100 pt-4 dark:border-dark-700"
                 >
                   <div>
-                    <label
+                    <label for="settings-rate-limit429-cooldown-form-cooldown-seconds"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{
@@ -314,7 +314,7 @@
                         )
                       }}
                     </label>
-                    <input
+                    <input id="settings-rate-limit429-cooldown-form-cooldown-seconds"
                       v-model.number="rateLimit429CooldownForm.cooldown_seconds"
                       type="number"
                       min="1"
@@ -399,14 +399,14 @@
                 <!-- Enable Stream Timeout -->
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="font-medium text-gray-900 dark:text-white">{{
+                    <label for="settings-stream-timeout-form-enabled" class="font-medium text-gray-900 dark:text-white">{{
                       t("admin.settings.streamTimeout.enabled")
                     }}</label>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ t("admin.settings.streamTimeout.enabledHint") }}
                     </p>
                   </div>
-                  <Toggle v-model="streamTimeoutForm.enabled" />
+                  <Toggle id="settings-stream-timeout-form-enabled" v-model="streamTimeoutForm.enabled" />
                 </div>
 
                 <!-- Settings - Only show when enabled -->
@@ -416,12 +416,12 @@
                 >
                   <!-- Action -->
                   <div>
-                    <label
+                    <label for="settings-stream-timeout-form-action"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.streamTimeout.action") }}
                     </label>
-                    <select
+                    <select id="settings-stream-timeout-form-action"
                       v-model="streamTimeoutForm.action"
                       class="input w-64"
                     >
@@ -444,12 +444,12 @@
 
                   <!-- Temp Unsched Minutes (only show when action is temp_unsched) -->
                   <div v-if="streamTimeoutForm.action === 'temp_unsched'">
-                    <label
+                    <label for="settings-stream-timeout-form-temp-unsched-minutes"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.streamTimeout.tempUnschedMinutes") }}
                     </label>
-                    <input
+                    <input id="settings-stream-timeout-form-temp-unsched-minutes"
                       v-model.number="streamTimeoutForm.temp_unsched_minutes"
                       type="number"
                       min="1"
@@ -465,12 +465,12 @@
 
                   <!-- Threshold Count -->
                   <div>
-                    <label
+                    <label for="settings-stream-timeout-form-threshold-count"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.streamTimeout.thresholdCount") }}
                     </label>
-                    <input
+                    <input id="settings-stream-timeout-form-threshold-count"
                       v-model.number="streamTimeoutForm.threshold_count"
                       type="number"
                       min="1"
@@ -484,14 +484,14 @@
 
                   <!-- Threshold Window Minutes -->
                   <div>
-                    <label
+                    <label for="settings-stream-timeout-form-threshold-window-minutes"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{
                         t("admin.settings.streamTimeout.thresholdWindowMinutes")
                       }}
                     </label>
-                    <input
+                    <input id="settings-stream-timeout-form-threshold-window-minutes"
                       v-model.number="
                         streamTimeoutForm.threshold_window_minutes
                       "
@@ -579,14 +579,14 @@
                 <!-- Master Toggle -->
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="font-medium text-gray-900 dark:text-white">{{
+                    <label for="settings-rectifier-form-enabled" class="font-medium text-gray-900 dark:text-white">{{
                       t("admin.settings.rectifier.enabled")
                     }}</label>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ t("admin.settings.rectifier.enabledHint") }}
                     </p>
                   </div>
-                  <Toggle v-model="rectifierForm.enabled" />
+                  <Toggle id="settings-rectifier-form-enabled" v-model="rectifierForm.enabled" />
                 </div>
 
                 <!-- Sub-toggles (only show when master is enabled) -->
@@ -597,7 +597,7 @@
                   <!-- Thinking Signature Rectifier -->
                   <div class="flex items-center justify-between">
                     <div>
-                      <label
+                      <label for="settings-rectifier-form-thinking-signature-enabled"
                         class="text-sm font-medium text-gray-700 dark:text-gray-300"
                         >{{
                           t("admin.settings.rectifier.thinkingSignature")
@@ -609,7 +609,7 @@
                         }}
                       </p>
                     </div>
-                    <Toggle
+                    <Toggle id="settings-rectifier-form-thinking-signature-enabled"
                       v-model="rectifierForm.thinking_signature_enabled"
                     />
                   </div>
@@ -617,7 +617,7 @@
                   <!-- Thinking Budget Rectifier -->
                   <div class="flex items-center justify-between">
                     <div>
-                      <label
+                      <label for="settings-rectifier-form-thinking-budget-enabled"
                         class="text-sm font-medium text-gray-700 dark:text-gray-300"
                         >{{
                           t("admin.settings.rectifier.thinkingBudget")
@@ -627,13 +627,13 @@
                         {{ t("admin.settings.rectifier.thinkingBudgetHint") }}
                       </p>
                     </div>
-                    <Toggle v-model="rectifierForm.thinking_budget_enabled" />
+                    <Toggle id="settings-rectifier-form-thinking-budget-enabled" v-model="rectifierForm.thinking_budget_enabled" />
                   </div>
 
                   <!-- API Key Signature Rectifier -->
                   <div class="flex items-center justify-between">
                     <div>
-                      <label
+                      <label for="settings-rectifier-form-apikey-signature-enabled"
                         class="text-sm font-medium text-gray-700 dark:text-gray-300"
                         >{{
                           t("admin.settings.rectifier.apikeySignature")
@@ -643,7 +643,7 @@
                         {{ t("admin.settings.rectifier.apikeySignatureHint") }}
                       </p>
                     </div>
-                    <Toggle v-model="rectifierForm.apikey_signature_enabled" />
+                    <Toggle id="settings-rectifier-form-apikey-signature-enabled" v-model="rectifierForm.apikey_signature_enabled" />
                   </div>
 
                   <!-- Custom Patterns (only when apikey_signature_enabled) -->
@@ -669,7 +669,7 @@
                       :key="index"
                       class="flex items-center gap-2"
                     >
-                      <input
+                      <input :aria-label="`${t('admin.settings.rectifier.apikeyPatterns')} ${index + 1}`" :id="`settings-rectifier-pattern-${index}`"
                         v-model="rectifierForm.apikey_signature_patterns[index]"
                         type="text"
                         class="input input-sm flex-1"
@@ -777,7 +777,7 @@
               <template v-else>
                 <!-- Rule Cards -->
                 <div
-                  v-for="rule in betaPolicyForm.rules"
+                  v-for="(rule, ruleIndex) in betaPolicyForm.rules"
                   :key="rule.beta_token"
                   class="rounded-lg border border-gray-200 p-4 dark:border-dark-600"
                 >
@@ -797,12 +797,12 @@
                   <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <!-- Action -->
                     <div>
-                      <label
+                      <label :for="`settings-beta-policy-action-${ruleIndex}`"
                         class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                       >
                         {{ t("admin.settings.betaPolicy.action") }}
                       </label>
-                      <Select
+                      <Select :id="`settings-beta-policy-action-${ruleIndex}`"
                         :modelValue="rule.action"
                         @update:modelValue="rule.action = $event as any"
                         :options="betaPolicyActionOptions"
@@ -811,12 +811,12 @@
 
                     <!-- Scope -->
                     <div>
-                      <label
+                      <label :for="`settings-beta-policy-scope-${ruleIndex}`"
                         class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                       >
                         {{ t("admin.settings.betaPolicy.scope") }}
                       </label>
-                      <Select
+                      <Select :id="`settings-beta-policy-scope-${ruleIndex}`"
                         :modelValue="rule.scope"
                         @update:modelValue="rule.scope = $event as any"
                         :options="betaPolicyScopeOptions"
@@ -826,12 +826,12 @@
 
                   <!-- Error Message (only when action=block) -->
                   <div v-if="rule.action === 'block'" class="mt-3">
-                    <label
+                    <label :for="`settings-beta-policy-error-message-${ruleIndex}`"
                       class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                     >
                       {{ t("admin.settings.betaPolicy.errorMessage") }}
                     </label>
-                    <input
+                    <input :id="`settings-beta-policy-error-message-${ruleIndex}`"
                       v-model="rule.error_message"
                       type="text"
                       class="input"
@@ -881,7 +881,7 @@
                       :key="index"
                       class="mb-1.5 flex items-center gap-2"
                     >
-                      <input
+                      <input :aria-label="`${t('admin.settings.betaPolicy.modelWhitelist')} ${ruleIndex + 1}.${index + 1}`" :id="`settings-beta-policy-pattern-${ruleIndex}-${index}`"
                         v-model="rule.model_whitelist![index]"
                         type="text"
                         class="input input-sm flex-1"
@@ -964,7 +964,7 @@
                     >
                       {{ t("admin.settings.betaPolicy.fallbackAction") }}
                     </label>
-                    <Select
+                    <Select :aria-label="t('admin.settings.betaPolicy.fallbackAction')"
                       :modelValue="rule.fallback_action || 'pass'"
                       @update:modelValue="rule.fallback_action = $event as any"
                       :options="betaPolicyActionOptions"
@@ -974,7 +974,7 @@
                     </p>
                     <!-- Fallback Error Message (only when fallback_action=block) -->
                     <div v-if="rule.fallback_action === 'block'" class="mt-2">
-                      <input
+                      <input :aria-label="t('admin.settings.betaPolicy.errorMessage')"
                         v-model="rule.fallback_error_message"
                         type="text"
                         class="input"
@@ -1132,12 +1132,12 @@
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
                   <!-- Service Tier -->
                   <div>
-                    <label
+                    <label :for="`settings-openai-fast-service-tier-${ruleIndex}`"
                       class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                     >
                       {{ t("admin.settings.openaiFastPolicy.serviceTier") }}
                     </label>
-                    <Select
+                    <Select :id="`settings-openai-fast-service-tier-${ruleIndex}`"
                       :modelValue="rule.service_tier"
                       @update:modelValue="
                         rule.service_tier = $event as
@@ -1152,12 +1152,12 @@
 
                   <!-- Action -->
                   <div>
-                    <label
+                    <label :for="`settings-openai-fast-action-${ruleIndex}`"
                       class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                     >
                       {{ t("admin.settings.openaiFastPolicy.action") }}
                     </label>
-                    <Select
+                    <Select :id="`settings-openai-fast-action-${ruleIndex}`"
                       :modelValue="rule.action"
                       @update:modelValue="
                         rule.action = $event as
@@ -1172,12 +1172,12 @@
 
                   <!-- Scope -->
                   <div>
-                    <label
+                    <label :for="`settings-openai-fast-scope-${ruleIndex}`"
                       class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                     >
                       {{ t("admin.settings.openaiFastPolicy.scope") }}
                     </label>
-                    <Select
+                    <Select :id="`settings-openai-fast-scope-${ruleIndex}`"
                       :modelValue="rule.scope"
                       @update:modelValue="
                         rule.scope = $event as
@@ -1209,12 +1209,12 @@
 
                 <!-- Error Message (only when action=block) -->
                 <div v-if="rule.action === 'block'" class="mt-3">
-                  <label
+                  <label :for="`settings-openai-fast-error-message-${ruleIndex}`"
                     class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                   >
                     {{ t("admin.settings.openaiFastPolicy.errorMessage") }}
                   </label>
-                  <input
+                  <input :id="`settings-openai-fast-error-message-${ruleIndex}`"
                     v-model="rule.error_message"
                     type="text"
                     class="input"
@@ -1255,7 +1255,7 @@
                     :key="patternIdx"
                     class="mb-1.5 flex items-center gap-2"
                   >
-                    <input
+                    <input :aria-label="`${t('admin.settings.openaiFastPolicy.modelWhitelist')} ${ruleIndex + 1}.${patternIdx + 1}`" :id="`settings-openai-fast-pattern-${ruleIndex}-${patternIdx}`"
                       v-model="rule.model_whitelist![patternIdx]"
                       type="text"
                       class="input input-sm flex-1"
@@ -1319,7 +1319,7 @@
                   >
                     {{ t("admin.settings.openaiFastPolicy.fallbackAction") }}
                   </label>
-                  <Select
+                  <Select :aria-label="t('admin.settings.openaiFastPolicy.fallbackAction')"
                     :modelValue="rule.fallback_action || 'pass'"
                     @update:modelValue="
                       rule.fallback_action = $event as
@@ -1336,7 +1336,7 @@
                     }}
                   </p>
                   <div v-if="rule.fallback_action === 'block'" class="mt-2">
-                    <input
+                    <input :aria-label="t('admin.settings.openaiFastPolicy.errorMessage')"
                       v-model="rule.fallback_error_message"
                       type="text"
                       class="input"
@@ -1382,7 +1382,7 @@
         <!-- /Tab: Gateway -->
 
         <!-- Tab: Security — Registration, Turnstile, LinuxDo -->
-        <div v-show="activeTab === 'security'" class="space-y-6">
+        <div v-if="visitedSettingsTabs.has('security')" v-show="activeTab === 'security'" class="space-y-6">
           <!-- Registration Settings -->
           <div class="card">
             <div
@@ -1399,7 +1399,7 @@
               <!-- Enable Registration -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-registration-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.registration.enableRegistration")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -1408,7 +1408,7 @@
                     }}
                   </p>
                 </div>
-                <Toggle v-model="form.registration_enabled" />
+                <Toggle id="settings-form-registration-enabled" v-model="form.registration_enabled" />
               </div>
 
               <!-- Email Verification -->
@@ -1416,14 +1416,14 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-email-verify-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.registration.emailVerification")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.registration.emailVerificationHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.email_verify_enabled" />
+                <Toggle id="settings-form-email-verify-enabled" v-model="form.email_verify_enabled" />
               </div>
 
               <!-- Email Suffix Whitelist -->
@@ -1465,7 +1465,7 @@
                     <div
                       class="flex min-w-[220px] flex-1 items-center gap-1 rounded border border-transparent px-2 py-1 focus-within:border-primary-300 dark:focus-within:border-primary-700"
                     >
-                      <input
+                      <input :aria-label="t('admin.settings.registration.emailSuffixWhitelist')"
                         v-model="registrationEmailSuffixWhitelistDraft"
                         type="text"
                         class="w-full bg-transparent text-sm font-mono text-gray-900 outline-none placeholder:text-gray-400 dark:text-white dark:placeholder:text-gray-500"
@@ -1500,14 +1500,14 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-registration-email-domain-quota-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.registration.emailDomainQuota")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.registration.emailDomainQuotaHint") }}
                   </p>
                 </div>
-                <Toggle
+                <Toggle id="settings-form-registration-email-domain-quota-enabled"
                   v-model="form.registration_email_domain_quota_enabled"
                 />
               </div>
@@ -1517,14 +1517,14 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-promo-code-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.registration.promoCode")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.registration.promoCodeHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.promo_code_enabled" />
+                <Toggle id="settings-form-promo-code-enabled" v-model="form.promo_code_enabled" />
               </div>
 
               <!-- Invitation Code -->
@@ -1532,14 +1532,14 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-invitation-code-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.registration.invitationCode")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.registration.invitationCodeHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.invitation_code_enabled" />
+                <Toggle id="settings-form-invitation-code-enabled" v-model="form.invitation_code_enabled" />
               </div>
               <!-- Password Reset - Only show when email verification is enabled -->
               <div
@@ -1547,26 +1547,26 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-password-reset-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.registration.passwordReset")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.registration.passwordResetHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.password_reset_enabled" />
+                <Toggle id="settings-form-password-reset-enabled" v-model="form.password_reset_enabled" />
               </div>
               <!-- Frontend URL - Only show when password reset is enabled -->
               <div
                 v-if="form.email_verify_enabled && form.password_reset_enabled"
                 class="border-t border-gray-100 pt-4 dark:border-dark-700"
               >
-                <label
+                <label for="settings-form-frontend-url"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{ t("admin.settings.registration.frontendUrl") }}
                 </label>
-                <input
+                <input id="settings-form-frontend-url"
                   v-model="form.frontend_url"
                   type="url"
                   class="input"
@@ -1584,7 +1584,7 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-totp-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.registration.totp")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -1598,7 +1598,7 @@
                     {{ t("admin.settings.registration.totpKeyNotConfigured") }}
                   </p>
                 </div>
-                <Toggle
+                <Toggle id="settings-form-totp-enabled"
                   v-model="form.totp_enabled"
                   :disabled="!form.totp_encryption_key_configured"
                 />
@@ -1611,14 +1611,14 @@
               >
                 <div class="flex items-start justify-between gap-4">
                   <div>
-                    <label class="font-medium text-gray-900 dark:text-white">{{
+                    <label for="settings-form-passkey-enabled" class="font-medium text-gray-900 dark:text-white">{{
                       t("admin.settings.security.passkey")
                     }}</label>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ t("admin.settings.security.passkeyHint") }}
                     </p>
                   </div>
-                  <Toggle
+                  <Toggle id="settings-form-passkey-enabled"
                     v-model="form.passkey_enabled"
                     data-testid="passkey-toggle"
                     :disabled="!form.passkey_configured"
@@ -1668,14 +1668,14 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-step-up-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.security.stepUp")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.security.stepUpHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.step_up_enabled" />
+                <Toggle id="settings-form-step-up-enabled" v-model="form.step_up_enabled" />
               </div>
 
               <!-- 会话 IP/UA 绑定 -->
@@ -1683,14 +1683,14 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-session-binding-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.security.sessionBinding")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.security.sessionBindingHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.session_binding_enabled" />
+                <Toggle id="settings-form-session-binding-enabled" v-model="form.session_binding_enabled" />
               </div>
 
               <!-- 审计日志保留天数 -->
@@ -1698,14 +1698,14 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-audit-log-retention-days" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.security.auditRetention")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.security.auditRetentionHint") }}
                   </p>
                 </div>
-                <input
+                <input id="settings-form-audit-log-retention-days"
                   v-model.number="form.audit_log_retention_days"
                   type="number"
                   min="0"
@@ -1730,14 +1730,14 @@
             <div class="space-y-5 p-6">
               <div class="flex items-center justify-between gap-4">
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">
+                  <label for="settings-form-api-key-acl-trust-forwarded-ip" class="font-medium text-gray-900 dark:text-white">
                     {{ t("admin.settings.apiKeyAcl.trustForwardedIp") }}
                   </label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.apiKeyAcl.trustForwardedIpHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.api_key_acl_trust_forwarded_ip" />
+                <Toggle id="settings-form-api-key-acl-trust-forwarded-ip" v-model="form.api_key_acl_trust_forwarded_ip" />
               </div>
 
               <div
@@ -1851,14 +1851,14 @@
 
                 <div class="flex items-center justify-between">
                   <div>
-                    <label class="font-medium text-gray-900 dark:text-white">{{
+                    <label for="settings-panel-rate-limit-form-enabled" class="font-medium text-gray-900 dark:text-white">{{
                       t("admin.settings.panelRateLimit.enabled")
                     }}</label>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ t("admin.settings.panelRateLimit.enabledHint") }}
                     </p>
                   </div>
-                  <Toggle v-model="panelRateLimitForm.enabled" />
+                  <Toggle id="settings-panel-rate-limit-form-enabled" v-model="panelRateLimitForm.enabled" />
                 </div>
 
                 <div
@@ -1867,13 +1867,13 @@
                 >
                   <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
                     <div>
-                      <label
+                      <label for="settings-panel-rate-limit-form-user-rpm"
                         class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                       >
                         {{ t("admin.settings.panelRateLimit.userRpm") }}
                       </label>
                       <div class="flex items-center gap-2">
-                        <input
+                        <input id="settings-panel-rate-limit-form-user-rpm"
                           v-model.number="panelRateLimitForm.user_rpm"
                           data-testid="panel-rate-limit-user-rpm"
                           type="number"
@@ -1891,13 +1891,13 @@
                     </div>
 
                     <div>
-                      <label
+                      <label for="settings-panel-rate-limit-form-heavy-rpm"
                         class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                       >
                         {{ t("admin.settings.panelRateLimit.heavyRpm") }}
                       </label>
                       <div class="flex items-center gap-2">
-                        <input
+                        <input id="settings-panel-rate-limit-form-heavy-rpm"
                           v-model.number="panelRateLimitForm.heavy_rpm"
                           type="number"
                           min="0"
@@ -1914,13 +1914,13 @@
                     </div>
 
                     <div>
-                      <label
+                      <label for="settings-panel-rate-limit-form-public-ip-rpm"
                         class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                       >
                         {{ t("admin.settings.panelRateLimit.publicIpRpm") }}
                       </label>
                       <div class="flex items-center gap-2">
-                        <input
+                        <input id="settings-panel-rate-limit-form-public-ip-rpm"
                           v-model.number="panelRateLimitForm.public_ip_rpm"
                           type="number"
                           min="0"
@@ -1941,14 +1941,14 @@
                     class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
                   >
                     <div>
-                      <label class="font-medium text-gray-900 dark:text-white">{{
+                      <label for="settings-panel-rate-limit-form-exempt-admin" class="font-medium text-gray-900 dark:text-white">{{
                         t("admin.settings.panelRateLimit.exemptAdmin")
                       }}</label>
                       <p class="text-sm text-gray-500 dark:text-gray-400">
                         {{ t("admin.settings.panelRateLimit.exemptAdminHint") }}
                       </p>
                     </div>
-                    <Toggle v-model="panelRateLimitForm.exempt_admin" />
+                    <Toggle id="settings-panel-rate-limit-form-exempt-admin" v-model="panelRateLimitForm.exempt_admin" />
                   </div>
                 </div>
 
@@ -2009,14 +2009,14 @@
               <!-- Enable Captcha -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-captcha-master-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.captcha.enable")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.captcha.enableHint") }}
                   </p>
                 </div>
-                <Toggle
+                <Toggle id="settings-captcha-master-enabled"
                   v-model="captchaMasterEnabled"
                   data-testid="captcha-enabled-toggle"
                 />
@@ -2085,12 +2085,12 @@
                   class="grid grid-cols-1 gap-6"
                 >
                   <div>
-                    <label
+                    <label for="settings-form-turnstile-site-key"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.turnstile.siteKey") }}
                     </label>
-                    <input
+                    <input id="settings-form-turnstile-site-key"
                       v-model="form.turnstile_site_key"
                       type="text"
                       class="input font-mono text-sm"
@@ -2109,12 +2109,12 @@
                     </p>
                   </div>
                   <div>
-                    <label
+                    <label for="settings-form-turnstile-secret-key"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.turnstile.secretKey") }}
                     </label>
-                    <input
+                    <input id="settings-form-turnstile-secret-key"
                       v-model="form.turnstile_secret_key"
                       type="password"
                       class="input font-mono text-sm"
@@ -2180,10 +2180,10 @@
                       </p>
                     </div>
                     <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label for="settings-form-tencent-captcha-app-id" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ t("admin.settings.tencentCaptcha.appId") }}
                       </label>
-                      <input
+                      <input id="settings-form-tencent-captcha-app-id"
                         v-model="form.tencent_captcha_app_id"
                         type="text"
                         inputmode="numeric"
@@ -2192,10 +2192,10 @@
                       />
                     </div>
                     <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label for="settings-form-tencent-captcha-app-secret-key" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ t("admin.settings.tencentCaptcha.appSecretKey") }}
                       </label>
-                      <input
+                      <input id="settings-form-tencent-captcha-app-secret-key"
                         v-model="form.tencent_captcha_app_secret_key"
                         type="password"
                         autocomplete="new-password"
@@ -2215,10 +2215,10 @@
                       </p>
                     </div>
                     <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label for="settings-form-tencent-captcha-cloud-secret-id" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ t("admin.settings.tencentCaptcha.cloudSecretId") }}
                       </label>
-                      <input
+                      <input id="settings-form-tencent-captcha-cloud-secret-id"
                         v-model="form.tencent_captcha_cloud_secret_id"
                         type="password"
                         autocomplete="new-password"
@@ -2230,10 +2230,10 @@
                       </p>
                     </div>
                     <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label for="settings-form-tencent-captcha-cloud-secret-key" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ t("admin.settings.tencentCaptcha.cloudSecretKey") }}
                       </label>
-                      <input
+                      <input id="settings-form-tencent-captcha-cloud-secret-key"
                         v-model="form.tencent_captcha_cloud_secret_key"
                         type="password"
                         autocomplete="new-password"
@@ -2321,12 +2321,12 @@
                       </p>
                     </div>
                     <div>
-                      <label
+                      <label for="settings-form-aliyun-captcha-prefix"
                         class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                       >
                         {{ t("admin.settings.aliyunCaptcha.prefix") }}
                       </label>
-                      <input
+                      <input id="settings-form-aliyun-captcha-prefix"
                         v-model="form.aliyun_captcha_prefix"
                         type="text"
                         class="input font-mono text-sm"
@@ -2338,12 +2338,12 @@
                     </div>
                   </div>
                   <div>
-                    <label
+                    <label for="settings-form-aliyun-captcha-scene-id"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.aliyunCaptcha.sceneId") }}
                     </label>
-                    <input
+                    <input id="settings-form-aliyun-captcha-scene-id"
                       v-model="form.aliyun_captcha_scene_id"
                       type="text"
                       class="input font-mono text-sm"
@@ -2354,12 +2354,12 @@
                     </p>
                   </div>
                   <div>
-                    <label
+                    <label for="settings-form-aliyun-captcha-access-key-id"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.aliyunCaptcha.accessKeyId") }}
                     </label>
-                    <input
+                    <input id="settings-form-aliyun-captcha-access-key-id"
                       v-model="form.aliyun_captcha_access_key_id"
                       type="text"
                       class="input font-mono text-sm"
@@ -2370,12 +2370,12 @@
                     </p>
                   </div>
                   <div>
-                    <label
+                    <label for="settings-form-aliyun-captcha-access-key-secret"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.aliyunCaptcha.accessKeySecret") }}
                     </label>
-                    <input
+                    <input id="settings-form-aliyun-captcha-access-key-secret"
                       v-model="form.aliyun_captcha_access_key_secret"
                       type="password"
                       autocomplete="new-password"
@@ -2412,14 +2412,14 @@
             <div class="space-y-5 p-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-linuxdo-connect-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.linuxdo.enable")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.linuxdo.enableHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.linuxdo_connect_enabled" />
+                <Toggle id="settings-form-linuxdo-connect-enabled" v-model="form.linuxdo_connect_enabled" />
               </div>
 
               <div
@@ -2428,12 +2428,12 @@
               >
                 <div class="grid grid-cols-1 gap-6">
                   <div>
-                    <label
+                    <label for="settings-form-linuxdo-connect-client-id"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.linuxdo.clientId") }}
                     </label>
-                    <input
+                    <input id="settings-form-linuxdo-connect-client-id"
                       v-model="form.linuxdo_connect_client_id"
                       type="text"
                       class="input font-mono text-sm"
@@ -2447,12 +2447,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-linuxdo-connect-client-secret"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.linuxdo.clientSecret") }}
                     </label>
-                    <input
+                    <input id="settings-form-linuxdo-connect-client-secret"
                       v-model="form.linuxdo_connect_client_secret"
                       type="password"
                       class="input font-mono text-sm"
@@ -2476,12 +2476,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-linuxdo-connect-redirect-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.linuxdo.redirectUrl") }}
                     </label>
-                    <input
+                    <input id="settings-form-linuxdo-connect-redirect-url"
                       v-model="form.linuxdo_connect_redirect_url"
                       type="url"
                       class="input font-mono text-sm"
@@ -2549,7 +2549,7 @@
                         }}
                       </p>
                     </div>
-                    <Toggle v-model="form.github_oauth_enabled" />
+                    <Toggle :aria-label="localText('启用 GitHub 登录', 'Enable GitHub sign-in')" v-model="form.github_oauth_enabled" />
                   </div>
 
                   <div v-if="form.github_oauth_enabled" class="mt-4 space-y-4">
@@ -2580,8 +2580,8 @@
 
                     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                       <div>
-                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Client ID</label>
-                        <input
+                        <label for="settings-form-github-oauth-client-id" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Client ID</label>
+                        <input id="settings-form-github-oauth-client-id"
                           v-model="form.github_oauth_client_id"
                           type="text"
                           class="input font-mono text-sm"
@@ -2589,8 +2589,8 @@
                         />
                       </div>
                       <div>
-                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Client Secret</label>
-                        <input
+                        <label for="settings-form-github-oauth-client-secret" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Client Secret</label>
+                        <input id="settings-form-github-oauth-client-secret"
                           v-model="form.github_oauth_client_secret"
                           type="password"
                           class="input font-mono text-sm"
@@ -2604,10 +2604,10 @@
                     </div>
 
                     <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label for="settings-form-github-oauth-redirect-url" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ localText("后端回调地址", "Backend Callback URL") }}
                       </label>
-                      <input
+                      <input id="settings-form-github-oauth-redirect-url"
                         v-model="form.github_oauth_redirect_url"
                         type="url"
                         class="input font-mono text-sm"
@@ -2631,10 +2631,10 @@
                     </div>
 
                     <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label for="settings-form-github-oauth-frontend-redirect-url" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ localText("前端回跳地址", "Frontend Callback URL") }}
                       </label>
-                      <input
+                      <input id="settings-form-github-oauth-frontend-redirect-url"
                         v-model="form.github_oauth_frontend_redirect_url"
                         type="text"
                         class="input font-mono text-sm"
@@ -2659,7 +2659,7 @@
                         }}
                       </p>
                     </div>
-                    <Toggle v-model="form.google_oauth_enabled" />
+                    <Toggle :aria-label="localText('启用 Google 登录', 'Enable Google sign-in')" v-model="form.google_oauth_enabled" />
                   </div>
 
                   <div v-if="form.google_oauth_enabled" class="mt-4 space-y-4">
@@ -2674,8 +2674,8 @@
 
                     <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
                       <div>
-                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Client ID</label>
-                        <input
+                        <label for="settings-form-google-oauth-client-id" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Client ID</label>
+                        <input id="settings-form-google-oauth-client-id"
                           v-model="form.google_oauth_client_id"
                           type="text"
                           class="input font-mono text-sm"
@@ -2683,8 +2683,8 @@
                         />
                       </div>
                       <div>
-                        <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Client Secret</label>
-                        <input
+                        <label for="settings-form-google-oauth-client-secret" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">Client Secret</label>
+                        <input id="settings-form-google-oauth-client-secret"
                           v-model="form.google_oauth_client_secret"
                           type="password"
                           class="input font-mono text-sm"
@@ -2698,10 +2698,10 @@
                     </div>
 
                     <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label for="settings-form-google-oauth-redirect-url" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ localText("后端回调地址", "Backend Callback URL") }}
                       </label>
-                      <input
+                      <input id="settings-form-google-oauth-redirect-url"
                         v-model="form.google_oauth_redirect_url"
                         type="url"
                         class="input font-mono text-sm"
@@ -2725,10 +2725,10 @@
                     </div>
 
                     <div>
-                      <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      <label for="settings-form-google-oauth-frontend-redirect-url" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                         {{ localText("前端回跳地址", "Frontend Callback URL") }}
                       </label>
-                      <input
+                      <input id="settings-form-google-oauth-frontend-redirect-url"
                         v-model="form.google_oauth_frontend_redirect_url"
                         type="text"
                         class="input font-mono text-sm"
@@ -2756,14 +2756,14 @@
             <div class="space-y-5 p-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-wechat-connect-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.wechatConnect.enabledLabel")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.wechatConnect.enabledHint") }}
                   </p>
                 </div>
-                <Toggle
+                <Toggle id="settings-form-wechat-connect-enabled"
                   v-model="form.wechat_connect_enabled"
                   data-testid="wechat-connect-enabled"
                 />
@@ -2791,7 +2791,7 @@
                           }}
                         </p>
                       </div>
-                      <Toggle
+                      <Toggle :aria-label="localText('微信 PC 应用登录', 'WeChat PC app sign-in')"
                         :model-value="form.wechat_connect_open_enabled"
                         data-testid="wechat-connect-open-enabled"
                         @update:model-value="handleWeChatOpenEnabledChange"
@@ -2802,12 +2802,12 @@
                       class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2"
                     >
                       <div>
-                        <label
+                        <label for="settings-form-wechat-connect-open-app-id"
                           class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                           {{ localText("PC AppID", "PC App ID") }}
                         </label>
-                        <input
+                        <input id="settings-form-wechat-connect-open-app-id"
                           v-model="form.wechat_connect_open_app_id"
                           data-testid="wechat-connect-open-app-id"
                           type="text"
@@ -2821,12 +2821,12 @@
                         />
                       </div>
                       <div>
-                        <label
+                        <label for="settings-form-wechat-connect-open-app-secret"
                           class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                           {{ localText("PC AppSecret", "PC App Secret") }}
                         </label>
-                        <input
+                        <input id="settings-form-wechat-connect-open-app-secret"
                           v-model="form.wechat_connect_open_app_secret"
                           data-testid="wechat-connect-open-app-secret"
                           type="password"
@@ -2864,7 +2864,7 @@
                           }}
                         </p>
                       </div>
-                      <Toggle
+                      <Toggle :aria-label="localText('微信公众账号登录', 'WeChat Official Account sign-in')"
                         :model-value="form.wechat_connect_mp_enabled"
                         data-testid="wechat-connect-mp-enabled"
                         @update:model-value="handleWeChatMPEnabledChange"
@@ -2875,12 +2875,12 @@
                       class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2"
                     >
                       <div>
-                        <label
+                        <label for="settings-form-wechat-connect-mp-app-id"
                           class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                           {{ localText("公众号 AppID", "Official Account App ID") }}
                         </label>
-                        <input
+                        <input id="settings-form-wechat-connect-mp-app-id"
                           v-model="form.wechat_connect_mp_app_id"
                           data-testid="wechat-connect-mp-app-id"
                           type="text"
@@ -2894,7 +2894,7 @@
                         />
                       </div>
                       <div>
-                        <label
+                        <label for="settings-form-wechat-connect-mp-app-secret"
                           class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                           {{
@@ -2904,7 +2904,7 @@
                             )
                           }}
                         </label>
-                        <input
+                        <input id="settings-form-wechat-connect-mp-app-secret"
                           v-model="form.wechat_connect_mp_app_secret"
                           data-testid="wechat-connect-mp-app-secret"
                           type="password"
@@ -2942,7 +2942,7 @@
                           }}
                         </p>
                       </div>
-                      <Toggle
+                      <Toggle :aria-label="localText('微信移动应用登录', 'WeChat mobile app sign-in')"
                         :model-value="form.wechat_connect_mobile_enabled"
                         data-testid="wechat-connect-mobile-enabled"
                         @update:model-value="handleWeChatMobileEnabledChange"
@@ -2953,12 +2953,12 @@
                       class="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2"
                     >
                       <div>
-                        <label
+                        <label for="settings-form-wechat-connect-mobile-app-id"
                           class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                           {{ localText("移动应用 AppID", "Mobile App ID") }}
                         </label>
-                        <input
+                        <input id="settings-form-wechat-connect-mobile-app-id"
                           v-model="form.wechat_connect_mobile_app_id"
                           data-testid="wechat-connect-mobile-app-id"
                           type="text"
@@ -2972,12 +2972,12 @@
                         />
                       </div>
                       <div>
-                        <label
+                        <label for="settings-form-wechat-connect-mobile-app-secret"
                           class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                           {{ localText("移动应用 AppSecret", "Mobile App Secret") }}
                         </label>
-                        <input
+                        <input id="settings-form-wechat-connect-mobile-app-secret"
                           v-model="form.wechat_connect_mobile_app_secret"
                           data-testid="wechat-connect-mobile-app-secret"
                           type="password"
@@ -3017,7 +3017,7 @@
 
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <div>
-                    <label
+                    <label for="settings-form-wechat-connect-redirect-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{
@@ -3027,7 +3027,7 @@
                         )
                       }}
                     </label>
-                    <input
+                    <input id="settings-form-wechat-connect-redirect-url"
                       data-testid="wechat-connect-redirect-url"
                       v-model="form.wechat_connect_redirect_url"
                       type="url"
@@ -3063,12 +3063,12 @@
                 </div>
 
                 <div>
-                  <label
+                  <label for="settings-form-wechat-connect-frontend-redirect-url"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.wechatConnect.frontendRedirectUrlLabel") }}
                   </label>
-                  <input
+                  <input id="settings-form-wechat-connect-frontend-redirect-url"
                     data-testid="wechat-connect-frontend-redirect-url"
                     v-model="form.wechat_connect_frontend_redirect_url"
                     type="text"
@@ -3098,14 +3098,14 @@
             <div class="space-y-5 p-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-dingtalk-connect-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.dingtalk.enable")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.dingtalk.enableHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.dingtalk_connect_enabled" />
+                <Toggle id="settings-form-dingtalk-connect-enabled" v-model="form.dingtalk_connect_enabled" />
               </div>
 
               <div
@@ -3114,12 +3114,12 @@
               >
                 <div class="grid grid-cols-1 gap-6">
                   <div>
-                    <label
+                    <label for="settings-form-dingtalk-connect-client-id"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.dingtalk.clientId") }}
                     </label>
-                    <input
+                    <input id="settings-form-dingtalk-connect-client-id"
                       v-model="form.dingtalk_connect_client_id"
                       type="text"
                       class="input font-mono text-sm"
@@ -3133,12 +3133,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-dingtalk-connect-client-secret"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.dingtalk.clientSecret") }}
                     </label>
-                    <input
+                    <input id="settings-form-dingtalk-connect-client-secret"
                       v-model="form.dingtalk_connect_client_secret"
                       type="password"
                       class="input font-mono text-sm"
@@ -3162,12 +3162,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-dingtalk-connect-redirect-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.dingtalk.redirectUrl") }}
                     </label>
-                    <input
+                    <input id="settings-form-dingtalk-connect-redirect-url"
                       v-model="form.dingtalk_connect_redirect_url"
                       type="url"
                       class="input font-mono text-sm"
@@ -3220,14 +3220,14 @@
                     class="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-dark-700"
                   >
                     <div>
-                      <label class="font-medium text-gray-900 dark:text-white">{{
+                      <label for="settings-form-dingtalk-connect-bypass-registration" class="font-medium text-gray-900 dark:text-white">{{
                         t("admin.settings.dingtalk.bypassRegistration")
                       }}</label>
                       <p class="text-sm text-gray-500 dark:text-gray-400">
                         {{ t("admin.settings.dingtalk.bypassRegistrationHint") }}
                       </p>
                     </div>
-                    <Toggle v-model="form.dingtalk_connect_bypass_registration" />
+                    <Toggle id="settings-form-dingtalk-connect-bypass-registration" v-model="form.dingtalk_connect_bypass_registration" />
                   </div>
 
                   <!-- 身份同步开关（仅 internal_only 模式下可见） -->
@@ -3237,21 +3237,21 @@
                   >
                     <div class="flex items-center justify-between">
                       <div>
-                        <label class="font-medium text-gray-900 dark:text-white">{{
+                        <label for="settings-form-dingtalk-connect-sync-display-name" class="font-medium text-gray-900 dark:text-white">{{
                           t("admin.settings.dingtalk.syncDisplayName")
                         }}</label>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
                           {{ t("admin.settings.dingtalk.syncDisplayNameHint") }}
                         </p>
                       </div>
-                      <Toggle v-model="form.dingtalk_connect_sync_display_name" />
+                      <Toggle id="settings-form-dingtalk-connect-sync-display-name" v-model="form.dingtalk_connect_sync_display_name" />
                     </div>
                     <div v-if="form.dingtalk_connect_sync_display_name" class="space-y-2">
                       <div class="flex items-center gap-2">
-                        <label class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
+                        <label for="settings-form-dingtalk-connect-sync-display-name-attr-key" class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
                           {{ t("admin.settings.dingtalk.syncDisplayNameTarget") }}
                         </label>
-                        <input
+                        <input id="settings-form-dingtalk-connect-sync-display-name-attr-key"
                           v-model="form.dingtalk_connect_sync_display_name_attr_key"
                           type="text"
                           placeholder="dingtalk_name"
@@ -3259,10 +3259,10 @@
                         />
                       </div>
                       <div class="flex items-center gap-2">
-                        <label class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
+                        <label for="settings-form-dingtalk-connect-sync-display-name-attr-name" class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
                           {{ t("admin.settings.dingtalk.syncAttrDisplayName") }}
                         </label>
-                        <input
+                        <input id="settings-form-dingtalk-connect-sync-display-name-attr-name"
                           v-model="form.dingtalk_connect_sync_display_name_attr_name"
                           type="text"
                           :placeholder="localText('钉钉姓名', 'DingTalk Name')"
@@ -3280,7 +3280,7 @@
                   >
                     <div class="flex items-center justify-between">
                       <div>
-                        <label class="font-medium text-gray-900 dark:text-white">{{
+                        <label for="settings-form-dingtalk-connect-sync-corp-email" class="font-medium text-gray-900 dark:text-white">{{
                           t("admin.settings.dingtalk.syncCorpEmail")
                         }}</label>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -3290,14 +3290,14 @@
                           {{ t("admin.settings.dingtalk.syncCorpEmailPermissionHint") }}
                         </p>
                       </div>
-                      <Toggle v-model="form.dingtalk_connect_sync_corp_email" />
+                      <Toggle id="settings-form-dingtalk-connect-sync-corp-email" v-model="form.dingtalk_connect_sync_corp_email" />
                     </div>
                     <div v-if="form.dingtalk_connect_sync_corp_email" class="space-y-2">
                       <div class="flex items-center gap-2">
-                        <label class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
+                        <label for="settings-form-dingtalk-connect-sync-corp-email-attr-key" class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
                           {{ t("admin.settings.dingtalk.syncCorpEmailTarget") }}
                         </label>
-                        <input
+                        <input id="settings-form-dingtalk-connect-sync-corp-email-attr-key"
                           v-model="form.dingtalk_connect_sync_corp_email_attr_key"
                           type="text"
                           placeholder="dingtalk_email"
@@ -3305,10 +3305,10 @@
                         />
                       </div>
                       <div class="flex items-center gap-2">
-                        <label class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
+                        <label for="settings-form-dingtalk-connect-sync-corp-email-attr-name" class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
                           {{ t("admin.settings.dingtalk.syncAttrDisplayName") }}
                         </label>
-                        <input
+                        <input id="settings-form-dingtalk-connect-sync-corp-email-attr-name"
                           v-model="form.dingtalk_connect_sync_corp_email_attr_name"
                           type="text"
                           :placeholder="localText('钉钉企业邮箱', 'DingTalk Corporate Email')"
@@ -3326,7 +3326,7 @@
                   >
                     <div class="flex items-center justify-between">
                       <div>
-                        <label class="font-medium text-gray-900 dark:text-white">{{
+                        <label for="settings-form-dingtalk-connect-sync-dept" class="font-medium text-gray-900 dark:text-white">{{
                           t("admin.settings.dingtalk.syncDept")
                         }}</label>
                         <p class="text-sm text-gray-500 dark:text-gray-400">
@@ -3336,14 +3336,14 @@
                           {{ t("admin.settings.dingtalk.syncDeptPermissionHint") }}
                         </p>
                       </div>
-                      <Toggle v-model="form.dingtalk_connect_sync_dept" />
+                      <Toggle id="settings-form-dingtalk-connect-sync-dept" v-model="form.dingtalk_connect_sync_dept" />
                     </div>
                     <div v-if="form.dingtalk_connect_sync_dept" class="space-y-2">
                       <div class="flex items-center gap-2">
-                        <label class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
+                        <label for="settings-form-dingtalk-connect-sync-dept-attr-key" class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
                           {{ t("admin.settings.dingtalk.syncDeptTarget") }}
                         </label>
-                        <input
+                        <input id="settings-form-dingtalk-connect-sync-dept-attr-key"
                           v-model="form.dingtalk_connect_sync_dept_attr_key"
                           type="text"
                           placeholder="dingtalk_department"
@@ -3351,10 +3351,10 @@
                         />
                       </div>
                       <div class="flex items-center gap-2">
-                        <label class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
+                        <label for="settings-form-dingtalk-connect-sync-dept-attr-name" class="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap min-w-[5rem]">
                           {{ t("admin.settings.dingtalk.syncAttrDisplayName") }}
                         </label>
-                        <input
+                        <input id="settings-form-dingtalk-connect-sync-dept-attr-name"
                           v-model="form.dingtalk_connect_sync_dept_attr_name"
                           type="text"
                           :placeholder="localText('钉钉部门', 'DingTalk Department')"
@@ -3386,14 +3386,14 @@
             <div class="space-y-5 p-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-oidc-connect-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.oidc.enable")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.oidc.enableHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.oidc_connect_enabled" />
+                <Toggle id="settings-form-oidc-connect-enabled" v-model="form.oidc_connect_enabled" />
               </div>
 
               <div
@@ -3402,12 +3402,12 @@
               >
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-provider-name"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.providerName") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-provider-name"
                       v-model="form.oidc_connect_provider_name"
                       type="text"
                       class="input"
@@ -3418,12 +3418,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-client-id"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.clientId") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-client-id"
                       v-model="form.oidc_connect_client_id"
                       type="text"
                       class="input font-mono text-sm"
@@ -3434,12 +3434,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-client-secret"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.clientSecret") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-client-secret"
                       v-model="form.oidc_connect_client_secret"
                       type="password"
                       class="input font-mono text-sm"
@@ -3463,12 +3463,12 @@
 
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-issuer-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.issuerUrl") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-issuer-url"
                       v-model="form.oidc_connect_issuer_url"
                       type="url"
                       class="input font-mono text-sm"
@@ -3479,12 +3479,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-discovery-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.discoveryUrl") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-discovery-url"
                       v-model="form.oidc_connect_discovery_url"
                       type="url"
                       class="input font-mono text-sm"
@@ -3495,12 +3495,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-authorize-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.authorizeUrl") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-authorize-url"
                       v-model="form.oidc_connect_authorize_url"
                       type="url"
                       class="input font-mono text-sm"
@@ -3511,12 +3511,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-token-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.tokenUrl") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-token-url"
                       v-model="form.oidc_connect_token_url"
                       type="url"
                       class="input font-mono text-sm"
@@ -3527,12 +3527,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-userinfo-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.userinfoUrl") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-userinfo-url"
                       v-model="form.oidc_connect_userinfo_url"
                       type="url"
                       class="input font-mono text-sm"
@@ -3543,12 +3543,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-jwks-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.jwksUrl") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-jwks-url"
                       v-model="form.oidc_connect_jwks_url"
                       type="url"
                       class="input font-mono text-sm"
@@ -3559,12 +3559,12 @@
 
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-scopes"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.scopes") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-scopes"
                       v-model="form.oidc_connect_scopes"
                       type="text"
                       class="input font-mono text-sm"
@@ -3576,12 +3576,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-redirect-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.redirectUrl") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-redirect-url"
                       v-model="form.oidc_connect_redirect_url"
                       type="url"
                       class="input font-mono text-sm"
@@ -3612,12 +3612,12 @@
                   </div>
 
                   <div class="lg:col-span-2">
-                    <label
+                    <label for="settings-form-oidc-connect-frontend-redirect-url"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.frontendRedirectUrl") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-frontend-redirect-url"
                       v-model="form.oidc_connect_frontend_redirect_url"
                       type="text"
                       class="input font-mono text-sm"
@@ -3633,12 +3633,12 @@
 
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-token-auth-method"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.tokenAuthMethod") }}
                     </label>
-                    <select
+                    <select id="settings-form-oidc-connect-token-auth-method"
                       v-model="form.oidc_connect_token_auth_method"
                       class="input font-mono text-sm"
                     >
@@ -3653,12 +3653,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-clock-skew-seconds"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.clockSkewSeconds") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-clock-skew-seconds"
                       v-model.number="form.oidc_connect_clock_skew_seconds"
                       type="number"
                       min="0"
@@ -3668,12 +3668,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-allowed-signing-algs"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.allowedSigningAlgs") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-allowed-signing-algs"
                       v-model="form.oidc_connect_allowed_signing_algs"
                       type="text"
                       class="input font-mono text-sm"
@@ -3689,11 +3689,11 @@
                     class="flex items-center justify-between rounded border border-gray-200 px-4 py-3 dark:border-dark-700"
                   >
                     <div>
-                      <label class="font-medium text-gray-900 dark:text-white">
+                      <label for="settings-form-oidc-connect-use-pkce" class="font-medium text-gray-900 dark:text-white">
                         {{ t("admin.settings.oidc.usePkce") }}
                       </label>
                     </div>
-                    <Toggle
+                    <Toggle id="settings-form-oidc-connect-use-pkce"
                       v-model="form.oidc_connect_use_pkce"
                       data-testid="oidc-connect-use-pkce"
                     />
@@ -3703,11 +3703,11 @@
                     class="flex items-center justify-between rounded border border-gray-200 px-4 py-3 dark:border-dark-700"
                   >
                     <div>
-                      <label class="font-medium text-gray-900 dark:text-white">
+                      <label for="settings-form-oidc-connect-validate-id-token" class="font-medium text-gray-900 dark:text-white">
                         {{ t("admin.settings.oidc.validateIdToken") }}
                       </label>
                     </div>
-                    <Toggle
+                    <Toggle id="settings-form-oidc-connect-validate-id-token"
                       v-model="form.oidc_connect_validate_id_token"
                       data-testid="oidc-connect-validate-id-token"
                     />
@@ -3717,11 +3717,11 @@
                     class="flex items-center justify-between rounded border border-gray-200 px-4 py-3 dark:border-dark-700"
                   >
                     <div>
-                      <label class="font-medium text-gray-900 dark:text-white">
+                      <label for="settings-form-oidc-connect-require-email-verified" class="font-medium text-gray-900 dark:text-white">
                         {{ t("admin.settings.oidc.requireEmailVerified") }}
                       </label>
                     </div>
-                    <Toggle
+                    <Toggle id="settings-form-oidc-connect-require-email-verified"
                       v-model="form.oidc_connect_require_email_verified"
                     />
                   </div>
@@ -3729,12 +3729,12 @@
 
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-userinfo-email-path"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.userinfoEmailPath") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-userinfo-email-path"
                       v-model="form.oidc_connect_userinfo_email_path"
                       type="text"
                       class="input font-mono text-sm"
@@ -3745,12 +3745,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-userinfo-id-path"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.userinfoIdPath") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-userinfo-id-path"
                       v-model="form.oidc_connect_userinfo_id_path"
                       type="text"
                       class="input font-mono text-sm"
@@ -3761,12 +3761,12 @@
                   </div>
 
                   <div>
-                    <label
+                    <label for="settings-form-oidc-connect-userinfo-username-path"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.oidc.userinfoUsernamePath") }}
                     </label>
-                    <input
+                    <input id="settings-form-oidc-connect-userinfo-username-path"
                       v-model="form.oidc_connect_userinfo_username_path"
                       type="text"
                       class="input font-mono text-sm"
@@ -3783,7 +3783,7 @@
         <!-- /Tab: Security — Registration, Turnstile, LinuxDo, OIDC -->
 
         <!-- Tab: Users -->
-        <div v-show="activeTab === 'users'" class="space-y-6">
+        <div v-if="visitedSettingsTabs.has('users')" v-show="activeTab === 'users'" class="space-y-6">
           <!-- Default Settings -->
           <div class="card">
             <div
@@ -3799,12 +3799,12 @@
             <div class="space-y-6 p-6">
               <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
-                  <label
+                  <label for="settings-form-default-balance"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.defaults.defaultBalance") }}
                   </label>
-                  <input
+                  <input id="settings-form-default-balance"
                     v-model.number="form.default_balance"
                     type="number"
                     step="0.01"
@@ -3817,12 +3817,12 @@
                   </p>
                 </div>
                 <div>
-                  <label
+                  <label for="settings-form-default-concurrency"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.defaults.defaultConcurrency") }}
                   </label>
-                  <input
+                  <input id="settings-form-default-concurrency"
                     v-model.number="form.default_concurrency"
                     type="number"
                     min="1"
@@ -3834,12 +3834,12 @@
                   </p>
                 </div>
                 <div>
-                  <label
+                  <label for="settings-form-default-user-rpm-limit"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.defaults.defaultUserRpmLimit") }}
                   </label>
-                  <input
+                  <input id="settings-form-default-user-rpm-limit"
                     v-model.number="form.default_user_rpm_limit"
                     type="number"
                     min="0"
@@ -3889,12 +3889,12 @@
                     class="grid grid-cols-1 gap-3 rounded border border-gray-200 p-3 md:grid-cols-[1fr_160px_auto] dark:border-dark-600"
                   >
                     <div>
-                      <label
+                      <label :for="`settings-default-subscription-group-${index}`"
                         class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                       >
                         {{ t("admin.settings.defaults.subscriptionGroup") }}
                       </label>
-                      <Select
+                      <Select :id="`settings-default-subscription-group-${index}`"
                         v-model="item.group_id"
                         class="default-sub-group-select"
                         :options="defaultSubscriptionGroupOptions"
@@ -3963,14 +3963,14 @@
                       </Select>
                     </div>
                     <div>
-                      <label
+                      <label :for="`settings-default-subscription-days-${index}`"
                         class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                       >
                         {{
                           t("admin.settings.defaults.subscriptionValidityDays")
                         }}
                       </label>
-                      <input
+                      <input :id="`settings-default-subscription-days-${index}`"
                         v-model.number="item.validity_days"
                         type="number"
                         min="1"
@@ -4020,7 +4020,7 @@
                           <span class="font-mono text-xs text-gray-700 dark:text-gray-300">{{ p }}</span>
                         </td>
                         <td class="pr-4 py-1">
-                          <input
+                          <input :aria-label="`${p}: ${t('admin.settings.platformQuota.daily')}`"
                             v-model.number="form.default_platform_quotas[p]!.daily"
                             type="number"
                             step="0.01"
@@ -4030,7 +4030,7 @@
                           />
                         </td>
                         <td class="pr-4 py-1">
-                          <input
+                          <input :aria-label="`${p}: ${t('admin.settings.platformQuota.weekly')}`"
                             v-model.number="form.default_platform_quotas[p]!.weekly"
                             type="number"
                             step="0.01"
@@ -4040,7 +4040,7 @@
                           />
                         </td>
                         <td class="py-1">
-                          <input
+                          <input :aria-label="`${p}: ${t('admin.settings.platformQuota.monthly')}`"
                             v-model.number="form.default_platform_quotas[p]!.monthly"
                             type="number"
                             step="0.01"
@@ -4074,14 +4074,14 @@
                 class="flex items-center justify-between rounded border border-gray-200 px-4 py-3 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">
+                  <label for="settings-form-force-email-on-third-party-signup" class="font-medium text-gray-900 dark:text-white">
                     {{ t("admin.settings.authSourceDefaults.requireEmailLabel") }}
                   </label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.authSourceDefaults.requireEmailHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.force_email_on_third_party_signup" />
+                <Toggle id="settings-form-force-email-on-third-party-signup" v-model="form.force_email_on_third_party_signup" />
               </div>
 
               <div class="space-y-4">
@@ -4099,7 +4099,7 @@
                         {{ authSource.description }}
                       </p>
                     </div>
-                    <Toggle
+                    <Toggle :aria-label="`${authSource.title}: ${t('common.enabled')}`"
                       v-model="
                         authSourceDefaults[authSource.source].grant_on_signup
                       "
@@ -4118,12 +4118,12 @@
 
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                       <div>
-                        <label
+                        <label :for="`settings-auth-source-balance-${authSource.source}`"
                           class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                           {{ t("admin.settings.defaults.defaultBalance") }}
                         </label>
-                        <input
+                        <input :id="`settings-auth-source-balance-${authSource.source}`"
                           v-model.number="
                             authSourceDefaults[authSource.source].balance
                           "
@@ -4135,12 +4135,12 @@
                         />
                       </div>
                       <div>
-                        <label
+                        <label :for="`settings-auth-source-concurrency-${authSource.source}`"
                           class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                         >
                           {{ t("admin.settings.defaults.defaultConcurrency") }}
                         </label>
-                        <input
+                        <input :id="`settings-auth-source-concurrency-${authSource.source}`"
                           v-model.number="
                             authSourceDefaults[authSource.source].concurrency
                           "
@@ -4156,7 +4156,7 @@
                       class="flex items-center justify-between rounded border border-gray-200 px-4 py-3 dark:border-dark-700"
                     >
                       <div>
-                        <label
+                        <label :for="`settings-auth-source-grant-on-first-bind-${authSource.source}`"
                           class="font-medium text-gray-900 dark:text-white"
                         >
                           {{ t("admin.settings.authSourceDefaults.grantOnFirstBindLabel") }}
@@ -4167,7 +4167,7 @@
                           {{ t("admin.settings.authSourceDefaults.grantOnFirstBindHint") }}
                         </p>
                       </div>
-                      <Toggle
+                      <Toggle :id="`settings-auth-source-grant-on-first-bind-${authSource.source}`"
                         v-model="
                           authSourceDefaults[authSource.source]
                             .grant_on_first_bind
@@ -4219,12 +4219,12 @@
                         class="grid grid-cols-1 gap-3 rounded border border-gray-200 p-3 md:grid-cols-[1fr_160px_auto] dark:border-dark-600"
                       >
                         <div>
-                          <label
+                          <label :for="`settings-auth-source-subscription-group-${authSource.source}-${index}`"
                             class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                           >
                             {{ t("admin.settings.defaults.subscriptionGroup") }}
                           </label>
-                          <Select
+                          <Select :id="`settings-auth-source-subscription-group-${authSource.source}-${index}`"
                             v-model="item.group_id"
                             class="default-sub-group-select"
                             :options="defaultSubscriptionGroupOptions"
@@ -4295,7 +4295,7 @@
                           </Select>
                         </div>
                         <div>
-                          <label
+                          <label :for="`settings-auth-source-subscription-days-${authSource.source}-${index}`"
                             class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                           >
                             {{
@@ -4304,7 +4304,7 @@
                               )
                             }}
                           </label>
-                          <input
+                          <input :id="`settings-auth-source-subscription-days-${authSource.source}-${index}`"
                             v-model.number="item.validity_days"
                             type="number"
                             min="1"
@@ -4355,7 +4355,7 @@
                                 <span class="font-mono text-xs text-gray-700 dark:text-gray-300">{{ p }}</span>
                               </td>
                               <td class="pr-4 py-1">
-                                <input
+                                <input :aria-label="`${authSource.title} / ${p}: ${t('admin.settings.platformQuota.daily')}`"
                                   v-model.number="authSourceDefaults[authSource.source].platform_quotas[p]!.daily"
                                   type="number"
                                   step="0.01"
@@ -4365,7 +4365,7 @@
                                 />
                               </td>
                               <td class="pr-4 py-1">
-                                <input
+                                <input :aria-label="`${authSource.title} / ${p}: ${t('admin.settings.platformQuota.weekly')}`"
                                   v-model.number="authSourceDefaults[authSource.source].platform_quotas[p]!.weekly"
                                   type="number"
                                   step="0.01"
@@ -4375,7 +4375,7 @@
                                 />
                               </td>
                               <td class="py-1">
-                                <input
+                                <input :aria-label="`${authSource.title} / ${p}: ${t('admin.settings.platformQuota.monthly')}`"
                                   v-model.number="authSourceDefaults[authSource.source].platform_quotas[p]!.monthly"
                                   type="number"
                                   step="0.01"
@@ -4399,7 +4399,7 @@
         <!-- /Tab: Users -->
 
         <!-- Tab: Gateway — Claude Code, Scheduling -->
-        <div v-show="activeTab === 'gateway'" class="space-y-6">
+        <div v-if="visitedSettingsTabs.has('gateway')" v-show="activeTab === 'gateway'" class="space-y-6">
           <!-- Claude Code Settings -->
           <div class="card">
             <div
@@ -4414,12 +4414,12 @@
             </div>
             <div class="p-6">
               <div>
-                <label
+                <label for="settings-form-min-claude-code-version"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{ t("admin.settings.claudeCode.minVersion") }}
                 </label>
-                <input
+                <input id="settings-form-min-claude-code-version"
                   v-model="form.min_claude_code_version"
                   type="text"
                   class="input max-w-xs font-mono text-sm"
@@ -4432,12 +4432,12 @@
                 </p>
               </div>
               <div class="mt-4">
-                <label
+                <label for="settings-form-max-claude-code-version"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{ t("admin.settings.claudeCode.maxVersion") }}
                 </label>
-                <input
+                <input id="settings-form-max-claude-code-version"
                   v-model="form.max_claude_code_version"
                   type="text"
                   class="input max-w-xs font-mono text-sm"
@@ -4472,12 +4472,12 @@
                 </div>
                 <div class="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label
+                    <label for="settings-form-min-codex-version"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.gatewayForwarding.minCodexVersion") }}
                     </label>
-                    <input
+                    <input id="settings-form-min-codex-version"
                       v-model="form.min_codex_version"
                       type="text"
                       class="input w-full font-mono text-sm"
@@ -4489,12 +4489,12 @@
                     />
                   </div>
                   <div>
-                    <label
+                    <label for="settings-form-max-codex-version"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.gatewayForwarding.maxCodexVersion") }}
                     </label>
-                    <input
+                    <input id="settings-form-max-codex-version"
                       v-model="form.max_codex_version"
                       type="text"
                       class="input w-full font-mono text-sm"
@@ -4522,12 +4522,12 @@
                     :key="`codex-fp-${i}`"
                     class="mb-2 flex items-center gap-2"
                   >
-                    <select v-model="row.type" class="input w-32 text-sm">
+                    <select :aria-label="localText('客户端指纹匹配方式', 'Client fingerprint match type')" v-model="row.type" class="input w-32 text-sm">
                       <option value="header_exact">{{ t("admin.settings.gatewayForwarding.codexFpTypeHeaderExact") }}</option>
                       <option value="header_prefix">{{ t("admin.settings.gatewayForwarding.codexFpTypeHeaderPrefix") }}</option>
                       <option value="body_path">{{ t("admin.settings.gatewayForwarding.codexFpTypeBodyPath") }}</option>
                     </select>
-                    <input
+                    <input :aria-label="t('admin.settings.gatewayForwarding.codexFpMatchPlaceholder')"
                       v-model="row.match"
                       type="text"
                       class="input flex-1 font-mono text-sm"
@@ -4558,7 +4558,7 @@
 
                 <div class="flex items-center justify-between">
                   <div class="pr-4">
-                    <label
+                    <label for="settings-form-codex-cli-only-allow-app-server-clients"
                       class="block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{
@@ -4573,7 +4573,7 @@
                       }}
                     </p>
                   </div>
-                  <Toggle
+                  <Toggle id="settings-form-codex-cli-only-allow-app-server-clients"
                     v-model="form.codex_cli_only_allow_app_server_clients"
                   />
                 </div>
@@ -4592,7 +4592,11 @@
                     :key="`codex-bl-${i}`"
                     class="mb-2 flex gap-2"
                   >
-                    <input
+                    <input :aria-label="
+                        t(
+                          'admin.settings.gatewayForwarding.codexOriginatorPlaceholder',
+                        )
+                      "
                       v-model="row.originator"
                       type="text"
                       class="input w-1/3 font-mono text-sm"
@@ -4602,7 +4606,11 @@
                         )
                       "
                     />
-                    <input
+                    <input :aria-label="
+                        t(
+                          'admin.settings.gatewayForwarding.codexUaContainsPlaceholder',
+                        )
+                      "
                       v-model="row.uaContains"
                       type="text"
                       class="input flex-1 font-mono text-sm"
@@ -4643,7 +4651,11 @@
                     :key="`codex-wl-${i}`"
                     class="mb-2 flex gap-2"
                   >
-                    <input
+                    <input :aria-label="
+                        t(
+                          'admin.settings.gatewayForwarding.codexOriginatorPlaceholder',
+                        )
+                      "
                       v-model="row.originator"
                       type="text"
                       class="input w-1/3 font-mono text-sm"
@@ -4653,7 +4665,11 @@
                         )
                       "
                     />
-                    <input
+                    <input :aria-label="
+                        t(
+                          'admin.settings.gatewayForwarding.codexUaContainsPlaceholder',
+                        )
+                      "
                       v-model="row.uaContains"
                       type="text"
                       class="input flex-1 font-mono text-sm"
@@ -4726,14 +4742,14 @@
               <template v-else>
                 <div class="flex items-center justify-between gap-4">
                   <div>
-                    <label class="font-medium text-gray-900 dark:text-white">
+                    <label for="settings-upstream-billing-probe-form-enabled" class="font-medium text-gray-900 dark:text-white">
                       {{ t("admin.settings.upstreamBillingProbe.enabled") }}
                     </label>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ t("admin.settings.upstreamBillingProbe.enabledHint") }}
                     </p>
                   </div>
-                  <Toggle
+                  <Toggle id="settings-upstream-billing-probe-form-enabled"
                     v-model="upstreamBillingProbeForm.enabled"
                     :aria-label="t('admin.settings.upstreamBillingProbe.enabled')"
                     data-testid="upstream-billing-probe-enabled"
@@ -4804,14 +4820,14 @@
               <template v-else>
                 <div class="flex items-center justify-between gap-4">
                   <div>
-                    <label class="font-medium text-gray-900 dark:text-white">
+                    <label for="settings-ollama-cloud-usage-form-enabled" class="font-medium text-gray-900 dark:text-white">
                       {{ t("admin.settings.ollamaCloudUsage.enabled") }}
                     </label>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ t("admin.settings.ollamaCloudUsage.enabledHint") }}
                     </p>
                   </div>
-                  <Toggle
+                  <Toggle id="settings-ollama-cloud-usage-form-enabled"
                     v-model="ollamaCloudUsageForm.enabled"
                     :aria-label="t('admin.settings.ollamaCloudUsage.enabled')"
                     data-testid="ollama-cloud-usage-global-enabled"
@@ -4888,14 +4904,14 @@
               <template v-else>
                 <div class="flex items-center justify-between gap-4">
                   <div>
-                    <label class="font-medium text-gray-900 dark:text-white">
+                    <label for="settings-opencode-go-usage-form-enabled" class="font-medium text-gray-900 dark:text-white">
                       {{ t("admin.settings.opencodeGoUsage.enabled") }}
                     </label>
                     <p class="text-sm text-gray-500 dark:text-gray-400">
                       {{ t("admin.settings.opencodeGoUsage.enabledHint") }}
                     </p>
                   </div>
-                  <Toggle
+                  <Toggle id="settings-opencode-go-usage-form-enabled"
                     v-model="opencodeGoUsageForm.enabled"
                     :aria-label="t('admin.settings.opencodeGoUsage.enabled')"
                     data-testid="opencode-go-usage-global-enabled"
@@ -4969,7 +4985,7 @@
             <div class="space-y-5 p-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-form-allow-ungrouped-key-scheduling"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.scheduling.allowUngroupedKey") }}
@@ -4978,7 +4994,7 @@
                     {{ t("admin.settings.scheduling.allowUngroupedKeyHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.allow_ungrouped_key_scheduling" />
+                <Toggle id="settings-form-allow-ungrouped-key-scheduling" v-model="form.allow_ungrouped_key_scheduling" />
               </div>
 
               <div class="border-t border-gray-100 pt-4 dark:border-dark-700">
@@ -5020,7 +5036,7 @@
                   >
                     <div class="flex items-start justify-between gap-3">
                       <div>
-                        <label
+                        <label :for="`settings-scheduling-threshold-${platform}`"
                           class="font-mono text-sm font-medium text-gray-900 dark:text-white"
                         >
                           {{ platform }}
@@ -5039,7 +5055,7 @@
                         %
                       </span>
                     </div>
-                    <input
+                    <input :id="`settings-scheduling-threshold-${platform}`"
                       v-model.number="form.account_scheduling_thresholds[platform]"
                       type="number"
                       min="1"
@@ -5058,7 +5074,7 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-5 dark:border-dark-700"
               >
                 <div>
-                  <label
+                  <label for="settings-form-openai-low-upstream-rate-priority-enabled"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.openaiExperimentalScheduler.lowRatePriorityTitle") }}
@@ -5069,7 +5085,7 @@
                     }}
                   </p>
                 </div>
-                <Toggle
+                <Toggle id="settings-form-openai-low-upstream-rate-priority-enabled"
                   v-model="form.openai_low_upstream_rate_priority_enabled"
                   data-testid="openai-low-rate-priority-toggle"
                 />
@@ -5108,7 +5124,7 @@
 
               <div class="flex items-center justify-between border-t border-gray-100 pt-5 dark:border-dark-700">
                 <div>
-                  <label
+                  <label for="settings-form-openai-advanced-scheduler-enabled"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.openaiExperimentalScheduler.title") }}
@@ -5119,7 +5135,7 @@
                     }}
                   </p>
                 </div>
-                <Toggle
+                <Toggle id="settings-form-openai-advanced-scheduler-enabled"
                   v-model="form.openai_advanced_scheduler_enabled"
                   data-testid="openai-advanced-scheduler-toggle"
                 />
@@ -5130,7 +5146,7 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-5 dark:border-dark-700"
               >
                 <div>
-                  <label
+                  <label for="settings-form-openai-advanced-scheduler-sticky-weighted-enabled"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.openaiExperimentalScheduler.stickyWeightedTitle") }}
@@ -5141,7 +5157,7 @@
                     }}
                   </p>
                 </div>
-                <Toggle v-model="form.openai_advanced_scheduler_sticky_weighted_enabled" />
+                <Toggle id="settings-form-openai-advanced-scheduler-sticky-weighted-enabled" v-model="form.openai_advanced_scheduler_sticky_weighted_enabled" />
               </div>
 
               <div
@@ -5149,7 +5165,7 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-5 dark:border-dark-700"
               >
                 <div>
-                  <label
+                  <label for="settings-form-openai-advanced-scheduler-subscription-priority-enabled"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.openaiExperimentalScheduler.subscriptionPriorityTitle") }}
@@ -5160,7 +5176,7 @@
                     }}
                   </p>
                 </div>
-                <Toggle v-model="form.openai_advanced_scheduler_subscription_priority_enabled" />
+                <Toggle id="settings-form-openai-advanced-scheduler-subscription-priority-enabled" v-model="form.openai_advanced_scheduler_subscription_priority_enabled" />
               </div>
 
               <div
@@ -5274,14 +5290,14 @@
                 </div>
                 <div class="flex items-center justify-between gap-5 md:min-w-72">
                   <div>
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="settings-form-grok-cross-client-model-map-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                       {{ t("admin.settings.gatewayForwarding.grokCrossClientMap") }}
                     </label>
                     <p class="mt-0.5 max-w-sm text-xs text-gray-500 dark:text-gray-400">
                       {{ t("admin.settings.gatewayForwarding.grokCrossClientMapHint") }}
                     </p>
                   </div>
-                  <Toggle
+                  <Toggle id="settings-form-grok-cross-client-model-map-enabled"
                     v-model="form.grok_cross_client_model_map_enabled"
                     data-testid="grok-cross-client-model-map-toggle"
                   />
@@ -5340,7 +5356,7 @@
               <!-- Fingerprint Unification -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-form-enable-fingerprint-unification"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{
@@ -5357,13 +5373,13 @@
                     }}
                   </p>
                 </div>
-                <Toggle v-model="form.enable_fingerprint_unification" />
+                <Toggle id="settings-form-enable-fingerprint-unification" v-model="form.enable_fingerprint_unification" />
               </div>
 
               <!-- Metadata Passthrough -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-form-enable-metadata-passthrough"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{
@@ -5378,13 +5394,13 @@
                     }}
                   </p>
                 </div>
-                <Toggle v-model="form.enable_metadata_passthrough" />
+                <Toggle id="settings-form-enable-metadata-passthrough" v-model="form.enable_metadata_passthrough" />
               </div>
 
               <!-- CCH Signing -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-form-enable-cch-signing"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.gatewayForwarding.cchSigning") }}
@@ -5393,13 +5409,13 @@
                     {{ t("admin.settings.gatewayForwarding.cchSigningHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.enable_cch_signing" />
+                <Toggle id="settings-form-enable-cch-signing" v-model="form.enable_cch_signing" />
               </div>
 
               <!-- Claude OAuth System Prompt Injection -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-form-enable-claude-oauth-system-prompt-injection"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{
@@ -5416,7 +5432,7 @@
                     }}
                   </p>
                 </div>
-                <Toggle
+                <Toggle id="settings-form-enable-claude-oauth-system-prompt-injection"
                   v-model="form.enable_claude_oauth_system_prompt_injection"
                 />
               </div>
@@ -5507,7 +5523,7 @@
                         >
                           <Icon name="arrowDown" size="xs" />
                         </button>
-                        <Toggle v-model="block.enabled" />
+                        <Toggle :aria-label="`${t('admin.settings.gatewayForwarding.systemBlockText')} ${index + 1}: ${t('common.enabled')}`" v-model="block.enabled" />
                         <button
                           type="button"
                           class="btn btn-secondary btn-sm px-2 text-red-600 hover:text-red-700 dark:text-red-400"
@@ -5521,7 +5537,7 @@
                     <div v-show="block.expanded">
                       <div class="grid gap-3 md:grid-cols-2">
                         <div>
-                          <label
+                          <label :for="`settings-claude-prompt-preset-${index}`"
                             class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300"
                           >
                             {{
@@ -5530,7 +5546,7 @@
                               )
                             }}
                           </label>
-                          <Select
+                          <Select :id="`settings-claude-prompt-preset-${index}`"
                             v-model="block.preset"
                             :options="claudeOAuthSystemPromptPresetOptions"
                             @change="
@@ -5540,7 +5556,7 @@
                           />
                         </div>
                         <div>
-                          <label
+                          <label :for="`settings-claude-prompt-type-${index}`"
                             class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300"
                           >
                             {{
@@ -5549,7 +5565,7 @@
                               )
                             }}
                           </label>
-                          <Select
+                          <Select :id="`settings-claude-prompt-type-${index}`"
                             v-model="block.type"
                             :options="claudeOAuthSystemPromptBlockTypeOptions"
                           />
@@ -5557,12 +5573,12 @@
                       </div>
 
                       <div class="mt-3">
-                        <label
+                        <label :for="`settings-claude-prompt-text-${index}`"
                           class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-300"
                         >
                           {{ t("admin.settings.gatewayForwarding.systemBlockText") }}
                         </label>
-                        <textarea
+                        <textarea :id="`settings-claude-prompt-text-${index}`"
                           v-model="block.text"
                           rows="6"
                           class="input w-full resize-y font-mono text-xs leading-5"
@@ -5575,7 +5591,7 @@
                       >
                         <div class="flex items-center justify-between gap-4">
                           <div>
-                            <label
+                            <label :for="`settings-claude-prompt-cache-control-enabled-${index}`"
                               class="text-xs font-medium text-gray-600 dark:text-gray-300"
                             >
                               {{
@@ -5585,10 +5601,10 @@
                               }}
                             </label>
                           </div>
-                          <Toggle v-model="block.cacheControlEnabled" />
+                          <Toggle :id="`settings-claude-prompt-cache-control-enabled-${index}`" v-model="block.cacheControlEnabled" />
                         </div>
                         <div v-if="block.cacheControlEnabled">
-                          <Select
+                          <Select :aria-label="`${t('admin.settings.gatewayForwarding.systemBlockCacheControl')} ${index + 1}: TTL`"
                             v-model="block.cacheControlTTL"
                             :options="claudeOAuthSystemPromptCacheTTLOptions"
                           />
@@ -5630,7 +5646,7 @@
               <!-- Anthropic Cache TTL 1h Injection -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-form-enable-anthropic-cache-ttl-1h-injection"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{
@@ -5647,7 +5663,7 @@
                     }}
                   </p>
                 </div>
-                <Toggle
+                <Toggle id="settings-form-enable-anthropic-cache-ttl-1h-injection"
                   v-model="form.enable_anthropic_cache_ttl_1h_injection"
                 />
               </div>
@@ -5655,7 +5671,7 @@
               <!-- messages cache_control 改写 -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-form-rewrite-message-cache-control"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{
@@ -5672,13 +5688,13 @@
                     }}
                   </p>
                 </div>
-                <Toggle v-model="form.rewrite_message_cache_control" />
+                <Toggle id="settings-form-rewrite-message-cache-control" v-model="form.rewrite_message_cache_control" />
               </div>
 
               <!-- 客户端 dateline 归一化（仅 Anthropic OAuth/SetupToken） -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-form-enable-client-dateline-normalization"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{
@@ -5695,14 +5711,14 @@
                     }}
                   </p>
                 </div>
-                <Toggle
+                <Toggle id="settings-form-enable-client-dateline-normalization"
                   v-model="form.enable_client_dateline_normalization"
                 />
               </div>
 
               <!-- Antigravity UA 版本 -->
               <div>
-                <label
+                <label for="settings-form-antigravity-user-agent-version"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{
@@ -5711,7 +5727,7 @@
                     )
                   }}
                 </label>
-                <input
+                <input id="settings-form-antigravity-user-agent-version"
                   v-model="form.antigravity_user_agent_version"
                   type="text"
                   class="input max-w-xs font-mono text-sm"
@@ -5732,7 +5748,7 @@
 
               <!-- OpenAI Codex UA -->
               <div>
-                <label
+                <label for="settings-form-openai-codex-user-agent"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{
@@ -5741,7 +5757,7 @@
                     )
                   }}
                 </label>
-                <input
+                <input id="settings-form-openai-codex-user-agent"
                   v-model="form.openai_codex_user_agent"
                   type="text"
                   class="input w-full font-mono text-sm"
@@ -5762,7 +5778,7 @@
 
               <!-- Codex 客户端版本号 -->
               <div>
-                <label
+                <label for="settings-form-openai-codex-client-version"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{
@@ -5771,7 +5787,7 @@
                     )
                   }}
                 </label>
-                <input
+                <input id="settings-form-openai-codex-client-version"
                   v-model="form.openai_codex_client_version"
                   type="text"
                   class="input w-full font-mono text-sm"
@@ -5793,7 +5809,7 @@
               <!-- Codex 版本号自动同步 -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-form-openai-codex-version-auto-sync-enabled"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{
@@ -5816,12 +5832,12 @@
                     {{ codexSyncedVersionLabel }}
                   </p>
                 </div>
-                <Toggle v-model="form.openai_codex_version_auto_sync_enabled" />
+                <Toggle id="settings-form-openai-codex-version-auto-sync-enabled" v-model="form.openai_codex_version_auto_sync_enabled" />
               </div>
 
               <!-- Claude Code 客户端版本号 -->
               <div>
-                <label
+                <label for="settings-form-claude-code-client-version"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{
@@ -5830,7 +5846,7 @@
                     )
                   }}
                 </label>
-                <input
+                <input id="settings-form-claude-code-client-version"
                   v-model="form.claude_code_client_version"
                   type="text"
                   class="input w-full font-mono text-sm"
@@ -5848,7 +5864,7 @@
               <!-- Claude Code 版本号自动同步 -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-form-claude-code-version-auto-sync-enabled"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{
@@ -5871,7 +5887,7 @@
                     {{ claudeSyncedVersionLabel }}
                   </p>
                 </div>
-                <Toggle v-model="form.claude_code_version_auto_sync_enabled" />
+                <Toggle id="settings-form-claude-code-version-auto-sync-enabled" v-model="form.claude_code_version_auto_sync_enabled" />
               </div>
 
             </div>
@@ -5893,7 +5909,7 @@
               <!-- Global Toggle -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label
+                  <label for="settings-web-search-config-enabled"
                     class="text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.webSearchEmulation.enabled") }}
@@ -5902,7 +5918,7 @@
                     {{ t("admin.settings.webSearchEmulation.enabledHint") }}
                   </p>
                 </div>
-                <Toggle v-model="webSearchConfig.enabled" />
+                <Toggle id="settings-web-search-config-enabled" v-model="webSearchConfig.enabled" />
               </div>
 
               <!-- Providers -->
@@ -5954,7 +5970,7 @@
                           d="M9 5l7 7-7 7"
                         />
                       </svg>
-                      <Select
+                      <Select :aria-label="`${t('admin.settings.webSearchEmulation.providers')} ${pIdx + 1}`"
                         v-model="provider.type"
                         :options="[
                           { value: 'brave', label: 'Brave Search' },
@@ -6005,11 +6021,11 @@
                   >
                     <!-- API Key with inline show/copy -->
                     <div>
-                      <label class="text-xs text-gray-500">{{
+                      <label :for="`settings-search-key-${pIdx}`" class="text-xs text-gray-500">{{
                         t("admin.settings.webSearchEmulation.apiKey")
                       }}</label>
                       <div class="relative">
-                        <input
+                        <input :id="`settings-search-key-${pIdx}`"
                           v-model="provider.api_key"
                           :type="apiKeyVisible[pIdx] ? 'text' : 'password'"
                           class="input w-full text-sm"
@@ -6113,10 +6129,10 @@
                     <!-- Quota + Subscription in compact row -->
                     <div class="grid grid-cols-2 gap-3">
                       <div>
-                        <label class="text-xs text-gray-500">{{
+                        <label :for="`settings-search-quota-${pIdx}`" class="text-xs text-gray-500">{{
                           t("admin.settings.webSearchEmulation.quotaLimit")
                         }}</label>
-                        <input
+                        <input :id="`settings-search-quota-${pIdx}`"
                           v-model="provider.quota_limit"
                           type="number"
                           min="1"
@@ -6132,10 +6148,10 @@
                         </p>
                       </div>
                       <div>
-                        <label class="text-xs text-gray-500">{{
+                        <label :for="`settings-search-subscription-${pIdx}`" class="text-xs text-gray-500">{{
                           t("admin.settings.webSearchEmulation.subscribedAt")
                         }}</label>
-                        <input
+                        <input :id="`settings-search-subscription-${pIdx}`"
                           :value="formatSubscribedAt(provider.subscribed_at)"
                           type="date"
                           class="input text-sm"
@@ -6200,6 +6216,7 @@
                         type="button"
                         class="text-xs text-primary-600 hover:text-primary-700"
                         @click="resetWebSearchUsage(pIdx)"
+                        :disabled="webSearchUsageResetting.has(provider)"
                       >
                         {{ t("admin.settings.webSearchEmulation.resetUsage") }}
                       </button>
@@ -6234,7 +6251,7 @@
           <div
             v-if="wsTestDialogOpen"
             class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-            @click.self="wsTestDialogOpen = false"
+            @click.self="closeTestDialog"
           >
             <div
               class="mx-4 w-full max-w-lg rounded-xl bg-white p-6 shadow-xl dark:bg-dark-800"
@@ -6245,7 +6262,7 @@
                 {{ t("admin.settings.webSearchEmulation.testResultTitle") }}
               </h3>
               <div class="flex items-center gap-2">
-                <input
+                <input :aria-label="localText('搜索测试查询', 'Search test query')"
                   v-model="wsTestQuery"
                   type="text"
                   class="input flex-1 text-sm"
@@ -6305,7 +6322,7 @@
                 <button
                   type="button"
                   class="btn btn-secondary btn-sm"
-                  @click="wsTestDialogOpen = false"
+                  @click="closeTestDialog"
                 >
                   {{ t("common.close") }}
                 </button>
@@ -6345,7 +6362,7 @@
         <!-- /Tab: Gateway — Claude Code, Scheduling -->
 
         <!-- Tab: General -->
-        <div v-show="activeTab === 'general'" class="space-y-6">
+        <div v-if="visitedSettingsTabs.has('general')" v-show="activeTab === 'general'" class="space-y-6">
           <!-- Site Settings -->
           <div class="card">
             <div
@@ -6371,17 +6388,17 @@
                     {{ t("admin.settings.site.backendModeDescription") }}
                   </p>
 	                </div>
-	                <Toggle v-model="form.backend_mode_enabled" />
+	                <Toggle :aria-label="localText('后端模式', 'Backend mode')" v-model="form.backend_mode_enabled" />
 	              </div>
 
 	              <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
-                  <label
+                  <label for="settings-form-site-name"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.site.siteName") }}
                   </label>
-                  <input
+                  <input id="settings-form-site-name"
                     v-model="form.site_name"
                     type="text"
                     class="input"
@@ -6392,12 +6409,12 @@
                   </p>
                 </div>
                 <div>
-                  <label
+                  <label for="settings-form-site-subtitle"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.site.siteSubtitle") }}
                   </label>
-                  <input
+                  <input id="settings-form-site-subtitle"
                     v-model="form.site_subtitle"
                     type="text"
                     class="input"
@@ -6413,12 +6430,12 @@
 
               <!-- API Base URL -->
               <div>
-                <label
+                <label for="settings-form-api-base-url"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{ t("admin.settings.site.apiBaseUrl") }}
                 </label>
-                <input
+                <input id="settings-form-api-base-url"
                   v-model="form.api_base_url"
                   type="text"
                   class="input font-mono text-sm"
@@ -6439,12 +6456,12 @@
                 </p>
                 <div class="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
-                    <label
+                    <label for="settings-form-table-default-page-size"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.site.tableDefaultPageSize") }}
                     </label>
-                    <input
+                    <input id="settings-form-table-default-page-size"
                       v-model.number="form.table_default_page_size"
                       type="number"
                       min="5"
@@ -6457,12 +6474,12 @@
                     </p>
                   </div>
                   <div>
-                    <label
+                    <label for="settings-table-page-size-options-input"
                       class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                     >
                       {{ t("admin.settings.site.tablePageSizeOptions") }}
                     </label>
-                    <input
+                    <input id="settings-table-page-size-options-input"
                       v-model="tablePageSizeOptionsInput"
                       type="text"
                       class="input font-mono text-sm"
@@ -6526,12 +6543,12 @@
                     </div>
                     <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                       <div>
-                        <label
+                        <label :for="`settings-endpoint-name-${index}`"
                           class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                         >
                           {{ t("admin.settings.site.customEndpoints.name") }}
                         </label>
-                        <input
+                        <input :id="`settings-endpoint-name-${index}`"
                           v-model="ep.name"
                           type="text"
                           class="input text-sm"
@@ -6543,14 +6560,14 @@
                         />
                       </div>
                       <div>
-                        <label
+                        <label :for="`settings-endpoint-endpoint-${index}`"
                           class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                         >
                           {{
                             t("admin.settings.site.customEndpoints.endpointUrl")
                           }}
                         </label>
-                        <input
+                        <input :id="`settings-endpoint-endpoint-${index}`"
                           v-model="ep.endpoint"
                           type="url"
                           class="input font-mono text-sm"
@@ -6562,7 +6579,7 @@
                         />
                       </div>
                       <div class="sm:col-span-2">
-                        <label
+                        <label :for="`settings-endpoint-description-${index}`"
                           class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                         >
                           {{
@@ -6571,7 +6588,7 @@
                             )
                           }}
                         </label>
-                        <input
+                        <input :id="`settings-endpoint-description-${index}`"
                           v-model="ep.description"
                           type="text"
                           class="input text-sm"
@@ -6610,12 +6627,12 @@
 
               <!-- Contact Info -->
               <div>
-                <label
+                <label for="settings-form-contact-info"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{ t("admin.settings.site.contactInfo") }}
                 </label>
-                <input
+                <input id="settings-form-contact-info"
                   v-model="form.contact_info"
                   type="text"
                   class="input"
@@ -6628,12 +6645,12 @@
 
               <!-- Doc URL -->
               <div>
-                <label
+                <label for="settings-form-doc-url"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{ t("admin.settings.site.docUrl") }}
                 </label>
-                <input
+                <input id="settings-form-doc-url"
                   v-model="form.doc_url"
                   type="url"
                   class="input font-mono text-sm"
@@ -6663,12 +6680,12 @@
 
               <!-- Home Content -->
               <div>
-                <label
+                <label for="settings-form-home-content"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                 >
                   {{ t("admin.settings.site.homeContent") }}
                 </label>
-                <textarea
+                <textarea id="settings-form-home-content"
                   v-model="form.home_content"
                   rows="6"
                   class="input font-mono text-sm"
@@ -6686,14 +6703,14 @@
               <!-- Compact Home Page -->
               <div class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700">
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-compact-home-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.site.compactHome")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.site.compactHomeHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.compact_home_enabled" data-testid="compact-home-toggle" />
+                <Toggle id="settings-form-compact-home-enabled" v-model="form.compact_home_enabled" data-testid="compact-home-toggle" />
               </div>
 
               <!-- Hide CCS Import Button -->
@@ -6701,14 +6718,14 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-hide-ccs-import-button" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.site.hideCcsImportButton")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.site.hideCcsImportButtonHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.hide_ccs_import_button" />
+                <Toggle id="settings-form-hide-ccs-import-button" v-model="form.hide_ccs_import_button" />
               </div>
             </div>
           </div>
@@ -6812,12 +6829,12 @@
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <!-- Label -->
                   <div>
-                    <label
+                    <label :for="`settings-menu-label-${index}`"
                       class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                     >
                       {{ t("admin.settings.customMenu.name") }}
                     </label>
-                    <input
+                    <input :id="`settings-menu-label-${index}`"
                       v-model="item.label"
                       type="text"
                       class="input text-sm"
@@ -6829,12 +6846,12 @@
 
                   <!-- Visibility -->
                   <div>
-                    <label
+                    <label :for="`settings-menu-visibility-${index}`"
                       class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                     >
                       {{ t("admin.settings.customMenu.visibility") }}
                     </label>
-                    <select v-model="item.visibility" class="input text-sm">
+                    <select :id="`settings-menu-visibility-${index}`" v-model="item.visibility" class="input text-sm">
                       <option value="user">
                         {{ t("admin.settings.customMenu.visibilityUser") }}
                       </option>
@@ -6846,12 +6863,12 @@
 
                   <!-- URL (full width) -->
                   <div class="sm:col-span-2">
-                    <label
+                    <label :for="`settings-menu-url-${index}`"
                       class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400"
                     >
                       {{ t("admin.settings.customMenu.url") }}
                     </label>
-                    <input
+                    <input :id="`settings-menu-url-${index}`"
                       v-model="item.url"
                       type="url"
                       class="input font-mono text-sm"
@@ -6918,7 +6935,7 @@
 	        <!-- /Tab: General -->
 
 	        <!-- Tab: Login Agreement -->
-	        <div v-show="activeTab === 'agreement'" class="space-y-6">
+	        <div v-if="visitedSettingsTabs.has('agreement')" v-show="activeTab === 'agreement'" class="space-y-6">
 	          <div class="card">
 	            <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
 	              <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
@@ -6939,7 +6956,7 @@
 	                  <span class="text-sm text-gray-600 dark:text-gray-300">
 	                    {{ form.login_agreement_enabled ? localText("已启用", "Enabled") : localText("未启用", "Disabled") }}
 	                  </span>
-	                  <Toggle v-model="form.login_agreement_enabled" />
+	                  <Toggle :aria-label="localText('启用登录条款确认', 'Enable login agreement')" v-model="form.login_agreement_enabled" />
 	                </div>
 	              </div>
 	            </div>
@@ -6988,10 +7005,10 @@
                 </div>
 
                 <div>
-                  <label class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label for="settings-form-login-agreement-updated-at" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
                     {{ localText("条款更新日期", "Updated date") }}
                   </label>
-                  <input
+                  <input id="settings-form-login-agreement-updated-at"
                     v-model="form.login_agreement_updated_at"
                     type="date"
                     class="input"
@@ -7073,10 +7090,10 @@
 
                     <div class="grid grid-cols-1 gap-3 lg:grid-cols-2">
                       <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                        <label :for="`settings-agreement-title-${index}`" class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
                           {{ localText("文档名称", "Document title") }}
                         </label>
-                        <input
+                        <input :id="`settings-agreement-title-${index}`"
                           v-model="doc.title"
                           type="text"
                           class="input text-sm"
@@ -7084,14 +7101,14 @@
                         />
                       </div>
                       <div>
-                        <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                        <label :for="`settings-agreement-id-${index}`" class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
                           {{ localText("路由标识", "Route slug") }}
                         </label>
                         <div class="flex overflow-hidden rounded-lg border border-gray-300 bg-white focus-within:border-primary-500 focus-within:ring-1 focus-within:ring-primary-500 dark:border-dark-600 dark:bg-dark-900">
                           <span class="inline-flex flex-shrink-0 items-center border-r border-gray-200 bg-gray-50 px-3 text-sm text-gray-500 dark:border-dark-700 dark:bg-dark-800 dark:text-dark-400">
                             /legal/
                           </span>
-                          <input
+                          <input :id="`settings-agreement-id-${index}`"
                             v-model="doc.id"
                             type="text"
                             class="min-w-0 flex-1 border-0 bg-transparent px-3 py-2 text-sm text-gray-900 outline-none placeholder:text-gray-400 focus:ring-0 dark:text-white dark:placeholder:text-dark-500"
@@ -7101,10 +7118,10 @@
                       </div>
                     </div>
                     <div class="mt-3">
-                      <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+                      <label :for="`settings-agreement-content-md-${index}`" class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
                         {{ localText("Markdown 内容", "Markdown content") }}
                       </label>
-                        <textarea
+                        <textarea :id="`settings-agreement-content-md-${index}`"
                           v-model="doc.content_md"
                           rows="8"
                           class="input font-mono text-sm"
@@ -7120,7 +7137,7 @@
         <!-- /Tab: Login Agreement -->
 
 	        <!-- Tab: Features (功能开关) -->
-        <div v-show="activeTab === 'features'" class="space-y-6">
+        <div v-if="visitedSettingsTabs.has('features')" v-show="activeTab === 'features'" class="space-y-6">
 
         <div class="card">
           <div class="border-b border-gray-100 px-6 py-4 dark:border-dark-700">
@@ -7143,14 +7160,14 @@
           <div class="space-y-5 p-6">
             <div class="flex items-center justify-between">
               <div>
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="settings-form-channel-monitor-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {{ t('admin.settings.features.channelMonitor.enabled') }}
                 </label>
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                   {{ t('admin.settings.features.channelMonitor.enabledHint') }}
                 </p>
               </div>
-              <Toggle v-model="form.channel_monitor_enabled" />
+              <Toggle id="settings-form-channel-monitor-enabled" v-model="form.channel_monitor_enabled" />
             </div>
 
             <div v-if="form.channel_monitor_enabled" class="space-y-5">
@@ -7197,11 +7214,11 @@
               </div>
 
               <div v-if="form.channel_monitor_mode === 'v1'">
-                <label class="input-label">
+                <label for="settings-form-channel-monitor-default-interval-seconds" class="input-label">
                   {{ t('admin.settings.features.channelMonitor.defaultInterval') }}
                   <span class="text-red-500">*</span>
                 </label>
-                <input
+                <input id="settings-form-channel-monitor-default-interval-seconds"
                   v-model.number="form.channel_monitor_default_interval_seconds"
                   type="number"
                   min="15"
@@ -7223,7 +7240,7 @@
                       {{ t('admin.settings.features.channelMonitor.hideThroughputHint') }}
                     </p>
                   </div>
-                  <Toggle v-model="form.channel_monitor_hide_throughput" />
+                  <Toggle :aria-label="t('admin.settings.features.channelMonitor.hideThroughput')" v-model="form.channel_monitor_hide_throughput" />
                 </div>
                 <div class="flex items-start justify-between gap-4">
                   <div class="min-w-0">
@@ -7234,7 +7251,7 @@
                       {{ t('admin.settings.features.channelMonitor.hideUserRankingHint') }}
                     </p>
                   </div>
-                  <Toggle v-model="form.channel_monitor_hide_user_ranking" />
+                  <Toggle :aria-label="t('admin.settings.features.channelMonitor.hideUserRanking')" v-model="form.channel_monitor_hide_user_ranking" />
                 </div>
               </div>
 
@@ -7247,7 +7264,7 @@
                     {{ t('admin.settings.features.channelMonitor.showQuotaHint') }}
                   </p>
                 </div>
-                <Toggle v-model="form.channel_monitor_show_quota" />
+                <Toggle :aria-label="t('admin.settings.features.channelMonitor.showQuota')" v-model="form.channel_monitor_show_quota" />
               </div>
             </div>
           </div>
@@ -7274,14 +7291,14 @@
           <div class="space-y-5 p-6">
             <div class="flex items-center justify-between">
               <div>
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="settings-form-available-channels-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {{ t('admin.settings.features.availableChannels.enabled') }}
                 </label>
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                   {{ t('admin.settings.features.availableChannels.enabledHint') }}
                 </p>
               </div>
-              <Toggle v-model="form.available_channels_enabled" />
+              <Toggle id="settings-form-available-channels-enabled" v-model="form.available_channels_enabled" />
             </div>
           </div>
         </div>
@@ -7298,36 +7315,36 @@
           <div class="space-y-5 p-6">
             <div class="flex items-center justify-between">
               <div>
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="settings-form-model-plaza-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {{ t('admin.settings.features.modelPlaza.enabled') }}
                 </label>
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                   {{ t('admin.settings.features.modelPlaza.enabledHint') }}
                 </p>
               </div>
-              <Toggle v-model="form.model_plaza_enabled" />
+              <Toggle id="settings-form-model-plaza-enabled" v-model="form.model_plaza_enabled" />
             </div>
 
             <div v-if="form.model_plaza_enabled" class="flex items-center justify-between">
               <div>
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="settings-form-model-plaza-require-auth" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {{ t('admin.settings.features.modelPlaza.requireAuth') }}
                 </label>
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                   {{ t('admin.settings.features.modelPlaza.requireAuthHint') }}
                 </p>
               </div>
-              <Toggle v-model="form.model_plaza_require_auth" />
+              <Toggle id="settings-form-model-plaza-require-auth" v-model="form.model_plaza_require_auth" />
             </div>
 
             <div v-if="form.model_plaza_enabled">
-              <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+              <label for="settings-form-model-plaza-description" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                 {{ t('admin.settings.features.modelPlaza.priceDescription') }}
               </label>
               <p class="mb-2 mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.settings.features.modelPlaza.priceDescriptionHint') }}
               </p>
-              <textarea
+              <textarea id="settings-form-model-plaza-description"
                 v-model="form.model_plaza_description"
                 rows="6"
                 class="input font-mono text-sm"
@@ -7348,7 +7365,7 @@
           <div class="space-y-5 p-6">
             <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div class="min-w-0">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="settings-admin-settings-features-site-billing-mode-label" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {{ t('admin.settings.features.siteBillingMode.label') }}
                 </label>
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
@@ -7356,7 +7373,7 @@
                 </p>
               </div>
               <div class="w-full shrink-0 sm:w-56">
-                <Select
+                <Select id="settings-admin-settings-features-site-billing-mode-label"
                   :modelValue="siteBillingMode"
                   :options="siteBillingModeOptions"
                   @update:modelValue="siteBillingMode = $event as SiteBillingMode"
@@ -7378,14 +7395,14 @@
           <div class="space-y-5 p-6">
             <div class="flex items-center justify-between gap-4">
               <div>
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="settings-form-plugin-management-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {{ t('admin.settings.features.pluginManagement.enabled') }}
                 </label>
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                   {{ t('admin.settings.features.pluginManagement.enabledHint') }}
                 </p>
               </div>
-              <Toggle v-model="form.plugin_management_enabled" />
+              <Toggle id="settings-form-plugin-management-enabled" v-model="form.plugin_management_enabled" />
             </div>
           </div>
         </div>
@@ -7411,14 +7428,14 @@
           <div class="space-y-5 p-6">
             <div class="flex items-center justify-between">
               <div>
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="settings-form-risk-control-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {{ t('admin.settings.features.riskControl.enabled') }}
                 </label>
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                   {{ t('admin.settings.features.riskControl.enabledHint') }}
                 </p>
               </div>
-              <Toggle v-model="form.risk_control_enabled" />
+              <Toggle id="settings-form-risk-control-enabled" v-model="form.risk_control_enabled" />
             </div>
 
             <div>
@@ -7435,22 +7452,22 @@
 
             <div class="flex items-center justify-between">
               <div>
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="settings-form-cyber-session-block-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {{ t('admin.settings.features.riskControl.cyberSessionBlock') }}
                 </label>
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                   {{ t('admin.settings.features.riskControl.cyberSessionBlockHint') }}
                 </p>
               </div>
-              <Toggle v-model="form.cyber_session_block_enabled" />
+              <Toggle id="settings-form-cyber-session-block-enabled" v-model="form.cyber_session_block_enabled" />
             </div>
 
             <div v-if="form.cyber_session_block_enabled">
-              <label class="input-label">
+              <label for="settings-form-cyber-session-block-ttl-seconds" class="input-label">
                 {{ t('admin.settings.features.riskControl.cyberSessionBlockTTL') }}
                 <span class="text-red-500">*</span>
               </label>
-              <input
+              <input id="settings-form-cyber-session-block-ttl-seconds"
                 v-model.number="form.cyber_session_block_ttl_seconds"
                 type="number"
                 min="1"
@@ -7473,35 +7490,35 @@
           <div class="space-y-5 p-6">
             <div class="flex items-center justify-between">
               <div>
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="settings-form-affiliate-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {{ t('admin.settings.features.affiliate.enabled') }}
                 </label>
                 <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                   {{ t('admin.settings.features.affiliate.enabledHint') }}
                 </p>
               </div>
-              <Toggle v-model="form.affiliate_enabled" />
+              <Toggle id="settings-form-affiliate-enabled" v-model="form.affiliate_enabled" />
             </div>
 
             <div v-if="form.affiliate_enabled" class="space-y-6">
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label for="settings-form-affiliate-admin-recharge-enabled" class="text-sm font-medium text-gray-700 dark:text-gray-300">
                     {{ t('admin.settings.features.affiliate.adminRechargeRebate') }}
                   </label>
                   <p class="mt-0.5 text-xs text-gray-500 dark:text-gray-400">
                     {{ t('admin.settings.features.affiliate.adminRechargeRebateHint') }}
                   </p>
                 </div>
-                <Toggle v-model="form.affiliate_admin_recharge_enabled" />
+                <Toggle id="settings-form-affiliate-admin-recharge-enabled" v-model="form.affiliate_admin_recharge_enabled" />
               </div>
 
               <div>
-                <label class="input-label">
+                <label for="settings-form-affiliate-rebate-rate" class="input-label">
                   {{ t('admin.settings.features.affiliate.rebateRate') }}
                 </label>
                 <div class="relative">
-                  <input
+                  <input id="settings-form-affiliate-rebate-rate"
                     v-model.number="form.affiliate_rebate_rate"
                     type="number"
                     step="0.01"
@@ -7518,10 +7535,10 @@
               </div>
 
               <div>
-                <label class="input-label">
+                <label for="settings-form-affiliate-rebate-freeze-hours" class="input-label">
                   {{ t('admin.settings.features.affiliate.freezeHours') }}
                 </label>
-                <input
+                <input id="settings-form-affiliate-rebate-freeze-hours"
                   v-model.number="form.affiliate_rebate_freeze_hours"
                   type="number"
                   step="1"
@@ -7535,10 +7552,10 @@
               </div>
 
               <div>
-                <label class="input-label">
+                <label for="settings-form-affiliate-rebate-duration-days" class="input-label">
                   {{ t('admin.settings.features.affiliate.durationDays') }}
                 </label>
-                <input
+                <input id="settings-form-affiliate-rebate-duration-days"
                   v-model.number="form.affiliate_rebate_duration_days"
                   type="number"
                   step="1"
@@ -7552,10 +7569,10 @@
               </div>
 
               <div>
-                <label class="input-label">
+                <label for="settings-form-affiliate-rebate-per-invitee-cap" class="input-label">
                   {{ t('admin.settings.features.affiliate.perInviteeCap') }}
                 </label>
-                <input
+                <input id="settings-form-affiliate-rebate-per-invitee-cap"
                   v-model.number="form.affiliate_rebate_per_invitee_cap"
                   type="number"
                   step="0.01"
@@ -7588,7 +7605,7 @@
                 </div>
 
                 <div class="mb-3 flex items-center gap-2">
-                  <input
+                  <input :aria-label="t('admin.settings.features.affiliate.customUsers.searchPlaceholder')"
                     v-model="affiliateState.search"
                     type="text"
                     class="input flex-1"
@@ -7610,7 +7627,7 @@
                     <thead class="bg-gray-50 dark:bg-dark-800">
                       <tr>
                         <th class="px-3 py-2 text-left">
-                          <input
+                          <input :aria-label="t('common.selectAll')"
                             type="checkbox"
                             :checked="affiliateState.entries.length > 0 && affiliateState.selected.length === affiliateState.entries.length"
                             @change="toggleAffiliateSelectAll"
@@ -7636,7 +7653,7 @@
                       </tr>
                       <tr v-for="entry in affiliateState.entries" :key="entry.user_id">
                         <td class="px-3 py-2">
-                          <input
+                          <input :aria-label="`${t('admin.settings.features.affiliate.customUsers.title')} #${entry.user_id}`"
                             type="checkbox"
                             :checked="affiliateState.selected.includes(entry.user_id)"
                             @change="toggleAffiliateSelect(entry.user_id)"
@@ -7715,7 +7732,7 @@
             </h3>
             <div class="space-y-4">
               <div v-if="affiliateModal.mode === 'add'">
-                <label class="input-label">{{ t('admin.settings.features.affiliate.modal.userLabel') }}</label>
+                <label for="settings-affiliate-modal-user-query" class="input-label">{{ t('admin.settings.features.affiliate.modal.userLabel') }}</label>
                 <!-- Chip showing the picked user; clicking it re-opens the search -->
                 <div
                   v-if="affiliateModal.selectedUser"
@@ -7736,7 +7753,7 @@
                 </div>
                 <!-- Search input + result dropdown — hidden once a selection is made -->
                 <template v-else>
-                  <input
+                  <input id="settings-affiliate-modal-user-query"
                     v-model="affiliateModal.userQuery"
                     type="text"
                     class="input"
@@ -7760,8 +7777,8 @@
                 </template>
               </div>
               <div v-else>
-                <label class="input-label">{{ t('admin.settings.features.affiliate.modal.userLabel') }}</label>
-                <input
+                <label for="settings-affiliate-modal-editing-entry-affiliate-modal-editing-entry-email" class="input-label">{{ t('admin.settings.features.affiliate.modal.userLabel') }}</label>
+                <input id="settings-affiliate-modal-editing-entry-affiliate-modal-editing-entry-email"
                   type="text"
                   class="input"
                   :value="affiliateModal.editingEntry ? affiliateModal.editingEntry.email : ''"
@@ -7770,8 +7787,8 @@
               </div>
 
               <div>
-                <label class="input-label">{{ t('admin.settings.features.affiliate.modal.codeLabel') }}</label>
-                <input
+                <label for="settings-affiliate-modal-code" class="input-label">{{ t('admin.settings.features.affiliate.modal.codeLabel') }}</label>
+                <input id="settings-affiliate-modal-code"
                   v-model="affiliateModal.code"
                   type="text"
                   class="input font-mono"
@@ -7784,9 +7801,9 @@
               </div>
 
               <div>
-                <label class="input-label">{{ t('admin.settings.features.affiliate.modal.rateLabel') }}</label>
+                <label for="settings-affiliate-modal-rate" class="input-label">{{ t('admin.settings.features.affiliate.modal.rateLabel') }}</label>
                 <div class="relative">
-                  <input
+                  <input id="settings-affiliate-modal-rate"
                     v-model="affiliateModal.rate"
                     type="number"
                     step="0.01"
@@ -7832,7 +7849,7 @@
         <div
           v-if="affiliateBatchModal.open"
           class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          @click.self="affiliateBatchModal.open = false"
+          @click.self="closeAffiliateBatchModal"
         >
           <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-xl dark:bg-dark-900">
             <h3 class="mb-4 text-lg font-semibold">
@@ -7842,7 +7859,7 @@
               {{ t('admin.settings.features.affiliate.batchModal.hint') }}
             </p>
             <div class="relative">
-              <input
+              <input :aria-label="t('admin.settings.features.affiliate.modal.rateLabel')"
                 v-model="affiliateBatchModal.rate"
                 type="number"
                 step="0.01"
@@ -7857,7 +7874,7 @@
               {{ t('admin.settings.features.affiliate.batchModal.clearHint') }}
             </p>
             <div class="mt-6 flex justify-end gap-2">
-              <button type="button" class="btn btn-secondary" @click="affiliateBatchModal.open = false">
+              <button type="button" class="btn btn-secondary" @click="closeAffiliateBatchModal">
                 {{ t('common.cancel') }}
               </button>
               <button
@@ -7876,7 +7893,7 @@
 
         <!-- Tab: Email -->
         <!-- Tab: Payment -->
-        <div v-show="activeTab === 'payment'" class="space-y-6">
+        <div v-if="visitedSettingsTabs.has('payment')" v-show="activeTab === 'payment'" class="space-y-6">
           <!-- Payment System Settings -->
           <div class="card">
             <div
@@ -7914,23 +7931,23 @@
               <!-- Enable toggle -->
               <div class="flex items-center justify-between">
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-payment-enabled" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.payment.enabled")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.payment.enabledHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.payment_enabled" />
+                <Toggle id="settings-form-payment-enabled" v-model="form.payment_enabled" />
               </div>
               <template v-if="form.payment_enabled">
                 <!-- Row 1: Product name -->
                 <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div>
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-product-name-prefix" class="input-label">{{
                       t("admin.settings.payment.productNamePrefix")
                     }}</label
-                    ><input
+                    ><input id="settings-form-payment-product-name-prefix"
                       v-model="form.payment_product_name_prefix"
                       type="text"
                       class="input"
@@ -7938,10 +7955,10 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-product-name-suffix" class="input-label">{{
                       t("admin.settings.payment.productNameSuffix")
                     }}</label
-                    ><input
+                    ><input id="settings-form-payment-product-name-suffix"
                       v-model="form.payment_product_name_suffix"
                       type="text"
                       class="input"
@@ -7966,10 +7983,10 @@
                 <!-- Row 2: Balance toggle + amounts -->
                 <div class="grid grid-cols-2 gap-3 sm:grid-cols-5">
                   <div>
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-min-amount" class="input-label">{{
                       t("admin.settings.payment.minAmount")
                     }}</label
-                    ><input
+                    ><input id="settings-form-payment-min-amount"
                       :value="form.payment_min_amount || ''"
                       @input="
                         form.payment_min_amount =
@@ -7985,10 +8002,10 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-max-amount" class="input-label">{{
                       t("admin.settings.payment.maxAmount")
                     }}</label
-                    ><input
+                    ><input id="settings-form-payment-max-amount"
                       :value="form.payment_max_amount || ''"
                       @input="
                         form.payment_max_amount =
@@ -8004,10 +8021,10 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-daily-limit" class="input-label">{{
                       t("admin.settings.payment.dailyLimit")
                     }}</label
-                    ><input
+                    ><input id="settings-form-payment-daily-limit"
                       :value="form.payment_daily_limit || ''"
                       @input="
                         form.payment_daily_limit =
@@ -8023,10 +8040,10 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-balance-recharge-multiplier" class="input-label">{{
                       t("admin.settings.payment.balanceRechargeMultiplier")
                     }}</label>
-                    <input
+                    <input id="settings-form-payment-balance-recharge-multiplier"
                       :value="form.payment_balance_recharge_multiplier || ''"
                       @input="
                         form.payment_balance_recharge_multiplier =
@@ -8060,10 +8077,10 @@
                     </p>
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-subscription-usd-to-cny-rate" class="input-label">{{
                       t("admin.settings.payment.subscriptionUsdToCnyRate")
                     }}</label>
-                    <input
+                    <input id="settings-form-payment-subscription-usd-to-cny-rate"
                       :value="form.payment_subscription_usd_to_cny_rate || ''"
                       @input="
                         form.payment_subscription_usd_to_cny_rate =
@@ -8088,11 +8105,11 @@
                     </p>
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-recharge-fee-rate" class="input-label">{{
                       t("admin.settings.payment.rechargeFeeRate")
                     }}</label>
                     <div class="relative">
-                      <input
+                      <input id="settings-form-payment-recharge-fee-rate"
                         :value="form.payment_recharge_fee_rate ?? ''"
                         @input="
                           form.payment_recharge_fee_rate = Math.min(
@@ -8136,10 +8153,10 @@
                     </p>
                   </div>
                   <div>
-                    <label class="input-label"
+                    <label for="settings-form-payment-order-timeout-minutes" class="input-label"
                       >{{ t("admin.settings.payment.orderTimeout") }}
                       <span class="text-red-500">*</span></label
-                    ><input
+                    ><input id="settings-form-payment-order-timeout-minutes"
                       v-model.number="form.payment_order_timeout_minutes"
                       type="number"
                       min="1"
@@ -8154,10 +8171,10 @@
                 <!-- Row 3: Pending orders + load balance + cancel rate limit (all in one row) -->
                 <div class="flex flex-wrap items-end gap-4">
                   <div class="w-28">
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-max-pending-orders" class="input-label">{{
                       t("admin.settings.payment.maxPendingOrders")
                     }}</label
-                    ><input
+                    ><input id="settings-form-payment-max-pending-orders"
                       v-model.number="form.payment_max_pending_orders"
                       type="number"
                       min="1"
@@ -8165,10 +8182,10 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-load-balance-strategy" class="input-label">{{
                       t("admin.settings.payment.loadBalanceStrategy")
                     }}</label>
-                    <Select
+                    <Select id="settings-form-payment-load-balance-strategy"
                       v-model="form.payment_load_balance_strategy"
                       :options="loadBalanceOptions"
                       class="w-40"
@@ -8181,6 +8198,9 @@
                     <div class="flex items-center gap-2">
                       <button
                         type="button"
+                        role="switch"
+                        :aria-checked="form.payment_cancel_rate_limit_enabled"
+                        :aria-label="t('admin.settings.payment.cancelRateLimit')"
                         :class="[
                           'relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2',
                           form.payment_cancel_rate_limit_enabled
@@ -8201,7 +8221,7 @@
                           ]"
                         />
                       </button>
-                      <Select
+                      <Select :aria-label="t('admin.settings.payment.cancelRateLimitWindowMode')"
                         v-model="form.payment_cancel_rate_limit_window_mode"
                         :options="cancelRateLimitModeOptions"
                         class="w-24"
@@ -8218,7 +8238,7 @@
                           t("admin.settings.payment.cancelRateLimitEvery")
                         }}</span
                       >
-                      <input
+                      <input :aria-label="t('admin.settings.payment.cancelRateLimitWindow')"
                         v-model.number="form.payment_cancel_rate_limit_window"
                         type="number"
                         min="1"
@@ -8226,7 +8246,7 @@
                         class="input w-14 text-center"
                         :disabled="!form.payment_cancel_rate_limit_enabled"
                       />
-                      <Select
+                      <Select :aria-label="t('admin.settings.payment.cancelRateLimitUnit')"
                         v-model="form.payment_cancel_rate_limit_unit"
                         :options="cancelRateLimitUnitOptions"
                         class="w-28"
@@ -8243,7 +8263,7 @@
                           t("admin.settings.payment.cancelRateLimitAllowMax")
                         }}</span
                       >
-                      <input
+                      <input :aria-label="t('admin.settings.payment.cancelRateLimitMax')"
                         v-model.number="form.payment_cancel_rate_limit_max"
                         type="number"
                         min="1"
@@ -8391,10 +8411,10 @@
                     />
                   </div>
                   <div>
-                    <label class="input-label">{{
+                    <label for="settings-form-payment-help-text" class="input-label">{{
                       t("admin.settings.payment.helpText")
                     }}</label>
-                    <textarea
+                    <textarea id="settings-form-payment-help-text"
                       v-model="form.payment_help_text"
                       rows="3"
                       class="input"
@@ -8417,25 +8437,32 @@
           />
 
           <!-- Provider Management -->
-          <PaymentProviderList
-            v-if="form.payment_enabled"
-            :providers="providers"
-            :loading="providersLoading"
-            :can-create="hasAnyPaymentTypeEnabled"
-            :enabled-payment-types="form.payment_enabled_types"
-            :all-payment-types="allPaymentTypes"
-            :redirect-label="t('admin.settings.payment.easypayRedirect')"
-            @refresh="loadProviders"
-            @create="openCreateProvider"
-            @edit="openEditProvider"
-            @delete="confirmDeleteProvider"
-            @toggle-field="handleToggleField"
-            @toggle-type="handleToggleType"
-            @reorder="handleReorderProviders"
-          />
+          <p v-if="providerUncertainCreates.size" class="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-200" role="status">
+            {{ localText("支付服务商创建结果尚未确认。列表仅供核对，请勿把再次创建当作原请求重试。", "A provider creation result is unconfirmed. Check the list; creating again is a new command, not a replay of the original request.") }}
+          </p>
+          <p v-if="providerMutationPending" class="text-sm text-gray-500 dark:text-gray-400" role="status">{{ t("common.saving") }}</p>
+          <fieldset v-if="form.payment_enabled" :disabled="providerMutationPending" :aria-busy="providerMutationPending" class="min-w-0 border-0 p-0">
+            <legend class="sr-only">{{ t("admin.settings.payment.providerManagement") }}</legend>
+            <PaymentProviderList
+              :class="{ 'pointer-events-none': providerMutationPending }"
+              :providers="providers"
+              :loading="providersLoading"
+              :can-create="hasAnyPaymentTypeEnabled"
+              :enabled-payment-types="form.payment_enabled_types"
+              :all-payment-types="allPaymentTypes"
+              :redirect-label="t('admin.settings.payment.easypayRedirect')"
+              @refresh="loadProviders"
+              @create="openCreateProvider"
+              @edit="openEditProvider"
+              @delete="confirmDeleteProvider"
+              @toggle-field="handleToggleField"
+              @toggle-type="handleToggleType"
+              @reorder="handleReorderProviders"
+            />
+          </fieldset>
         </div>
 
-        <div v-show="activeTab === 'email'" class="space-y-6">
+        <div v-if="visitedSettingsTabs.has('email')" v-show="activeTab === 'email'" class="space-y-6">
           <!-- Email disabled hint - show when email_verify_enabled is off -->
           <div v-if="!form.email_verify_enabled" class="card">
             <div class="p-6">
@@ -8506,12 +8533,12 @@
             <div class="space-y-6 p-6">
               <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
                 <div>
-                  <label
+                  <label for="settings-form-smtp-host"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.smtp.host") }}
                   </label>
-                  <input
+                  <input id="settings-form-smtp-host"
                     v-model="form.smtp_host"
                     type="text"
                     class="input"
@@ -8519,12 +8546,12 @@
                   />
                 </div>
                 <div>
-                  <label
+                  <label for="settings-form-smtp-port"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.smtp.port") }}
                   </label>
-                  <input
+                  <input id="settings-form-smtp-port"
                     v-model.number="form.smtp_port"
                     type="number"
                     min="1"
@@ -8534,12 +8561,12 @@
                   />
                 </div>
                 <div>
-                  <label
+                  <label for="settings-form-smtp-username"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.smtp.username") }}
                   </label>
-                  <input
+                  <input id="settings-form-smtp-username"
                     v-model="form.smtp_username"
                     type="text"
                     class="input"
@@ -8547,12 +8574,12 @@
                   />
                 </div>
                 <div>
-                  <label
+                  <label for="settings-form-smtp-password"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.smtp.password") }}
                   </label>
-                  <input
+                  <input id="settings-form-smtp-password"
                     v-model="form.smtp_password"
                     type="password"
                     class="input"
@@ -8576,12 +8603,12 @@
                   </p>
                 </div>
                 <div>
-                  <label
+                  <label for="settings-form-smtp-from-email"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.smtp.fromEmail") }}
                   </label>
-                  <input
+                  <input id="settings-form-smtp-from-email"
                     v-model="form.smtp_from_email"
                     type="email"
                     class="input"
@@ -8589,12 +8616,12 @@
                   />
                 </div>
                 <div>
-                  <label
+                  <label for="settings-form-smtp-from-name"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.smtp.fromName") }}
                   </label>
-                  <input
+                  <input id="settings-form-smtp-from-name"
                     v-model="form.smtp_from_name"
                     type="text"
                     class="input"
@@ -8608,14 +8635,14 @@
                 class="flex items-center justify-between border-t border-gray-100 pt-4 dark:border-dark-700"
               >
                 <div>
-                  <label class="font-medium text-gray-900 dark:text-white">{{
+                  <label for="settings-form-smtp-use-tls" class="font-medium text-gray-900 dark:text-white">{{
                     t("admin.settings.smtp.useTls")
                   }}</label>
                   <p class="text-sm text-gray-500 dark:text-gray-400">
                     {{ t("admin.settings.smtp.useTlsHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.smtp_use_tls" />
+                <Toggle id="settings-form-smtp-use-tls" v-model="form.smtp_use_tls" />
               </div>
             </div>
           </div>
@@ -8635,12 +8662,12 @@
             <div class="p-6">
               <div class="flex items-end gap-4">
                 <div class="flex-1">
-                  <label
+                  <label for="settings-test-email-address"
                     class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.testEmail.recipientEmail") }}
                   </label>
-                  <input
+                  <input id="settings-test-email-address"
                     v-model="testEmailAddress"
                     type="email"
                     class="input"
@@ -8702,7 +8729,7 @@
             <div class="px-6 py-6">
               <div class="flex items-center justify-between gap-4">
                 <div>
-                  <label
+                  <label for="settings-form-subscription-expiry-notify-enabled"
                     class="mb-0 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
                     {{ t("admin.settings.subscriptionExpiryNotify.enabled") }}
@@ -8711,7 +8738,7 @@
                     {{ t("admin.settings.subscriptionExpiryNotify.enabledHint") }}
                   </p>
                 </div>
-                <Toggle v-model="form.subscription_expiry_notify_enabled" />
+                <Toggle id="settings-form-subscription-expiry-notify-enabled" v-model="form.subscription_expiry_notify_enabled" />
               </div>
             </div>
           </div>
@@ -8732,14 +8759,14 @@
             </div>
             <div class="px-6 py-6 space-y-4">
               <div class="flex items-center justify-between">
-                <label
+                <label for="settings-form-balance-low-notify-enabled"
                   class="mb-0 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >{{ t("admin.settings.balanceNotify.enabled") }}</label
                 >
-                <Toggle v-model="form.balance_low_notify_enabled" />
+                <Toggle id="settings-form-balance-low-notify-enabled" v-model="form.balance_low_notify_enabled" />
               </div>
               <div v-if="form.balance_low_notify_enabled">
-                <label
+                <label for="settings-form-balance-low-notify-threshold"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >{{ t("admin.settings.balanceNotify.threshold") }}</label
                 >
@@ -8748,7 +8775,7 @@
                     class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                     >$</span
                   >
-                  <input
+                  <input id="settings-form-balance-low-notify-threshold"
                     v-model.number="form.balance_low_notify_threshold"
                     type="number"
                     min="0"
@@ -8761,11 +8788,11 @@
                 </p>
               </div>
               <div>
-                <label
+                <label for="settings-form-balance-low-notify-recharge-url"
                   class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >{{ t("admin.settings.balanceNotify.rechargeUrl") }}</label
                 >
-                <input
+                <input id="settings-form-balance-low-notify-recharge-url"
                   v-model="form.balance_low_notify_recharge_url"
                   type="url"
                   class="input"
@@ -8792,11 +8819,11 @@
             </div>
             <div class="px-6 py-6 space-y-4">
               <div class="flex items-center justify-between">
-                <label
+                <label for="settings-form-account-quota-notify-enabled"
                   class="mb-0 block text-sm font-medium text-gray-700 dark:text-gray-300"
                   >{{ t("admin.settings.quotaNotify.enabled") }}</label
                 >
-                <Toggle v-model="form.account_quota_notify_enabled" />
+                <Toggle id="settings-form-account-quota-notify-enabled" v-model="form.account_quota_notify_enabled" />
               </div>
               <div v-if="form.account_quota_notify_enabled">
                 <label
@@ -8823,7 +8850,9 @@
                         class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:after:border-gray-500 peer-checked:bg-primary-600"
                       ></div>
                     </label>
-                    <input
+                    <input :aria-label="
+                        t('admin.settings.quotaNotify.emailPlaceholder')
+                      "
                       v-model="entry.email"
                       type="email"
                       class="input flex-1"
@@ -8857,7 +8886,7 @@
         <!-- /Tab: Email -->
 
         <!-- Tab: Backup -->
-        <div v-show="activeTab === 'backup'">
+        <div v-if="visitedSettingsTabs.has('backup')" v-show="activeTab === 'backup'">
           <BackupSettings />
         </div>
 
@@ -8899,6 +8928,7 @@
 
       <!-- Provider dialogs placed outside the settings form to prevent form submission bubbling -->
       <PaymentProviderDialog
+        v-if="showProviderDialog"
         ref="providerDialogRef"
         :show="showProviderDialog"
         :saving="providerSaving"
@@ -8907,7 +8937,7 @@
         :enabled-key-options="enabledProviderKeyOptions"
         :all-payment-types="allPaymentTypes"
         :redirect-label="t('admin.settings.payment.easypayRedirect')"
-        @close="showProviderDialog = false"
+        @close="closeProviderDialog"
         @save="handleSaveProvider"
       />
       <ConfirmDialog
@@ -8917,7 +8947,7 @@
         :confirm-text="t('common.delete')"
         danger
         @confirm="handleDeleteProvider"
-        @cancel="showDeleteProviderDialog = false"
+        @cancel="closeDeleteProviderDialog"
       />
       <ConfirmDialog
         :show="affiliateConfirmDialog.show"
@@ -8935,7 +8965,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted, watch } from "vue";
+import { ref, reactive, computed, defineAsyncComponent, onBeforeUnmount, onMounted, watch } from "vue";
 import { listPlatformIds } from "@/constants/platformCatalog";
 import { useI18n } from "vue-i18n";
 import { adminAPI } from "@/api";
@@ -8983,16 +9013,16 @@ import {
   type SiteBillingMode,
 } from "@/utils/siteBillingMode";
 import ConfirmDialog from "@/components/common/ConfirmDialog.vue";
-import PaymentProviderList from "@/components/payment/PaymentProviderList.vue";
-import PaymentProviderDialog from "@/components/payment/PaymentProviderDialog.vue";
+const PaymentProviderList = defineAsyncComponent(() => import("@/components/payment/PaymentProviderList.vue"));
+const PaymentProviderDialog = defineAsyncComponent(() => import("@/components/payment/PaymentProviderDialog.vue"));
 import GroupBadge from "@/components/common/GroupBadge.vue";
 import GroupOptionItem from "@/components/common/GroupOptionItem.vue";
 import Toggle from "@/components/common/Toggle.vue";
 import ProxySelector from "@/components/common/ProxySelector.vue";
 import ImageUpload from "@/components/common/ImageUpload.vue";
-import BackupSettings from "@/views/admin/BackupView.vue";
-import EmailTemplateEditor from "@/views/admin/settings/EmailTemplateEditor.vue";
-import RechargeBonusTierEditor from "@/components/admin/settings/RechargeBonusTierEditor.vue";
+const BackupSettings = defineAsyncComponent(() => import("@/views/admin/BackupView.vue"));
+const EmailTemplateEditor = defineAsyncComponent(() => import("@/views/admin/settings/EmailTemplateEditor.vue"));
+const RechargeBonusTierEditor = defineAsyncComponent(() => import("@/components/admin/settings/RechargeBonusTierEditor.vue"));
 import {
   normalizeRechargeBonusMode,
   normalizeRechargeBonusTiers,
@@ -9008,12 +9038,13 @@ import {
   isStepUpBlocked,
   stepUpBlockReason,
 } from "@/composables/useStepUp";
-import AdminAccessKeysSettings from "@/components/admin/settings/AdminAccessKeysSettings.vue";
+const AdminAccessKeysSettings = defineAsyncComponent(() => import("@/components/admin/settings/AdminAccessKeysSettings.vue"));
 import TotpStepUpDialog from "@/components/auth/TotpStepUpDialog.vue";
 import { affiliatesAPI, type AffiliateAdminEntry, type SimpleUser as AffiliateSimpleUser } from "@/api/admin/affiliates";
 import { extractApiErrorMessage, extractI18nErrorMessage } from "@/utils/apiError";
 import { useAppStore } from "@/stores";
 import { useAdminSettingsStore } from "@/stores/adminSettings";
+import { createSessionTasks } from "@/utils/sessionTasks";
 import { normalizeVisibleMethod } from "@/components/payment/paymentFlow";
 import {
   isRegistrationEmailSuffixDomainValid,
@@ -9030,6 +9061,8 @@ import {
 
 const { t, locale } = useI18n();
 const appStore = useAppStore();
+const pageTasks = createSessionTasks();
+onBeforeUnmount(() => pageTasks.dispose());
 // 关闭 step-up 开关是敏感操作：后端返回 STEP_UP_REQUIRED 时弹 TOTP 码重试
 const settingsStepUp = useStepUp();
 const adminSettingsStore = useAdminSettingsStore();
@@ -9062,6 +9095,8 @@ type SettingsTab =
   | "email"
   | "backup";
 const activeTab = ref<SettingsTab>("general");
+const visitedSettingsTabs = reactive(new Set<SettingsTab>(["general"]));
+watch(activeTab, (tab) => visitedSettingsTabs.add(tab), { flush: "sync" });
 const settingsTabs = [
   { key: "general" as SettingsTab, icon: "home" as const },
   { key: "agreement" as SettingsTab, icon: "document" as const },
@@ -10269,10 +10304,23 @@ const wsTestQuery = ref("");
 const wsTestLoading = ref(false);
 const wsTestResult = ref<WebSearchTestResult | null>(null);
 const wsTestDialogOpen = ref(false);
+let wsTestDialogRevision = 0;
+const webSearchUsageResetting = reactive(new Set<WebSearchProviderConfig>());
 
 function openTestDialog() {
+  if (!pageTasks.current()) return;
+  wsTestDialogRevision += 1;
+  pageTasks.cancel("search:test");
+  wsTestLoading.value = false;
   wsTestResult.value = null;
   wsTestDialogOpen.value = true;
+}
+
+function closeTestDialog() {
+  wsTestDialogRevision += 1;
+  pageTasks.cancel("search:test");
+  wsTestDialogOpen.value = false;
+  wsTestLoading.value = false;
 }
 
 function toggleProviderExpand(idx: number) {
@@ -10334,19 +10382,31 @@ function quotaPercentage(provider: WebSearchProviderConfig): number {
 
 async function resetWebSearchUsage(idx: number) {
   const provider = webSearchConfig.providers[idx];
-  if (!provider) return;
+  if (!pageTasks.current() || !provider || webSearchUsageResetting.has(provider)) return;
   if (!confirm(t("admin.settings.webSearchEmulation.resetUsageConfirm")))
     return;
+  if (!pageTasks.current()) return;
+  const providerType = provider.type;
+  const apiKey = provider.api_key;
+  const task = pageTasks.begin(`search:usage:${idx}`, () =>
+    webSearchConfig.providers.includes(provider) && provider.type === providerType && provider.api_key === apiKey,
+  );
+  webSearchUsageResetting.add(provider);
   try {
     await adminAPI.settings.resetWebSearchUsage({
-      provider_type: provider.type,
+      provider_type: providerType,
     });
+    if (!task.active()) return;
     provider.quota_used = 0;
     appStore.showSuccess(
       t("admin.settings.webSearchEmulation.resetUsageSuccess"),
     );
   } catch (err: unknown) {
+    if (!task.active()) return;
     appStore.showError(extractApiErrorMessage(err, t("common.error")));
+  } finally {
+    webSearchUsageResetting.delete(provider);
+    task.finish();
   }
 }
 
@@ -10367,43 +10427,57 @@ async function copyApiKey(idx: number) {
 }
 
 async function testWebSearchProvider() {
+  if (!pageTasks.current() || !wsTestDialogOpen.value || wsTestLoading.value) return;
+  const revision = wsTestDialogRevision;
+  const draftQuery = wsTestQuery.value;
+  const query = draftQuery.trim() || t("admin.settings.webSearchEmulation.testDefaultQuery");
+  const task = pageTasks.begin("search:test", () =>
+    wsTestDialogOpen.value && revision === wsTestDialogRevision && wsTestQuery.value === draftQuery,
+  );
   wsTestLoading.value = true;
   wsTestResult.value = null;
   try {
-    const query =
-      wsTestQuery.value.trim() ||
-      t("admin.settings.webSearchEmulation.testDefaultQuery");
-    wsTestResult.value = await adminAPI.settings.testWebSearchEmulation(query);
+    const result = await adminAPI.settings.testWebSearchEmulation(query);
+    if (!task.active()) return;
+    wsTestResult.value = result;
   } catch (err: unknown) {
+    if (!task.active()) return;
     appStore.showError(extractApiErrorMessage(err, t("common.error")));
   } finally {
-    wsTestLoading.value = false;
+    if (task.owned()) wsTestLoading.value = false;
+    task.finish();
   }
 }
 
 async function loadWebSearchConfig() {
+  if (!pageTasks.current()) return;
+  const task = pageTasks.begin("search:load");
   try {
     const [resp, proxiesResp] = await Promise.all([
       adminAPI.settings.getWebSearchEmulationConfig(),
       adminAPI.proxies.list().catch(() => ({ items: [] as Proxy[] })),
     ]);
+    if (!task.active()) return;
     if (resp) {
       webSearchConfig.enabled = resp.enabled || false;
       webSearchConfig.providers = resp.providers || [];
     }
     webSearchProxies.value = proxiesResp.items || [];
   } catch (err: unknown) {
+    if (!task.active()) return;
     // 404 is expected when config hasn't been created yet; show error for other failures
     const status = (err as { status?: number })?.status;
     if (status !== 404 && status !== undefined) {
       appStore.showError(extractApiErrorMessage(err, t("common.error")));
     }
-  }
+  } finally { task.finish(); }
 }
 
-async function saveWebSearchConfig(): Promise<boolean> {
+async function saveWebSearchConfig(config: WebSearchEmulationConfig = webSearchConfig): Promise<boolean> {
+  if (!pageTasks.current()) return false;
+  const task = pageTasks.begin("search:save");
   try {
-    for (const p of webSearchConfig.providers) {
+    for (const p of config.providers) {
       const raw = p.quota_limit;
       if (raw != null && Number(raw) !== 0 && Number(raw) < 1) {
         appStore.showError(
@@ -10412,21 +10486,21 @@ async function saveWebSearchConfig(): Promise<boolean> {
         return false;
       }
     }
-    const providers = webSearchConfig.providers.map(
+    const providers = config.providers.map(
       (p: WebSearchProviderConfig) => ({
         ...p,
         quota_limit: Number(p.quota_limit) > 0 ? Number(p.quota_limit) : null,
       }),
     );
     await adminAPI.settings.updateWebSearchEmulationConfig({
-      enabled: webSearchConfig.enabled,
+      enabled: config.enabled,
       providers,
     });
-    return true;
+    return task.active();
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t("common.error")));
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t("common.error")));
     return false;
-  }
+  } finally { task.finish(); }
 }
 
 const defaultSubscriptionGroupOptions = computed<
@@ -11004,10 +11078,13 @@ const claudeSyncedVersionLabel = computed(() => {
 });
 
 async function loadSettings() {
+  if (!pageTasks.current()) return;
+  const task = pageTasks.begin("settings:load");
   loading.value = true;
   loadFailed.value = false;
   try {
     const settings = await adminAPI.settings.getSettings();
+    if (!task.active()) return;
     settings.payment_load_balance_strategy =
       settings.payment_load_balance_strategy || "round-robin";
     // Only assign non-null values from backend (null means unconfigured, keep defaults)
@@ -11182,12 +11259,14 @@ async function loadSettings() {
     // Load web search emulation config separately
     await loadWebSearchConfig();
   } catch (error: unknown) {
+    if (!task.active()) return;
     loadFailed.value = true;
     appStore.showError(
       extractApiErrorMessage(error, t("admin.settings.failedToLoad")),
     );
   } finally {
-    loading.value = false;
+    if (task.owned()) loading.value = false;
+    task.finish();
   }
 }
 
@@ -11278,8 +11357,13 @@ const siteBillingModeHint = computed(() =>
 );
 
 async function saveSettings() {
+  if (!pageTasks.current() || loading.value || loadFailed.value || saving.value) return;
+  const task = pageTasks.begin("settings:save");
   saving.value = true;
   try {
+    // Keep the confirmed recipients independent of edits made while step-up or
+    // the write is pending. Those later inputs remain a draft for the next save.
+    const notificationRecipients = (form.account_quota_notify_emails || []).map(entry => ({ ...entry }));
     const normalizedTableDefaultPageSize = Math.floor(
       Number(form.table_default_page_size),
     );
@@ -11436,6 +11520,20 @@ async function saveSettings() {
       return;
     }
 
+    if (
+      !Number.isInteger(form.oidc_connect_clock_skew_seconds) ||
+      form.oidc_connect_clock_skew_seconds < 0 ||
+      form.oidc_connect_clock_skew_seconds > 600
+    ) {
+      appStore.showError(
+        localText(
+          "OIDC 时钟偏差必须为 0 至 600 的整数秒，请修正后保存。",
+          "OIDC clock skew must be a whole number of seconds from 0 to 600. Correct it before saving.",
+        ),
+      );
+      return;
+    }
+
     const payload: UpdateSettingsRequest = {
       registration_enabled: form.registration_enabled,
       email_verify_enabled: form.email_verify_enabled,
@@ -11460,7 +11558,7 @@ async function saveSettings() {
       login_agreement_enabled: form.login_agreement_enabled,
       login_agreement_mode: form.login_agreement_mode,
       login_agreement_updated_at: form.login_agreement_updated_at,
-      login_agreement_documents: form.login_agreement_documents,
+      login_agreement_documents: form.login_agreement_documents.map(doc => ({ ...doc })),
       default_balance: form.default_balance,
       affiliate_rebate_rate: Math.min(
         100,
@@ -11486,7 +11584,7 @@ async function saveSettings() {
       hide_ccs_import_button: form.hide_ccs_import_button,
       table_default_page_size: form.table_default_page_size,
       table_page_size_options: form.table_page_size_options,
-      custom_menu_items: form.custom_menu_items,
+      custom_menu_items: form.custom_menu_items.map(item => ({ ...item })),
       custom_endpoints: form.custom_endpoints,
       frontend_url: form.frontend_url,
       smtp_host: form.smtp_host,
@@ -11740,9 +11838,7 @@ async function saveSettings() {
       subscription_expiry_notify_enabled:
         form.subscription_expiry_notify_enabled,
       account_quota_notify_enabled: form.account_quota_notify_enabled,
-      account_quota_notify_emails: (
-        form.account_quota_notify_emails || []
-      ).filter((e) => e.email.trim() !== ""),
+      account_quota_notify_emails: notificationRecipients.filter((e) => e.email.trim() !== ""),
       // Channel Monitor feature switch
       channel_monitor_enabled: form.channel_monitor_enabled,
       channel_monitor_mode: form.channel_monitor_mode === 'v1' ? 'v1' : 'v2',
@@ -11803,72 +11899,115 @@ async function saveSettings() {
     );
     appendAuthSourceDefaultsToUpdateRequest(payload, authSourceDefaults);
 
+    // Capture exactly the JSON wire values once, after all validation and
+    // normalization. Verification must replay this intent, not a live draft.
+    const request = JSON.parse(JSON.stringify(payload)) as UpdateSettingsRequest;
+    const submittedForm = JSON.parse(JSON.stringify(form)) as Record<string, unknown>;
+    const submittedAuthSources = JSON.parse(JSON.stringify(authSourceDefaults)) as AuthSourceDefaultsState;
+    const submittedRegistrationTags = JSON.stringify(registrationEmailSuffixWhitelistTags.value);
+    const submittedRegistrationDraft = registrationEmailSuffixWhitelistDraft.value;
+    const submittedHeaderDraft = forwardedClientIpHeaderDraft.value;
+    const submittedTableOptions = tablePageSizeOptionsInput.value;
+    const submittedFastRules = JSON.stringify(openaiFastPolicyForm.rules);
+    const submittedSmtpEdited = smtpPasswordManuallyEdited.value;
+    const submittedWebSearch = JSON.parse(JSON.stringify(webSearchConfig)) as WebSearchEmulationConfig;
     const updated = await settingsStepUp.run(() =>
-      adminAPI.settings.updateSettings(payload),
+      adminAPI.settings.updateSettings(request),
     );
+    if (!task.active()) return;
+    // Compute every dirty boundary before applying any server field: aliases
+    // and derived controls must not compare against partially updated state.
+    const currentForm = form as Record<string, unknown>;
+    const dirtyKeys = new Set(Object.keys({ ...submittedForm, ...currentForm }).filter(key =>
+      JSON.stringify(currentForm[key]) !== JSON.stringify(submittedForm[key]),
+    ));
+    const dirtyAuthSources = new Set((Object.keys(authSourceDefaults) as AuthSourceType[]).filter(source =>
+      JSON.stringify(authSourceDefaults[source]) !== JSON.stringify(submittedAuthSources[source]),
+    ));
+    const registrationTagsUnchanged = JSON.stringify(registrationEmailSuffixWhitelistTags.value) === submittedRegistrationTags;
+    const registrationDraftUnchanged = registrationEmailSuffixWhitelistDraft.value === submittedRegistrationDraft;
+    const headerDraftUnchanged = forwardedClientIpHeaderDraft.value === submittedHeaderDraft;
+    const tableOptionsUnchanged = tablePageSizeOptionsInput.value === submittedTableOptions;
+    const fastRulesUnchanged = JSON.stringify(openaiFastPolicyForm.rules) === submittedFastRules;
+    const smtpDraftUnchanged = !dirtyKeys.has("smtp_password") && smtpPasswordManuallyEdited.value === submittedSmtpEdited;
+    if (!registrationTagsUnchanged) dirtyKeys.add("registration_email_suffix_whitelist");
+    if (!tableOptionsUnchanged) dirtyKeys.add("table_page_size_options");
+    for (const source of dirtyAuthSources) {
+      for (const key of Object.keys(currentForm)) {
+        if (key.startsWith(`auth_source_default_${source}_`)) dirtyKeys.add(key);
+      }
+    }
+    const wechatModeKeys = ["wechat_connect_enabled", "wechat_connect_open_enabled", "wechat_connect_mp_enabled",
+      "wechat_connect_mobile_enabled", "wechat_connect_mode", "wechat_connect_scopes"];
+    const wechatModeUnchanged = !wechatModeKeys.some(key => dirtyKeys.has(key));
+    if (!wechatModeUnchanged) wechatModeKeys.forEach(key => dirtyKeys.add(key));
     for (const [key, value] of Object.entries(updated)) {
       if (key === "openai_fast_policy_settings") continue;
+      if (dirtyKeys.has(key)) continue;
       if (value !== null && value !== undefined) {
         (form as Record<string, unknown>)[key] = value;
       }
     }
-    if (updated.openai_oauth_scheduling_rate_multiplier === null) {
+    if (!dirtyKeys.has("openai_oauth_scheduling_rate_multiplier") && updated.openai_oauth_scheduling_rate_multiplier === null) {
       form.openai_oauth_scheduling_rate_multiplier = null;
     }
-    Object.assign(authSourceDefaults, buildAuthSourceDefaultsState(updated));
-    form.default_platform_quotas = normalizePlatformQuotasMap(updated.default_platform_quotas);
-    form.account_scheduling_thresholds = normalizeAccountSchedulingThresholdsMap(
-      updated.account_scheduling_thresholds,
-    );
-    registrationEmailSuffixWhitelistTags.value =
-      normalizeRegistrationEmailSuffixDomains(
-        updated.registration_email_suffix_whitelist,
+    const updatedAuthSources = buildAuthSourceDefaultsState(updated);
+    for (const source of Object.keys(updatedAuthSources) as AuthSourceType[]) {
+      if (!dirtyAuthSources.has(source)) authSourceDefaults[source] = updatedAuthSources[source];
+    }
+    if (!dirtyKeys.has("default_platform_quotas")) {
+      form.default_platform_quotas = normalizePlatformQuotasMap(updated.default_platform_quotas);
+    }
+    if (!dirtyKeys.has("account_scheduling_thresholds")) {
+      form.account_scheduling_thresholds = normalizeAccountSchedulingThresholdsMap(updated.account_scheduling_thresholds);
+    }
+    if (!dirtyKeys.has("registration_email_suffix_whitelist")) {
+      registrationEmailSuffixWhitelistTags.value = normalizeRegistrationEmailSuffixDomains(updated.registration_email_suffix_whitelist);
+    }
+    if (!dirtyKeys.has("forwarded_client_ip_headers")) {
+      form.forwarded_client_ip_headers = normalizeForwardedClientIpHeaders(updated.forwarded_client_ip_headers);
+    }
+    if (headerDraftUnchanged) forwardedClientIpHeaderDraft.value = "";
+    if (tableOptionsUnchanged) {
+      tablePageSizeOptionsInput.value = formatTablePageSizeOptions(
+        Array.isArray(updated.table_page_size_options) ? updated.table_page_size_options : [10, 20, 50, 100],
       );
-    form.forwarded_client_ip_headers = normalizeForwardedClientIpHeaders(
-      updated.forwarded_client_ip_headers,
-    );
-    forwardedClientIpHeaderDraft.value = "";
-    tablePageSizeOptionsInput.value = formatTablePageSizeOptions(
-      Array.isArray(updated.table_page_size_options)
-        ? updated.table_page_size_options
-        : [10, 20, 50, 100],
-    );
-    registrationEmailSuffixWhitelistDraft.value = "";
-    form.smtp_password = "";
-    smtpPasswordManuallyEdited.value = false;
-    form.turnstile_secret_key = "";
-    form.aliyun_captcha_access_key_secret = "";
-    form.linuxdo_connect_client_secret = "";
-    form.dingtalk_connect_client_secret = "";
-    form.github_oauth_client_secret = "";
-    form.google_oauth_client_secret = "";
-    form.wechat_connect_app_secret = "";
-    form.wechat_connect_open_app_secret = "";
-    form.wechat_connect_mp_app_secret = "";
-    form.wechat_connect_mobile_app_secret = "";
-    const updatedWechatCapabilities = resolveWeChatConnectModeCapabilities(
-      updated.wechat_connect_open_enabled,
-      updated.wechat_connect_mp_enabled,
-      updated.wechat_connect_mobile_enabled,
-      updated.wechat_connect_mode,
-    );
-    form.wechat_connect_open_enabled = updatedWechatCapabilities.openEnabled;
-    form.wechat_connect_mp_enabled = updatedWechatCapabilities.mpEnabled;
-    form.wechat_connect_mobile_enabled =
-      updatedWechatCapabilities.mobileEnabled;
-    form.wechat_connect_mode = deriveWeChatConnectStoredMode(
-      updatedWechatCapabilities.openEnabled,
-      updatedWechatCapabilities.mpEnabled,
-      updatedWechatCapabilities.mobileEnabled,
-      updated.wechat_connect_mode,
-    );
-    form.wechat_connect_scopes = defaultWeChatConnectScopesForMode(
-      form.wechat_connect_mode,
-    );
-    form.oidc_connect_client_secret = "";
+    }
+    if (registrationDraftUnchanged) registrationEmailSuffixWhitelistDraft.value = "";
+    if (smtpDraftUnchanged) {
+      form.smtp_password = "";
+      smtpPasswordManuallyEdited.value = false;
+    }
+    for (const key of ["turnstile_secret_key", "tencent_captcha_app_secret_key", "tencent_captcha_cloud_secret_id",
+      "tencent_captcha_cloud_secret_key", "aliyun_captcha_access_key_secret", "linuxdo_connect_client_secret",
+      "dingtalk_connect_client_secret", "github_oauth_client_secret", "google_oauth_client_secret", "wechat_connect_app_secret",
+      "wechat_connect_open_app_secret", "wechat_connect_mp_app_secret", "wechat_connect_mobile_app_secret", "oidc_connect_client_secret"] as const) {
+      if (!dirtyKeys.has(key)) form[key] = "";
+    }
+    if (wechatModeUnchanged) {
+      const updatedWechatCapabilities = resolveWeChatConnectModeCapabilities(
+        updated.wechat_connect_open_enabled,
+        updated.wechat_connect_mp_enabled,
+        updated.wechat_connect_mobile_enabled,
+        updated.wechat_connect_mode,
+      );
+      form.wechat_connect_open_enabled = updatedWechatCapabilities.openEnabled;
+      form.wechat_connect_mp_enabled = updatedWechatCapabilities.mpEnabled;
+      form.wechat_connect_mobile_enabled =
+        updatedWechatCapabilities.mobileEnabled;
+      form.wechat_connect_mode = deriveWeChatConnectStoredMode(
+        updatedWechatCapabilities.openEnabled,
+        updatedWechatCapabilities.mpEnabled,
+        updatedWechatCapabilities.mobileEnabled,
+        updated.wechat_connect_mode,
+      );
+      form.wechat_connect_scopes = defaultWeChatConnectScopesForMode(
+        form.wechat_connect_mode,
+      );
+    }
     // Refresh OpenAI fast/flex policy from server response
     if (
-      updated.openai_fast_policy_settings &&
+      fastRulesUnchanged && updated.openai_fast_policy_settings &&
       Array.isArray(updated.openai_fast_policy_settings.rules)
     ) {
       openaiFastPolicyForm.rules =
@@ -11882,14 +12021,18 @@ async function saveSettings() {
       openaiFastPolicyLoaded.value = true;
     }
     // Save web search emulation config separately (errors handled internally)
-    const wsOk = await saveWebSearchConfig();
+    const wsOk = await saveWebSearchConfig(submittedWebSearch);
+    if (!task.active()) return;
     // Refresh cached settings so sidebar/header update immediately
     await appStore.fetchPublicSettings(true);
+    if (!task.active()) return;
     await adminSettingsStore.fetch(true);
+    if (!task.active()) return;
     if (wsOk) {
       appStore.showSuccess(t("admin.settings.settingsSaved"));
     }
   } catch (error: unknown) {
+    if (!task.active()) return;
     // 用户取消 step-up 验证：静默返回，不弹错误
     if (isStepUpCancelled(error)) {
       return;
@@ -11913,11 +12056,14 @@ async function saveSettings() {
       extractApiErrorMessage(error, t("admin.settings.failedToSave")),
     );
   } finally {
-    saving.value = false;
+    if (task.owned()) saving.value = false;
+    task.finish();
   }
 }
 
 async function testSmtpConnection() {
+  if (!pageTasks.current() || testingSmtp.value || loadFailed.value) return;
+  const task = pageTasks.begin("smtp:test");
   testingSmtp.value = true;
   try {
     const smtpPasswordForTest = smtpPasswordManuallyEdited.value
@@ -11930,26 +12076,31 @@ async function testSmtpConnection() {
       smtp_password: smtpPasswordForTest,
       smtp_use_tls: form.smtp_use_tls,
     });
+    if (!task.active()) return;
     // API returns { message: "..." } on success, errors are thrown as exceptions
     appStore.showSuccess(
       result.message || t("admin.settings.smtpConnectionSuccess"),
     );
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(error, t("admin.settings.failedToTestSmtp")),
     );
   } finally {
-    testingSmtp.value = false;
+    if (task.owned()) testingSmtp.value = false;
+    task.finish();
   }
 }
 
 async function sendTestEmail() {
+  if (!pageTasks.current() || sendingTestEmail.value || loadFailed.value) return;
   if (!testEmailAddress.value) {
     appStore.showError(t("admin.settings.testEmail.enterRecipientHint"));
     return;
   }
 
   sendingTestEmail.value = true;
+  const task = pageTasks.begin("smtp:send");
   try {
     const smtpPasswordForSend = smtpPasswordManuallyEdited.value
       ? form.smtp_password
@@ -11964,80 +12115,98 @@ async function sendTestEmail() {
       smtp_from_name: form.smtp_from_name,
       smtp_use_tls: form.smtp_use_tls,
     });
+    if (!task.active()) return;
     // API returns { message: "..." } on success, errors are thrown as exceptions
     appStore.showSuccess(result.message || t("admin.settings.testEmailSent"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(error, t("admin.settings.failedToSendTestEmail")),
     );
   } finally {
-    sendingTestEmail.value = false;
+    if (task.owned()) sendingTestEmail.value = false;
+    task.finish();
   }
 }
 
 // Admin API Key 方法
 async function loadAdminApiKey() {
+  if (!pageTasks.current()) return;
+  const task = pageTasks.begin("admin-key:load");
   adminApiKeyLoading.value = true;
   try {
     const status = await adminAPI.settings.getAdminApiKey();
+    if (!task.active()) return;
     adminApiKeyExists.value = status.exists;
     adminApiKeyMasked.value = status.masked_key;
   } catch (_error: unknown) {
     // Silent fail - admin API key status is non-critical
   } finally {
-    adminApiKeyLoading.value = false;
+    if (task.owned()) adminApiKeyLoading.value = false;
+    task.finish();
   }
 }
 
 async function createAdminApiKey() {
-  if (!adminApiKeyExists.value) return;
+  if (!pageTasks.current() || !adminApiKeyExists.value || adminApiKeyOperating.value) return;
+  const task = pageTasks.begin("admin-key:write");
   adminApiKeyOperating.value = true;
   try {
     const result = await settingsStepUp.run(() => adminAPI.settings.regenerateAdminApiKey());
+    if (!task.active()) return;
     newAdminApiKey.value = result.key;
     adminApiKeyExists.value = true;
     adminApiKeyMasked.value =
       result.key.substring(0, 10) + "..." + result.key.slice(-4);
     appStore.showSuccess(t("admin.settings.adminApiKey.keyGenerated"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     if (isStepUpCancelled(error)) return;
     appStore.showError(extractApiErrorMessage(error, t("common.error")));
   } finally {
-    adminApiKeyOperating.value = false;
+    if (task.owned()) adminApiKeyOperating.value = false;
+    task.finish();
   }
 }
 
 async function regenerateAdminApiKey() {
+  if (!pageTasks.current() || adminApiKeyOperating.value || !adminApiKeyExists.value) return;
   if (!confirm(t("admin.settings.adminApiKey.regenerateConfirm"))) return;
   await createAdminApiKey();
 }
 
 async function deleteAdminApiKey() {
+  if (!pageTasks.current() || adminApiKeyOperating.value || !adminApiKeyExists.value) return;
   if (!confirm(t("admin.settings.adminApiKey.deleteConfirm"))) return;
+  if (!pageTasks.current()) return;
+  const task = pageTasks.begin("admin-key:write");
   adminApiKeyOperating.value = true;
   try {
     await settingsStepUp.run(() => adminAPI.settings.deleteAdminApiKey());
+    if (!task.active()) return;
     adminApiKeyExists.value = false;
     adminApiKeyMasked.value = "";
     newAdminApiKey.value = "";
     appStore.showSuccess(t("admin.settings.adminApiKey.keyDeleted"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     if (isStepUpCancelled(error)) return;
     appStore.showError(extractApiErrorMessage(error, t("common.error")));
   } finally {
-    adminApiKeyOperating.value = false;
+    if (task.owned()) adminApiKeyOperating.value = false;
+    task.finish();
   }
 }
 
-function copyNewKey() {
-  navigator.clipboard
-    .writeText(newAdminApiKey.value)
-    .then(() => {
-      appStore.showSuccess(t("admin.settings.adminApiKey.keyCopied"));
-    })
-    .catch(() => {
-      appStore.showError(t("common.copyFailed"));
-    });
+async function copyNewKey() {
+  const key = newAdminApiKey.value;
+  if (!pageTasks.current() || !key) return;
+  const task = pageTasks.begin("admin-key:copy", () => newAdminApiKey.value === key);
+  try {
+    await copyToClipboard(key, t("admin.settings.adminApiKey.keyCopied"), task.active);
+  } finally {
+    task.finish();
+  }
 }
 
 async function loadUpstreamBillingProbeSettings() {
@@ -12055,14 +12224,19 @@ async function loadUpstreamBillingProbeSettings() {
 }
 
 async function saveUpstreamBillingProbeSettings() {
+  if (!pageTasks.current() || upstreamBillingProbeLoading.value || upstreamBillingProbeSaving.value) return;
+  const draft = JSON.stringify(upstreamBillingProbeForm);
+  const task = pageTasks.begin("billing-probe:save", () => JSON.stringify(upstreamBillingProbeForm) === draft);
   upstreamBillingProbeSaving.value = true;
   try {
     const updated = await adminAPI.accounts.updateUpstreamBillingProbeSettings({
       ...upstreamBillingProbeForm,
     });
+    if (!task.active()) return;
     Object.assign(upstreamBillingProbeForm, updated);
     appStore.showSuccess(t("admin.settings.upstreamBillingProbe.saved"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(
         error,
@@ -12070,7 +12244,8 @@ async function saveUpstreamBillingProbeSettings() {
       ),
     );
   } finally {
-    upstreamBillingProbeSaving.value = false;
+    if (task.owned()) upstreamBillingProbeSaving.value = false;
+    task.finish();
   }
 }
 
@@ -12089,19 +12264,25 @@ async function loadOllamaCloudUsageSettings() {
 }
 
 async function saveOllamaCloudUsageSettings() {
+  if (!pageTasks.current() || ollamaCloudUsageLoading.value || ollamaCloudUsageSaving.value) return;
+  const draft = JSON.stringify(ollamaCloudUsageForm);
+  const task = pageTasks.begin("ollama-usage:save", () => JSON.stringify(ollamaCloudUsageForm) === draft);
   ollamaCloudUsageSaving.value = true;
   try {
     const updated = await adminAPI.accounts.updateOllamaCloudUsageSettings({
       ...ollamaCloudUsageForm,
     });
+    if (!task.active()) return;
     Object.assign(ollamaCloudUsageForm, updated);
     appStore.showSuccess(t("admin.settings.ollamaCloudUsage.saved"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(error, t("admin.settings.ollamaCloudUsage.saveFailed")),
     );
   } finally {
-    ollamaCloudUsageSaving.value = false;
+    if (task.owned()) ollamaCloudUsageSaving.value = false;
+    task.finish();
   }
 }
 
@@ -12120,19 +12301,25 @@ async function loadOpenCodeGoUsageSettings() {
 }
 
 async function saveOpenCodeGoUsageSettings() {
+  if (!pageTasks.current() || opencodeGoUsageLoading.value || opencodeGoUsageSaving.value) return;
+  const draft = JSON.stringify(opencodeGoUsageForm);
+  const task = pageTasks.begin("opencode-usage:save", () => JSON.stringify(opencodeGoUsageForm) === draft);
   opencodeGoUsageSaving.value = true;
   try {
     const updated = await adminAPI.accounts.updateOpenCodeGoUsageSettings({
       ...opencodeGoUsageForm,
     });
+    if (!task.active()) return;
     Object.assign(opencodeGoUsageForm, updated);
     appStore.showSuccess(t("admin.settings.opencodeGoUsage.saved"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(error, t("admin.settings.opencodeGoUsage.saveFailed")),
     );
   } finally {
-    opencodeGoUsageSaving.value = false;
+    if (task.owned()) opencodeGoUsageSaving.value = false;
+    task.finish();
   }
 }
 
@@ -12150,15 +12337,20 @@ async function loadOverloadCooldownSettings() {
 }
 
 async function saveOverloadCooldownSettings() {
+  if (!pageTasks.current() || overloadCooldownLoading.value || overloadCooldownSaving.value) return;
+  const draft = JSON.stringify(overloadCooldownForm);
+  const task = pageTasks.begin("cooldown:save", () => JSON.stringify(overloadCooldownForm) === draft);
   overloadCooldownSaving.value = true;
   try {
     const updated = await adminAPI.settings.updateOverloadCooldownSettings({
       enabled: overloadCooldownForm.enabled,
       cooldown_minutes: overloadCooldownForm.cooldown_minutes,
     });
+    if (!task.active()) return;
     Object.assign(overloadCooldownForm, updated);
     appStore.showSuccess(t("admin.settings.overloadCooldown.saved"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(
         error,
@@ -12166,7 +12358,8 @@ async function saveOverloadCooldownSettings() {
       ),
     );
   } finally {
-    overloadCooldownSaving.value = false;
+    if (task.owned()) overloadCooldownSaving.value = false;
+    task.finish();
   }
 }
 
@@ -12184,6 +12377,9 @@ async function loadPanelRateLimitSettings() {
 }
 
 async function savePanelRateLimitSettings() {
+  if (!pageTasks.current() || panelRateLimitLoading.value || panelRateLimitSaving.value) return;
+  const draft = JSON.stringify(panelRateLimitForm);
+  const task = pageTasks.begin("panel-rate-limit:save", () => JSON.stringify(panelRateLimitForm) === draft);
   panelRateLimitSaving.value = true;
   try {
     const updated = await adminAPI.settings.updatePanelRateLimitSettings({
@@ -12193,9 +12389,11 @@ async function savePanelRateLimitSettings() {
       exempt_admin: panelRateLimitForm.exempt_admin,
       public_ip_rpm: panelRateLimitForm.public_ip_rpm,
     });
+    if (!task.active()) return;
     Object.assign(panelRateLimitForm, updated);
     appStore.showSuccess(t("admin.settings.panelRateLimit.saved"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(
         error,
@@ -12203,7 +12401,8 @@ async function savePanelRateLimitSettings() {
       ),
     );
   } finally {
-    panelRateLimitSaving.value = false;
+    if (task.owned()) panelRateLimitSaving.value = false;
+    task.finish();
   }
 }
 
@@ -12221,15 +12420,20 @@ async function loadRateLimit429CooldownSettings() {
 }
 
 async function saveRateLimit429CooldownSettings() {
+  if (!pageTasks.current() || rateLimit429CooldownLoading.value || rateLimit429CooldownSaving.value) return;
+  const draft = JSON.stringify(rateLimit429CooldownForm);
+  const task = pageTasks.begin("429-cooldown:save", () => JSON.stringify(rateLimit429CooldownForm) === draft);
   rateLimit429CooldownSaving.value = true;
   try {
     const updated = await adminAPI.settings.updateRateLimit429CooldownSettings({
       enabled: rateLimit429CooldownForm.enabled,
       cooldown_seconds: rateLimit429CooldownForm.cooldown_seconds,
     });
+    if (!task.active()) return;
     Object.assign(rateLimit429CooldownForm, updated);
     appStore.showSuccess(t("admin.settings.rateLimit429Cooldown.saved"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(
         error,
@@ -12237,7 +12441,8 @@ async function saveRateLimit429CooldownSettings() {
       ),
     );
   } finally {
-    rateLimit429CooldownSaving.value = false;
+    if (task.owned()) rateLimit429CooldownSaving.value = false;
+    task.finish();
   }
 }
 
@@ -12255,6 +12460,9 @@ async function loadStreamTimeoutSettings() {
 }
 
 async function saveStreamTimeoutSettings() {
+  if (!pageTasks.current() || streamTimeoutLoading.value || streamTimeoutSaving.value) return;
+  const draft = JSON.stringify(streamTimeoutForm);
+  const task = pageTasks.begin("stream-timeout:save", () => JSON.stringify(streamTimeoutForm) === draft);
   streamTimeoutSaving.value = true;
   try {
     const updated = await adminAPI.settings.updateStreamTimeoutSettings({
@@ -12264,9 +12472,11 @@ async function saveStreamTimeoutSettings() {
       threshold_count: streamTimeoutForm.threshold_count,
       threshold_window_minutes: streamTimeoutForm.threshold_window_minutes,
     });
+    if (!task.active()) return;
     Object.assign(streamTimeoutForm, updated);
     appStore.showSuccess(t("admin.settings.streamTimeout.saved"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(
         error,
@@ -12274,7 +12484,8 @@ async function saveStreamTimeoutSettings() {
       ),
     );
   } finally {
-    streamTimeoutSaving.value = false;
+    if (task.owned()) streamTimeoutSaving.value = false;
+    task.finish();
   }
 }
 
@@ -12296,6 +12507,9 @@ async function loadRectifierSettings() {
 }
 
 async function saveRectifierSettings() {
+  if (!pageTasks.current() || rectifierLoading.value || rectifierSaving.value) return;
+  const draft = JSON.stringify(rectifierForm);
+  const task = pageTasks.begin("rectifier:save", () => JSON.stringify(rectifierForm) === draft);
   rectifierSaving.value = true;
   try {
     const updated = await adminAPI.settings.updateRectifierSettings({
@@ -12307,17 +12521,20 @@ async function saveRectifierSettings() {
         (p) => p.trim() !== "",
       ),
     });
+    if (!task.active()) return;
     Object.assign(rectifierForm, updated);
     if (!Array.isArray(rectifierForm.apikey_signature_patterns)) {
       rectifierForm.apikey_signature_patterns = [];
     }
     appStore.showSuccess(t("admin.settings.rectifier.saved"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(error, t("admin.settings.rectifier.saveFailed")),
     );
   } finally {
-    rectifierSaving.value = false;
+    if (task.owned()) rectifierSaving.value = false;
+    task.finish();
   }
 }
 
@@ -12485,6 +12702,9 @@ function removeOpenAIFastPolicyModelPattern(
 }
 
 async function saveBetaPolicySettings() {
+  if (!pageTasks.current() || betaPolicyLoading.value || betaPolicySaving.value) return;
+  const draft = JSON.stringify(betaPolicyForm);
+  const task = pageTasks.begin("beta-policy:save", () => JSON.stringify(betaPolicyForm) === draft);
   betaPolicySaving.value = true;
   try {
     // Clean up empty patterns before saving
@@ -12509,14 +12729,17 @@ async function saveBetaPolicySettings() {
     const updated = await adminAPI.settings.updateBetaPolicySettings({
       rules: cleanedRules,
     });
+    if (!task.active()) return;
     betaPolicyForm.rules = updated.rules;
     appStore.showSuccess(t("admin.settings.betaPolicy.saved"));
   } catch (error: unknown) {
+    if (!task.active()) return;
     appStore.showError(
       extractApiErrorMessage(error, t("admin.settings.betaPolicy.saveFailed")),
     );
   } finally {
-    betaPolicySaving.value = false;
+    if (task.owned()) betaPolicySaving.value = false;
+    task.finish();
   }
 }
 
@@ -12575,9 +12798,33 @@ const showProviderDialog = ref(false);
 const showDeleteProviderDialog = ref(false);
 const editingProvider = ref<ProviderInstance | null>(null);
 const deletingProviderId = ref<number | null>(null);
+const providerDeleting = ref(false);
+let providerDeleteRevision = 0;
 const providerDialogRef = ref<InstanceType<
   typeof PaymentProviderDialog
 > | null>(null);
+let providerDialogRevision = 0;
+// These in-memory tokens describe this page's commands, not provider identity.
+// An unrelated successful create must not erase another command's uncertainty.
+const providerPendingCreates = new Set<symbol>();
+const providerUncertainCreates = reactive(new Set<symbol>());
+const providerChanging = reactive(new Set<number>());
+const providerReordering = ref(false);
+const providerMutationPending = computed(() => providerReordering.value || providerChanging.size > 0);
+
+function providerCreateOutcomeUncertain(error: unknown): boolean {
+  const failure = error as { status?: number; response?: { status?: number } };
+  const status = Number(failure?.status ?? failure?.response?.status ?? 0);
+  return !status || status === 408 || status >= 500;
+}
+
+// The async dialog is mounted by v-if. Initialize its exposed form only once
+// its actual instance exists, including a newly opened edit after cancellation.
+watch([providerDialogRef, editingProvider, showProviderDialog], ([dialog, provider, show]) => {
+  if (!dialog || !show) return;
+  if (provider) dialog.loadProvider?.(provider);
+  else dialog.reset?.(enabledProviderKeyOptions.value[0]?.value || "easypay");
+}, { flush: "post" });
 
 const providerKeyOptions = computed(() => [
   { value: "easypay", label: t("admin.settings.payment.providerEasypay") },
@@ -12713,9 +12960,12 @@ function showProviderEnablementConflict(
 }
 
 async function loadProviders() {
+  if (!pageTasks.current()) return;
+  const task = pageTasks.begin("provider:load");
   providersLoading.value = true;
   try {
     const res = await adminAPI.payment.getProviders();
+    if (!task.active()) return;
     // Normalize supported_types: backend returns null when the list is empty
     // (Go nil slice → JSON null). Without this, ProviderCard's isSelected()
     // throws TypeError on null.includes(), causing the card to vanish.
@@ -12726,37 +12976,61 @@ async function loadProviders() {
         : [],
     }));
   } catch (err: unknown) {
+    if (!task.active()) return;
     appStore.showError(extractI18nErrorMessage(err, t, "payment.errors", t("common.error")));
   } finally {
-    providersLoading.value = false;
+    if (task.owned()) providersLoading.value = false;
+    task.finish();
   }
 }
 
 function openCreateProvider() {
+  if (!pageTasks.current()) return;
+  providerDialogRevision += 1;
+  providerSaving.value = false;
   editingProvider.value = null;
-  providerDialogRef.value?.reset(
-    enabledProviderKeyOptions.value[0]?.value || "easypay",
-  );
   showProviderDialog.value = true;
 }
 
 function openEditProvider(provider: ProviderInstance) {
+  if (!pageTasks.current()) return;
+  providerDialogRevision += 1;
+  providerSaving.value = false;
   editingProvider.value = provider;
-  providerDialogRef.value?.loadProvider(provider);
   showProviderDialog.value = true;
 }
 
+function closeProviderDialog() {
+  providerDialogRevision += 1;
+  showProviderDialog.value = false;
+  providerSaving.value = false;
+}
+
 async function handleSaveProvider(payload: Partial<ProviderInstance>) {
+  if (!pageTasks.current() || providerSaving.value || !showProviderDialog.value) return;
+  const revision = providerDialogRevision;
+  const targetId = editingProvider.value?.id;
+  if (targetId == null && (providerPendingCreates.size || providerUncertainCreates.size)) {
+    if (!confirm(localText(
+      "此前创建的结果未知或仍在处理中。请先核对服务商列表；仍要发送另一个新建命令吗？这不会重放原请求，可能新增重复实例。",
+      "A previous creation is unconfirmed or still pending. Check the provider list first. Send another NEW create command anyway? This is not a replay and may create a duplicate instance.",
+    ))) return;
+    if (!pageTasks.current() || providerDialogRevision !== revision || !showProviderDialog.value || providerSaving.value) return;
+  }
+  const request = JSON.parse(JSON.stringify(payload)) as Partial<ProviderInstance>;
+  const task = pageTasks.begin("provider:save", () => providerDialogRevision === revision);
+  const createToken = targetId == null ? Symbol("provider-create") : null;
+  let createDispatched = false;
   providerSaving.value = true;
   try {
     const candidate: ProviderEnablementCandidate = {
-      id: editingProvider.value?.id ?? 0,
+      id: targetId ?? 0,
       provider_key:
-        payload.provider_key ?? editingProvider.value?.provider_key ?? "",
+        request.provider_key ?? editingProvider.value?.provider_key ?? "",
       supported_types:
-        payload.supported_types ?? editingProvider.value?.supported_types ?? [],
-      enabled: payload.enabled ?? editingProvider.value?.enabled ?? false,
-      name: payload.name ?? editingProvider.value?.name ?? "",
+        request.supported_types ?? editingProvider.value?.supported_types ?? [],
+      enabled: request.enabled ?? editingProvider.value?.enabled ?? false,
+      name: request.name ?? editingProvider.value?.name ?? "",
     };
     const conflict = findProviderEnablementConflict(candidate);
     if (conflict) {
@@ -12764,20 +13038,38 @@ async function handleSaveProvider(payload: Partial<ProviderInstance>) {
       return;
     }
 
-    if (editingProvider.value) {
-      await adminAPI.payment.updateProvider(editingProvider.value.id, payload);
+    if (targetId != null) {
+      await adminAPI.payment.updateProvider(targetId, request);
     } else {
-      await adminAPI.payment.createProvider(payload);
+      providerPendingCreates.add(createToken!);
+      createDispatched = true;
+      await adminAPI.payment.createProvider(request);
     }
+    if (!task.active()) return;
     showProviderDialog.value = false;
     // Reload full list (API returns decrypted/formatted data with correct sort order)
     await loadProviders();
+    if (!task.active()) return;
     // Auto-save settings so provider changes take effect immediately
     await saveSettings();
   } catch (err: unknown) {
+    const uncertain = createDispatched && createToken != null && providerCreateOutcomeUncertain(err);
+    if (uncertain && pageTasks.current()) providerUncertainCreates.add(createToken);
+    if (!task.active()) return;
+    if (uncertain) {
+      await loadProviders();
+      if (!task.active()) return;
+      appStore.showError(localText(
+        "创建结果尚未确认，请核对已刷新的服务商列表。原草稿已保留；再次保存将发送另一个新建命令，可能产生重复实例。",
+        "The creation result is unconfirmed. Check the refreshed provider list. Your draft is retained; saving again sends another new command and may create a duplicate instance.",
+      ));
+      return;
+    }
     appStore.showError(extractI18nErrorMessage(err, t, "payment.errors", t("common.error")));
   } finally {
-    providerSaving.value = false;
+    if (createToken != null) providerPendingCreates.delete(createToken);
+    if (task.owned()) providerSaving.value = false;
+    task.finish();
   }
 }
 
@@ -12785,98 +13077,146 @@ async function handleToggleField(
   provider: ProviderInstance,
   field: "enabled" | "refund_enabled" | "allow_user_refund",
 ) {
-  let newValue: boolean;
-  if (field === "enabled") newValue = !provider.enabled;
-  else if (field === "refund_enabled") newValue = !provider.refund_enabled;
-  else newValue = !provider.allow_user_refund;
+  if (!pageTasks.current() || providerMutationPending.value) return;
+  const task = pageTasks.begin("provider:change");
+  const id = provider.id;
+  providerChanging.add(id);
+  try {
+    let newValue: boolean;
+    if (field === "enabled") newValue = !provider.enabled;
+    else if (field === "refund_enabled") newValue = !provider.refund_enabled;
+    else newValue = !provider.allow_user_refund;
 
-  if (field === "enabled" && newValue) {
+    if (field === "enabled" && newValue) {
+      const conflict = findProviderEnablementConflict({
+        id: provider.id,
+        provider_key: provider.provider_key,
+        supported_types: provider.supported_types,
+        enabled: true,
+        name: provider.name,
+      });
+      if (conflict) {
+        showProviderEnablementConflict(conflict);
+        return;
+      }
+    }
+
+    const payload: Record<string, boolean> = { [field]: newValue };
+    // Cascade: turning off refund_enabled also turns off allow_user_refund
+    if (field === "refund_enabled" && !newValue) {
+      payload.allow_user_refund = false;
+    }
+    await adminAPI.payment.updateProvider(id, payload);
+    if (!task.active()) return;
+    await loadProviders();
+  } catch (err: unknown) {
+    if (!task.active()) return;
+    appStore.showError(extractI18nErrorMessage(err, t, "payment.errors", t("common.error")));
+  } finally {
+    providerChanging.delete(id);
+    task.finish();
+  }
+}
+
+async function handleToggleType(provider: ProviderInstance, type: string) {
+  if (!pageTasks.current() || providerMutationPending.value) return;
+  const task = pageTasks.begin("provider:change");
+  const id = provider.id;
+  providerChanging.add(id);
+  try {
+    const currentTypes = Array.isArray(provider.supported_types)
+      ? provider.supported_types
+      : [];
+    const updated = currentTypes.includes(type)
+      ? currentTypes.filter((t) => t !== type)
+      : [...currentTypes, type];
     const conflict = findProviderEnablementConflict({
       id: provider.id,
       provider_key: provider.provider_key,
-      supported_types: provider.supported_types,
-      enabled: true,
+      supported_types: updated,
+      enabled: provider.enabled,
       name: provider.name,
     });
     if (conflict) {
       showProviderEnablementConflict(conflict);
       return;
     }
-  }
-
-  const payload: Record<string, boolean> = { [field]: newValue };
-  // Cascade: turning off refund_enabled also turns off allow_user_refund
-  if (field === "refund_enabled" && !newValue) {
-    payload.allow_user_refund = false;
-  }
-  try {
-    await adminAPI.payment.updateProvider(provider.id, payload);
-    await loadProviders();
-  } catch (err: unknown) {
-    appStore.showError(extractI18nErrorMessage(err, t, "payment.errors", t("common.error")));
-  }
-}
-
-async function handleToggleType(provider: ProviderInstance, type: string) {
-  const currentTypes = Array.isArray(provider.supported_types)
-    ? provider.supported_types
-    : [];
-  const updated = currentTypes.includes(type)
-    ? currentTypes.filter((t) => t !== type)
-    : [...currentTypes, type];
-  const conflict = findProviderEnablementConflict({
-    id: provider.id,
-    provider_key: provider.provider_key,
-    supported_types: updated,
-    enabled: provider.enabled,
-    name: provider.name,
-  });
-  if (conflict) {
-    showProviderEnablementConflict(conflict);
-    return;
-  }
-  try {
-    await adminAPI.payment.updateProvider(provider.id, {
+    await adminAPI.payment.updateProvider(id, {
       supported_types: updated,
     } as any);
+    if (!task.active()) return;
     await loadProviders();
   } catch (err: unknown) {
+    if (!task.active()) return;
     appStore.showError(extractI18nErrorMessage(err, t, "payment.errors", t("common.error")));
+  } finally {
+    providerChanging.delete(id);
+    task.finish();
   }
 }
 
 function confirmDeleteProvider(provider: ProviderInstance) {
+  if (!pageTasks.current()) return;
+  providerDeleteRevision += 1;
+  providerDeleting.value = false;
   deletingProviderId.value = provider.id;
   showDeleteProviderDialog.value = true;
+}
+
+function closeDeleteProviderDialog() {
+  providerDeleteRevision += 1;
+  showDeleteProviderDialog.value = false;
+  deletingProviderId.value = null;
+  providerDeleting.value = false;
 }
 
 async function handleReorderProviders(
   updates: { id: number; sort_order: number }[],
 ) {
+  if (!pageTasks.current() || providerMutationPending.value) return;
+  const task = pageTasks.begin("provider:order");
+  const request = updates.map(update => ({ id: update.id, sort_order: update.sort_order }));
+  providerReordering.value = true;
   try {
-    await Promise.all(
-      updates.map((u) =>
+    const results = await Promise.allSettled(
+      request.map((u) =>
         adminAPI.payment.updateProvider(u.id, {
           sort_order: u.sort_order,
         } as Partial<ProviderInstance>),
       ),
     );
+    const failure = results.find(result => result.status === "rejected");
+    if (failure?.status === "rejected") throw failure.reason;
+    if (!task.active()) return;
     await loadProviders();
   } catch (err: unknown) {
+    if (!task.active()) return;
     appStore.showError(extractI18nErrorMessage(err, t, "payment.errors", t("common.error")));
     loadProviders();
+  } finally {
+    if (task.owned()) providerReordering.value = false;
+    task.finish();
   }
 }
 
 async function handleDeleteProvider() {
-  if (!deletingProviderId.value) return;
+  if (!pageTasks.current() || !showDeleteProviderDialog.value || providerDeleting.value || !deletingProviderId.value) return;
+  const id = deletingProviderId.value;
+  const revision = providerDeleteRevision;
+  const task = pageTasks.begin("provider:delete", () => revision === providerDeleteRevision);
+  providerDeleting.value = true;
   try {
-    await adminAPI.payment.deleteProvider(deletingProviderId.value);
+    await adminAPI.payment.deleteProvider(id);
+    if (!task.active()) return;
     appStore.showSuccess(t("common.deleted"));
     showDeleteProviderDialog.value = false;
     loadProviders();
   } catch (err: unknown) {
+    if (!task.active()) return;
     appStore.showError(extractI18nErrorMessage(err, t, "payment.errors", t("common.error")));
+  } finally {
+    if (task.owned()) providerDeleting.value = false;
+    task.finish();
   }
 }
 
@@ -12961,6 +13301,14 @@ const affiliateBatchModal = reactive<{
   rate: "",
 });
 
+let affiliateModalRevision = 0;
+let affiliateBatchRevision = 0;
+let affiliateConfirmRevision = 0;
+onBeforeUnmount(() => {
+  if (affiliateState.searchTimer != null) window.clearTimeout(affiliateState.searchTimer);
+  if (affiliateModal.searchTimer != null) window.clearTimeout(affiliateModal.searchTimer);
+});
+
 // affiliateConfirmDialog drives the project-standard <ConfirmDialog>. We can't
 // `await` the user's response from the dialog component, so the confirm action
 // runs from the @confirm callback once the user clicks the dialog's confirm
@@ -12985,6 +13333,8 @@ function openAffiliateConfirm(
   confirmText: string,
   fn: () => Promise<unknown>,
 ) {
+  if (!pageTasks.current()) return;
+  affiliateConfirmRevision += 1;
   affiliateConfirmDialog.title = title;
   affiliateConfirmDialog.message = message;
   affiliateConfirmDialog.confirmText = confirmText;
@@ -12993,20 +13343,28 @@ function openAffiliateConfirm(
 }
 
 async function handleAffiliateConfirm() {
+  if (!pageTasks.current()) return;
+  const revision = affiliateConfirmRevision;
   const fn = affiliateConfirmDialog.pending;
   affiliateConfirmDialog.show = false;
   affiliateConfirmDialog.pending = null;
   if (!fn) return;
+  const task = pageTasks.begin("affiliate:confirm", () => revision === affiliateConfirmRevision);
   try {
     await fn();
+    if (!task.active()) return;
     appStore.showSuccess(t("common.saved"));
     await loadAffiliateUsers();
   } catch (err) {
+    if (!task.active()) return;
     appStore.showError(extractApiErrorMessage(err, t("common.error")));
+  } finally {
+    task.finish();
   }
 }
 
 function cancelAffiliateConfirm() {
+  affiliateConfirmRevision += 1;
   affiliateConfirmDialog.show = false;
   affiliateConfirmDialog.pending = null;
 }
@@ -13038,34 +13396,40 @@ function parseRebateRate(raw: unknown): number | null | undefined {
 }
 
 async function loadAffiliateUsers() {
+  if (!pageTasks.current()) return;
+  const request = { page: affiliateState.page, page_size: affiliateState.pageSize, search: affiliateState.search };
+  const task = pageTasks.begin("affiliate:list", () =>
+    affiliateState.page === request.page && affiliateState.pageSize === request.page_size && affiliateState.search === request.search,
+  );
   affiliateState.loading = true;
   try {
-    const res = await affiliatesAPI.listUsers({
-      page: affiliateState.page,
-      page_size: affiliateState.pageSize,
-      search: affiliateState.search,
-    });
+    const res = await affiliatesAPI.listUsers(request);
+    if (!task.active()) return;
     affiliateState.entries = res.items ?? [];
     affiliateState.total = res.total ?? 0;
     // Drop selections that are no longer visible.
     const visibleIds = new Set(affiliateState.entries.map((e) => e.user_id));
     affiliateState.selected = affiliateState.selected.filter((id) => visibleIds.has(id));
   } catch (err) {
+    if (!task.active()) return;
     appStore.showError(extractApiErrorMessage(err, t("common.error")));
   } finally {
-    affiliateState.loading = false;
+    if (task.owned()) affiliateState.loading = false;
+    task.finish();
   }
 }
 
 function onAffiliateSearchInput() {
+  if (!pageTasks.current()) return;
   debounceTimer(affiliateState, 300, () => {
+    if (!pageTasks.current()) return;
     affiliateState.page = 1;
     loadAffiliateUsers();
   });
 }
 
 function changeAffiliatePage(page: number) {
-  if (page < 1) return;
+  if (!pageTasks.current() || page < 1) return;
   affiliateState.page = page;
   loadAffiliateUsers();
 }
@@ -13084,6 +13448,11 @@ function toggleAffiliateSelect(userId: number) {
 // openAffiliateModal opens the add/edit modal, prefilling fields from the
 // edited entry when present and resetting them otherwise.
 function openAffiliateModal(entry: AffiliateAdminEntry | null) {
+  if (!pageTasks.current()) return;
+  affiliateModalRevision += 1;
+  affiliateModal.saving = false;
+  if (affiliateModal.searchTimer != null) window.clearTimeout(affiliateModal.searchTimer);
+  pageTasks.cancel("affiliate:lookup");
   affiliateModal.open = true;
   affiliateModal.mode = entry ? "edit" : "add";
   affiliateModal.userQuery = "";
@@ -13096,6 +13465,9 @@ function openAffiliateModal(entry: AffiliateAdminEntry | null) {
 }
 
 function closeAffiliateModal() {
+  affiliateModalRevision += 1;
+  affiliateModal.saving = false;
+  pageTasks.cancel("affiliate:lookup");
   affiliateModal.open = false;
   if (affiliateModal.searchTimer != null) {
     window.clearTimeout(affiliateModal.searchTimer);
@@ -13105,15 +13477,25 @@ function closeAffiliateModal() {
 
 function onAffiliateUserSearchInput() {
   const q = affiliateModal.userQuery.trim();
-  if (!q) {
-    affiliateModal.userResults = [];
-    return;
-  }
+  if (affiliateModal.searchTimer != null) window.clearTimeout(affiliateModal.searchTimer);
+  pageTasks.cancel("affiliate:lookup");
+  affiliateModal.userResults = [];
+  if (!pageTasks.current() || !affiliateModal.open || !q) return;
+  const revision = affiliateModalRevision;
+  const task = pageTasks.begin("affiliate:lookup", () =>
+    affiliateModal.open && revision === affiliateModalRevision && !affiliateModal.selectedUser && affiliateModal.userQuery.trim() === q,
+  );
   debounceTimer(affiliateModal, 300, async () => {
+    if (!task.active()) { task.finish(); return; }
     try {
-      affiliateModal.userResults = await affiliatesAPI.lookupUsers(q);
+      const results = await affiliatesAPI.lookupUsers(q);
+      if (!task.active()) return;
+      affiliateModal.userResults = results;
     } catch (err) {
+      if (!task.active()) return;
       appStore.showError(extractApiErrorMessage(err, t("common.error")));
+    } finally {
+      task.finish();
     }
   });
 }
@@ -13152,6 +13534,7 @@ const affiliateModalCanSubmit = computed(() => {
 });
 
 async function submitAffiliateModal() {
+  if (!pageTasks.current() || !affiliateModal.open || affiliateModal.saving) return;
   if (!affiliateModalCanSubmit.value) {
     // Should be unreachable because the button is disabled, but keep a guard.
     appStore.showError(t("admin.settings.features.affiliate.modal.errorEmpty"));
@@ -13179,17 +13562,28 @@ async function submitAffiliateModal() {
     payload.aff_rebate_rate_percent = rateInput;
   }
 
+  const revision = affiliateModalRevision;
+  const submittedCode = affiliateModal.code;
+  const submittedRate = String(affiliateModal.rate ?? "");
+  const task = pageTasks.begin("affiliate:save", () =>
+    affiliateModal.open && revision === affiliateModalRevision &&
+    affiliateModal.code === submittedCode && String(affiliateModal.rate ?? "") === submittedRate &&
+    (affiliateModal.mode === "add" ? affiliateModal.selectedUser?.id : affiliateModal.editingEntry?.user_id) === userId,
+  );
   affiliateModal.saving = true;
   try {
     await affiliatesAPI.updateUserSettings(userId, payload);
+    if (!task.active()) return;
     appStore.showSuccess(t("common.saved"));
     closeAffiliateModal();
     affiliateState.page = 1;
     await loadAffiliateUsers();
   } catch (err) {
+    if (!task.active()) return;
     appStore.showError(extractApiErrorMessage(err, t("common.error")));
   } finally {
-    affiliateModal.saving = false;
+    if (task.owned()) affiliateModal.saving = false;
+    task.finish();
   }
 }
 
@@ -13208,31 +13602,51 @@ function askResetAffiliateUser(entry: AffiliateAdminEntry) {
 }
 
 function openAffiliateBatchModal() {
-  if (affiliateState.selected.length === 0) return;
+  if (!pageTasks.current() || affiliateState.selected.length === 0) return;
+  affiliateBatchRevision += 1;
+  affiliateBatchModal.saving = false;
   affiliateBatchModal.open = true;
   affiliateBatchModal.rate = "";
 }
 
+function closeAffiliateBatchModal() {
+  affiliateBatchRevision += 1;
+  affiliateBatchModal.open = false;
+  affiliateBatchModal.saving = false;
+}
+
 async function submitAffiliateBatchModal() {
+  if (!pageTasks.current() || !affiliateBatchModal.open || affiliateBatchModal.saving) return;
   const rateInput = parseRebateRate(affiliateBatchModal.rate);
   if (rateInput === undefined) return;
   const userIDs = [...affiliateState.selected];
+  if (!userIDs.length) return;
   const payload: Parameters<typeof affiliatesAPI.batchSetRate>[0] =
     rateInput === null
       ? { user_ids: userIDs, clear: true }
       : { user_ids: userIDs, aff_rebate_rate_percent: rateInput };
 
+  const revision = affiliateBatchRevision;
+  const submittedRate = String(affiliateBatchModal.rate ?? "");
+  const task = pageTasks.begin("affiliate:batch", () =>
+    affiliateBatchModal.open && revision === affiliateBatchRevision &&
+    String(affiliateBatchModal.rate ?? "") === submittedRate &&
+    JSON.stringify(affiliateState.selected) === JSON.stringify(userIDs),
+  );
   affiliateBatchModal.saving = true;
   try {
     await affiliatesAPI.batchSetRate(payload);
+    if (!task.active()) return;
     appStore.showSuccess(t("common.saved"));
     affiliateBatchModal.open = false;
     affiliateState.selected = [];
     await loadAffiliateUsers();
   } catch (err) {
+    if (!task.active()) return;
     appStore.showError(extractApiErrorMessage(err, t("common.error")));
   } finally {
-    affiliateBatchModal.saving = false;
+    if (task.owned()) affiliateBatchModal.saving = false;
+    task.finish();
   }
 }
 

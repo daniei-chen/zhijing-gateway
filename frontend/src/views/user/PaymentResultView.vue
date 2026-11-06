@@ -141,10 +141,12 @@ const returnInfo = ref<ReturnInfo | null>(null)
 
 const SUCCESS_STATUSES = new Set(['COMPLETED', 'PAID', 'RECHARGING'])
 const PENDING_STATUSES = new Set(['PENDING', 'CREATED', 'WAITING', 'PROCESSING'])
+const STATUS_REFRESH_STATUSES = new Set([...PENDING_STATUSES, 'PAID', 'RECHARGING'])
 const STATUS_REFRESH_INTERVAL_MS = 2000
 const STATUS_REFRESH_MAX_ATTEMPTS = 15
 
 let statusRefreshTimer: ReturnType<typeof setTimeout> | null = null
+let disposed = false
 let userBalanceRefreshStarted = false
 const refreshAttempts = ref(0)
 
@@ -200,6 +202,7 @@ function formatGatewayAmount(value: number): string {
 }
 
 function setResolvedOrder(nextOrder: ResolvedOrder | null): void {
+  if (disposed) return
   order.value = nextOrder
   if (nextOrder && 'currency' in nextOrder && nextOrder.currency) {
     currency.value = normalizePaymentCurrency(nextOrder.currency)
@@ -253,6 +256,10 @@ function isSuccessStatus(status: string | null | undefined): boolean {
 
 function isPendingStatus(status: string | null | undefined): boolean {
   return PENDING_STATUSES.has(normalizeOrderStatus(status))
+}
+
+function shouldRefreshOrderStatus(status: string | null | undefined): boolean {
+  return STATUS_REFRESH_STATUSES.has(normalizeOrderStatus(status))
 }
 
 function readRouteQueryString(key: string): string {
@@ -339,7 +346,7 @@ function clearRecoverySnapshot(): void {
 }
 
 function clearRecoverySnapshotForTerminalStatus(status: string | null | undefined): void {
-  if (!status) return
+  if (disposed || !status) return
   if (!isPendingStatus(status)) {
     clearRecoverySnapshot()
   }
@@ -347,19 +354,20 @@ function clearRecoverySnapshotForTerminalStatus(status: string | null | undefine
 
 function scheduleStatusRefresh(refreshOrder: (() => Promise<ResolvedOrder | null>) | null): void {
   clearStatusRefreshTimer()
-  if (!refreshOrder || !isPending.value || refreshAttempts.value >= STATUS_REFRESH_MAX_ATTEMPTS) {
+  if (disposed || !refreshOrder || !shouldRefreshOrderStatus(order.value?.status) || refreshAttempts.value >= STATUS_REFRESH_MAX_ATTEMPTS) {
     return
   }
 
   statusRefreshTimer = setTimeout(async () => {
     refreshAttempts.value += 1
     const refreshedOrder = await refreshOrder()
+    if (disposed) return
     if (refreshedOrder) {
       setResolvedOrder(refreshedOrder)
       clearRecoverySnapshotForTerminalStatus(refreshedOrder.status)
     }
 
-    if (isPendingStatus(order.value?.status)) {
+    if (shouldRefreshOrderStatus(order.value?.status)) {
       scheduleStatusRefresh(refreshOrder)
     }
   }, STATUS_REFRESH_INTERVAL_MS)
@@ -389,6 +397,7 @@ onMounted(async () => {
 
   if (resumeToken) {
     const resolvedOrder = await resolveOrderFromResumeToken(resumeToken)
+    if (disposed) return
     if (resolvedOrder) {
       setResolvedOrder(resolvedOrder)
       if (!orderId) {
@@ -414,9 +423,11 @@ onMounted(async () => {
       // Order lookup failed, will try legacy fallback below when possible.
     }
   }
+  if (disposed) return
 
   if (!order.value && shouldUsePublicOutTradeNo && (!resumeToken || resumeTokenLookupFailed)) {
     const legacyOrder = await resolveOrderFromOutTradeNo(outTradeNo)
+    if (disposed) return
     if (legacyOrder) {
       setResolvedOrder(legacyOrder)
       if (!orderId) {
@@ -435,8 +446,10 @@ onMounted(async () => {
   }
 
   const refreshOrder = async (): Promise<ResolvedOrder | null> => {
+    if (disposed) return null
     if (resumeToken) {
       const resolvedOrder = await resolveOrderFromResumeToken(resumeToken)
+      if (disposed) return null
       if (resolvedOrder) {
         return resolvedOrder
       }
@@ -457,7 +470,8 @@ onMounted(async () => {
     return null
   }
 
-  if (isPendingStatus(order.value?.status)) {
+  if (shouldRefreshOrderStatus(order.value?.status)) {
+    clearRecoverySnapshotForTerminalStatus(order.value?.status)
     scheduleStatusRefresh(refreshOrder)
   } else if (order.value) {
     clearRecoverySnapshotForTerminalStatus(order.value.status)
@@ -468,6 +482,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
+  disposed = true
   clearStatusRefreshTimer()
 })
 </script>

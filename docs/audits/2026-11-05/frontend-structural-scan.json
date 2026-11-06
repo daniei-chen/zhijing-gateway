@@ -1,0 +1,5978 @@
+[
+  {
+    "path": "frontend/build/serializePublicSettings.ts",
+    "sha256": "16f89a26759257164a819b4ae89dc8c99fe6afbcedb4a85dc7b2ae2c1969cda4",
+    "lines": 12,
+    "scriptLines": 12,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/__tests__/publicSettingsSerialization.spec.ts",
+    "sha256": "0ea203b21a2f42bace123063454be2c4e07add05c288b1d7a04305c95e73b06c",
+    "lines": 21,
+    "scriptLines": 21,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/api/admin/backup.ts",
+    "sha256": "4ccb26d5bc07c51af899ad8f4ae764593c12f3bf2a6a96c2cc45fbd4dbee0872",
+    "lines": 203,
+    "scriptLines": 203,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/components/payment/PaymentQRDialog.vue",
+    "sha256": "c21fafdfa2c84a1744eb6c48c5591bed828dd80d57565bf13bc4ce3db75fd0e7",
+    "lines": 349,
+    "scriptLines": 276,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 268,
+        "name": "setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 308,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 309,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 332,
+        "name": "setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 337,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 345,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 347,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/components/payment/PaymentStatusPanel.vue",
+    "sha256": "11273262f20a8c882f88b103bc4a8d381669ae7c16553230f7d2bb3fab20b6cd",
+    "lines": 555,
+    "scriptLines": 330,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 474,
+        "name": "setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 503,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 504,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 545,
+        "name": "setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 550,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 551,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 552,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 553,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts",
+    "sha256": "01d47f9ecc2180bf4b853245f1fe954254dee0347a0b2aa8f273cf82f6c73829",
+    "lines": 126,
+    "scriptLines": 126,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 38,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 44,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/antigravityMappings.retry.spec.ts",
+    "sha256": "7080c09ac62ade293847a3a3a6751e6b5b45dc864d0c674242fb389343096907",
+    "lines": 51,
+    "scriptLines": 51,
+    "test": true,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 17,
+        "name": "fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 18,
+        "name": "fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 25,
+        "name": "fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 26,
+        "name": "fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 33,
+        "name": "fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 34,
+        "name": "fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 43,
+        "name": "fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 44,
+        "name": "fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 47,
+        "name": "fetch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useAntigravityOAuth.spec.ts",
+    "sha256": "e86dcd55497d56ed9a03b1bce811df2447f593da626f75afd987edb5aa0ecbea",
+    "lines": 71,
+    "scriptLines": 71,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useBatchImageAccess.retry.spec.ts",
+    "sha256": "dbe5a32f3f62f3ae921180bbffc5e4c45679be84809b62b88cb18e82b80427c8",
+    "lines": 33,
+    "scriptLines": 33,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useBatchImageAccess.session.spec.ts",
+    "sha256": "db6cf3a9117a756def695b6f26351e1f6c4b2335c272d2765ae9b15b4c3764ba",
+    "lines": 84,
+    "scriptLines": 84,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 22,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useClipboard.spec.ts",
+    "sha256": "ecf585dbcc942adb347f3f0aae1a027f5277fd76d6acb399d3f02a3584d1569f",
+    "lines": 159,
+    "scriptLines": 159,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useForm.spec.ts",
+    "sha256": "ef10f27527a527d160a949532756c9c16a999c63f7777c82c801c1a29195eaa0",
+    "lines": 144,
+    "scriptLines": 144,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useGeminiOAuth.errors.spec.ts",
+    "sha256": "b2149548925a70959250fa89535684d06bb0aa54f3f5746634ce4af6073cd4f3",
+    "lines": 40,
+    "scriptLines": 40,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useGrokOAuth.spec.ts",
+    "sha256": "a2b966ea59b506b400dec4787dc9941bd518ba3f71f785af43342813009b32c0",
+    "lines": 84,
+    "scriptLines": 84,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useKeyedDebouncedSearch.spec.ts",
+    "sha256": "a6a2978c1f0bd82c8501af937313669f9bb40d05fe9643846b00febf9cb0fbe7",
+    "lines": 101,
+    "scriptLines": 101,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useModelWhitelist.spec.ts",
+    "sha256": "44f79fa6b2846ccf4873abc90821e5bd9a6c26c4b9eb92cafe612d2f707551ac",
+    "lines": 269,
+    "scriptLines": 269,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useNavigationLoading.spec.ts",
+    "sha256": "bac8803fc075e3addea722dc2ae9ed80112dc6fd47d8e248b0b318733852deac",
+    "lines": 177,
+    "scriptLines": 177,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useOpenAIOAuth.spec.ts",
+    "sha256": "d731c2ef62ffbde77ba3b7f9d70188d636ab8f762615eee8062e38fd1859ddbb",
+    "lines": 95,
+    "scriptLines": 95,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/usePersistedPageSize.spec.ts",
+    "sha256": "bb8163e09b6489eff7053408f942552876ad8bb4d76134d021d0b63aab5ebd0a",
+    "lines": 22,
+    "scriptLines": 22,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 7,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 16,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 17,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useRoutePrefetch.spec.ts",
+    "sha256": "d418206377ab286d669db567d022e58b0dae111b6d9e7b53f6e6463f0e76e126",
+    "lines": 245,
+    "scriptLines": 245,
+    "test": true,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 59,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 62,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 122,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 132,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 136,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 167,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 180,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 207,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 216,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 238,
+        "name": "setTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useStepUp.session.spec.ts",
+    "sha256": "c62c3e18f29b44e5f30b8a5bd112b8ff86e67f6e55280602f5970524d9f444f6",
+    "lines": 52,
+    "scriptLines": 52,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 7,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useStepUp.spec.ts",
+    "sha256": "eff0143c6ba3d64613f4f612a446926eaa80e96cbfe1bd3db8e84efea6ccb8d9",
+    "lines": 109,
+    "scriptLines": 109,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useSwipeSelect.spec.ts",
+    "sha256": "a3848a7913bbd3d63f7168d7597b9a3dc89d9a88d77467d7550989895d83e290",
+    "lines": 75,
+    "scriptLines": 75,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useTableLoader.race.spec.ts",
+    "sha256": "6fd3c5597d6fa639a443cfdd21b7442fc2df7cd310fc34623d6fada02b3f96a0",
+    "lines": 80,
+    "scriptLines": 80,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/__tests__/useTableLoader.spec.ts",
+    "sha256": "ce7fafebd195e1f5c7d8844728e89ddc6e6af609b0e241626c9a5d36d3a68f0b",
+    "lines": 252,
+    "scriptLines": 252,
+    "test": true,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 9,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 10,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 12,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 203,
+        "name": "options.signal.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 208,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 226,
+        "name": "Promise.allSettled",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useAccountOAuth.ts",
+    "sha256": "a0f13132f3a671614b52c414bc097ab01577e45c18649ebb31c81b10f437146f",
+    "lines": 198,
+    "scriptLines": 198,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useAntigravityOAuth.ts",
+    "sha256": "58466c632fbe6852e739234a9dcae4238f8d012d94f157551cca8c5ca50b0620",
+    "lines": 153,
+    "scriptLines": 153,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useAutoRefresh.ts",
+    "sha256": "ae607fb43630768779b09a5b67a74d8bae0b4c7d94f6075a7a6b0020adcec550",
+    "lines": 114,
+    "scriptLines": 114,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 65,
+        "name": "setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 70,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 99,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [
+      {
+        "line": 31,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 42,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useBatchImageAccess.ts",
+    "sha256": "5719f6b02ee634fd131fac200a438d9a24b5dde538a614dd2caf047d79e197d2",
+    "lines": 126,
+    "scriptLines": 126,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useChannelMonitorFormat.ts",
+    "sha256": "44ea114987653252b9f9ac6e795e726625012fe115ad22a253882df891f928aa",
+    "lines": 283,
+    "scriptLines": 283,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useClipboard.ts",
+    "sha256": "9f5b01c2b5a5f35cb16a5b63e0e2e323e5c11acd84e0a770447d00d46aec9da4",
+    "lines": 74,
+    "scriptLines": 74,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 62,
+        "name": "setTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useForm.ts",
+    "sha256": "825c1a2006b940929913c51d6966eedb74338ae414c50f83bbfacd3a33381552",
+    "lines": 44,
+    "scriptLines": 44,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useGeminiOAuth.ts",
+    "sha256": "6a86bdabac076a31f738563119d88bf48f1134269a3c5db80271af808ac827d0",
+    "lines": 167,
+    "scriptLines": 167,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useGrokOAuth.ts",
+    "sha256": "911eba898ee437e5f8293134134b6d6e845af8b24d6fbbf0c8b002cfc490add0",
+    "lines": 218,
+    "scriptLines": 218,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useKeyedDebouncedSearch.ts",
+    "sha256": "5dfef9a4abb88833baee7947628775c32a586c43faca4ccdf9122cbe86852660",
+    "lines": 104,
+    "scriptLines": 104,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 27,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 56,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 66,
+        "name": "setTimeout",
+        "asyncCallback": true
+      },
+      {
+        "line": 69,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 93,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useModelWhitelist.ts",
+    "sha256": "2aaf57d3e0bd6d8e74d79b5530a60cbb8a51c458702bb8dba43162e47a1ad289",
+    "lines": 648,
+    "scriptLines": 648,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useNavigationLoading.ts",
+    "sha256": "0d544fc5cd439c9e7eecc8393e1802e92e28bacc0593f721bca5571062517d46",
+    "lines": 133,
+    "scriptLines": 133,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 36,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 50,
+        "name": "setTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useOnboardingTour.ts",
+    "sha256": "42d227d9d23f87d40d3a022d169445d696ffbc4000ee9a7cf3f3d7669fc3b775",
+    "lines": 570,
+    "scriptLines": 570,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 38,
+        "name": "el.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 40,
+        "name": "el.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 89,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 329,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 364,
+        "name": "htmlElement.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 365,
+        "name": "htmlElement.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 369,
+        "name": "htmlElement.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 370,
+        "name": "htmlElement.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 386,
+        "name": "htmlElement.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 387,
+        "name": "htmlElement.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 404,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 500,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 507,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 523,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 546,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 551,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 553,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [
+      {
+        "line": 68,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 72,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 76,
+        "name": "localStorage.removeItem"
+      }
+    ],
+    "sinks": [
+      {
+        "line": 251,
+        "name": "footerEl.innerHTML"
+      }
+    ],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useOpenAIOAuth.ts",
+    "sha256": "da8198599fd35bd95d697b70bce9d5c0ff5692c232b77bc574ec54b721b99c4a",
+    "lines": 242,
+    "scriptLines": 242,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/usePersistedPageSize.ts",
+    "sha256": "ea52e70880a243d13662dd3fa424121e0a2e67f4482cfe425790c3d7ce567b28",
+    "lines": 34,
+    "scriptLines": 34,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useQuotaNotifyState.ts",
+    "sha256": "14577e43424a5b85954614502c85f33cf8f5cb623eead7b580d56dee53af52cf",
+    "lines": 70,
+    "scriptLines": 70,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useRoutePrefetch.ts",
+    "sha256": "0f1e3c19245dd1629e7e1c1a3408ab5a8b904adb92dce9a60ff2c7848e2403fa",
+    "lines": 203,
+    "scriptLines": 203,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 52,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 61,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 153,
+        "name": "Promise.all",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useStepUp.ts",
+    "sha256": "5c5c88ae55953d636bce27b06152a4579fe069b05b42a65137147eb19593e3a5",
+    "lines": 162,
+    "scriptLines": 162,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 101,
+        "name": "onScopeDispose",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useSwipeSelect.ts",
+    "sha256": "20de2340c4bd7951597fbdaf88b67d7b24f61eca775048e99acb38442ec67bc7",
+    "lines": 598,
+    "scriptLines": 598,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 383,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 384,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 385,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 391,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 392,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 409,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 410,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 411,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 415,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 416,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 418,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 491,
+        "name": "cancelAnimationFrame",
+        "asyncCallback": false
+      },
+      {
+        "line": 492,
+        "name": "requestAnimationFrame",
+        "asyncCallback": false
+      },
+      {
+        "line": 505,
+        "name": "requestAnimationFrame",
+        "asyncCallback": false
+      },
+      {
+        "line": 519,
+        "name": "cancelAnimationFrame",
+        "asyncCallback": false
+      },
+      {
+        "line": 522,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 523,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 524,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 525,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 536,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 537,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 538,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 545,
+        "name": "cancelAnimationFrame",
+        "asyncCallback": false
+      },
+      {
+        "line": 570,
+        "name": "requestAnimationFrame",
+        "asyncCallback": false
+      },
+      {
+        "line": 572,
+        "name": "requestAnimationFrame",
+        "asyncCallback": false
+      },
+      {
+        "line": 577,
+        "name": "cancelAnimationFrame",
+        "asyncCallback": false
+      },
+      {
+        "line": 581,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 582,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 583,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 586,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 587,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 588,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 590,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 591,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 592,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useTableLoader.ts",
+    "sha256": "2c138c91271f17071a289148cbff1a542d5c0166ca5532f2c0eec874d6ef0804",
+    "lines": 123,
+    "scriptLines": 123,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 51,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 104,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useTableSelection.ts",
+    "sha256": "b48ab3ad61bbcbc8521af0437c3c0669a5b57485dd1f8ad30e0341672bed7981",
+    "lines": 106,
+    "scriptLines": 106,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/composables/useWorkspaceAppearance.ts",
+    "sha256": "b6d8dca3181ad6785a5ff5e3bffbfc1ff3c407ab33ee6096e8a961570051d4b4",
+    "lines": 19,
+    "scriptLines": 19,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/utils/accountUsageRefresh.ts",
+    "sha256": "3f2f4d83e0655b332a0246ffa6c920b03192824786b101ea53920499fb25903b",
+    "lines": 72,
+    "scriptLines": 72,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/utils/usageLoadQueue.ts",
+    "sha256": "9e21783487000c85c7b1260283af7d6bcac6dd52a389fdbc65b45cecdd1a2134",
+    "lines": 19,
+    "scriptLines": 19,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/AccountsView.vue",
+    "sha256": "888cbf05d976c6314486af2a37fa0b8ac551e1cdd58d171671e3a994b0bf5334",
+    "lines": 2665,
+    "scriptLines": 2163,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 898,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1298,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 1382,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 1394,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 1496,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 1548,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 2346,
+        "name": "URL.createObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2351,
+        "name": "URL.revokeObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2588,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 2596,
+        "name": "desktopViewportMediaQuery.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2604,
+        "name": "Promise.allSettled",
+        "asyncCallback": false
+      },
+      {
+        "line": 2619,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2620,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2621,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2631,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 2637,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 2641,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2642,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2643,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2646,
+        "name": "desktopViewportMediaQuery.removeEventListener",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [
+      {
+        "line": 666,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 704,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 988,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 995,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 997,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 998,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1004,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1016,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1017,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1025,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 1040,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1333,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/AnnouncementsView.vue",
+    "sha256": "8b5d6c913d52b4ff12374ebe7c2fc273ee88e4a1af8e8fa62203a6a3e45d64de",
+    "lines": 626,
+    "scriptLines": 367,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 352,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 416,
+        "name": "window.clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 417,
+        "name": "window.setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 616,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 621,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 622,
+        "name": "window.clearTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/AuditLogView.vue",
+    "sha256": "eb61ce8cf6297fe0cd4574e260dedb21354f7993e3610c555a9375427eae7903",
+    "lines": 687,
+    "scriptLines": 333,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 685,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/BackupView.vue",
+    "sha256": "0a4a83b4d4de59bb9ba6629ba9c7603838c420bf402ac001356dc8c7fb999067",
+    "lines": 996,
+    "scriptLines": 569,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 555,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 560,
+        "name": "setInterval",
+        "asyncCallback": true
+      },
+      {
+        "line": 596,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 604,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 609,
+        "name": "setInterval",
+        "asyncCallback": true
+      },
+      {
+        "line": 645,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 823,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 958,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 959,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 960,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 976,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      },
+      {
+        "line": 982,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ChannelMonitorView.vue",
+    "sha256": "513b7f12904e360008e43633a337180ac69cb64d3fc80ab4b634aced6b7ea32a",
+    "lines": 396,
+    "scriptLines": 225,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 254,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 284,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 285,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 385,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 388,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 391,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 392,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ChannelsView.vue",
+    "sha256": "99691057dd9d257431d88ea0ae00898b97e4d68920a8855870c858db7571b7d8",
+    "lines": 1737,
+    "scriptLines": 1086,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 1293,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 1343,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1344,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1386,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 1399,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 1475,
+        "name": "Promise.allSettled",
+        "asyncCallback": false
+      },
+      {
+        "line": 1701,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 1705,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 1708,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 1709,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1711,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/DashboardView.vue",
+    "sha256": "c06bd20d75e56c47827ff0a746e3cf4e704eca4c89b78b60eb25f11ed777a8bc",
+    "lines": 782,
+    "scriptLines": 427,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 759,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 767,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 774,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/GroupsView.vue",
+    "sha256": "0ee4b70865ebefb59ef089f18de9e0b20164d399419d9bb562b394941db7c1af",
+    "lines": 6943,
+    "scriptLines": 2648,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 5646,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 5780,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 5781,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 6709,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 6725,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 6737,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 6781,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 6788,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 6795,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 6840,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 6847,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 6854,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 6928,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 6934,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 6937,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 6938,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [
+      {
+        "line": 4534,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 4550,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 4565,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 4587,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 4588,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/PluginsView.vue",
+    "sha256": "79d419e49bcfe0f799fb9a9a1f79155086a81bfcf4800228e68f51bb9f805451",
+    "lines": 735,
+    "scriptLines": 400,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 557,
+        "name": "window.clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 570,
+        "name": "window.setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 584,
+        "name": "window.clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 725,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 726,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 730,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      },
+      {
+        "line": 731,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/PromoCodesView.vue",
+    "sha256": "24a22c1bbfc4dd2c82ac5aeced3e60d90a164ae9e325ad05ac2721a553b10f8b",
+    "lines": 748,
+    "scriptLines": 360,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 518,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 559,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 560,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 588,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 739,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 743,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 744,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ProxiesView.vue",
+    "sha256": "384c29deaf80ba70b505ced8da9017ec21af1168f0c2819e355a26bfc2775b28",
+    "lines": 2090,
+    "scriptLines": 1124,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 1194,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 1231,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1232,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1685,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 1847,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 1936,
+        "name": "URL.createObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 1941,
+        "name": "URL.revokeObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2078,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 2081,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2084,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 2085,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 2087,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/RedeemView.vue",
+    "sha256": "02957ebcab12862d40a4e9239091b97fe8c95fb2868fe2158edae216a88bdec0",
+    "lines": 1198,
+    "scriptLines": 585,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 712,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 720,
+        "name": "window.URL.createObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 727,
+        "name": "window.URL.revokeObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 849,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 872,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 910,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 911,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1072,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1083,
+        "name": "window.URL.createObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 1090,
+        "name": "window.URL.revokeObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 1188,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 1193,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 1194,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/RiskControlView.vue",
+    "sha256": "bb1972a13cffa2c37fe9df8fcf8aa4aa36c588f32dfcf9699376d9b795891c0a",
+    "lines": 2473,
+    "scriptLines": 1324,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 1837,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 1938,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 2459,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 2461,
+        "name": "window.setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 2466,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 2468,
+        "name": "window.clearInterval",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/SettingsView.vue",
+    "sha256": "ff924ea2f42c81cc047e46436702def5bffc3fb8b79f603af523c49b8807d3ae",
+    "lines": 13395,
+    "scriptLines": 4330,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 9091,
+        "name": "window.requestAnimationFrame",
+        "asyncCallback": false
+      },
+      {
+        "line": 10386,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 11888,
+        "name": "adminSettingsStore.fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 12857,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 12883,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 13017,
+        "name": "window.clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 13018,
+        "name": "window.setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 13101,
+        "name": "window.clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 13243,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 13255,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/SubscriptionsView.vue",
+    "sha256": "d7116a7f626afe8afc4beb43c9ac7281f951bfde0163db949a5475efbf67faee",
+    "lines": 1645,
+    "scriptLines": 785,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 1141,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 1193,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1195,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1249,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1251,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1609,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 1614,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 1617,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 1618,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 1620,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1623,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [
+      {
+        "line": 901,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 912,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 956,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 972,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/UsageView.vue",
+    "sha256": "88732ecf5d18a4e5d46fedf3096285143e8247ce25bf045feda062cde76150c5",
+    "lines": 908,
+    "scriptLines": 715,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 400,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 585,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 887,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 893,
+        "name": "window.setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 898,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 900,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 900,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 902,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [
+      {
+        "line": 701,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 702,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 751,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 759,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 778,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 783,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 789,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 790,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 796,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [
+      {
+        "line": 640,
+        "name": "XLSX.write"
+      }
+    ],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/UsersView.vue",
+    "sha256": "07f905293a3e8a9ea35c226057286dba470a8d9812f1d499857d154402df1421",
+    "lines": 1915,
+    "scriptLines": 1119,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 1421,
+        "name": "Promise.allSettled",
+        "asyncCallback": false
+      },
+      {
+        "line": 1443,
+        "name": "Promise.allSettled",
+        "asyncCallback": false
+      },
+      {
+        "line": 1589,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 1633,
+        "name": "window.setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1660,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1661,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1893,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 1904,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 1905,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 1908,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 1909,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 1910,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 1911,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [
+      {
+        "line": 945,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 953,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 966,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 971,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 982,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 983,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1052,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 1172,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 1178,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 1198,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1207,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1235,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 1250,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1252,
+        "name": "localStorage.removeItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/AccountsView.bulkEdit.spec.ts",
+    "sha256": "c5da69fc3d092065ff377f6cf59b3afd801ef95680d099b9b8cc04d7ab966425",
+    "lines": 631,
+    "scriptLines": 631,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 129,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/AccountsView.lite.spec.ts",
+    "sha256": "871c506365535f0baaa08abfc1edbc3f5ebefddce5676dc6960b1c8e88b4e561",
+    "lines": 339,
+    "scriptLines": 339,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 161,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 224,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 243,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/AccountsView.priorityColumn.spec.ts",
+    "sha256": "97a9c45a3222f7c7a23fe0444ee9259b86bf793b74a436e28db337c67c0dd87a",
+    "lines": 153,
+    "scriptLines": 153,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 99,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 127,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 128,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 134,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 141,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 147,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 150,
+        "name": "localStorage.getItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/AccountsView.schedulerScore.spec.ts",
+    "sha256": "581a54bcfc0c1016a965ae9b0f39fb8c4dc6d1af2e3488129d9cc4b7904a6347",
+    "lines": 254,
+    "scriptLines": 254,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 134,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 222,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 230,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 234,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 235,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/AccountsView.selectAllResults.spec.ts",
+    "sha256": "2db1bf1c24f14da603723eb03dea764a660f97fd9b43b971be078a007ead8858",
+    "lines": 268,
+    "scriptLines": 268,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 145,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/AccountsView.sparkShadow.spec.ts",
+    "sha256": "c4fa74ce0bcea68ccf464fb4a8d6e8db0ceb1f137691cba0193e451a20d572d4",
+    "lines": 583,
+    "scriptLines": 583,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 109,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 261,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 551,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/AccountsView.usageWindowsHint.spec.ts",
+    "sha256": "506962cd4c1bb006a782ed810b4b0eb1e48635980f1bcb576298d2afbfa663f2",
+    "lines": 240,
+    "scriptLines": 240,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 136,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 186,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/BackupView.polling.spec.ts",
+    "sha256": "53644e7e149324e9632d40e80f4944af574f5659fedc745dd92e1fc39cc2be94",
+    "lines": 109,
+    "scriptLines": 109,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/BackupView.spec.ts",
+    "sha256": "10d90d4bbc8c16dbd96c3541d2a134ca05374035c127316b43fc0e41d7dadf90",
+    "lines": 303,
+    "scriptLines": 303,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [
+      {
+        "line": 108,
+        "name": "document.body.innerHTML"
+      }
+    ],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/ChannelMonitorView.checkModeBadge.spec.ts",
+    "sha256": "0d742c18ad4a0257dc09cf658e943bb191e1e9fd71dabbb662e688a3c5fba71d",
+    "lines": 160,
+    "scriptLines": 160,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 121,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/ChannelMonitorView.duplicate.spec.ts",
+    "sha256": "f5bea8e2e7f054571433730e5033bbbae46cc2cb2230a16b0a1f6816cd4217d4",
+    "lines": 231,
+    "scriptLines": 231,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 131,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/ChannelMonitorView.grok.spec.ts",
+    "sha256": "3ca619fa25284144600e3a9d0ea30d379f66f629d197b4a9bed2ffa7c4ca1b0c",
+    "lines": 156,
+    "scriptLines": 156,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/ChannelsView.modelSync.spec.ts",
+    "sha256": "e9e1a5699654789f0d84dd69b7637a292820f20eeb190c406a0731c42dcda047",
+    "lines": 156,
+    "scriptLines": 156,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 86,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/ChannelsView.webSearchEmulation.spec.ts",
+    "sha256": "d9169ea361116a7d14b8c9616d12b8307f5f47508ea144c4a93ebdf0f6014a8a",
+    "lines": 42,
+    "scriptLines": 42,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/DashboardView.spec.ts",
+    "sha256": "f4d69fdae5592c05cada6ad35b80065561311c106df10898deee26269d7678f4",
+    "lines": 175,
+    "scriptLines": 175,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/GroupsView.codexManifest.spec.ts",
+    "sha256": "742af4a3049a2d984fdfbab7f7aaaec5bec8b79689c93eddc50534dbe8828ae5",
+    "lines": 289,
+    "scriptLines": 289,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 233,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/GroupsView.columnSettings.spec.ts",
+    "sha256": "cb4aaab54a673620070f475faea97cd131380e65847d889dcfdb45a817a30526",
+    "lines": 435,
+    "scriptLines": 435,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 238,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 287,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 305,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 306,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 310,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 314,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 332,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 348,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 351,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 371,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 395,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 399,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/GroupsView.compositePlatforms.spec.ts",
+    "sha256": "963efc56596c3dead0f191a55c27e193a67b7f15a1db9d0b68dcb1d94eae3bad",
+    "lines": 11,
+    "scriptLines": 11,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/GroupsView.duplicate.spec.ts",
+    "sha256": "249a5963d80229f340ce9c9b9e0887597615a18bfe5a89fad398dd17e1574cef",
+    "lines": 453,
+    "scriptLines": 453,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 181,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/MonitorFormDialog.accountSelector.spec.ts",
+    "sha256": "ebe2a15dea14ea1eaf904133d13f10f97017e7f3256de60f7c47870e25a54131",
+    "lines": 377,
+    "scriptLines": 377,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [
+      {
+        "line": 159,
+        "name": "document.body.innerHTML"
+      }
+    ],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/PluginsView.spec.ts",
+    "sha256": "10b795f7771e8ef0982db924a36cb66b9c017d8cadae6946d14310fa06a2d998",
+    "lines": 228,
+    "scriptLines": 228,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/ProxiesView.credentials.spec.ts",
+    "sha256": "dd19d43d7ed1bb555750627dac354df6dd2f385ca7190c1a5aeb6718eadb2c62",
+    "lines": 67,
+    "scriptLines": 67,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/ProxiesView.filters.spec.ts",
+    "sha256": "98f7eae395a2459956e993955c5efa5ebe948666e9cc88ee9b83520c31d284db",
+    "lines": 105,
+    "scriptLines": 105,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/ProxiesView.ipv6.spec.ts",
+    "sha256": "620d4d1c6590ef7fa8ffb8d8788525a31dfd3926234b44ef863cb2aed037ed44",
+    "lines": 52,
+    "scriptLines": 52,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/RedeemView.batchUpdate.spec.ts",
+    "sha256": "511c475cf326d30f72021bd095d2ca45b083201ebad89e28e05dff102e1bdb0c",
+    "lines": 188,
+    "scriptLines": 188,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 104,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [
+      {
+        "line": 105,
+        "name": "document.body.innerHTML"
+      }
+    ],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/RiskControlView.spec.ts",
+    "sha256": "decdb05797192c9beda24d77931632e97f3c02c9390d34efd2e48e3363d21f61",
+    "lines": 539,
+    "scriptLines": 539,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/SettingsView.spec.ts",
+    "sha256": "f0d52c3eaf1fd0c3e01fa2f6c52c35469a10014d93a16656d29ece7ff8edd4ab",
+    "lines": 2130,
+    "scriptLines": 2130,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/SubscriptionsView.bulkActions.spec.ts",
+    "sha256": "c85840aed086b534d5e8e22302c5bb4936e398414e05457f510285d2dc116419",
+    "lines": 144,
+    "scriptLines": 144,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 47,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 48,
+        "name": "sessionStorage.clear"
+      },
+      {
+        "line": 49,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/SubscriptionsView.userUsageLink.spec.ts",
+    "sha256": "d05e65b7a1001140fbca476fce64f4f76b6cc389085e38cb06a016cd794f84ac",
+    "lines": 260,
+    "scriptLines": 260,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 63,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 229,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/UsageView.exportLifecycle.spec.ts",
+    "sha256": "95d9c19647e3eecd8062496ee5bfe57a05616613fd65871737f77baaf710aade",
+    "lines": 130,
+    "scriptLines": 130,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 35,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/UsageView.spec.ts",
+    "sha256": "e220008c96c0ee1a8ecc67475669a13bf99bb127b7028a948aba28419f6ccfb6",
+    "lines": 810,
+    "scriptLines": 810,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/UsersView.spec.ts",
+    "sha256": "14886509537f64c8f3f77f3094ce9116e69ff8ba2520eb1992c7acf5be76b964",
+    "lines": 576,
+    "scriptLines": 576,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 183,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 407,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 408,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 482,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 487,
+        "name": "localStorage.getItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/apiKeyGroupFilterOptions.spec.ts",
+    "sha256": "a90ef99370c79ffc003525ba67c65e7f8facee15fc2c2c7af51efd855727b0a6",
+    "lines": 94,
+    "scriptLines": 94,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/channelPlatformOptions.spec.ts",
+    "sha256": "79b3a55a141930f6771c4418530ccb33f25788a4e0f9c070bd121f017742eca3",
+    "lines": 18,
+    "scriptLines": 18,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/codexFingerprintSignals.spec.ts",
+    "sha256": "22822b50edf09877566b764720b0493d81ae18b99428cbd3c8c7208e26ba9ae3",
+    "lines": 32,
+    "scriptLines": 32,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/groupModelAllowlist.spec.ts",
+    "sha256": "748597851aebb09883366f063734bfd39a4dd371d67462568f8c545759cf5097",
+    "lines": 165,
+    "scriptLines": 165,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/groupModelAllowlistLayout.spec.ts",
+    "sha256": "ab738587dd51df9e6cd538e7dbdd16a9d493b4319f207b54d01e020f74bcf99f",
+    "lines": 27,
+    "scriptLines": 27,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/groupsImagePricing.spec.ts",
+    "sha256": "97bc73ecd21205648d04e27764140a2e849de081a61be7d58c6ffa2569c6c2b4",
+    "lines": 67,
+    "scriptLines": 67,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/groupsMessagesDispatch.spec.ts",
+    "sha256": "f5a860aabadb60f7d8393a9f1a377f4973b0c755d3cc567a1c46871a5e81584f",
+    "lines": 102,
+    "scriptLines": 102,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/groupsOpenAIFast.spec.ts",
+    "sha256": "0ca1e36051cfa35f8a25c6407e005513c2b2569493c5c835966017ac6d31ef25",
+    "lines": 41,
+    "scriptLines": 41,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/groupsProfitControl.spec.ts",
+    "sha256": "cc30c4a6d9b3950ed45834356ddc4c2651f314e311ad861ea27c5dabaa7d1126",
+    "lines": 182,
+    "scriptLines": 182,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/groupsReasoningEffort.spec.ts",
+    "sha256": "879cc34c9eef373db93a91ca260b0ff2175396279461789dfc14e09174216a24",
+    "lines": 348,
+    "scriptLines": 348,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/groupsSupportedModelScopes.spec.ts",
+    "sha256": "09a9319b6a92398a380ede7d9f4a252b7319c5ce4079bc106be8c6965673a43a",
+    "lines": 32,
+    "scriptLines": 32,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/groupsVideoModelPricing.spec.ts",
+    "sha256": "fa88cd7752094ccd30536c2b3715597d08ba1acf53b2c6b6420f05974b42fc72",
+    "lines": 48,
+    "scriptLines": 48,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/modelAllowlistCandidates.spec.ts",
+    "sha256": "618d72589fea83ccbceab773bfe499b829ca9fcfab9933fe3224041d37a1e004",
+    "lines": 66,
+    "scriptLines": 66,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/__tests__/platformFilterCatalogUsage.spec.ts",
+    "sha256": "1b242d1ab4bc1953ae6c1a82259c9e3894c8dff6d09bfee023433ae3511232ff",
+    "lines": 34,
+    "scriptLines": 34,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/affiliates/AdminAffiliateInvitesView.vue",
+    "sha256": "3d1d8fa091905c7457f068eae4c7b01067ddc2a4f9bcc8454a6d4821c9b3e907",
+    "lines": 8,
+    "scriptLines": 3,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/affiliates/AdminAffiliateRebatesView.vue",
+    "sha256": "09c08019f128572165a23e73e8087b97cf53adcf08460e00a74e5fbce1683e67",
+    "lines": 8,
+    "scriptLines": 3,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/affiliates/AdminAffiliateRecordsTable.vue",
+    "sha256": "695e1945ecf2cfb9d7ca5989084fd3adec4da4fefa2dd8f98e0d43fa5632c021",
+    "lines": 449,
+    "scriptLines": 278,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 309,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 310,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 445,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [
+      {
+        "line": 248,
+        "name": "localStorage.getItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/affiliates/AdminAffiliateTransfersView.vue",
+    "sha256": "9a57b84356c8d25c91e0f118553e4d3f86836c44e427c3993f3099fa72989356",
+    "lines": 8,
+    "scriptLines": 3,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/affiliates/AffiliateOfflineWithdrawDialog.vue",
+    "sha256": "1bd770cfb1274c4ee4f100d455d83eb9aebd58e340c5037dd0b9cd22d214402d",
+    "lines": 358,
+    "scriptLines": 222,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 213,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 227,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 348,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 356,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/affiliates/__tests__/AdminAffiliateRecordsTable.spec.ts",
+    "sha256": "e9a052f47c181049fb7aa7bf75b0034db2a4bbbb5444ec850104dab7fbdeb072",
+    "lines": 180,
+    "scriptLines": 180,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 81,
+        "name": "localStorage.clear"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/affiliates/__tests__/AffiliateOfflineWithdrawDialog.spec.ts",
+    "sha256": "e431ad24612d15d7396fe8b2861775b1731947b41b00c4f00c728bb13cdcdad9",
+    "lines": 226,
+    "scriptLines": 226,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/affiliates/__tests__/affiliateWithdrawOperation.spec.ts",
+    "sha256": "a46503c985b0fee3c94b5f84b6eefcf7aa15516e42cb427f98c80ade625db56f",
+    "lines": 51,
+    "scriptLines": 51,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 7,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 8,
+        "name": "sessionStorage.clear"
+      },
+      {
+        "line": 32,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 40,
+        "name": "sessionStorage.setItem"
+      },
+      {
+        "line": 47,
+        "name": "sessionStorage.getItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/affiliates/affiliateWithdrawOperation.ts",
+    "sha256": "c1febb550d7279545b64d9942e060997af6fc5a8523475f85aac2b8b301b7211",
+    "lines": 69,
+    "scriptLines": 69,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/apiKeyGroupFilterOptions.ts",
+    "sha256": "b7b494ba627b194bdccb5d283c51470df81f898f1b61b325b4b571ec7592cea9",
+    "lines": 76,
+    "scriptLines": 76,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/codexFingerprintSignals.ts",
+    "sha256": "1769e04b34c39f49c063ab56fd2dd77fd8e30ae0b49c65aaa249240294402df4",
+    "lines": 59,
+    "scriptLines": 59,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/groupModelAllowlist.ts",
+    "sha256": "08fbbfc7869764f629b7f2a92fb6467cfdb1ad4da122343723d56b016874c8cb",
+    "lines": 153,
+    "scriptLines": 153,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/groupsImagePricing.ts",
+    "sha256": "de3d621e02b55cb3e04d0f0e636135c838d5a9846c3fe0508b9f08067021db77",
+    "lines": 101,
+    "scriptLines": 101,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/groupsMessagesDispatch.ts",
+    "sha256": "5b452b90a17c32797ea9770c8fc90d39665baf46ac690a3f9f944fd79f7a205f",
+    "lines": 77,
+    "scriptLines": 77,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/groupsOpenAIFast.ts",
+    "sha256": "e9405a14c8f1ac100cc5f4b4193036b9ab561b2ff6b08dbbb95f5aa9272a8941",
+    "lines": 11,
+    "scriptLines": 11,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/groupsProfitControl.ts",
+    "sha256": "5b4b7556ca3d57fe45ec1a0347ceccbabb61ca381fc52a07255b557f95a0fbbb",
+    "lines": 70,
+    "scriptLines": 70,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/groupsReasoningEffort.ts",
+    "sha256": "651f5bda0af206de231639b56a3ec4dada2c00b88f74851b5221dc151518006f",
+    "lines": 318,
+    "scriptLines": 318,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/groupsSupportedModelScopes.ts",
+    "sha256": "4b122a8d084250931e4ecf8c0b8b7f9001b3d6c70be42db3e6b7a6350b205762",
+    "lines": 8,
+    "scriptLines": 8,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/groupsVideoModelPricing.ts",
+    "sha256": "3e9a886b25f5922ffb453f1af48afdf111e38c76f9c69f54014f0814d3a0cbcf",
+    "lines": 78,
+    "scriptLines": 78,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/modelAllowlistCandidates.ts",
+    "sha256": "2fe8e0ec29caae44116132e86aea13274be222be58f815a2c3a7713b50bcab8f",
+    "lines": 42,
+    "scriptLines": 42,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/OpsDashboard.vue",
+    "sha256": "0d1e28a4c5a413ba00b4ffa6d3f84b36f5d7f15f4a76f8fe13442f4eefa818e7",
+    "lines": 868,
+    "scriptLines": 723,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 545,
+        "name": "window.setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 647,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 716,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 738,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 743,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 774,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 785,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 808,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 810,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 812,
+        "name": "adminSettingsStore.fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 844,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 845,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 851,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 862,
+        "name": "watch",
+        "asyncCallback": true
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/LogRetentionSelect.vue",
+    "sha256": "11f9cf37a542f2443f171535fa07911837aa114209e9a4b1faba64231c685d7f",
+    "lines": 44,
+    "scriptLines": 26,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsAdmissionNotice.vue",
+    "sha256": "578d46bc252e9ffb49edabbcb4d460d0152be3d62b8e0e6956469f4d4e863280",
+    "lines": 31,
+    "scriptLines": 9,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsAlertEventsCard.vue",
+    "sha256": "5521f7b7c06ee34e60c3f4ba6ae177432999bcf906cf9297588aff3a65e1f33a",
+    "lines": 705,
+    "scriptLines": 368,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 26,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      },
+      {
+        "line": 327,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 331,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 337,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsAlertRulesCard.vue",
+    "sha256": "15ea44a07f400706bd426678d48ad655fcadc65bde0f5558166d97cef603051e",
+    "lines": 634,
+    "scriptLines": 391,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 37,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsConcurrencyCard.vue",
+    "sha256": "fbf06e90b10c50a7e48468b499d6a13eaa75883df441f826059a4b7f080bcb69",
+    "lines": 626,
+    "scriptLines": 341,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 272,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 288,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 297,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 332,
+        "name": "watch",
+        "asyncCallback": true
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsDashboardHeader.vue",
+    "sha256": "067f92452172ef5824426fe79fc0229117522503d917804575fe3a5ad9db8796",
+    "lines": 1632,
+    "scriptLines": 859,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 80,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 141,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 152,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 316,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 324,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 338,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsDashboardSkeleton.vue",
+    "sha256": "e3d1140792bdf4a434241ebf8462241cfd9acce66a02e9a7639dda4c759abbee",
+    "lines": 103,
+    "scriptLines": 9,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsEmailNotificationCard.vue",
+    "sha256": "f7ccb7bb71cdf89df729e7f8a0afea4891c7d168ded1ef65720ca78a10897e92",
+    "lines": 442,
+    "scriptLines": 181,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 178,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsErrorDetailModal.vue",
+    "sha256": "7180e54376bc834bf98f1e9c4dd4068e95684f79e9b6809d0041f04b62061cd1",
+    "lines": 442,
+    "scriptLines": 214,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 410,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsErrorDetailsModal.vue",
+    "sha256": "05935f143fdd49fa68907ef2d4b3bcedf3f3770e088c049f424ff730fb85f35a",
+    "lines": 303,
+    "scriptLines": 217,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 168,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 179,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 188,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 197,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 201,
+        "name": "window.clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 202,
+        "name": "window.setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 209,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsErrorDistributionChart.vue",
+    "sha256": "67e68c62ac1976716c0b77d30384cbefc270cf67b0358d7824d1d68d562e1ecf",
+    "lines": 162,
+    "scriptLines": 109,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsErrorLogTable.vue",
+    "sha256": "2afa6586ba09eef95f2e06270c9a8f2b9aaa10e2794a5ba1330aaef2564484d5",
+    "lines": 352,
+    "scriptLines": 168,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsErrorTrendChart.vue",
+    "sha256": "4b43480a24946e7c6cb2810245525ceba4702df85bad809313bfe54383a9c9a7",
+    "lines": 199,
+    "scriptLines": 153,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsLatencyChart.vue",
+    "sha256": "0b91182c45bd12871cc3229c04978aeac953c92e6bd59b5d622f7712fe162e82",
+    "lines": 102,
+    "scriptLines": 74,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsOpenAITokenStatsCard.vue",
+    "sha256": "f818074508d63f1101fa89cbb2f4caf376b6c60f2942c92586e59811753d0002",
+    "lines": 285,
+    "scriptLines": 158,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 118,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsRequestDetailsModal.vue",
+    "sha256": "eb6ec8a1c34f922b45da29136808684abd24ef06713248ffb0c81b11d8849f0e",
+    "lines": 403,
+    "scriptLines": 213,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 55,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      },
+      {
+        "line": 130,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 146,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsRequestDiagnostics.vue",
+    "sha256": "4d73d471121862616134acf4d94294bec9c701cd5fd76ac7d0369d067a5d4971",
+    "lines": 98,
+    "scriptLines": 22,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsRuntimeSettingsCard.vue",
+    "sha256": "2bb7050e41a47914e89a98da3338e29a83b2eb9822949cf5a9408f66d1bff463",
+    "lines": 537,
+    "scriptLines": 237,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 234,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsSettingsDialog.vue",
+    "sha256": "242e1eea6adb50c46efa3d4794741f4f770249898fd4aca85e1f6ac11f6c15b1",
+    "lines": 655,
+    "scriptLines": 236,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 46,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 78,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 220,
+        "name": "Promise.all",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsSwitchRateTrendChart.vue",
+    "sha256": "0b9d4babd47b252fec19be23634cf95112e88f5508f436cd04f15a35c7057593",
+    "lines": 151,
+    "scriptLines": 128,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsSystemLogTable.vue",
+    "sha256": "a990cfaf86c2f17f82cff239b9fe0599ce5c3d17db0d63a47552f8c008043f7b",
+    "lines": 602,
+    "scriptLines": 399,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 332,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 362,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 370,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 393,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 397,
+        "name": "Promise.all",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/OpsThroughputTrendChart.vue",
+    "sha256": "df3ad36095f78d3b618d48a9bd0b85ca4abf4625fbdf1fb4ee04b82383ff61d0",
+    "lines": 262,
+    "scriptLines": 173,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 34,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 37,
+        "name": "setTimeout",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsAlertEventsCard.pagination.spec.ts",
+    "sha256": "74b653611bf9ab8174bab17b541bf782b1aaa7fa8657ef5d0d754712a995736c",
+    "lines": 73,
+    "scriptLines": 73,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsAlertRulesCard.duration.spec.ts",
+    "sha256": "f673fc394158ca14396060c172a123be42a6e9e8f85b98ae9e940b3eac0a383f",
+    "lines": 51,
+    "scriptLines": 51,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsDashboardHeader.spec.ts",
+    "sha256": "f0a0e1a44480d54b024e4fd847036e2c5eb6b5439cda6534f6fc53ebc28fb4b7",
+    "lines": 52,
+    "scriptLines": 52,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsDashboardHeader.timezone.spec.ts",
+    "sha256": "a00461636cd991a2e40a029e8fe85f841568a2756b929c77db700f31942f7101",
+    "lines": 55,
+    "scriptLines": 55,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsErrorDetailModal.spec.ts",
+    "sha256": "5ab1fb9a456b903f0efe0e8646f3f57775392ace13942d02fe9490d5a0b01e40",
+    "lines": 80,
+    "scriptLines": 80,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsErrorLogTable.spec.ts",
+    "sha256": "a591ad00646e1debb521107e99c061afa7c9717f5505a9997fa0be13ad003f90",
+    "lines": 125,
+    "scriptLines": 125,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsErrorScopeCharts.spec.ts",
+    "sha256": "f67731f46a1f22a817945b95d25c2c39503d0c4bdeeecfeb78928ecc1380484e",
+    "lines": 148,
+    "scriptLines": 148,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsOpenAITokenStatsCard.spec.ts",
+    "sha256": "f1273b47e225fc321d4c21e5e6f11b0ac701a32eb8c7d0667f5c481a23637e7c",
+    "lines": 312,
+    "scriptLines": 312,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsRequestDetailsModal.spec.ts",
+    "sha256": "a57bcaf9c7d253133dd72c0099eafb73e2abab6aa13389afbda225b81426aa76",
+    "lines": 166,
+    "scriptLines": 166,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsRequestDiagnostics.spec.ts",
+    "sha256": "bb0a90a054856aecc26a4775b4c2438f359c20aa069372a0ebcc6d894abb97eb",
+    "lines": 47,
+    "scriptLines": 47,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsSettingsDialog.loading.spec.ts",
+    "sha256": "77648608489eb705bd280032ecfbd2e32aa57f8bb46812f7c31f4fb80d358bf5",
+    "lines": 87,
+    "scriptLines": 87,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsSystemLogTable.spec.ts",
+    "sha256": "a7f7d5d4bf85868d1439d88e2ed334414d03940ec489d91f8e803cde331999f1",
+    "lines": 216,
+    "scriptLines": 216,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/components/__tests__/OpsThroughputTrendChart.spec.ts",
+    "sha256": "5d8a3d0debce5d60d472f641847385d99f7ea5fb767da673f46a75e15edae34b",
+    "lines": 51,
+    "scriptLines": 51,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/types.ts",
+    "sha256": "b4dfef53945c96557341f7ba4eefc08853c156408397fae48aec6c305891632f",
+    "lines": 25,
+    "scriptLines": 25,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/utils/__tests__/errorDetailResponse.spec.ts",
+    "sha256": "5c8c4def06c084e0365c46fa235e94e508493c46d2def83744dd4aad57fef2b0",
+    "lines": 135,
+    "scriptLines": 135,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/utils/__tests__/opsErrorParams.spec.ts",
+    "sha256": "7eae4ead4af8e33f0e67faa0bd894f43d2f772fd580723c1a9432541d1d432ab",
+    "lines": 17,
+    "scriptLines": 17,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/utils/__tests__/opsFormatters.spec.ts",
+    "sha256": "e10b61431ac636b2b1f509fc2d220bbc27dc9a90ea0171c0bb5e53d55e15dce6",
+    "lines": 26,
+    "scriptLines": 26,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/utils/__tests__/requestDiagnostics.spec.ts",
+    "sha256": "a9502c2819bc8469c1847ce033ff4389881806bde879499d1b2af50fef3dee2c",
+    "lines": 38,
+    "scriptLines": 38,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/utils/accountNameMap.ts",
+    "sha256": "929902cd2726b3d2f8d5f4cca1e35b4f3b8a4709adaf73f014fef09b6dc9517a",
+    "lines": 34,
+    "scriptLines": 34,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/utils/errorDetailResponse.ts",
+    "sha256": "19f35542f506e44583e17c1e9bcd6f8efbaffea7de9374587845787bf6d0a8cb",
+    "lines": 92,
+    "scriptLines": 92,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/utils/opsErrorParams.ts",
+    "sha256": "0a1ba7a6228ee5f446b0cd7b1473447a20e1100a7e37574b95b2a425e3ba9cdc",
+    "lines": 12,
+    "scriptLines": 12,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/utils/opsFormatters.ts",
+    "sha256": "799b304854bb2775a35487335cfd7582dd099e5bf92224454ea19325850b2808",
+    "lines": 89,
+    "scriptLines": 89,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/ops/utils/requestDiagnostics.ts",
+    "sha256": "55d9cf46468585b9c322b21f77f4aca1f48b7459b7a7ce962aab47d47f6a7c94",
+    "lines": 85,
+    "scriptLines": 85,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/orders/AdminOrdersView.vue",
+    "sha256": "00cef2f9fa4efe773ac9669096cac2f5adaa5942ebffefa62b4b86670b77e28b",
+    "lines": 312,
+    "scriptLines": 194,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 168,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 169,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 310,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/orders/AdminPaymentDashboardView.vue",
+    "sha256": "d0cee7a6119953759dc1e4e7afdea01bb8b2acb95450d73b85168af9b9023756",
+    "lines": 141,
+    "scriptLines": 68,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 138,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 139,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/orders/AdminPaymentPlansView.vue",
+    "sha256": "651d4b2519093ebcf1fc1e67733b5382534a151ecf64d7e2c938ae7c2886ab2d",
+    "lines": 203,
+    "scriptLines": 126,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 197,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/orders/PlanEditDialog.vue",
+    "sha256": "995d9a995923ab3bbb70ef8aa2b7ea2648d56cd9755fb36e952d52703ae95563",
+    "lines": 229,
+    "scriptLines": 136,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 175,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/orders/__tests__/AdminPaymentPlansView.spec.ts",
+    "sha256": "0bf6f0cb08af7571ced269485bb4d0428485e7b252dad165ecf193a89423a772",
+    "lines": 107,
+    "scriptLines": 107,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/orders/__tests__/PlanEditDialog.spec.ts",
+    "sha256": "56afb5a217dea03260efe8704c6e3b03b6d5b3d4574486f5b4e39367d06c39de",
+    "lines": 197,
+    "scriptLines": 197,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/settings/EmailTemplateEditor.vue",
+    "sha256": "7c6abe13f58bb14658bed11eb7eec65d8706f5a16b73fc63f2470b4acb4d1980",
+    "lines": 725,
+    "scriptLines": 493,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 714,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 721,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/settings/OpenAIFastPolicyUserSelector.vue",
+    "sha256": "f1b928af1a74d8526cee81f81b2eaadadf9a84073a111ed2e4445a85eeac2d23",
+    "lines": 230,
+    "scriptLines": 148,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 125,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 142,
+        "name": "setTimeout",
+        "asyncCallback": true
+      },
+      {
+        "line": 182,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 213,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 221,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 222,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 225,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 227,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/admin/settings/__tests__/OpenAIFastPolicyUserSelector.spec.ts",
+    "sha256": "a7c6c4fbf9546481da8e0daa1f06272dc04c6e7638a62da90b66172cdb3f4633",
+    "lines": 113,
+    "scriptLines": 113,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/AffiliateView.vue",
+    "sha256": "0f6bffa0a82f450e94023b462c7282a0b2fbd5d086c0877685eda42a676d66ca",
+    "lines": 228,
+    "scriptLines": 86,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 213,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 224,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/AirwallexPaymentView.vue",
+    "sha256": "03c0854854d4a551753508f10c304843aa080c5b673d2a133c760dfec5a3bae6",
+    "lines": 139,
+    "scriptLines": 112,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 47,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 95,
+        "name": "onMounted",
+        "asyncCallback": true
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/AvailableChannelsView.vue",
+    "sha256": "fe5b8b2df1b7d75a563541b38e12dccbe743be47ce2e922a48331b225c74efb3",
+    "lines": 128,
+    "scriptLines": 77,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 110,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 126,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/BatchImageGuideView.vue",
+    "sha256": "c4c5331ef5d810f6842529fa9d06dc9506571cad76fc81c59f524c83a16ce6dd",
+    "lines": 2694,
+    "scriptLines": 1897,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 1419,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1425,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1441,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1454,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1508,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 1681,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 1704,
+        "name": "setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 1715,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 2057,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 2063,
+        "name": "URL.createObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2170,
+        "name": "URL.createObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2182,
+        "name": "URL.revokeObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2185,
+        "name": "URL.revokeObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2199,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 2242,
+        "name": "URL.revokeObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2247,
+        "name": "URL.createObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2252,
+        "name": "URL.createObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2278,
+        "name": "URL.revokeObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2287,
+        "name": "URL.revokeObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 2602,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 2606,
+        "name": "setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 2609,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2610,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2611,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2612,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2613,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2616,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 2623,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 2637,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      },
+      {
+        "line": 2640,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 2644,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2645,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2646,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2647,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2648,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/ChannelStatusV1View.vue",
+    "sha256": "9844d1a8aefce9cc37caa118ad8339446de17c2ee6e8bf1311a40a0707af695e",
+    "lines": 174,
+    "scriptLines": 143,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 92,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 117,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 132,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 151,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 155,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 163,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 170,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/ChannelStatusV2View.vue",
+    "sha256": "93cecadfb97a08c55495cdfb7e182b00e92c2f919478b4d49438036ce1d3fa29",
+    "lines": 1002,
+    "scriptLines": 510,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 623,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 722,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 739,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 746,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 769,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 790,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 793,
+        "name": "signal?.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 822,
+        "name": "signal?.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 844,
+        "name": "window.clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 851,
+        "name": "window.setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 932,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 943,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 947,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 948,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 949,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 953,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 958,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 959,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      },
+      {
+        "line": 966,
+        "name": "window.clearInterval",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/ChannelStatusView.vue",
+    "sha256": "f4831a7a6de216964b11054e93ce83968a0e14d207bf0932bff895095f4bdcdb",
+    "lines": 23,
+    "scriptLines": 15,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 19,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/CustomPageView.vue",
+    "sha256": "50b487b1e2267c24b273861427748abdb9c4744caccaa06c59c88c87a94d8b3c",
+    "lines": 586,
+    "scriptLines": 326,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 300,
+        "name": "fetch",
+        "asyncCallback": false
+      },
+      {
+        "line": 368,
+        "name": "requestAnimationFrame",
+        "asyncCallback": false
+      },
+      {
+        "line": 398,
+        "name": "btn.addEventListener",
+        "asyncCallback": true
+      },
+      {
+        "line": 403,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 406,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 414,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 425,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 447,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": [
+      {
+        "line": 74,
+        "expression": "renderedHtml"
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/views/user/DashboardView.vue",
+    "sha256": "6c679915609f3f11aac8eaa9faf7d3607ade39d9b6911e7fd9e518b48692b0a9",
+    "lines": 50,
+    "scriptLines": 30,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 43,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 48,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/KeysView.vue",
+    "sha256": "70905f5909a540b8c65804e51217002f15c357740998a8635360d3b1b1cbf737",
+    "lines": 2114,
+    "scriptLines": 896,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 1567,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 1592,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 1606,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 2063,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 2099,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 2105,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2106,
+        "name": "setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 2109,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 2110,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 2111,
+        "name": "clearInterval",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [
+      {
+        "line": 1317,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1318,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1327,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 1338,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 1349,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 1353,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/MCPView.vue",
+    "sha256": "bc28988199edfbe2296d847da44d57c1948fd217cee82b4794c815fb8b73e609",
+    "lines": 180,
+    "scriptLines": 99,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 174,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 178,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/PaymentQRCodeView.vue",
+    "sha256": "cb95bd1ad74e76b6a7cd6e0038f8478fece96fc587e9c333b38c5a3d9de8bc62",
+    "lines": 216,
+    "scriptLines": 181,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 165,
+        "name": "setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 189,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 190,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 193,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 195,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 210,
+        "name": "setInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 214,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/PaymentResultView.vue",
+    "sha256": "12b00d327041107423ac48e6dfb08f88a8c947d11732543d9b6e66bd523c10dd",
+    "lines": 474,
+    "scriptLines": 371,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 331,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 354,
+        "name": "setTimeout",
+        "asyncCallback": true
+      },
+      {
+        "line": 368,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 470,
+        "name": "onBeforeUnmount",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/PaymentView.vue",
+    "sha256": "6d671262c0939531cdefb9399ec7b647b87a6ce3d80bb44dce2e0de7a72e13a0",
+    "lines": 1227,
+    "scriptLines": 946,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 413,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 414,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 415,
+        "name": "window.clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 419,
+        "name": "window.setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 420,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 421,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 561,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 766,
+        "name": "watch",
+        "asyncCallback": false
+      },
+      {
+        "line": 1165,
+        "name": "onMounted",
+        "asyncCallback": true
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": [
+      {
+        "line": 58,
+        "expression": "renderedBonusNotice"
+      },
+      {
+        "line": 248,
+        "expression": "renderedHelpText"
+      }
+    ]
+  },
+  {
+    "path": "frontend/src/views/user/ProfileView.vue",
+    "sha256": "b311363964bd393fab5b19853cb36dccab22fc52ca5f736fb0b5ef9042bbc99b",
+    "lines": 44,
+    "scriptLines": 20,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 40,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/RedeemView.vue",
+    "sha256": "0615ae2f1b19aef1607ed7ddc395e37e870a90cf8152562d0c4248c869107a7e",
+    "lines": 549,
+    "scriptLines": 166,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 526,
+        "name": "onMounted",
+        "asyncCallback": true
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/StripePaymentView.vue",
+    "sha256": "5722401242a3dcfd3b7a06ac73c4a4948dfc4bd148f99c588ed74e46c9adddc2",
+    "lines": 329,
+    "scriptLines": 233,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 137,
+        "name": "onMounted",
+        "asyncCallback": true
+      },
+      {
+        "line": 289,
+        "name": "setInterval",
+        "asyncCallback": true
+      },
+      {
+        "line": 296,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 302,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 315,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 317,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 323,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 325,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 326,
+        "name": "clearInterval",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/StripePopupView.vue",
+    "sha256": "20b340e9af425b358345a38b1cc7c0d64e1861bd1578be45e6f4b055efc013c9",
+    "lines": 238,
+    "scriptLines": 183,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 100,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 108,
+        "name": "clearInterval",
+        "asyncCallback": false
+      },
+      {
+        "line": 115,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 120,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 139,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 144,
+        "name": "window.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 151,
+        "name": "setTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 158,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 161,
+        "name": "clearTimeout",
+        "asyncCallback": false
+      },
+      {
+        "line": 164,
+        "name": "window.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 214,
+        "name": "setInterval",
+        "asyncCallback": true
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/SubscriptionsView.vue",
+    "sha256": "babeb16fe163113c4fd8b3c09cc5114dd7d001297472004fbc9151a08b396c97",
+    "lines": 69,
+    "scriptLines": 39,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 58,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/UsageView.vue",
+    "sha256": "f912e9bae2b02a61af9204638d4b20c1a5650ad8bf87e033abcfcdac31fe2074",
+    "lines": 921,
+    "scriptLines": 695,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 451,
+        "name": "AbortController",
+        "asyncCallback": false
+      },
+      {
+        "line": 701,
+        "name": "window.URL.createObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 706,
+        "name": "window.URL.revokeObjectURL",
+        "asyncCallback": false
+      },
+      {
+        "line": 835,
+        "name": "Promise.all",
+        "asyncCallback": false
+      },
+      {
+        "line": 904,
+        "name": "onMounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 907,
+        "name": "document.addEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 912,
+        "name": "onUnmounted",
+        "asyncCallback": false
+      },
+      {
+        "line": 914,
+        "name": "document.removeEventListener",
+        "asyncCallback": false
+      },
+      {
+        "line": 917,
+        "name": "watch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [
+      {
+        "line": 745,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 749,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 791,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 795,
+        "name": "localStorage.getItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/UserOrdersView.vue",
+    "sha256": "b1eface6ee193f835d7bb6e638041130c8658517dfe7ff42353f264b917f5680",
+    "lines": 190,
+    "scriptLines": 107,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 188,
+        "name": "onMounted",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/AffiliateView.spec.ts",
+    "sha256": "0be297660ce8d4c07bb9e5bbe152960820403cc0842746550950a63ae37724e2",
+    "lines": 117,
+    "scriptLines": 117,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/AirwallexPaymentView.lifecycle.spec.ts",
+    "sha256": "e88c36df68c3238ce7eaf901ef4304c7ad1b8a6cf86cb109abc4aabdb2ee5645",
+    "lines": 55,
+    "scriptLines": 55,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/AirwallexPaymentView.spec.ts",
+    "sha256": "e92fa06e78aa49785c775bb86ecba99cccf65101871493b51c01f92dbcb5b96e",
+    "lines": 135,
+    "scriptLines": 135,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/ChannelStatusV1View.details.spec.ts",
+    "sha256": "62a9b5cade7e253d87d175f2b3450c7166ec2924c76b545db632ab8f18e0253b",
+    "lines": 78,
+    "scriptLines": 78,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 13,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 21,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 22,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/ChannelStatusV1View.refresh.spec.ts",
+    "sha256": "40944413225dd871133c475aee86722ed257775c4e36a625ff62949e6ae7ddc6",
+    "lines": 82,
+    "scriptLines": 82,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 23,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 24,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 35,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 71,
+        "name": "localStorage.setItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/ChannelStatusV2View.race.spec.ts",
+    "sha256": "e8cf567dfdfa64eaa37837f54e0b6acad7ef01144d8f675e7a0ee65536688423",
+    "lines": 117,
+    "scriptLines": 117,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/ChannelStatusView.mode.spec.ts",
+    "sha256": "f64a7f548db625f2bae80582b2cb615dc342bd29313cce4ee297f911030fa667",
+    "lines": 53,
+    "scriptLines": 53,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/CustomPageView.race.spec.ts",
+    "sha256": "6a281b8f1024335f4ff7d615ce7909243c583d484384270bf084a66923843473",
+    "lines": 97,
+    "scriptLines": 97,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/CustomPageView.spec.ts",
+    "sha256": "992cbbdd1a2418beb4572187217c87ec0070c9820f3c735ad6fe5122497cdb83",
+    "lines": 171,
+    "scriptLines": 171,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/KeysView.spec.ts",
+    "sha256": "f65c5c2e93702940bef2a97b1a2b78db5f2d55b2fa7b425a54a669493feb7108",
+    "lines": 658,
+    "scriptLines": 658,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [
+      {
+        "line": 271,
+        "name": "localStorage.clear"
+      },
+      {
+        "line": 425,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 428,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 462,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 463,
+        "name": "localStorage.setItem"
+      },
+      {
+        "line": 478,
+        "name": "localStorage.getItem"
+      },
+      {
+        "line": 481,
+        "name": "localStorage.getItem"
+      }
+    ],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/MCPView.spec.ts",
+    "sha256": "f4100ab1b434c1bee14ace6d4211f9b172f817aa72cdb0e2cb18fc4e9d017035",
+    "lines": 151,
+    "scriptLines": 151,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/PaymentResultView.spec.ts",
+    "sha256": "f7684c9d2e37a702b8ae9a2e20b32995bd7ec707379552273a11fcb7fd970590",
+    "lines": 539,
+    "scriptLines": 539,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/PaymentView.spec.ts",
+    "sha256": "6fd3b4bcc4d3a4d63e90bb8a89fa7083749f6a2a0e500902bd8f6cf1a5a0045d",
+    "lines": 890,
+    "scriptLines": 890,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/ProfileView.spec.ts",
+    "sha256": "cf5f0d369152c58f60cced6981dbc2581af62d297e700ee41cbc1bc97f6aa1ec",
+    "lines": 107,
+    "scriptLines": 107,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/RedeemView.spec.ts",
+    "sha256": "a328216dec9f61accfb2928b0cf3699d6ce0b22a7547ad35b4a03d360c82d670",
+    "lines": 242,
+    "scriptLines": 242,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/StripePaymentView.spec.ts",
+    "sha256": "834ab845a21f5e8418a5d642b7e26fa186315cf3813e9fcaff59fc8613d8850c",
+    "lines": 284,
+    "scriptLines": 284,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/StripePopupView.lifecycle.spec.ts",
+    "sha256": "5f079fb3f3466a7c019212694b09de3c46f12cca48c8502d804fe45c632d5843",
+    "lines": 120,
+    "scriptLines": 120,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/SubscriptionsView.membership.spec.ts",
+    "sha256": "5ccb0f2be97bc0d4f8bc67fefdbe9cce36f9ca99e5323bae85b46fa8f998c9af",
+    "lines": 50,
+    "scriptLines": 50,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/UsageView.spec.ts",
+    "sha256": "a5e6a11266b6f6e95d5a984c4dbb1cbdb5f84c2008911a41de184db8a04456bd",
+    "lines": 599,
+    "scriptLines": 599,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/UserOrdersView.filters.spec.ts",
+    "sha256": "c2b897dfb9f00dd73607dced52594156c22230d040132fb63930506d939b8fa7",
+    "lines": 55,
+    "scriptLines": 55,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/paymentUx.spec.ts",
+    "sha256": "c9be534f11ac217bf60be013fe7c993a0936a7c3ce85c56b7a9f521fecaa2265",
+    "lines": 83,
+    "scriptLines": 83,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/paymentWechatResume.spec.ts",
+    "sha256": "03978b30f5de14103285a00941b4e75d55154ba169578df3bbdf693e2ef9083a",
+    "lines": 58,
+    "scriptLines": 58,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/__tests__/stripeLazyLoading.spec.ts",
+    "sha256": "009c20419841cde4cd625ecf7178d3b07f29f46063adec5bbee754b0f4441c4c",
+    "lines": 34,
+    "scriptLines": 34,
+    "test": true,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/paymentUx.ts",
+    "sha256": "4c9a50b3db490605f2b538da4aed8e40db74571a7720425e23ceb6b5a7e28d70",
+    "lines": 114,
+    "scriptLines": 114,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/src/views/user/paymentWechatResume.ts",
+    "sha256": "4b0e049b945881618f19a4fbe2c16d40a2c6d94c972e76f029d367e62e2d7e1c",
+    "lines": 91,
+    "scriptLines": 91,
+    "test": false,
+    "parseErrors": [],
+    "calls": [],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  },
+  {
+    "path": "frontend/vite.config.ts",
+    "sha256": "092dd3644b10082ba1dbb96bbd25fdaa50e334d21c5786763036058f44ad2be9",
+    "lines": 188,
+    "scriptLines": 188,
+    "test": false,
+    "parseErrors": [],
+    "calls": [
+      {
+        "line": 62,
+        "name": "fetch",
+        "asyncCallback": false
+      }
+    ],
+    "storage": [],
+    "sinks": [],
+    "vHtml": []
+  }
+]

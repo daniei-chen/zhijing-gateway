@@ -703,7 +703,8 @@ export default {
         restoreHint: 'These subscriptions will be enabled again. Subscriptions whose original validity has ended will be restored as expired.',
         confirm: 'Confirm Action',
         retry: 'Retry Original Action',
-        retryHint: 'The outcome is not yet confirmed. Retrying continues the original operation to avoid duplicate changes. You can also close this dialog, then select the same subscriptions and settings to retry.',
+        retryHint: 'The outcome is not yet confirmed. Retrying only checks the saved result. You can also close this dialog, then select the same subscriptions and settings to check again.',
+        resultUnconfirmed: 'The saved batch result is unavailable or expired. Review the subscription change history before starting a new batch. This check did not repeat any item.',
         requestFailed: 'The bulk request failed. Please retry.',
         result: 'Completed: {success} succeeded, {failed} failed',
         itemFailed: 'Action failed'
@@ -783,6 +784,7 @@ export default {
       failedToLoad: 'Failed to load subscriptions',
       failedToAssign: 'Failed to assign subscription',
       failedToAdjust: 'Failed to adjust subscription',
+      adjustResultUnconfirmed: 'The previous subscription adjustment is unconfirmed. Review the subscription change history before starting another operation. This check does not apply another adjustment.',
       failedToRevoke: 'Failed to revoke subscription',
       failedToRestore: 'Failed to restore subscription',
       adjustWouldExpire: 'Remaining days after adjustment must be greater than 0',

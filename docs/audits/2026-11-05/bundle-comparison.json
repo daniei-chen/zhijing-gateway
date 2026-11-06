@@ -1,0 +1,476 @@
+{
+  "generated_at_utc": "2026-11-05T11:11:24.702511+00:00",
+  "purpose": "Exact original tracked source versus final audited candidate static bundle acceptance comparison.",
+  "original": {
+    "commit": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+    "tracked_files_verified": 1182,
+    "source_matches_git_blobs": true,
+    "working_and_installed_lockfile_identical": true,
+    "lockfile_sha256": "0c2e5969a1eca24a0c04251c16239cbf6f5c4ee9da066826f5bf2584eee7c8be",
+    "toolchain": {
+      "vite": "5.4.21",
+      "vitest": "2.1.9",
+      "xlsx": "0.18.5",
+      "node": "24.22.1"
+    },
+    "proof": "${AUDIT_WORKSPACE}/release-baseline-source-proof.json",
+    "metrics": "${AUDIT_WORKSPACE}/perf-build-release.metrics.json",
+    "directory": "${AUDIT_WORKSPACE}/perf-build-release"
+  },
+  "candidate": {
+    "source_base_commit": "8f72c8545d8134b4c4d14036a2060fd2a08b0053",
+    "build_input_files": 733,
+    "toolchain": {
+      "vite": "6.4.5",
+      "vitest": "4.1.12",
+      "xlsx": "0.20.3",
+      "node": "24.22.1"
+    },
+    "input_hashes": "${AUDIT_WORKSPACE}/perf-build-final.source-hashes.json",
+    "artifact_hashes": "${AUDIT_WORKSPACE}/perf-build-final.artifact-hashes.json",
+    "metrics": "${AUDIT_WORKSPACE}/perf-build-final.metrics.json",
+    "directory": "${AUDIT_WORKSPACE}/perf-build-final",
+    "input_files_verified_unchanged_at_recheck": 733,
+    "artifact_files_verified_unchanged_at_recheck": 314
+  },
+  "method": "Sum individually gzip-compressed JS files reachable through manifest imports from index.html and the route. Excludes dynamicImports, CSS/images, transport overhead and browser timings.",
+  "route_comparison": {
+    "index.html": {
+      "original_js_bytes": 654907,
+      "candidate_js_bytes": 615927,
+      "js_bytes_reduction": 38980,
+      "js_reduction_percent": 5.952,
+      "original_gzip_js_bytes": 218779,
+      "candidate_gzip_js_bytes": 207301,
+      "gzip_bytes_reduction": 11478,
+      "gzip_reduction_percent": 5.246
+    },
+    "src/views/auth/LoginView.vue": {
+      "original_js_bytes": 1147730,
+      "candidate_js_bytes": 679382,
+      "js_bytes_reduction": 468348,
+      "js_reduction_percent": 40.806,
+      "original_gzip_js_bytes": 385159,
+      "candidate_gzip_js_bytes": 232131,
+      "gzip_bytes_reduction": 153028,
+      "gzip_reduction_percent": 39.731
+    },
+    "src/views/user/DashboardView.vue": {
+      "original_js_bytes": 1444582,
+      "candidate_js_bytes": 976385,
+      "js_bytes_reduction": 468197,
+      "js_reduction_percent": 32.411,
+      "original_gzip_js_bytes": 478612,
+      "candidate_gzip_js_bytes": 325829,
+      "gzip_bytes_reduction": 152783,
+      "gzip_reduction_percent": 31.922
+    },
+    "src/views/admin/UsageView.vue": {
+      "original_js_bytes": 1610823,
+      "candidate_js_bytes": 1142624,
+      "js_bytes_reduction": 468199,
+      "js_reduction_percent": 29.066,
+      "original_gzip_js_bytes": 527546,
+      "candidate_gzip_js_bytes": 374763,
+      "gzip_bytes_reduction": 152783,
+      "gzip_reduction_percent": 28.961
+    },
+    "src/views/user/AirwallexPaymentView.vue": {
+      "original_js_bytes": 1221517,
+      "candidate_js_bytes": 753087,
+      "js_bytes_reduction": 468430,
+      "js_reduction_percent": 38.348,
+      "original_gzip_js_bytes": 402578,
+      "candidate_gzip_js_bytes": 249715,
+      "gzip_bytes_reduction": 152863,
+      "gzip_reduction_percent": 37.971
+    },
+    "src/views/admin/AccountsView.vue": {
+      "original_js_bytes": 2459773,
+      "candidate_js_bytes": 1993493,
+      "js_bytes_reduction": 466280,
+      "js_reduction_percent": 18.956,
+      "original_gzip_js_bytes": 711319,
+      "candidate_gzip_js_bytes": 559401,
+      "gzip_bytes_reduction": 151918,
+      "gzip_reduction_percent": 21.357
+    },
+    "src/views/admin/SettingsView.vue": {
+      "original_js_bytes": 1722183,
+      "candidate_js_bytes": 1254997,
+      "js_bytes_reduction": 467186,
+      "js_reduction_percent": 27.128,
+      "original_gzip_js_bytes": 513645,
+      "candidate_gzip_js_bytes": 361272,
+      "gzip_bytes_reduction": 152373,
+      "gzip_reduction_percent": 29.665
+    }
+  },
+  "vendor_chunks": {
+    "original": {
+      "vendor-chart-BchnUoOD.js": {
+        "bytes": 178340,
+        "gzip_bytes": 61253
+      },
+      "vendor-i18n-cY70av7B.js": {
+        "bytes": 56991,
+        "gzip_bytes": 19111
+      },
+      "vendor-misc-BBAVm09x.js": {
+        "bytes": 280570,
+        "gzip_bytes": 95227
+      },
+      "vendor-stripe-DSy-tJeT.js": {
+        "bytes": 3308,
+        "gzip_bytes": 1520
+      },
+      "vendor-ui-CP-ddnDN.js": {
+        "bytes": 436938,
+        "gzip_bytes": 144776
+      },
+      "vendor-vue-DJQ-D4Ek.js": {
+        "bytes": 114299,
+        "gzip_bytes": 44270
+      }
+    },
+    "candidate": {
+      "vendor-airwallex-DfdtCo4_.js": {
+        "bytes": 41987,
+        "gzip_bytes": 12822
+      },
+      "vendor-chart-Dc57SmKv.js": {
+        "bytes": 178344,
+        "gzip_bytes": 61252
+      },
+      "vendor-i18n-CiNGTo9G.js": {
+        "bytes": 56997,
+        "gzip_bytes": 19116
+      },
+      "vendor-misc-8hxHCCDN.js": {
+        "bytes": 239658,
+        "gzip_bytes": 83248
+      },
+      "vendor-stripe-DSy-tJeT.js": {
+        "bytes": 3308,
+        "gzip_bytes": 1520
+      },
+      "vendor-ui-ClhMSMq2.js": {
+        "bytes": 7301,
+        "gzip_bytes": 3133
+      },
+      "vendor-vue-Cj0O_yEB.js": {
+        "bytes": 114318,
+        "gzip_bytes": 44276
+      },
+      "vendor-xlsx-D9UGuzH6.js": {
+        "bytes": 500050,
+        "gzip_bytes": 161399
+      }
+    }
+  },
+  "largest_js_chunks": {
+    "original": [
+      {
+        "file": "app-assets/AccountsView-BdASsCSv.js",
+        "bytes": 855369,
+        "gzip_bytes": 176633
+      },
+      {
+        "file": "app-assets/index-CDqNL0_y.js",
+        "bytes": 446010,
+        "gzip_bytes": 135646
+      },
+      {
+        "file": "app-assets/SettingsView-CPBss4RU.js",
+        "bytes": 440486,
+        "gzip_bytes": 86741
+      },
+      {
+        "file": "app-assets/vendor-ui-CP-ddnDN.js",
+        "bytes": 436938,
+        "gzip_bytes": 144776
+      },
+      {
+        "file": "app-assets/index-Djdmzfdh.js",
+        "bytes": 426373,
+        "gzip_bytes": 143123
+      },
+      {
+        "file": "app-assets/vendor-misc-BBAVm09x.js",
+        "bytes": 280570,
+        "gzip_bytes": 95227
+      },
+      {
+        "file": "app-assets/OpsDashboard-BbifKsi8.js",
+        "bytes": 224727,
+        "gzip_bytes": 48308
+      },
+      {
+        "file": "app-assets/GroupsView-cKKSvOIL.js",
+        "bytes": 218138,
+        "gzip_bytes": 44563
+      },
+      {
+        "file": "app-assets/index-CT74q1ON.js",
+        "bytes": 203047,
+        "gzip_bytes": 60171
+      },
+      {
+        "file": "app-assets/vendor-chart-BchnUoOD.js",
+        "bytes": 178340,
+        "gzip_bytes": 61253
+      }
+    ],
+    "candidate": [
+      {
+        "file": "app-assets/AccountsView-DBCQtUL-.js",
+        "bytes": 857071,
+        "gzip_bytes": 177404
+      },
+      {
+        "file": "app-assets/vendor-xlsx-D9UGuzH6.js",
+        "bytes": 500050,
+        "gzip_bytes": 161399
+      },
+      {
+        "file": "app-assets/index-CDqNL0_y.js",
+        "bytes": 446010,
+        "gzip_bytes": 135646
+      },
+      {
+        "file": "app-assets/SettingsView-BgqaaqNN.js",
+        "bytes": 441299,
+        "gzip_bytes": 87071
+      },
+      {
+        "file": "app-assets/index-Djdmzfdh.js",
+        "bytes": 426373,
+        "gzip_bytes": 143123
+      },
+      {
+        "file": "app-assets/vendor-misc-8hxHCCDN.js",
+        "bytes": 239658,
+        "gzip_bytes": 83248
+      },
+      {
+        "file": "app-assets/OpsDashboard-CAO_TCJL.js",
+        "bytes": 224719,
+        "gzip_bytes": 48320
+      },
+      {
+        "file": "app-assets/GroupsView-DYtsol35.js",
+        "bytes": 218138,
+        "gzip_bytes": 44584
+      },
+      {
+        "file": "app-assets/index-BbgfBQo0.js",
+        "bytes": 204954,
+        "gzip_bytes": 60661
+      },
+      {
+        "file": "app-assets/vendor-chart-Dc57SmKv.js",
+        "bytes": 178344,
+        "gzip_bytes": 61252
+      }
+    ]
+  },
+  "build_input_changes": [
+    {
+      "path": "frontend/build/serializePublicSettings.ts",
+      "change": "added",
+      "original_sha256": null,
+      "candidate_sha256": "16f89a26759257164a819b4ae89dc8c99fe6afbcedb4a85dc7b2ae2c1969cda4"
+    },
+    {
+      "path": "frontend/package.json",
+      "change": "modified",
+      "original_sha256": "b42f89ac5b4c76ce23655093b1b8c3e402d94586fa94dfa2c1b1af1990801ea6",
+      "candidate_sha256": "70eefcb68d71f2f48f7abca5f9b005c351638646e99bbad23cd9b68ae607a1f6"
+    },
+    {
+      "path": "frontend/pnpm-lock.yaml",
+      "change": "modified",
+      "original_sha256": "0c2e5969a1eca24a0c04251c16239cbf6f5c4ee9da066826f5bf2584eee7c8be",
+      "candidate_sha256": "25454509edd113a44bd23337aa3e49673fcc1e8ebdc2d4dba4ac8324acd04e4c"
+    },
+    {
+      "path": "frontend/src/api/accountTestStream.ts",
+      "change": "added",
+      "original_sha256": null,
+      "candidate_sha256": "798ec0aa4067430eaeae0b02045d24be1771739423525f0e84aacd8f260636cd"
+    },
+    {
+      "path": "frontend/src/api/admin/accounts.ts",
+      "change": "modified",
+      "original_sha256": "e225230816da0d2d2bbfd6d730440473be18f61d4693cdf793760c764572ab73",
+      "candidate_sha256": "11bd939d7f738530187310ba7f4f9f839f528cefd54b1e590d7b34f76d95046f"
+    },
+    {
+      "path": "frontend/src/api/admin/backup.ts",
+      "change": "modified",
+      "original_sha256": "ab075a014eb820554170f0802768bc97d0a412a502124d34541153d299ee9b39",
+      "candidate_sha256": "4ccb26d5bc07c51af899ad8f4ae764593c12f3bf2a6a96c2cc45fbd4dbee0872"
+    },
+    {
+      "path": "frontend/src/api/admin/channelMonitor.ts",
+      "change": "modified",
+      "original_sha256": "0ad6d38cc9e2ac3c8b026ca0b91bfafa6396051ce66ab1ed5f46caeb9f11d6c2",
+      "candidate_sha256": "32e73847fb7b31166a2aed51fa4303b7930695d098bfd3197fc949767c22d355"
+    },
+    {
+      "path": "frontend/src/api/admin/groups.ts",
+      "change": "modified",
+      "original_sha256": "2e96f6c14714144236deedb7c8e71b45eaa1d2f11d861db49162408e6a7091c6",
+      "candidate_sha256": "bc3e32e6abc5728adfc86ec1702be1eb397c277d7fbf45033c276341d72e52b3"
+    },
+    {
+      "path": "frontend/src/api/admin/ops.ts",
+      "change": "modified",
+      "original_sha256": "55576d7b4a11c100d740eade9a047fb1adca942c9dd237a58bbf7d2cbba1a718",
+      "candidate_sha256": "5833407aacae43d8f549b14c5cd954897dd69aab04e23315049eb3a3b775ed3a"
+    },
+    {
+      "path": "frontend/src/api/authSession.ts",
+      "change": "modified",
+      "original_sha256": "4e2f9249556608664125e2d5c697aba33ec6c4afd4886a3261cc23a66258860c",
+      "candidate_sha256": "6261024f14e5b1a3148bf1bd4b3722a273456f49f8c234c053d56e08eb53fa2b"
+    },
+    {
+      "path": "frontend/src/api/passkey.ts",
+      "change": "modified",
+      "original_sha256": "b38ab22fc8e47277fe4aa9448424bbff41586044d448758dca1521806d6509dd",
+      "candidate_sha256": "215009c3c2922a2ccade3bb9ee4a7886a55d9c350e8466ba2916863643f244f4"
+    },
+    {
+      "path": "frontend/src/components/account/AccountTestModal.vue",
+      "change": "modified",
+      "original_sha256": "2cbb713a5c736992d7cb3628ad4e9f7e6c94cf5b3b96a206d8447cbcdc699b9f",
+      "candidate_sha256": "a74a02d9f6f03e38492d8377739391e142865af657b37f419a6256793d103a4a"
+    },
+    {
+      "path": "frontend/src/components/admin/account/AccountTestModal.vue",
+      "change": "modified",
+      "original_sha256": "22854fb14788b422728700169f8ee069a6c0cc99bf82950e1c01a225527d9e8a",
+      "candidate_sha256": "9858d485190a77896e57baabe355d3639ed8cb9e0ad43b9577c8fc9b83e110de"
+    },
+    {
+      "path": "frontend/src/components/payment/PaymentQRDialog.vue",
+      "change": "modified",
+      "original_sha256": "72e44b5d1db9e262b1d90433a7c7fb8a97d4bcee17b7e12ba8f67b0090b47eb6",
+      "candidate_sha256": "c21fafdfa2c84a1744eb6c48c5591bed828dd80d57565bf13bc4ce3db75fd0e7"
+    },
+    {
+      "path": "frontend/src/components/payment/PaymentStatusPanel.vue",
+      "change": "modified",
+      "original_sha256": "aebb696fcb9c26c8d6139d6c2d1d5ea5b36d7e97880e2f733f6ebba9c69706a7",
+      "candidate_sha256": "11273262f20a8c882f88b103bc4a8d381669ae7c16553230f7d2bb3fab20b6cd"
+    },
+    {
+      "path": "frontend/src/composables/useBatchImageAccess.ts",
+      "change": "modified",
+      "original_sha256": "00983cd67629d4d1c27af600f4a11ce5f9776de0f27fcb52d14ded7abe5f0930",
+      "candidate_sha256": "5719f6b02ee634fd131fac200a438d9a24b5dde538a614dd2caf047d79e197d2"
+    },
+    {
+      "path": "frontend/src/composables/useStepUp.ts",
+      "change": "modified",
+      "original_sha256": "e493b40b1e18b2e7c72caeff49c4964e4a1ca257bfc93878926542051b12a4e9",
+      "candidate_sha256": "5c5c88ae55953d636bce27b06152a4579fe069b05b42a65137147eb19593e3a5"
+    },
+    {
+      "path": "frontend/src/composables/useTableLoader.ts",
+      "change": "modified",
+      "original_sha256": "312b02aef5292521a35797fbc7aed4df668ffd5029f6412ba32ddeaa35a868f3",
+      "candidate_sha256": "2c138c91271f17071a289148cbff1a542d5c0166ca5532f2c0eec874d6ef0804"
+    },
+    {
+      "path": "frontend/src/stores/auth.ts",
+      "change": "modified",
+      "original_sha256": "e283d82a19a939440c749c88868719d8d90ba84d15c86767ac9785152336c2f5",
+      "candidate_sha256": "d9aacbc8c0cfffb8e98961dc74867468b515e10c22780406e9e61c92641500a1"
+    },
+    {
+      "path": "frontend/src/utils/embedded-url.ts",
+      "change": "modified",
+      "original_sha256": "8857292d8594abac89743fafc811db9d6503a66a3569f0a0ee8e0edd4247ab54",
+      "candidate_sha256": "b2321ed6d6ca4a66c4788006b55e5f15dedfaa1fb544d4673358b5f225c7ef01"
+    },
+    {
+      "path": "frontend/src/utils/registrationDraft.ts",
+      "change": "added",
+      "original_sha256": null,
+      "candidate_sha256": "d4102a21284117184a175cc980993228609d6754fa9addd9257cf97c8a12131e"
+    },
+    {
+      "path": "frontend/src/views/admin/AccountsView.vue",
+      "change": "modified",
+      "original_sha256": "cead854ae01c05b5135c44e6c414ab43c20aaf9208a19ec610472dab50c74c4b",
+      "candidate_sha256": "888cbf05d976c6314486af2a37fa0b8ac551e1cdd58d171671e3a994b0bf5334"
+    },
+    {
+      "path": "frontend/src/views/admin/BackupView.vue",
+      "change": "modified",
+      "original_sha256": "f7e8f2b458aa2ff9595c4c0ec8c577076e40cc423f01df8a155b891096447707",
+      "candidate_sha256": "0a4a83b4d4de59bb9ba6629ba9c7603838c420bf402ac001356dc8c7fb999067"
+    },
+    {
+      "path": "frontend/src/views/admin/UsageView.vue",
+      "change": "modified",
+      "original_sha256": "2da75ffe925b42b0d0a925105dc8cda1643d431978dffcb9d856215cd5b81f7e",
+      "candidate_sha256": "88732ecf5d18a4e5d46fedf3096285143e8247ce25bf045feda062cde76150c5"
+    },
+    {
+      "path": "frontend/src/views/auth/EmailVerifyView.vue",
+      "change": "modified",
+      "original_sha256": "87fc8dc1239437ddc3c70f968a0ed0505bf2d2047fb1030e2a82a35018fcb70f",
+      "candidate_sha256": "64bfc71c4e2831cd66c4fd4e6b3e831ccd3b87b73c58794e7ef39ac1bca595d8"
+    },
+    {
+      "path": "frontend/src/views/auth/LoginView.vue",
+      "change": "modified",
+      "original_sha256": "f6fffcd385cd56dcb8f2ca50d14505fb4f3cfbed932e9c5498bda6371574849f",
+      "candidate_sha256": "226610f6f27cd728271f13bd3a6fb6d9eaaa187eecb9173f76b8089ff614a0f4"
+    },
+    {
+      "path": "frontend/src/views/auth/RegisterView.vue",
+      "change": "modified",
+      "original_sha256": "8406d449578b24efb0da4981322c7711926bbb957e4d45aa6aea7fcbe498bac5",
+      "candidate_sha256": "4dfb2fa29c75ee19e33f034925949e340f5f789f94d532b0b59c4e1712f0b9c8"
+    },
+    {
+      "path": "frontend/src/views/user/ChannelStatusV2View.vue",
+      "change": "modified",
+      "original_sha256": "911dd40db4532bc25ea0bf3fec27d260ea00802f1f91beed5a1944671c6c566d",
+      "candidate_sha256": "93cecadfb97a08c55495cdfb7e182b00e92c2f919478b4d49438036ce1d3fa29"
+    },
+    {
+      "path": "frontend/src/views/user/StripePaymentView.vue",
+      "change": "modified",
+      "original_sha256": "c7c8d6597022b75d0b8ae21c338096630c1b5f3cae9f5ec5dabb492d5cde5337",
+      "candidate_sha256": "5722401242a3dcfd3b7a06ac73c4a4948dfc4bd148f99c588ed74e46c9adddc2"
+    },
+    {
+      "path": "frontend/src/views/user/StripePopupView.vue",
+      "change": "modified",
+      "original_sha256": "fe88457a8ccfb6618cc49fcc9934592639b9f32322a936e204b96dba60138a36",
+      "candidate_sha256": "20b340e9af425b358345a38b1cc7c0d64e1861bd1578be45e6f4b055efc013c9"
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "change": "modified",
+      "original_sha256": "70f3a51de904951f70c7ee398a661575c0024fc530d24f22bf27465db660610f",
+      "candidate_sha256": "092dd3644b10082ba1dbb96bbd25fdaa50e334d21c5786763036058f44ad2be9"
+    }
+  ],
+  "build_input_change_counts": {
+    "modified": 28,
+    "added": 3,
+    "deleted": 0
+  },
+  "limitations": [
+    "Original Vite 5.4.21/XLSX 0.18.5 versus candidate Vite 6.4.5/XLSX 0.20.3; changes include code, chunking and dependency updates. This is an original-release-to-candidate comparison, not an isolated single-change experiment.",
+    "Static imports only. Existing idle route prefetch and subsequent dynamic feature downloads are excluded, so results are not total browser HAR downloads.",
+    "JS sizes and gzip are deterministic artifact measurements, not live network latency, CPU profiling, memory profiling, backend TPS or p95 latency.",
+    "Earlier perf-build-before/perf-build-after snapshots were taken during parallel agent edits. Retained for explaining vendor splitting, but not used as pure release baseline."
+  ]
+}

@@ -2,6 +2,8 @@ import { defineComponent, h } from 'vue'
 import { flushPromises, mount } from '@vue/test-utils'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import EmailVerifyView from '@/views/auth/EmailVerifyView.vue'
+import { clearRegistrationDraft, saveRegistrationDraft } from '@/utils/registrationDraft'
+import { replaceAuthSession } from '@/api/authSession'
 
 const {
   pushMock,
@@ -121,6 +123,7 @@ describe('EmailVerifyView', () => {
     createTurnstileResetMock.mockReset()
     verifyActionMock.mockReset()
     authStoreState.pendingAuthSession = null
+    clearRegistrationDraft()
     sessionStorage.clear()
     localStorage.clear()
 
@@ -133,6 +136,41 @@ describe('EmailVerifyView', () => {
     sendVerifyCodeMock.mockResolvedValue({ countdown: 60 })
     sendPendingOAuthVerifyCodeMock.mockResolvedValue({ countdown: 60 })
     setTokenMock.mockResolvedValue({})
+  })
+
+  it('does not create an account from an old captcha operation after the session changes', async () => {
+    getPublicSettingsMock.mockResolvedValue({
+      turnstile_enabled: false, tencent_captcha_enabled: true,
+      tencent_captcha_app_id: 'SYNTHETIC-app', registration_email_suffix_whitelist: []
+    })
+    saveRegistrationDraft({
+      email: 'new@example.test', password: 'SYNTHETIC-password', pending_provider: 'oidc',
+      pending_auth_token_field: 'pending_oauth_token'
+    })
+    let complete!: (proof: { token: string; randstr: string }) => void
+    verifyActionMock.mockReturnValue(new Promise(resolve => { complete = resolve }))
+    const CaptchaChallengeStub = defineComponent({
+      setup(_, { expose }) {
+        expose({ verifyAction: verifyActionMock, reset: createTurnstileResetMock })
+        return () => h('div')
+      }
+    })
+    const wrapper = mount(EmailVerifyView, { global: { stubs: {
+      AuthLayout: { template: '<div><slot /><slot name="footer" /></div>' },
+      Icon: true, TurnstileWidget: CaptchaChallengeStub, transition: false
+    } } })
+    await flushPromises()
+    await wrapper.get('#code').setValue('123456')
+    await wrapper.get('form').trigger('submit')
+    await wrapper.get('form').trigger('submit')
+    expect(verifyActionMock).toHaveBeenCalledTimes(1)
+    replaceAuthSession({ accessToken: 'SYNTHETIC-new-session', user: { id: 810 } })
+    complete({ token: 'SYNTHETIC-proof', randstr: '@SYNTHETIC' })
+    await flushPromises()
+    expect(apiClientPostMock).not.toHaveBeenCalled()
+    expect(registerMock).not.toHaveBeenCalled()
+    expect(localStorage.getItem('auth_token')).toBe('SYNTHETIC-new-session')
+    wrapper.unmount()
   })
 
   it('acquires a fresh Tencent proof for each resend action', async () => {
@@ -148,15 +186,12 @@ describe('EmailVerifyView', () => {
     verifyActionMock
       .mockResolvedValueOnce({ token: 'ticket-1', randstr: '@rand-1' })
       .mockResolvedValueOnce({ token: 'ticket-2', randstr: '@rand-2' })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'fresh@example.com',
         password: 'secret-123',
         tencent_captcha_ticket: 'initial-ticket',
         tencent_captcha_randstr: '@initial-rand',
       })
-    )
 
     const CaptchaChallengeStub = defineComponent({
       setup(_, { expose }) {
@@ -196,6 +231,26 @@ describe('EmailVerifyView', () => {
     }))
   })
 
+  it('does not redirect or show success after leaving the verification page during registration', async () => {
+    saveRegistrationDraft({ email: 'fresh@example.test', password: 'SYNTHETIC-password' })
+    let complete!: (value: unknown) => void
+    registerMock.mockReturnValue(new Promise(resolve => { complete = resolve }))
+    const wrapper = mount(EmailVerifyView, { global: { stubs: {
+      AuthLayout: { template: '<div><slot /><slot name="footer" /></div>' },
+      Icon: true, TurnstileWidget: true, transition: false
+    } } })
+    await flushPromises()
+    await wrapper.get('#code').setValue('123456')
+    await wrapper.get('form').trigger('submit')
+    await flushPromises()
+    expect(registerMock).toHaveBeenCalledOnce()
+    wrapper.unmount()
+    complete({})
+    await flushPromises()
+    expect(pushMock).not.toHaveBeenCalled()
+    expect(showSuccessMock).not.toHaveBeenCalled()
+  })
+
   it('uses the pending oauth verify-code endpoint when register data carries a pending auth session', async () => {
     authStoreState.pendingAuthSession = {
       token: 'pending-token-1',
@@ -203,13 +258,10 @@ describe('EmailVerifyView', () => {
       provider: 'wechat',
       redirect: '/profile',
     }
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'fresh@example.com',
         password: 'secret-123',
       })
-    )
 
     mount(EmailVerifyView, {
       global: {
@@ -239,14 +291,11 @@ describe('EmailVerifyView', () => {
       registration_email_suffix_whitelist: [],
     })
     sendVerifyCodeMock.mockRejectedValue(new Error('send failed'))
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'fresh@example.com',
         password: 'secret-123',
         turnstile_token: 'initial-proof',
       })
-    )
 
     const wrapper = mount(EmailVerifyView, {
       global: {
@@ -282,13 +331,10 @@ describe('EmailVerifyView', () => {
       site_name: 'Sub2API',
       registration_email_suffix_whitelist: ['allowed.com'],
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'fresh@example.com',
         password: 'secret-123',
       })
-    )
 
     mount(EmailVerifyView, {
       global: {
@@ -318,13 +364,10 @@ describe('EmailVerifyView', () => {
       registration_email_suffix_whitelist: ['allowed.com'],
       registration_email_domain_quota_enabled: true,
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'first@custom.example',
         password: 'secret-123',
       })
-    )
 
     mount(EmailVerifyView, {
       global: {
@@ -357,13 +400,10 @@ describe('EmailVerifyView', () => {
       reason: 'EMAIL_DOMAIN_REGISTRATION_LIMIT',
       message: 'raw backend message',
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'second@custom.example',
         password: 'secret-123',
       })
-    )
 
     mount(EmailVerifyView, {
       global: {
@@ -391,13 +431,10 @@ describe('EmailVerifyView', () => {
       registration_email_suffix_whitelist: ['allowed.com'],
       registration_email_domain_quota_enabled: true,
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'second@custom.example',
         password: 'secret-123',
       })
-    )
     registerMock.mockRejectedValueOnce({
       reason: 'EMAIL_DOMAIN_REGISTRATION_LIMIT',
       message: 'raw backend message',
@@ -433,13 +470,10 @@ describe('EmailVerifyView', () => {
       site_name: 'Sub2API',
       registration_email_suffix_whitelist: ['allowed.com'],
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'first@custom.example',
         password: 'secret-123',
       })
-    )
 
     mount(EmailVerifyView, {
       global: {
@@ -471,13 +505,10 @@ describe('EmailVerifyView', () => {
       site_name: 'Sub2API',
       registration_email_suffix_whitelist: ['allowed.com'],
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'fresh@example.com',
         password: 'secret-123',
       })
-    )
 
     mount(EmailVerifyView, {
       global: {
@@ -518,13 +549,10 @@ describe('EmailVerifyView', () => {
       provider: 'oidc',
       redirect: '/profile/security',
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'fresh@example.com',
         password: 'secret-123',
       })
-    )
 
     mount(EmailVerifyView, {
       global: {
@@ -556,14 +584,11 @@ describe('EmailVerifyView', () => {
       provider: 'wechat',
       redirect: '/profile',
     }
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'fresh@example.com',
         password: 'secret-123',
         aff_code: 'AFF123',
       })
-    )
     apiClientPostMock.mockResolvedValue({
       data: {
         access_token: 'oauth-access-token',
@@ -620,14 +645,11 @@ describe('EmailVerifyView', () => {
       site_name: 'Sub2API',
       registration_email_suffix_whitelist: ['allowed.com'],
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'fresh@example.com',
         password: 'secret-123',
         turnstile_token: 'send-code-token',
       })
-    )
     apiClientPostMock.mockResolvedValue({
       data: {
         access_token: 'oauth-access-token',
@@ -692,14 +714,11 @@ describe('EmailVerifyView', () => {
       site_name: 'Sub2API',
       registration_email_suffix_whitelist: ['allowed.com'],
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'fresh@example.com',
         password: 'secret-123',
         turnstile_token: 'send-code-token',
       })
-    )
     apiClientPostMock.mockRejectedValue(new Error('invalid verify code'))
 
     const wrapper = mount(EmailVerifyView, {
@@ -749,13 +768,10 @@ describe('EmailVerifyView', () => {
       site_name: 'Sub2API',
       registration_email_suffix_whitelist: ['allowed.com'],
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'fresh@example.com',
         password: 'secret-123',
       })
-    )
     apiClientPostMock.mockResolvedValue({
       data: {
         auth_result: 'pending_session',
@@ -801,15 +817,12 @@ describe('EmailVerifyView', () => {
   })
 
   it('keeps the normal email registration flow unchanged', async () => {
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'normal@example.com',
         password: 'secret-456',
         promo_code: 'PROMO',
         invitation_code: 'INVITE',
       })
-    )
     registerMock.mockResolvedValue({})
 
     const wrapper = mount(EmailVerifyView, {
@@ -851,15 +864,12 @@ describe('EmailVerifyView', () => {
       site_name: 'Sub2API',
       registration_email_suffix_whitelist: [],
     })
-    sessionStorage.setItem(
-      'register_data',
-      JSON.stringify({
+    saveRegistrationDraft({
         email: 'normal@example.com',
         password: 'secret-456',
         tencent_captcha_ticket: 'send-code-ticket',
         tencent_captcha_randstr: '@send-code-rand',
       })
-    )
     registerMock.mockResolvedValue({})
 
     const wrapper = mount(EmailVerifyView, {
@@ -883,10 +893,7 @@ describe('EmailVerifyView', () => {
       tencent_captcha_ticket: 'send-code-ticket',
       tencent_captcha_randstr: '@send-code-rand',
     }))
-    expect(JSON.parse(sessionStorage.getItem('register_data') || '{}')).toEqual({
-      email: 'normal@example.com',
-      password: 'secret-456',
-    })
+    expect(sessionStorage.getItem('register_data')).toBeNull()
 
     await wrapper.get('#code').setValue('654321')
     await wrapper.get('form').trigger('submit.prevent')

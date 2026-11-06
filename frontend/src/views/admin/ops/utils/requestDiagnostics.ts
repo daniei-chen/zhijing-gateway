@@ -75,10 +75,17 @@ export const durationStages = [
   { key: 'connection_wait_ms', label: 'connection' },
 ] as const
 
+export const attemptMilestones = [
+  { key: 'upstream_request_write_ms', label: 'written' },
+  { key: 'upstream_first_byte_ms', label: 'firstByte' },
+  { key: 'upstream_headers_ms', label: 'headers' },
+] as const
+
 export const ingressMilestones = [
   { key: 'body_ready_ingress_ms', label: 'bodyReady' },
   { key: 'routing_start_ingress_ms', label: 'routing' },
   { key: 'chat_first_event_ingress_ms', label: 'firstEvent' },
+  { key: 'upstream_first_event_ingress_ms', label: 'responseEvent' },
   { key: 'upstream_semantic_ingress_ms', label: 'semantic' },
   { key: 'downstream_semantic_flush_ingress_ms', label: 'flush' },
 ] as const

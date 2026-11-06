@@ -223,7 +223,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, reactive, onMounted, watch } from 'vue'
+import { computed, ref, reactive, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import ZhijingLoginLayout from '@/components/layout/ZhijingLoginLayout.vue'
@@ -252,6 +252,7 @@ import type {
 } from '@/types'
 import { extractI18nErrorMessage } from '@/utils/apiError'
 import { clearAllAffiliateReferralCodes } from '@/utils/oauthAffiliate'
+import { assertAuthSession, captureAuthSession } from '@/api/authSession'
 
 const { t, locale } = useI18n()
 const LOGIN_AGREEMENT_STORAGE_KEY = 'sub2api_login_agreement_consent'
@@ -261,6 +262,7 @@ const LOGIN_AGREEMENT_STORAGE_KEY = 'sub2api_login_agreement_consent'
 const router = useRouter()
 const authStore = useAuthStore()
 const appStore = useAppStore()
+let disposed = false
 
 // Post-login destination. Only same-origin absolute paths are accepted so a
 // crafted ?redirect= value cannot turn the login page into an open redirect.
@@ -406,6 +408,7 @@ onMounted(async () => {
 
   try {
     const settings = await getPublicSettings()
+    if (disposed) return
     registrationEnabled.value = settings.registration_enabled === true
     turnstileEnabled.value = settings.turnstile_enabled
     turnstileSiteKey.value = settings.turnstile_site_key || ''
@@ -435,6 +438,14 @@ onMounted(async () => {
   } finally {
     publicSettingsLoaded.value = true
   }
+})
+
+onUnmounted(() => {
+  disposed = true
+  formData.password = ''
+  turnstileToken.value = ''
+  tencentCaptchaRandstr.value = ''
+  totpTempToken.value = ''
 })
 
 // ==================== Login Agreement ====================
@@ -585,7 +596,7 @@ function validateForm(): boolean {
 // ==================== Form Handlers ====================
 
 async function handleLogin(): Promise<void> {
-  if (isLoading.value || passkeyLoading.value) return
+  if (disposed || isLoading.value || passkeyLoading.value) return
   // Clear previous error
   errorMessage.value = ''
 
@@ -594,13 +605,14 @@ async function handleLogin(): Promise<void> {
     return
   }
 
-  if (!(await acquireActionProof())) {
-    return
-  }
-
   isLoading.value = true
 
   try {
+    const expected = captureAuthSession()
+    if (!(await acquireActionProof()) || disposed) return
+    // Captcha can remain open while another tab logs in. The old user intent
+    // must not clear or replace that newer session when the challenge completes.
+    assertAuthSession(expected)
     // Call auth store login（阿里云 captchaVerifyParam 复用 turnstile_token 字段）
     const response = await authStore.login({
       email: formData.email,
@@ -612,6 +624,7 @@ async function handleLogin(): Promise<void> {
         ? tencentCaptchaRandstr.value
         : undefined
     })
+    if (disposed) return
 
     // Check if 2FA is required
     if (isTotp2FARequired(response)) {
@@ -643,6 +656,7 @@ async function handleLogin(): Promise<void> {
 }
 
 async function handlePasskeyLogin(): Promise<void> {
+  if (disposed || isLoading.value || passkeyLoading.value) return
   if (agreementGateActive.value) {
     appStore.showWarning(t('legal.loginAgreementPrompt.loginRequiredWarning'))
     if (loginAgreementMode.value !== 'checkbox') {
@@ -653,10 +667,11 @@ async function handlePasskeyLogin(): Promise<void> {
 
   passkeyLoading.value = true
   try {
+    const expected = captureAuthSession()
     let proof: ActionCaptchaRequestProof | undefined
     if (actionCaptchaEnabled.value) {
       const result = await turnstileRef.value?.verifyAction()
-      if (!result) return
+      if (!result || disposed) return
       proof = tencentCaptchaEnabled.value
         ? {
             tencent_captcha_ticket: result.token,
@@ -665,7 +680,9 @@ async function handlePasskeyLogin(): Promise<void> {
         : { turnstile_token: result.token }
     }
 
+    assertAuthSession(expected)
     await authStore.loginWithPasskey(proof)
+    if (disposed) return
     clearAllAffiliateReferralCodes()
     appStore.showSuccess(t('auth.loginSuccess'))
     await router.push(resolvePostLoginPath())
@@ -684,7 +701,7 @@ async function handlePasskeyLogin(): Promise<void> {
 }
 
 async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
-  if (authActionDisabled.value) return
+  if (disposed || authActionDisabled.value) return
 
   if (!actionCaptchaEnabled.value) {
     window.location.href = buildOAuthLoginStartURL(request)
@@ -693,8 +710,10 @@ async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
 
   isLoading.value = true
   try {
+    const expected = captureAuthSession()
     const proof = await turnstileRef.value?.verifyAction()
-    if (!proof) return
+    if (!proof || disposed) return
+    assertAuthSession(expected)
 
     const result = await startOAuthLogin(
       request,
@@ -705,6 +724,8 @@ async function handleOAuthStart(request: OAuthLoginStart): Promise<void> {
           }
         : { turnstile_token: proof.token }
     )
+    if (disposed) return
+    assertAuthSession(expected)
     window.location.href = result.authorize_url
   } catch (error: unknown) {
     errorMessage.value = extractI18nErrorMessage(
@@ -729,6 +750,7 @@ async function handle2FAVerify(code: string): Promise<void> {
 
   try {
     await authStore.login2FA(totpTempToken.value, code)
+    if (disposed) return
 
     // Close modal and show success
     show2FAModal.value = false

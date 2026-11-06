@@ -18,7 +18,13 @@ export interface GeminiTokenInfo {
   [key: string]: unknown
 }
 
-export function useGeminiOAuth() {
+export function useGeminiOAuth(getRequestOwner?: () => unknown) {
+  let requestVersion = 0
+  const beginRequest = () => {
+    const version = ++requestVersion
+    const owner = getRequestOwner?.()
+    return () => version === requestVersion && owner === getRequestOwner?.()
+  }
   const appStore = useAppStore()
   const { t } = useI18n()
 
@@ -29,6 +35,7 @@ export function useGeminiOAuth() {
   const error = ref('')
 
   const resetState = () => {
+    requestVersion++
     authUrl.value = ''
     sessionId.value = ''
     state.value = ''
@@ -42,6 +49,7 @@ export function useGeminiOAuth() {
     oauthType?: string,
     tierId?: string
   ): Promise<boolean> => {
+    const isCurrent = beginRequest()
     loading.value = true
     authUrl.value = ''
     sessionId.value = ''
@@ -58,16 +66,18 @@ export function useGeminiOAuth() {
       if (trimmedTierID) payload.tier_id = trimmedTierID
 
       const response = await adminAPI.gemini.generateAuthUrl(payload as any)
+      if (!isCurrent()) return false
       authUrl.value = response.auth_url
       sessionId.value = response.session_id
       state.value = response.state
       return true
     } catch (err: unknown) {
+      if (!isCurrent()) return false
       error.value = extractApiErrorMessage(err, t('admin.accounts.oauth.gemini.failedToGenerateUrl'))
       appStore.showError(error.value)
       return false
     } finally {
-      loading.value = false
+      if (isCurrent()) loading.value = false
     }
   }
 
@@ -79,6 +89,7 @@ export function useGeminiOAuth() {
     oauthType?: string
     tierId?: string
   }): Promise<GeminiTokenInfo | null> => {
+    const isCurrent = beginRequest()
     const code = params.code?.trim()
     if (!code || !params.sessionId || !params.state) {
       error.value = t('admin.accounts.oauth.gemini.missingExchangeParams')
@@ -100,8 +111,10 @@ export function useGeminiOAuth() {
       if (trimmedTierID) payload.tier_id = trimmedTierID
 
       const tokenInfo = await adminAPI.gemini.exchangeCode(payload as any)
+      if (!isCurrent()) return null
       return tokenInfo as GeminiTokenInfo
     } catch (err: any) {
+      if (!isCurrent()) return null
       // Check for specific missing project_id error
       const errorMessage = err.message || err.response?.data?.message || ''
       if (errorMessage.includes('missing project_id')) {
@@ -112,7 +125,7 @@ export function useGeminiOAuth() {
       appStore.showError(error.value)
       return null
     } finally {
-      loading.value = false
+      if (isCurrent()) loading.value = false
     }
   }
 
@@ -142,9 +155,13 @@ export function useGeminiOAuth() {
   }
 
   const getCapabilities = async (): Promise<GeminiOAuthCapabilities | null> => {
+    const owner = getRequestOwner?.()
+    const isCurrent = () => owner === getRequestOwner?.()
     try {
-      return await adminAPI.gemini.getCapabilities()
+      const result = await adminAPI.gemini.getCapabilities()
+      return isCurrent() ? result : null
     } catch (err: any) {
+      if (!isCurrent()) return null
       // Capabilities are optional for older servers; don't block the UI.
       return null
     }

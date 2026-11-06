@@ -237,6 +237,47 @@ describe('admin AccountsView lite account list', () => {
     wrapper.unmount()
   })
 
+  it('discards an older automatic response after a new search finishes', async () => {
+    vi.useFakeTimers()
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(false)
+    localStorage.setItem('account-auto-refresh', JSON.stringify({ enabled: true, interval_seconds: 5 }))
+    let finishOldRefresh!: (value: unknown) => void
+    listWithEtag.mockReturnValueOnce(new Promise(resolve => { finishOldRefresh = resolve }))
+    const wrapper = mountView()
+    await flushPromises()
+    await vi.advanceTimersByTimeAsync(6000)
+    expect(listWithEtag).toHaveBeenCalledTimes(1)
+
+    const newRow = { ...listRow, id: 77, name: 'new search result' }
+    listAccounts.mockResolvedValueOnce({ items: [newRow], total: 1, page: 1, page_size: 20, pages: 1 })
+    wrapper.findComponent({ name: 'AccountTableFilters' }).vm.$emit('update:searchQuery', 'new query')
+    await vi.advanceTimersByTimeAsync(300)
+    await flushPromises()
+    expect(wrapper.get('[data-account-name]').attributes('data-account-name')).toBe('new search result')
+
+    finishOldRefresh({ notModified: false, etag: 'obsolete', data: { items: [listRow], total: 10, pages: 2 } })
+    await flushPromises()
+    expect(wrapper.get('[data-account-name]').attributes('data-account-name')).toBe('new search result')
+    expect(listWithEtag.mock.calls[0][3].signal.aborted).toBe(true)
+    wrapper.unmount()
+  })
+
+  it('does not add page listeners after unmount during catalog loading', async () => {
+    let finishGroups!: (value: unknown[]) => void
+    getAllGroups.mockReturnValueOnce(new Promise(resolve => { finishGroups = resolve }))
+    const windowListeners = vi.spyOn(window, 'addEventListener')
+    const documentListeners = vi.spyOn(document, 'addEventListener')
+    const wrapper = mountView()
+    await flushPromises()
+    wrapper.unmount()
+    windowListeners.mockClear()
+    documentListeners.mockClear()
+    finishGroups([])
+    await flushPromises()
+    expect(windowListeners.mock.calls.filter(([type]) => type === 'scroll' || type === 'resize')).toEqual([])
+    expect(documentListeners.mock.calls.filter(([type]) => type === 'click')).toEqual([])
+  })
+
   it('loads the full account by id before opening edit, test, and stats actions', async () => {
     const wrapper = mountView()
     await flushPromises()
@@ -290,7 +331,7 @@ describe('admin AccountsView lite account list', () => {
     await flushPromises()
 
     expect(showError).toHaveBeenCalledWith('detail failed')
-    expect(wrapper.get('[data-test="edit-account"]').text()).toBe('')
+    expect(wrapper.find('[data-test="edit-account"]').exists()).toBe(false)
     consoleError.mockRestore()
     wrapper.unmount()
   })

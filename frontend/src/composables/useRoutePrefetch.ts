@@ -15,6 +15,15 @@ import type { RouteLocationNormalized, Router } from 'vue-router'
  */
 type ComponentImportFn = () => Promise<unknown>
 
+type PrefetchConnection = { saveData?: boolean; effectiveType?: string; downlink?: number; rtt?: number }
+export function canPrefetchRoute(): boolean {
+  const connection = (navigator as Navigator & { connection?: PrefetchConnection }).connection
+  return navigator.onLine !== false && document.visibilityState !== 'hidden' &&
+    !connection?.saveData && !['slow-2g', '2g', '3g'].includes(connection?.effectiveType || '') &&
+    !(connection?.downlink !== undefined && connection.downlink < 1.5) &&
+    !(connection?.rtt !== undefined && connection.rtt > 300)
+}
+
 /**
  * 预加载邻接表：定义每个路由应该预加载哪些相邻路由
  * 只存储路由路径，不存储 import 函数，避免打包问题
@@ -68,6 +77,8 @@ const cancelScheduledCallback = (handle: IdleCallbackHandle): void => {
  * @param router - Vue Router 实例，用于获取路由组件
  */
 export function useRoutePrefetch(router?: Router) {
+  let generation = 0
+  const loadedPaths = new Set<string>()
   // 当前挂起的预加载任务句柄
   const pendingPrefetchHandle = ref<IdleCallbackHandle | null>(null)
 
@@ -103,14 +114,16 @@ export function useRoutePrefetch(router?: Router) {
   /**
    * 执行单个组件的预加载
    */
-  const prefetchComponent = async (importFn: ComponentImportFn): Promise<void> => {
+  const prefetchComponent = async (importFn: ComponentImportFn): Promise<boolean> => {
     try {
       await importFn()
+      return true
     } catch (error) {
       // 静默处理预加载错误
       if (import.meta.env.DEV) {
         console.debug('[Prefetch] Failed to prefetch component:', error)
       }
+      return false
     }
   }
 
@@ -118,6 +131,7 @@ export function useRoutePrefetch(router?: Router) {
    * 取消挂起的预加载任务
    */
   const cancelPendingPrefetch = (): void => {
+    generation += 1
     if (pendingPrefetchHandle.value !== null) {
       cancelScheduledCallback(pendingPrefetchHandle.value)
       pendingPrefetchHandle.value = null
@@ -129,30 +143,32 @@ export function useRoutePrefetch(router?: Router) {
    */
   const triggerPrefetch = (route: RouteLocationNormalized): void => {
     cancelPendingPrefetch()
+    if (!canPrefetchRoute()) return
+    const expected = generation
 
     const prefetchPaths = getPrefetchPaths(route)
     if (prefetchPaths.length === 0) return
 
     pendingPrefetchHandle.value = scheduleIdleCallback(
-      () => {
+      (deadline) => {
         pendingPrefetchHandle.value = null
+        if (expected !== generation || !canPrefetchRoute() || deadline.didTimeout || deadline.timeRemaining() < 8) return
 
         const routePath = route.path
         if (prefetchedRoutes.value.has(routePath)) return
 
-        // 获取需要预加载的组件 import 函数
-        const importFns: ComponentImportFn[] = []
+        // Spend at most one speculative route per idle period/navigation.
         for (const path of prefetchPaths) {
+          if (loadedPaths.has(path)) continue
           const importFn = getComponentImporter(path)
           if (importFn) {
-            importFns.push(importFn)
+            void prefetchComponent(importFn).then(success => {
+              if (!success) return
+              loadedPaths.add(path)
+              if (expected === generation) prefetchedRoutes.value.add(routePath)
+            })
+            break
           }
-        }
-
-        if (importFns.length > 0) {
-          Promise.all(importFns.map(prefetchComponent)).then(() => {
-            prefetchedRoutes.value.add(routePath)
-          })
         }
       },
       { timeout: 2000 }
@@ -165,6 +181,7 @@ export function useRoutePrefetch(router?: Router) {
   const resetPrefetchState = (): void => {
     cancelPendingPrefetch()
     prefetchedRoutes.value.clear()
+    loadedPaths.clear()
   }
 
   /**

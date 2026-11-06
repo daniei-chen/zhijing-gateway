@@ -17,7 +17,7 @@
       </div>
 
       <div>
-        <label class="input-label">{{ t('admin.proxies.dataImportFile') }}</label>
+        <label for="proxy-data-import-file" class="input-label">{{ t('admin.proxies.dataImportFile') }}</label>
         <div
           class="flex items-center justify-between gap-3 rounded-lg border border-dashed border-gray-300 bg-gray-50 px-4 py-3 dark:border-dark-600 dark:bg-dark-800"
         >
@@ -27,15 +27,17 @@
             </div>
             <div class="text-xs text-gray-500 dark:text-dark-400">JSON (.json)</div>
           </div>
-          <button type="button" class="btn btn-secondary shrink-0" @click="openFilePicker">
+          <button type="button" class="btn btn-secondary shrink-0" :disabled="importing" @click="openFilePicker">
             {{ t('common.chooseFile') }}
           </button>
         </div>
         <input
+          id="proxy-data-import-file"
           ref="fileInput"
           type="file"
           class="hidden"
           accept="application/json,.json"
+          :disabled="importing"
           @change="handleFileChange"
         />
       </div>
@@ -85,12 +87,13 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import BaseDialog from '@/components/common/BaseDialog.vue'
 import { adminAPI } from '@/api/admin'
 import { useAppStore } from '@/stores/app'
 import type { AdminDataImportResult } from '@/types'
+import { createSessionTasks } from '@/utils/sessionTasks'
 
 interface Props {
   show: boolean
@@ -106,6 +109,8 @@ const emit = defineEmits<Emits>()
 
 const { t } = useI18n()
 const appStore = useAppStore()
+const importTasks = createSessionTasks()
+let dialogRevision = 0
 
 const importing = ref(false)
 const hasImportedData = ref(false)
@@ -120,6 +125,9 @@ const errorItems = computed(() => result.value?.errors || [])
 watch(
   () => props.show,
   (open) => {
+    dialogRevision++
+    importTasks.cancel('import')
+    importing.value = false
     if (open) {
       file.value = null
       hasImportedData.value = false
@@ -128,20 +136,26 @@ watch(
         fileInput.value.value = ''
       }
     }
-  }
+  },
+  { flush: 'sync' }
 )
+onBeforeUnmount(() => importTasks.dispose())
 
 const openFilePicker = () => {
+  if (importing.value || !props.show || !importTasks.current()) return
   fileInput.value?.click()
 }
 
 const handleFileChange = (event: Event) => {
+  if (importing.value || !props.show || !importTasks.current()) return
   const target = event.target as HTMLInputElement
   file.value = target.files?.[0] || null
 }
 
 const handleClose = () => {
-  if (importing.value) return
+  if (importing.value || !props.show || !importTasks.current()) return
+  dialogRevision++
+  importTasks.cancel('import')
   if (hasImportedData.value) {
     hasImportedData.value = false
     emit('imported')
@@ -168,17 +182,23 @@ const readFileAsText = async (sourceFile: File): Promise<string> => {
 }
 
 const handleImport = async () => {
+  if (importing.value || !props.show || !importTasks.current()) return
   if (!file.value) {
     appStore.showError(t('admin.proxies.dataImportSelectFile'))
     return
   }
 
+  const selectedFile = file.value
+  const revision = dialogRevision
+  const task = importTasks.begin('import', () => props.show && revision === dialogRevision && file.value === selectedFile)
   importing.value = true
   try {
-    const text = await readFileAsText(file.value)
+    const text = await readFileAsText(selectedFile)
+    if (!task.active()) return
     const dataPayload = JSON.parse(text)
 
     const res = await adminAPI.proxies.importData({ data: dataPayload })
+    if (!task.active()) return
 
     result.value = res
 
@@ -197,13 +217,15 @@ const handleImport = async () => {
       emit('imported')
     }
   } catch (error: any) {
+    if (!task.active()) return
     if (error instanceof SyntaxError) {
       appStore.showError(t('admin.proxies.dataImportParseFailed'))
     } else {
       appStore.showError(error?.message || t('admin.proxies.dataImportFailed'))
     }
   } finally {
-    importing.value = false
+    if (task.owned()) importing.value = false
+    task.finish()
   }
 }
 </script>

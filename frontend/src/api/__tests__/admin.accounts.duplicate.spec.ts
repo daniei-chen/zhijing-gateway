@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { post } = vi.hoisted(() => ({
   post: vi.fn()
@@ -12,18 +12,22 @@ import { duplicate } from '@/api/admin/accounts'
 
 describe('admin account duplicate API', () => {
   beforeEach(() => {
+    localStorage.clear()
     sessionStorage.clear()
+    localStorage.setItem('auth_user', JSON.stringify({ id: 7 }))
     post.mockReset()
     post.mockResolvedValue({ data: { id: 43, name: 'primary (Copy)' } })
     vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue('11111111-1111-4111-8111-111111111111')
   })
+
+  afterEach(() => vi.restoreAllMocks())
 
   it('sends a stable idempotency key with the duplicate request', async () => {
     const account = await duplicate(42)
 
     expect(post).toHaveBeenCalledWith('/admin/accounts/42/duplicate', undefined, {
       headers: {
-        'Idempotency-Key': 'account-duplicate-42-11111111-1111-4111-8111-111111111111'
+        'Idempotency-Key': 'account-duplicate-7-42-11111111-1111-4111-8111-111111111111'
       }
     })
     expect(account).toEqual({ id: 43, name: 'primary (Copy)' })
@@ -54,6 +58,23 @@ describe('admin account duplicate API', () => {
 
     expect(post).toHaveBeenCalledTimes(2)
     expect(post.mock.calls[1][2].headers).toEqual(firstHeaders)
+    expect(sessionStorage.length).toBe(0)
+  })
+
+  it('does not adopt an old account-only operation key with no recorded administrator', async () => {
+    sessionStorage.setItem('sub2api:admin:account-duplicate:88', 'legacy-unknown-admin')
+    await duplicate(88)
+    expect(post.mock.calls[0][2].headers['Idempotency-Key']).not.toBe('legacy-unknown-admin')
+  })
+
+  it('does not persist or reuse keys when the current administrator cannot be parsed', async () => {
+    localStorage.setItem('auth_user', '{invalid json')
+    post.mockRejectedValueOnce(new Error('network timeout'))
+    await expect(duplicate(66)).rejects.toThrow('network timeout')
+    const firstHeaders = post.mock.calls[0][2].headers
+    vi.mocked(globalThis.crypto.randomUUID).mockReturnValueOnce('33333333-3333-4333-8333-333333333333')
+    await duplicate(66)
+    expect(post.mock.calls[1][2].headers).not.toEqual(firstHeaders)
     expect(sessionStorage.length).toBe(0)
   })
 })

@@ -10,14 +10,16 @@
       id="edit-account-form"
       @submit.prevent="handleSubmit"
       class="space-y-5"
+      :aria-busy="submitting"
     >
+      <fieldset :disabled="submitting" class="min-w-0 space-y-5 border-0 p-0">
       <div>
-        <label class="input-label">{{ t('common.name') }}</label>
-        <input v-model="form.name" type="text" required class="input" data-tour="edit-account-form-name" />
+        <label :for="`${fieldId}-form-name`" class="input-label">{{ t('common.name') }}</label>
+        <input :id="`${fieldId}-form-name`" v-model="form.name" type="text" required class="input" data-tour="edit-account-form-name" />
       </div>
       <div>
-        <label class="input-label">{{ t('admin.accounts.notes') }}</label>
-        <textarea
+        <label :for="`${fieldId}-form-notes`" class="input-label">{{ t('admin.accounts.notes') }}</label>
+        <textarea :id="`${fieldId}-form-notes`"
           v-model="form.notes"
           rows="3"
           class="input"
@@ -29,8 +31,8 @@
       <!-- API Key fields (only for apikey type) -->
       <div v-if="account.type === 'apikey'" class="space-y-4">
         <div v-if="!isCNApiKeyAccount || editApiProtocol !== 'adaptive'">
-          <label class="input-label">{{ t('admin.accounts.baseUrl') }}</label>
-          <input
+          <label :for="`${fieldId}-edit-base-url`" class="input-label">{{ t('admin.accounts.baseUrl') }}</label>
+          <input :id="`${fieldId}-edit-base-url`"
             v-model="editBaseUrl"
             type="text"
             class="input"
@@ -66,10 +68,10 @@
           <label class="input-label">{{ t('admin.accounts.cnProviders.apiProtocol.endpoints') }}</label>
           <div class="mt-2 space-y-3">
             <div v-for="item in editAdaptiveProtocolOptions" :key="item.value">
-              <label class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
+              <label :for="`${fieldId}-edit-adaptive-base-urls-item-value--${item.value}`" class="mb-1 block text-xs font-medium text-gray-600 dark:text-gray-400">
                 {{ t(`admin.accounts.cnProviders.apiProtocol.${item.labelKey}`) }}
               </label>
-              <input v-model="editAdaptiveBaseUrls[item.value]" type="text" class="input" />
+              <input :id="`${fieldId}-edit-adaptive-base-urls-item-value--${item.value}`" v-model="editAdaptiveBaseUrls[item.value]" type="text" class="input" />
             </div>
           </div>
           <p v-if="!cnSupportsNativeResponses(account.platform, currentOpenCodeOrCNMode())" class="input-hint">
@@ -215,19 +217,19 @@
           </div>
           <div class="mt-2 grid gap-4 sm:grid-cols-2">
             <div>
-              <label class="input-label">{{ t('admin.accounts.cnProviders.zhipuTeam.organization') }}</label>
-              <input v-model="editZhipuOrganization" type="text" class="input" :placeholder="t('admin.accounts.cnProviders.zhipuTeam.organizationPlaceholder')" />
+              <label :for="`${fieldId}-edit-zhipu-organization`" class="input-label">{{ t('admin.accounts.cnProviders.zhipuTeam.organization') }}</label>
+              <input :id="`${fieldId}-edit-zhipu-organization`" v-model="editZhipuOrganization" type="text" class="input" :placeholder="t('admin.accounts.cnProviders.zhipuTeam.organizationPlaceholder')" />
             </div>
             <div>
-              <label class="input-label">{{ t('admin.accounts.cnProviders.zhipuTeam.project') }}</label>
-              <input v-model="editZhipuProject" type="text" class="input" :placeholder="t('admin.accounts.cnProviders.zhipuTeam.projectPlaceholder')" />
+              <label :for="`${fieldId}-edit-zhipu-project`" class="input-label">{{ t('admin.accounts.cnProviders.zhipuTeam.project') }}</label>
+              <input :id="`${fieldId}-edit-zhipu-project`" v-model="editZhipuProject" type="text" class="input" :placeholder="t('admin.accounts.cnProviders.zhipuTeam.projectPlaceholder')" />
             </div>
           </div>
           <p class="input-hint mt-2">{{ t('admin.accounts.cnProviders.zhipuTeam.hint') }}</p>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.apiKey') }}</label>
-          <input
+          <label :for="`${fieldId}-edit-api-key`" class="input-label">{{ t('admin.accounts.apiKey') }}</label>
+          <input :id="`${fieldId}-edit-api-key`"
             v-model="editApiKey"
             type="password"
             class="input font-mono"
@@ -419,10 +421,10 @@
                   ? 'grid grid-cols-[minmax(0,1fr)_1rem_minmax(0,1.2fr)_2rem] items-center gap-1.5 sm:gap-2'
                   : 'flex items-center gap-2'"
               >
-                <input
+                <input :id="`${fieldId}-mapping-from-${getModelMappingKey(mapping)}`"
                   v-model="mapping.from"
                   type="text"
-                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.mappingFromAria', { index: index + 1 }) : undefined"
+                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.mappingFromAria', { index: index + 1 }) : t('admin.accounts.requestModel')"
                   :class="account.platform === 'grok' ? 'input min-w-0 w-full font-mono text-xs' : 'input flex-1'"
                   :placeholder="t('admin.accounts.requestModel')"
                 />
@@ -447,17 +449,17 @@
                     d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </svg>
-                <input
+                <input :id="`${fieldId}-mapping-to-${getModelMappingKey(mapping)}`"
                   v-model="mapping.to"
                   type="text"
-                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.mappingTargetAria', { index: index + 1 }) : undefined"
+                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.mappingTargetAria', { index: index + 1 }) : t('admin.accounts.actualModel')"
                   :class="account.platform === 'grok' ? 'input min-w-0 w-full font-mono text-xs' : 'input flex-1'"
                   :placeholder="t('admin.accounts.actualModel')"
                 />
                 <button
                   type="button"
                   @click="removeModelMapping(index)"
-                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 }) : undefined"
+                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 }) : t('common.delete')"
                   :class="account.platform === 'grok'
                     ? 'rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-gray-400 dark:hover:bg-dark-700'
                     : 'rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20'"
@@ -524,7 +526,7 @@
                 {{ t('admin.accounts.poolModeHint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="poolModeEnabled" :aria-label="t('admin.accounts.poolMode')"
               type="button"
               @click="poolModeEnabled = !poolModeEnabled"
               :class="[
@@ -547,8 +549,8 @@
             </p>
           </div>
           <div v-if="poolModeEnabled" class="mt-3">
-            <label class="input-label">{{ t('admin.accounts.poolModeRetryCount') }}</label>
-            <input
+            <label :for="`${fieldId}-pool-mode-retry-count`" class="input-label">{{ t('admin.accounts.poolModeRetryCount') }}</label>
+            <input :id="`${fieldId}-pool-mode-retry-count`"
               v-model.number="poolModeRetryCount"
               type="number"
               min="0"
@@ -566,8 +568,8 @@
             </p>
           </div>
           <div v-if="poolModeEnabled" class="mt-3">
-            <label class="input-label">{{ t('admin.accounts.poolModeRetryStatusCodes') }}</label>
-            <input
+            <label :for="`${fieldId}-pool-mode-retry-status-codes-input`" class="input-label">{{ t('admin.accounts.poolModeRetryStatusCodes') }}</label>
+            <input :id="`${fieldId}-pool-mode-retry-status-codes-input`"
               v-model="poolModeRetryStatusCodesInput"
               type="text"
               class="input"
@@ -592,7 +594,7 @@
                 {{ t('admin.accounts.explicitCacheUpstreamHint') }}
               </p>
             </div>
-            <Toggle
+            <Toggle :id="`${fieldId}-explicit-cache-upstream-enabled`"
               v-model="explicitCacheUpstreamEnabled"
               data-testid="explicit-cache-upstream-toggle"
               :aria-label="t('admin.accounts.explicitCacheUpstream')"
@@ -605,8 +607,8 @@
             </p>
           </div>
           <div v-if="explicitCacheUpstreamEnabled" class="mt-3">
-            <label class="input-label">{{ t('admin.accounts.explicitCacheUpstreamMaxTTL') }}</label>
-            <input
+            <label :for="`${fieldId}-explicit-cache-upstream-max-t-t-l`" class="input-label">{{ t('admin.accounts.explicitCacheUpstreamMaxTTL') }}</label>
+            <input :id="`${fieldId}-explicit-cache-upstream-max-t-t-l`"
               v-model="explicitCacheUpstreamMaxTTL"
               data-testid="explicit-cache-upstream-max-ttl"
               type="number"
@@ -625,12 +627,12 @@
         <div class="border-t border-gray-200 pt-4 dark:border-dark-600">
           <div class="mb-3 flex items-center justify-between">
             <div>
-              <label class="input-label mb-0">{{ t('admin.accounts.customErrorCodes') }}</label>
+              <label :for="`${fieldId}-custom-error-code-input`" class="input-label mb-0">{{ t('admin.accounts.customErrorCodes') }}</label>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.accounts.customErrorCodesHint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="customErrorCodesEnabled" :aria-label="t('admin.accounts.customErrorCodes')"
               type="button"
               @click="customErrorCodesEnabled = !customErrorCodesEnabled"
               :class="[
@@ -675,7 +677,7 @@
 
             <!-- Manual input -->
             <div class="flex items-center gap-2">
-              <input
+              <input :id="`${fieldId}-custom-error-code-input`"
                 v-model.number="customErrorCodeInput"
                 type="number"
                 min="100"
@@ -684,7 +686,7 @@
                 :placeholder="t('admin.accounts.enterErrorCode')"
                 @keyup.enter="addCustomErrorCode"
               />
-              <button type="button" @click="addCustomErrorCode" class="btn btn-secondary px-3">
+              <button :aria-label="t('common.add')" type="button" @click="addCustomErrorCode" class="btn btn-secondary px-3">
                 <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
                     stroke-linecap="round"
@@ -704,7 +706,7 @@
                 class="inline-flex items-center gap-1 rounded-full bg-red-100 px-2.5 py-0.5 text-sm font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400"
               >
                 {{ code }}
-                <button
+                <button :aria-label="t('common.delete') + ' ' + code"
                   type="button"
                   @click="removeErrorCode(code)"
                   class="hover:text-red-900 dark:hover:text-red-300"
@@ -733,7 +735,7 @@
               {{ t('admin.accounts.grokClientToolCache.hint') }}
             </p>
           </div>
-          <Toggle
+          <Toggle :id="`${fieldId}-grok-client-tool-cache-enabled`"
             v-model="grokClientToolCacheEnabled"
             data-testid="grok-client-tool-cache-toggle"
             :aria-label="t('admin.accounts.grokClientToolCache.title')"
@@ -749,12 +751,12 @@
       >
         <div class="space-y-3">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.grokMediaEligibility.title') }}</label>
+            <label :for="`${fieldId}-grok-media-eligibility-mode`" class="input-label mb-0">{{ t('admin.accounts.grokMediaEligibility.title') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.grokMediaEligibility.hint') }}
             </p>
           </div>
-          <select
+          <select :id="`${fieldId}-grok-media-eligibility-mode`"
             v-model="grokMediaEligibilityMode"
             class="input"
             data-testid="grok-media-eligibility-mode"
@@ -799,12 +801,12 @@
       >
         <div class="mb-3 flex items-center justify-between">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.grokCustomBaseUrl.title') }}</label>
+            <label :for="`${fieldId}-grok-o-auth-base-url`" class="input-label mb-0">{{ t('admin.accounts.grokCustomBaseUrl.title') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.grokCustomBaseUrl.hint') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="grokOAuthCustomBaseUrlEnabled" :aria-label="t('admin.accounts.grokCustomBaseUrl.title')"
             type="button"
             data-testid="grok-custom-base-url-toggle"
             @click="grokOAuthCustomBaseUrlEnabled = !grokOAuthCustomBaseUrlEnabled"
@@ -822,7 +824,7 @@
           </button>
         </div>
         <div v-if="grokOAuthCustomBaseUrlEnabled" class="space-y-2">
-          <input
+          <input :id="`${fieldId}-grok-o-auth-base-url`"
             v-model="grokOAuthBaseUrl"
             type="text"
             class="input"
@@ -842,7 +844,7 @@
               {{ t('admin.accounts.headerOverride.hint') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="headerOverrideEnabled" :aria-label="t('admin.accounts.headerOverride.title')"
             type="button"
             @click="headerOverrideEnabled = !headerOverrideEnabled"
             :class="[
@@ -1000,10 +1002,10 @@
                   ? 'grid grid-cols-[minmax(0,1fr)_1rem_minmax(0,1.2fr)_2rem] items-center gap-1.5 sm:gap-2'
                   : 'flex items-center gap-2'"
               >
-                <input
+                <input :id="`${fieldId}-mapping-from-2-${getModelMappingKey(mapping)}`"
                   v-model="mapping.from"
                   type="text"
-                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.mappingFromAria', { index: index + 1 }) : undefined"
+                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.mappingFromAria', { index: index + 1 }) : t('admin.accounts.requestModel')"
                   :class="account.platform === 'grok' ? 'input min-w-0 w-full font-mono text-xs' : 'input flex-1'"
                   :placeholder="t('admin.accounts.requestModel')"
                 />
@@ -1028,17 +1030,17 @@
                     d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </svg>
-                <input
+                <input :id="`${fieldId}-mapping-to-2-${getModelMappingKey(mapping)}`"
                   v-model="mapping.to"
                   type="text"
-                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.mappingTargetAria', { index: index + 1 }) : undefined"
+                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.mappingTargetAria', { index: index + 1 }) : t('admin.accounts.actualModel')"
                   :class="account.platform === 'grok' ? 'input min-w-0 w-full font-mono text-xs' : 'input flex-1'"
                   :placeholder="t('admin.accounts.actualModel')"
                 />
                 <button
                   type="button"
                   @click="removeModelMapping(index)"
-                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 }) : undefined"
+                  :aria-label="account.platform === 'grok' ? t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 }) : t('common.delete')"
                   :class="account.platform === 'grok'
                     ? 'rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 focus-visible:ring-2 focus-visible:ring-primary-500 dark:text-gray-400 dark:hover:bg-dark-700'
                     : 'rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20'"
@@ -1086,8 +1088,8 @@
       <!-- Upstream fields (only for upstream type) -->
       <div v-if="account.type === 'upstream'" class="space-y-4">
         <div>
-          <label class="input-label">{{ t('admin.accounts.upstream.baseUrl') }}</label>
-          <input
+          <label :for="`${fieldId}-edit-base-url-2`" class="input-label">{{ t('admin.accounts.upstream.baseUrl') }}</label>
+          <input :id="`${fieldId}-edit-base-url-2`"
             v-model="editBaseUrl"
             type="text"
             class="input"
@@ -1096,8 +1098,8 @@
           <p class="input-hint">{{ t('admin.accounts.upstream.baseUrlHint') }}</p>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.upstream.apiKey') }}</label>
-          <input
+          <label :for="`${fieldId}-edit-api-key-2`" class="input-label">{{ t('admin.accounts.upstream.apiKey') }}</label>
+          <input :id="`${fieldId}-edit-api-key-2`"
             v-model="editApiKey"
             type="password"
             class="input font-mono"
@@ -1110,8 +1112,8 @@
       <!-- Vertex Service Account -->
       <div v-if="(account.platform === 'gemini' || account.platform === 'anthropic') && account.type === 'service_account'" class="space-y-4">
         <div v-if="isVertexAPIKeyMode">
-          <label class="input-label">API Key</label>
-          <input
+          <label :for="`${fieldId}-edit-vertex-api-key`" class="input-label">API Key</label>
+          <input :id="`${fieldId}-edit-vertex-api-key`"
             v-model="editVertexApiKey"
             type="password"
             class="input font-mono"
@@ -1122,8 +1124,8 @@
         </div>
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div v-if="isVertexAPIKeyMode">
-            <label class="input-label">Project ID</label>
-            <input
+            <label :for="`${fieldId}-edit-vertex-project-id`" class="input-label">Project ID</label>
+            <input :id="`${fieldId}-edit-vertex-project-id`"
               v-model="editVertexProjectId"
               type="text"
               class="input font-mono"
@@ -1133,8 +1135,8 @@
             <p class="input-hint">{{ t('admin.accounts.vertexApiKeyProjectIdHint') }}</p>
           </div>
           <div v-else>
-            <label class="input-label">Project ID</label>
-            <input
+            <label :for="`${fieldId}-edit-vertex-project-id-2`" class="input-label">Project ID</label>
+            <input :id="`${fieldId}-edit-vertex-project-id-2`"
               v-model="editVertexProjectId"
               type="text"
               class="input font-mono"
@@ -1144,8 +1146,8 @@
             <p class="input-hint">{{ t('admin.accounts.vertexSaJsonEditHint') }}</p>
           </div>
           <div v-if="!isVertexAPIKeyMode || editVertexProjectId.trim()">
-            <label class="input-label">Location</label>
-            <select
+            <label :for="`${fieldId}-edit-vertex-location`" class="input-label">Location</label>
+            <select :id="`${fieldId}-edit-vertex-location`"
               v-model="editVertexLocation"
               required
               class="input font-mono"
@@ -1265,7 +1267,7 @@
                 :key="getModelMappingKey(mapping)"
                 class="flex items-center gap-2"
               >
-                <input
+                <input :aria-label="t('admin.accounts.requestModel')" :id="`${fieldId}-mapping-from-3-${getModelMappingKey(mapping)}`"
                   v-model="mapping.from"
                   type="text"
                   class="input flex-1"
@@ -1284,13 +1286,13 @@
                     d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </svg>
-                <input
+                <input :aria-label="t('admin.accounts.actualModel')" :id="`${fieldId}-mapping-to-3-${getModelMappingKey(mapping)}`"
                   v-model="mapping.to"
                   type="text"
                   class="input flex-1"
                   :placeholder="t('admin.accounts.actualModel')"
                 />
-                <button
+                <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })"
                   type="button"
                   @click="removeModelMapping(index)"
                   class="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
@@ -1349,8 +1351,8 @@
         <!-- SigV4 fields -->
         <template v-if="!isBedrockAPIKeyMode">
           <div>
-            <label class="input-label">{{ t('admin.accounts.bedrockAccessKeyId') }}</label>
-            <input
+            <label :for="`${fieldId}-edit-bedrock-access-key-id`" class="input-label">{{ t('admin.accounts.bedrockAccessKeyId') }}</label>
+            <input :id="`${fieldId}-edit-bedrock-access-key-id`"
               v-model="editBedrockAccessKeyId"
               type="text"
               class="input font-mono"
@@ -1358,8 +1360,8 @@
             />
           </div>
           <div>
-            <label class="input-label">{{ t('admin.accounts.bedrockSecretAccessKey') }}</label>
-            <input
+            <label :for="`${fieldId}-edit-bedrock-secret-access-key`" class="input-label">{{ t('admin.accounts.bedrockSecretAccessKey') }}</label>
+            <input :id="`${fieldId}-edit-bedrock-secret-access-key`"
               v-model="editBedrockSecretAccessKey"
               type="password"
               class="input font-mono"
@@ -1368,8 +1370,8 @@
             <p class="input-hint">{{ t('admin.accounts.bedrockSecretKeyLeaveEmpty') }}</p>
           </div>
           <div>
-            <label class="input-label">{{ t('admin.accounts.bedrockSessionToken') }}</label>
-            <input
+            <label :for="`${fieldId}-edit-bedrock-session-token`" class="input-label">{{ t('admin.accounts.bedrockSessionToken') }}</label>
+            <input :id="`${fieldId}-edit-bedrock-session-token`"
               v-model="editBedrockSessionToken"
               type="password"
               class="input font-mono"
@@ -1381,8 +1383,8 @@
 
         <!-- API Key field -->
         <div v-if="isBedrockAPIKeyMode">
-          <label class="input-label">{{ t('admin.accounts.bedrockApiKeyInput') }}</label>
-          <input
+          <label :for="`${fieldId}-edit-bedrock-api-key-value`" class="input-label">{{ t('admin.accounts.bedrockApiKeyInput') }}</label>
+          <input :id="`${fieldId}-edit-bedrock-api-key-value`"
             v-model="editBedrockApiKeyValue"
             type="password"
             class="input font-mono"
@@ -1393,8 +1395,8 @@
 
         <!-- Shared: Region -->
         <div>
-          <label class="input-label">{{ t('admin.accounts.bedrockRegion') }}</label>
-          <input
+          <label :for="`${fieldId}-edit-bedrock-region`" class="input-label">{{ t('admin.accounts.bedrockRegion') }}</label>
+          <input :id="`${fieldId}-edit-bedrock-region`"
             v-model="editBedrockRegion"
             type="text"
             class="input"
@@ -1460,10 +1462,10 @@
           <!-- Mapping Mode -->
           <div v-else class="space-y-3">
             <div v-for="(mapping, index) in modelMappings" :key="getModelMappingKey(mapping)" class="flex items-center gap-2">
-              <input v-model="mapping.from" type="text" class="input flex-1" :placeholder="t('admin.accounts.fromModel')" />
+              <input :aria-label="t('admin.accounts.fromModel')" :id="`${fieldId}-mapping-from-4-${getModelMappingKey(mapping)}`" v-model="mapping.from" type="text" class="input flex-1" :placeholder="t('admin.accounts.fromModel')" />
               <span class="text-gray-400">→</span>
-              <input v-model="mapping.to" type="text" class="input flex-1" :placeholder="t('admin.accounts.toModel')" />
-              <button type="button" @click="modelMappings.splice(index, 1)" class="text-red-500 hover:text-red-700">
+              <input :aria-label="t('admin.accounts.toModel')" :id="`${fieldId}-mapping-to-4-${getModelMappingKey(mapping)}`" v-model="mapping.to" type="text" class="input flex-1" :placeholder="t('admin.accounts.toModel')" />
+              <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })" type="button" @click="modelMappings.splice(index, 1)" class="text-red-500 hover:text-red-700">
                 <Icon name="trash" size="sm" />
               </button>
             </div>
@@ -1494,7 +1496,7 @@
                 {{ t('admin.accounts.poolModeHint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="poolModeEnabled" :aria-label="t('admin.accounts.poolMode')"
               type="button"
               @click="poolModeEnabled = !poolModeEnabled"
               :class="[
@@ -1517,8 +1519,8 @@
             </p>
           </div>
           <div v-if="poolModeEnabled" class="mt-3">
-            <label class="input-label">{{ t('admin.accounts.poolModeRetryCount') }}</label>
-            <input
+            <label :for="`${fieldId}-pool-mode-retry-count-2`" class="input-label">{{ t('admin.accounts.poolModeRetryCount') }}</label>
+            <input :id="`${fieldId}-pool-mode-retry-count-2`"
               v-model.number="poolModeRetryCount"
               type="number"
               min="0"
@@ -1536,8 +1538,8 @@
             </p>
           </div>
           <div v-if="poolModeEnabled" class="mt-3">
-            <label class="input-label">{{ t('admin.accounts.poolModeRetryStatusCodes') }}</label>
-            <input
+            <label :for="`${fieldId}-pool-mode-retry-status-codes-input-2`" class="input-label">{{ t('admin.accounts.poolModeRetryStatusCodes') }}</label>
+            <input :id="`${fieldId}-pool-mode-retry-status-codes-input-2`"
               v-model="poolModeRetryStatusCodesInput"
               type="text"
               class="input"
@@ -1554,8 +1556,8 @@
         v-if="account.platform === 'antigravity' && account.type === 'oauth'"
         class="border-t border-gray-200 pt-4 dark:border-dark-600"
       >
-        <label class="input-label">{{ t('admin.accounts.antigravityProjectIdLabel') }}</label>
-        <input
+        <label :for="`${fieldId}-antigravity-project-id`" class="input-label">{{ t('admin.accounts.antigravityProjectIdLabel') }}</label>
+        <input :id="`${fieldId}-antigravity-project-id`"
           v-model="antigravityProjectId"
           data-testid="antigravity-project-id-input"
           type="text"
@@ -1594,7 +1596,7 @@
               class="space-y-1"
             >
               <div class="flex items-center gap-2">
-                <input
+                <input :aria-label="t('admin.accounts.requestModel')" :id="`${fieldId}-mapping-from-5-${getAntigravityModelMappingKey(mapping)}`"
                   v-model="mapping.from"
                   type="text"
                   :class="[
@@ -1607,7 +1609,7 @@
                 <svg class="h-4 w-4 flex-shrink-0 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                 </svg>
-                <input
+                <input :aria-label="t('admin.accounts.actualModel')" :id="`${fieldId}-mapping-to-5-${getAntigravityModelMappingKey(mapping)}`"
                   v-model="mapping.to"
                   type="text"
                   :class="[
@@ -1616,7 +1618,7 @@
                   ]"
                   :placeholder="t('admin.accounts.actualModel')"
                 />
-                <button
+                <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })"
                   type="button"
                   @click="removeAntigravityModelMapping(index)"
                   class="rounded-lg p-2 text-red-500 transition-colors hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20"
@@ -1675,7 +1677,7 @@
               {{ t('admin.accounts.tempUnschedulable.hint') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="tempUnschedEnabled" :aria-label="t('admin.accounts.tempUnschedulable.title')"
             type="button"
             @click="tempUnschedEnabled = !tempUnschedEnabled"
             :class="[
@@ -1723,7 +1725,7 @@
                   {{ t('admin.accounts.tempUnschedulable.ruleIndex', { index: index + 1 }) }}
                 </span>
                 <div class="flex items-center gap-2">
-                  <button
+                  <button :aria-label="t('admin.settings.customMenu.moveUp')"
                     type="button"
                     :disabled="index === 0"
                     @click="moveTempUnschedRule(index, -1)"
@@ -1731,7 +1733,7 @@
                   >
                     <Icon name="chevronUp" size="sm" :stroke-width="2" />
                   </button>
-                  <button
+                  <button :aria-label="t('admin.settings.customMenu.moveDown')"
                     type="button"
                     :disabled="index === tempUnschedRules.length - 1"
                     @click="moveTempUnschedRule(index, 1)"
@@ -1741,7 +1743,7 @@
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                     </svg>
                   </button>
-                  <button
+                  <button :aria-label="t('common.delete') + ' ' + (index + 1)"
                     type="button"
                     @click="removeTempUnschedRule(index)"
                     class="rounded p-1 text-red-500 transition-colors hover:text-red-600"
@@ -1753,8 +1755,8 @@
 
               <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <label class="input-label">{{ t('admin.accounts.tempUnschedulable.errorCode') }}</label>
-                  <input
+                  <label :for="`${fieldId}-rule-error-code-${getTempUnschedRuleKey(rule)}`" class="input-label">{{ t('admin.accounts.tempUnschedulable.errorCode') }}</label>
+                  <input :id="`${fieldId}-rule-error-code-${getTempUnschedRuleKey(rule)}`"
                     v-model.number="rule.error_code"
                     type="number"
                     min="100"
@@ -1764,8 +1766,8 @@
                   />
                 </div>
                 <div>
-                  <label class="input-label">{{ t('admin.accounts.tempUnschedulable.durationMinutes') }}</label>
-                  <input
+                  <label :for="`${fieldId}-rule-duration-minutes-${getTempUnschedRuleKey(rule)}`" class="input-label">{{ t('admin.accounts.tempUnschedulable.durationMinutes') }}</label>
+                  <input :id="`${fieldId}-rule-duration-minutes-${getTempUnschedRuleKey(rule)}`"
                     v-model.number="rule.duration_minutes"
                     type="number"
                     min="1"
@@ -1812,8 +1814,8 @@
                   <p class="input-hint">{{ t('admin.accounts.tempUnschedulable.scopeHint') }}</p>
                 </div>
                 <div class="sm:col-span-2">
-                  <label class="input-label">{{ t('admin.accounts.tempUnschedulable.keywords') }}</label>
-                  <input
+                  <label :for="`${fieldId}-rule-keywords-${getTempUnschedRuleKey(rule)}`" class="input-label">{{ t('admin.accounts.tempUnschedulable.keywords') }}</label>
+                  <input :id="`${fieldId}-rule-keywords-${getTempUnschedRuleKey(rule)}`"
                     v-model="rule.keywords"
                     type="text"
                     class="input"
@@ -1822,8 +1824,8 @@
                   <p class="input-hint">{{ t('admin.accounts.tempUnschedulable.keywordsHint') }}</p>
                 </div>
                 <div class="sm:col-span-2">
-                  <label class="input-label">{{ t('admin.accounts.tempUnschedulable.description') }}</label>
-                  <input
+                  <label :for="`${fieldId}-rule-description-${getTempUnschedRuleKey(rule)}`" class="input-label">{{ t('admin.accounts.tempUnschedulable.description') }}</label>
+                  <input :id="`${fieldId}-rule-description-${getTempUnschedRuleKey(rule)}`"
                     v-model="rule.description"
                     type="text"
                     class="input"
@@ -1860,12 +1862,12 @@
       >
         <div class="mb-3 flex items-center justify-between">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.accountSchedulingThresholdOverride') }}</label>
+            <label :for="`${fieldId}-account-scheduling-threshold-override-enabled`" class="input-label mb-0">{{ t('admin.accounts.accountSchedulingThresholdOverride') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.accountSchedulingThresholdOverrideHint') }}
             </p>
           </div>
-          <input
+          <input :id="`${fieldId}-account-scheduling-threshold-override-enabled`"
             v-model="accountSchedulingThresholdOverrideEnabled"
             data-testid="account-scheduling-threshold-override-enabled"
             type="checkbox"
@@ -1873,8 +1875,8 @@
           />
         </div>
         <div v-if="accountSchedulingThresholdOverrideEnabled">
-          <label class="input-label">{{ t('admin.accounts.accountSchedulingThresholdOverrideValue') }}</label>
-          <input
+          <label :for="`${fieldId}-account-scheduling-threshold-override-value`" class="input-label">{{ t('admin.accounts.accountSchedulingThresholdOverrideValue') }}</label>
+          <input :id="`${fieldId}-account-scheduling-threshold-override-value`"
             v-model.number="accountSchedulingThresholdOverrideValue"
             data-testid="account-scheduling-threshold-override-value"
             type="number"
@@ -1900,7 +1902,7 @@
               {{ t('admin.accounts.interceptWarmupRequestsDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="interceptWarmupRequests" :aria-label="t('admin.accounts.interceptWarmupRequests')"
             type="button"
             @click="interceptWarmupRequests = !interceptWarmupRequests"
             :class="[
@@ -1920,10 +1922,10 @@
 
       <div v-if="!isSparkShadow">
         <div class="mb-1 flex items-center gap-2">
-          <label class="input-label mb-0">{{ t('admin.accounts.proxy') }}</label>
+          <label :for="`${fieldId}-proxy`" class="input-label mb-0">{{ t('admin.accounts.proxy') }}</label>
           <ProxyAdBanner />
         </div>
-        <ProxySelector v-model="form.proxy_id" :proxies="proxies" />
+        <ProxySelector :id="`${fieldId}-proxy`" v-model="form.proxy_id" :proxies="proxies" :disabled="submitting" />
       </div>
 
       <UpstreamRequestIdHeaderField
@@ -1934,20 +1936,20 @@
 
       <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <div>
-          <label class="input-label">{{ t('admin.accounts.concurrency') }}</label>
-          <input v-model.number="form.concurrency" type="number" min="1" class="input"
+          <label :for="`${fieldId}-form-concurrency`" class="input-label">{{ t('admin.accounts.concurrency') }}</label>
+          <input :id="`${fieldId}-form-concurrency`" v-model.number="form.concurrency" type="number" min="1" class="input"
             @input="form.concurrency = Math.max(1, form.concurrency || 1)" />
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.loadFactor') }}</label>
-          <input v-model.number="form.load_factor" type="number" min="1"
+          <label :for="`${fieldId}-form-load-factor`" class="input-label">{{ t('admin.accounts.loadFactor') }}</label>
+          <input :id="`${fieldId}-form-load-factor`" v-model.number="form.load_factor" type="number" min="1"
             class="input" :placeholder="String(form.concurrency || 1)"
             @input="form.load_factor = (form.load_factor &amp;&amp; form.load_factor >= 1) ? form.load_factor : null" />
           <p class="input-hint">{{ t('admin.accounts.loadFactorHint') }}</p>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.priority') }}</label>
-          <input
+          <label :for="`${fieldId}-form-priority`" class="input-label">{{ t('admin.accounts.priority') }}</label>
+          <input :id="`${fieldId}-form-priority`"
             v-model.number="form.priority"
             type="number"
             min="1"
@@ -1957,8 +1959,8 @@
           <p class="input-hint">{{ t('admin.accounts.priorityHint') }}</p>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.billingRateMultiplier') }}</label>
-          <input
+          <label :for="`${fieldId}-form-rate-multiplier`" class="input-label">{{ t('admin.accounts.billingRateMultiplier') }}</label>
+          <input :id="`${fieldId}-form-rate-multiplier`"
             v-model.number="form.rate_multiplier"
             type="number"
             min="0"
@@ -1988,7 +1990,7 @@
                 {{ t('admin.accounts.upstreamBilling.syncRateHint') }}
               </p>
             </div>
-            <Toggle
+            <Toggle :id="`${fieldId}-field`"
               :model-value="upstreamBillingRateSyncEnabled"
               data-testid="upstream-billing-rate-sync"
               :aria-label="t('admin.accounts.upstreamBilling.syncRate')"
@@ -1998,8 +2000,8 @@
         </div>
       </div>
       <div class="border-t border-gray-200 pt-4 dark:border-dark-600">
-        <label class="input-label">{{ t('admin.accounts.expiresAt') }}</label>
-        <input v-model="expiresAtInput" type="datetime-local" class="input" />
+        <label :for="`${fieldId}-expires-at-input`" class="input-label">{{ t('admin.accounts.expiresAt') }}</label>
+        <input :id="`${fieldId}-expires-at-input`" v-model="expiresAtInput" type="datetime-local" class="input" />
         <div class="mt-2 flex gap-2">
           <button type="button" class="btn btn-secondary btn-sm" @click="form.expires_at = getAccountExpiryTimestamp(1)">
             {{ t('payment.oneMonth') }}
@@ -2026,7 +2028,7 @@
               {{ t('admin.accounts.openai.oauthPassthroughDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="openaiPassthroughEnabled" :aria-label="t('admin.accounts.openai.oauthPassthrough')"
             type="button"
             @click="openaiPassthroughEnabled = !openaiPassthroughEnabled"
             :class="[
@@ -2056,7 +2058,7 @@
               {{ t('admin.accounts.openai.flattenNamespacesDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="openaiFlattenNamespacesEnabled" :aria-label="t('admin.accounts.openai.flattenNamespaces')"
             type="button"
             data-testid="edit-openai-flatten-namespaces-toggle"
             @click="openaiFlattenNamespacesEnabled = !openaiFlattenNamespacesEnabled"
@@ -2142,7 +2144,7 @@
       >
         <div class="flex items-center justify-between">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.openai.wsMode') }}</label>
+            <label :for="`${fieldId}-openai-responses-web-socket-v2-mode`" class="input-label mb-0">{{ t('admin.accounts.openai.wsMode') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.openai.wsModeDesc') }}
             </p>
@@ -2151,7 +2153,7 @@
             </p>
           </div>
           <div class="w-52">
-            <Select v-model="openaiResponsesWebSocketV2Mode" data-testid="edit-openai-ws-mode-select" :options="openAIWSModeOptions" />
+            <Select :id="`${fieldId}-openai-responses-web-socket-v2-mode`" v-model="openaiResponsesWebSocketV2Mode" data-testid="edit-openai-ws-mode-select" :options="openAIWSModeOptions" :disabled="submitting" />
           </div>
         </div>
       </div>
@@ -2163,16 +2165,16 @@
       >
         <div class="flex items-center justify-between gap-4">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.openai.responsesMode') }}</label>
+            <label :for="`${fieldId}-open-a-i-responses-mode`" class="input-label mb-0">{{ t('admin.accounts.openai.responsesMode') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.openai.responsesModeDesc') }}
             </p>
           </div>
           <div class="w-56">
-            <Select
+            <Select :id="`${fieldId}-open-a-i-responses-mode`"
               v-model="openAIResponsesMode"
               :options="openAIResponsesModeOptions"
-              :disabled="!openAITextGenerationCapabilityEnabled"
+              :disabled="submitting || !openAITextGenerationCapabilityEnabled"
               data-testid="openai-responses-mode-select"
             />
           </div>
@@ -2223,7 +2225,7 @@
             {{ t('admin.accounts.openai.imagesUrlToB64JsonDesc') }}
           </p>
         </div>
-        <button
+        <button :aria-label="t('admin.accounts.openai.imagesUrlToB64Json')"
           type="button"
           data-testid="openai-images-url-to-b64-json-toggle"
           role="switch"
@@ -2253,7 +2255,7 @@
             {{ t('admin.accounts.upstreamBilling.autoProbeHint') }}
           </p>
         </div>
-        <Toggle
+        <Toggle :id="`${fieldId}-field-2`"
           :model-value="upstreamBillingAutoProbeEnabled"
           data-testid="upstream-billing-auto-probe"
           :aria-label="t('admin.accounts.upstreamBilling.autoProbe')"
@@ -2335,14 +2337,14 @@
 
           <div class="flex items-center justify-between gap-4 border-t border-gray-100 pt-4 dark:border-dark-700">
             <div>
-              <label class="text-sm font-medium text-gray-900 dark:text-white">
+              <label :for="`${fieldId}-field-3`" class="text-sm font-medium text-gray-900 dark:text-white">
                 {{ t('admin.accounts.opencodeGo.autoRefresh') }}
               </label>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.accounts.opencodeGo.autoRefreshHint') }}
               </p>
             </div>
-            <Toggle
+            <Toggle :id="`${fieldId}-field-3`"
               :model-value="opencodeGoState?.auto_refresh_enabled ?? false"
               :disabled="opencodeGoSaving"
               data-testid="opencode-go-auto-refresh"
@@ -2364,7 +2366,7 @@
               {{ t('admin.accounts.anthropic.apiKeyPassthroughDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="anthropicPassthroughEnabled" :aria-label="t('admin.accounts.anthropic.apiKeyPassthrough')"
             type="button"
             @click="anthropicPassthroughEnabled = !anthropicPassthroughEnabled"
             :class="[
@@ -2388,12 +2390,12 @@
       >
         <div class="flex items-center justify-between gap-4">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.anthropic.apiKeyAuthScheme') }}</label>
+            <label :for="`${fieldId}-anthropic-a-p-i-key-auth-scheme`" class="input-label mb-0">{{ t('admin.accounts.anthropic.apiKeyAuthScheme') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.anthropic.apiKeyAuthSchemeDesc') }}
             </p>
           </div>
-          <select v-model="anthropicAPIKeyAuthScheme" class="input w-52 text-sm">
+          <select :id="`${fieldId}-anthropic-a-p-i-key-auth-scheme`" v-model="anthropicAPIKeyAuthScheme" class="input w-52 text-sm">
             <option value="x_api_key">{{ t('admin.accounts.anthropic.apiKeyAuthSchemeXApiKey') }}</option>
             <option value="authorization_bearer">{{ t('admin.accounts.anthropic.apiKeyAuthSchemeBearer') }}</option>
           </select>
@@ -2407,12 +2409,12 @@
       >
         <div class="flex items-center justify-between">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.anthropic.webSearchEmulation') }}</label>
+            <label :for="`${fieldId}-web-search-emulation-mode`" class="input-label mb-0">{{ t('admin.accounts.anthropic.webSearchEmulation') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.anthropic.webSearchEmulationDesc') }}
             </p>
           </div>
-          <select v-model="webSearchEmulationMode" class="input w-24 text-sm">
+          <select :id="`${fieldId}-web-search-emulation-mode`" v-model="webSearchEmulationMode" class="input w-24 text-sm">
             <option value="default">{{ t('admin.accounts.anthropic.webSearchDefault') }}</option>
             <option value="enabled">{{ t('admin.accounts.anthropic.webSearchEnabled') }}</option>
             <option value="disabled">{{ t('admin.accounts.anthropic.webSearchDisabled') }}</option>
@@ -2535,7 +2537,7 @@
               {{ t('admin.accounts.openai.longContextBillingDesc') }}
             </p>
           </div>
-          <button
+          <button :aria-label="t('admin.accounts.openai.longContextBilling')"
             type="button"
             data-testid="openai-long-context-billing-toggle"
             role="switch"
@@ -2567,7 +2569,7 @@
               {{ t('admin.accounts.openai.codexCLIOnlyDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="codexCLIOnlyEnabled" :aria-label="t('admin.accounts.openai.codexCLIOnly')"
             type="button"
             @click="codexCLIOnlyEnabled = !codexCLIOnlyEnabled"
             :class="[
@@ -2593,7 +2595,7 @@
               {{ t('admin.accounts.openai.codexCLIOnlyAppServerDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="codexCLIOnlyAppServerEnabled" :aria-label="t('admin.accounts.openai.codexCLIOnlyAppServer')"
             type="button"
             @click="codexCLIOnlyAppServerEnabled = !codexCLIOnlyAppServerEnabled"
             :class="[
@@ -2618,13 +2620,13 @@
       >
         <div class="flex items-center justify-between gap-4">
           <div class="min-w-0">
-            <label class="input-label mb-0">{{ t('admin.accounts.openai.codexFingerprintMode') }}</label>
+            <label :for="`${fieldId}-codex-fingerprint-mode`" class="input-label mb-0">{{ t('admin.accounts.openai.codexFingerprintMode') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.openai.codexFingerprintModeDesc') }}
             </p>
           </div>
           <div class="w-52 flex-shrink-0">
-            <Select v-model="codexFingerprintMode" data-testid="edit-codex-fingerprint-mode-select" :options="codexFingerprintModeOptions" />
+            <Select :id="`${fieldId}-codex-fingerprint-mode`" v-model="codexFingerprintMode" data-testid="edit-codex-fingerprint-mode-select" :options="codexFingerprintModeOptions" :disabled="submitting" />
           </div>
         </div>
       </div>
@@ -2636,13 +2638,13 @@
       >
         <div class="flex items-center justify-between gap-4">
           <div class="min-w-0">
-            <label class="input-label mb-0">{{ t('admin.accounts.openai.planType') }}</label>
+            <label :for="`${fieldId}-edit-plan-type`" class="input-label mb-0">{{ t('admin.accounts.openai.planType') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.openai.planTypeDesc') }}
             </p>
           </div>
           <div class="w-44 flex-shrink-0">
-            <Select v-model="editPlanType" :options="planTypeOptions" />
+            <Select :id="`${fieldId}-edit-plan-type`" v-model="editPlanType" :options="planTypeOptions" :disabled="submitting" />
           </div>
         </div>
       </div>
@@ -2653,13 +2655,13 @@
       >
         <div class="flex items-center justify-between">
           <div>
-            <label class="input-label mb-0">{{ t('admin.accounts.openai.compactMode') }}</label>
+            <label :for="`${fieldId}-open-a-i-compact-mode`" class="input-label mb-0">{{ t('admin.accounts.openai.compactMode') }}</label>
             <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
               {{ t('admin.accounts.openai.compactModeDesc') }}
             </p>
           </div>
           <div class="w-44">
-            <Select v-model="openAICompactMode" :options="openAICompactModeOptions" />
+            <Select :id="`${fieldId}-open-a-i-compact-mode`" v-model="openAICompactMode" :options="openAICompactModeOptions" :disabled="submitting" />
           </div>
         </div>
         <div class="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-600 dark:bg-dark-700 dark:text-gray-300">
@@ -2681,20 +2683,20 @@
               :key="getOpenAICompactModelMappingKey(mapping)"
               class="flex items-center gap-2"
             >
-              <input
+              <input :aria-label="t('admin.accounts.fromModel')" :id="`${fieldId}-mapping-from-6-${getOpenAICompactModelMappingKey(mapping)}`"
                 v-model="mapping.from"
                 type="text"
                 class="input flex-1"
                 :placeholder="t('admin.accounts.fromModel')"
               />
               <span class="text-gray-400">→</span>
-              <input
+              <input :aria-label="t('admin.accounts.toModel')" :id="`${fieldId}-mapping-to-6-${getOpenAICompactModelMappingKey(mapping)}`"
                 v-model="mapping.to"
                 type="text"
                 class="input flex-1"
                 :placeholder="t('admin.accounts.toModel')"
               />
-              <button type="button" @click="removeOpenAICompactModelMapping(index)" class="text-red-500 hover:text-red-700">
+              <button :aria-label="t('admin.accounts.grokModelDiagnostics.removeMappingAria', { index: index + 1 })" type="button" @click="removeOpenAICompactModelMapping(index)" class="text-red-500 hover:text-red-700">
                 <Icon name="trash" size="sm" />
               </button>
             </div>
@@ -2715,7 +2717,7 @@
               {{ t('admin.accounts.autoPauseOnExpiredDesc') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="autoPauseOnExpired" :aria-label="t('admin.accounts.autoPauseOnExpired')"
             type="button"
             @click="autoPauseOnExpired = !autoPauseOnExpired"
             :class="[
@@ -2740,7 +2742,7 @@
         <div class="space-y-2">
           <div class="flex items-center justify-between">
             <label class="input-label mb-0">{{ t('admin.accounts.autoPause5hDisabled') }}</label>
-            <button
+            <button role="switch" :aria-checked="autoPause5hDisabled" :aria-label="t('admin.accounts.autoPause5hDisabled')"
               type="button"
               @click="autoPause5hDisabled = !autoPause5hDisabled"
               :class="[
@@ -2760,8 +2762,8 @@
           <p class="input-hint">{{ t('admin.accounts.autoPauseDisabledHint') }}</p>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.autoPause5hThreshold') }}</label>
-          <input
+          <label :for="`${fieldId}-auto-pause5h-threshold`" class="input-label">{{ t('admin.accounts.autoPause5hThreshold') }}</label>
+          <input :id="`${fieldId}-auto-pause5h-threshold`"
             v-model.number="autoPause5hThreshold"
             type="number"
             min="0"
@@ -2776,7 +2778,7 @@
         <div class="space-y-2">
           <div class="flex items-center justify-between">
             <label class="input-label mb-0">{{ t('admin.accounts.autoPause7dDisabled') }}</label>
-            <button
+            <button role="switch" :aria-checked="autoPause7dDisabled" :aria-label="t('admin.accounts.autoPause7dDisabled')"
               type="button"
               @click="autoPause7dDisabled = !autoPause7dDisabled"
               :class="[
@@ -2796,8 +2798,8 @@
           <p class="input-hint">{{ t('admin.accounts.autoPauseDisabledHint') }}</p>
         </div>
         <div>
-          <label class="input-label">{{ t('admin.accounts.autoPause7dThreshold') }}</label>
-          <input
+          <label :for="`${fieldId}-auto-pause7d-threshold`" class="input-label">{{ t('admin.accounts.autoPause7dThreshold') }}</label>
+          <input :id="`${fieldId}-auto-pause7d-threshold`"
             v-model.number="autoPause7dThreshold"
             type="number"
             min="0"
@@ -2823,7 +2825,7 @@
               {{ t('admin.accounts.autoResetCredit.hint') }}
             </p>
           </div>
-          <button
+          <button role="switch" :aria-checked="autoResetCreditEnabled" :aria-label="t('admin.accounts.autoResetCredit.title')"
             type="button"
             data-testid="auto-reset-credit-enabled"
             @click="autoResetCreditEnabled = !autoResetCreditEnabled"
@@ -2842,8 +2844,8 @@
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
           <div>
-            <label class="input-label">{{ t('admin.accounts.autoResetCredit.threshold5h') }}</label>
-            <input
+            <label :for="`${fieldId}-auto-reset-credit5h-threshold`" class="input-label">{{ t('admin.accounts.autoResetCredit.threshold5h') }}</label>
+            <input :id="`${fieldId}-auto-reset-credit5h-threshold`"
               v-model.number="autoResetCredit5hThreshold"
               type="number"
               min="0.1"
@@ -2855,8 +2857,8 @@
             />
           </div>
           <div>
-            <label class="input-label">{{ t('admin.accounts.autoResetCredit.threshold7d') }}</label>
-            <input
+            <label :for="`${fieldId}-auto-reset-credit7d-threshold`" class="input-label">{{ t('admin.accounts.autoResetCredit.threshold7d') }}</label>
+            <input :id="`${fieldId}-auto-reset-credit7d-threshold`"
               v-model.number="autoResetCredit7dThreshold"
               type="number"
               min="0.1"
@@ -2892,7 +2894,7 @@
                 {{ t('admin.accounts.quotaControl.windowCost.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="windowCostEnabled" :aria-label="t('admin.accounts.quotaControl.windowCost.label')"
               type="button"
               @click="windowCostEnabled = !windowCostEnabled"
               :class="[
@@ -2911,10 +2913,10 @@
 
           <div v-if="windowCostEnabled" class="grid grid-cols-2 gap-4">
             <div>
-              <label class="input-label">{{ t('admin.accounts.quotaControl.windowCost.limit') }}</label>
+              <label :for="`${fieldId}-window-cost-limit`" class="input-label">{{ t('admin.accounts.quotaControl.windowCost.limit') }}</label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
-                <input
+                <input :id="`${fieldId}-window-cost-limit`"
                   v-model.number="windowCostLimit"
                   type="number"
                   min="0"
@@ -2926,10 +2928,10 @@
               <p class="input-hint">{{ t('admin.accounts.quotaControl.windowCost.limitHint') }}</p>
             </div>
             <div>
-              <label class="input-label">{{ t('admin.accounts.quotaControl.windowCost.stickyReserve') }}</label>
+              <label :for="`${fieldId}-window-cost-sticky-reserve`" class="input-label">{{ t('admin.accounts.quotaControl.windowCost.stickyReserve') }}</label>
               <div class="relative">
                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400">$</span>
-                <input
+                <input :id="`${fieldId}-window-cost-sticky-reserve`"
                   v-model.number="windowCostStickyReserve"
                   type="number"
                   min="0"
@@ -2952,7 +2954,7 @@
                 {{ t('admin.accounts.quotaControl.sessionLimit.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="sessionLimitEnabled" :aria-label="t('admin.accounts.quotaControl.sessionLimit.label')"
               type="button"
               @click="sessionLimitEnabled = !sessionLimitEnabled"
               :class="[
@@ -2971,8 +2973,8 @@
 
           <div v-if="sessionLimitEnabled" class="grid grid-cols-2 gap-4">
             <div>
-              <label class="input-label">{{ t('admin.accounts.quotaControl.sessionLimit.maxSessions') }}</label>
-              <input
+              <label :for="`${fieldId}-max-sessions`" class="input-label">{{ t('admin.accounts.quotaControl.sessionLimit.maxSessions') }}</label>
+              <input :id="`${fieldId}-max-sessions`"
                 v-model.number="maxSessions"
                 type="number"
                 min="1"
@@ -2983,9 +2985,9 @@
               <p class="input-hint">{{ t('admin.accounts.quotaControl.sessionLimit.maxSessionsHint') }}</p>
             </div>
             <div>
-              <label class="input-label">{{ t('admin.accounts.quotaControl.sessionLimit.idleTimeout') }}</label>
+              <label :for="`${fieldId}-session-idle-timeout`" class="input-label">{{ t('admin.accounts.quotaControl.sessionLimit.idleTimeout') }}</label>
               <div class="relative">
-                <input
+                <input :id="`${fieldId}-session-idle-timeout`"
                   v-model.number="sessionIdleTimeout"
                   type="number"
                   min="1"
@@ -3009,7 +3011,7 @@
                 {{ t('admin.accounts.quotaControl.rpmLimit.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="rpmLimitEnabled" :aria-label="t('admin.accounts.quotaControl.rpmLimit.label')"
               type="button"
               @click="rpmLimitEnabled = !rpmLimitEnabled"
               :class="[
@@ -3028,8 +3030,8 @@
 
           <div v-if="rpmLimitEnabled" class="space-y-4">
             <div>
-              <label class="input-label">{{ t('admin.accounts.quotaControl.rpmLimit.baseRpm') }}</label>
-              <input
+              <label :for="`${fieldId}-base-rpm`" class="input-label">{{ t('admin.accounts.quotaControl.rpmLimit.baseRpm') }}</label>
+              <input :id="`${fieldId}-base-rpm`"
                 v-model.number="baseRpm"
                 type="number"
                 min="1"
@@ -3078,8 +3080,8 @@
             </div>
 
             <div v-if="rpmStrategy === 'tiered'">
-              <label class="input-label">{{ t('admin.accounts.quotaControl.rpmLimit.stickyBuffer') }}</label>
-              <input
+              <label :for="`${fieldId}-rpm-sticky-buffer`" class="input-label">{{ t('admin.accounts.quotaControl.rpmLimit.stickyBuffer') }}</label>
+              <input :id="`${fieldId}-rpm-sticky-buffer`"
                 v-model.number="rpmStickyBuffer"
                 type="number"
                 min="1"
@@ -3117,12 +3119,12 @@
         <div class="rounded-lg border border-gray-200 p-4 dark:border-dark-600">
           <div class="flex items-center justify-between">
             <div>
-              <label class="input-label mb-0">{{ t('admin.accounts.quotaControl.tlsFingerprint.label') }}</label>
+              <label :for="`${fieldId}-tls-fingerprint-profile-id`" class="input-label mb-0">{{ t('admin.accounts.quotaControl.tlsFingerprint.label') }}</label>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.accounts.quotaControl.tlsFingerprint.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="tlsFingerprintEnabled" :aria-label="t('admin.accounts.quotaControl.tlsFingerprint.label')"
               type="button"
               @click="tlsFingerprintEnabled = !tlsFingerprintEnabled"
               :class="[
@@ -3140,7 +3142,7 @@
           </div>
           <!-- Profile selector -->
           <div v-if="tlsFingerprintEnabled" class="mt-3">
-            <select v-model="tlsFingerprintProfileId" class="input">
+            <select :id="`${fieldId}-tls-fingerprint-profile-id`" v-model="tlsFingerprintProfileId" class="input">
               <option :value="null">{{ t('admin.accounts.quotaControl.tlsFingerprint.defaultProfile') }}</option>
               <option v-if="tlsFingerprintProfiles.length > 0" :value="-1">{{ t('admin.accounts.quotaControl.tlsFingerprint.randomProfile') }}</option>
               <option v-for="p in tlsFingerprintProfiles" :key="p.id" :value="p.id">{{ p.name }}</option>
@@ -3157,7 +3159,7 @@
                 {{ t('admin.accounts.quotaControl.sessionIdMasking.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="sessionIdMaskingEnabled" :aria-label="t('admin.accounts.quotaControl.sessionIdMasking.label')"
               type="button"
               @click="sessionIdMaskingEnabled = !sessionIdMaskingEnabled"
               :class="[
@@ -3184,7 +3186,7 @@
                 {{ t('admin.accounts.quotaControl.cacheTTLOverride.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="cacheTTLOverrideEnabled" :aria-label="t('admin.accounts.quotaControl.cacheTTLOverride.label')"
               type="button"
               @click="cacheTTLOverrideEnabled = !cacheTTLOverrideEnabled"
               :class="[
@@ -3201,8 +3203,8 @@
             </button>
           </div>
           <div v-if="cacheTTLOverrideEnabled" class="mt-3">
-            <label class="input-label text-xs">{{ t('admin.accounts.quotaControl.cacheTTLOverride.target') }}</label>
-            <select
+            <label :for="`${fieldId}-cache-t-t-l-override-target`" class="input-label text-xs">{{ t('admin.accounts.quotaControl.cacheTTLOverride.target') }}</label>
+            <select :id="`${fieldId}-cache-t-t-l-override-target`"
               v-model="cacheTTLOverrideTarget"
               class="mt-1 block w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 dark:border-dark-500 dark:bg-dark-700 dark:text-white"
             >
@@ -3219,12 +3221,12 @@
         <div class="rounded-lg border border-gray-200 p-4 dark:border-dark-600">
           <div class="flex items-center justify-between">
             <div>
-              <label class="input-label mb-0">{{ t('admin.accounts.quotaControl.customBaseUrl.label') }}</label>
+              <label :for="`${fieldId}-custom-base-url`" class="input-label mb-0">{{ t('admin.accounts.quotaControl.customBaseUrl.label') }}</label>
               <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
                 {{ t('admin.accounts.quotaControl.customBaseUrl.hint') }}
               </p>
             </div>
-            <button
+            <button role="switch" :aria-checked="customBaseUrlEnabled" :aria-label="t('admin.accounts.quotaControl.customBaseUrl.label')"
               type="button"
               @click="customBaseUrlEnabled = !customBaseUrlEnabled"
               :class="[
@@ -3241,7 +3243,7 @@
             </button>
           </div>
           <div v-if="customBaseUrlEnabled" class="mt-3">
-            <input
+            <input :id="`${fieldId}-custom-base-url`"
               v-model="customBaseUrl"
               type="text"
               class="input"
@@ -3253,8 +3255,8 @@
 
       <div class="border-t border-gray-200 pt-4 dark:border-dark-600">
         <div>
-          <label class="input-label">{{ t('common.status') }}</label>
-          <Select v-model="form.status" :options="statusOptions" />
+          <label :for="`${fieldId}-form-status`" class="input-label">{{ t('common.status') }}</label>
+          <Select :id="`${fieldId}-form-status`" v-model="form.status" :options="statusOptions" :disabled="submitting" />
         </div>
 
         <!-- Mixed Scheduling (only for antigravity accounts, read-only in edit mode) -->
@@ -3319,12 +3321,14 @@
       <!-- Group Selection - 仅标准模式显示 -->
       <GroupSelector
         v-model="form.group_ids"
+        :disabled="submitting"
         :groups="selectableGroups"
         :platform="account?.platform"
         :mixed-scheduling="mixedScheduling"
         data-tour="account-form-groups"
       />
 
+      </fieldset>
     </form>
 
     <template #footer>
@@ -3379,7 +3383,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, watch, nextTick, onBeforeUnmount, onMounted } from 'vue'
+import { ref, reactive, computed, watch, nextTick, onBeforeUnmount, onMounted, useId } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores/app'
 
@@ -3506,6 +3510,7 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const fieldId = `edit-account-${useId()}`
 const appStore = useAppStore()
 const browserTimeZone = getBrowserTimeZone()
 
@@ -3567,33 +3572,47 @@ const applyOpenCodeGoState = (next: OpenCodeGoUsageState) => {
 }
 
 const loadOpenCodeGoUsage = async () => {
+  const generation = editGeneration
+  const accountID = props.account?.id
+  if (!props.show || !accountID) return
   opencodeGoLoading.value = true
   try {
-    applyOpenCodeGoState(await adminAPI.accounts.getOpenCodeGoUsage(props.account!.id))
+    const state = await adminAPI.accounts.getOpenCodeGoUsage(accountID)
+    if (isCurrentEdit(generation)) applyOpenCodeGoState(state)
   } catch (error) {
-    appStore.showError(extractApiErrorMessage(error, t('admin.accounts.opencodeGo.loadFailed')))
+    if (isCurrentEdit(generation)) appStore.showError(extractApiErrorMessage(error, t('admin.accounts.opencodeGo.loadFailed')))
   } finally {
-    opencodeGoLoading.value = false
+    if (isCurrentEdit(generation)) opencodeGoLoading.value = false
   }
 }
 
 const setOpenCodeGoAutoRefresh = async (enabled: boolean) => {
+  const generation = editGeneration
+  const accountID = props.account?.id
+  if (!props.show || !accountID || opencodeGoSaving.value) return
   opencodeGoSaving.value = true
   try {
-    applyOpenCodeGoState(await adminAPI.accounts.setOpenCodeGoUsageAutoRefresh(props.account!.id, enabled))
+    const state = await adminAPI.accounts.setOpenCodeGoUsageAutoRefresh(accountID, enabled)
+    if (isCurrentEdit(generation)) applyOpenCodeGoState(state)
   } catch (error) {
-    appStore.showError(extractApiErrorMessage(error, t('admin.accounts.opencodeGo.autoRefreshFailed')))
+    if (isCurrentEdit(generation)) appStore.showError(extractApiErrorMessage(error, t('admin.accounts.opencodeGo.autoRefreshFailed')))
   } finally {
-    opencodeGoSaving.value = false
+    if (isCurrentEdit(generation)) opencodeGoSaving.value = false
   }
 }
 
 const refreshOpenCodeGoUsage = async () => {
+  const generation = editGeneration
+  const accountID = props.account?.id
+  if (!props.show || !accountID || opencodeGoRefreshing.value) return
   opencodeGoRefreshing.value = true
   try {
-    applyOpenCodeGoState(await adminAPI.accounts.refreshOpenCodeGoUsage(props.account!.id))
+    const state = await adminAPI.accounts.refreshOpenCodeGoUsage(accountID)
+    if (!isCurrentEdit(generation)) return
+    applyOpenCodeGoState(state)
     appStore.showSuccess(t('admin.accounts.opencodeGo.refreshSuccess'))
   } catch (error) {
+    if (!isCurrentEdit(generation)) return
     appStore.showError(extractI18nErrorMessage(
       error,
       t,
@@ -3601,11 +3620,12 @@ const refreshOpenCodeGoUsage = async () => {
       t('admin.accounts.opencodeGo.refreshFailed')
     ))
   } finally {
-    opencodeGoRefreshing.value = false
+    if (isCurrentEdit(generation)) opencodeGoRefreshing.value = false
   }
 }
 
-watch(() => props.account?.id, () => {
+watch([() => props.show, () => props.account?.id], ([show]) => {
+  if (!show) return
   opencodeGoState.value = props.account?.opencode_go_usage ?? null
   if (opencodeGoState.value && !opencodeGoState.value.snapshot) void loadOpenCodeGoUsage()
 })
@@ -3643,6 +3663,24 @@ interface TempUnschedRuleForm {
 
 // State
 const submitting = ref(false)
+let editGeneration = 0
+const isCurrentEdit = (generation: number) => generation === editGeneration && props.show
+const invalidateEdit = () => {
+  editGeneration++
+  submitting.value = false
+  opencodeGoLoading.value = false
+  opencodeGoSaving.value = false
+  opencodeGoRefreshing.value = false
+  isSyncingAntigravityUpstream.value = false
+  antigravityMixedChannelConfirmed.value = false
+  clearMixedChannelDialog()
+}
+watch(
+  [() => props.show, () => props.account?.id, () => props.account?.platform, () => props.account?.type],
+  invalidateEdit,
+  { flush: 'sync' }
+)
+onBeforeUnmount(invalidateEdit)
 const editBaseUrl = ref('https://api.anthropic.com')
 const editApiKey = ref('')
 
@@ -3798,9 +3836,12 @@ const cnProtocolDescKey = computed(
   () => cnProtocolOptions.value.find(o => o.value === editApiProtocol.value)?.labelKey ?? 'chatCompletions'
 )
 // 点击预设端点：回填 base url 与对应模式/协议。
-function onCnPresetSelect(preset: { mode: CnAccountMode; protocol: CnApiProtocol; url: string }) {
+async function onCnPresetSelect(preset: { mode: CnAccountMode; protocol: CnApiProtocol; url: string }) {
+  const generation = editGeneration
   editAccountMode.value = preset.mode
   editApiProtocol.value = preset.protocol
+  await nextTick()
+  if (!isCurrentEdit(generation)) return
   editBaseUrl.value = preset.url
 }
 // Bedrock credentials
@@ -4047,6 +4088,7 @@ const modeFromGrokMediaExtra = (extra: Record<string, unknown> | undefined): Gro
 }
 
 const loadGrokMediaEligibility = async (accountID: number): Promise<GrokMediaEligibilityState | null> => {
+  const generation = editGeneration
   if (!isGrokOAuthAccount.value || typeof adminAPI.accounts.getGrokMediaEligibility !== 'function') {
     return null
   }
@@ -4055,17 +4097,17 @@ const loadGrokMediaEligibility = async (accountID: number): Promise<GrokMediaEli
   grokMediaEligibilityError.value = ''
   try {
     const state = await adminAPI.accounts.getGrokMediaEligibility(accountID)
-    if (requestVersion !== grokMediaEligibilityRequestVersion) return null
+    if (requestVersion !== grokMediaEligibilityRequestVersion || !isCurrentEdit(generation)) return null
     grokMediaEligibilityState.value = state
     grokMediaEligibilityMode.value = state.mode
     grokMediaEligibilityInitialMode.value = state.mode
     return state
   } catch (error: any) {
-    if (requestVersion !== grokMediaEligibilityRequestVersion) return null
+    if (requestVersion !== grokMediaEligibilityRequestVersion || !isCurrentEdit(generation)) return null
     grokMediaEligibilityError.value = error?.message || t('admin.accounts.grokMediaEligibility.loadFailed')
     return null
   } finally {
-    if (requestVersion === grokMediaEligibilityRequestVersion) {
+    if (requestVersion === grokMediaEligibilityRequestVersion && isCurrentEdit(generation)) {
       grokMediaEligibilityLoading.value = false
     }
   }
@@ -5091,11 +5133,13 @@ const addAntigravityPresetMapping = (from: string, to: string) => {
 }
 
 const syncAntigravityUpstreamModels = async () => {
-  if (!props.account?.id || isSyncingAntigravityUpstream.value) return
+  if (!props.show || !props.account?.id || isSyncingAntigravityUpstream.value) return
+  const generation = editGeneration
 
   isSyncingAntigravityUpstream.value = true
   try {
     const result = await adminAPI.accounts.syncUpstreamModels(props.account.id)
+    if (!isCurrentEdit(generation)) return
     const upstreamModels = result.models.map((model) => model.trim()).filter(Boolean)
     if (upstreamModels.length === 0) {
       appStore.showInfo(t('admin.accounts.syncUpstreamModelsEmpty'))
@@ -5131,10 +5175,11 @@ const syncAntigravityUpstreamModels = async () => {
       appStore.showWarning(t('admin.accounts.syncUpstreamModelsMetadataPartial'))
     }
   } catch (error) {
+    if (!isCurrentEdit(generation)) return
     const message = extractApiErrorMessage(error, t('admin.accounts.syncUpstreamModelsFailed'))
     appStore.showError(t('admin.accounts.syncUpstreamModelsError', { message }))
   } finally {
-    isSyncingAntigravityUpstream.value = false
+    if (isCurrentEdit(generation)) isSyncingAntigravityUpstream.value = false
   }
 }
 
@@ -5414,7 +5459,9 @@ function loadQuotaControlSettings(account: Account) {
   if (account.enable_tls_fingerprint === true) {
     tlsFingerprintEnabled.value = true
   }
-  tlsFingerprintProfileId.value = account.tls_fingerprint_profile_id ?? null
+  // The DTO omits negative profile IDs; -1 remains the stored random-profile choice.
+  tlsFingerprintProfileId.value = account.tls_fingerprint_profile_id ??
+    (account.extra?.tls_fingerprint_profile_id === -1 ? -1 : null)
 
   // Load session ID masking setting
   if (account.session_id_masking_enabled === true) {
@@ -5519,6 +5566,7 @@ const withAntigravityConfirmFlag = (payload: Record<string, unknown>) => {
 }
 
 const ensureAntigravityMixedChannelConfirmed = async (onConfirm: () => Promise<void>): Promise<boolean> => {
+  const generation = editGeneration
   if (!needsMixedChannelCheck()) {
     return true
   }
@@ -5535,18 +5583,21 @@ const ensureAntigravityMixedChannelConfirmed = async (onConfirm: () => Promise<v
       group_ids: form.group_ids,
       account_id: props.account.id
     })
+    if (!isCurrentEdit(generation)) return false
     if (!result.has_risk) {
       return true
     }
     openMixedChannelDialog({
       response: result,
       onConfirm: async () => {
+        if (!isCurrentEdit(generation)) return
         antigravityMixedChannelConfirmed.value = true
         await onConfirm()
       }
     })
     return false
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return false
     appStore.showError(error.message || t('admin.accounts.failedToUpdate'))
     return false
   }
@@ -5557,12 +5608,12 @@ const parseDateTimeLocal = parseDateTimeLocalInput
 
 // Methods
 const handleClose = () => {
-  antigravityMixedChannelConfirmed.value = false
-  clearMixedChannelDialog()
+  invalidateEdit()
   emit('close')
 }
 
 const persistGrokMediaEligibility = async (accountID: number, updatedAccount: Account): Promise<Account> => {
+  const generation = editGeneration
   if (
     !isGrokOAuthAccount.value ||
     grokMediaEligibilityMode.value === grokMediaEligibilityInitialMode.value ||
@@ -5573,6 +5624,7 @@ const persistGrokMediaEligibility = async (accountID: number, updatedAccount: Ac
 
   try {
     const state = await adminAPI.accounts.updateGrokMediaEligibility(accountID, grokMediaEligibilityMode.value)
+    if (!isCurrentEdit(generation)) return updatedAccount
     grokMediaEligibilityState.value = state
     grokMediaEligibilityInitialMode.value = state.mode
     const nextExtra = { ...((updatedAccount.extra as Record<string, unknown> | undefined) || {}) }
@@ -5583,6 +5635,7 @@ const persistGrokMediaEligibility = async (accountID: number, updatedAccount: Ac
     }
     updatedAccount.extra = nextExtra
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return updatedAccount
     appStore.showError(t('admin.accounts.grokMediaEligibility.partialSave'))
     try {
       const state = await loadGrokMediaEligibility(accountID)
@@ -5600,14 +5653,18 @@ const persistGrokMediaEligibility = async (accountID: number, updatedAccount: Ac
 }
 
 const submitUpdateAccount = async (accountID: number, updatePayload: Record<string, unknown>) => {
+  const generation = editGeneration
   submitting.value = true
   try {
     let updatedAccount = await adminAPI.accounts.update(accountID, withAntigravityConfirmFlag(updatePayload))
+    if (!isCurrentEdit(generation)) return
     updatedAccount = await persistGrokMediaEligibility(accountID, updatedAccount)
+    if (!isCurrentEdit(generation)) return
     appStore.showSuccess(t('admin.accounts.accountUpdated'))
     emit('updated', updatedAccount)
     handleClose()
   } catch (error: any) {
+    if (!isCurrentEdit(generation)) return
     if (error.status === 409 && error.error === 'mixed_channel_warning' && needsMixedChannelCheck()) {
       openMixedChannelDialog({
         message: error.message,
@@ -5620,12 +5677,13 @@ const submitUpdateAccount = async (accountID: number, updatePayload: Record<stri
     }
     appStore.showError(error.message || t('admin.accounts.failedToUpdate'))
   } finally {
-    submitting.value = false
+    if (isCurrentEdit(generation)) submitting.value = false
   }
 }
 
 const handleSubmit = async () => {
-  if (!props.account) return
+  if (!props.account || !props.show || submitting.value) return
+  const generation = editGeneration
   const accountID = props.account.id
 
   if (form.status !== 'active' && form.status !== 'inactive' && form.status !== 'error') {
@@ -6390,21 +6448,26 @@ const handleSubmit = async () => {
       updatePayload.extra = newExtra
     }
 
+    submitting.value = true
     const canContinue = await ensureAntigravityMixedChannelConfirmed(async () => {
       await submitUpdateAccount(accountID, updatePayload)
     })
-    if (!canContinue) {
+    if (!canContinue || !isCurrentEdit(generation)) {
       return
     }
 
     await submitUpdateAccount(accountID, updatePayload)
   } catch (error: any) {
-    appStore.showError(error.message || t('admin.accounts.failedToUpdate'))
+    if (isCurrentEdit(generation)) appStore.showError(error.message || t('admin.accounts.failedToUpdate'))
+  } finally {
+    if (isCurrentEdit(generation)) submitting.value = false
   }
 }
 
 // Handle mixed channel warning confirmation
 const handleMixedChannelConfirm = async () => {
+  if (!props.show || submitting.value) return
+  const generation = editGeneration
   const action = mixedChannelWarningAction.value
   if (!action) {
     clearMixedChannelDialog()
@@ -6415,7 +6478,7 @@ const handleMixedChannelConfirm = async () => {
   try {
     await action()
   } finally {
-    submitting.value = false
+    if (isCurrentEdit(generation)) submitting.value = false
   }
 }
 

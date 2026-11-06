@@ -1,0 +1,11 @@
+✔ the original optional type contract remains verified without audit metadata (402.38289ms)
+✔ runtime edits fail unless their exact source is in the reviewed delta (1077.328031ms)
+✔ a wrong baseline, missing evidence or unknown path cannot bypass the contract (1009.083109ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 3
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 2839.218795

@@ -5,6 +5,11 @@ import { useAuthStore as useUserStore } from '@/stores/auth'
 import { useOnboardingStore } from '@/stores/onboarding'
 import { useI18n } from 'vue-i18n'
 import { getAdminSteps, getUserSteps } from '@/components/Guide/steps'
+import { captureAuthSession, isAuthSessionCurrent, trackAuthRequest, type AuthSessionSnapshot } from '@/api/authSession'
+
+type TourOwnership = { revision: number; driver: Driver | null; session: AuthSessionSnapshot | null; untrack?: () => void }
+// Each Pinia application owns one tour, including starts still waiting for DOM.
+const tourOwnership = new WeakMap<object, TourOwnership>()
 
 export interface OnboardingOptions {
   storageKey?: string
@@ -15,6 +20,18 @@ export function useOnboardingTour(options: OnboardingOptions) {
   const { t } = useI18n()
   const userStore = useUserStore()
   const onboardingStore = useOnboardingStore()
+  const session = captureAuthSession()
+  let ownership = tourOwnership.get(onboardingStore)
+  if (!ownership) {
+    ownership = { revision: 0, driver: null, session: null }
+    tourOwnership.set(onboardingStore, ownership)
+  }
+  const owner = ownership
+  const ownsStoredDriver = (candidate: Driver | null) => !!candidate && owner.driver === candidate &&
+    owner.session?.generation === session.generation && owner.session?.subject === session.subject && isAuthSessionCurrent(session)
+  let disposed = false
+  let startRevision = 0
+  let highlightRevision = 0
   const storageVersion = 'v4_interactive' // Bump version for new tour type
 
   // Timing constants for better maintainability
@@ -46,7 +63,8 @@ export function useOnboardingTour(options: OnboardingOptions) {
   }
 
   // 使用 store 管理的全局 driver 实例
-  let driverInstance: Driver | null = onboardingStore.getDriverInstance()
+  const storedDriver = onboardingStore.getDriverInstance()
+  let driverInstance: Driver | null = ownsStoredDriver(storedDriver) ? storedDriver : null
   let currentClickListener: {
     element: HTMLElement
     handler: () => void
@@ -69,19 +87,21 @@ export function useOnboardingTour(options: OnboardingOptions) {
   }
 
   const markAsSeen = () => {
+    if (!isAuthSessionCurrent(session)) return
     localStorage.setItem(getStorageKey(), 'true')
   }
 
   const clearSeen = () => {
+    if (!isAuthSessionCurrent(session)) return
     localStorage.removeItem(getStorageKey())
   }
 
   /**
    * 检查元素是否存在，如果不存在则重试
    */
-  const ensureElement = async (selector: string, timeout = 5000): Promise<boolean> => {
+  const ensureElement = async (selector: string, timeout = 5000, current = () => true): Promise<boolean> => {
     const startTime = Date.now()
-    while (Date.now() - startTime < timeout) {
+    while (current() && Date.now() - startTime < timeout) {
       const element = document.querySelector(selector)
       if (element && element.getBoundingClientRect().height > 0) {
         return true
@@ -92,6 +112,11 @@ export function useOnboardingTour(options: OnboardingOptions) {
   }
 
   const startTour = async (startIndex = 0) => {
+    if (disposed || !isAuthSessionCurrent(session)) return
+    const revision = ++startRevision
+    const globalRevision = ++owner.revision
+    const ownsStart = () => !disposed && revision === startRevision && globalRevision === owner.revision && isAuthSessionCurrent(session)
+    highlightRevision++
     // 动态获取当前用户角色和步骤
     const isAdmin = userStore.user?.role === 'admin'
     const isSimpleMode = userStore.isSimpleMode
@@ -99,18 +124,29 @@ export function useOnboardingTour(options: OnboardingOptions) {
 
     // 确保 DOM 就绪
     await nextTick()
+    if (!ownsStart()) return
 
     // 如果指定了起始步骤，确保元素可见
     const currentStep = steps[startIndex]
     if (currentStep?.element && typeof currentStep.element === 'string') {
-      await ensureElement(currentStep.element, TIMING.ELEMENT_TIMEOUT_MS)
+      await ensureElement(currentStep.element, TIMING.ELEMENT_TIMEOUT_MS, ownsStart)
     }
+    if (!ownsStart()) return
 
-    if (driverInstance) {
-      driverInstance.destroy()
+    const previousDriver = onboardingStore.getDriverInstance()
+    if (previousDriver) {
+      cleanupClickListener()
+      if (globalKeyboardHandler) {
+        document.removeEventListener('keydown', globalKeyboardHandler, { capture: true })
+        globalKeyboardHandler = null
+      }
+      previousDriver.destroy()
     }
 
     // 创建新的 driver 实例并存储到 store
+    let createdDriver: Driver | null = null
+    let createdKeyboardHandler: ((event: KeyboardEvent) => void) | null = null
+    const ownsCreatedDriver = () => ownsStoredDriver(createdDriver) && onboardingStore.getDriverInstance() === createdDriver
     driverInstance = driver({
       showProgress: true,
       steps,
@@ -124,6 +160,7 @@ export function useOnboardingTour(options: OnboardingOptions) {
 
       // 导航处理
       onNextClick: async (_el, _step, { config, state }) => {
+        if (!ownsCreatedDriver()) return
         // 如果是最后一步，点击则是"完成"
         if (state.activeIndex === (config.steps?.length ?? 0) - 1) {
           markAsSeen()
@@ -151,9 +188,11 @@ export function useOnboardingTour(options: OnboardingOptions) {
         }
       },
       onPrevClick: () => {
+        if (!ownsCreatedDriver()) return
         driverInstance?.movePrevious()
       },
       onCloseClick: () => {
+        if (!ownsCreatedDriver()) return
         markAsSeen()
         driverInstance?.destroy()
         onboardingStore.setDriverInstance(null)
@@ -161,6 +200,7 @@ export function useOnboardingTour(options: OnboardingOptions) {
 
       // 渲染时重组 Footer 布局
       onPopoverRender: (popover, { config, state }) => {
+        if (!ownsCreatedDriver()) return
         // Class name constants for easier maintenance
         const CLASS_REORGANIZED = 'reorganized'
         const CLASS_FOOTER_LEFT = 'footer-left'
@@ -271,12 +311,16 @@ export function useOnboardingTour(options: OnboardingOptions) {
 
       // 步骤高亮时触发
       onHighlightStarted: async (element, step) => {
+        const revision = ++highlightRevision
+        const expectedDriver = driverInstance
+        const ownsHighlight = () => revision === highlightRevision && driverInstance === expectedDriver && ownsCreatedDriver()
         // 清理之前的监听器
         cleanupClickListener()
 
         // 尝试等待元素
         if (!element && step.element && typeof step.element === 'string') {
-           const exists = await ensureElement(step.element, 8000)
+           const exists = await ensureElement(step.element, 8000, ownsHighlight)
+           if (!ownsHighlight()) return
            if (!exists) {
              console.warn(`Tour element not found after 8s: ${step.element}`)
              return
@@ -327,6 +371,7 @@ export function useOnboardingTour(options: OnboardingOptions) {
 
             // Wait before advancing to allow user to see the result of their action
             await new Promise(resolve => setTimeout(resolve, TIMING.INTERACTIVE_WAIT_MS))
+            if (!ownsHighlight()) return
 
             // Verify driver is still active and not destroyed
             if (!driverInstance || !driverInstance.isActive()) {
@@ -342,7 +387,8 @@ export function useOnboardingTour(options: OnboardingOptions) {
             const nextStep = steps[currentIndex + 1]
 
             if (nextStep?.element && typeof nextStep.element === 'string') {
-              const exists = await ensureElement(nextStep.element, TIMING.ELEMENT_TIMEOUT_MS)
+              const exists = await ensureElement(nextStep.element, TIMING.ELEMENT_TIMEOUT_MS, ownsHighlight)
+              if (!ownsHighlight() || driverInstance?.getActiveIndex() !== boundStepIndex) return
               if (!exists) {
                 console.warn(`Onboarding: Next step element not found: ${nextStep.element}`)
                 return
@@ -398,21 +444,40 @@ export function useOnboardingTour(options: OnboardingOptions) {
       },
 
       onDestroyed: () => {
-        cleanupClickListener()
+        if (driverInstance === createdDriver) cleanupClickListener()
         // 清理全局监听器 (由此处唯一管理)
-        if (globalKeyboardHandler) {
-          document.removeEventListener('keydown', globalKeyboardHandler, { capture: true })
-          globalKeyboardHandler = null
+        if (createdKeyboardHandler) {
+          document.removeEventListener('keydown', createdKeyboardHandler, { capture: true })
+          if (globalKeyboardHandler === createdKeyboardHandler) globalKeyboardHandler = null
         }
-        onboardingStore.setDriverInstance(null)
+        if (onboardingStore.getDriverInstance() === createdDriver) onboardingStore.setDriverInstance(null)
+        if (owner.driver === createdDriver) {
+          owner.untrack?.()
+          owner.untrack = undefined
+          owner.driver = null
+          owner.session = null
+        }
       }
     })
+    createdDriver = driverInstance
 
+    owner.untrack?.()
+    owner.driver = createdDriver
+    owner.session = session
+    owner.untrack = trackAuthRequest(session, () => {
+      if (owner.driver !== createdDriver) return
+      owner.revision++
+      createdDriver?.destroy()
+    })
     onboardingStore.setDriverInstance(driverInstance)
 
     // 添加全局键盘监听器
     globalKeyboardHandler = (e: KeyboardEvent) => {
-      if (!driverInstance?.isActive()) return
+      if (!isAuthSessionCurrent(session)) {
+        driverInstance?.destroy()
+        return
+      }
+      if (!ownsCreatedDriver() || !driverInstance?.isActive()) return
 
       if (e.key === 'Escape') {
         e.preventDefault()
@@ -497,21 +562,27 @@ export function useOnboardingTour(options: OnboardingOptions) {
       }
     }
 
+    createdKeyboardHandler = globalKeyboardHandler
     document.addEventListener('keydown', globalKeyboardHandler, { capture: true })
     driverInstance.drive(startIndex)
   }
 
   const nextStep = async (delay = 300) => {
-    if (!driverInstance?.isActive()) return
+    const expectedDriver = onboardingStore.getDriverInstance()
+    if (disposed || !ownsStoredDriver(expectedDriver) || !expectedDriver?.isActive()) return
+    const expectedIndex = expectedDriver.getActiveIndex()
     if (delay > 0) {
       await new Promise(resolve => setTimeout(resolve, delay))
     }
-    driverInstance.moveNext()
+    if (disposed || !ownsStoredDriver(expectedDriver) || onboardingStore.getDriverInstance() !== expectedDriver ||
+        !expectedDriver.isActive() || expectedDriver.getActiveIndex() !== expectedIndex) return
+    expectedDriver.moveNext()
   }
 
   const isCurrentStep = (elementSelector: string): boolean => {
-    if (!driverInstance?.isActive()) return false
-    const activeElement = driverInstance.getActiveElement()
+    const activeDriver = onboardingStore.getDriverInstance()
+    if (disposed || !ownsStoredDriver(activeDriver) || !activeDriver?.isActive()) return false
+    const activeElement = activeDriver.getActiveElement()
     return activeElement?.matches(elementSelector) ?? false
   }
 
@@ -526,9 +597,14 @@ export function useOnboardingTour(options: OnboardingOptions) {
       isCurrentStep
     })
 
-    if (onboardingStore.isDriverActive()) {
-      driverInstance = onboardingStore.getDriverInstance()
-      return
+    const activeDriver = onboardingStore.getDriverInstance()
+    if (activeDriver) {
+      if (ownsStoredDriver(activeDriver) && activeDriver.isActive()) {
+        driverInstance = activeDriver
+        return
+      }
+      activeDriver.destroy()
+      if (onboardingStore.getDriverInstance() === activeDriver) onboardingStore.setDriverInstance(null)
     }
 
     // 简易模式下禁用新手引导
@@ -549,12 +625,14 @@ export function useOnboardingTour(options: OnboardingOptions) {
   })
 
   onUnmounted(() => {
+    disposed = true
+    startRevision++
     if (autoStartTimer) {
       clearTimeout(autoStartTimer)
       autoStartTimer = null
     }
     // 关键修复：不再此处清理 globalKeyboardHandler，交由 driver.onDestroyed 管理
-    onboardingStore.clearControlMethods()
+    onboardingStore.clearControlMethods({ nextStep, isCurrentStep })
   })
 
   return {

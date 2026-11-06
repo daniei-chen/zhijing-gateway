@@ -66,6 +66,6 @@ export function prepareBulkSubscriptionOperation(input: SubscriptionBulkActionRe
 
 export function completeBulkSubscriptionOperation(operation: BulkSubscriptionOperation) {
   if (!operation.storageKey) return
-  pendingKeys.delete(operation.storageKey)
-  storeKey(operation.storageKey, null)
+  if (pendingKeys.get(operation.storageKey) === operation.key) pendingKeys.delete(operation.storageKey)
+  if (readStoredKey(operation.storageKey) === operation.key) storeKey(operation.storageKey, null)
 }

@@ -1,4 +1,5 @@
 import { apiClient } from './client'
+import { assertAuthSession, captureAuthSession, trackAuthRequest, type AuthSessionSnapshot } from './authSession'
 import type { ActionCaptchaRequestProof, AuthResponse } from '@/types'
 
 export interface PasskeyCredentialSummary {
@@ -104,14 +105,35 @@ function serializeAssertionCredential(credential: PublicKeyCredential): Record<s
   }
 }
 
+async function waitForCredential(
+  session: AuthSessionSnapshot,
+  request: (signal: AbortSignal) => Promise<Credential | null>
+): Promise<Credential | null> {
+  assertAuthSession(session)
+  const controller = new AbortController()
+  const untrack = trackAuthRequest(session, () => controller.abort())
+  try {
+    const credential = await request(controller.signal)
+    assertAuthSession(session)
+    return credential
+  } catch (error) {
+    assertAuthSession(session)
+    throw error
+  } finally {
+    untrack()
+  }
+}
+
 async function login(proof?: ActionCaptchaRequestProof): Promise<AuthResponse> {
   requirePasskeySupport()
+  const session = captureAuthSession()
   const { data: begin } = proof
     ? await apiClient.post<CeremonyOptionsResponse>('/auth/passkey/login/begin', proof)
     : await apiClient.post<CeremonyOptionsResponse>('/auth/passkey/login/begin')
-  const credential = await navigator.credentials.get({
-    publicKey: requestOptionsFromJSON(begin.options.publicKey)
-  })
+  const credential = await waitForCredential(session, signal => navigator.credentials.get({
+    publicKey: requestOptionsFromJSON(begin.options.publicKey), signal
+  }))
+  assertAuthSession(session)
   if (!(credential instanceof PublicKeyCredential)) {
     throw new Error('Passkey sign-in was cancelled')
   }
@@ -119,18 +141,21 @@ async function login(proof?: ActionCaptchaRequestProof): Promise<AuthResponse> {
     session_token: begin.session_token,
     credential: serializeAssertionCredential(credential)
   })
+  assertAuthSession(session)
   return data
 }
 
 async function register(name: string, password: string): Promise<PasskeyCredentialSummary> {
   requirePasskeySupport()
+  const session = captureAuthSession()
   const { data: begin } = await apiClient.post<CeremonyOptionsResponse>(
     '/user/passkeys/register/begin',
     { password }
   )
-  const credential = await navigator.credentials.create({
-    publicKey: creationOptionsFromJSON(begin.options.publicKey)
-  })
+  const credential = await waitForCredential(session, signal => navigator.credentials.create({
+    publicKey: creationOptionsFromJSON(begin.options.publicKey), signal
+  }))
+  assertAuthSession(session)
   if (!(credential instanceof PublicKeyCredential)) {
     throw new Error('Passkey creation was cancelled')
   }
@@ -142,6 +167,7 @@ async function register(name: string, password: string): Promise<PasskeyCredenti
       credential: serializeRegistrationCredential(credential)
     }
   )
+  assertAuthSession(session)
   return data
 }
 

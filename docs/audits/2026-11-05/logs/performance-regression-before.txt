@@ -1,0 +1,487 @@
+
+ RUN  v2.1.9 baseline/frontend
+
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ❯ src/views/user/__tests__/StripePaymentView.audit-regression.spec.ts (11 tests | 1 failed) 141ms
+   × StripePaymentView > does not overlap slow status polls and stops polling a failed order 16ms
+     → expected "spy" to be called 1 times, but got 4 times
+ ❯ src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts (10 tests | 9 failed) 144ms
+   × payment polling lifecycle: dialog > never overlaps slow polls, including the provider verification stage 40ms
+     → expected "spy" to be called 1 times, but got 4 times
+   × payment polling lifecycle: dialog > does not initiate provider verification after unmount 9ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "synthetic_42",
+    ]
+
+
+Number of calls: 1
+
+   × payment polling lifecycle: dialog > keeps an old order response from settling or clearing the new order request 12ms
+     → expected [ [] ] to be undefined
+   × payment polling lifecycle: dialog > ignores a cancel response from an order that has been replaced 15ms
+     → expected [ [] ] to be undefined
+   × payment polling lifecycle: dialog > does not start polling an already expired order 7ms
+     → expected "spy" to not be called at all, but actually been called 2 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      42,
+    ]
+
+  2nd spy call:
+
+    Array [
+      42,
+    ]
+
+
+Number of calls: 2
+
+   × payment polling lifecycle: panel > does not initiate provider verification after unmount 5ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "synthetic_42",
+    ]
+
+
+Number of calls: 1
+
+   × payment polling lifecycle: panel > keeps an old order response from settling or clearing the new order request 6ms
+     → expected "spy" to be called 2 times, but got 1 times
+   × payment polling lifecycle: panel > ignores a cancel response from an order that has been replaced 8ms
+     → expected [ [ 'cancelled' ] ] to be undefined
+   × payment polling lifecycle: panel > does not start polling an already expired order 5ms
+     → expected "spy" to not be called at all, but actually been called 2 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      42,
+    ]
+
+  2nd spy call:
+
+    Array [
+      42,
+    ]
+
+
+Number of calls: 2
+
+ ❯ src/views/user/__tests__/StripePopupView.lifecycle.spec.ts (0 test)
+ ❯ src/composables/__tests__/useBatchImageAccess.session.spec.ts (4 tests | 4 failed) 94ms
+   × batch image access session ownership > clears cached access synchronously when the login session is replaced 28ms
+     → expected true to be false // Object.is equality
+   × batch image access session ownership > does not continue an old paginated lookup using the new login 23ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × batch image access session ownership > does not let the old lookup clear a new lookup or publish its result 27ms
+     → expected true to be false // Object.is equality
+   × batch image access session ownership > clears the feature affordance on logout without another API call 15ms
+     → expected true to be false // Object.is equality
+ ❯ src/views/admin/__tests__/AccountsView.lite.audit-regression.spec.ts (9 tests | 2 failed) 347ms
+   × admin AccountsView lite account list > discards an older automatic response after a new search finishes 41ms
+     → expected 'compact row' to be 'new search result' // Object.is equality
+   × admin AccountsView lite account list > does not add page listeners after unmount during catalog loading 23ms
+     → expected [ [ 'scroll', …(2) ], …(1) ] to deeply equal []
+stderr | src/composables/__tests__/useTableLoader.race.spec.ts > table loader request ownership > ignores an obsolete error without clearing the new request loading state
+Table load error: Error: late stale failure
+    at baseline/frontend/src/composables/__tests__/useTableLoader.race.spec.ts:54:18
+    at file://frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:146:14
+    at file://frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:533:11
+    at runWithTimeout (file://frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:39:7)
+    at runTest (file://frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1056:17)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at runSuite (file://frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)
+    at runSuite (file://frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1205:15)
+    at runFiles (file://frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1262:5)
+    at startTests (file://frontend/node_modules/.pnpm/@vitest+runner@2.1.9/node_modules/@vitest/runner/dist/index.js:1271:3)
+
+ ❯ src/composables/__tests__/useTableLoader.race.spec.ts (3 tests | 3 failed) 44ms
+   × table loader request ownership > does not let an adapter that ignores cancellation overwrite the latest page 28ms
+     → expected [ { id: 1 } ] to deeply equal [ { id: 2 } ]
+   × table loader request ownership > ignores an obsolete error without clearing the new request loading state 6ms
+     → promise rejected "Error: late stale failure" instead of resolving
+   × table loader request ownership > does not write a late result or start a queued search after unmount 9ms
+     → expected [ { id: 1 } ] to deeply equal []
+
+⎯⎯⎯⎯⎯⎯ Failed Suites 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/views/user/__tests__/StripePopupView.lifecycle.spec.ts [ src/views/user/__tests__/StripePopupView.lifecycle.spec.ts ]
+Error: [vitest] No "createI18n" export is defined on the "vue-i18n" mock. Did you forget to return it from "vi.mock"?
+If you need to partially mock a module, you can use "importOriginal" helper inside:
+
+vi.mock(import("vue-i18n"), async (importOriginal) => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    // your mocked methods
+  }
+})
+
+ ❯ src/i18n/index.ts:33:21
+     31| }
+     32|
+     33| export const i18n = createI18n({
+       |                     ^
+     34|   legacy: false,
+     35|   locale: getDefaultLocale(),
+ ❯ src/api/client.ts:2:31
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/20]⎯
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 19 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/composables/__tests__/useBatchImageAccess.session.spec.ts > batch image access session ownership > clears cached access synchronously when the login session is replaced
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/composables/__tests__/useBatchImageAccess.session.spec.ts:33:43
+     31|     expect(await access.refreshBatchImageAccess()).toBe(true)
+     32|     sessions.replaceAuthSession({ accessToken: 'synthetic-b', user: { …
+     33|     expect(access.canUseBatchImage.value).toBe(false)
+       |                                           ^
+     34|     expect(access.batchImageAccessLoaded.value).toBe(false)
+     35|     list.mockResolvedValueOnce({ items: [], pages: 1 })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/20]⎯
+
+ FAIL  src/composables/__tests__/useBatchImageAccess.session.spec.ts > batch image access session ownership > does not continue an old paginated lookup using the new login
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/composables/__tests__/useBatchImageAccess.session.spec.ts:48:18
+     46|     oldPage.resolve({ items: [{ status: 'active', group: { platform: '…
+     47|     expect(await oldLoad).toBe(false)
+     48|     expect(list).toHaveBeenCalledTimes(1)
+       |                  ^
+     49|     expect(access.batchImageAccessLoaded.value).toBe(false)
+     50|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/20]⎯
+
+ FAIL  src/composables/__tests__/useBatchImageAccess.session.spec.ts > batch image access session ownership > does not let the old lookup clear a new lookup or publish its result
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/composables/__tests__/useBatchImageAccess.session.spec.ts:62:43
+     60|     oldPage.resolve({ items: [eligible], pages: 1 })
+     61|     await oldLoad
+     62|     expect(access.canUseBatchImage.value).toBe(false)
+       |                                           ^
+     63|     expect(access.batchImageAccessLoading.value).toBe(true)
+     64|     const duplicateLoad = access.refreshBatchImageAccess(true)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/20]⎯
+
+ FAIL  src/composables/__tests__/useBatchImageAccess.session.spec.ts > batch image access session ownership > clears the feature affordance on logout without another API call
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ src/composables/__tests__/useBatchImageAccess.session.spec.ts:78:43
+     76|     await access.refreshBatchImageAccess()
+     77|     sessions.clearStoredAuthSession()
+     78|     expect(access.canUseBatchImage.value).toBe(false)
+       |                                           ^
+     79|     auth.isAuthenticated = false
+     80|     expect(await access.refreshBatchImageAccess()).toBe(false)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/20]⎯
+
+ FAIL  src/composables/__tests__/useTableLoader.race.spec.ts > table loader request ownership > does not let an adapter that ignores cancellation overwrite the latest page
+AssertionError: expected [ { id: 1 } ] to deeply equal [ { id: 2 } ]
+
+- Expected
++ Received
+
+  Array [
+    Object {
+-     "id": 2,
++     "id": 1,
+    },
+  ]
+
+ ❯ src/composables/__tests__/useTableLoader.race.spec.ts:40:31
+     38|     first.resolve({ items: [{ id: 1 }], total: 100, pages: 10 })
+     39|     await oldLoad
+     40|     expect(table.items.value).toEqual([{ id: 2 }])
+       |                               ^
+     41|     expect(table.pagination.total).toBe(20)
+     42|     expect(table.pagination.pages).toBe(2)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/20]⎯
+
+ FAIL  src/composables/__tests__/useTableLoader.race.spec.ts > table loader request ownership > ignores an obsolete error without clearing the new request loading state
+AssertionError: promise rejected "Error: late stale failure" instead of resolving
+ ❯ src/composables/__tests__/useTableLoader.race.spec.ts:55:25
+     53|     const newLoad = table.load()
+     54|     first.reject(new Error('late stale failure'))
+     55|     await expect(oldLoad).resolves.toBeUndefined()
+       |                         ^
+     56|     expect(table.loading.value).toBe(true)
+     57|     second.resolve({ items: [{ id: 2 }], total: 1, pages: 1 })
+
+Caused by: Error: late stale failure
+ ❯ src/composables/__tests__/useTableLoader.race.spec.ts:54:18
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/20]⎯
+
+ FAIL  src/composables/__tests__/useTableLoader.race.spec.ts > table loader request ownership > does not write a late result or start a queued search after unmount
+AssertionError: expected [ { id: 1 } ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   Object {
++     "id": 1,
++   },
++ ]
+
+ ❯ src/composables/__tests__/useTableLoader.race.spec.ts:75:31
+     73|     await vi.advanceTimersByTimeAsync(300)
+     74|     await flushPromises()
+     75|     expect(table.items.value).toEqual([])
+       |                               ^
+     76|     expect(fetchFn).toHaveBeenCalledTimes(1)
+     77|     expect(table.loading.value).toBe(false)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/20]⎯
+
+ FAIL  src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts > payment polling lifecycle: dialog > never overlaps slow polls, including the provider verification stage
+AssertionError: expected "spy" to be called 1 times, but got 4 times
+ ❯ src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts:54:24
+     52|     const wrapper = await open(kind)
+     53|     await vi.advanceTimersByTimeAsync(12000)
+     54|     expect(mocks.poll).toHaveBeenCalledTimes(1)
+       |                        ^
+     55|     status.resolve(order())
+     56|     await flushPromises()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/20]⎯
+
+ FAIL  src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts > payment polling lifecycle: dialog > does not initiate provider verification after unmount
+ FAIL  src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts > payment polling lifecycle: panel > does not initiate provider verification after unmount
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      "synthetic_42",
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts:74:30
+     72|     status.resolve(order())
+     73|     await flushPromises()
+     74|     expect(mocks.verify).not.toHaveBeenCalled()
+       |                              ^
+     75|     expect(wrapper.emitted('success')).toBeUndefined()
+     76|     expect(vi.getTimerCount()).toBe(0)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/20]⎯
+
+ FAIL  src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts > payment polling lifecycle: dialog > keeps an old order response from settling or clearing the new order request
+AssertionError: expected [ [] ] to be undefined
+
+- Expected:
+undefined
+
++ Received:
+Array [
+  Array [],
+]
+
+ ❯ src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts:93:40
+     91|     await vi.advanceTimersByTimeAsync(6000)
+     92|     expect(mocks.poll).toHaveBeenCalledTimes(2)
+     93|     expect(wrapper.emitted('success')).toBeUndefined()
+       |                                        ^
+     94|     second.resolve(order(77, 'PAID'))
+     95|     await flushPromises()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/20]⎯
+
+ FAIL  src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts > payment polling lifecycle: dialog > ignores a cancel response from an order that has been replaced
+AssertionError: expected [ [] ] to be undefined
+
+- Expected:
+undefined
+
++ Received:
+Array [
+  Array [],
+]
+
+ ❯ src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts:111:38
+    109|     cancel.resolve()
+    110|     await flushPromises()
+    111|     expect(wrapper.emitted('close')).toBeUndefined()
+       |                                      ^
+    112|     expect(wrapper.emitted('settled')).toBeUndefined()
+    113|     await vi.advanceTimersByTimeAsync(3000)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/20]⎯
+
+ FAIL  src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts > payment polling lifecycle: dialog > does not start polling an already expired order
+ FAIL  src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts > payment polling lifecycle: panel > does not start polling an already expired order
+AssertionError: expected "spy" to not be called at all, but actually been called 2 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      42,
+    ]
+
+  2nd spy call:
+
+    Array [
+      42,
+    ]
+
+
+Number of calls: 2
+
+ ❯ src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts:121:28
+    119|     await wrapper.setProps({ expiresAt: new Date(Date.now() - 1000).to…
+    120|     await vi.advanceTimersByTimeAsync(6000)
+    121|     expect(mocks.poll).not.toHaveBeenCalled()
+       |                            ^
+    122|     expect(wrapper.text()).toContain('payment.qr.expired')
+    123|     expect(vi.getTimerCount()).toBe(0)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/20]⎯
+
+ FAIL  src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts > payment polling lifecycle: panel > keeps an old order response from settling or clearing the new order request
+AssertionError: expected "spy" to be called 2 times, but got 1 times
+ ❯ src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts:87:24
+     85|     await wrapper.setProps({ orderId: 77 })
+     86|     await vi.advanceTimersByTimeAsync(3000)
+     87|     expect(mocks.poll).toHaveBeenCalledTimes(2)
+       |                        ^
+     88|     expect(mocks.poll).toHaveBeenLastCalledWith(77)
+     89|     first.resolve(order(42, 'PAID'))
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/20]⎯
+
+ FAIL  src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts > payment polling lifecycle: panel > ignores a cancel response from an order that has been replaced
+AssertionError: expected [ [ 'cancelled' ] ] to be undefined
+
+- Expected:
+undefined
+
++ Received:
+Array [
+  Array [
+    "cancelled",
+  ],
+]
+
+ ❯ src/components/payment/__tests__/paymentPolling.lifecycle.spec.ts:112:40
+    110|     await flushPromises()
+    111|     expect(wrapper.emitted('close')).toBeUndefined()
+    112|     expect(wrapper.emitted('settled')).toBeUndefined()
+       |                                        ^
+    113|     await vi.advanceTimersByTimeAsync(3000)
+    114|     expect(mocks.poll).toHaveBeenCalledWith(77)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/20]⎯
+
+ FAIL  src/views/admin/__tests__/AccountsView.lite.audit-regression.spec.ts > admin AccountsView lite account list > discards an older automatic response after a new search finishes
+AssertionError: expected 'compact row' to be 'new search result' // Object.is equality
+
+Expected: "new search result"
+Received: "compact row"
+
+ ❯ src/views/admin/__tests__/AccountsView.lite.audit-regression.spec.ts:260:80
+    258|     finishOldRefresh({ notModified: false, etag: 'obsolete', data: { i…
+    259|     await flushPromises()
+    260|     expect(wrapper.get('[data-account-name]').attributes('data-account…
+       |                                                                                ^
+    261|     expect(listWithEtag.mock.calls[0][3].signal.aborted).toBe(true)
+    262|     wrapper.unmount()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/20]⎯
+
+ FAIL  src/views/admin/__tests__/AccountsView.lite.audit-regression.spec.ts > admin AccountsView lite account list > does not add page listeners after unmount during catalog loading
+AssertionError: expected [ [ 'scroll', …(2) ], …(1) ] to deeply equal []
+
+- Expected
++ Received
+
+- Array []
++ Array [
++   Array [
++     "scroll",
++     [Function handleScroll],
++     true,
++   ],
++   Array [
++     "resize",
++     [Function handleViewportResize],
++   ],
++ ]
+
+ ❯ src/views/admin/__tests__/AccountsView.lite.audit-regression.spec.ts:277:99
+    275|     finishGroups([])
+    276|     await flushPromises()
+    277|     expect(windowListeners.mock.calls.filter(([type]) => type === 'scr…
+       |                                                                                                   ^
+    278|     expect(documentListeners.mock.calls.filter(([type]) => type === 'c…
+    279|   })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/20]⎯
+
+ FAIL  src/views/user/__tests__/StripePaymentView.audit-regression.spec.ts > StripePaymentView > does not overlap slow status polls and stops polling a failed order
+AssertionError: expected "spy" to be called 1 times, but got 4 times
+ ❯ src/views/user/__tests__/StripePaymentView.audit-regression.spec.ts:259:42
+    257|     await flushPromises()
+    258|     await vi.advanceTimersByTimeAsync(12000)
+    259|     expect(paymentStore.pollOrderStatus).toHaveBeenCalledTimes(1)
+       |                                          ^
+    260|     finishPoll(orderFactory({ status: 'EXPIRED' }))
+    261|     await flushPromises()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/20]⎯
+
+ Test Files  6 failed (6)
+      Tests  19 failed | 18 passed (37)
+   Start at  19:46:06
+   Duration  7.69s (transform 5.75s, setup 433ms, collect 8.08s, tests 770ms, environment 2.34s, prepare 468ms)

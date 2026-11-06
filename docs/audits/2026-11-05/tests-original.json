@@ -1,0 +1,3149 @@
+{
+  "numTotalTests": 3139,
+  "numPassedTests": 3139,
+  "numFailedTests": 0,
+  "numPendingTests": 0,
+  "numTodoTests": 0,
+  "success": true,
+  "startTime": 1793875345197,
+  "test_files": 392,
+  "raw_report_sha256": "1693c9333d07f31bf49ee0f3f0354d3bf7fdde5d37d89656ec83df9ce816c3a5",
+  "files": [
+    {
+      "path": "baseline/frontend/src/__review__/p1.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/__tests__/integration/data-import.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/__tests__/integration/navigation.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/__tests__/integration/proxy-data-import.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/__tests__/integration/usage-reasoning-effort.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/__tests__/AliyunCaptchaWidget.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/__tests__/ApiKeyCreate.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/__tests__/Dashboard.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/__tests__/LoginForm.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/__tests__/TencentCaptchaGate.spec.ts",
+      "status": "passed",
+      "test_count": 15,
+      "status_counts": {
+        "passed": 15
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/__tests__/TurnstileWidget.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/constants/__tests__/platforms.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/antigravityMappings.retry.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useAntigravityOAuth.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useBatchImageAccess.retry.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useClipboard.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useForm.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useGeminiOAuth.errors.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useGrokOAuth.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useKeyedDebouncedSearch.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useModelWhitelist.spec.ts",
+      "status": "passed",
+      "test_count": 23,
+      "status_counts": {
+        "passed": 23
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useNavigationLoading.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useOpenAIOAuth.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/usePersistedPageSize.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useRoutePrefetch.spec.ts",
+      "status": "passed",
+      "test_count": 15,
+      "status_counts": {
+        "passed": 15
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useStepUp.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useSwipeSelect.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/composables/__tests__/useTableLoader.spec.ts",
+      "status": "passed",
+      "test_count": 12,
+      "status_counts": {
+        "passed": 12
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.accounts.duplicate.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.accounts.grokModelDiagnostics.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.accounts.ollamaCloudUsage.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.accounts.opencodeGoUsage.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.accounts.upstreamBillingProbe.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.channelMonitor.duplicate.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.grok.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.groups.duplicate.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.groups.usage-summary.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.proxies.spec.ts",
+      "status": "passed",
+      "test_count": 24,
+      "status_counts": {
+        "passed": 24
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.subscriptions.bulk.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.system.rollback.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/admin.users.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/adminUIRequest.spec.ts",
+      "status": "passed",
+      "test_count": 57,
+      "status_counts": {
+        "passed": 57
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/auth-captcha-oauth-start.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/auth-oauth-adoption.spec.ts",
+      "status": "passed",
+      "test_count": 13,
+      "status_counts": {
+        "passed": 13
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/authSession.cross-tab.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/authSession.integration.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/authSessionDigest.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/channelMonitorV2.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/client.spec.ts",
+      "status": "passed",
+      "test_count": 30,
+      "status_counts": {
+        "passed": 30
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/codex.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/keys.bulkUpdate.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/passkey.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/payment.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/redeem.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/settings.authSourceDefaults.spec.ts",
+      "status": "passed",
+      "test_count": 13,
+      "status_counts": {
+        "passed": 13
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/settings.paymentVisibleMethods.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/settings.wechatConnect.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/tokenRefresh.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/api/__tests__/user.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/i18n/__tests__/ipGeoLocales.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/i18n/__tests__/localeKeyCompleteness.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/i18n/__tests__/localesMessageCompile.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/i18n/__tests__/localesNoKeyCollision.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/i18n/__tests__/openaiFastPolicyLocales.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/i18n/__tests__/opsLocaleKeys.spec.ts",
+      "status": "passed",
+      "test_count": 27,
+      "status_counts": {
+        "passed": 27
+      }
+    },
+    {
+      "path": "baseline/frontend/src/i18n/__tests__/riskControlLocales.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/i18n/__tests__/usageServiceTierLocales.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/i18n/__tests__/wsModeLocaleDesc.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/router/__tests__/feature-access.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/router/__tests__/guards.spec.ts",
+      "status": "passed",
+      "test_count": 34,
+      "status_counts": {
+        "passed": 34
+      }
+    },
+    {
+      "path": "baseline/frontend/src/router/__tests__/mcp-route.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/router/__tests__/title.spec.ts",
+      "status": "passed",
+      "test_count": 12,
+      "status_counts": {
+        "passed": 12
+      }
+    },
+    {
+      "path": "baseline/frontend/src/router/__tests__/wechat-route.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/stores/__tests__/adminCompliance.reset.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/stores/__tests__/adminSettings.retry.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/stores/__tests__/announcements.fetch.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/stores/__tests__/announcements.markAll.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/stores/__tests__/app.spec.ts",
+      "status": "passed",
+      "test_count": 26,
+      "status_counts": {
+        "passed": 26
+      }
+    },
+    {
+      "path": "baseline/frontend/src/stores/__tests__/auth.spec.ts",
+      "status": "passed",
+      "test_count": 21,
+      "status_counts": {
+        "passed": 21
+      }
+    },
+    {
+      "path": "baseline/frontend/src/stores/__tests__/payment.config.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/stores/__tests__/subscriptions.clear.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/stores/__tests__/subscriptions.spec.ts",
+      "status": "passed",
+      "test_count": 13,
+      "status_counts": {
+        "passed": 13
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/accountSelection.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/accountUsageRefresh.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/authError.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/billingMode.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/branding.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/ccswitchImport.antigravityUrl.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/ccswitchImport.spec.ts",
+      "status": "passed",
+      "test_count": 18,
+      "status_counts": {
+        "passed": 18
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/codexCatalogConfig.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/device.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/embedded-url.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/featureFlags.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/floatingPanel.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/formatBytes.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/formatCompactNumber.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/formatDateLocalInput.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/formatDateTimeLocalInput.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/formatDateTimeToMinute.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/formatMultiplier.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/formatReasoningEffort.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/geminiExplicitCache.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/intervalPrices.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/ipGeoLookup.spec.ts",
+      "status": "passed",
+      "test_count": 22,
+      "status_counts": {
+        "passed": 22
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/latencyHealth.spec.ts",
+      "status": "passed",
+      "test_count": 22,
+      "status_counts": {
+        "passed": 22
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/oauthAffiliate.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/openaiWsMode.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/pricing.formatScaled.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/proxyExpiry.boundary.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/proxyExpiry.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/rechargeBonus.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/registrationEmailPolicy.spec.ts",
+      "status": "passed",
+      "test_count": 13,
+      "status_counts": {
+        "passed": 13
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/siteBillingMode.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/stableObjectKey.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/subscriptionQuota.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/tablePreferences.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/utils/__tests__/usageServiceTier.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/__tests__/HomeView.compact.spec.ts",
+      "status": "passed",
+      "test_count": 13,
+      "status_counts": {
+        "passed": 13
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/__tests__/KeyUsageView.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/AccountPriorityCell.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/AccountStatusIndicator.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/AccountTestModal.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/AccountUsageCell.spec.ts",
+      "status": "passed",
+      "test_count": 61,
+      "status_counts": {
+        "passed": 61
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/BulkEditAccountModal.spec.ts",
+      "status": "passed",
+      "test_count": 54,
+      "status_counts": {
+        "passed": 54
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/CNProviderBalanceCell.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/CNProviderQuotaCell.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/ClaudeResetCreditsCell.spec.ts",
+      "status": "passed",
+      "test_count": 27,
+      "status_counts": {
+        "passed": 27
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/CreateAccountModal.grok.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/CreateAccountModal.spec.ts",
+      "status": "passed",
+      "test_count": 49,
+      "status_counts": {
+        "passed": 49
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/EditAccountModal.grokMediaEligibility.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/EditAccountModal.grokUpstream.spec.ts",
+      "status": "passed",
+      "test_count": 62,
+      "status_counts": {
+        "passed": 62
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/EditAccountModal.spec.ts",
+      "status": "passed",
+      "test_count": 73,
+      "status_counts": {
+        "passed": 73
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/GrokModelDiagnosticsPanel.spec.ts",
+      "status": "passed",
+      "test_count": 56,
+      "status_counts": {
+        "passed": 56
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/GrokQuotaProbeCell.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/ModelWhitelistSelector.spec.ts",
+      "status": "passed",
+      "test_count": 38,
+      "status_counts": {
+        "passed": 38
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/OllamaCloudUsageCell.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/OllamaCloudUsageSettings.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/OpenAIQuotaResetCell.spark_shadow.spec.ts",
+      "status": "passed",
+      "test_count": 29,
+      "status_counts": {
+        "passed": 29
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/OpenAIReferralCell.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/OpenAIReferralCell.transport.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/OpenCodeGoProtocolRulesEditor.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/OpenCodeGoUsageCell.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/TempUnschedStatusModal.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/UpstreamBillingRateCell.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/UpstreamRequestIdHeaderField.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/UsageProgressBar.spec.ts",
+      "status": "passed",
+      "test_count": 12,
+      "status_counts": {
+        "passed": 12
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/accountExpiry.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/credentialsBuilder.cnAdaptive.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/credentialsBuilder.platformCatalog.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/credentialsBuilder.spec.ts",
+      "status": "passed",
+      "test_count": 71,
+      "status_counts": {
+        "passed": 71
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/account/__tests__/longContextBilling.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/__tests__/ErrorPassthroughRulesModal.toggle.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/monitor/MonitorActionsCell.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/auth/__tests__/EmailOAuthButtons.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/auth/__tests__/OAuthLoginSections.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/auth/__tests__/PendingOAuthCreateAccountForm.spec.ts",
+      "status": "passed",
+      "test_count": 12,
+      "status_counts": {
+        "passed": 12
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/auth/__tests__/TotpLoginModal.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/auth/__tests__/WechatOAuthSection.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/channels/__tests__/AvailableChannelsTable.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/channels/__tests__/SupportedModelChip.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/charts/__tests__/GroupDistributionChart.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/charts/__tests__/ModelDistributionChart.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/charts/__tests__/TokenUsageTrend.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/charts/__tests__/dailyTokenUsage.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/AnnouncementBell.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/AnnouncementPopup.spec.ts",
+      "status": "passed",
+      "test_count": 12,
+      "status_counts": {
+        "passed": 12
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/BaseDialog.escape.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/BaseDialog.ids.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/BaseDialog.scrollLock.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/BaseDialog.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/DataTable.spec.ts",
+      "status": "passed",
+      "test_count": 12,
+      "status_counts": {
+        "passed": 12
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/DateRangePicker.dismiss.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/DateRangePicker.midnight.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/DateRangePicker.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/GroupOptionItem.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/GroupSelector.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/HelpTooltip.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/ImageUpload.readOrder.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/IpGeoCell.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/LocaleSwitcher.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/MonitorQuotaView.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/NavigationProgress.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/Pagination.jump.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/PlatformTypeBadge.grok.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/PlatformTypeBadge.openaiPlans.spec.ts",
+      "status": "passed",
+      "test_count": 15,
+      "status_counts": {
+        "passed": 15
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/ProxySelector.testing.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/SearchInput.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/Select.ime.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/Select.keyboard.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/Select.searchHighlight.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/Select.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/SubscriptionProgressMini.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/dialogFocus.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/common/__tests__/disabledSelectors.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/keys/__tests__/BulkEditKeysModal.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/keys/__tests__/EndpointPopover.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/keys/__tests__/UseKeyModal.spec.ts",
+      "status": "passed",
+      "test_count": 30,
+      "status_counts": {
+        "passed": 30
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/layout/__tests__/AppSidebar.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/layout/__tests__/TablePageLayout.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/layout/__tests__/docUrlSanitization.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/layout/__tests__/siteLogoSanitization.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/layout/__tests__/workspaceMotion.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/modelPlaza/__tests__/PlazaGroupSection.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/modelPlaza/__tests__/PlazaModelPricingTable.spec.ts",
+      "status": "passed",
+      "test_count": 37,
+      "status_counts": {
+        "passed": 37
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/AmountInput.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/PaymentMethodSelector.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/PaymentProviderDialog.spec.ts",
+      "status": "passed",
+      "test_count": 16,
+      "status_counts": {
+        "passed": 16
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/PaymentQRDialog.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/PaymentStatusPanel.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/SubscriptionPlanCard.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/alipayDeepLink.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/currency.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/paymentCountdown.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/paymentFlow.spec.ts",
+      "status": "passed",
+      "test_count": 25,
+      "status_counts": {
+        "passed": 25
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/providerConfig.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/payment/__tests__/validity.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/__tests__/MonitorCard.quota.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/__tests__/MonitorDetailDialog.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/__tests__/UserAttributeForm.race.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/__tests__/UserAttributeForm.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/__tests__/UserAttributesConfigModal.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/__tests__/UserErrorDetailModal.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/__tests__/UserPlatformQuotaCell.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/__tests__/WorkspaceMembershipStamp.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/channel-monitor-v2/__tests__/MetricCell.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/channel-monitor-v2/__tests__/MonitorSettingsPanel.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/channel-monitor-v2/__tests__/RelayPulseMatrix.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/channel-monitor-v2/__tests__/designSystem.structure.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/channel-monitor-v2/__tests__/monitorFormat.spec.ts",
+      "status": "passed",
+      "test_count": 13,
+      "status_counts": {
+        "passed": 13
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/channel-monitor-v2/__tests__/monitorZoom.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/prompt-audit/__tests__/PromptAuditView.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/prompt-audit/__tests__/api.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/prompt-audit/__tests__/components.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/prompt-audit/__tests__/integrationSurface.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/features/prompt-audit/__tests__/viewModel.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/AccountsView.bulkEdit.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/AccountsView.lite.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/AccountsView.priorityColumn.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/AccountsView.schedulerScore.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/AccountsView.selectAllResults.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/AccountsView.sparkShadow.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/AccountsView.usageWindowsHint.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/BackupView.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/ChannelMonitorView.checkModeBadge.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/ChannelMonitorView.duplicate.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/ChannelMonitorView.grok.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/ChannelsView.modelSync.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/ChannelsView.webSearchEmulation.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/DashboardView.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/GroupsView.codexManifest.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/GroupsView.columnSettings.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/GroupsView.compositePlatforms.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/GroupsView.duplicate.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/MonitorFormDialog.accountSelector.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/PluginsView.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/ProxiesView.credentials.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/ProxiesView.filters.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/ProxiesView.ipv6.spec.ts",
+      "status": "passed",
+      "test_count": 12,
+      "status_counts": {
+        "passed": 12
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/RedeemView.batchUpdate.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/RiskControlView.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/SettingsView.spec.ts",
+      "status": "passed",
+      "test_count": 43,
+      "status_counts": {
+        "passed": 43
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/SubscriptionsView.bulkActions.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/SubscriptionsView.userUsageLink.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/UsageView.spec.ts",
+      "status": "passed",
+      "test_count": 14,
+      "status_counts": {
+        "passed": 14
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/UsersView.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/apiKeyGroupFilterOptions.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/channelPlatformOptions.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/codexFingerprintSignals.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/groupModelAllowlist.spec.ts",
+      "status": "passed",
+      "test_count": 13,
+      "status_counts": {
+        "passed": 13
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/groupModelAllowlistLayout.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/groupsImagePricing.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/groupsMessagesDispatch.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/groupsOpenAIFast.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/groupsProfitControl.spec.ts",
+      "status": "passed",
+      "test_count": 13,
+      "status_counts": {
+        "passed": 13
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/groupsReasoningEffort.spec.ts",
+      "status": "passed",
+      "test_count": 19,
+      "status_counts": {
+        "passed": 19
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/groupsSupportedModelScopes.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/groupsVideoModelPricing.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/modelAllowlistCandidates.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/__tests__/platformFilterCatalogUsage.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/EmailVerifyView.spec.ts",
+      "status": "passed",
+      "test_count": 16,
+      "status_counts": {
+        "passed": 16
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/LinuxDoCallbackView.spec.ts",
+      "status": "passed",
+      "test_count": 17,
+      "status_counts": {
+        "passed": 17
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/LoginView.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/MCPLoginRedirect.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/MCPOAuthAuthorizeView.spec.ts",
+      "status": "passed",
+      "test_count": 23,
+      "status_counts": {
+        "passed": 23
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/OAuthCallbackView.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/OidcCallbackView.spec.ts",
+      "status": "passed",
+      "test_count": 15,
+      "status_counts": {
+        "passed": 15
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/RegisterView.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/TencentCaptchaActionGate.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/TencentCaptchaForgotPassword.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/WechatCallbackView.spec.ts",
+      "status": "passed",
+      "test_count": 25,
+      "status_counts": {
+        "passed": 25
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/auth/__tests__/WechatPaymentCallbackView.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/AffiliateView.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/AirwallexPaymentView.lifecycle.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/AirwallexPaymentView.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/ChannelStatusV1View.details.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/ChannelStatusV1View.refresh.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/ChannelStatusView.mode.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/CustomPageView.race.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/CustomPageView.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/KeysView.spec.ts",
+      "status": "passed",
+      "test_count": 26,
+      "status_counts": {
+        "passed": 26
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/MCPView.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/PaymentResultView.spec.ts",
+      "status": "passed",
+      "test_count": 14,
+      "status_counts": {
+        "passed": 14
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/PaymentView.spec.ts",
+      "status": "passed",
+      "test_count": 23,
+      "status_counts": {
+        "passed": 23
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/ProfileView.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/RedeemView.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/StripePaymentView.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/SubscriptionsView.membership.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/UsageView.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/UserOrdersView.filters.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/paymentUx.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/paymentWechatResume.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/user/__tests__/stripeLazyLoading.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/account/__tests__/AccountActionMenu.position.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/account/__tests__/AccountActionMenu.spark_shadow.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/account/__tests__/AccountBulkActionsBar.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/account/__tests__/AccountTestModal.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/account/__tests__/ReAuthAccountModal.grok.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/account/__tests__/ScheduledTestsPanel.results.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/announcements/__tests__/AnnouncementReadStatusDialog.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/channel/__tests__/IntervalRow.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/channel/__tests__/ModelTagInput.keyboard.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/channel/__tests__/PricingEntryCard.modelDefaultPrice.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/channel/__tests__/PricingEntryCard.timePricing.spec.ts",
+      "status": "passed",
+      "test_count": 14,
+      "status_counts": {
+        "passed": 14
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/channel/__tests__/TimePricingSection.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/channel/__tests__/types.spec.ts",
+      "status": "passed",
+      "test_count": 38,
+      "status_counts": {
+        "passed": 38
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/group/__tests__/CodexManifestAccountsField.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/group/__tests__/GroupI18nField.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/group/__tests__/GroupModal.cleanup.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/group/__tests__/GroupRPMOverridesModal.edit.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/group/__tests__/GroupRPMOverridesModal.requests.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/group/__tests__/GroupRPMOverridesModal.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/group/__tests__/GroupRateMultipliersModal.edit.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/group/__tests__/GroupRateMultipliersModal.requests.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/group/__tests__/GroupRateMultipliersModal.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/group/__tests__/ReasoningEffortPolicyFields.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/monitor/__tests__/MonitorPrimaryModelCell.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/monitor/__tests__/MonitorTemplateApplyPickerDialog.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/monitor/__tests__/MonitorTemplateManagerDialog.requests.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/payment/__tests__/AdminRefundDialog.balance.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/payment/__tests__/orderCurrencyDisplay.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/settings/__tests__/AdminAccessKeysSettings.spec.ts",
+      "status": "passed",
+      "test_count": 12,
+      "status_counts": {
+        "passed": 12
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/subscription/__tests__/BulkSubscriptionActionDialog.spec.ts",
+      "status": "passed",
+      "test_count": 20,
+      "status_counts": {
+        "passed": 20
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/subscription/__tests__/bulkSubscriptionOperation.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/usage/__tests__/UsageCleanupDialog.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/usage/__tests__/UsageFilters.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/usage/__tests__/UsageStatsCards.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/usage/__tests__/UsageTable.spec.ts",
+      "status": "passed",
+      "test_count": 32,
+      "status_counts": {
+        "passed": 32
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/usage/__tests__/UserTokenRanking.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/user/__tests__/BulkEditUserModal.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/user/__tests__/GroupReplaceModal.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/user/__tests__/UserAllowedGroupsModal.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/user/__tests__/UserApiKeysModal.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/user/__tests__/UserBalanceHistoryModal.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/user/__tests__/UserBalanceModal.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/user/__tests__/UserEditModal.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/admin/user/__tests__/UserPlatformQuotaModal.spec.ts",
+      "status": "passed",
+      "test_count": 27,
+      "status_counts": {
+        "passed": 27
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/dashboard/__tests__/UserDashboardStats.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/profile/__tests__/ProfileAvatarCard.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/profile/__tests__/ProfileBalanceNotifyCard.spec.ts",
+      "status": "passed",
+      "test_count": 12,
+      "status_counts": {
+        "passed": 12
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/profile/__tests__/ProfileEditForm.draft.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/profile/__tests__/ProfileEditForm.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/profile/__tests__/ProfileIdentityBindingsSection.spec.ts",
+      "status": "passed",
+      "test_count": 29,
+      "status_counts": {
+        "passed": 29
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/profile/__tests__/ProfileInfoCard.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/profile/__tests__/ProfilePasswordForm.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/profile/__tests__/Totp.errors.spec.ts",
+      "status": "passed",
+      "test_count": 11,
+      "status_counts": {
+        "passed": 11
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/profile/__tests__/TotpSetupModal.inputs.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/profile/__tests__/totp-timer-cleanup.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/subscriptions/__tests__/SubscriptionMembershipCard.spec.ts",
+      "status": "passed",
+      "test_count": 5,
+      "status_counts": {
+        "passed": 5
+      }
+    },
+    {
+      "path": "baseline/frontend/src/components/user/subscriptions/__tests__/planPresentation.spec.ts",
+      "status": "passed",
+      "test_count": 9,
+      "status_counts": {
+        "passed": 9
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/affiliates/__tests__/AdminAffiliateRecordsTable.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/affiliates/__tests__/AffiliateOfflineWithdrawDialog.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/affiliates/__tests__/affiliateWithdrawOperation.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/orders/__tests__/AdminPaymentPlansView.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/orders/__tests__/PlanEditDialog.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/settings/__tests__/OpenAIFastPolicyUserSelector.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsAlertEventsCard.pagination.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsAlertRulesCard.duration.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsDashboardHeader.spec.ts",
+      "status": "passed",
+      "test_count": 4,
+      "status_counts": {
+        "passed": 4
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsDashboardHeader.timezone.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsErrorDetailModal.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsErrorLogTable.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsErrorScopeCharts.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsOpenAITokenStatsCard.spec.ts",
+      "status": "passed",
+      "test_count": 8,
+      "status_counts": {
+        "passed": 8
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsRequestDetailsModal.spec.ts",
+      "status": "passed",
+      "test_count": 10,
+      "status_counts": {
+        "passed": 10
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsRequestDiagnostics.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsSettingsDialog.loading.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsSystemLogTable.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/components/__tests__/OpsThroughputTrendChart.spec.ts",
+      "status": "passed",
+      "test_count": 1,
+      "status_counts": {
+        "passed": 1
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/utils/__tests__/errorDetailResponse.spec.ts",
+      "status": "passed",
+      "test_count": 7,
+      "status_counts": {
+        "passed": 7
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/utils/__tests__/opsErrorParams.spec.ts",
+      "status": "passed",
+      "test_count": 2,
+      "status_counts": {
+        "passed": 2
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/utils/__tests__/opsFormatters.spec.ts",
+      "status": "passed",
+      "test_count": 3,
+      "status_counts": {
+        "passed": 3
+      }
+    },
+    {
+      "path": "baseline/frontend/src/views/admin/ops/utils/__tests__/requestDiagnostics.spec.ts",
+      "status": "passed",
+      "test_count": 6,
+      "status_counts": {
+        "passed": 6
+      }
+    }
+  ]
+}

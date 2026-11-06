@@ -1,0 +1,36 @@
+{
+  "runtime": "v24.22.1",
+  "environment": "Node.js in-memory storage, synthetic 2048-character access token and 128-character refresh token; no HTTP, browser rendering, or production data",
+  "iterations_per_trial": 10000,
+  "trials": 7,
+  "warmup_iterations": 2000,
+  "results": {
+    "baseline": {
+      "milliseconds": [
+        619.673896,
+        594.569982,
+        644.3232390000003,
+        647.6291150000002,
+        570.3832469999998,
+        516.3204089999999,
+        562.6182800000006
+      ],
+      "median_total_ms": 594.569982,
+      "median_microseconds_per_capture": 59.456998199999994
+    },
+    "candidate": {
+      "milliseconds": [
+        34.829155000000014,
+        37.29538100000002,
+        45.031776000000264,
+        60.82966600000009,
+        59.382974000000104,
+        61.13928100000021,
+        60.25881500000014
+      ],
+      "median_total_ms": 59.382974000000104,
+      "median_microseconds_per_capture": 5.93829740000001
+    }
+  },
+  "ratio": 10.012465559572664
+}

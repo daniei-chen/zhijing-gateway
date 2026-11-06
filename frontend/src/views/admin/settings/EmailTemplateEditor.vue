@@ -23,7 +23,7 @@
         <button
           type="button"
           class="btn btn-secondary btn-sm"
-          :disabled="loadingTemplate || restoring || !selectedEvent || !selectedLocale"
+          :disabled="loadingTemplate || saving || restoring || !selectedEvent || !selectedLocale"
           @click="restoreOfficial"
         >
           {{ restoring ? t("admin.settings.emailTemplates.restoring") : t("admin.settings.emailTemplates.restoreOfficial") }}
@@ -31,7 +31,7 @@
         <button
           type="button"
           class="btn btn-primary btn-sm"
-          :disabled="loadingTemplate || saving || !canSave"
+          :disabled="loadingTemplate || saving || restoring || !canSave"
           @click="saveTemplate"
         >
           {{ saving ? t("admin.settings.emailTemplates.saving") : t("admin.settings.emailTemplates.save") }}
@@ -143,6 +143,7 @@
               <input
                 id="email-template-subject"
                 v-model="subject"
+                @input="markDraftEdited"
                 type="text"
                 class="input"
                 :disabled="loadingTemplate"
@@ -157,6 +158,7 @@
               <textarea
                 id="email-template-html"
                 v-model="html"
+                @input="markDraftEdited"
                 rows="18"
                 class="input min-h-[28rem] resize-y font-mono text-sm leading-6"
                 :disabled="loadingTemplate"
@@ -230,7 +232,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { adminAPI } from "@/api";
 import type {
@@ -239,9 +241,12 @@ import type {
 } from "@/api/admin/settings";
 import { useAppStore } from "@/stores";
 import { extractApiErrorMessage } from "@/utils/apiError";
+import { createSessionTasks } from "@/utils/sessionTasks";
 
 const { t, locale } = useI18n();
 const appStore = useAppStore();
+const requests = createSessionTasks();
+onBeforeUnmount(() => requests.dispose());
 
 const fallbackPlaceholders = [
   "{{site_name}}",
@@ -328,6 +333,43 @@ const placeholders = ref<string[]>([]);
 const previewSubject = ref("");
 const previewHtml = ref("");
 const initializingSelection = ref(false);
+let selectionRevision = 0;
+let draftRevision = 0;
+
+function captureSelection() {
+  return { event: selectedEvent.value, locale: selectedLocale.value, revision: selectionRevision };
+}
+
+function isSelectionCurrent(selection: ReturnType<typeof captureSelection>) {
+  return requests.current() && selection.revision === selectionRevision &&
+    selection.event === selectedEvent.value && selection.locale === selectedLocale.value;
+}
+
+function clearPreview() {
+  requests.cancel("template:preview");
+  previewing.value = false;
+  previewSubject.value = "";
+  previewHtml.value = "";
+}
+
+function markDraftEdited() {
+  draftRevision++;
+  clearPreview();
+}
+
+function resetSelection() {
+  selectionRevision++;
+  draftRevision++;
+  requests.cancel("template:");
+  loadingTemplate.value = false;
+  saving.value = false;
+  restoring.value = false;
+  subject.value = "";
+  html.value = "";
+  isCustomTemplate.value = false;
+  placeholders.value = [];
+  clearPreview();
+}
 
 interface EventDisplayMeta {
   label: string;
@@ -591,6 +633,7 @@ function applyTemplate(template: {
   is_custom?: boolean;
   placeholders?: string[];
 }) {
+  clearPreview();
   subject.value = template.subject;
   html.value = template.html;
   isCustomTemplate.value = template.is_custom === true;
@@ -598,125 +641,159 @@ function applyTemplate(template: {
 }
 
 async function loadTemplate() {
-  if (!selectedEvent.value || !selectedLocale.value) return;
+  if (!requests.current() || !selectedEvent.value || !selectedLocale.value) return;
+  const selection = captureSelection();
+  const draft = draftRevision;
+  const task = requests.begin("template:load", () => isSelectionCurrent(selection) && draft === draftRevision);
   loadingTemplate.value = true;
   try {
     const template = await adminAPI.settings.getEmailTemplate(
-      selectedEvent.value,
-      selectedLocale.value,
+      selection.event,
+      selection.locale,
     );
+    if (!task.active()) return;
     applyTemplate(template);
     await refreshPreview();
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t("common.error")));
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t("common.error")));
   } finally {
-    loadingTemplate.value = false;
+    if (task.owned()) loadingTemplate.value = false;
+    task.finish();
   }
 }
 
 async function loadTemplateList() {
+  if (!requests.current()) return;
+  const task = requests.begin("list");
   loadingList.value = true;
   try {
     const response = await adminAPI.settings.getEmailTemplates();
+    if (!task.active()) return;
     eventOptions.value = response.events.map(normalizeEventOption);
     localeOptions.value = response.locales;
     placeholders.value = response.placeholders || [];
     initializingSelection.value = true;
+    resetSelection();
     selectedEvent.value = eventOptions.value[0]?.value || "";
     selectedLocale.value = selectInitialLocale(response.locales);
     await loadTemplate();
+    if (!task.active()) return;
     initializingSelection.value = false;
   } catch (err: unknown) {
+    if (!task.active()) return;
     initializingSelection.value = false;
     appStore.showError(extractApiErrorMessage(err, t("common.error")));
   } finally {
-    loadingList.value = false;
+    if (task.owned()) {
+      initializingSelection.value = false;
+      loadingList.value = false;
+    }
+    task.finish();
   }
 }
 
 async function saveTemplate() {
+  if (!requests.current() || loadingTemplate.value || saving.value || restoring.value) return;
   if (!canSave.value) {
     appStore.showError(t("admin.settings.emailTemplates.validationRequired"));
     return;
   }
+  const selection = captureSelection();
+  const draft = draftRevision;
+  const payload = { subject: subject.value, html: html.value };
+  const task = requests.begin("template:write", () => isSelectionCurrent(selection) && draft === draftRevision);
   saving.value = true;
   try {
     const template = await adminAPI.settings.updateEmailTemplate(
-      selectedEvent.value,
-      selectedLocale.value,
-      {
-        subject: subject.value,
-        html: html.value,
-      },
+      selection.event,
+      selection.locale,
+      payload,
     );
+    if (!task.active()) return;
     applyTemplate(template);
     await refreshPreview();
+    if (!task.active()) return;
     appStore.showSuccess(t("admin.settings.emailTemplates.saveSuccess"));
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t("common.error")));
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t("common.error")));
   } finally {
-    saving.value = false;
+    if (task.owned()) saving.value = false;
+    task.finish();
   }
 }
 
 async function refreshPreview() {
+  if (!requests.current()) return;
   if (!canPreview.value) {
-    previewSubject.value = "";
-    previewHtml.value = "";
+    clearPreview();
     return;
   }
+  const selection = captureSelection();
+  const draft = draftRevision;
+  const payload = { event: selection.event, locale: selection.locale, subject: subject.value, html: html.value };
+  const task = requests.begin("template:preview", () => isSelectionCurrent(selection) && draft === draftRevision &&
+    subject.value === payload.subject && html.value === payload.html);
   previewing.value = true;
   try {
-    const preview = await adminAPI.settings.previewEmailTemplate({
-      event: selectedEvent.value,
-      locale: selectedLocale.value,
-      subject: subject.value,
-      html: html.value,
-    });
+    const preview = await adminAPI.settings.previewEmailTemplate(payload);
+    if (!task.active()) return;
     previewSubject.value = preview.subject;
     previewHtml.value = preview.html;
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t("common.error")));
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t("common.error")));
   } finally {
-    previewing.value = false;
+    if (task.owned()) previewing.value = false;
+    task.finish();
   }
 }
 
 async function restoreOfficial() {
-  if (!selectedEvent.value || !selectedLocale.value) return;
+  if (!requests.current() || loadingTemplate.value || saving.value || restoring.value || !selectedEvent.value || !selectedLocale.value) return;
+  const selection = captureSelection();
+  const draft = draftRevision;
   if (!window.confirm(t("admin.settings.emailTemplates.restoreConfirm"))) return;
+  if (!isSelectionCurrent(selection) || draft !== draftRevision) return;
 
+  const task = requests.begin("template:write", () => isSelectionCurrent(selection) && draft === draftRevision);
   restoring.value = true;
   try {
     const template = await adminAPI.settings.restoreOfficialEmailTemplate(
-      selectedEvent.value,
-      selectedLocale.value,
+      selection.event,
+      selection.locale,
     );
+    if (!task.active()) return;
     applyTemplate(template);
     await refreshPreview();
+    if (!task.active()) return;
     appStore.showSuccess(t("admin.settings.emailTemplates.restoreSuccess"));
   } catch (err: unknown) {
-    appStore.showError(extractApiErrorMessage(err, t("common.error")));
+    if (task.active()) appStore.showError(extractApiErrorMessage(err, t("common.error")));
   } finally {
-    restoring.value = false;
+    if (task.owned()) restoring.value = false;
+    task.finish();
   }
 }
 
 async function copyPlaceholder(placeholder: string) {
+  if (!requests.current()) return;
+  const selection = captureSelection();
+  const task = requests.begin("template:copy", () => isSelectionCurrent(selection));
   try {
     await navigator.clipboard.writeText(placeholder);
+    if (!task.active()) return;
     appStore.showSuccess(t("admin.settings.emailTemplates.placeholderCopied"));
   } catch {
-    appStore.showError(t("common.error"));
-  }
+    if (task.active()) appStore.showError(t("common.error"));
+  } finally { task.finish(); }
 }
 
 watch([selectedEvent, selectedLocale], ([eventValue, localeValue], [oldEvent, oldLocale]) => {
   if (initializingSelection.value) return;
   if (!eventValue || !localeValue) return;
   if (eventValue === oldEvent && localeValue === oldLocale) return;
+  resetSelection();
   void loadTemplate();
-});
+}, { flush: "sync" });
 
 onMounted(() => {
   void loadTemplateList();

@@ -1,0 +1,458 @@
+
+ RUN  v2.1.9 baseline/frontend
+
+Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+ ❯ src/views/auth/__tests__/TencentCaptchaActionGate.audit-regression.spec.ts (11 tests | 4 failed) 269ms
+   × Tencent captcha action gate > does not start a second login while the first captcha is pending 33ms
+     → expected "spy" to be called 1 times, but got 2 times
+   × Tencent captcha action gate > does not resume stale password login after a captcha wait 16ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      Object {
+        "email": "user@example.test",
+        "password": "SYNTHETIC-password",
+        "tencent_captcha_randstr": "@SYNTHETIC",
+        "tencent_captcha_ticket": "SYNTHETIC-proof",
+        "turnstile_token": undefined,
+      },
+    ]
+
+
+Number of calls: 1
+
+   × Tencent captcha action gate > does not resume stale passkey login after a captcha wait 23ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      Object {
+        "tencent_captcha_randstr": "@SYNTHETIC",
+        "tencent_captcha_ticket": "SYNTHETIC-proof",
+      },
+    ]
+
+
+Number of calls: 1
+
+   × Tencent captcha action gate > does not resume stale oauth login after a captcha wait 11ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      Object {
+        "params": Object {
+          "redirect": "/dashboard",
+        },
+        "provider": "github",
+      },
+      Object {
+        "tencent_captcha_randstr": "@SYNTHETIC",
+        "tencent_captcha_ticket": "SYNTHETIC-proof",
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/api/__tests__/passkey.audit-regression.spec.ts (6 tests | 2 failed) 129ms
+   × passkey api > does not finish an old login ceremony after the session is replaced 66ms
+     → expected {} to match object { code: 'AUTH_SESSION_CHANGED' }
+   × passkey api > does not finish an old register ceremony after the session is replaced 53ms
+     → expected {} to match object { code: 'AUTH_SESSION_CHANGED' }
+ ❯ src/utils/__tests__/embedded-url.audit-regression.spec.ts (14 tests | 6 failed) 44ms
+   × embedded-url > rejects unvalidated or credential-bearing embedded URL not a url 9ms
+     → expected 'not a url' to be '' // Object.is equality
+   × embedded-url > rejects unvalidated or credential-bearing embedded URL //example.test/embed?access_token=SYNTHETIC 1ms
+     → expected '//example.test/embed?access_token=SYN…' to be '' // Object.is equality
+   × embedded-url > rejects unvalidated or credential-bearing embedded URL /embed?access_token=SYNTHETIC 1ms
+     → expected '/embed?access_token=SYNTHETIC' to be '' // Object.is equality
+   × embedded-url > rejects unvalidated or credential-bearing embedded URL https://user:SYNTHETIC@example.test/embed 1ms
+     → expected 'https://user:SYNTHETIC@example.test/e…' to be '' // Object.is equality
+   × embedded-url > rejects unvalidated or credential-bearing embedded URL https://example.test/embed#%61ccess_token=SYNTHETIC 1ms
+     → expected 'https://example.test/embed?user_id=1&…' to be '' // Object.is equality
+   × embedded-url > rejects unvalidated or credential-bearing embedded URL https://example.test/embed#/checkout?%72efresh_token=SYNTHETIC 1ms
+     → expected 'https://example.test/embed?user_id=1&…' to be '' // Object.is equality
+ ❯ src/stores/__tests__/auth.refreshSchedule.spec.ts (5 tests | 4 failed) 125ms
+   × proactive token refresh scheduling > does not immediately refresh a newly issued short-lived token 82ms
+     → expected "spy" to not be called at all, but actually been called 3 times
+
+Received:
+
+  1st spy call:
+
+    Array []
+
+  2nd spy call:
+
+    Array []
+
+  3rd spy call:
+
+    Array []
+
+
+Number of calls: 3
+
+   × proactive token refresh scheduling > schedules one future refresh after a short-lived token rotates 17ms
+     → expected "spy" to be called 1 times, but got 3 times
+   × proactive token refresh scheduling > does not overflow the browser timeout for a long-lived token 7ms
+     → expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array []
+
+
+Number of calls: 1
+
+   × proactive token refresh scheduling > stops refreshing after the store is disposed 10ms
+     → expected "spy" to not be called at all, but actually been called 3 times
+
+Received:
+
+  1st spy call:
+
+    Array []
+
+  2nd spy call:
+
+    Array []
+
+  3rd spy call:
+
+    Array []
+
+
+Number of calls: 3
+
+
+⎯⎯⎯⎯⎯⎯ Failed Tests 16 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/api/__tests__/passkey.audit-regression.spec.ts > passkey api > does not finish an old login ceremony after the session is replaced
+ FAIL  src/api/__tests__/passkey.audit-regression.spec.ts > passkey api > does not finish an old register ceremony after the session is replaced
+AssertionError: expected {} to match object { code: 'AUTH_SESSION_CHANGED' }
+
+- Expected
++ Received
+
+- Object {
+-   "code": "AUTH_SESSION_CHANGED",
+- }
++ Object {}
+
+ ❯ src/api/__tests__/passkey.audit-regression.spec.ts:229:5
+    227|     complete(mode === 'login' ? new FakePublicKeyCredential() : new Fa…
+    228|
+    229|     await expect(result).resolves.toMatchObject({ code: 'AUTH_SESSION_…
+       |     ^
+    230|     expect(signal?.aborted).toBe(true)
+    231|     expect(post).toHaveBeenCalledTimes(1)
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/16]⎯
+
+ FAIL  src/stores/__tests__/auth.refreshSchedule.spec.ts > proactive token refresh scheduling > does not immediately refresh a newly issued short-lived token
+AssertionError: expected "spy" to not be called at all, but actually been called 3 times
+
+Received:
+
+  1st spy call:
+
+    Array []
+
+  2nd spy call:
+
+    Array []
+
+  3rd spy call:
+
+    Array []
+
+
+Number of calls: 3
+
+ ❯ src/stores/__tests__/auth.refreshSchedule.spec.ts:53:30
+     51|   it('does not immediately refresh a newly issued short-lived token', …
+     52|     await signIn(60)
+     53|     expect(refreshToken).not.toHaveBeenCalled()
+       |                              ^
+     54|     await vi.advanceTimersByTimeAsync(29_999)
+     55|     expect(refreshToken).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/16]⎯
+
+ FAIL  src/stores/__tests__/auth.refreshSchedule.spec.ts > proactive token refresh scheduling > schedules one future refresh after a short-lived token rotates
+AssertionError: expected "spy" to be called 1 times, but got 3 times
+ ❯ src/stores/__tests__/auth.refreshSchedule.spec.ts:65:26
+     63|     await signIn(60)
+     64|     await vi.advanceTimersByTimeAsync(30_000)
+     65|     expect(refreshToken).toHaveBeenCalledTimes(1)
+       |                          ^
+     66|     const { captureAuthSession, commitAuthTokenRotation } = await impo…
+     67|     const rotated = { ...pair(60), access_token: 'SYNTHETIC-rotated' }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/16]⎯
+
+ FAIL  src/stores/__tests__/auth.refreshSchedule.spec.ts > proactive token refresh scheduling > does not overflow the browser timeout for a long-lived token
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array []
+
+
+Number of calls: 1
+
+ ❯ src/stores/__tests__/auth.refreshSchedule.spec.ts:89:30
+     87|     await signIn(30 * 24 * 60 * 60)
+     88|     await vi.advanceTimersByTimeAsync(1_000)
+     89|     expect(refreshToken).not.toHaveBeenCalled()
+       |                              ^
+     90|   })
+     91|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/16]⎯
+
+ FAIL  src/stores/__tests__/auth.refreshSchedule.spec.ts > proactive token refresh scheduling > stops refreshing after the store is disposed
+AssertionError: expected "spy" to not be called at all, but actually been called 3 times
+
+Received:
+
+  1st spy call:
+
+    Array []
+
+  2nd spy call:
+
+    Array []
+
+  3rd spy call:
+
+    Array []
+
+
+Number of calls: 3
+
+ ❯ src/stores/__tests__/auth.refreshSchedule.spec.ts:97:30
+     95|     dispose = undefined
+     96|     await vi.advanceTimersByTimeAsync(120_000)
+     97|     expect(refreshToken).not.toHaveBeenCalled()
+       |                              ^
+     98|   })
+     99| })
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/16]⎯
+
+ FAIL  src/utils/__tests__/embedded-url.audit-regression.spec.ts > embedded-url > rejects unvalidated or credential-bearing embedded URL not a url
+AssertionError: expected 'not a url' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ not a url
+
+ ❯ src/utils/__tests__/embedded-url.audit-regression.spec.ts:85:58
+     83|     'https://example.test/embed#/checkout?%72efresh_token=SYNTHETIC',
+     84|   ])('rejects unvalidated or credential-bearing embedded URL %s', base…
+     85|     expect(buildEmbeddedUrl(base, 1, 'SYNTHETIC-LOGIN')).toBe('')
+       |                                                          ^
+     86|   })
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/16]⎯
+
+ FAIL  src/utils/__tests__/embedded-url.audit-regression.spec.ts > embedded-url > rejects unvalidated or credential-bearing embedded URL //example.test/embed?access_token=SYNTHETIC
+AssertionError: expected '//example.test/embed?access_token=SYN…' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ //example.test/embed?access_token=SYNTHETIC
+
+ ❯ src/utils/__tests__/embedded-url.audit-regression.spec.ts:85:58
+     83|     'https://example.test/embed#/checkout?%72efresh_token=SYNTHETIC',
+     84|   ])('rejects unvalidated or credential-bearing embedded URL %s', base…
+     85|     expect(buildEmbeddedUrl(base, 1, 'SYNTHETIC-LOGIN')).toBe('')
+       |                                                          ^
+     86|   })
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/16]⎯
+
+ FAIL  src/utils/__tests__/embedded-url.audit-regression.spec.ts > embedded-url > rejects unvalidated or credential-bearing embedded URL /embed?access_token=SYNTHETIC
+AssertionError: expected '/embed?access_token=SYNTHETIC' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ /embed?access_token=SYNTHETIC
+
+ ❯ src/utils/__tests__/embedded-url.audit-regression.spec.ts:85:58
+     83|     'https://example.test/embed#/checkout?%72efresh_token=SYNTHETIC',
+     84|   ])('rejects unvalidated or credential-bearing embedded URL %s', base…
+     85|     expect(buildEmbeddedUrl(base, 1, 'SYNTHETIC-LOGIN')).toBe('')
+       |                                                          ^
+     86|   })
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/16]⎯
+
+ FAIL  src/utils/__tests__/embedded-url.audit-regression.spec.ts > embedded-url > rejects unvalidated or credential-bearing embedded URL https://user:SYNTHETIC@example.test/embed
+AssertionError: expected 'https://user:SYNTHETIC@example.test/e…' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ https://user:SYNTHETIC@example.test/embed?user_id=1&theme=light&ui_mode=embedded&src_host=https%3A%2F%2Fapp.example.com&src_url=https%3A%2F%2Fapp.example.com%2Fuser%2Fpurchase
+
+ ❯ src/utils/__tests__/embedded-url.audit-regression.spec.ts:85:58
+     83|     'https://example.test/embed#/checkout?%72efresh_token=SYNTHETIC',
+     84|   ])('rejects unvalidated or credential-bearing embedded URL %s', base…
+     85|     expect(buildEmbeddedUrl(base, 1, 'SYNTHETIC-LOGIN')).toBe('')
+       |                                                          ^
+     86|   })
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/16]⎯
+
+ FAIL  src/utils/__tests__/embedded-url.audit-regression.spec.ts > embedded-url > rejects unvalidated or credential-bearing embedded URL https://example.test/embed#%61ccess_token=SYNTHETIC
+ FAIL  src/utils/__tests__/embedded-url.audit-regression.spec.ts > embedded-url > rejects unvalidated or credential-bearing embedded URL https://example.test/embed#/checkout?%72efresh_token=SYNTHETIC
+AssertionError: expected 'https://example.test/embed?user_id=1&…' to be '' // Object.is equality
+
+- Expected
++ Received
+
++ https://example.test/embed?user_id=1&theme=light&ui_mode=embedded&src_host=https%3A%2F%2Fapp.example.com&src_url=https%3A%2F%2Fapp.example.com%2Fuser%2Fpurchase#%61ccess_token=SYNTHETIC
+
+ ❯ src/utils/__tests__/embedded-url.audit-regression.spec.ts:85:58
+     83|     'https://example.test/embed#/checkout?%72efresh_token=SYNTHETIC',
+     84|   ])('rejects unvalidated or credential-bearing embedded URL %s', base…
+     85|     expect(buildEmbeddedUrl(base, 1, 'SYNTHETIC-LOGIN')).toBe('')
+       |                                                          ^
+     86|   })
+     87|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/16]⎯
+
+ FAIL  src/views/auth/__tests__/TencentCaptchaActionGate.audit-regression.spec.ts > Tencent captcha action gate > does not start a second login while the first captcha is pending
+AssertionError: expected "spy" to be called 1 times, but got 2 times
+ ❯ src/views/auth/__tests__/TencentCaptchaActionGate.audit-regression.spec.ts:241:30
+    239|     await wrapper.get('form').trigger('submit')
+    240|     await wrapper.get('form').trigger('submit')
+    241|     expect(verifyActionMock).toHaveBeenCalledTimes(1)
+       |                              ^
+    242|     expect(loginMock).not.toHaveBeenCalled()
+    243|     wrapper.unmount()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/16]⎯
+
+ FAIL  src/views/auth/__tests__/TencentCaptchaActionGate.audit-regression.spec.ts > Tencent captcha action gate > does not resume stale password login after a captcha wait
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      Object {
+        "email": "user@example.test",
+        "password": "SYNTHETIC-password",
+        "tencent_captcha_randstr": "@SYNTHETIC",
+        "tencent_captcha_ticket": "SYNTHETIC-proof",
+        "turnstile_token": undefined,
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/auth/__tests__/TencentCaptchaActionGate.audit-regression.spec.ts:262:27
+    260|     complete({ token: 'SYNTHETIC-proof', randstr: '@SYNTHETIC' })
+    261|     await flushPromises()
+    262|     expect(loginMock).not.toHaveBeenCalled()
+       |                           ^
+    263|     expect(loginWithPasskeyMock).not.toHaveBeenCalled()
+    264|     expect(startOAuthLoginMock).not.toHaveBeenCalled()
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/16]⎯
+
+ FAIL  src/views/auth/__tests__/TencentCaptchaActionGate.audit-regression.spec.ts > Tencent captcha action gate > does not resume stale passkey login after a captcha wait
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      Object {
+        "tencent_captcha_randstr": "@SYNTHETIC",
+        "tencent_captcha_ticket": "SYNTHETIC-proof",
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/auth/__tests__/TencentCaptchaActionGate.audit-regression.spec.ts:263:38
+    261|     await flushPromises()
+    262|     expect(loginMock).not.toHaveBeenCalled()
+    263|     expect(loginWithPasskeyMock).not.toHaveBeenCalled()
+       |                                      ^
+    264|     expect(startOAuthLoginMock).not.toHaveBeenCalled()
+    265|     expect(localStorage.getItem('auth_token')).toBe('SYNTHETIC-new-ses…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/16]⎯
+
+ FAIL  src/views/auth/__tests__/TencentCaptchaActionGate.audit-regression.spec.ts > Tencent captcha action gate > does not resume stale oauth login after a captcha wait
+AssertionError: expected "spy" to not be called at all, but actually been called 1 times
+
+Received:
+
+  1st spy call:
+
+    Array [
+      Object {
+        "params": Object {
+          "redirect": "/dashboard",
+        },
+        "provider": "github",
+      },
+      Object {
+        "tencent_captcha_randstr": "@SYNTHETIC",
+        "tencent_captcha_ticket": "SYNTHETIC-proof",
+      },
+    ]
+
+
+Number of calls: 1
+
+ ❯ src/views/auth/__tests__/TencentCaptchaActionGate.audit-regression.spec.ts:264:37
+    262|     expect(loginMock).not.toHaveBeenCalled()
+    263|     expect(loginWithPasskeyMock).not.toHaveBeenCalled()
+    264|     expect(startOAuthLoginMock).not.toHaveBeenCalled()
+       |                                     ^
+    265|     expect(localStorage.getItem('auth_token')).toBe('SYNTHETIC-new-ses…
+    266|     expect(locationState.href).toBe('http://localhost/login')
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/16]⎯
+
+ Test Files  4 failed (4)
+      Tests  16 failed | 20 passed (36)
+   Start at  19:42:59
+   Duration  5.90s (transform 1.21s, setup 374ms, collect 1.45s, tests 568ms, environment 1.85s, prepare 400ms)

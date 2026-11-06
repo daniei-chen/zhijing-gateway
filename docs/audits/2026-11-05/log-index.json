@@ -1,0 +1,152 @@
+[
+  {
+    "original_name": "auth-baseline-regressions.log",
+    "saved_as": "logs/auth-baseline-regressions.txt",
+    "raw_sha256": "6c8067e09e198fd06cd8b5db036e28084dadf32b6d6c7af324decfe4e7be52b1",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "register-baseline-regressions.log",
+    "saved_as": "logs/register-baseline-regressions.txt",
+    "raw_sha256": "5e24a15b3487218886d8d30d425c5b77b624b5e51b8a8a67f915e50bba39fda8",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "registration-secrets-baseline.log",
+    "saved_as": "logs/registration-secrets-baseline.txt",
+    "raw_sha256": "22749d531e27b76f6db380129dd0539661ca4231283ad823f0b9bd60763fbf7d",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "auth-hydration-baseline.log",
+    "saved_as": "logs/auth-hydration-baseline.txt",
+    "raw_sha256": "28c460bb5c4510a361c4f6f48d4e7271a584729c1304d35e628657794b4eed8e",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "performance-regression-before.log",
+    "saved_as": "logs/performance-regression-before.txt",
+    "raw_sha256": "61d48e91d49a26d9638bb6985df9f314b5ec6e9ca7a1d8c11be4e5ccb5dd3802",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "stripe-popup-before.log",
+    "saved_as": "logs/stripe-popup-before.txt",
+    "raw_sha256": "add3f4486de374d166bf2380795f30c6d1e064046f3bf7b11c500fb27e32367f",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "stepup-before.log",
+    "saved_as": "logs/stepup-before.txt",
+    "raw_sha256": "b5fcd26b04431cb6d7290664de0523c60f909dc884594ff817f59cc24aa5dc11",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "monitor-backup-before.log",
+    "saved_as": "logs/monitor-backup-before.txt",
+    "raw_sha256": "df7d39fc392c6f533249aed06f9f03462826ea109f5f47e2eb220ccb330c598c",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "python-final.log",
+    "saved_as": "logs/python-final.txt",
+    "raw_sha256": "01bf747b39523f6a8666343aa64fc60745af9431ac686ca5b853377bc7204f25",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "ops-contract-tests-final.log",
+    "saved_as": "logs/ops-contract-tests-final.txt",
+    "raw_sha256": "e807cfa385470c54b8367e1611c8191445f6538557948cae2dd1e9f1f20ba064",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "typecheck-final.log",
+    "saved_as": "logs/typecheck-final.txt",
+    "raw_sha256": "d5e00046b1c0866fc2413b6c913c5c47467019e81ae7b8fd0d50240ab24c741e",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "perf-build-release.log",
+    "saved_as": "logs/perf-build-release.txt",
+    "raw_sha256": "0861091f9f5d479c8571b23b18bd13707a1831a1f944422bc115ba7801c29df5",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "perf-build-final.log",
+    "saved_as": "logs/perf-build-final.txt",
+    "raw_sha256": "0d42fc657c68f09432cb88322646eabae11d760328a5a43cc128fdc587351f41",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "browser-smoke.log",
+    "saved_as": "logs/browser-smoke.txt",
+    "raw_sha256": "9b8c802a2c3d27778890f56a01d606b815a505cfef0ac7b91d712a6f74abc2fe",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "full-tests-final.log",
+    "saved_as": "logs/full-tests-final.txt",
+    "raw_sha256": "dbaf5337980ca32b9d8843404601a774b99b88f556630897688101aab910f83d",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "audit_evidence/backend_release/fixed_duplicate_operations.log",
+    "saved_as": "logs/fixed_duplicate_operations.txt",
+    "raw_sha256": "888f39aa273616cafe5596ed91e35fc99e5457f600ba7d31171d52d28e5a7c9d",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "audit_evidence/backend_release/baseline_duplicate_operations.log",
+    "saved_as": "logs/baseline_duplicate_operations.txt",
+    "raw_sha256": "54c2c73f567c3c31be8d06d403950ba3f9685ba7ce4a01b862cc9416a25797bf",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "audit_evidence/backend_release/baseline_optimized_contract.log",
+    "saved_as": "logs/baseline_optimized_contract.txt",
+    "raw_sha256": "ba71c1410842cb530b837dacca293e64da030b1086441e80e918ac7232cead69",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "audit_evidence/backend_release/fixed_ops_contract.log",
+    "saved_as": "logs/fixed_ops_contract.txt",
+    "raw_sha256": "a28004a7b10b574edee6a5aa4520ea6ad138ad238f233ce098d17996c02deb4b",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "audit_evidence/backend_release/published_release_verifier.log",
+    "saved_as": "logs/published_release_verifier.txt",
+    "raw_sha256": "560dc7217bad02a91ab8de286b6333f2c3555ee672e6f027773c628a88b64937",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "audit_evidence/backend_release/fixed_patch_integrity_optimized.log",
+    "saved_as": "logs/fixed_patch_integrity_optimized.txt",
+    "raw_sha256": "5fad4234525f457637831bd2a27db6862473b62c655fa63b92d8a5b1f2c6699f",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "audit_evidence/backend_release/baseline_preview_http.log",
+    "saved_as": "logs/baseline_preview_http.txt",
+    "raw_sha256": "ffe2450135925cee3d8a891c068da3abb731317ce122172ef3a25dad05b824a8",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "audit_evidence/backend_release/baseline_release_integrity.log",
+    "saved_as": "logs/baseline_release_integrity.txt",
+    "raw_sha256": "e9955fc2497db4606f3005f0111d29364ae91584195d8a42c6ee12f3a01535bf",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "audit_evidence/backend_release/fixed_targeted_lint.log",
+    "saved_as": "logs/fixed_targeted_lint.txt",
+    "raw_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  },
+  {
+    "original_name": "audit_evidence/backend_release/fixed_python_regressions.log",
+    "saved_as": "logs/fixed_python_regressions.txt",
+    "raw_sha256": "78fdd1db924471d08c4d3ed23c35cab1f2d7030cc0e629c4fdaad888445eba71",
+    "normalization": "ANSI color removed; absolute audit workspace prefix replaced for portability; trailing whitespace and extra blank lines at EOF removed"
+  }
+]

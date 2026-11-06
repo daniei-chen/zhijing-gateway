@@ -1,0 +1,53 @@
+{
+  "recorded_at": "2026-11-06T03:31:57.442372+00:00",
+  "source_files": 1106,
+  "test_files": 486,
+  "tests": 5015,
+  "failed_tests": 0,
+  "pending_tests": 0,
+  "test_assertions_passed": true,
+  "coverage_command_exit": 1,
+  "coverage": {
+    "lines": {
+      "total": 52187,
+      "covered": 42258,
+      "skipped": 0,
+      "pct": 80.97
+    },
+    "statements": {
+      "total": 58945,
+      "covered": 46216,
+      "skipped": 0,
+      "pct": 78.4
+    },
+    "functions": {
+      "total": 12187,
+      "covered": 8775,
+      "skipped": 0,
+      "pct": 72
+    },
+    "branches": {
+      "total": 45919,
+      "covered": 32073,
+      "skipped": 0,
+      "pct": 69.84
+    },
+    "branchesTrue": {
+      "total": 0,
+      "covered": 0,
+      "skipped": 0,
+      "pct": 100
+    }
+  },
+  "global_thresholds": {
+    "lines": 80,
+    "functions": 80,
+    "statements": 80,
+    "branches": 80
+  },
+  "all_global_coverage_gates_passed": false,
+  "typecheck": "passed",
+  "whole_eslint": "passed",
+  "vite_manifest_build": "passed",
+  "production_deployed": false
+}
