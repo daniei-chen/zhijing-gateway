@@ -1,0 +1,55 @@
+{
+  "version": "0.0.5",
+  "production_deployed": true,
+  "deployed_at": "2026-11-08T12:36:00+08:00",
+  "frontend": {
+    "changed": false,
+    "note": "前端沿用 v0.0.4 构建，346 个静态文件，未重新构建",
+    "source_release": "v0.0.4"
+  },
+  "backend": {
+    "image": "zhijing-sub2api-japan:v005-f8a506c",
+    "image_id_sha256": "f1eb9c2bbe8e24b86abc5d704f37efee1ae92b8c3c4e78f30d9838130b448fca",
+    "binary_sha256": "50addb5501da92e5f36ca5f1e396921decca380fc68ace608d32b7486ddd00d1",
+    "binary_bytes": 132579488,
+    "source_commit": "f8a506c",
+    "version_string": "0.2.20-zhijing-3-9-v0.0.5",
+    "container": "zhijing-api-v005",
+    "listen": "127.0.0.1:18784",
+    "memory_limit_bytes": 805306368,
+    "read_only_rootfs": true
+  },
+  "migrations": {
+    "applied": 300,
+    "source_files": 300,
+    "new_migrations": 0,
+    "verify": "pass"
+  },
+  "cutover": {
+    "method": "nginx upstream zhijing_api with marked peer block",
+    "steps": [
+      5,
+      25,
+      50,
+      100
+    ],
+    "errors": 0,
+    "http_5xx": 0,
+    "final_weights": {
+      "127.0.0.1:18784": "100",
+      "127.0.0.1:18783": "backup"
+    }
+  },
+  "preservation": {
+    "old_peers_restarted": false,
+    "containers_removed": false,
+    "compose_changed": false,
+    "database_data_changed": false
+  },
+  "rollback": {
+    "method": "restore /root/zhijing-v005-cutover-*/site.conf then nginx -s reload",
+    "window": "24h; old peer zhijing-sub2api-japan-api-v004 kept healthy as backup"
+  },
+  "provider_inference_probes_sent": false,
+  "scope": "public record only; no credentials, private backend sources, production configs or business logs"
+}

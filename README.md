@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat-square">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-638bdf?style=flat-square">
-  <a href="https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.4"><img alt="Release v0.0.4" src="https://img.shields.io/badge/Release-v0.0.4-8b6ad5?style=flat-square"></a>
+  <a href="https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.5"><img alt="Release v0.0.5" src="https://img.shields.io/badge/Release-v0.0.5-8b6ad5?style=flat-square"></a>
   <a href="https://github.com/daniei-chen/zhijing-gateway/actions/workflows/ci.yml"><img alt="Frontend verification" src="https://github.com/daniei-chen/zhijing-gateway/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="LGPL v3" src="https://img.shields.io/badge/License-LGPL--3.0-868093?style=flat-square"></a>
 </p>
@@ -22,9 +22,23 @@
 
 智境提供登录、成员工作台与管理员控制台的统一前端。业务能力沿用 [Sub2API](https://github.com/Wei-Shaw/sub2api)，权限、计费与功能开关继续由后端决定。公开前端源码、合成预览、验证工具及明确版本的通用后端差异补丁。
 
-> **上线状态**：v0.0.4 前端与匹配后端已于 2026-11-06 完成上线，认证存储升级后采用并行 API 实例切流，保留旧实例、静态资源与回退材料。详见[线上部署记录](docs/deployments/v0.0.4-2026-11-06.zh-CN.md)。本页截图继续使用合成数据，额度、价格、指标与有效期均为演示样例。
+> **上线状态**：v0.0.5 后端已于 2026-11-08 完成生产上线（前端与 v0.0.4 完全一致，未重建）：新建 18784 peer，5% → 25% → 50% → 100% 灰度，每档 0 错误、0 5xx；旧 peer 保留为 `backup` 回滚窗口。详见[线上部署记录](docs/deployments/v0.0.5-2026-11-08.zh-CN.md)。本页截图继续使用合成数据，额度、价格、指标与有效期均为演示样例。
 
-**版本下载**：[v0.0.4 · 交互有序，发布有据](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.4)，提供静态前端、配套源码差异、构建清单和 SHA256；[更新说明](docs/releases/v0.0.4.zh-CN.md)。GitHub 发布与线上部署分开记录，当前线上为 v0.0.4。
+**版本下载**：[v0.0.5 · 后端随上游升级，交互保持原样](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.5)，提供配套后端源码差异、构建清单和 SHA256（前端沿用 v0.0.4 构建，无需更新静态资源）；[更新说明](docs/releases/v0.0.5.zh-CN.md)。GitHub 发布与线上部署分开记录，当前线上为 v0.0.4。
+
+## v0.0.5 · 后端随上游升级，交互保持原样
+
+本版是**后端升级版**：后端跟随上游 Sub2API `v0.2.20`（`6b4b37db`）并恢复智境的全部行为层，前端沿用 v0.0.4 构建（346 个静态文件，未重新构建、视觉与交互不变）。因此升级路径是「先换后端、前端不动」，回滚只需把入口权重切回旧 peer。
+
+| 改进 | 实际行为 |
+| --- | --- |
+| 上游稳定性合入 | 96 个上游提交：WS 连接池与租约、SSE 限制、鉴权与会话、计费模式、迁移校验、观测口径等。 |
+| 智境行为保留 | 256 MiB 请求体预算、120s 单次读/写停滞、30s 断连 drain、25 分钟转发上限、关键词与管理豁免、并发 3/9/9。 |
+| 本地增补修复 | 配置键守护测试、迁移回滚开关（默认关）、预算记账、drain 优先级行为测试。 |
+| 迁移一致 | 生产库 `schema_migrations` 300 条与源码 300 个文件一致；启动校验通过，**无新增迁移**。 |
+| 灰度验证 | 5% → 25% → 50% → 100%，每档 0 错误、0 5xx；公网 `/healthz`、`/login`、`/api/v1/settings/public` 均 200。 |
+
+后端验证（本地冻结输入）：`go build`／全 tag `go vet`／`-race`（0 数据竞争）／`govulncheck`（调用链 0 漏洞）／handler 2041 项与 service 整包通过／真实 PostgreSQL 18 + Redis 7 上 6 套件 177 子测试通过／旧 UI 263 个端点回放 0 回归。
 
 ## v0.0.4 · 交互有序，发布有据
 
@@ -40,7 +54,7 @@
 
 合并此前未正式发布的 v0.0.3 会话与资源生命周期修复：匹配后端支持 HttpOnly Cookie、OAuth 一次性交接、图片资源清理、按需加载、设置草稿保留与更细的首响应诊断。原 TTFT、模型、权限、计费与额度口径保持。
 
-先验收并升级[匹配后端](integrations/sub2api/v0.0.4/README.zh-CN.md)，再更新前端；现已完成[匹配版本的生产升级](docs/deployments/v0.0.4-2026-11-06.zh-CN.md)。覆盖率和回归通过不代表每条路径都已验证，也没有生产 TTFT 长尾消除的测量结论。详见[机器可读验证摘要](docs/validation-v0.0.4.json)、[逐项运行修复](docs/proofs/v0.0.4/frontend-runtime-fixes.json)和[完整回归证据](docs/proofs/v0.0.4/frontend-validation-final.json)。历史 [v0.0.3 候选](docs/releases/v0.0.3.zh-CN.md)保留当时门禁与范围。
+先验收并升级[匹配后端](integrations/sub2api/v0.0.5/README.zh-CN.md)，再更新前端（v0.0.5 前端无变化）；已完成[匹配版本的生产升级](docs/deployments/v0.0.5-2026-11-08.zh-CN.md)。覆盖率和回归通过不代表每条路径都已验证，也没有生产 TTFT 长尾消除的测量结论。详见[机器可读验证摘要](docs/validation-v0.0.4.json)、[逐项运行修复](docs/proofs/v0.0.4/frontend-runtime-fixes.json)和[完整回归证据](docs/proofs/v0.0.4/frontend-validation-final.json)。历史 [v0.0.3 候选](docs/releases/v0.0.3.zh-CN.md)保留当时门禁与范围。
 
 ## v0.0.2 · 已发布的工作台基础
 
@@ -122,7 +136,7 @@ python qa/preview_server.py --port 18872
 
 ## 验证与兼容
 
-当前 v0.0.4 的完整结果见[机器可读验证摘要](docs/validation-v0.0.4.json)。[严格审计报告](docs/reviews/2026-11-05-strict-audit.zh-CN.md)记录继承的安全、依赖与性能修复；其历史计数不改写为本轮结果。下面的 v0.0.2 数据保留原发布口径。
+当前 v0.0.5 的后端结果见[机器可读验证摘要](docs/validation-v0.0.5.json)；v0.0.4 的前端结果见[机器可读验证摘要](docs/validation-v0.0.4.json)。[严格审计报告](docs/reviews/2026-11-05-strict-audit.zh-CN.md)记录继承的安全、依赖与性能修复；其历史计数不改写为本轮结果。下面的 v0.0.2 数据保留原发布口径。
 
 v0.0.2 前端全量回归 **392 个文件、3,139 项测试通过**；原四条失败的安全验收全部转为通过。真实客户端、认证 API 与状态仓库的合成往返覆盖不同 HTTP 方法、晚到结果、同账号重新登录、刷新与会话切换。本地浏览器验证双标签管理员到成员切换、浅/深色时序面板、320/390px 和关闭后焦点恢复。
 
@@ -138,7 +152,7 @@ cd ..
 python tools/verify_frontend.py
 node tools/verify_ops_contract.mjs
 python integrations/sub2api/check_patch.py --artifact-only
-python integrations/sub2api/check_patch.py --bundle v0.0.4 --artifact-only
+python integrations/sub2api/check_patch.py --bundle v0.0.5 --artifact-only
 ```
 
 - 原 227 文件兼容基线保留；v0.0.2、严格审计与 v0.0.3 的变更分别通过明确摘要链登记，未静默重建基线。Ops 契约明确包含已批准的运行时变化。
@@ -155,7 +169,7 @@ frontend/              Vue、TypeScript、样式与组件测试
   src/styles/          智境设计语言与各版本表现层
   public/app-assets/   本地托管字体与品牌资源
 qa/                    本机合成数据预览
-integrations/sub2api/  历史诊断补丁、v0.0.4 配套会话补丁与摘要核验
+integrations/sub2api/  历史诊断补丁、v0.0.5 上游 v0.2.20 配套补丁与摘要核验
 tools/                 契约、构建、发布包及下载校验
 docs/                  设计、验证、界面图片和字体许可
 ```
