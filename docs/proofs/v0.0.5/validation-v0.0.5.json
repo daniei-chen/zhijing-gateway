@@ -1,0 +1,104 @@
+{
+  "version": "0.0.5",
+  "scope": "backend upgrade on top of upstream Sub2API v0.2.20; frontend unchanged from v0.0.4",
+  "upstream_base": "6b4b37db43443b5e88e424fe3c69602cc3810dfb",
+  "source_commit": "f8a506c",
+  "patch_sha256": "d6c0b66190c8850996a52ee1d3f0c32ba64994197d80c70fec84963a57d8ed04",
+  "patch_files": 176,
+  "build": {
+    "go_build": "pass",
+    "go_build_tags_embed": "pass",
+    "gofmt": "clean",
+    "go_vet": "clean"
+  },
+  "vet_all_tags": {
+    "no_tag": "pass",
+    "integration": "pass",
+    "e2e": "pass",
+    "mcp_go_client_oauth": "pass"
+  },
+  "unit": {
+    "handler_run_events": 2041,
+    "handler_failures": 0,
+    "repository": "pass",
+    "server": "pass",
+    "pkg": "pass",
+    "service_full": {
+      "result": "ok 196.7s",
+      "run_events": 18059,
+      "skips": 12,
+      "failures": 0
+    },
+    "ws_groups_individual": [
+      "TestOpenAIWSConnPool pass",
+      "TestOpenAIWSConnLease pass",
+      "TestPassthroughLifecycle pass"
+    ]
+  },
+  "race": {
+    "packages": [
+      "internal/handler",
+      "internal/repository",
+      "internal/service",
+      "internal/pkg/httputil"
+    ],
+    "data_races": 0,
+    "result": "pass"
+  },
+  "govulncheck": {
+    "call_chain_vulnerabilities": 0,
+    "imported_package_vulnerabilities": 0,
+    "module_vulnerabilities_not_called": 6
+  },
+  "integration": {
+    "database": "PostgreSQL 18",
+    "cache": "Redis 7",
+    "suites": 6,
+    "subtests": 177,
+    "failures": 0,
+    "includes": [
+      "migration idempotency",
+      "schema alignment",
+      "concurrent migration serialization",
+      "api key repo",
+      "group repo",
+      "usage log repo",
+      "user repo"
+    ]
+  },
+  "runtime": {
+    "stack": "windows backend + remote PostgreSQL/Redis + old v0.0.4 UI",
+    "old_ui_endpoint_replays": 263,
+    "regressions": 0,
+    "browser": [
+      "dashboard",
+      "users",
+      "accounts",
+      "settings",
+      "ops",
+      "usage"
+    ]
+  },
+  "production": {
+    "deployed_at": "2026-11-08T12:36:00+08:00",
+    "cutover_steps": [
+      5,
+      25,
+      50,
+      100
+    ],
+    "errors": 0,
+    "http_5xx": 0,
+    "public_checks": {
+      "healthz": 200,
+      "login": 200,
+      "settings_public": 200
+    }
+  },
+  "not_covered": [
+    "all upstream vendor-specific paths",
+    "extreme long-lived websocket scenarios",
+    "billing reconciliation against upstream statements over 24h",
+    "admin console login on production (no credentials used)"
+  ]
+}
