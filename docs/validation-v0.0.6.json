@@ -1,0 +1,95 @@
+{
+  "version": "0.0.6",
+  "scope": "backend stability & security fixes on top of v0.0.5; frontend unchanged from v0.0.5",
+  "base": {
+    "version": "0.0.5",
+    "source_commit": "f8a506c",
+    "upstream": "Sub2API v0.2.20 (6b4b37db)"
+  },
+  "patch": {
+    "file": "v0.0.6.patch",
+    "files_total": 13,
+    "files_modified": 9,
+    "files_added": 4,
+    "diff_lines": 753,
+    "sha256": "76f8e1f19f75a35f3513dfa7dc6d39c09e0567091cf68d1ff30326389f13d07b",
+    "changed_files": [
+      "internal/handler/concurrency_error_response.go",
+      "internal/handler/ops_admission_test.go",
+      "internal/repository/billing_cache.go",
+      "internal/repository/ops_repo_alerts.go",
+      "internal/repository/ops_repo_billing_integrity.go",
+      "internal/repository/billing_cache_setnx_test.go",
+      "internal/repository/ops_repo_alert_backfill_test.go",
+      "internal/server/routes/admin.go",
+      "internal/server/routes/system_routes_stepup_test.go",
+      "internal/service/ops_alert_evaluator_service.go",
+      "internal/service/ops_alert_evaluator_service_test.go",
+      "internal/service/ops_port.go",
+      "internal/service/ops_repo_mock_test.go"
+    ]
+  },
+  "fixes": {
+    "P1-01": "local 429 Retry-After 2s -> 30s, aligned with maxConcurrencyWait",
+    "P1-02": "SLA alert metrics require >=20 samples before evaluation",
+    "P1-03": "new billing reconciliation metrics: billing_leakage_count / billing_leakage_amount_usd / billing_dedup_gap_count",
+    "P2-01": "balance cache backfill uses SETNX to prevent stale snapshot overwriting newer deduction",
+    "P2-02": "/admin/system/{update,rollback,restart} now gated by step-up 2FA",
+    "P2-03": "ops_alert_rules.last_triggered_at is now written back on event creation"
+  },
+  "build": {
+    "go_build": "pass",
+    "gofmt": "clean",
+    "go_vet_default_tags": "pass"
+  },
+  "unit": {
+    "handler": "ok 49.9s",
+    "repository": "ok 8.5s",
+    "service": "ok 143.2s",
+    "new_tests": {
+      "P1-02_TestComputeRuleMetricSLAMinimumSampleGate": "pass (7 subtests)",
+      "P1-03_TestComputeRuleMetricBillingIntegrity": "pass (3 subtests)",
+      "P2-01_TestSetUserBalance*": "pass (3 tests)",
+      "P2-02_TestSystemRoutesRequireStepUp": "pass",
+      "P2-03_TestCreateAlertEvent*": "pass (3 tests)"
+    }
+  },
+  "patch_applicability": {
+    "method": "git apply --check + git apply on clean v0.0.5 backend tree",
+    "check_exit_code": 0,
+    "apply_exit_code": 0,
+    "files_applied": 13
+  },
+  "production": {
+    "host": "JPLC094840",
+    "deployed_at": "2026-11-09T23:13:29+08:00",
+    "cutover": "direct container switch (no gradual weight ramp)",
+    "downtime_seconds": 5,
+    "image": "zhijing-sub2api-japan:v0.1.0-dev",
+    "image_id_short": "fcb3628107ec",
+    "rollback_kept": "zhijing-api-v005-prev (exited, retained 24-48h)",
+    "post_deploy": {
+      "version_string": "0.1.0-zhijing-dev",
+      "health_consecutive": "3x HTTP 200",
+      "real_traffic": "processed /v1/responses continuously 23:14-23:22, decision=allow, body_bytes up to 740765",
+      "resources": "CPU 6.29%, MEM 86 MiB / 768 MiB",
+      "new_alerts_first_10min": 0,
+      "startup_errors": "none (grep-matched 'error' lines were business-log fields error_code=\"\")"
+    }
+  },
+  "behavior_changes": [
+    "local concurrency rejection Retry-After changes from 2s to 30s",
+    "SLA alert rules go silent when the window has fewer than 20 requests",
+    "P2-02 is inert until step_up_enabled=true AND the operator has TOTP enabled"
+  ],
+  "not_covered": [
+    "full-tag compilation (no-tag/integration/e2e/mcp_go_client_oauth)",
+    "-race on concurrency/budget/migration packages",
+    "govulncheck",
+    "integration suites against real PostgreSQL/Redis",
+    "old-UI endpoint replay",
+    "browser regression across dashboard/users/accounts/settings/ops/usage",
+    "all upstream vendor-specific paths",
+    "billing reconciliation against upstream statements over 24h"
+  ]
+}

@@ -1,0 +1,85 @@
+{
+  "version": "0.0.6",
+  "deployed_at": "2026-11-09T23:13:29+08:00",
+  "host": "JPLC094840",
+  "environment": "production",
+  "frontend": "unchanged from v0.0.5",
+  "backend": {
+    "image": "zhijing-sub2api-japan:v0.1.0-dev",
+    "image_id_short": "fcb3628107ec",
+    "image_size_mb": 350,
+    "binary_bytes": 120451232,
+    "version_string": "0.1.0-zhijing-dev",
+    "version_string_note": "injected at build time; differs from repo release number v0.0.6, code identical"
+  },
+  "source_patch": {
+    "file": "v0.0.6.patch",
+    "files_total": 13,
+    "files_modified": 9,
+    "files_added": 4,
+    "sha256": "76f8e1f19f75a35f3513dfa7dc6d39c09e0567091cf68d1ff30326389f13d07b",
+    "apply_check_exit_code": 0,
+    "apply_exit_code": 0
+  },
+  "container": {
+    "name": "zhijing-api-v005",
+    "bind": "127.0.0.1:18784",
+    "memory_limit_bytes": 805306368,
+    "readonly_rootfs": true,
+    "tmpfs_tmp_size": "64m",
+    "restart_policy": "unless-stopped"
+  },
+  "config_added": {
+    "GATEWAY_REQUEST_BODY_MEMORY_BUDGET_BYTES": "268435456",
+    "GATEWAY_REQUEST_BODY_READ_TIMEOUT_SECONDS": "120",
+    "GATEWAY_DOWNSTREAM_WRITE_TIMEOUT_SECONDS": "120",
+    "GATEWAY_DISABLE_OPENAI_TRANSPORT_ERROR_COOLDOWN": "true",
+    "GATEWAY_OPENAI_RESPONSE_HEADER_TIMEOUT": "900"
+  },
+  "cutover": {
+    "method": "direct container switch, no gradual weight ramp",
+    "downtime_seconds": 5,
+    "steps": [
+      "precheck: image present, current health 200",
+      "backup: /root/backups/v010-deploy-20261109T151323Z",
+      "docker stop (60s grace) + rename old to zhijing-api-v005-prev",
+      "docker run new container with merged env",
+      "health poll: 200 at 5s"
+    ]
+  },
+  "migrations": {
+    "new_migrations": 0,
+    "startup_validation": "pass"
+  },
+  "post_deploy": {
+    "health_consecutive_200": 3,
+    "real_traffic_window": "23:14-23:22 CST",
+    "real_traffic_endpoint": "/v1/responses",
+    "max_body_bytes_observed": 740765,
+    "http_5xx": 0,
+    "startup_errors": "none",
+    "cpu_percent": 6.29,
+    "mem_mib": 86,
+    "new_alert_events_first_10min": 0,
+    "alert_rule_last_triggered_at": "still NULL (requires next alert to backfill)"
+  },
+  "rollback": {
+    "script": "/root/deploy_v0.1.0.sh rollback",
+    "manual": "docker rm -f zhijing-api-v005 && docker rename zhijing-api-v005-prev zhijing-api-v005 && docker start zhijing-api-v005",
+    "previous_container_retained": "zhijing-api-v005-prev (exited)",
+    "retention_hours": 48
+  },
+  "pending": {
+    "P2-02_step_up": "code deployed but inactive: step_up_enabled=false and admin TOTP not enabled",
+    "P1-03_alert_rules": "3 reconciliation rules still need to be created in ops_alert_rules"
+  },
+  "not_verified": [
+    "full-tag compilation",
+    "-race",
+    "govulncheck",
+    "integration suites (real PostgreSQL/Redis)",
+    "old-UI endpoint replay",
+    "browser regression",
+    "provider inference probes (no vendor TTFT measurement performed)"
+  ]
+}

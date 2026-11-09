@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat-square">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-638bdf?style=flat-square">
-  <a href="https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.2"><img alt="Release v0.0.2" src="https://img.shields.io/badge/Release-v0.0.2-8b6ad5?style=flat-square"></a>
+  <a href="https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.6"><img alt="Release v0.0.6" src="https://img.shields.io/badge/Release-v0.0.6-8b6ad5?style=flat-square"></a>
   <a href="https://github.com/daniei-chen/zhijing-gateway/actions/workflows/ci.yml"><img alt="Frontend verification" src="https://github.com/daniei-chen/zhijing-gateway/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="LGPL v3" src="https://img.shields.io/badge/License-LGPL--3.0-868093?style=flat-square"></a>
 </p>
@@ -24,7 +24,7 @@
 
 > **交付边界**：本版本完成本地隔离验证，GitHub 发布与生产部署分别记录，本次没有切换线上。截图来自合成数据，额度、价格、指标与有效期均为演示样例。
 
-**版本下载**：[v0.0.5 · 后端随上游升级，交互保持原样](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.5)，提供配套后端源码差异、构建清单和 SHA256（前端沿用 v0.0.4 构建）；[更新说明](docs/releases/v0.0.5.zh-CN.md)。
+**版本下载**：[v0.0.6 · 稳定性与安全修复](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.6)，提供配套后端源码差异、构建清单和 SHA256（前端沿用 v0.0.5 构建）；[更新说明](docs/releases/v0.0.6.zh-CN.md)。
 
 ## v0.0.2 · 清晰的边界，从容的工作台
 

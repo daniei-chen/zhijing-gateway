@@ -11,7 +11,7 @@
 <p align="center">
   <img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat-square">
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5-638bdf?style=flat-square">
-  <a href="https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.5"><img alt="Release v0.0.5" src="https://img.shields.io/badge/Release-v0.0.5-8b6ad5?style=flat-square"></a>
+  <a href="https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.6"><img alt="Release v0.0.6" src="https://img.shields.io/badge/Release-v0.0.6-8b6ad5?style=flat-square"></a>
   <a href="https://github.com/daniei-chen/zhijing-gateway/actions/workflows/ci.yml"><img alt="Frontend verification" src="https://github.com/daniei-chen/zhijing-gateway/actions/workflows/ci.yml/badge.svg"></a>
   <a href="LICENSE"><img alt="LGPL v3" src="https://img.shields.io/badge/License-LGPL--3.0-868093?style=flat-square"></a>
 </p>
@@ -22,9 +22,26 @@
 
 智境提供登录、成员工作台与管理员控制台的统一前端。业务能力沿用 [Sub2API](https://github.com/Wei-Shaw/sub2api)，权限、计费与功能开关继续由后端决定。公开前端源码、合成预览、验证工具及明确版本的通用后端差异补丁。
 
-> **上线状态**：v0.0.5 后端已于 2026-11-08 完成生产上线（前端与 v0.0.4 完全一致，未重建）：新建 18784 peer，5% → 25% → 50% → 100% 灰度，每档 0 错误、0 5xx；旧 peer 保留为 `backup` 回滚窗口。详见[线上部署记录](docs/deployments/v0.0.5-2026-11-08.zh-CN.md)。本页截图继续使用合成数据，额度、价格、指标与有效期均为演示样例。
+> **上线状态**：v0.0.6 后端已于 2026-11-09 完成生产上线（前端与 v0.0.5 完全一致，未重建）：容器直接切换，中断约 5 秒，0 错误、0 5xx；旧容器保留 24–48 小时作为回滚窗口。详见[线上部署记录](docs/deployments/v0.0.6-2026-11-09.zh-CN.md)。本页截图继续使用合成数据，额度、价格、指标与有效期均为演示样例。
 
-**版本下载**：[v0.0.5 · 后端随上游升级，交互保持原样](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.5)，提供配套后端源码差异、构建清单和 SHA256（前端沿用 v0.0.4 构建，无需更新静态资源）；[更新说明](docs/releases/v0.0.5.zh-CN.md)。GitHub 发布与线上部署分开记录；当前线上后端为 v0.0.5（前端仍是 v0.0.4 构建）。
+**版本下载**：[v0.0.6 · 稳定性与安全修复](https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.0.6)，提供配套后端源码差异、构建清单和 SHA256（前端沿用 v0.0.5 构建，无需更新静态资源）；[更新说明](docs/releases/v0.0.6.zh-CN.md)。GitHub 发布与线上部署分开记录；当前线上后端为 v0.0.6（前端仍是 v0.0.5 构建）。
+
+## v0.0.6 · 稳定性与安全修复
+
+本版是**后端修复版**：6 个独立补丁，覆盖重试退避、告警可信度、资金对账、缓存一致性、管理员操作门控与规则状态回写。前端沿用 v0.0.5 构建，未改动。
+
+| 补丁 | 实际行为 |
+| --- | --- |
+| 重试退避 | 本地并发拒绝的 `Retry-After` 从 2 秒改为 30 秒，与排队窗口对齐，打断「429 → 立刻重试 → 更饱和」的正反馈。 |
+| 告警可信度 | SLA 类告警要求窗口内 ≥20 个样本；线上 7 天 260 次告警全部来自 1–18 个请求的小样本。 |
+| 资金对账 | 新增 3 个告警指标（漏收笔数/金额、幂等键缺口），资金异常首次出现即可报警。需在 `ops_alert_rules` 建规则。 |
+| 缓存一致性 | 余额缓存回填改用 `SETNX`，避免较早的 DB 快照覆盖较新的增量扣减。 |
+| 管理员门控 | `/admin/system/{update,rollback,restart}` 挂上 step-up 2FA——此前任何 admin API Key 都能直接替换服务二进制。 |
+| 规则状态 | 告警规则的 `last_triggered_at` 此前从不回写，导致列表永远显示「从未触发」；现于事件创建时回写。 |
+
+⚠️ **含两条行为变更**：客户端重试间隔变长（2s→30s）；低流量时段 SLA 类告警会静默。详见[更新说明](docs/releases/v0.0.6.zh-CN.md)。
+
+> P2-02 门控默认不生效：`step_up_enabled` 仍为 false 且管理员未绑定 TOTP。启用顺序见[step-up 启用指引](docs/security/step-up-rollout.zh-CN.md)——顺序错误会把管理员锁在门外。
 
 ## v0.0.5 · 后端随上游升级，交互保持原样
 
