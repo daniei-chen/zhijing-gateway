@@ -60,6 +60,6 @@ func markLocalConcurrencyResponse(c *gin.Context, status int, code string, strea
 	c.Set(opsLocalConcurrencyCodeKey, code)
 	if !streamStarted && !c.Writer.Written() {
 		// Advisory minimum backoff, not a promise that capacity will be available.
-		c.Header("Retry-After", "2")
+		c.Header("Retry-After", "30")
 	}
 }

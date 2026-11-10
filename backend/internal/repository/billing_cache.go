@@ -155,7 +155,10 @@ func (c *billingCache) GetUserBalance(ctx context.Context, userID int64) (float6
 
 func (c *billingCache) SetUserBalance(ctx context.Context, userID int64, balance float64) error {
 	key := billingBalanceKey(userID)
-	return c.rdb.Set(ctx, key, balance, jitteredTTL()).Err()
+	// 回填必须"只写不覆盖"：此方法仅在缓存 miss 后回填 DB 快照时调用。
+	// 若用普通 SET，队列延迟期间已发生的扣费会被旧快照覆盖，
+	// 预检将读到虚高余额并放行 -> 并发透支（见审计 P0-5 / 补丁 P2-01）。
+	return c.rdb.SetNX(ctx, key, balance, jitteredTTL()).Err()
 }
 
 func (c *billingCache) DeductUserBalance(ctx context.Context, userID int64, amount float64) error {
