@@ -481,6 +481,15 @@ func syncBalanceCacheAfterDeduction(ctx context.Context, p *postUsageBillingPara
 		}
 		return
 	}
+	// 缓存键缺失时 deductBalanceScript 是 no-op（返回 0，调用方当成功），
+	// 本次扣费会在缓存侧静默丢失；随后 miss 回填又会把"扣费前快照"写回去，
+	// 预检于是读到虚高余额。这里先用 DB 事务 RETURNING 的权威余额（已含本次扣费）
+	// 做一次 SETNX 回填：键不存在则补上即完成，键存在则不动、继续走增量扣减。
+	if result != nil && result.NewBalance != nil {
+		if filled, err := deps.billingCacheService.BackfillBalanceIfAbsent(ctx, p.User.ID, *result.NewBalance); err == nil && filled {
+			return
+		}
+	}
 	if deps.billingCacheService.InflightReservationEnabled() {
 		// 在途预留开启时同步扣减余额缓存：计费任务结束后才会释放预留，
 		// 必须保证此时准入读取的缓存余额已反映本次扣费，否则释放与扣减之间

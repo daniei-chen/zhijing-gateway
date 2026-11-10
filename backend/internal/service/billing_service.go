@@ -65,6 +65,7 @@ type BillingCache interface {
 	// Balance operations
 	GetUserBalance(ctx context.Context, userID int64) (float64, error)
 	SetUserBalance(ctx context.Context, userID int64, balance float64) error
+	SetUserBalanceIfAbsent(ctx context.Context, userID int64, balance float64) (bool, error)
 	DeductUserBalance(ctx context.Context, userID int64, amount float64) error
 	InvalidateUserBalance(ctx context.Context, userID int64) error
 

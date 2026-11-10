@@ -161,6 +161,13 @@ func (c *billingCache) SetUserBalance(ctx context.Context, userID int64, balance
 	return c.rdb.SetNX(ctx, key, balance, jitteredTTL()).Err()
 }
 
+// SetUserBalanceIfAbsent 仅在 key 不存在时写入余额快照，并暴露 SETNX 的结果。
+// 供"扣费后缓存 miss"场景用数据库权威余额做一次性回填，与增量扣减互斥。
+func (c *billingCache) SetUserBalanceIfAbsent(ctx context.Context, userID int64, balance float64) (bool, error) {
+	key := billingBalanceKey(userID)
+	return c.rdb.SetNX(ctx, key, balance, jitteredTTL()).Result()
+}
+
 func (c *billingCache) DeductUserBalance(ctx context.Context, userID int64, amount float64) error {
 	key := billingBalanceKey(userID)
 	_, err := deductBalanceScript.Run(ctx, c.rdb, []string{key}, amount, int(jitteredTTL().Seconds())).Result()

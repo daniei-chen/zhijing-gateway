@@ -14,6 +14,7 @@ type opsRepoMock struct {
 	ListSystemLogsFn              func(ctx context.Context, filter *OpsSystemLogFilter) (*OpsSystemLogList, error)
 	DeleteSystemLogsFn            func(ctx context.Context, filter *OpsSystemLogCleanupFilter) (int64, error)
 	InsertSystemLogCleanupAuditFn func(ctx context.Context, input *OpsSystemLogCleanupAudit) error
+	GetBillingReconciliationFn   func(ctx context.Context, start, end time.Time) (*OpsBillingReconciliation, error)
 }
 
 func (m *opsRepoMock) InsertErrorLog(ctx context.Context, input *OpsInsertErrorLogInput) (int64, error) {
@@ -191,6 +192,13 @@ func (m *opsRepoMock) GetLatestHourlyBucketStart(ctx context.Context) (time.Time
 
 func (m *opsRepoMock) GetLatestDailyBucketDate(ctx context.Context) (time.Time, bool, error) {
 	return time.Time{}, false, nil
+}
+
+func (m *opsRepoMock) GetBillingReconciliation(ctx context.Context, start, end time.Time) (*OpsBillingReconciliation, error) {
+	if m.GetBillingReconciliationFn != nil {
+		return m.GetBillingReconciliationFn(ctx, start, end)
+	}
+	return &OpsBillingReconciliation{}, nil
 }
 
 var _ OpsRepository = (*opsRepoMock)(nil)

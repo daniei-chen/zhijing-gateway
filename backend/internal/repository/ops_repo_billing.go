@@ -39,6 +39,9 @@ WHERE ul.created_at >= $1
   AND ul.created_at <  $2
   AND ul.request_id IS NOT NULL
   AND ul.request_id <> ''
+  -- Live 会话（/v1/live）绕过计费管道直接写 usage_log，本就不落 dedup 键，
+  -- 不排除会让该指标在开启 Live 的分组上 100% 误报（见 v0.0.7 复核 billing P1）。
+  AND COALESCE(ul.inbound_endpoint, '') NOT LIKE '/v1/live%'
   AND d.id IS NULL`
 	if err := r.db.QueryRowContext(ctx, dedupGapSQL, start, end).Scan(&out.DedupGapCount); err != nil {
 		return nil, fmt.Errorf("billing dedup gap: %w", err)

@@ -368,6 +368,14 @@ func (s *BillingCacheService) setBalanceCache(ctx context.Context, userID int64,
 	}
 }
 
+// BackfillBalanceIfAbsent 用数据库权威余额做一次性回填（仅当缓存键缺失）。
+func (s *BillingCacheService) BackfillBalanceIfAbsent(ctx context.Context, userID int64, balance float64) (bool, error) {
+	if s == nil || s.cache == nil {
+		return false, nil
+	}
+	return s.cache.SetUserBalanceIfAbsent(ctx, userID, balance)
+}
+
 // DeductBalanceCache 扣减余额缓存（同步调用）
 func (s *BillingCacheService) DeductBalanceCache(ctx context.Context, userID int64, amount float64) error {
 	if s.cache == nil {
