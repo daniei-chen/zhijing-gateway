@@ -33,6 +33,9 @@ type OpsRepository interface {
 	InsertSystemMetrics(ctx context.Context, input *OpsInsertSystemMetricsInput) error
 	GetLatestSystemMetrics(ctx context.Context, windowMinutes int) (*OpsSystemMetricsSnapshot, error)
 
+	// GetBillingReconciliation 返回窗口内的资金对账异常（补丁 P1-03）。
+	GetBillingReconciliation(ctx context.Context, start, end time.Time) (*OpsBillingReconciliation, error)
+
 	UpsertJobHeartbeat(ctx context.Context, input *OpsUpsertJobHeartbeatInput) error
 	ListJobHeartbeats(ctx context.Context) ([]*OpsJobHeartbeat, error)
 
@@ -310,4 +313,12 @@ type OpsWindowStats struct {
 	SuccessCount    int64 `json:"success_count"`
 	ErrorCountTotal int64 `json:"error_count_total"`
 	TokenConsumed   int64 `json:"token_consumed"`
+}
+
+// OpsBillingReconciliation 是窗口内的资金对账异常快照（补丁 P1-03）。
+// 三个字段分别对应三条内置告警规则的 metric_type。
+type OpsBillingReconciliation struct {
+	DedupGapCount    int64   // usage_logs 有记录但 usage_billing_dedup 缺失的笔数（存在重复扣费风险）
+	LeakageCount     int64   // 应计费（total_cost>0）但实收为 0 的笔数
+	LeakageAmountUSD float64 // 上述笔数的应计费金额合计
 }

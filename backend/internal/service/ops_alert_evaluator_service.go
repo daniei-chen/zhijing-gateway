@@ -432,6 +432,11 @@ func parseOpsAlertRuleScope(filters map[string]any) (platform string, groupID *i
 	return platform, groupID, region
 }
 
+// opsAlertMinSamplesSLA 是成功率/错误率类告警的最小样本门槛（补丁 P1-02）。
+// 低于该门槛时窗口内的比率没有统计意义：1 个请求失败即可让错误率达到 100%，
+// 曾导致低流量时段反复触发 P0「错误率极高」误报。
+const opsAlertMinSamplesSLA = 20
+
 func (s *OpsAlertEvaluatorService) computeRuleMetric(
 	ctx context.Context,
 	rule *OpsAlertRule,
@@ -599,20 +604,38 @@ func (s *OpsAlertEvaluatorService) computeRuleMetric(
 
 	switch strings.TrimSpace(rule.MetricType) {
 	case "success_rate":
-		if overview.RequestCountSLA <= 0 {
+		if overview.RequestCountSLA < opsAlertMinSamplesSLA {
 			return 0, false
 		}
 		return overview.SLA * 100, true
 	case "error_rate":
-		if overview.RequestCountSLA <= 0 {
+		if overview.RequestCountSLA < opsAlertMinSamplesSLA {
 			return 0, false
 		}
 		return overview.ErrorRate * 100, true
 	case "upstream_error_rate":
-		if overview.RequestCountSLA <= 0 {
+		if overview.RequestCountSLA < opsAlertMinSamplesSLA {
 			return 0, false
 		}
 		return overview.UpstreamErrorRate * 100, true
+	case "billing_dedup_gap_count", "billing_leakage_count", "billing_leakage_amount_usd":
+		// 资金对账三指标（补丁 P1-03）：直接查窗口内的 usage/billing 表。
+		// 任一条 rule 命中时只查一次，三个 metric_type 共用同一次快照。
+		if s == nil || s.opsRepo == nil {
+			return 0, false
+		}
+		rec, err := s.opsRepo.GetBillingReconciliation(ctx, start, end)
+		if err != nil || rec == nil {
+			return 0, false
+		}
+		switch strings.TrimSpace(rule.MetricType) {
+		case "billing_dedup_gap_count":
+			return float64(rec.DedupGapCount), true
+		case "billing_leakage_count":
+			return float64(rec.LeakageCount), true
+		default:
+			return rec.LeakageAmountUSD, true
+		}
 	default:
 		return 0, false
 	}
