@@ -1,0 +1,1 @@
+function r(e){return e>=1e6?`${(e/1e6).toFixed(1)}M`:e>=1e3?`${(e/1e3).toFixed(1)}K`:e.toLocaleString()}function i(e){return e<1e-4?e.toPrecision(2):e.toFixed(4).replace(/(\.\d{2}\d*?)0+$/,"$1")}export{i as a,r as f};
