@@ -228,7 +228,10 @@ func (s *OpsAlertEvaluatorService) evaluateOnce(interval time.Duration) {
 
 		metricValue, ok := s.computeRuleMetric(ctx, rule, systemMetrics, windowStart, windowEnd, scopePlatform, scopeGroupID)
 		if !ok {
-			s.resetRuleState(rule.ID, now)
+			// 指标不可用或样本不足：只跳过本次评估，**不清零连击状态**。
+			// 清零会让"样本偶尔不足"打断正在积累的 sustained 连击，
+			// 相当于把反复抖动的故障也一并静音。updateRuleBreaches 自身在
+			// 恢复评估时若发现间隔 > interval*2 会把连击归零，状态不会永久滞留。
 			continue
 		}
 		rulesEvaluated++
@@ -432,10 +435,29 @@ func parseOpsAlertRuleScope(filters map[string]any) (platform string, groupID *i
 	return platform, groupID, region
 }
 
-// opsAlertMinSamplesSLA 是成功率/错误率类告警的最小样本门槛（补丁 P1-02）。
-// 低于该门槛时窗口内的比率没有统计意义：1 个请求失败即可让错误率达到 100%，
-// 曾导致低流量时段反复触发 P0「错误率极高」误报。
-const opsAlertMinSamplesSLA = 20
+// opsAlertMinSamples 返回成功率/错误率类告警在该窗口下的最小样本门槛（补丁 P1-02）。
+//
+// 不能用固定门槛：本环境每分钟约 2 个请求，1 分钟窗口实测最大只有 12 个样本，
+// 固定 20 会让短窗口规则（如 P0「错误率极高」window=1min）出现"永远达不到样本数
+// → 永不评估"的静音效果，比误报更危险（见 v0.0.7 复核 §6）。
+// 因此门槛随窗口线性缩放并夹在 [3, 20]：
+//
+//	1 分钟 → 3，5 分钟 → 5，20 分钟及以上 → 20
+//
+// 下限 3 保证"1 个请求失败"不会直接判定（需 1/3≈33% 才越过常见 20% 阈值），
+// 上限 20 保证长窗口仍然有统计意义。
+func opsAlertMinSamples(windowMinutes int) int {
+	if windowMinutes <= 0 {
+		windowMinutes = 1
+	}
+	if windowMinutes < 3 {
+		return 3
+	}
+	if windowMinutes > 20 {
+		return 20
+	}
+	return windowMinutes
+}
 
 func (s *OpsAlertEvaluatorService) computeRuleMetric(
 	ctx context.Context,
@@ -449,6 +471,7 @@ func (s *OpsAlertEvaluatorService) computeRuleMetric(
 	if rule == nil {
 		return 0, false
 	}
+	minSamples := opsAlertMinSamples(int(end.Sub(start).Minutes()))
 	switch strings.TrimSpace(rule.MetricType) {
 	case "cpu_usage_percent":
 		if systemMetrics != nil && systemMetrics.CPUUsagePercent != nil {
@@ -604,17 +627,17 @@ func (s *OpsAlertEvaluatorService) computeRuleMetric(
 
 	switch strings.TrimSpace(rule.MetricType) {
 	case "success_rate":
-		if overview.RequestCountSLA < opsAlertMinSamplesSLA {
+		if overview.RequestCountSLA < int64(minSamples) {
 			return 0, false
 		}
 		return overview.SLA * 100, true
 	case "error_rate":
-		if overview.RequestCountSLA < opsAlertMinSamplesSLA {
+		if overview.RequestCountSLA < int64(minSamples) {
 			return 0, false
 		}
 		return overview.ErrorRate * 100, true
 	case "upstream_error_rate":
-		if overview.RequestCountSLA < opsAlertMinSamplesSLA {
+		if overview.RequestCountSLA < int64(minSamples) {
 			return 0, false
 		}
 		return overview.UpstreamErrorRate * 100, true
