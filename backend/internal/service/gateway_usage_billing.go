@@ -375,6 +375,16 @@ func applyUsageBilling(ctx context.Context, requestID string, usageLog *UsageLog
 
 	result, err := repo.Apply(billingCtx, cmd)
 	if err != nil {
+		// 计费事务失败：usage_logs 已记（账记了）但余额/配额未扣（钱没扣）。
+		// 持久化到 billing_failures 以便对账与人工补录（审计 P0-4）。
+		// 独立超时 + 吞异常：留痕失败绝不能反过来影响计费错误本身的传播。
+		go func(c *UsageBillingCommand, cause error) {
+			rctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+			defer cancel()
+			if rerr := repo.RecordFailure(rctx, c, cause); rerr != nil {
+				logger.LegacyPrintf("service.gateway", "Warning: record billing failure failed for request %s: %v", c.RequestID, rerr)
+			}
+		}(cmd, err)
 		return false, err
 	}
 

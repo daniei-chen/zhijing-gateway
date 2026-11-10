@@ -638,3 +638,36 @@ func execAccountQuotaIncrement(ctx context.Context, tx *sql.Tx, query string, ac
 	}
 	return state, nil
 }
+
+// RecordFailure 把一次计费事务失败持久化到 billing_failures（审计 P0-4）。
+//
+// 背景：Apply 失败时 usage_logs 已经写入（账记了），但余额/配额未扣（钱没扣），
+// 此前除一行日志外无任何痕迹——漏收不可对账、不可补录、不可统计。
+//
+// 语义约束：
+//   - 只留痕，不改变 applyUsageBilling 的返回值（调用方仍然看到原始错误）
+//   - ON CONFLICT DO NOTHING 依赖 idx_billing_failures_request 唯一索引，
+//     同一 (request_id, api_key_id) 重复失败只登记一次
+//   - 表由 migrations/250_billing_failures.sql 创建；表不存在时返回错误，
+//     由调用方降级为日志（绝不因此影响主流程）
+func (r *usageBillingRepository) RecordFailure(ctx context.Context, cmd *service.UsageBillingCommand, cause error) error {
+	if r == nil || r.db == nil || cmd == nil {
+		return errors.New("record billing failure: nil repository or command")
+	}
+	msg := ""
+	if cause != nil {
+		msg = cause.Error()
+	}
+	total := cmd.BalanceCost + cmd.SubscriptionCost
+	_, err := r.db.ExecContext(ctx, `
+INSERT INTO billing_failures (
+	request_id, api_key_id, user_id, account_id, model,
+	input_tokens, output_tokens, cache_read_tokens,
+	total_cost, actual_cost, error_message, status, created_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'pending',now())
+ON CONFLICT DO NOTHING`,
+		cmd.RequestID, cmd.APIKeyID, cmd.UserID, cmd.AccountID, cmd.Model,
+		cmd.InputTokens, cmd.OutputTokens, cmd.CacheReadTokens,
+		total, total, msg)
+	return err
+}

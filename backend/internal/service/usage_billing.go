@@ -228,4 +228,9 @@ type UsageBillingRepository interface {
 	ReserveBatchImageBalance(ctx context.Context, cmd *BatchImageBalanceHoldCommand) (*BatchImageBalanceHoldResult, error)
 	CaptureBatchImageBalance(ctx context.Context, cmd *BatchImageBalanceHoldCommand) (*BatchImageBalanceHoldResult, error)
 	ReleaseBatchImageBalance(ctx context.Context, cmd *BatchImageBalanceHoldCommand) (*BatchImageBalanceHoldResult, error)
+
+	// RecordFailure 把一次计费事务失败持久化到 billing_failures（审计 P0-4）。
+	// 失败本身不改变主流程语义——applyUsageBilling 仍然返回错误，
+	// 但留下可对账、可补录的痕迹，而不是只有一行日志。
+	RecordFailure(ctx context.Context, cmd *UsageBillingCommand, cause error) error
 }
