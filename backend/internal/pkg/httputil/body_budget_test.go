@@ -111,6 +111,37 @@ func TestRequestBodyMemoryBudgetUnknownLengthAndConcurrency(t *testing.T) {
 	}
 }
 
+type countedReader struct {
+	reader bytes.Reader
+	reads  int
+}
+
+func (r *countedReader) Read(p []byte) (int, error) {
+	r.reads++
+	return r.reader.Read(p)
+}
+
+func TestReadRequestBodyPreallocatesBoundedKnownLength(t *testing.T) {
+	payload := bytes.Repeat([]byte{'x'}, 4<<20)
+	reader := &countedReader{}
+	reader.reader.Reset(payload)
+	ctx, release := WithRequestBodyMemoryBudget(context.Background(), NewBodyMemoryBudget(16<<20))
+	defer release()
+	req := httptest.NewRequest("POST", "/", reader).WithContext(ctx)
+	req.ContentLength = int64(len(payload))
+
+	got, err := ReadRequestBodyWithPrealloc(req)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, payload) {
+		t.Fatalf("body mismatch: got %d bytes, want %d", len(got), len(payload))
+	}
+	if reader.reads > 2 {
+		t.Fatalf("known-length body was fragmented into %d reads", reader.reads)
+	}
+}
+
 func TestDecompressRequestBodyRejectsExcessiveZstdWindow(t *testing.T) {
 	for _, exponent := range []byte{20, 24, 29} {
 		raw := []byte{0x28, 0xb5, 0x2f, 0xfd, 0, (exponent - 10) << 3, 9, 0, 0, 'x'}
@@ -242,7 +273,7 @@ func TestRequestBodyMemoryBudgetRetainsOnlyFinalAllocation(t *testing.T) {
 }
 
 func TestRequestBodyMemoryBudgetReusesTransientCapacityWhileHandlersWait(t *testing.T) {
-	const bodySize = requestBodyReadMaxInitCap + 512
+	const bodySize = requestBodyKnownLengthPrealloc + 512
 	// Enough for two retained bodies plus the third body before concatenation.
 	// A third simultaneous final copy must still be rejected.
 	budget := NewBodyMemoryBudget(3*bodySize + 1)

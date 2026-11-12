@@ -57,6 +57,10 @@ func (s *simpleModeUsageBillingRepoStub) Apply(_ context.Context, cmd *UsageBill
 	return &UsageBillingApplyResult{Applied: true}, nil
 }
 
+func (s *simpleModeUsageBillingRepoStub) RecordFailure(context.Context, *UsageBillingCommand, error) error {
+	return nil
+}
+
 func TestApplyUsageBillingSimpleModeDeduplicatesWithoutBalanceEffects(t *testing.T) {
 	repo := &simpleModeUsageBillingRepoStub{}
 	p := &postUsageBillingParams{

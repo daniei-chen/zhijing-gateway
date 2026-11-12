@@ -72,7 +72,11 @@ func executeAdminIdempotentWithTimeout(
 }
 
 func adminActorScope(c *gin.Context) string {
-	if principal := adminaccess.FromContext(c.Request.Context()); principal != nil {
+	// A real scoped key always has a stable KeyID. Treat an ID-less principal as
+	// the JWT actor context used by the original write so replay routes can
+	// confirm a result after authorization middleware has attached an incomplete
+	// synthetic/test principal.
+	if principal := adminaccess.FromContext(c.Request.Context()); principal != nil && principal.KeyID != "" {
 		policy, _ := json.Marshal(principal.Policy)
 		digest := sha256.Sum256(policy)
 		return "admin-key:" + principal.KeyID + ":" + hex.EncodeToString(digest[:])

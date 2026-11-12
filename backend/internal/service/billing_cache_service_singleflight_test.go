@@ -27,6 +27,11 @@ func (s *billingCacheMissStub) SetUserBalance(ctx context.Context, userID int64,
 	return nil
 }
 
+func (s *billingCacheMissStub) SetUserBalanceIfAbsent(ctx context.Context, userID int64, balance float64) (bool, error) {
+	s.setBalanceCalls.Add(1)
+	return true, nil
+}
+
 func (s *billingCacheMissStub) DeductUserBalance(ctx context.Context, userID int64, amount float64) error {
 	return nil
 }

@@ -25,6 +25,11 @@ func (b *billingCacheWorkerStub) SetUserBalance(ctx context.Context, userID int6
 	return nil
 }
 
+func (b *billingCacheWorkerStub) SetUserBalanceIfAbsent(ctx context.Context, userID int64, balance float64) (bool, error) {
+	atomic.AddInt64(&b.balanceUpdates, 1)
+	return true, nil
+}
+
 func (b *billingCacheWorkerStub) DeductUserBalance(ctx context.Context, userID int64, amount float64) error {
 	atomic.AddInt64(&b.balanceUpdates, 1)
 	return nil

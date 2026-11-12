@@ -51,19 +51,18 @@ func TestReleaseNotesSecurityPrefixIsNotEffective(t *testing.T) {
 	t.Setenv("SECURITY_REQUEST_BODY_MEMORY_BUDGET_BYTES", "1024")
 	t.Setenv("SECURITY_REQUEST_BODY_READ_TIMEOUT_SECONDS", "1")
 	t.Setenv("SECURITY_DOWNSTREAM_WRITE_TIMEOUT_SECONDS", "1")
+	t.Setenv("GATEWAY_REQUEST_BODY_MEMORY_BUDGET_BYTES", "268435456")
 	cfg := loadWithBaseEnv(t)
 
-	require.EqualValues(t, 1024*1024*1024, cfg.Gateway.RequestBodyMemoryBudgetBytes,
+	require.EqualValues(t, 268435456, cfg.Gateway.RequestBodyMemoryBudgetBytes,
 		"security.* prefix must not reach the gateway budget; update the docs if upstream renames it")
 	require.Equal(t, 120, cfg.Gateway.RequestBodyReadTimeoutSeconds)
 	require.Equal(t, 120, cfg.Gateway.DownstreamWriteTimeoutSeconds)
 }
 
-func TestGatewayRequestBodyDefaultsAreContainerUnsafe(t *testing.T) {
-	// Documents why production must override the budget: the upstream default
-	// (1 GiB) exceeds the 768 MiB container limit used by this deployment.
+func TestGatewayRequestBodyDefaultsHaveSafeFloor(t *testing.T) {
+	// The upstream default is adaptive and retains the historical 1 GiB floor.
 	cfg := loadWithBaseEnv(t)
-	require.EqualValues(t, 1024*1024*1024, cfg.Gateway.RequestBodyMemoryBudgetBytes)
-	require.Greater(t, cfg.Gateway.RequestBodyMemoryBudgetBytes, int64(768*1024*1024),
-		"default budget must stay above the container limit; production override is mandatory")
+	require.GreaterOrEqual(t, cfg.Gateway.RequestBodyMemoryBudgetBytes, int64(1024*1024*1024),
+		"adaptive budget must retain the 1 GiB safety floor")
 }

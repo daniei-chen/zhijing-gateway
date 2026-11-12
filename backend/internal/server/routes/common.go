@@ -12,7 +12,7 @@ import (
 // RegisterCommonRoutes 注册通用路由（健康检查、状态等）。
 //
 // redisClient 可为 nil（届时 /readyz 只报告未配置，不判失败）。
-func RegisterCommonRoutes(r *gin.Engine, redisClient *redis.Client) {
+func RegisterCommonRoutes(r *gin.Engine, redisClient *redis.Client, dbCheck func(context.Context) error) {
 	// 浅存活探针：只证明进程能响应 HTTP，不查依赖。
 	// 注意：它无法区分 "full-role 正常" 与 "全部实例都是 API-only"，
 	// 也不能发现 DB/Redis 故障，因此不能作为唯一判据（见审计 2026-11-09 后台停摆）。
@@ -40,8 +40,17 @@ func RegisterCommonRoutes(r *gin.Engine, redisClient *redis.Client) {
 			checks["redis"] = "ok"
 		}
 
-		// DB 探针未接入本函数（需要注入 *sql.DB）；显式标注而不是假装 ok。
-		checks["database"] = "not_probed"
+		// DB 探针（2026-11-12 第 3 轮审计 P0-4）：原实现写死 not_probed，
+		// 导致 DB 挂掉时 /readyz 仍报 ready。现由调用方注入真实查库回调。
+		if dbCheck == nil {
+			checks["database"] = "not_configured"
+		} else if err := dbCheck(ctx); err != nil {
+			checks["database"] = "error"
+			checks["database_error"] = err.Error()
+			ready = false
+		} else {
+			checks["database"] = "ok"
+		}
 
 		if ready {
 			c.JSON(http.StatusOK, gin.H{"status": "ready", "checks": checks})

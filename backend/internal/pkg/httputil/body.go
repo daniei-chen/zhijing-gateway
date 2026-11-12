@@ -18,7 +18,12 @@ import (
 const (
 	requestBodyReadInitCap    = 512
 	requestBodyReadMaxInitCap = 1 << 20
-	jsonUTF8BOMLen            = 3
+	// A bounded preallocation for a trusted-size request avoids repeated chunk
+	// growth and the final concatenation copy on the common multi-megabyte path.
+	// The bound keeps a client-controlled Content-Length from causing a large
+	// eager allocation; the shared BodyMemoryBudget remains the hard guard.
+	requestBodyKnownLengthPrealloc = 8 << 20
+	jsonUTF8BOMLen                 = 3
 	// maxDecompressedBodySize limits the decompressed request body to 64 MB
 	// to prevent decompression bomb attacks.
 	maxDecompressedBodySize  = 64 << 20
@@ -101,10 +106,10 @@ func readRequestBodyWithBudget(req *http.Request) (requestBodyBuffer, error) {
 		switch {
 		case req.ContentLength < int64(requestBodyReadInitCap):
 			capHint = requestBodyReadInitCap
+		case req.ContentLength <= int64(requestBodyKnownLengthPrealloc):
+			capHint = int(req.ContentLength)
 		case req.ContentLength > int64(requestBodyReadMaxInitCap):
 			capHint = requestBodyReadMaxInitCap
-		default:
-			capHint = int(req.ContentLength)
 		}
 	}
 

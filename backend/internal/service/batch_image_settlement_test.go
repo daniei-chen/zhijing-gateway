@@ -488,6 +488,10 @@ func (r *fakeBatchImageBillingRepo) ReleaseBatchImageBalance(_ context.Context, 
 	return r.applyHold(cmd, &r.releases)
 }
 
+func (r *fakeBatchImageBillingRepo) RecordFailure(_ context.Context, _ *UsageBillingCommand, _ error) error {
+	return nil
+}
+
 func (r *fakeBatchImageBillingRepo) applyHold(cmd *BatchImageBalanceHoldCommand, calls *[]*BatchImageBalanceHoldCommand) (*BatchImageBalanceHoldResult, error) {
 	if r.seen == nil {
 		r.seen = make(map[string]struct{})

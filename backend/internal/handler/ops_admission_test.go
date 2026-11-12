@@ -64,7 +64,7 @@ func TestOpenAIConcurrencyResponseHasAdvisoryBackoff(t *testing.T) {
 		h := &OpenAIGatewayHandler{}
 		h.handleConcurrencyError(c, &service.GatewayConcurrencyLimitError{Scope: scope, Limit: 3}, scope, false)
 		require.Equal(t, http.StatusTooManyRequests, rec.Code)
-		require.Equal(t, "2", rec.Header().Get("Retry-After"))
+		require.Equal(t, "30", rec.Header().Get("Retry-After"))
 		var body struct {
 			Error struct{ Type, Code, Message string }
 		}
