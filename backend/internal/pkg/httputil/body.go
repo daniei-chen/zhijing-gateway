@@ -24,6 +24,10 @@ const (
 	// eager allocation; the shared BodyMemoryBudget remains the hard guard.
 	requestBodyKnownLengthPrealloc = 8 << 20
 	jsonUTF8BOMLen                 = 3
+	// JSON strings may not contain these bytes literally. Keep the set explicit
+	// so the overwhelmingly common already-valid body can skip the stateful
+	// normalization scan below.
+	jsonRawControlChars = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f\x7f"
 	// maxDecompressedBodySize limits the decompressed request body to 64 MB
 	// to prevent decompression bomb attacks.
 	maxDecompressedBodySize  = 64 << 20
@@ -301,6 +305,13 @@ func normalizeLenientJSONRequestBody(ctx context.Context, body []byte, maxNormal
 	}
 	if int64(len(body)) > maxNormalizedBytes {
 		return requestBodyBuffer{}, &http.MaxBytesError{Limit: maxNormalizedBytes}
+	}
+	// Normal OpenAI-compatible JSON contains escaped controls (for example
+	// "\\n"), not literal control bytes. bytes.IndexAny uses the optimized
+	// byte-search path here; only malformed lenient JSON takes the slower
+	// quote/escape-aware pass below.
+	if bytes.IndexAny(body, jsonRawControlChars) < 0 {
+		return requestBodyBuffer{data: body}, nil
 	}
 
 	normalizedSize := int64(len(body))

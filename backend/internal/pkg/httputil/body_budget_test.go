@@ -205,6 +205,20 @@ func TestNormalizedRequestBodySharesMemoryBudget(t *testing.T) {
 	}
 }
 
+func TestNormalizeLenientJSONRequestBodyFastPathPreservesBody(t *testing.T) {
+	body := []byte(`{"input":"line 1\\nline 2","nested":{"ok":true}}`)
+	got, err := NormalizeLenientJSONRequestBody(body, 4096)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(got, body) {
+		t.Fatalf("fast path changed body: %q", got)
+	}
+	if len(got) == 0 || &got[0] != &body[0] {
+		t.Fatal("fast path allocated a replacement body")
+	}
+}
+
 func requestBodyBudgetUsed(budget *BodyMemoryBudget) int64 {
 	budget.mu.Lock()
 	defer budget.mu.Unlock()
