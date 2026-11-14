@@ -2,10 +2,13 @@ package routes
 
 import (
 	"context"
+	"crypto/subtle"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/metrics"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
@@ -87,6 +90,32 @@ func RegisterCommonRoutes(r *gin.Engine, redisClient *redis.Client, dbCheck func
 			return
 		}
 		c.JSON(http.StatusServiceUnavailable, gin.H{"status": "not_ready", "checks": checks})
+	})
+
+	// Prometheus 指标（2026-11-15）：默认关闭。只有配置 METRICS_TOKEN 才暴露，
+	// 且必须带 Authorization: Bearer <token> 或 ?token=。未配置或校验失败一律 404，
+	// 不返回 401——不让人确认这个端点是否存在。
+	//
+	// 动机：外部监控以前只能探 /health 和 /readyz，看不到请求量和状态码分布。
+	r.GET("/metrics", func(c *gin.Context) {
+		expected := strings.TrimSpace(os.Getenv("METRICS_TOKEN"))
+		if expected == "" {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		provided := strings.TrimSpace(c.Query("token"))
+		if provided == "" {
+			auth := strings.TrimSpace(c.GetHeader("Authorization"))
+			if len(auth) > 7 && strings.EqualFold(auth[:7], "bearer ") {
+				provided = strings.TrimSpace(auth[7:])
+			}
+		}
+		if subtle.ConstantTimeCompare([]byte(provided), []byte(expected)) != 1 {
+			c.Status(http.StatusNotFound)
+			return
+		}
+		c.Data(http.StatusOK, "text/plain; version=0.0.4; charset=utf-8",
+			[]byte(metrics.Render()))
 	})
 
 	// Claude Code 遥测日志（忽略，直接返回200）

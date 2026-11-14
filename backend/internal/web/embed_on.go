@@ -378,6 +378,7 @@ func shouldBypassEmbeddedFrontend(path string) bool {
 		strings.HasPrefix(trimmed, "/setup/") ||
 		trimmed == "/health" ||
 		trimmed == "/readyz" || // 深度就绪探针必须在 SPA 中间件之前放行
+		trimmed == "/metrics" || // Prometheus 抓取端点，绝不能落到 SPA 的 index.html
 		trimmed == "/models" ||
 		strings.HasPrefix(trimmed, "/models/") ||
 		trimmed == "/responses" ||
