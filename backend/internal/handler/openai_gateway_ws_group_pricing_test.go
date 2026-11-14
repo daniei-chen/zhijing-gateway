@@ -6,9 +6,9 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
-	"github.com/Wei-Shaw/sub2api/internal/service"
 	coderws "github.com/coder/websocket"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/stretchr/testify/require"
 )
 

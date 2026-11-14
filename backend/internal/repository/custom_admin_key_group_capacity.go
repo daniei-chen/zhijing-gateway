@@ -3,11 +3,11 @@ package repository
 import (
 	"context"
 
-	"github.com/Wei-Shaw/sub2api/ent/group"
-	"github.com/Wei-Shaw/sub2api/ent/predicate"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/adminaccess"
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/ent/group"
+	"github.com/daniei-chen/zhijing-gateway/ent/predicate"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/adminaccess"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 )
 
 // ListScopedAdminCapacityGroupIDs 先在数据库内限定分组，再查询账户与实时容量。

@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"slices"
 
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
 )
 
 // 只接受对接客户端实际需要的字段，不能写入额度快照、任意 extra 或影子关系。

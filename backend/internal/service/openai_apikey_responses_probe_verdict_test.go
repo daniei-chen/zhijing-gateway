@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/openai_compat"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/openai_compat"
 	"github.com/stretchr/testify/require"
 )
 

@@ -11,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/ent"
-	"github.com/Wei-Shaw/sub2api/ent/securitysecret"
-	"github.com/Wei-Shaw/sub2api/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/ent"
+	"github.com/daniei-chen/zhijing-gateway/ent/securitysecret"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
 )
 
 const (

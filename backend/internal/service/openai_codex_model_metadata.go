@@ -3,7 +3,7 @@ package service
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/openai"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/openai"
 	"net/url"
 	"strings"
 )

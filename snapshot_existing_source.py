@@ -5,7 +5,7 @@ from pathlib import Path
 import shutil
 import subprocess
 
-SOURCE = Path(r"D:\AI\codex\codex3\zhijing-sub2api").resolve()
+SOURCE = Path(r"D:\AI\codex\codex3\zhijing-gateway").resolve()
 TARGET = Path(__file__).resolve().parent
 MANIFEST = TARGET / "local-v002-baseline.json"
 if MANIFEST.exists():

@@ -8,9 +8,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/ent/paymentauditlog"
-	"github.com/Wei-Shaw/sub2api/internal/payment"
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	"github.com/daniei-chen/zhijing-gateway/ent/paymentauditlog"
+	"github.com/daniei-chen/zhijing-gateway/internal/payment"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 

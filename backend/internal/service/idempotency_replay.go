@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
 )
 
 var ErrIdempotencyResultUnconfirmed = infraerrors.Conflict("IDEMPOTENCY_RESULT_UNCONFIRMED", "the previous operation result cannot be confirmed; review operation history before starting another operation")

@@ -4,13 +4,13 @@ import (
 	"context"
 	"time"
 
-	dbent "github.com/Wei-Shaw/sub2api/ent"
-	"github.com/Wei-Shaw/sub2api/ent/group"
-	"github.com/Wei-Shaw/sub2api/ent/predicate"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/adminaccess"
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
+	"github.com/daniei-chen/zhijing-gateway/ent/group"
+	"github.com/daniei-chen/zhijing-gateway/ent/predicate"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/adminaccess"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/pagination"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 )
 
 func (r *groupRepository) ScopedAdminUpdateGroupModels(ctx context.Context, id int64, cfg service.GroupModelAllowlist) (*service.Group, error) {

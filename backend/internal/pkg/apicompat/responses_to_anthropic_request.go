@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/claude"
 )
 
 // ResponsesToAnthropicRequest converts a Responses API request into an

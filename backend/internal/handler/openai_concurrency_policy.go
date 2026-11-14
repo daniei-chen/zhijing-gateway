@@ -3,8 +3,8 @@ package handler
 import (
 	"errors"
 
-	"github.com/Wei-Shaw/sub2api/internal/service"
 	coderws "github.com/coder/websocket"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 )
 
 func openAIConcurrencyWSClose(err error) (coderws.StatusCode, string) {

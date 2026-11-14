@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/timezone"
-	middleware2 "github.com/Wei-Shaw/sub2api/internal/server/middleware"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/timezone"
+	middleware2 "github.com/daniei-chen/zhijing-gateway/internal/server/middleware"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/gin-gonic/gin"
 )
 

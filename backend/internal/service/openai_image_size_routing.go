@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
 )
 
 // AccountExtraOpenAIImageSizeTiers 是账号允许承接的生图尺寸档位列表，档位口径与

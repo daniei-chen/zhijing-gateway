@@ -6,7 +6,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	dbent "github.com/Wei-Shaw/sub2api/ent"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
 	"os"

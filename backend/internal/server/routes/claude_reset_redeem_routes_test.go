@@ -6,9 +6,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Wei-Shaw/sub2api/internal/handler"
-	adminhandler "github.com/Wei-Shaw/sub2api/internal/handler/admin"
-	servermiddleware "github.com/Wei-Shaw/sub2api/internal/server/middleware"
+	"github.com/daniei-chen/zhijing-gateway/internal/handler"
+	adminhandler "github.com/daniei-chen/zhijing-gateway/internal/handler/admin"
+	servermiddleware "github.com/daniei-chen/zhijing-gateway/internal/server/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )

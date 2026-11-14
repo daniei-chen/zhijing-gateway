@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/googleapi"
-	"github.com/Wei-Shaw/sub2api/internal/securityaudit"
-	"github.com/Wei-Shaw/sub2api/internal/service"
 	coderws "github.com/coder/websocket"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/googleapi"
+	"github.com/daniei-chen/zhijing-gateway/internal/securityaudit"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/gin-gonic/gin"
 )
 

@@ -18,12 +18,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/openai"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/processrole"
-	"github.com/Wei-Shaw/sub2api/internal/util/urlvalidator"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/claude"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/logger"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/openai"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/processrole"
+	"github.com/daniei-chen/zhijing-gateway/internal/util/urlvalidator"
 	"go.uber.org/zap"
 )
 

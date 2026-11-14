@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/claude"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/claude"
 )
 
 type stubIdentityCache struct {

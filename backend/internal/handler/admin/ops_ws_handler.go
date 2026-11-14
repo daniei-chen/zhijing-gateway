@@ -15,9 +15,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
-	servermiddleware "github.com/Wei-Shaw/sub2api/internal/server/middleware"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/logger"
+	servermiddleware "github.com/daniei-chen/zhijing-gateway/internal/server/middleware"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )

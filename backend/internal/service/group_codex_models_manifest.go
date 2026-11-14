@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
 )
 
 // maxCodexModelsManifestAccounts is the upper bound of pinned accounts per group.

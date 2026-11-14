@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/httputil"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/requestmodel"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/httputil"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/requestmodel"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

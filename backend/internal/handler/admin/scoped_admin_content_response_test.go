@@ -5,9 +5,9 @@ package admin
 import (
 	"context"
 	"encoding/json"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/adminaccess"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/adminaccess"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/pagination"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 	"net/http/httptest"

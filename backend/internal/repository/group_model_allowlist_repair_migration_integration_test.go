@@ -7,7 +7,7 @@ import (
 	"database/sql"
 	"testing"
 
-	dbmigrations "github.com/Wei-Shaw/sub2api/migrations"
+	dbmigrations "github.com/daniei-chen/zhijing-gateway/migrations"
 	"github.com/stretchr/testify/require"
 )
 

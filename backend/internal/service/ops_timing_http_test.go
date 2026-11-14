@@ -10,11 +10,11 @@ import (
 	"testing"
 	"time"
 
-	adminhandler "github.com/Wei-Shaw/sub2api/internal/handler/admin"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/ctxkey"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
-	"github.com/Wei-Shaw/sub2api/internal/server/middleware"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	adminhandler "github.com/daniei-chen/zhijing-gateway/internal/handler/admin"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/ctxkey"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/gatewaytiming"
+	"github.com/daniei-chen/zhijing-gateway/internal/server/middleware"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
 )

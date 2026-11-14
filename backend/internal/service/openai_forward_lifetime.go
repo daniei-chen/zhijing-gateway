@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
 )
 
 type openAIForwardLifetimeKey struct{}

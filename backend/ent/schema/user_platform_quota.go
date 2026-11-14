@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
-	"github.com/Wei-Shaw/sub2api/ent/schema/mixins"
-	"github.com/Wei-Shaw/sub2api/internal/domain"
+	"github.com/daniei-chen/zhijing-gateway/ent/schema/mixins"
+	"github.com/daniei-chen/zhijing-gateway/internal/domain"
 )
 
 // UserPlatformQuota holds the schema definition for per-user per-platform quota.

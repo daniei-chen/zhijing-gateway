@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 )
 
 // service_account 与 apikey 同语义：设了总额度才输出 quota_limit / quota_used。

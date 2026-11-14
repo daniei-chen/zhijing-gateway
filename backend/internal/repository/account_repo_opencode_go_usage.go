@@ -6,8 +6,8 @@ import (
 	"errors"
 	"time"
 
-	dbent "github.com/Wei-Shaw/sub2api/ent"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/lib/pq"
 )
 

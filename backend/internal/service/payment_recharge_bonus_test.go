@@ -6,8 +6,8 @@ import (
 	"context"
 	"testing"
 
-	dbent "github.com/Wei-Shaw/sub2api/ent"
-	"github.com/Wei-Shaw/sub2api/internal/payment"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
+	"github.com/daniei-chen/zhijing-gateway/internal/payment"
 	"github.com/stretchr/testify/require"
 )
 

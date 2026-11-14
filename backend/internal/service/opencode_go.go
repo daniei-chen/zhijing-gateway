@@ -6,7 +6,7 @@ import (
 	"slices"
 	"strings"
 
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
 	"github.com/gin-gonic/gin"
 )
 

@@ -8,7 +8,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/Wei-Shaw/sub2api/internal/domain"
+	"github.com/daniei-chen/zhijing-gateway/internal/domain"
 	"github.com/stretchr/testify/require"
 )
 

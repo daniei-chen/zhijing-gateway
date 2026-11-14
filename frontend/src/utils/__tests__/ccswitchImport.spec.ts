@@ -23,7 +23,7 @@ describe('ccswitchImport utils', () => {
 
   const baseInput = {
     baseUrl: 'https://api.example.com',
-    providerName: 'Sub2API',
+    providerName: '智境网关',
     apiKey: 'sk-test',
     usageScript: 'return true'
   }
@@ -156,7 +156,7 @@ describe('CC Switch usage script', () => {
           baseUrl: 'https://api.example.com',
           platform,
           clientType: platform === 'gemini' ? 'gemini' : 'claude',
-          providerName: 'Sub2API',
+          providerName: '智境网关',
           apiKey: 'sk-test',
           usageScript: CC_SWITCH_USAGE_SCRIPT
         })

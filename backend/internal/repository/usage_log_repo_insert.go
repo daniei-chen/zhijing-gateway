@@ -11,9 +11,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	dbent "github.com/Wei-Shaw/sub2api/ent"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/logger"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 )
 
 // usageLogInsertArgTypes must stay in the same order as:

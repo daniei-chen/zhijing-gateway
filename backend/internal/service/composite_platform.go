@@ -4,8 +4,8 @@ import (
 	"context"
 	"strings"
 
-	"github.com/Wei-Shaw/sub2api/internal/domain"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/ctxkey"
+	"github.com/daniei-chen/zhijing-gateway/internal/domain"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/ctxkey"
 )
 
 // WithResolvedTargetPlatform stores the concrete provider chosen for a request

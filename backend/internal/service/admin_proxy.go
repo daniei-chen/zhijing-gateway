@@ -7,11 +7,11 @@ import (
 	"net/http"
 	"time"
 
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/httpclient"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
-	"github.com/Wei-Shaw/sub2api/internal/util/httputil"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/httpclient"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/logger"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/pagination"
+	"github.com/daniei-chen/zhijing-gateway/internal/util/httputil"
 )
 
 // Proxy management implementations

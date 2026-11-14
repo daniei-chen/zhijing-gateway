@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Wei-Shaw/sub2api/ent/authidentity"
-	"github.com/Wei-Shaw/sub2api/ent/authidentitychannel"
-	"github.com/Wei-Shaw/sub2api/ent/predicate"
+	"github.com/daniei-chen/zhijing-gateway/ent/authidentity"
+	"github.com/daniei-chen/zhijing-gateway/ent/authidentitychannel"
+	"github.com/daniei-chen/zhijing-gateway/ent/predicate"
 )
 
 // AuthIdentityChannelUpdate is the builder for updating AuthIdentityChannel entities.

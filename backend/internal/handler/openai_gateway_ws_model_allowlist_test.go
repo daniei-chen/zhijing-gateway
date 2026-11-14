@@ -3,7 +3,7 @@ package handler
 import (
 	"testing"
 
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 )
 
 func wsAllowlistGroup(enabled bool, models ...string) *service.Group {

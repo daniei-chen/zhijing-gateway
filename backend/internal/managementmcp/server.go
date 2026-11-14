@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 

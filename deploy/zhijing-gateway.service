@@ -1,0 +1,32 @@
+[Unit]
+Description=智境网关 - AI API Gateway Platform
+Documentation=https://github.com/daniei-chen/zhijing-gateway
+After=network.target postgresql.service redis.service
+Wants=postgresql.service redis.service
+
+[Service]
+Type=simple
+User=zhijing
+Group=zhijing
+WorkingDirectory=/opt/zhijing-gateway
+ExecStart=/opt/zhijing-gateway/zhijing-gateway
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=zhijing-gateway
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/opt/zhijing-gateway
+
+# Environment - Server configuration
+Environment=GIN_MODE=release
+Environment=SERVER_HOST=0.0.0.0
+Environment=SERVER_PORT=8080
+
+[Install]
+WantedBy=multi-user.target

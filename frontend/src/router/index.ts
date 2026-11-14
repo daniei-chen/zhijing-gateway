@@ -1,5 +1,5 @@
 /**
- * Vue Router configuration for Sub2API frontend
+ * Vue Router configuration for 智境网关 frontend
  * Defines all application routes with lazy loading and navigation guards
  */
 

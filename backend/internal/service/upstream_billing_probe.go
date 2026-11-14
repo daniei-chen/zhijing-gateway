@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/processrole"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/processrole"
 	"io"
 	"log/slog"
 	"math"
@@ -20,10 +20,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/domain"
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/tlsfingerprint"
+	"github.com/daniei-chen/zhijing-gateway/internal/domain"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/logger"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/tlsfingerprint"
 	"github.com/google/uuid"
 	"golang.org/x/sync/errgroup"
 	"golang.org/x/sync/singleflight"
@@ -238,7 +238,7 @@ func normalizeUpstreamBillingProbeSettings(settings *UpstreamBillingProbeSetting
 	}
 }
 
-// UpstreamBillingProbeService discovers a remote Sub2API billing snapshot.
+// UpstreamBillingProbeService discovers a remote 智境网关 billing snapshot.
 type UpstreamBillingProbeService struct {
 	accountRepo        AccountRepository
 	accountTestService *AccountTestService

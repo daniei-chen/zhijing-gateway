@@ -11,9 +11,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Wei-Shaw/sub2api/ent/authidentity"
-	"github.com/Wei-Shaw/sub2api/ent/identityadoptiondecision"
-	"github.com/Wei-Shaw/sub2api/ent/pendingauthsession"
+	"github.com/daniei-chen/zhijing-gateway/ent/authidentity"
+	"github.com/daniei-chen/zhijing-gateway/ent/identityadoptiondecision"
+	"github.com/daniei-chen/zhijing-gateway/ent/pendingauthsession"
 )
 
 // IdentityAdoptionDecisionCreate is the builder for creating a IdentityAdoptionDecision entity.

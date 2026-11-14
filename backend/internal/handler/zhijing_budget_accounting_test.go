@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
-	pkghttputil "github.com/Wei-Shaw/sub2api/internal/pkg/httputil"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
+	pkghttputil "github.com/daniei-chen/zhijing-gateway/internal/pkg/httputil"
 	"github.com/stretchr/testify/require"
 )
 

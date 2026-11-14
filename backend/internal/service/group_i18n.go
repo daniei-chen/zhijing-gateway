@@ -8,8 +8,8 @@ import (
 	"strings"
 	"unicode/utf8"
 
-	"github.com/Wei-Shaw/sub2api/internal/domain"
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	"github.com/daniei-chen/zhijing-gateway/internal/domain"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
 )
 
 type GroupI18n = domain.GroupI18n

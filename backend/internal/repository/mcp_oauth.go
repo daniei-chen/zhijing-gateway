@@ -7,8 +7,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	dbent "github.com/Wei-Shaw/sub2api/ent"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 )
 
 const mcpOAuthClientIDKeyName = "mcp_oauth_client_id_key"

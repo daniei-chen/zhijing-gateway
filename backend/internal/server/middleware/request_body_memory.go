@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net/http"
 
-	pkghttputil "github.com/Wei-Shaw/sub2api/internal/pkg/httputil"
+	pkghttputil "github.com/daniei-chen/zhijing-gateway/internal/pkg/httputil"
 	"github.com/gin-gonic/gin"
 )
 

@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/gatewaytiming"
 )
 
 type OpsRequestKind string

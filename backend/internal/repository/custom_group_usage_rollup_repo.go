@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/usagestats"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/usagestats"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 )
 
 // groupUsageRollupSnapshot 是一次汇总水位的快照。

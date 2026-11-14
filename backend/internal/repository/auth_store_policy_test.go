@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
 	"github.com/alicebob/miniredis/v2"
 	redisserver "github.com/alicebob/miniredis/v2/server"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"
 )

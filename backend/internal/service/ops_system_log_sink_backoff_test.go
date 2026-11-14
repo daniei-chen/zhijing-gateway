@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/logger"
 )
 
 func opsSystemLogBackoffEvent() *logger.LogEvent {

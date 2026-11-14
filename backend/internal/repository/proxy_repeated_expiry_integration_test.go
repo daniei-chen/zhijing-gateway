@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 )
 
 func (s *ProxyExpirySuite) TestSweep_RepeatedExpiryPreservesOriginalProxy() {

@@ -58,7 +58,7 @@ Usage: ./apple-container.sh <command> [options]
 
 Commands:
   init                  Create .env and generate required secrets
-  up [--recreate]       Create and start the complete Sub2API stack
+  up [--recreate]       Create and start the complete 智境网关 stack
   down                  Stop the stack and preserve all data
   restart               Restart the stack in dependency order
   status                Show container and workload health
@@ -99,7 +99,7 @@ acquire_lock() {
             rm -rf "${LOCK_DIR}"
             mkdir "${LOCK_DIR}" || die "Failed to reclaim stale operation lock."
         else
-            die "Another Sub2API Apple container operation is already running."
+            die "Another 智境网关 Apple container operation is already running."
         fi
     fi
     printf '%s\n' "$$" >"${LOCK_DIR}/pid"
@@ -414,7 +414,7 @@ validate_env_file_security() {
 prepare_environment() {
     validate_env_file_security
 
-    APP_IMAGE="$(read_env_value APPLE_CONTAINER_SUB2API_IMAGE weishaw/sub2api:latest)"
+    APP_IMAGE="$(read_env_value APPLE_CONTAINER_SUB2API_IMAGE ghcr.io/daniei-chen/zhijing-gateway:latest)"
     POSTGRES_IMAGE="$(read_env_value APPLE_CONTAINER_POSTGRES_IMAGE postgres:18-alpine)"
     REDIS_IMAGE="$(read_env_value APPLE_CONTAINER_REDIS_IMAGE redis:8-alpine)"
     BIND_HOST="$(read_env_value BIND_HOST 0.0.0.0)"
@@ -522,7 +522,7 @@ create_redis_container() {
 }
 
 create_app_container() {
-    info "Creating Sub2API container..."
+    info "Creating 智境网关 container..."
     container create \
         --name "${APP_CONTAINER}" \
         --label "${STACK_LABEL_KEY}=${STACK_LABEL_VALUE}" \
@@ -537,10 +537,10 @@ create_app_container() {
         -c '
 set -e
 mkdir -p "$DATA_DIR"
-chown -R sub2api:sub2api "$DATA_DIR"
+chown -R zhijing:zhijing "$DATA_DIR"
 
 runtime_dir=/app/storage/runtime
-runtime_binary="$runtime_dir/sub2api"
+runtime_binary="$runtime_dir/zhijing-gateway"
 image_marker="$runtime_dir/base-image-id"
 installed_image_id=""
 if [ -f "$image_marker" ]; then
@@ -548,15 +548,15 @@ if [ -f "$image_marker" ]; then
 fi
 if [ ! -x "$runtime_binary" ] || [ "$installed_image_id" != "$APPLE_CONTAINER_SUB2API_IMAGE_ID" ]; then
     mkdir -p "$runtime_dir"
-    cp /app/sub2api "${runtime_binary}.new"
-    chown sub2api:sub2api "${runtime_binary}.new"
+    cp /app/zhijing-gateway "${runtime_binary}.new"
+    chown zhijing:zhijing "${runtime_binary}.new"
     chmod 0755 "${runtime_binary}.new"
     mv "${runtime_binary}.new" "$runtime_binary"
     printf "%s\n" "$APPLE_CONTAINER_SUB2API_IMAGE_ID" >"${image_marker}.new"
     mv "${image_marker}.new" "$image_marker"
     rm -f "${runtime_binary}.backup"
 fi
-chown -R sub2api:sub2api "$runtime_dir"
+chown -R zhijing:zhijing "$runtime_dir"
 
 child_pid=""
 stop() {
@@ -570,14 +570,14 @@ stop() {
 trap stop TERM INT
 
 while true; do
-    su-exec sub2api "$runtime_binary" &
+    su-exec zhijing "$runtime_binary" &
     child_pid=$!
     set +e
     wait "$child_pid"
     status=$?
     set -e
     child_pid=""
-    echo "Sub2API exited with status ${status}; restarting in 1 second..." >&2
+    echo "智境网关 exited with status ${status}; restarting in 1 second..." >&2
     sleep 1
 done
 ' \
@@ -702,11 +702,11 @@ start_dependencies() {
 
 start_app() {
     start_container_if_needed "${APP_CONTAINER}"
-    if ! wait_for_probe "Sub2API" 180 probe_app; then
+    if ! wait_for_probe "智境网关" 180 probe_app; then
         show_failure_logs "${APP_CONTAINER}"
-        die "Sub2API did not become ready."
+        die "智境网关 did not become ready."
     fi
-    if ! wait_for_probe "Sub2API host port" 15 probe_host_app; then
+    if ! wait_for_probe "智境网关 host port" 15 probe_host_app; then
         die "Host port forwarding failed. In System Settings > Privacy & Security > Local Network, allow container-runtime-linux; restart Apple container services; then run 'apple-container.sh up' again."
     fi
 }
@@ -753,7 +753,7 @@ cmd_up() {
     create_app_container
     start_app
 
-    info "Sub2API is available at http://${ACCESS_HOST}:${HOST_PORT}"
+    info "智境网关 is available at http://${ACCESS_HOST}:${HOST_PORT}"
 }
 
 cmd_down() {
@@ -766,7 +766,7 @@ cmd_down() {
     stop_container_if_running "${APP_CONTAINER}"
     stop_container_if_running "${REDIS_CONTAINER}"
     stop_container_if_running "${POSTGRES_CONTAINER}"
-    info "Sub2API stack stopped; persistent volumes were preserved."
+    info "智境网关 stack stopped; persistent volumes were preserved."
 }
 
 cmd_restart() {
@@ -881,9 +881,9 @@ confirm_destroy() {
     local answer
 
     if [[ "${include_volumes}" == true ]]; then
-        printf 'Delete the Sub2API stack and all persistent data? [y/N] '
+        printf 'Delete the 智境网关 stack and all persistent data? [y/N] '
     else
-        printf 'Delete the Sub2API containers and network, preserving volumes? [y/N] '
+        printf 'Delete the 智境网关 containers and network, preserving volumes? [y/N] '
     fi
     read -r answer
     [[ "${answer}" == "y" || "${answer}" == "Y" ]]
@@ -934,9 +934,9 @@ cmd_destroy() {
         delete_volume_if_present "${APP_VOLUME}"
         delete_volume_if_present "${REDIS_VOLUME}"
         delete_volume_if_present "${POSTGRES_VOLUME}"
-        info "Sub2API stack and persistent data deleted."
+        info "智境网关 stack and persistent data deleted."
     else
-        info "Sub2API stack deleted; persistent volumes were preserved."
+        info "智境网关 stack deleted; persistent volumes were preserved."
     fi
 }
 

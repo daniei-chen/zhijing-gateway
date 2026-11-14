@@ -1,7 +1,7 @@
 # =============================================================================
-# Sub2API Docker Compose - Standalone Configuration
+# 智境网关 Docker Compose - Standalone Configuration
 # =============================================================================
-# This configuration runs only the Sub2API application.
+# This configuration runs only the 智境网关 application.
 # PostgreSQL and Redis must be provided externally.
 #
 # Usage:
@@ -11,9 +11,9 @@
 # =============================================================================
 
 services:
-  sub2api:
-    image: weishaw/sub2api:latest
-    container_name: sub2api
+  zhijing-gateway:
+    image: ghcr.io/daniei-chen/zhijing-gateway:latest
+    container_name: zhijing-gateway
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -121,7 +121,7 @@ services:
       # Gateway Upstream, Scheduling & Image Configuration
       # =======================================================================
       # Gateway values come from Compose .env or the shell.
-      # Fallbacks mirror Sub2API backend defaults so omitted values preserve behavior.
+      # Fallbacks mirror 智境网关 backend defaults so omitted values preserve behavior.
       - GATEWAY_FORCE_CODEX_CLI=${GATEWAY_FORCE_CODEX_CLI:-false}
       - GATEWAY_OPENAI_COMPACT_MODEL=${GATEWAY_OPENAI_COMPACT_MODEL:-gpt-5.5}
       - SUB2API_IMAGES_MAIN_MODEL=${SUB2API_IMAGES_MAIN_MODEL:-gpt-5.6-luna}

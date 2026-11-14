@@ -3,8 +3,8 @@ package repository
 import (
 	"strconv"
 
-	"github.com/Wei-Shaw/sub2api/ent/predicate"
-	"github.com/Wei-Shaw/sub2api/ent/proxy"
+	"github.com/daniei-chen/zhijing-gateway/ent/predicate"
+	"github.com/daniei-chen/zhijing-gateway/ent/proxy"
 )
 
 // proxyOptionSearchPredicate 数字关键词同时匹配端口和 ID；文本搜索保持参数化。

@@ -26,15 +26,15 @@ import (
 	"golang.org/x/mod/semver"
 	"golang.org/x/net/http2"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
-	pkghttputil "github.com/Wei-Shaw/sub2api/internal/pkg/httputil"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/proxyurl"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/proxyutil"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/servertiming"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/tlsfingerprint"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/xai"
-	"github.com/Wei-Shaw/sub2api/internal/service"
-	"github.com/Wei-Shaw/sub2api/internal/util/urlvalidator"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
+	pkghttputil "github.com/daniei-chen/zhijing-gateway/internal/pkg/httputil"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/proxyurl"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/proxyutil"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/servertiming"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/tlsfingerprint"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/xai"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/internal/util/urlvalidator"
 )
 
 // 默认配置常量

@@ -9,9 +9,9 @@ import (
 	"sync"
 	"testing"
 
-	dbent "github.com/Wei-Shaw/sub2api/ent"
-	_ "github.com/Wei-Shaw/sub2api/ent/runtime"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
+	_ "github.com/daniei-chen/zhijing-gateway/ent/runtime"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/stretchr/testify/require"
 
 	"entgo.io/ent/dialect"

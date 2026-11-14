@@ -4,10 +4,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/ctxkey"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/ip"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/logger"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/ctxkey"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/gatewaytiming"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/ip"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/logger"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )

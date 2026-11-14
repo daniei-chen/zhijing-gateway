@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/openai"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/openai"
 )
 
 var codexModelMap = map[string]string{

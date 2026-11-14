@@ -21,7 +21,7 @@ VERSION_RE = re.compile(r'\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?')
 
 
 def config(simple=False):
-    return yaml.safe_load((SIMPLE_CONFIG if simple else FULL_CONFIG).read_text())
+    return yaml.safe_load((SIMPLE_CONFIG if simple else FULL_CONFIG).read_text(encoding='utf-8'))
 
 
 def targets(simple=False):
@@ -42,7 +42,7 @@ def archive_name(version, target):
     if not VERSION_RE.fullmatch(version) or target not in targets():
         raise ValueError('invalid release version or target')
     suffix = 'zip' if target['goos'] == 'windows' else 'tar.gz'
-    return f"sub2api_{version}_{target['goos']}_{target['goarch']}.{suffix}"
+    return f"zhijing-gateway_{version}_{target['goos']}_{target['goarch']}.{suffix}"
 
 
 def sha256(path):
@@ -53,7 +53,7 @@ def sha256(path):
 def plan(args):
     sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
     if args.dry_run:
-        version = VERSION_FILE.read_text().strip()
+        version = VERSION_FILE.read_text(encoding='utf-8').strip()
         tag = 'v' + version
     else:
         tag = args.ref
@@ -65,7 +65,7 @@ def plan(args):
             raise ValueError('checkout does not match the selected release tag')
     if not VERSION_RE.fullmatch(version):
         raise ValueError('invalid VERSION')
-    VERSION_FILE.write_text(version + '\n')
+    VERSION_FILE.write_text(version + '\n', encoding='utf-8')
     result = {'sha': sha, 'tag': tag, 'version': version,
               'owner_lower': os.environ.get('GITHUB_REPOSITORY_OWNER', '').lower(),
               'simple': str(args.simple).lower(), 'dry_run': str(args.dry_run).lower(),
@@ -93,22 +93,22 @@ def generate_config(args):
         # Artifacts are supplied through the OSS extra_files mechanism. No build
         # is repeated on the publishing runner, and release templates stay intact.
         data['before'] = {'hooks': []}
-        data['builds'] = [{'id': 'sub2api', 'skip': True}]
+        data['builds'] = [{'id': 'zhijing-gateway', 'skip': True}]
         data['archives'] = []
-        extra = [{'glob': 'release-input/sub2api_*.tar.gz'}, {'glob': 'release-input/sub2api_*.zip'}]
+        extra = [{'glob': 'release-input/zhijing-gateway_*.tar.gz'}, {'glob': 'release-input/zhijing-gateway_*.zip'}]
         if args.simple:
             data['checksum'] = {'disable': True}
         else:
             data['release']['extra_files'] = extra
             data['checksum'] = {'name_template': 'checksums.txt', 'algorithm': 'sha256', 'extra_files': extra}
-    Path(args.output).write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True))
+    Path(args.output).write_text(yaml.safe_dump(data, sort_keys=False, allow_unicode=True), encoding='utf-8')
 
 
 def collect(args):
     target = {'goos': args.goos, 'goarch': args.goarch}
     name = archive_name(args.version, target)
     source = Path('dist') / name
-    checksums = {line.split()[1].lstrip('*'): line.split()[0] for line in Path('dist/checksums.txt').read_text().splitlines()}
+    checksums = {line.split()[1].lstrip('*'): line.split()[0] for line in Path('dist/checksums.txt').read_text(encoding='utf-8').splitlines()}
     digest = sha256(source)
     if checksums.get(name) != digest:
         raise ValueError('archive does not match the build checksum')
@@ -116,7 +116,7 @@ def collect(args):
     output.mkdir(parents=True, exist_ok=True)
     shutil.copy2(source, output / name)
     manifest = {'sha': args.sha, 'version': args.version, 'target': target, 'archive': name, 'sha256': digest}
-    (output / f"manifest-{args.goos}-{args.goarch}.json").write_text(json.dumps(manifest) + '\n')
+    (output / f"manifest-{args.goos}-{args.goarch}.json").write_text(json.dumps(manifest) + '\n', encoding='utf-8')
 
 
 def verify(args):
@@ -126,7 +126,7 @@ def verify(args):
         name = archive_name(args.version, target)
         manifest_name = f"manifest-{target['goos']}-{target['goarch']}.json"
         expected.update((name, manifest_name))
-        manifest = json.loads((directory / manifest_name).read_text())
+        manifest = json.loads((directory / manifest_name).read_text(encoding='utf-8'))
         if manifest != {'sha': args.sha, 'version': args.version, 'target': target,
                         'archive': name, 'sha256': sha256(directory / name)}:
             raise ValueError(f'build provenance or checksum mismatch: {name}')
@@ -142,12 +142,12 @@ def contexts(args):
         dest = Path(args.output) / target['goarch']
         dest.mkdir(parents=True, exist_ok=True)
         with tarfile.open(Path(args.input) / archive_name(args.version, target), 'r:gz') as archive:
-            members = [member for member in archive.getmembers() if member.name in ('sub2api', './sub2api')]
+            members = [member for member in archive.getmembers() if member.name in ('zhijing-gateway', './zhijing-gateway')]
             if len(members) != 1 or not members[0].isfile():
-                raise ValueError('archive must contain one regular sub2api binary')
-            with archive.extractfile(members[0]) as source, (dest / 'sub2api').open('wb') as output:
+                raise ValueError('archive must contain one regular zhijing-gateway binary')
+            with archive.extractfile(members[0]) as source, (dest / 'zhijing-gateway').open('wb') as output:
                 shutil.copyfileobj(source, output)
-        (dest / 'sub2api').chmod(0o755)
+        (dest / 'zhijing-gateway').chmod(0o755)
         shutil.copy2('Dockerfile.goreleaser', dest / 'Dockerfile')
         (dest / 'deploy').mkdir(exist_ok=True)
         shutil.copy2('deploy/docker-entrypoint.sh', dest / 'deploy/docker-entrypoint.sh')

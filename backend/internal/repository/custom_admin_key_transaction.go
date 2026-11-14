@@ -2,7 +2,7 @@ package repository
 
 import (
 	"context"
-	dbent "github.com/Wei-Shaw/sub2api/ent"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
 )
 
 // accountTransactionScope 同时切换 ORM、原生 SQL 和关联查询，禁止在提交前发布缓存。

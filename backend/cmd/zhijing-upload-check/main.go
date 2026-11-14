@@ -18,7 +18,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/httputil"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/httputil"
 )
 
 const maxBytes = 16 << 20

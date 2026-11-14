@@ -24,7 +24,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/Wei-Shaw/sub2api/internal/payment"
+	"github.com/daniei-chen/zhijing-gateway/internal/payment"
 )
 
 // easyPayPoCProvider returns a provider with a fixed test credential set.

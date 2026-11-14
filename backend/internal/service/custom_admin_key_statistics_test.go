@@ -13,10 +13,10 @@ import (
 	"testing/synctest"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/adminaccess"
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
-	httppool "github.com/Wei-Shaw/sub2api/internal/pkg/httpclient"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/usagestats"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/adminaccess"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
+	httppool "github.com/daniei-chen/zhijing-gateway/internal/pkg/httpclient"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/usagestats"
 	"github.com/stretchr/testify/require"
 )
 

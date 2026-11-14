@@ -13,7 +13,7 @@
 示例：
 
 ```sh
-IMAGE=ghcr.io/daniei-chen/sub2api:0.1.0 \
+IMAGE=ghcr.io/daniei-chen/zhijing-gateway:0.1.1 \
 CURRENT_CONTAINER=zhijing-api-v010-u3-canary \
 NEW_CONTAINER=zhijing-api-v0101-canary \
 NEW_PORT=18798 \

@@ -3,7 +3,7 @@ package service
 import (
 	"net/http"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/gatewaytiming"
 )
 
 func (s *OpenAIGatewayService) SetPluginManager(manager *PluginManager) {

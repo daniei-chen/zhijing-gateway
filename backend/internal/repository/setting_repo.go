@@ -5,9 +5,9 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/ent"
-	"github.com/Wei-Shaw/sub2api/ent/setting"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	"github.com/daniei-chen/zhijing-gateway/ent"
+	"github.com/daniei-chen/zhijing-gateway/ent/setting"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 )
 
 // SetContentModerationConfig holds live group rows until the setting is written.

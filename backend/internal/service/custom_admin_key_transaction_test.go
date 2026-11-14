@@ -10,7 +10,7 @@ import (
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"
 	"github.com/DATA-DOG/go-sqlmock"
-	dbent "github.com/Wei-Shaw/sub2api/ent"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
 	"github.com/stretchr/testify/require"
 )
 

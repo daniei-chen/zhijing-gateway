@@ -12,7 +12,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/xai"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/xai"
 )
 
 const (

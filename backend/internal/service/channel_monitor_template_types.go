@@ -1,7 +1,7 @@
 package service
 
 import (
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
 	"time"
 )
 

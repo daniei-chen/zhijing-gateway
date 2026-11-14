@@ -3,7 +3,7 @@ package service
 import (
 	"strings"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/openai"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/openai"
 )
 
 func lastOpenAIModelSegment(model string) string {

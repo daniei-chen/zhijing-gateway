@@ -1,6 +1,8 @@
 [Unit]
-Description=Sub2API - AI API Gateway Platform
-Documentation=https://github.com/Wei-Shaw/sub2api
+# Legacy filename retained for existing installations. New installs use
+# deploy/zhijing-gateway.service and the zhijing-gateway systemd unit.
+Description=智境网关 - Legacy compatibility unit
+Documentation=https://github.com/daniei-chen/zhijing-gateway
 After=network.target postgresql.service redis.service
 Wants=postgresql.service redis.service
 

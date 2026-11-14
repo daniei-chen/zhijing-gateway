@@ -1,4 +1,4 @@
-module github.com/Wei-Shaw/sub2api
+module github.com/daniei-chen/zhijing-gateway
 
 go 1.27.4
 

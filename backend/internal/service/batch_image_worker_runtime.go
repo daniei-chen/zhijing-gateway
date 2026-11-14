@@ -2,10 +2,10 @@ package service
 
 import (
 	"context"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/processrole"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/processrole"
 	"sync"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
 )
 
 type BatchImageWorkerRuntime struct {

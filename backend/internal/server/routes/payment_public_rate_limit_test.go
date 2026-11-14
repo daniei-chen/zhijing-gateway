@@ -7,10 +7,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/handler"
-	"github.com/Wei-Shaw/sub2api/internal/handler/admin"
-	servermiddleware "github.com/Wei-Shaw/sub2api/internal/server/middleware"
 	"github.com/alicebob/miniredis/v2"
+	"github.com/daniei-chen/zhijing-gateway/internal/handler"
+	"github.com/daniei-chen/zhijing-gateway/internal/handler/admin"
+	servermiddleware "github.com/daniei-chen/zhijing-gateway/internal/server/middleware"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/require"

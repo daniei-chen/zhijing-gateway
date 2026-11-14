@@ -10,9 +10,9 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/antigravity"
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/antigravity"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 

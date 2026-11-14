@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/pagination"
 )
 
 // ListProxyOptions 为受限管理密钥提供有界的代理候选。

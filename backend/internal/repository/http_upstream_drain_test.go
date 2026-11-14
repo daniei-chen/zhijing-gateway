@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	pkghttputil "github.com/Wei-Shaw/sub2api/internal/pkg/httputil"
+	pkghttputil "github.com/daniei-chen/zhijing-gateway/internal/pkg/httputil"
 	"github.com/stretchr/testify/require"
 )
 

@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	dbent "github.com/Wei-Shaw/sub2api/ent"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
 )
 
 func lockScopedAdminAccount(ctx context.Context, tx *dbent.Tx, id int64) error {

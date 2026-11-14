@@ -21,7 +21,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
 )
 
 // errAnthropicNativeStreamIdle 表示上游流读间隔超时（见上方文件注释）。

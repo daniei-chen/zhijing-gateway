@@ -11,7 +11,7 @@ import (
 	"time"
 	"unicode"
 
-	infraerrors "github.com/Wei-Shaw/sub2api/internal/pkg/errors"
+	infraerrors "github.com/daniei-chen/zhijing-gateway/internal/pkg/errors"
 )
 
 // 注册邮箱精确黑名单。

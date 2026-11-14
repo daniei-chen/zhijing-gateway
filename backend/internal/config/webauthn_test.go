@@ -19,7 +19,7 @@ func TestValidateWebAuthnConfig(t *testing.T) {
 			configure: func(cfg *Config) {
 				cfg.WebAuthn = WebAuthnConfig{
 					Enabled:       true,
-					RPDisplayName: "Sub2API",
+					RPDisplayName: "智境网关",
 					RPID:          "sub2api.example.com",
 					RPOrigins:     []string{"https://sub2api.example.com"},
 				}
@@ -30,7 +30,7 @@ func TestValidateWebAuthnConfig(t *testing.T) {
 			configure: func(cfg *Config) {
 				cfg.WebAuthn = WebAuthnConfig{
 					Enabled:       true,
-					RPDisplayName: "Sub2API Dev",
+					RPDisplayName: "智境网关 Dev",
 					RPID:          "localhost",
 					RPOrigins:     []string{"http://localhost:5173"},
 				}
@@ -41,7 +41,7 @@ func TestValidateWebAuthnConfig(t *testing.T) {
 			configure: func(cfg *Config) {
 				cfg.WebAuthn = WebAuthnConfig{
 					Enabled:       true,
-					RPDisplayName: "Sub2API",
+					RPDisplayName: "智境网关",
 					RPOrigins:     []string{"https://sub2api.example.com"},
 				}
 			},
@@ -52,7 +52,7 @@ func TestValidateWebAuthnConfig(t *testing.T) {
 			configure: func(cfg *Config) {
 				cfg.WebAuthn = WebAuthnConfig{
 					Enabled:       true,
-					RPDisplayName: "Sub2API",
+					RPDisplayName: "智境网关",
 					RPID:          "https://sub2api.example.com",
 					RPOrigins:     []string{"https://sub2api.example.com"},
 				}
@@ -64,7 +64,7 @@ func TestValidateWebAuthnConfig(t *testing.T) {
 			configure: func(cfg *Config) {
 				cfg.WebAuthn = WebAuthnConfig{
 					Enabled:       true,
-					RPDisplayName: "Sub2API",
+					RPDisplayName: "智境网关",
 					RPID:          "sub2api.example.com",
 					RPOrigins:     []string{"http://sub2api.example.com"},
 				}
@@ -76,7 +76,7 @@ func TestValidateWebAuthnConfig(t *testing.T) {
 			configure: func(cfg *Config) {
 				cfg.WebAuthn = WebAuthnConfig{
 					Enabled:       true,
-					RPDisplayName: "Sub2API",
+					RPDisplayName: "智境网关",
 					RPID:          "example.com",
 					RPOrigins:     []string{"https://example.net"},
 				}

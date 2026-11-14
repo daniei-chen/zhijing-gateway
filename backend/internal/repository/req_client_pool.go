@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/proxyurl"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/servertiming"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/proxyurl"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/servertiming"
 
 	"github.com/imroc/req/v3"
 )

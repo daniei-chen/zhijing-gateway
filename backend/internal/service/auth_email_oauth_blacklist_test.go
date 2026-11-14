@@ -6,8 +6,8 @@ import (
 	"context"
 	"testing"
 
-	dbuser "github.com/Wei-Shaw/sub2api/ent/user"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	dbuser "github.com/daniei-chen/zhijing-gateway/ent/user"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/stretchr/testify/require"
 )
 

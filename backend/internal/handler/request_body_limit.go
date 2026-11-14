@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Wei-Shaw/sub2api/internal/config"
-	"github.com/Wei-Shaw/sub2api/internal/pkg/gatewaytiming"
-	pkghttputil "github.com/Wei-Shaw/sub2api/internal/pkg/httputil"
-	middleware2 "github.com/Wei-Shaw/sub2api/internal/server/middleware"
+	"github.com/daniei-chen/zhijing-gateway/internal/config"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/gatewaytiming"
+	pkghttputil "github.com/daniei-chen/zhijing-gateway/internal/pkg/httputil"
+	middleware2 "github.com/daniei-chen/zhijing-gateway/internal/server/middleware"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )

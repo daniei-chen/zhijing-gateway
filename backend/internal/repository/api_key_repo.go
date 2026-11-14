@@ -10,15 +10,15 @@ import (
 	"strings"
 	"time"
 
-	dbent "github.com/Wei-Shaw/sub2api/ent"
-	"github.com/Wei-Shaw/sub2api/ent/apikey"
-	"github.com/Wei-Shaw/sub2api/ent/group"
-	"github.com/Wei-Shaw/sub2api/ent/schema/mixins"
-	"github.com/Wei-Shaw/sub2api/ent/user"
-	"github.com/Wei-Shaw/sub2api/internal/service"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
+	"github.com/daniei-chen/zhijing-gateway/ent/apikey"
+	"github.com/daniei-chen/zhijing-gateway/ent/group"
+	"github.com/daniei-chen/zhijing-gateway/ent/schema/mixins"
+	"github.com/daniei-chen/zhijing-gateway/ent/user"
+	"github.com/daniei-chen/zhijing-gateway/internal/service"
 	"github.com/lib/pq"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/pagination"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/pagination"
 
 	"entgo.io/ent/dialect"
 	entsql "entgo.io/ent/dialect/sql"

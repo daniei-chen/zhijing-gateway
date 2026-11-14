@@ -1,6 +1,6 @@
 # Layout Components
 
-Vue 3 layout components for the Sub2API frontend, built with Composition API, TypeScript, and TailwindCSS.
+Vue 3 layout components for the 智境网关 frontend, built with Composition API, TypeScript, and TailwindCSS.
 
 ## Components
 

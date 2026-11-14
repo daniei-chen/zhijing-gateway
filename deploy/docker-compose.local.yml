@@ -1,5 +1,5 @@
 # =============================================================================
-# Sub2API Docker Compose - Local Directory Version
+# 智境网关 Docker Compose - Local Directory Version
 # =============================================================================
 # This configuration uses local directories for data storage instead of named
 # volumes, making it easy to migrate the entire deployment by simply copying
@@ -9,23 +9,23 @@
 #   1. Copy .env.example to .env and configure
 #   2. mkdir -p data postgres_data redis_data
 #   3. docker-compose -f docker-compose.local.yml up -d
-#   4. Check logs: docker-compose -f docker-compose.local.yml logs -f sub2api
+#   4. Check logs: docker-compose -f docker-compose.local.yml logs -f zhijing-gateway
 #   5. Access: http://localhost:8080
 #
 # Migration to New Server:
 #   1. docker-compose -f docker-compose.local.yml down
-#   2. tar czf sub2api-deploy.tar.gz deploy/
+#   2. tar czf zhijing-gateway-deploy.tar.gz deploy/
 #   3. Transfer to new server and extract
 #   4. docker-compose -f docker-compose.local.yml up -d
 # =============================================================================
 
 services:
   # ===========================================================================
-  # Sub2API Application
+  # 智境网关 Application
   # ===========================================================================
-  sub2api:
-    image: weishaw/sub2api:latest
-    container_name: sub2api
+  zhijing-gateway:
+    image: ghcr.io/daniei-chen/zhijing-gateway:latest
+    container_name: zhijing-gateway
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -173,7 +173,7 @@ services:
       # Gateway Upstream, Scheduling & Image Configuration
       # =======================================================================
       # Gateway values come from Compose .env or the shell.
-      # Fallbacks mirror Sub2API backend defaults so omitted values preserve behavior.
+      # Fallbacks mirror 智境网关 backend defaults so omitted values preserve behavior.
       - GATEWAY_FORCE_CODEX_CLI=${GATEWAY_FORCE_CODEX_CLI:-false}
       - GATEWAY_OPENAI_COMPACT_MODEL=${GATEWAY_OPENAI_COMPACT_MODEL:-gpt-5.5}
       - SUB2API_IMAGES_MAIN_MODEL=${SUB2API_IMAGES_MAIN_MODEL:-gpt-5.6-luna}
@@ -221,7 +221,7 @@ services:
       redis:
         condition: service_healthy
     networks:
-      - sub2api-network
+      - zhijing-gateway-network
     healthcheck:
       test: ["CMD", "wget", "-q", "-T", "5", "-O", "/dev/null", "http://localhost:8080/health"]
       interval: 30s
@@ -234,7 +234,7 @@ services:
   # ===========================================================================
   postgres:
     image: postgres:18-alpine
-    container_name: sub2api-postgres
+    container_name: zhijing-gateway-postgres
     restart: unless-stopped
     ulimits:
       nofile:
@@ -250,7 +250,7 @@ services:
       - PGDATA=/var/lib/postgresql/data
       - TZ=${TZ:-Asia/Shanghai}
     networks:
-      - sub2api-network
+      - zhijing-gateway-network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-sub2api} -d ${POSTGRES_DB:-sub2api}"]
       interval: 10s
@@ -265,7 +265,7 @@ services:
   # ===========================================================================
   redis:
     image: redis:8-alpine
-    container_name: sub2api-redis
+    container_name: zhijing-gateway-redis
     restart: unless-stopped
     ulimits:
       nofile:
@@ -290,7 +290,7 @@ services:
       # REDISCLI_AUTH is used by redis-cli for authentication (safer than -a flag)
       - REDISCLI_AUTH=${REDIS_PASSWORD:-}
     networks:
-      - sub2api-network
+      - zhijing-gateway-network
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -302,5 +302,5 @@ services:
 # Networks
 # =============================================================================
 networks:
-  sub2api-network:
+  zhijing-gateway-network:
     driver: bridge

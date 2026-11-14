@@ -1,5 +1,5 @@
 /**
- * Core Type Definitions for Sub2API Frontend
+ * Core Type Definitions for 智境网关 Frontend
  */
 
 // ==================== Common Types ====================

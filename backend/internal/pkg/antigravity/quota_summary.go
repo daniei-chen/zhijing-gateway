@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Wei-Shaw/sub2api/internal/pkg/servertiming"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/servertiming"
 )
 
 // quotaSummaryBodyLimit bounds the retrieveUserQuotaSummary response (a few hundred bytes today).

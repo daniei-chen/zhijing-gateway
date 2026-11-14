@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	dbent "github.com/Wei-Shaw/sub2api/ent"
+	dbent "github.com/daniei-chen/zhijing-gateway/ent"
 )
 
 // SelectAccountProxy 在数据库内选出单个 ID，不把整个代理池或密码载入应用。

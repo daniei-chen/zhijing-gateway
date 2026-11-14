@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/Wei-Shaw/sub2api/ent/channelmonitor"
-	"github.com/Wei-Shaw/sub2api/ent/predicate"
+	"github.com/daniei-chen/zhijing-gateway/ent/channelmonitor"
+	"github.com/daniei-chen/zhijing-gateway/ent/predicate"
 )
 
 // ChannelMonitorDelete is the builder for deleting a ChannelMonitor entity.
