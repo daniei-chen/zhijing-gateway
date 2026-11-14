@@ -1422,3 +1422,39 @@ jwt.refresh_token_expire_days 30     refresh token 30 天
 
 24 小时对管理后台偏长，但配合 session binding + TokenVersion 撤销，风险可控。
 这一条我没有改——缩短会频繁打扰使用者，而现有两道撤销机制已经覆盖了主要风险。
+
+### 6.37 从 Redis 数据侧反向验证「槽位无泄漏」（2026-11-15 第 29 轮）
+
+前面几轮是从代码读出来的「没有泄漏分支」。这轮换到数据侧，直接看 Redis 里有没有残留。
+
+**槽位 key 一个都没有**：
+
+```
+concurrency:startup:legacy_wait_sweep:v1    启动标记
+concurrency:zhijing:user_index:v1           活跃用户索引
+```
+
+`--scan --pattern 'concurrency:*'` 只有这两个，`concurrency:account:*` / `concurrency:user:*`
+这类真正装槽位的 ZSET **不存在**，连 `*slot*` 都扫不出来。当前无请求，也没有任何
+「占着不放」的残留。**代码结论和数据结论一致。**
+
+**顺带查清一个残留**：`concurrency:zhijing:user_index:v1` 里有 1 个成员（用户 4），
+score 是 **1794679933**，而 Redis 当前时间是 **1794692225**——**过期了 12,284 秒（3.4 小时）**。
+
+这不是问题，因为：
+
+| 口径 | 值 |
+|---|---|
+| `ZCOUNT key now +inf`（代码实际用的） | **0** |
+| `ZCOUNT key -inf now`（过期残留） | 1 |
+| `TTL` 整个 key | **-1（永不过期）** |
+
+代码统计活跃用户数时用的是 `[now, +inf]`，过期成员落在区间外，**不参与计数**。
+所以即便残留永久留着，也不会让「活跃用户数」算错——这正是用 score 过滤而不是
+主动删除的好处：省掉一次清理开销，牺牲一点内存。
+
+**也不会无限增长**：ZADD 对同一个 userID 是覆盖更新（score 刷新），每个用户最多占一个成员，
+所以这个 ZSET 的上限就是用户总数。当前 6 个用户，最坏 6 个成员。
+
+**结论**：数据侧没有发现泄漏迹象。槽位 ZSET 干净，索引里的残留是设计允许的、
+不影响功能的微量浪费。
