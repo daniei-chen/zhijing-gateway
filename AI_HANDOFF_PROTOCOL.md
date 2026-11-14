@@ -2869,3 +2869,65 @@ func (s *ProxyService) TestConnection(ctx context.Context, id int64) error {
 **这是 65 轮里第二个「接了线、被使用、但实现是空壳」的功能**（第一个是本轮之前的
 `content_moderation` 管理员豁免——那是有意的；这个是无意的）。它比 62/63 轮那两个死代码严重，
 因为**用户真的按了那个按钮**。
+
+### 6.68 账号「测试连接」也是空壳——16 次真实点击，全部假成功（2026-11-15 第 66 轮）
+
+`account_service.go:502`：
+
+```go
+func (s *AccountService) TestCredentials(ctx context.Context, id int64) error {
+	account, err := s.accountRepo.GetByID(ctx, id)
+	if err != nil { return fmt.Errorf("get account: %w", err) }
+	switch account.Platform {
+	case PlatformAnthropic:
+		// TODO: 测试Anthropic API凭证
+		return nil                 // ← 永远成功
+	case PlatformOpenAI:
+		// TODO: 测试OpenAI API凭证
+		return nil                 // ← 永远成功
+	case PlatformGemini:
+		// TODO: 测试Gemini API凭证
+		return nil                 // ← 永远成功
+	case PlatformGrok:
+		// Grok OAuth credentials are validated via token exchange/refresh and request-path probes.
+		return nil
+	...
+```
+
+**接线完整，而且真的被点过**：
+
+```
+路由      admin.go:399   accounts.POST("/:id/test", h.Admin.Account.Test)
+前端      AccountActionMenu.vue:16   「测试连接」按钮
+审计日志  admin.accounts.test.create  16 次（11-09、11-10），全部 200
+```
+
+**我们的账号是 OpenAI 平台，正好走那个 `TODO: 测试OpenAI API凭证 / return nil` 分支。**
+
+**所以：16 次「测试连接」全部是无条件成功，一次凭证校验都没做。**
+
+**但要区分两种情况**——这个 switch 里有些 `return nil` 是**有意的**：
+
+| 平台 | 行为 | 性质 |
+|---|---|---|
+| Anthropic / OpenAI / Gemini | `// TODO` + `return nil` | **未实现** |
+| Grok | 注释说「靠 token 交换/刷新和请求路径探测验证」 | **有意** |
+| TypeSafe | 注释说「API Key，靠推断失败驱动健康与冷却」 | **有意** |
+| 多协议 API Key 供应商 | 注释说「靠余额/额度探测与转发路径验证」 | **有意** |
+
+**作者在三种平台上明确写了替代验证路径，只在三种平台上留了 TODO。** 这不是随手糊的代码，
+是分得清哪些能靠被动机制、哪些需要主动探测。
+
+**和 65 轮的代理测试合起来看**，这两个「测试连接」按钮都是 UI 壳：
+
+```
+代理连接测试  15 次   永远成功   空壳
+账号凭证测试  16 次   永远成功   空壳（OpenAI/Anthropic/Gemini）
+```
+
+**当前有没有造成损害**：没有。唯一的 OpenAI 账号请求是成功的，凭证本身有效。
+但管理员这 31 次点击**没有得到任何信息**——他以为测过了。
+
+**没改**：实现真正的凭证测试要给每个平台发一次最小请求（OpenAI 的 models 端点、
+Anthropic 的 messages 端点等），涉及配额消耗和超时策略，是完整的开发任务。
+**记录，不修。**
