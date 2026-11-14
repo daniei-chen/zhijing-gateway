@@ -15,19 +15,15 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 
 ## 2. 当前已验证生产状态
 
-截至 2026-11-14 19:10（北京时间），推荐生产版本是 v0.1.7：
+截至 2026-11-14 19:25（北京时间），**生产运行的是 v0.1.6**；v0.1.7 已发布但因账号池回归在 19:21 回滚（详见 AUDIT-20261114.md「v0.1.7 回滚事件」）：
 
-- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.7
-- Release 名称：智境网关 0.1.7。
-- 源码提交：47bcce8c1136d7e467ec64c178486e027a5667c0。
-- GHCR digest：sha256:96619ea4d591558ccf23e92126f4ec66f99b6ac871c0a23a90bc1d817e27372f。
-- 当前容器：zhijing-api-v017-final，loopback 端口 18804。
-- 当前回滚容器：zhijing-api-v016-final（18803，v0.1.6）、zhijing-api-v015-final（18802，v0.1.5）、zhijing-api-v014-final（18801，v0.1.4）。
-- 额外历史回滚点：18799（v0.1.1）、18793（v0.2.21）；没有完成观察前不要删除最后一个可启动回滚点。
+- 当前生产 Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.6
+- 当前生产容器：zhijing-api-v016-final，loopback 端口 18803，镜像 `ghcr.io/daniei-chen/zhijing-gateway:0.1.6`，digest `sha256:bc6e18e97f1e4fef309abf767e6ef333675237b1f8daef29ebda88351716c9f6`。
+- 已回滚但保留作证据的：`zhijing-api-v017-final`（18804，v0.1.7，digest `sha256:96619ea4…7372f`）。它启动后约 2.5 分钟账号池为 0，导致 18 个 503；不要把它切回 upstream，直到回归修复并被验证。
+- 其他回滚点：18802（v0.1.5）、18801（v0.1.4）、18799（v0.1.1）、18793（v0.2.21）。没有完成观察前不要删除最后一个可启动回滚点。
 - 公网入口分两层：`zhijing.kaogong.art` 的权威 A 记录指向入口机 `175.27.132.225`（TLS 终止 + 反代，certbot 证书到 2027-02-12）；入口机回源到日本生产机 `154.36.187.147:443`（SNI=zhijing.kaogong.art）。
-- Nginx upstream 当前主节点是 127.0.0.1:18804，18803/18802/18801/18799/18793 为 backup。
-- 当前容器已验证：UID/GID 1000:1000、read_only=true、cap_drop=ALL、no-new-privileges=true、PID 限制 256、内存限制 768 MiB、CPU 限制 1.5 核（cgroup v2 `cpu.max=150000 100000`，由发布脚本 `--cpus` 直接带上）、restart=unless-stopped、health=healthy、restart count 0、OOM false。
-- v0.1.7 是第一个带 gin 1.12.0 / webauthn 0.18.2 的版本；本地 build/vet/test/lint 与 CI 均通过，生产启动后日志 `ERROR=0`，`/readyz` database/Redis 双 ok，未授权 API 全部 401，首页标题正常。
+- 当前容器已验证：UID/GID 1000:1000、read_only=true、cap_drop=ALL、no-new-privileges=true、PID 限制 256、内存限制 768 MiB、CPU 限制 1.5 核、restart=unless-stopped、health=healthy、restart count 0、OOM false。
+- **发布门禁新增要求**：`/readyz` 只证明 database/Redis 可用，**不证明账号池已加载**。v0.1.7 就是带着健康 `/readyz` 上线后 2.5 分钟内池为 0。在补齐"调度器/账号池就绪"探针之前，发布后必须立即用一次真实网关调用验证账号选择，再宣布完成。
 - 运维看门狗 `zhijing-japan-health.timer` 每 60 秒执行，`local_health=true`，`ops` 中证书/备份/磁盘/DB/计费积压/PITR 全部为 `ok`；自动 `docker restart` 默认关闭（需 `ZHIJING_AUTO_RESTART=1`）。
 - 异地备份：入口机 `/srv/zhijing-offsite/<stamp>/` 保存最近 3 份（脚本 `/usr/local/bin/zhijing-offsite-pull.sh`），**定时调度需运维手动装一次**。
 
