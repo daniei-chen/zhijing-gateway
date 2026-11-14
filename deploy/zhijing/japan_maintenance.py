@@ -282,6 +282,24 @@ def check_ops_baselines():
             out['accounts_ok'] = _n > 0
     except (OSError, subprocess.SubprocessError, ValueError):
         out['accounts_ok'] = None
+    # ── 活跃 Key 指向已软删分组（2026-11-15 round 52）──────────────────────
+    # queryAccountsByGroup 只过滤已删账号，从不检查分组本身是否已软删，所以绑在
+    # 已删分组上的 Key 仍会被正常调度、正常计费——管理员的"删除"没有生效，却不会
+    # 产生任何错误信号。v0.1.14 用"有 Key 的分组禁止删除"堵住了入口，但那是应用层
+    # 的单点保证；这里直接盯住这个状态本身。
+    try:
+        _r = subprocess.run(
+            ['docker', 'exec', 'zhijing-sub2api-japan-postgres-1',
+             'psql', '-U', 'zhijing_trial', '-d', 'zhijing_trial', '-Atc',
+             "select count(*) from api_keys k join groups g on g.id = k.group_id "
+             "where k.deleted_at is null and g.deleted_at is not null"],
+            capture_output=True, timeout=8)
+        if _r.returncode == 0:
+            _n = int((_r.stdout or b'0').strip() or b'0')
+            out['keys_on_deleted_groups'] = _n
+            out['key_group_ok'] = _n == 0
+    except (OSError, subprocess.SubprocessError, ValueError):
+        out['key_group_ok'] = None
     # ── 流内上游故障（2026-11-15 round 5）──────────────────────────────
     # gateway_ok 只看 status_code >= 500，但流式请求在发过 200 头之后上游才失败，
     # 落库是 status_code=200 + upstream_status_code=503。这类故障用户体感就是失败，

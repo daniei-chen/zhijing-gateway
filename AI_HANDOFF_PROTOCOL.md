@@ -2225,3 +2225,36 @@ preds = append(preds, dbaccount.DeletedAtIsNil())   // 只看账号自己有没�
 但它会改变「软删分组下的 Key 立即失效」这个行为（现在是继续可用），
 而这个行为在某些恢复场景下可能是有意的（误删后先把分组恢复，期间服务不断）。
 该不该改是产品判断，不是审计能定的。
+
+### 6.54 给巡检加了一项：活跃 Key 指向已软删分组（2026-11-15 第 52 轮）
+
+6.53 发现一个**不产生任何错误信号**的状态：软删的分组仍会被调度。
+v0.1.14 用「有 Key 的分组禁止删除」堵住了入口，但那是 `DeleteGroup` 一处检查，
+数据层和查询层都不拦。
+
+这轮把它变成一个**可观测项**，加进 `japan_maintenance.py` 的巡检：
+
+```sql
+select count(*) from api_keys k join groups g on g.id = k.group_id
+where k.deleted_at is null and g.deleted_at is not null
+```
+
+- 结果为 0 → `key_group_ok = true`
+- 不为 0 → `key_group_ok = false`，跟着 watchdog 的失败集合走，会写进
+  `ops_system_logs`，配了 webhook 就推送
+
+**实测**：
+
+```
+key_group_ok            = True
+keys_on_deleted_groups  = 0
+```
+
+当前干净，没有任何活跃 Key 指向已软删的分组。
+
+**为什么值得加**：这个状态的特征是「删了但还在跑」，**不会触发任何错误**——
+没有 5xx、没有拒绝、没有延迟变化。靠人去看是发现不了的，只能靠主动查询。
+
+**改动性质**：纯巡检（只读查询 + 结果写日志），
+不需要发版、不影响任何请求路径、失败时 `key_group_ok = None` 而不是报错。
+备份在 `japan_maintenance.py.bak-round52`。
