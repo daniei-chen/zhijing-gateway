@@ -2624,3 +2624,60 @@ backend/internal/service/api_key_service_delete_test.go   17,662 字节
 **更正后的结论**：`api_key_handler` 的四个方法确实没有 HTTP 层测试，
 但它们调用的 service 方法有测试，**核心安全逻辑是被覆盖的**。
 要不要补 handler 层的测试是另一回事（成本高、收益低——handler 不做判断，只做转发）。
+
+### 6.63 `/v1/live` 端点可用但完全不计费——作者自己标注的、61 轮里最实质的一处（2026-11-15 第 61 轮）
+
+扫全仓 13 条真 TODO（过滤掉注释里的 `xxx` 占位符），最重的一条在 `openai_live.go:830`：
+
+```
+// TODO(billing): Live 会话目前不计费：TotalCost/ActualCost 恒为 0，完全绕过
+// recordUsageCore/applyUsageBilling，余额模式下极低余额也能反复开启最长
+// liveMaxSessionDuration 的会话。若确认按时长计费，应在此接入计费管道；
+// 若确认有意免费，删除本注释即可（零值行为由
+// TestFinalizeLiveCallIsIdempotentAndWritesZeroUsage 锁定）。
+```
+
+**这不是我的推断，是代码作者自己写的。** 我做了三步核实：
+
+**① 端点确实对外可用**
+
+```go
+// gateway.go:213
+gateway.POST("/live", h.OpenAIGateway.Live)
+gateway.GET("/live/:call_id", h.OpenAIGateway.LiveSideband)
+```
+
+`gateway` 组挂了 `apiKeyAuth`，所以**任何持有 API Key 的用户**都能调用。
+
+**② 它写用量日志，但金额恒为 0**
+
+`writeUsageLogBestEffort` 会插一条 `usage_logs`，但 `TotalCost` / `ActualCost` 保持零值——
+完全跳过 `applyUsageBilling`。
+
+**③ 生产上从未被使用过**
+
+`usage_logs` 的 `request_type` 分布：
+
+```
+2 (stream)   36,275 条   $1,505.33
+1 (sync)        135 条   $3.71
+```
+
+**没有任何 `live` 记录**（`ParseUsageRequestType("live")` 对应的值一次都没出现过）。
+
+**这意味着什么**：
+
+- **当前没有收入损失**——没人用过
+- **但门是开的**：持有 Key 的人只要发现 `/v1/live`，就能无限免费跑实时会话，
+  而且低余额账号也拦不住（不计费 = 余额检查也不起作用）
+- 每次会话上限是 `liveMaxSessionDuration`，但可以反复开
+
+**为什么没动手修**：注释里那句「若确认有意免费，删除本注释即可」说明
+**这是产品决策，不是遗漏**。三条路都不该我选：
+
+1. 接入计费——要设计按时长计费的管道，工作量大
+2. 禁用端点——如果这是准备上线的功能，禁了会打断计划
+3. 保持免费——那就该把注释改成明确的「有意免费」
+
+**我建议第 3 条或第 2 条，但决定权在主人。** 这里只把事实摆清楚：
+**一个不计费的功能端点，正在对任何持 Key 的用户开放，而它从未被使用过。**
