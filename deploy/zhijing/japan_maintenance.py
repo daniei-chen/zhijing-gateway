@@ -533,6 +533,84 @@ def notify_webhook(level, message, detail):
         return False
 
 
+def write_system_log(level, component, message, detail):
+    """往 ops_system_logs 写一条记录。返回 True 表示写入成功。"""
+    sql = ("insert into ops_system_logs (level, component, message, extra) values ("
+           "'%s', '%s', '%s', '%s')"
+           % (level.replace("'", "''"),
+              component.replace("'", "''"),
+              message.replace("'", "''"),
+              json.dumps(detail, ensure_ascii=False).replace("'", "''")))
+    try:
+        proc = subprocess.run(['docker', 'exec', 'zhijing-sub2api-japan-postgres-1',
+                               'psql', '-U', 'zhijing_trial', '-d', 'zhijing_trial', '-c', sql],
+                              capture_output=True, timeout=8)
+    except (OSError, subprocess.SubprocessError):
+        return False
+    return proc.returncode == 0
+
+
+UPSTREAM_REPO = 'Wei-Shaw/sub2api'
+UPSTREAM_CHECK_SECONDS = 6 * 3600
+UPSTREAM_STATE_FILE = 'upstream_head.json'
+
+
+def maybe_check_upstream():
+    """检查上游 main 的 HEAD 是否变了；每 6 小时最多查一次。
+
+    跟踪上游是明确需求，但没人会天天去翻 GitHub。这里用匿名 GitHub API
+    （无需 token，匿名限流 60 次/小时，我们 6 小时才查一次），HEAD 变化时
+    写一条 ops_system_logs 并推 webhook。拿不到网络就静默跳过——监控本身
+    不应该因为外网不通而报错。
+    """
+    state_file = STATE / UPSTREAM_STATE_FILE
+    now = int(time.time())
+    previous = {}
+    if state_file.exists():
+        try:
+            previous = json.loads(state_file.read_text())
+        except (ValueError, OSError):
+            previous = {}
+    if not isinstance(previous, dict):
+        previous = {}
+    try:
+        checked_at = int(previous.get('checked_at') or 0)
+    except (TypeError, ValueError):
+        checked_at = 0
+    if checked_at and now - checked_at < UPSTREAM_CHECK_SECONDS:
+        return
+
+    url = 'https://api.github.com/repos/%s/commits/main' % UPSTREAM_REPO
+    request = urllib.request.Request(url, headers={
+        'User-Agent': 'zhijing-watchdog',
+        'Accept': 'application/vnd.github+json',
+    })
+    try:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(request, timeout=12) as response:
+            payload = json.loads(response.read().decode('utf-8'))
+    except (OSError, ValueError, urllib.error.URLError):
+        return
+
+    sha = str(payload.get('sha') or '')[:12]
+    if not sha:
+        return
+    committed = ((payload.get('commit') or {}).get('committer') or {}).get('date', '')
+    head_before = str(previous.get('sha') or '')
+
+    try:
+        private_json(state_file, {'sha': sha, 'date': committed, 'checked_at': now})
+    except OSError:
+        pass
+
+    if head_before and head_before != sha:
+        message = ('[InfraWatchdog] 上游 %s main 有新提交：%s → %s（%s）'
+                   % (UPSTREAM_REPO, head_before, sha, committed))
+        write_system_log('info', 'infra_watchdog', message,
+                         {'previous': head_before, 'current': sha, 'date': committed})
+        notify_webhook('info', message, {'previous': head_before, 'current': sha})
+
+
 def record_infra_alert(ops):
     """把基础设施检查的失败写进 ops_system_logs，让它在后台看得见。
 
@@ -541,6 +619,7 @@ def record_infra_alert(ops):
     这里复用应用自己的 ops_system_logs（后台「系统日志」页面直接可见）。
     只在失败集合发生变化时写，避免每 60 秒刷一条相同的记录。
     """
+    maybe_check_upstream()  # 6 小时限流在函数内部，必须早于下面的 early return
     if not isinstance(ops, dict):
         return
     failed = sorted([key for key in OPS_ALERT_KEYS if ops.get(key) is False])
@@ -565,16 +644,7 @@ def record_infra_alert(ops):
         message = '[InfraWatchdog] 基础设施检查已全部恢复'
         detail = {key: True for key in OPS_ALERT_KEYS}
 
-    sql = ("insert into ops_system_logs (level, component, message, extra) values ("
-           "'%s', 'infra_watchdog', '%s', '%s')"
-           % (level,
-              message.replace("'", "''"),
-              json.dumps(detail, ensure_ascii=False).replace("'", "''")))
-    try:
-        subprocess.run(['docker', 'exec', 'zhijing-sub2api-japan-postgres-1',
-                        'psql', '-U', 'zhijing_trial', '-d', 'zhijing_trial', '-c', sql],
-                       capture_output=True, timeout=8)
-    except (OSError, subprocess.SubprocessError):
+    if not write_system_log(level, 'infra_watchdog', message, detail):
         return
     try:
         private_json(state_file, {'failed': failed, 'at': int(time.time())})

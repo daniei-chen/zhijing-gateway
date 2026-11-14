@@ -767,3 +767,29 @@ v0.1.19 在打 tag 之前跑了，`0 issues`，CI 一次过。**以后每次发�
 
 备份：`/root/zhijing-nginx-metrics-20261114T210733Z.bak`（首次插入）、
 `/root/zhijing-nginx-metrics2-*.bak`（修正到正确 server 块之前）。
+
+### 6.19 上游 HEAD 变更检测（2026-11-15 第 9 轮）
+
+跟踪上游是明确需求，但没人会天天去翻 GitHub。watchdog 现在每 **6 小时**查一次
+`Wei-Shaw/sub2api` 的 `main` HEAD（匿名 GitHub API，无需 token；匿名限流 60 次/小时，
+我们 6 小时才查一次），HEAD 变化时写一条 `ops_system_logs` 并推 webhook。
+
+状态存在 `maintenance/upstream_head.json`：
+
+```json
+{"sha": "530c5e3a4f9c", "date": "2026-11-11T02:43:23Z", "checked_at": 1794690670}
+```
+
+实测三条路径：
+
+| 场景 | 结果 |
+|---|---|
+| 首次运行（无状态文件） | 只记录 sha，**不报警**（0 条日志） |
+| 6 小时内再跑 | 直接返回，不发网络请求（`checked_at` 不变） |
+| 人为改写成旧 sha 后再跑 | 写入 `info`「上游 Wei-Shaw/sub2api main 有新提交：deadbeef0000 → 530c5e3a4f9c」 |
+
+**踩到的坑**：第一次把 `maybe_check_upstream()` 放在 `record_infra_alert` 的**末尾**，
+但那个函数有 early return（失败集合没变化时直接返回），所以正常情况下永远不会走到末尾——
+上游检查从来没执行，`upstream_head.json` 一直是空的。移到函数开头（early return 之前）才生效。
+
+顺带把写 `ops_system_logs` 的 SQL 抽成了 `write_system_log()`，基础设施告警和上游检测共用。
