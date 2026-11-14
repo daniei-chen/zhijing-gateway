@@ -15,20 +15,21 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 
 ## 2. 当前已验证生产状态
 
-截至 2026-11-14 17:20（北京时间），推荐生产版本是 v0.1.5：
+截至 2026-11-14 18:40（北京时间），推荐生产版本是 v0.1.6：
 
-- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.5
-- Release 名称：智境网关 0.1.5。
-- 源码提交：24e708b6b031b0d4239dec3c69b8d54cad6343b4。
-- GHCR digest：sha256:07ff497e7865436e98aa98365f34c2aff231d2c093d4111d8f73d11b56361c8a。
-- 当前容器：zhijing-api-v015-final，loopback 端口 18802。
-- 当前回滚容器：zhijing-api-v014-final，loopback 端口 18801。
-- 额外历史回滚点：18800（v0.1.1-r1）、18799（v0.1.1）、18793（v0.2.21）；没有完成观察前不要删除最后一个可启动回滚点。
+- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.6
+- Release 名称：智境网关 0.1.6。
+- 源码提交：b5eae06a0592689a95b3dd7acc477d50146ae25e。
+- GHCR digest：sha256:bc6e18e97f1e4fef309abf767e6ef333675237b1f8daef29ebda88351716c9f6。
+- 当前容器：zhijing-api-v016-final，loopback 端口 18803。
+- 当前回滚容器：zhijing-api-v015-final（18802，v0.1.5）与 zhijing-api-v014-final（18801，v0.1.4）。
+- 额外历史回滚点：18799（v0.1.1）、18793（v0.2.21）；没有完成观察前不要删除最后一个可启动回滚点。
 - 公网入口分两层：`zhijing.kaogong.art` 的权威 A 记录指向入口机 `175.27.132.225`（TLS 终止 + 反代，certbot 证书到 2027-02-12）；入口机回源到日本生产机 `154.36.187.147:443`（SNI=zhijing.kaogong.art）。
-- Nginx upstream 当前主节点是 127.0.0.1:18802，18801/18800/18799/18793 为 backup。
-- 当前容器已验证：UID/GID 1000:1000、read_only=true、cap_drop=ALL、no-new-privileges=true、PID 限制 256、内存限制 768 MiB、**CPU 限制 1.5 核**（`docker update --cpus=1.5` 实时生效，cgroup v2 `cpu.max=150000 100000`，容器未重启）、restart=unless-stopped、health=healthy、restart count 0、OOM false。发布脚本自 v0.1.5 起默认传 `--cpus "${CPU_LIMIT:-1.5}"`，重建容器不会再丢这项限制。
-- 公网真实链路（浏览器 → 175 → 154）`/readyz` 连续 200，database/Redis 为 ok；`/health` 200；未授权 API（`/api/v1/admin/users`、`/api/v1/keys`、`/v1/models`）返回 401。
+- Nginx upstream 当前主节点是 127.0.0.1:18803，18802/18801/18799/18793 为 backup。
+- 当前容器已验证：UID/GID 1000:1000、read_only=true、cap_drop=ALL、no-new-privileges=true、PID 限制 256、内存限制 768 MiB、CPU 限制 1.5 核（cgroup v2 `cpu.max=150000 100000`，由发布脚本 `--cpus` 直接带上，不再依赖事后 `docker update`）、restart=unless-stopped、health=healthy、restart count 0、OOM false。
+- 公网真实链路（浏览器 → 175 → 154）`/readyz` 连续 200，database/Redis 为 ok；服务端本机延迟 2–5ms，公网观测到的秒级延迟来自跨境回源链路。
 - 运维看门狗 `zhijing-japan-health.timer` 每 60 秒执行，`local_health=true`，`ops` 中证书/备份/磁盘/DB/计费积压/PITR 全部为 `ok`；自动 `docker restart` 默认关闭（需 `ZHIJING_AUTO_RESTART=1`）。
+- 异地备份：入口机 `/srv/zhijing-offsite/<stamp>/` 保存最近 3 份（脚本 `/usr/local/bin/zhijing-offsite-pull.sh`），**定时调度需运维手动装一次**。
 
 v0.1.2 和 v0.1.3 已发布但没有进入生产：启动时迁移完整性门禁发现历史 SQL 文件字节被品牌替换。不要部署这两个版本，也不要通过修改数据库中的 schema_migrations 校验和来绕过门禁。
 
