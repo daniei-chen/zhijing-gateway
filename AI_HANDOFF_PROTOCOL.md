@@ -589,3 +589,27 @@ v0.1.14 起：
 唯一遗留是 `attempted_key_prefix` 列——**没有任何代码写入它**（grep 零结果），
 所以 401 排查时看不到调用方用的是什么 key 前缀。该列留着无害（预留），删列需要迁移，
 收益不抵风险，暂不动。
+
+### 6.14 线上前端是两套陈旧静态产物，与镜像里的 dist 不是同一份（2026-11-15 第 4 轮）
+
+nginx 实际服务的前端**不在容器里**：
+
+| 用途 | 目录 | 构建时间 | 入口 |
+|---|---|---|---|
+| `location /` 的 root | `/var/www/zhijing-homepage/` | **2026-11-01 12:07** | `/assets/index-BFVAedJu.js` |
+| `@zhijing_sub2api_spa` fallback 的 root | `/var/www/zhijing-workbench/` | **2026-11-06 08:40** | `/app-assets/index-DY_5OgR5.js` |
+| 仓库 / 镜像内嵌 | `backend/internal/web/dist` | 随每次构建 | `/assets/index-*.js` |
+
+三份互不相同。`zero-downtime-deploy.sh` **从不更新这两个目录**（grep 零结果），
+所以镜像里的前端改动不会上线——首页用 11-01 的构建，深层路由 fallback 用 11-06 的构建。
+
+**这意味着**：v0.1.10 加的「分组强制档位」选择器、以及任何 11-06 之后的前端改动，
+在浏览器里都看不到；后端 API 是最新的，界面不是。
+
+**也意味着我第 4 轮那个「首屏省 271KB」的优化没有实际效果**：我改的是仓库
+`dist/index.html` 的 modulepreload 列表，而线上 11-01 那份 index.html 根本没有
+modulepreload，也没有 vendor-excel。改动本身无害（对未来部署是对的），但**不该被描述成
+线上性能改善**。这是自我更正。
+
+要真正让线上前端与源码一致，需要把 `dist` 部署到 `/var/www/` 下的某个目录并让 nginx 指过去。
+**这是用户可见的界面替换，必须由主人决定**，不能自行执行。
