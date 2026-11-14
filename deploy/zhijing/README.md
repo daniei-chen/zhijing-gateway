@@ -47,7 +47,26 @@ python3 -m py_compile /opt/zhijing-sub2api/japan_maintenance.py
 
 - `check_ops_baselines()` 里的证书检查会逐个读取 Nginx 配置中出现的证书路径；如果某张证书文件不存在会被跳过，不会报错。
 - 备份是「库完整性优先」：`pg_dump -Fc` + `pg_restore --list` 校验 + Redis `SAVE`，但 Redis 快照与数据库不同步（`redis_snapshot_simultaneous_with_database=false`），恢复时以数据库为计费权威。
-- 备份仍落在同一块磁盘（`/var/backups/zhijing-sub2api`），异机/对象存储副本尚未落地。
+- 源站备份落在同一块磁盘（`/var/backups/zhijing-sub2api`），所以额外有异地副本（见下）。
+
+## 异地备份（入口机侧）
+
+源站的 `/var/backups/zhijing-sub2api` 与生产在同一块盘，磁盘故障会同时带走两者。入口机 `175.27.132.225` 上有 `/usr/local/bin/zhijing-offsite-pull.sh`（0700），用既有的 `wb2api_backup_ed25519` 主动从源站拉最新一份备份到 `/srv/zhijing-offsite/<stamp>/`，保留最近 3 份：
+
+```sh
+sudo /usr/local/bin/zhijing-offsite-pull.sh
+# offsite ok: 20261114T061826Z -> /srv/zhijing-offsite/20261114T061826Z (7.2M)
+```
+
+脚本自带三道校验：远端找不到备份即失败、rsync 后 `database.dump` 缺失即失败、只轮转保留最新 3 份。
+
+**定时调度需要手动安装一次**（入口机与本机 guard 都不允许自动写 cron/systemd 配置）：
+
+```sh
+echo '17 */6 * * * root /usr/local/bin/zhijing-offsite-pull.sh' | sudo tee /etc/cron.d/zhijing-offsite
+```
+
+在此之前可手动执行。恢复演练做法见 `AUDIT-20261114.md` 的"备份恢复演练"一节（临时库 `pg_restore` 后比对表数/行数，再 `DROP DATABASE`）。
 
 ## nginx/
 
