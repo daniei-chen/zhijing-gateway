@@ -413,3 +413,34 @@ curl -s 'http://127.0.0.1:<port>/readyz?deep=1'   # 深：再加上「有没有�
 
 判断「这实例到底能不能服务业务请求」时用深的，别只看浅的——2026-11-14 19:10 那次就是
 浅探针全绿、业务全 503。
+
+### 6.7 HSTS 头曾经重复（2026-11-15 已修）
+
+公网响应曾经长这样：
+
+```
+Strict-Transport-Security: max-age=2592000, max-age=31536000; includeSubDomains
+```
+
+两个来源叠加：源站 nginx 发 30 天，边缘 nginx 发 1 年 + 子域，而边缘没有 `hide` 掉下层的。
+按 HTTP 语义多个同名字段会被合并，`max-age` 取第一个值——**实际生效的是 30 天，
+`includeSubDomains` 基本被忽略**，和边缘配置里写的意图不一致。
+
+处置：边缘 `/etc/nginx/sites-available/zhijing.kaogong.art` 在 `add_header` 之后加一行
+`proxy_hide_header Strict-Transport-Security;`，只保留边缘那条。现在公网只有一条
+`max-age=31536000; includeSubDomains`。改前备份在 `/root/zhijing-edge-nginx.bak-*`。
+
+**教训**：多层反代时，每个 `add_header` 都要确认下层是不是也发了同一个头。这次其余
+安全头（CSP / X-Frame-Options / nosniff / Referrer-Policy / Permissions-Policy）都只有一条，
+唯独 HSTS 重了。
+
+### 6.8 深度探针的向后兼容（2026-11-15 实测）
+
+部署脚本的 `DEEP_READY_CHECK` 会请求 `/readyz?deep=1`。老镜像不认识 `deep` 参数，
+忽略它并返回浅探针结果，因此回滚部署不会被这道闸卡住。实测三个在跑实例：
+
+```
+18806 (v0.1.9)   deep=1 → 200 {"checks":{"database":"ok","redis":"ok"}}
+18808 (v0.1.11)  deep=1 → 200 {"checks":{"database":"ok","redis":"ok"}}
+18809 (v0.1.12)  deep=1 → 200 {"checks":{"business":"ok",...,"schedulable_accounts":1}}
+```
