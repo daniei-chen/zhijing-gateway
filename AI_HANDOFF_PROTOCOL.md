@@ -15,20 +15,29 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 
 ## 2. 当前已验证生产状态
 
-截至 2026-11-15 01:42（北京时间），生产版本是 **v0.1.12**（深度就绪探针）：
+截至 2026-11-15 02:20（北京时间），生产版本是 **v0.1.13**（告警邮件失败不再静默）：
 
-- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.12（「智境网关 0.1.12」）
-- 源码提交：`4e8d60f3d`
-- GHCR digest：`sha256:94b0bc7c61364fbbbe4184715b9b406219e35c49dcac32e41ff885773897438f`
-- 当前容器：`zhijing-api-v0112-final`，loopback 端口 **18809**
-- 回滚容器：18808（v0.1.11）、18807（v0.1.10）、18806（v0.1.9）
-- **v0.1.12 切换证据**：部署脚本新加的业务就绪检查打印
-  `candidate: business readiness ok (deep probe)`，随后
+- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.13（「智境网关 0.1.13」）
+- 源码提交：`222ea950c`
+- GHCR digest：`sha256:c3955e7f931cf734e9569727f935047027a399d941d0e7e40a4e671bab4156f7`
+- 当前容器：`zhijing-api-v0113-final`，loopback 端口 **18810**
+- 回滚容器：18809（v0.1.12）、18808（v0.1.11）、18807（v0.1.10）、18806（v0.1.9）
+- **v0.1.13 切换证据**：`candidate: business readiness ok (deep probe)` 之后
   `observe: 0 new 5xx within 180s, within limit`；容器 `restart=0`，切换窗口 0 条错误日志。
-- **v0.1.12 新增能力**：`/readyz?deep=1` 在 DB/Redis 之外回答「有没有可调度账号」，
-  返回 `schedulable_accounts`，为 0 时 503。浅探针语义不变。部署脚本在改写 peers 之前
-  会调用它，拒绝把流量切到没有账号的实例（`DEEP_READY_CHECK=0` 可关；旧镜像不认识该参数、
-  照常返回 200，所以回滚部署不受影响）。
+- **v0.1.13 修复**：告警邮件发送失败不再静默。逐收件人记录脱敏地址 + 事件 ID + 规则名 + 错误，
+  0/N 全失败时额外记汇总提示查 SMTP。见 6.9——这条链路此前整条断裂（334 条事件、0 发送）。
+
+### 2.1 这一夜（00:30–02:20）发布的四个版本
+
+| 版本 | 端口 | 内容 |
+|---|---|---|
+| v0.1.10 | 18807 | 分组强制 `service_tier`（跟随/priority/ultrafast）+ 迁移 252 |
+| v0.1.11 | 18808 | 强制档位增加上游能力守卫（模型目录没声明就不注入） |
+| v0.1.12 | 18809 | `/readyz?deep=1` 深度就绪探针 + 部署闸门 |
+| v0.1.13 | 18810 | 告警邮件失败不再静默 |
+
+四个版本全部零停机切换，每次都是 `0 new 5xx within 180s`。审计与误判记录见
+`AUDIT-20261115.md`。
 - **动态并发（已实测）**：`GATEWAY_MEMBER_CONCURRENCY_LIMIT=3` 为基础，
   `GATEWAY_MEMBER_CONCURRENCY_LIMIT_PEAK=5` 为活跃用户 ≤1 时的放宽值。
   **验收方式必须是打真实请求**：单用户发 5 个并发应全部 200；v0.1.8 因为仓库层
