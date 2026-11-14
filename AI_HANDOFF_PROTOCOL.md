@@ -26,8 +26,7 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 - 额外历史回滚点：18800（v0.1.1-r1）、18799（v0.1.1）、18793（v0.2.21）；没有完成观察前不要删除最后一个可启动回滚点。
 - 公网入口分两层：`zhijing.kaogong.art` 的权威 A 记录指向入口机 `175.27.132.225`（TLS 终止 + 反代，certbot 证书到 2027-02-12）；入口机回源到日本生产机 `154.36.187.147:443`（SNI=zhijing.kaogong.art）。
 - Nginx upstream 当前主节点是 127.0.0.1:18802，18801/18800/18799/18793 为 backup。
-- 当前容器已验证：UID/GID 1000:1000、read_only=true、cap_drop=ALL、no-new-privileges=true、PID 限制 256、内存限制 768 MiB、restart=unless-stopped、health=healthy、restart count 0、OOM false。
-- **已知未达成项：CPU 限制仍为 0**（compose 声明 `cpus: 1.50`，但零停机脚本的 `docker run` 没有 `--cpus`），下次发布脚本改动时才生效。
+- 当前容器已验证：UID/GID 1000:1000、read_only=true、cap_drop=ALL、no-new-privileges=true、PID 限制 256、内存限制 768 MiB、**CPU 限制 1.5 核**（`docker update --cpus=1.5` 实时生效，cgroup v2 `cpu.max=150000 100000`，容器未重启）、restart=unless-stopped、health=healthy、restart count 0、OOM false。发布脚本自 v0.1.5 起默认传 `--cpus "${CPU_LIMIT:-1.5}"`，重建容器不会再丢这项限制。
 - 公网真实链路（浏览器 → 175 → 154）`/readyz` 连续 200，database/Redis 为 ok；`/health` 200；未授权 API（`/api/v1/admin/users`、`/api/v1/keys`、`/v1/models`）返回 401。
 - 运维看门狗 `zhijing-japan-health.timer` 每 60 秒执行，`local_health=true`，`ops` 中证书/备份/磁盘/DB/计费积压/PITR 全部为 `ok`；自动 `docker restart` 默认关闭（需 `ZHIJING_AUTO_RESTART=1`）。
 
