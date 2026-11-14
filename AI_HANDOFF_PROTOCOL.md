@@ -1102,3 +1102,42 @@ selection.ReleaseFunc()                                          // 紧接着释
 **维护提醒**：如果哪天 `createUpstreamLiveCall` 变慢（或加了重试），这个窗口会拉长，
 期间账号的实际并发会超过配置值 1 个。这是可接受的，但要知道它存在——`allowance` 这个设计
 是「短暂超额」而不是「永久放宽」。
+
+### 6.28 账务一致性：原子、幂等，但漏扣靠人工补（2026-11-15 第 20 轮）
+
+**计费是单事务原子的。** `usageBillingRepository.Apply` 的结构：
+
+```go
+tx, err := r.db.BeginTx(ctx, nil)
+defer rollback
+applied, err := r.claimUsageBillingKey(ctx, tx, cmd)   // INSERT ... ON CONFLICT DO NOTHING RETURNING id
+if !applied {
+    return &UsageBillingApplyResult{Applied: false}, nil   // 幂等跳过
+}
+applyUsageBillingEffects(ctx, tx, cmd, result)          // 订阅/余额/Key额度/Key限速/账号配额
+tx.Commit()
+```
+
+一个事务里完成：去重占位 + 扣余额（含透支判定）+ 订阅用量 + Key 额度 + Key 限速 + 账号配额。
+中途任一步失败 → 整体回滚（连占位一起），重试会重新走完整流程。**不会出现扣一半的状态。**
+
+**幂等靠唯一索引**：`usage_billing_dedup(request_id, api_key_id)` 上 `ON CONFLICT DO NOTHING RETURNING id`。
+重复请求拿到 `sql.ErrNoRows` → `Applied: false` → 不重复计费。
+
+**但有一个真实窗口，代码注释自己写着**（`usage_billing_repo.go:644`）：
+
+> Apply 失败时 usage_logs 已经写入（账记了），但余额/配额未扣（钱没扣）
+
+因为 `usage_logs` 在 `Apply` 之前写入。这个窗口的处理方式是 `RecordFailure` 把失败落进
+`billing_failures` 表（`status='pending'`，`ON CONFLICT DO NOTHING` 保证同一请求只登记一次），
+供**对账与人工补录**。
+
+**实测现状：`billing_failures` 表 0 行**，也就是说生产上到目前为止没有发生过一次计费事务失败。
+`usage_logs` 共 36,410 行，最近 24 小时 2,380 条。
+
+**关键缺口**：`billing_failures` 只有写入，**没有任何代码读它或自动补偿**（grep 只有 INSERT 和注释）。
+补偿是纯人工的。而 watchdog 虽然有 `billing_failures_pending` 这一项监控，**告警通道却没配置**
+（见清单 B 类）——也就是说真出现漏扣，记录会有、监控会红，但**通知送不出去**。
+
+这就是为什么「告警凭据」在技术债清单里是 P1 而不是可选项：它不只是收不到通知，
+而是**账务异常的最后一环没有出口**。
