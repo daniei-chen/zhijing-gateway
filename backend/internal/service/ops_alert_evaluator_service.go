@@ -741,6 +741,21 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 	subject := fmt.Sprintf("[Ops Alert][%s] %s", strings.TrimSpace(rule.Severity), strings.TrimSpace(rule.Name))
 	body := buildOpsAlertEmailBody(rule, event)
 
+	// 2026-11-15：此前这里每个失败分支都是静默 continue，结果是「SMTP 密码没配、
+	// 334 条告警事件一封邮件都没发出去」这种事可以持续两周无人发现——因为
+	// email_sent 一直是 false，而没有任何日志说明原因。现在每个失败都留痕。
+	masked := func(addr string) string {
+		at := strings.LastIndex(addr, "@")
+		if at <= 0 {
+			return "***"
+		}
+		local := addr[:at]
+		if len(local) > 2 {
+			local = local[:2] + "***"
+		}
+		return local + addr[at:]
+	}
+	attempted := 0
 	anySent := false
 	for _, to := range emailCfg.Alert.Recipients {
 		addr := strings.TrimSpace(to)
@@ -748,8 +763,12 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 			continue
 		}
 		if !s.emailLimiter.Allow(time.Now().UTC()) {
+			logger.LegacyPrintf("service.ops_alert_evaluator",
+				"[OpsAlertEvaluator] alert email rate limited, skipping %s (event=%d rule=%s)",
+				masked(addr), event.ID, rule.Name)
 			continue
 		}
+		attempted++
 		if s.emailService.notificationEmailService != nil {
 			if err := s.emailService.notificationEmailService.Send(ctx, NotificationEmailSendInput{
 				Event:          NotificationEmailEventOpsAlert,
@@ -762,16 +781,26 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 				anySent = true
 				continue
 			} else if !shouldFallbackNotificationEmail(err) {
+				logger.LegacyPrintf("service.ops_alert_evaluator",
+					"[OpsAlertEvaluator] notification email failed for %s (event=%d rule=%s): %v",
+					masked(addr), event.ID, rule.Name, err)
 				continue
 			}
 		}
 		if err := s.emailService.SendEmail(ctx, addr, subject, body); err != nil {
-			// Ignore per-recipient failures; continue best-effort.
+			logger.LegacyPrintf("service.ops_alert_evaluator",
+				"[OpsAlertEvaluator] alert email failed for %s (event=%d rule=%s): %v",
+				masked(addr), event.ID, rule.Name, err)
 			continue
 		}
 		anySent = true
 	}
 
+	if !anySent && attempted > 0 {
+		logger.LegacyPrintf("service.ops_alert_evaluator",
+			"[OpsAlertEvaluator] alert email delivered to 0/%d recipients (event=%d rule=%s severity=%s); check SMTP settings",
+			attempted, event.ID, rule.Name, rule.Severity)
+	}
 	if anySent {
 		_ = s.opsRepo.UpdateAlertEventEmailSent(context.Background(), event.ID, true)
 	}
