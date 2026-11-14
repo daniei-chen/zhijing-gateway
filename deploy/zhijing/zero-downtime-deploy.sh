@@ -57,6 +57,7 @@ docker rm -f "$NEW_CONTAINER" >/dev/null 2>&1 || true
 run_args=(
   --detach
   --name "$NEW_CONTAINER"
+  --restart unless-stopped
   --env-file "$env_file"
   --publish "127.0.0.1:${NEW_PORT}:8080"
   --mount "type=${data_type},src=${data_source},dst=/app/data"
