@@ -20,6 +20,9 @@ test-unit:
 test-integration:
 	go test -tags=integration ./...
 
+test-race:
+	CGO_ENABLED=1 go test -race -tags=unit -timeout 600s ./internal/service/ ./internal/handler/ -run 'Concurren|Limiter|Limit|Cache|Schedul|Pool|Slot|Race|Parallel|Atomic'
+
 test-e2e:
 	./scripts/e2e-test.sh
 
