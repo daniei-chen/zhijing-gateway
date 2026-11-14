@@ -375,3 +375,29 @@ python3 /root/switch-primary.py 18808 && systemctl reload nginx
 
 `switch-primary.py` 会先备份站点文件、跑 `nginx -t`，失败时自动还原；它**不自己 reload**，
 把「什么时候切流量」留给调用者。peers 里保留哪些回滚端口由 `prune-peers.py` 管理，两个工具互不重叠。
+
+### 6.6 运维陷阱：容器漏挂 `/app/data` 会静默进入 setup 模式
+
+2026-11-15 做故障注入时手工 `docker run` 了个临时容器，漏了生产容器那条
+`-v /opt/zhijing-sub2api/upgrade-v0011/data:/app/data`，结果它打印
+`First run detected, starting setup wizard...`，只注册 `/setup/*` 四个路由，
+`/readyz` 和 `/health` 全部 **404**。
+
+**我最初以为这是 Redis 不可达导致的，猜错了。** `NeedsSetup()` 的判据是文件：
+配置文件和 `/app/data` 下的安装锁文件都不存在时判定首次运行——与 Redis 无关。
+
+陷阱在于：这时容器 `State=running`、healthcheck 一直 `starting`，看起来「起来了」，
+但业务路由一个都没有。**任何手工起容器的操作都必须带上 data 挂载。**
+
+兜底已经存在：watchdog 探 `/health` 期望 200，setup 模式下 `/health` 是 404 →
+`healthy=false` → 触发提醒。所以不会静默失明，但排查时要知道往这个方向看。
+
+同理，`concurrencyErrorResponse` 的语义也确认过了，别改错：
+
+```
+GatewayConcurrencyLimitError / WaitQueueFullError / ConcurrencyError  -> 429 rate_limit_error
+context.Canceled                                                      -> 499
+其余（Redis/DB 等设施错误）                                            -> 503 "Service temporarily unavailable"
+```
+
+也就是说 Redis 运行期失联时用户拿到的是 **503**，不是「你被限流了」。这个区分是对的。
