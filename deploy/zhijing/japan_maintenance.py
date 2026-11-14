@@ -38,7 +38,8 @@ def auto_restart_enabled():
     return os.environ.get(AUTO_RESTART_ENV,'').strip().lower() in ('1','true','yes')
 
 
-OPS_ALERT_KEYS=('cert_ok','backup_ok','disk_ok','db_ok','billing_ok','pitr_ok')
+OPS_ALERT_KEYS=('cert_ok','backup_ok','disk_ok','db_ok','billing_ok','pitr_ok',
+                'gateway_ok','accounts_ok')
 
 
 def ops_requires_review(ops):
@@ -252,6 +253,35 @@ def check_ops_baselines():
             out['billing_ok'] = (_n == 0)
     except (OSError, subprocess.SubprocessError, ValueError):
         out['billing_ok'] = None
+    # ── 网关业务健康（2026-11-14 round 10）─────────────────────────────
+    # 技术健康 ≠ 业务可用：账号配额打满或白名单放行了账号不支持的模型时，
+    # /readyz 依然报 database/redis ok、看门狗依然 healthy，但用户请求全部 503
+    # （2026-11-14 19:10-19:26 就是这样：27 个 5xx，而所有技术探针都是绿的）。
+    # 这里直接读最近 15 分钟的 5xx 数与可调度账号数，把"业务不可用"变成可见告警。
+    try:
+        _r = subprocess.run(
+            ['docker', 'exec', 'zhijing-sub2api-japan-postgres-1',
+             'psql', '-U', 'zhijing_trial', '-d', 'zhijing_trial', '-Atc',
+             "select count(*) from ops_error_logs where created_at > now() - interval '15 minutes' and status_code >= 500"],
+            capture_output=True, timeout=8)
+        if _r.returncode == 0:
+            _n = int((_r.stdout or b'0').strip() or b'0')
+            out['gateway_5xx_15m'] = _n
+            out['gateway_ok'] = _n < 5
+    except (OSError, subprocess.SubprocessError, ValueError):
+        out['gateway_ok'] = None
+    try:
+        _r = subprocess.run(
+            ['docker', 'exec', 'zhijing-sub2api-japan-postgres-1',
+             'psql', '-U', 'zhijing_trial', '-d', 'zhijing_trial', '-Atc',
+             "select count(*) from accounts where deleted_at is null and schedulable and status = 'active'"],
+            capture_output=True, timeout=8)
+        if _r.returncode == 0:
+            _n = int((_r.stdout or b'0').strip() or b'0')
+            out['accounts_schedulable'] = _n
+            out['accounts_ok'] = _n > 0
+    except (OSError, subprocess.SubprocessError, ValueError):
+        out['accounts_ok'] = None
     return out
 
 
