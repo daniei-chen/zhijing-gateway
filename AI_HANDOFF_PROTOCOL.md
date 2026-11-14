@@ -2583,3 +2583,44 @@ s.lastUsedTouchL1.Delete(id)
 **建议（未实施）**：`api_key_service.Delete` 的归属检查值得一个测试——
 它是唯一的越权防线，而现在它只靠代码审查保护。这是我在 59 轮里第一次明确建议
 「加测试」而不是「改实现」，因为实现是对的。
+
+### 6.62 纠正 6.61：API Key 的删除**有**完整测试，我说「回归保护是空的」是错的（2026-11-15 第 60 轮）
+
+**上一轮的建议建立在错误前提上，撤回。**
+
+6.61 我说「`api_key_handler` 的 CRUD 四个方法零覆盖，所以归属检查只靠代码审查保护，
+建议加测试」。这轮准备动手写测试，先查了一下——**测试文件早就在**：
+
+```
+backend/internal/service/api_key_service_delete_test.go   17,662 字节
+  TestApiKeyService_Delete_OwnerMismatch      ← 越权测试在
+  TestApiKeyService_Delete_Success
+  TestApiKeyService_Delete_NotFound
+  TestApiKeyService_Delete_DeleteFails
+```
+
+跑了一遍，四个全 PASS。
+
+**我错在**：只看了 `internal/handler` 的覆盖率报告（那是 0%），**就断言整个删除路径没有测试**。
+而实际上：
+
+- `handler` 层的 0% 是真的——它只有解析参数、调 service、写响应，**没人测 HTTP 包装**
+- `service` 层的归属检查**有 4 个测试**，正好覆盖越权拒绝、正常删除、找不到、删除失败
+
+**回归保护不是空的**。`ownerID != userID` 那条线有一整个测试盯着。
+
+**这是我第四次同类误判**：
+
+| 轮次 | 用一个层的观测推断另一层 |
+|---|---|
+| 36 | 用历史聚合推断当前状态 |
+| 30 | 用增量语义解读 `set` 操作 |
+| 54 | 用原生 SQL 推断 ORM 行为 |
+| **60** | **用 handler 覆盖率推断 service 测试覆盖** |
+
+形状完全一致：**在一个便宜的位置测量，然后对另一个位置下结论**。
+这次更蠢——那个测试文件的名字就叫 `api_key_service_delete_test.go`，`ls` 一下就能看到。
+
+**更正后的结论**：`api_key_handler` 的四个方法确实没有 HTTP 层测试，
+但它们调用的 service 方法有测试，**核心安全逻辑是被覆盖的**。
+要不要补 handler 层的测试是另一回事（成本高、收益低——handler 不做判断，只做转发）。
