@@ -1788,3 +1788,50 @@ set 150（11-01 21:29，覆盖当时余额）
 （这是对的——存内容会带来隐私和存储问题）。所以「形态已确认，内容不可知」。
 
 从 6.33 的「推断」升级为「形态已确认」。证据表里那一行相应调整。
+
+### 6.46 活跃索引里那个残留是怎么来的（2026-11-15 第 40 轮）
+
+6.37 查到 `concurrency:user:active_index` 里有一个用户 4 的成员，score 已过期 3.4 小时。
+当时验证了「无害」（`ZCOUNT [now,+inf]` 返回 0），但没解释「为什么没被清掉」。这轮追完了。
+
+**清理有两条路径，都是 best-effort。**
+
+**路径一：显式释放时刷新**（`refreshActiveIndex`）
+
+```go
+load, err := c.readActiveLoadForKey(ctx, id, slotKey, waitKey, now)
+member := strconv.FormatInt(id, 10)
+if load.slotCount == 0 && load.waitCount <= 0 {
+    if err := c.rdb.ZRem(ctx, indexKey, member).Err(); err != nil {
+        logger.LegacyPrintf(...)   // 只记日志，不返回错误
+    }
+}
+```
+
+函数注释写得很清楚：「索引维护是 best-effort：失败只记日志，不影响主流程」。
+所以**一次 ZRem 失败，成员就留在索引里了**。
+
+**路径二：启动时清扫**（部署/重启触发）
+
+```go
+accountMembers, _ := c.allIndexMembers(ctx, accountActiveIndexKey)
+c.cleanupStaleProcessSlotsForIndex(ctx, accountSlotIndex, accountMembers, ...)
+userMembers, _ := c.allIndexMembers(ctx, userActiveIndexKey)
+c.cleanupStaleProcessSlotsForIndex(ctx, userSlotIndex, userMembers, ...)
+```
+
+`cleanupStaleProcessSlotsForIndex` 对每个成员跑 `startupCleanupSlotScript` 清掉不属于当前进程的槽位，
+`remaining == 0` 就把成员标成 stale 后删掉。**这条路径能自愈**。
+
+**所以那个残留在的合理解释**：它在「上一次启动清扫之后、下一次启动清扫之前」产生，
+且产生它的那次 `refreshActiveIndex` 的 ZRem 没有成功（best-effort 语义允许失败）。
+中间没有重启，所以启动清扫没机会处理它。
+
+**为什么这不算问题**：
+
+1. **不影响正确性**：所有读索引的地方都用 `ZCOUNT [now, +inf]`，过期成员落在区间外（6.37 实测返回 0）
+2. **不增长**：`ZADD` 对同一 userID 覆盖更新，每用户最多一个成员，上限是用户总数
+3. **能自愈**：下次启动清扫会把它删掉
+
+**结论**：这是 best-effort 语义下的正常残留，有明确的产生路径、明确的兜底机制、明确的恢复路径。
+证据表里最后一条「推断」可以关掉了——**不是漏清，是允许失败的设计**。
