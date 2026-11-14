@@ -52,12 +52,12 @@ func RequestsTotal() int64 { return requestsTotal.Load() }
 // Render 输出 Prometheus 文本格式（version 0.0.4）。
 func Render() string {
 	var b strings.Builder
-	b.Grow(512)
+	b.Grow(1024)
 
 	writeSample(&b, "zhijing_uptime_seconds", "process uptime in seconds",
 		strconv.FormatFloat(time.Since(processStart).Seconds(), 'f', 0, 64))
 
-	writeSample(&b, "zhijing_http_requests_total", "total HTTP responses by status class",
+	writeSample(&b, "zhijing_http_requests_total", "total HTTP responses",
 		strconv.FormatInt(requestsTotal.Load(), 10))
 
 	for _, row := range []struct {
@@ -70,11 +70,11 @@ func Render() string {
 		{"4xx", &class4xx},
 		{"5xx", &class5xx},
 	} {
-		b.WriteString("zhijing_http_requests_by_class_total{class=\"")
-		b.WriteString(row.class)
-		b.WriteString("\"} ")
-		b.WriteString(strconv.FormatInt(row.value.Load(), 10))
-		b.WriteString("\n")
+		writeString(&b, "zhijing_http_requests_by_class_total{class=\"")
+		writeString(&b, row.class)
+		writeString(&b, "\"} ")
+		writeString(&b, strconv.FormatInt(row.value.Load(), 10))
+		writeString(&b, "\n")
 	}
 
 	writeSample(&b, "zhijing_go_goroutines", "number of goroutines",
@@ -83,16 +83,22 @@ func Render() string {
 	return b.String()
 }
 
+// writeString 包一层是为了让 errcheck 放过 strings.Builder：
+// 它的 WriteString 按文档永不返回错误，但 linter 不认这个特例。
+func writeString(b *strings.Builder, s string) {
+	_, _ = b.WriteString(s)
+}
+
 func writeSample(b *strings.Builder, name, help, value string) {
-	b.WriteString("# HELP ")
-	b.WriteString(name)
-	b.WriteString(" ")
-	b.WriteString(help)
-	b.WriteString("\n# TYPE ")
-	b.WriteString(name)
-	b.WriteString(" counter\n")
-	b.WriteString(name)
-	b.WriteString(" ")
-	b.WriteString(value)
-	b.WriteString("\n")
+	writeString(b, "# HELP ")
+	writeString(b, name)
+	writeString(b, " ")
+	writeString(b, help)
+	writeString(b, "\n# TYPE ")
+	writeString(b, name)
+	writeString(b, " counter\n")
+	writeString(b, name)
+	writeString(b, " ")
+	writeString(b, value)
+	writeString(b, "\n")
 }
