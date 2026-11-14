@@ -11,6 +11,10 @@ PUBLIC_HOST="${PUBLIC_HOST:-zhijing.kaogong.art}"
 HEALTH_TIMEOUT_SECONDS="${HEALTH_TIMEOUT_SECONDS:-180}"
 MEMORY_LIMIT="${MEMORY_LIMIT:-768m}"
 PIDS_LIMIT="${PIDS_LIMIT:-256}"
+# 2026-11-14：compose 里声明的 cpus: 1.50 在手工 docker run 下从来没有生效
+# （v0.1.4/v0.1.5 实测 CpuQuota/CpuPeriod/NanoCpus 全为 0）。这里显式带上，
+# 让候选实例与 compose 声明一致；--cpus 与 NanoCpus 等价，会同时设置 quota/period。
+CPU_LIMIT="${CPU_LIMIT:-1.5}"
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -67,6 +71,7 @@ run_args=(
   --security-opt no-new-privileges:true
   --pids-limit "$PIDS_LIMIT"
   --memory "$MEMORY_LIMIT"
+  --cpus "$CPU_LIMIT"
   --tmpfs /tmp:rw,noexec,nosuid,nodev,size=64m
   --label "org.opencontainers.image.ref.name=${IMAGE}"
 )
