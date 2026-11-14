@@ -38,6 +38,21 @@ def auto_restart_enabled():
     return os.environ.get(AUTO_RESTART_ENV,'').strip().lower() in ('1','true','yes')
 
 
+OPS_ALERT_KEYS=('cert_ok','backup_ok','disk_ok','db_ok','billing_ok','pitr_ok')
+
+
+def ops_requires_review(ops):
+    """任一运维基线为 False 时，把 health.json 标成需要人工处理。
+
+    2026-11-14：此前 ops 只写进 JSON，即使证书 14 天内到期、备份停了、磁盘超阈值，
+    manual_review_required 仍是 false —— 告警没有闭环。现在只要有一项为 False 就置位。
+    注意：值为 None 表示该项无法探测（例如容器缺失），不视为失败。
+    """
+    if not isinstance(ops,dict):
+        return False
+    return any(ops.get(key) is False for key in OPS_ALERT_KEYS)
+
+
 def _active_cert_paths():
     """返回 nginx 实际在用的证书文件路径。
 
@@ -342,11 +357,14 @@ def watch():
             # 整段被跳过——证书到期、备份新鲜度、磁盘、DB 连通性、计费积压、PITR
             # 六项观测在实际生产上从未执行过。观测必须在任何分支都跑。
             result['ops']=check_ops_baselines()
+            if ops_requires_review(result['ops']):
+                result['ops_alert']=True
             maybe_pitr_maintenance(now,result)
             private_json(state,result)
             print(json.dumps({'local_health':result['healthy'],'app_restarted':False,
                 'api_peer_healthy':result.get('api_peer_healthy'),
                 'manual_review_required':True,'restart_skipped':'container_unavailable',
+                'ops_alert':result.get('ops_alert',False),
                 'ops':result['ops'],'pitr':result.get('pitr')}))
             return
         # 2026-11-14：默认不再自动 docker restart。重启窗口内请求必然失败，与
@@ -357,11 +375,15 @@ def watch():
             run(['docker','restart','--time','60',APP],timeout=90)
             result.update(restarted=True,last_restart_epoch=now)
     result['ops']=check_ops_baselines()
+    if ops_requires_review(result['ops']):
+        result['ops_alert']=True
+        result['manual_review_required']=True
     maybe_pitr_maintenance(now,result)
     private_json(state,result)
     print(json.dumps({'local_health':result['healthy'],'app_restarted':result['restarted'],
         'api_peer_healthy':result.get('api_peer_healthy'),
         'manual_review_required':result.get('manual_review_required',False),
+        'ops_alert':result.get('ops_alert',False),
         'ops':result['ops'],'pitr':result.get('pitr')}))
 
 
