@@ -1377,3 +1377,48 @@ ssl_session_cache shared:ZHIJING_TLS:10m;  TLS 会话复用已开
 ```
 
 源站绕行那 0.6–1.1 秒是物理距离决定的（日本→边缘→再回来），不是配置问题，也没有优化空间。
+
+### 6.36 管理接口的认证强度（2026-11-15 第 28 轮）
+
+`/api/v1/admin/*` 的中间件链：`adminAuth` → `panelRateLimiter.Global()` → `auditLog` →
+`AdminComplianceGuard` → `ScopedAdminKeyAccounts`。**有限流、有审计、有合规守卫。**
+
+**三种认证方式**（`adminAuth`）：
+
+1. **WebSocket 子协议**（`Sec-WebSocket-Protocol: sub2api-admin, jwt.<token>`）——
+   浏览器 WS 不能设 header，这是必要的变通
+2. **`x-api-key`**（Admin API Key，`adm_sc_` 前缀走 scoped 分支）
+3. **`Authorization: Bearer <JWT>`**（标准）
+
+**JWT 验证是一条七步链**（`validateJWTForAdmin`）：
+
+| 步骤 | 检查 | 失败行为 |
+|---|---|---|
+| 1 | JWT 签名 + 过期 | 401 `TOKEN_EXPIRED` / `INVALID_TOKEN` |
+| 2 | Session 有效性（可撤销） | 401 `TOKEN_REVOKED`；**Redis 不可用 → 503** |
+| 3 | 用户存在 | 401 `USER_NOT_FOUND` |
+| 4 | 用户状态 | 401 `USER_INACTIVE` |
+| 5 | **TokenVersion** | 401（改密后旧 token 立即失效） |
+| 6 | **会话绑定**（IP/UA 变化即撤销） | 401 |
+| 7 | 管理员权限 | 403 `FORBIDDEN` |
+
+**三点值得单独说**：
+
+- **第 2 步是 fail-closed**：Redis 挂了返回 503 而不是放行。很多系统在这里 fail-open
+  （缓存不可用就当有效），那是给攻击者一个「打挂 Redis 就绕过认证」的入口。
+- **第 5 步 TokenVersion**：管理员改密码后，之前签发的所有 token 立刻失效，不用等 24 小时过期。
+- **第 6 步会话绑定**：IP 或 UA 任一变化就撤销会话。这是企业级防护，对 token 被复制到别处使用
+  有效。代价是用户换网络要重新登录。
+
+**另外**：`/settings/admin-api-key` 这个管理 API Key 自己的端点**只允许 JWT**，
+API Key 不能管理 API Key——避免了一把 key 泄露后自我复制。
+
+**JWT 有效期**（默认值）：
+
+```
+jwt.expire_hour               24     access token 24 小时
+jwt.refresh_token_expire_days 30     refresh token 30 天
+```
+
+24 小时对管理后台偏长，但配合 session binding + TokenVersion 撤销，风险可控。
+这一条我没有改——缩短会频繁打扰使用者，而现有两道撤销机制已经覆盖了主要风险。
