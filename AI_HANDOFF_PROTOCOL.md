@@ -1207,3 +1207,36 @@ tx.Commit()
    调小意味着等待中的请求更频繁地重试抢占，**抢到槽位更快、但 Redis 查询更密**。
    当前只有 1 个活跃用户，影响可以忽略；如果并发用户变多（比如 10 个请求同时等），
    每秒会多出约 40 次 Redis 查询。这是取舍，不是错误，但要知道它和默认值差了 8 倍。
+
+### 6.31 错误日志与用量记录能不能对上（2026-11-15 第 23 轮）
+
+想验证「每条错误是否都对应一条（或没有）用量记录」，结果先撞上一个前提问题。
+
+**两表的 `request_id` 是两套不同的标识，对不上。**
+
+```
+usage_logs.request_id       client:5cc49019-0b5d-4a12-995f-2b71e39ec985   ← 全部带 client: 前缀
+ops_error_logs.request_id   6182aa8c-9a24-4e75-ac28-c99832b3ade5        ← 裸 UUID
+```
+
+试着加上前缀再匹配（`'client:' || e.request_id`），**仍然是 0 条**——不是前缀问题，是根本不同的 ID。
+`usage_logs` 的 36,410 行全部是 `client:` 前缀（客户端传入的请求 id），
+`ops_error_logs` 的是网关自己生成的。
+
+**后果**：排查时无法从一条错误直接跳到它的用量记录（或反向）。
+**替代办法**：按 `user_id` + 时间窗口关联，能大致对上但做不到一对一。
+
+**顺带查清了一个容易误解的数字**：`ops_error_logs` 里有 **330 条 `status_code=200`** 的记录，
+看着像「成功请求却报了错」。实际内容是：
+
+```
+Recovered upstream error 503: Our servers are currently overloaded...   327
+Recovered upstream error 429: Rate limit exceeded                         2
+Recovered upstream error: Post "https://chatgpt.com/backend-api/codex/..." 1
+```
+
+**这是「已恢复的上游错误」**——上游抖了，网关重试或切号后成功，客户端拿到 200。
+记录它是为了观察上游健康度，不是错误。330 次抖动全部被成功恢复，说明 failover 是有效的。
+
+**第 300 条 502 / 154 条 503 才是真的没救回来的**，这部分和 429 的 1,786 条一起，
+构成了错误日志的主体。
