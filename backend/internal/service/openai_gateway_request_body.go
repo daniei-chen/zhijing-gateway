@@ -16,6 +16,7 @@ import (
 	"github.com/daniei-chen/zhijing-gateway/internal/pkg/apicompat"
 	"github.com/daniei-chen/zhijing-gateway/internal/pkg/ctxkey"
 	"github.com/daniei-chen/zhijing-gateway/internal/pkg/httputil"
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/logger"
 	"github.com/daniei-chen/zhijing-gateway/internal/util/urlvalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -2188,12 +2189,54 @@ func openAIFastPolicySettingsFromContext(ctx context.Context) *OpenAIFastPolicyS
 	return nil
 }
 
+// openAIAccountDeclaresServiceTier reports whether the account's upstream model
+// metadata explicitly advertises the given service_tier for the model.
+//
+// It answers true whenever it cannot decide — no model, no metadata, or no tier
+// list — so the guard only ever suppresses a tier the upstream has positively
+// documented as absent. That keeps accounts without a synced catalog on exactly
+// the pre-guard behaviour.
+func openAIAccountDeclaresServiceTier(account *Account, model, tier string) bool {
+	if account == nil {
+		return true
+	}
+	model = strings.TrimSpace(model)
+	tier = strings.TrimSpace(tier)
+	if model == "" || tier == "" {
+		return true
+	}
+	metadata, ok := account.GetUpstreamModelMetadata(model)
+	if !ok {
+		return true
+	}
+	raw, ok := metadata.CodexToolCapabilities["service_tiers"]
+	if !ok || len(raw) == 0 {
+		return true
+	}
+	var tiers []configuredCodexServiceTier
+	if err := json.Unmarshal(raw, &tiers); err != nil || len(tiers) == 0 {
+		return true
+	}
+	for _, candidate := range tiers {
+		if strings.EqualFold(strings.TrimSpace(candidate.ID), tier) {
+			return true
+		}
+	}
+	return false
+}
+
 // openAIGroupForcedServiceTier returns the service_tier that the trusted request
 // Group forces onto OpenAI-account requests: "ultrafast" for ForceOpenAIUltrafast,
 // "priority" for ForceOpenAIFast, "" when the group forces nothing. The admin
 // service keeps the two flags mutually exclusive; Ultrafast is checked first so
 // a row that somehow carries both still resolves deterministically.
-func openAIGroupForcedServiceTier(ctx context.Context, account *Account) string {
+//
+// Ultrafast is only forwarded when the account's upstream catalog advertises it
+// for this model. The catalog is the authority: forcing a tier a model does not
+// list can only be rejected or silently downgraded upstream, and the client sees
+// an unexplainable 4xx. When only priority is advertised we fall back to it and
+// log the reason; when neither is advertised we leave service_tier untouched.
+func openAIGroupForcedServiceTier(ctx context.Context, account *Account, model string) string {
 	if ctx == nil || account == nil || account.Platform != PlatformOpenAI {
 		return ""
 	}
@@ -2203,7 +2246,19 @@ func openAIGroupForcedServiceTier(ctx context.Context, account *Account) string 
 	}
 	switch {
 	case group.ForceOpenAIUltrafast:
-		return OpenAIFastTierUltrafast
+		if openAIAccountDeclaresServiceTier(account, model, OpenAIFastTierUltrafast) {
+			return OpenAIFastTierUltrafast
+		}
+		if openAIAccountDeclaresServiceTier(account, model, OpenAIFastTierPriority) {
+			logger.LegacyPrintf("service.openai",
+				"[OpenAI Fast] group %d forces ultrafast but model %q only advertises priority; falling back",
+				group.ID, model)
+			return OpenAIFastTierPriority
+		}
+		logger.LegacyPrintf("service.openai",
+			"[OpenAI Fast] group %d forces ultrafast but model %q advertises no compatible service_tier; skipping forced tier",
+			group.ID, model)
+		return ""
 	case group.ForceOpenAIFast:
 		return OpenAIFastTierPriority
 	default:
@@ -2230,7 +2285,7 @@ func (s *OpenAIGatewayService) applyOpenAIFastPolicyToBody(ctx context.Context, 
 	if len(body) == 0 {
 		return body, nil
 	}
-	if forcedTier := openAIGroupForcedServiceTier(ctx, account); forcedTier != "" {
+	if forcedTier := openAIGroupForcedServiceTier(ctx, account, model); forcedTier != "" {
 		updated, err := sjson.SetBytes(body, "service_tier", forcedTier)
 		if err != nil {
 			return body, fmt.Errorf("force group service_tier %s on body: %w", forcedTier, err)
@@ -2356,7 +2411,7 @@ func (s *OpenAIGatewayService) applyOpenAIFastPolicyToWSResponseCreate(
 	if frameType != "response.create" {
 		return frame, nil, nil
 	}
-	if forcedTier := openAIGroupForcedServiceTier(ctx, account); forcedTier != "" {
+	if forcedTier := openAIGroupForcedServiceTier(ctx, account, model); forcedTier != "" {
 		updated, err := sjson.SetBytes(frame, "service_tier", forcedTier)
 		if err != nil {
 			return frame, nil, fmt.Errorf("force group service_tier %s in ws frame: %w", forcedTier, err)
