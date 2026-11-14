@@ -29,6 +29,15 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+    user: "1000:1000"
+    read_only: true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    pids_limit: ${APP_PIDS_LIMIT:-256}
+    mem_limit: ${APP_MEMORY_LIMIT:-768m}
+    cpus: ${APP_CPU_LIMIT:-1.50}
     ulimits:
       nofile:
         soft: 100000
@@ -145,12 +154,11 @@ services:
       # =======================================================================
       # Security Configuration (URL Allowlist)
       # =======================================================================
-      # Enable URL allowlist validation (false to skip allowlist checks)
-      - SECURITY_URL_ALLOWLIST_ENABLED=${SECURITY_URL_ALLOWLIST_ENABLED:-false}
-      # Allow insecure HTTP URLs when allowlist is disabled (default: true; set to false to require https)
-      - SECURITY_URL_ALLOWLIST_ALLOW_INSECURE_HTTP=${SECURITY_URL_ALLOWLIST_ALLOW_INSECURE_HTTP:-true}
-      # Allow private IP addresses for upstream/pricing/CRS (default: true; set to false to block private hosts)
-      - SECURITY_URL_ALLOWLIST_ALLOW_PRIVATE_HOSTS=${SECURITY_URL_ALLOWLIST_ALLOW_PRIVATE_HOSTS:-true}
+      # Production-safe URL policy. Add intentional private/custom endpoints
+      # explicitly through .env instead of disabling SSRF checks globally.
+      - SECURITY_URL_ALLOWLIST_ENABLED=${SECURITY_URL_ALLOWLIST_ENABLED:-true}
+      - SECURITY_URL_ALLOWLIST_ALLOW_INSECURE_HTTP=${SECURITY_URL_ALLOWLIST_ALLOW_INSECURE_HTTP:-false}
+      - SECURITY_URL_ALLOWLIST_ALLOW_PRIVATE_HOSTS=${SECURITY_URL_ALLOWLIST_ALLOW_PRIVATE_HOSTS:-false}
       # Upstream hosts whitelist (comma-separated, only used when enabled=true)
       - SECURITY_URL_ALLOWLIST_UPSTREAM_HOSTS=${SECURITY_URL_ALLOWLIST_UPSTREAM_HOSTS:-}
 

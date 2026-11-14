@@ -17,6 +17,15 @@ services:
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
+    user: "1000:1000"
+    read_only: true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m
+    pids_limit: ${APP_PIDS_LIMIT:-256}
+    mem_limit: ${APP_MEMORY_LIMIT:-768m}
+    cpus: ${APP_CPU_LIMIT:-1.50}
     ulimits:
       nofile:
         soft: 100000

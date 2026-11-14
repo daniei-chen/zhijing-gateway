@@ -591,19 +591,20 @@ Header names are validated, canonicalized, and de-duplicated. The admin security
 
 **⚠️ Security Warning: HTTP URL Configuration**
 
-When `security.url_allowlist.enabled=false`, the system performs minimal URL validation and **allows HTTP URLs by default** (dev-friendly mode; Docker Compose deployments use the same default). For production, explicitly tighten this to HTTPS-only:
+The application defaults to URL allowlist and SSRF validation enabled, blocks private hosts, and requires HTTPS. Setting `security.url_allowlist.enabled=false` is an explicit trusted-network exception that falls back to minimal URL validation and allows HTTP only when `allow_insecure_http=true`. Production Compose templates keep the secure defaults:
 
 ```yaml
 security:
   url_allowlist:
-    enabled: false                # Disable allowlist checks
-    allow_insecure_http: false    # HTTPS only (recommended for production)
+    enabled: true                 # Keep allowlist checks enabled
+    allow_private_hosts: false    # Block private/local destinations
+    allow_insecure_http: false    # HTTPS only
 ```
 
 **Or via environment variable:**
 
 ```bash
-SECURITY_URL_ALLOWLIST_ENABLED=false
+SECURITY_URL_ALLOWLIST_ENABLED=true
 SECURITY_URL_ALLOWLIST_ALLOW_INSECURE_HTTP=false
 ```
 

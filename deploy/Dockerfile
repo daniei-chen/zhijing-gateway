@@ -7,7 +7,7 @@
 # =============================================================================
 
 ARG NODE_IMAGE=node:24-alpine
-ARG GOLANG_IMAGE=golang:1.27.2-alpine
+ARG GOLANG_IMAGE=golang:1.27.4-alpine
 ARG ALPINE_IMAGE=alpine:3.20
 ARG GOPROXY=https://goproxy.cn,direct
 ARG GOSUMDB=sum.golang.google.cn
@@ -18,11 +18,11 @@ ARG GOSUMDB=sum.golang.google.cn
 FROM ${NODE_IMAGE} AS frontend-builder
 
 WORKDIR /app/frontend
-ENV NODE_OPTIONS=--max-old-space-size=1536
+ENV NODE_OPTIONS=--max-old-space-size=2048
 
-# Install pnpm. Keep this pinned to the lockfile-compatible major version so
-# Docker builds remain reproducible when pnpm changes config validation rules.
-RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+# Keep the Docker builder on the exact package-manager version declared by the
+# frontend package so lockfile resolution is reproducible in CI and releases.
+RUN corepack enable && corepack prepare pnpm@11.22.0 --activate
 
 # Install dependencies first (better caching)
 COPY frontend/package.json frontend/pnpm-lock.yaml ./

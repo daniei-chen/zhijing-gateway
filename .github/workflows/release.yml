@@ -89,7 +89,7 @@ jobs:
           ref: ${{ needs.prepare.outputs.sha }}
       - uses: pnpm/action-setup@v6
         with:
-          version: 9
+          version: 11.22.0
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
@@ -137,7 +137,7 @@ jobs:
           check-latest: false
           cache: false
       - name: Verify Go version
-        run: go version | grep -q 'go1.27.3'
+        run: go version | grep -q 'go1.27.4'
       - name: Restore target-specific Go cache
         id: go-cache
         uses: actions/cache/restore@v6

@@ -140,6 +140,18 @@ export default defineConfig(({ mode }) => {
               return 'vendor-stripe'
             }
 
+            // Keep opt-in admin/export libraries out of the shared vendor
+            // chunk so normal user routes do not pay their parse cost.
+            if (id.includes('/exceljs/')) {
+              return 'vendor-excel'
+            }
+            if (id.includes('/mermaid/')) {
+              return 'vendor-mermaid'
+            }
+            if (id.includes('/katex/')) {
+              return 'vendor-katex'
+            }
+
             // 其他小型第三方库合并
             return 'vendor-misc'
           }

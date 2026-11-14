@@ -35,7 +35,7 @@ jobs:
           cache-dependency-path: backend/go.sum
       - name: Verify Go version
         run: |
-          go version | grep -q 'go1.27.3'
+          go version | grep -q 'go1.27.4'
       - name: Unit tests
         working-directory: backend
         run: make test-unit
@@ -50,7 +50,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v6
         with:
-          version: 9
+          version: 11.22.0
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -60,8 +60,18 @@ jobs:
       - name: Install frontend dependencies
         working-directory: frontend
         run: pnpm install --frozen-lockfile
-      - name: Frontend typecheck and critical vitest
-        run: make test-frontend
+      - name: Frontend lint
+        working-directory: frontend
+        run: pnpm run lint:check
+      - name: Frontend typecheck
+        working-directory: frontend
+        run: pnpm run typecheck
+      - name: Frontend full test suite
+        working-directory: frontend
+        run: pnpm test:run
+      - name: Frontend production build
+        working-directory: frontend
+        run: pnpm run build
 
   golangci-lint:
     runs-on: ubuntu-latest
@@ -75,7 +85,7 @@ jobs:
           cache-dependency-path: backend/go.sum
       - name: Verify Go version
         run: |
-          go version | grep -q 'go1.27.3'
+          go version | grep -q 'go1.27.4'
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:

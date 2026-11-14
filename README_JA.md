@@ -586,19 +586,20 @@ SECURITY_FORWARDED_CLIENT_IP_HEADERS=True-Client-IP,X-CDN-Client-IP
 
 **⚠️ セキュリティ警告: HTTP URL 設定**
 
-`security.url_allowlist.enabled=false` の場合、システムは最小限の URL バリデーションのみを行い、**デフォルトで HTTP URL を許可**します（開発フレンドリーモード。Docker Compose デプロイのデフォルトも同じです）。本番環境では、以下のように明示的に HTTPS のみに制限することを推奨します:
+アプリケーションはデフォルトで URL allowlist と SSRF 検証を有効にし、プライベートホストを拒否して HTTPS を要求します。`security.url_allowlist.enabled=false` は信頼済みネットワーク向けの明示的な例外であり、その場合は最小限の URL 検証に戻り、`allow_insecure_http=true` の場合だけ HTTP を許可します。本番用 Compose テンプレートは安全な既定値を維持します:
 
 ```yaml
 security:
   url_allowlist:
-    enabled: false                # 許可リストチェックを無効化
-    allow_insecure_http: false    # HTTPS のみ許可（本番環境推奨）
+    enabled: true                 # 許可リストチェックを有効化
+    allow_private_hosts: false    # プライベート/ローカル宛先を拒否
+    allow_insecure_http: false    # HTTPS のみ許可
 ```
 
 **または環境変数で設定:**
 
 ```bash
-SECURITY_URL_ALLOWLIST_ENABLED=false
+SECURITY_URL_ALLOWLIST_ENABLED=true
 SECURITY_URL_ALLOWLIST_ALLOW_INSECURE_HTTP=false
 ```
 
