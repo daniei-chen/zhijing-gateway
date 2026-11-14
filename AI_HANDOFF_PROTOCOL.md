@@ -793,3 +793,44 @@ v0.1.19 在打 tag 之前跑了，`0 issues`，CI 一次过。**以后每次发�
 上游检查从来没执行，`upstream_head.json` 一直是空的。移到函数开头（early return 之前）才生效。
 
 顺带把写 `ops_system_logs` 的 SQL 抽成了 `write_system_log()`，基础设施告警和上游检测共用。
+
+### 6.20 前端切换：一条命令，已 dry-run 验证（2026-11-15 第 10 轮）
+
+针对 6.14 那个「线上前端是 11-01 / 11-06 两套陈旧产物」的问题，切换工具已备好并验证过。
+
+**改什么**（只动主域名 HTTPS 块的两处）：
+
+| location | 现在 | 切换后 |
+|---|---|---|
+| `location /` | `try_files $uri $uri/ @zhijing_sub2api_spa`（读 `/var/www/zhijing-homepage`） | `proxy_pass http://zhijing_api`（后端内嵌 dist） |
+| `location /assets/` | `root` 继承 homepage → `try_files $uri =404` | `proxy_pass http://zhijing_api` |
+
+两处必须在**同一次 reload** 里生效——nginx 只在 reload 时读取整份配置，只改 `/assets/`
+会让还在加载旧 index.html 的客户端拿不到 chunk。
+
+**三个入口**：
+
+```bash
+bash /root/switch-frontend-to-proxy.sh --dry-run   # 改配置 → nginx -t → 立刻还原，不 reload
+bash /root/switch-frontend-to-proxy.sh apply       # 真正切换（reload）
+bash /root/switch-frontend-to-proxy.sh --rollback  # 用最近备份还原并 reload
+```
+
+**dry-run 实测结果**：
+
+```
+rewrote location / and location /assets/ to proxy to zhijing_api
+nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+DRY_RUN_OK: rewritten config passes nginx -t
+restored original, still valid
+```
+
+线上确认未变（仍是 `zhijing-entry.js` + `/assets/index-BFVAedJu.js`，11-01 的构建）。
+
+**切换后的预期**：首页、静态资源全部由镜像内嵌的 dist 提供（与源码同步），
+`/metrics`、`/readyz` 等 proxy 路径不受影响。回滚就是 `--rollback` 一条命令，
+配置改动只有两段 location，语义清晰。
+
+**风险**：这是**用户可见的界面替换**——11-01 的旧前端换成当前源码构建。功能上更完整
+（含 v0.1.10 的分组强制档位选择器），但界面细节可能与用户记忆中的不同。
+备份目录 `/root/zhijing-frontend-switch/`。
