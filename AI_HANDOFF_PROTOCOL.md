@@ -2399,3 +2399,33 @@ docker exec ... touch /app/data/.write-probe  →  WRITABLE
 
 **顺带确认**：`numeric field overflow` 那 4 条就是 6.44 里追过的天文数字余额操作（1e16 / 1e20），
 数据库拦住了，符合预期。
+
+### 6.58 `warn` 4,549 条逐层看：全是预期内的降级（2026-11-15 第 56 轮）
+
+`handler.openai_gateway.*` 占了 4,298 条，按消息聚合：
+
+| 消息 | 次数 | 是什么 |
+|---|---|---|
+| `user_slot_acquire_failed` | **1,842** | 并发槽位抢不到（与 1,785 次 429 吻合） |
+| `account_select_failed` | **779** | 没有可用账号（与 503 吻合） |
+| `upstream_failover_switching` | 587 | 上游失败后切号——**正常降级** |
+| `read request body failed` | 452 | 请求体读到一半失败 |
+| `pool_mode_same_account_retry` | 393 | 池模式重试同账号——**正常降级** |
+| `websocket_read_first_message_failed` | 165 | WS 首帧读取失败 |
+
+**四条主要消息都能对上已知现象**，没有一条是新问题。
+
+**`read request body failed` 单独查了**：`extra` 里只有 path / method / user_id，
+没有具体错误原因，但其中一批带 `"status": 499`——**499 是「客户端主动断开」**。
+154 次落在 `/v1/chat/completions`（user 2）、49 次 `/v1/responses`（user 2）。
+这是浏览器关闭、用户取消、客户端超时这一类的正常现象，用 `warn` 记录也恰当。
+
+**结论：日志分级是健康的。**
+
+- `error` 只有 94 条，其中 71 条是价格表服务的历史噪音（6.57）
+- `warn` 记录的是「降级发生了但请求还活着」——并发排队、切号、客户端断开
+- 没有「同一个 error 反复刷屏」的模式
+
+**这轮没找到问题，但确认了一件有价值的事**：这个系统的日志没有把正常降级当错误报，
+也没有把真实故障降级成 warn 藏起来。**噪音比是合理的**——4,549 条 warn 里没有一条需要人去看，
+94 条 error 里 71 条可以忽略、23 条是零散的真实事件。
