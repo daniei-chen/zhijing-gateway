@@ -39,7 +39,7 @@ def auto_restart_enabled():
 
 
 OPS_ALERT_KEYS=('cert_ok','backup_ok','disk_ok','db_ok','billing_ok','pitr_ok',
-                'gateway_ok','accounts_ok')
+                'gateway_ok','accounts_ok','model_catalog_ok','model_route_ok')
 
 
 def ops_requires_review(ops):
@@ -282,6 +282,50 @@ def check_ops_baselines():
             out['accounts_ok'] = _n > 0
     except (OSError, subprocess.SubprocessError, ValueError):
         out['accounts_ok'] = None
+    # ── 上游模型目录新鲜度（2026-11-15 round 2）─────────────────────────
+    # 2026-11-14 有 4 次 `Model "gpt-5.6-luna" is not supported by any configured
+    # account`（11:35 / 18:37 / 18:43），根因不是网关判定错，而是账号
+    # extra.upstream_model_metadata 还没同步到 5.6 系列——路由按旧目录判定
+    # "没有账号支持该模型"。19:44 同步进来后同一个模型就再没 404 过。
+    #
+    # 这类漂移会反复发生（上游上新模型/改名），而且所有技术探针都是绿的：
+    # /readyz ok、账号 schedulable、5xx 为 0，坏掉的只是"某个模型还能不能用"。
+    # 所以这里把「目录多久没同步」和「近 6 小时有多少 model_not_found」变成可见信号。
+    try:
+        _r = subprocess.run(
+            ['docker', 'exec', 'zhijing-sub2api-japan-postgres-1',
+             'psql', '-U', 'zhijing_trial', '-d', 'zhijing_trial', '-Atc',
+             "select coalesce(round(min(extract(epoch from (now() - "
+             "(extra->'upstream_model_metadata'->>'synced_at')::timestamptz)))/3600.0, 1), -1) "
+             "from accounts where deleted_at is null and schedulable "
+             "and extra->'upstream_model_metadata'->>'synced_at' is not null"],
+            capture_output=True, timeout=8)
+        if _r.returncode == 0:
+            _age = float((_r.stdout or b'-1').strip() or b'-1')
+            if _age >= 0:
+                out['model_catalog_age_hours'] = _age
+                out['model_catalog_ok'] = _age < 72.0
+            else:
+                out['model_catalog_age_hours'] = None
+                out['model_catalog_ok'] = None
+    except (OSError, subprocess.SubprocessError, ValueError):
+        out['model_catalog_ok'] = None
+    try:
+        _r = subprocess.run(
+            ['docker', 'exec', 'zhijing-sub2api-japan-postgres-1',
+             'psql', '-U', 'zhijing_trial', '-d', 'zhijing_trial', '-Atc',
+             "select count(*) from ops_error_logs "
+             "where created_at > now() - interval '6 hours' "
+             "and status_code = 404 and error_type = 'model_not_found'"],
+            capture_output=True, timeout=8)
+        if _r.returncode == 0:
+            _n = int((_r.stdout or b'0').strip() or b'0')
+            out['model_not_found_6h'] = _n
+            # 阈值刻意放宽到 10：客户端偶尔试一个不存在的模型名属正常，
+            # 持续 6 小时大面积 404 才是目录漂移或白名单配错。
+            out['model_route_ok'] = _n < 10
+    except (OSError, subprocess.SubprocessError, ValueError):
+        out['model_route_ok'] = None
     return out
 
 
