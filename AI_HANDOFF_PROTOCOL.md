@@ -2817,3 +2817,55 @@ TODO 那条注释（「改成禁用触发的 Key 而不是封人」）是个更�
 管理员账号被盗用，这个豁免就会让违规行为完全没有后果——**只剩一行 warn 日志**。
 
 **没有改**：改这条要动封禁策略，属于产品决策。
+
+### 6.67 「测试代理连接」永远是假成功，而它被真的点过 15 次（2026-11-15 第 65 轮）
+
+`proxy_service.go:179`：
+
+```go
+func (s *ProxyService) TestConnection(ctx context.Context, id int64) error {
+	proxy, err := s.proxyRepo.GetByID(ctx, id)
+	if err != nil {
+		return fmt.Errorf("get proxy: %w", err)
+	}
+	// TODO: 实现代理连接测试逻辑
+	_ = proxy
+	return nil          // ← 永远成功，一次网络请求都没发
+}
+```
+
+**这次不是死代码，是真的在用。**
+
+**接线完整**：
+
+```
+路由     admin.go:536   proxies.POST("/:id/test", h.Admin.Proxy.Test)
+前端     ProxySelector.vue:266   adminAPI.proxies.testProxy(proxy.id)
+         ProxiesView.vue:1572    adminAPI.proxies.testProxy(proxyId)
+         ProxySelector.vue:284   批量测试：props.proxies.map(handleTestProxy)
+```
+
+**审计日志确认被调用 15 次**：
+
+```
+11-11 23:52:25  POST /api/v1/admin/proxies/:id/test  200
+11-11 23:52:24  POST /api/v1/admin/proxies/:id/test  200
+11-10 01:11:16  POST /api/v1/admin/proxies/:id/test  200
+...
+```
+
+**所以：管理员在后台点「测试代理」15 次，每次都看到成功，而实际上一次网络请求都没发出。**
+
+**当前有没有造成损害**：1 个活跃账号配置了代理，而它的请求是成功的——
+**代理可能真的可用**。也就是说，这 15 次假测试没有骗到人，纯粹是运气好。
+
+**风险**：如果代理真的失效，界面上「测试通过」会让人继续用它，
+而代理失效的后果是请求走直连（**IP 暴露**）或全部失败。**这个功能存在的意义就是提前发现这种事，
+而它什么都没发现。**
+
+**为什么没改**：实现真正的代理测试要发 HTTP 请求验证连通性，涉及超时、认证、TLS 等细节，
+是完整的开发任务，不是审计里顺手能补的。**记录，不修。**
+
+**这是 65 轮里第二个「接了线、被使用、但实现是空壳」的功能**（第一个是本轮之前的
+`content_moderation` 管理员豁免——那是有意的；这个是无意的）。它比 62/63 轮那两个死代码严重，
+因为**用户真的按了那个按钮**。
