@@ -1062,3 +1062,43 @@ upstream, cancel := context.WithTimeout(context.WithoutCancel(ctx), maximum)
 **结论**：这条「不绑 ctx」的路径不是疏忽，是被三道锁共同保证的。
 25 分钟 / 40 分钟这两个数字的关系（上限 < TTL）是关键——如果哪天有人把
 `OpenAIForwardMaxSeconds` 调大到 40 分钟以上，这个保证就破了。**改这个配置时要看一眼槽位 TTL**。
+
+### 6.27 并发计数：配置变更和 regular/live 两套槽位的一致性（2026-11-15 第 19 轮）
+
+**场景一：管理员把账号 `concurrency` 从 10 改成 3，而 Redis 里已经有 7 个占用的槽位。**
+
+`acquireScript` 的逻辑是：
+
+```lua
+redis.call('ZREMRANGEBYSCORE', key, '-inf', expireBefore)   -- 先清过期
+local count = redis.call('ZCARD', key) + redis.call('ZCARD', liveKey)
+if count < maxConcurrency then
+    redis.call('ZADD', key, now, requestID)                 -- 再占
+    return {1, now}
+end
+return {0, now}
+```
+
+`7 < 3` 不成立 → 返回 0，**新请求被拒**，直到现有槽位自然释放到 3 以下。**行为正确**，
+调小配置不会突破上限，代价是那段时间会拒绝新请求（符合预期）。
+
+**场景二：`regular` 和 `live` 两套 ZSET 会被相加，会不会重复计数？**
+
+`count = ZCARD(key) + ZCARD(liveKey)`。查了 live lease 的获取路径（`openai_live.go:183`）：
+
+```go
+acquired, acquireErr := liveCache.AcquireLiveLease(..., true)   // replacingRegularSlots=true
+...
+created, createErr := s.createUpstreamLiveCall(ctx, account, request, attestation)
+selection.ReleaseFunc()                                          // 紧接着释放普通槽位
+```
+
+`replacing=true` 会让脚本把上限放宽 1（`allowance = 1`），因为调用方**已经**持有普通槽位，
+需要在切换的瞬间同时持有两者。拿到 live lease 后立刻 `selection.ReleaseFunc()`，净效果只占一个。
+
+所以那个「+1」是**有意的短暂超额**，窗口长度等于一次 `createUpstreamLiveCall` 的耗时，
+不是泄漏，也不是重复计数。
+
+**维护提醒**：如果哪天 `createUpstreamLiveCall` 变慢（或加了重试），这个窗口会拉长，
+期间账号的实际并发会超过配置值 1 个。这是可接受的，但要知道它存在——`allowance` 这个设计
+是「短暂超额」而不是「永久放宽」。
