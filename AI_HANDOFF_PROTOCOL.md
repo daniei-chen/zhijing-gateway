@@ -2681,3 +2681,56 @@ gateway.GET("/live/:call_id", h.OpenAIGateway.LiveSideband)
 
 **我建议第 3 条或第 2 条，但决定权在主人。** 这里只把事实摆清楚：
 **一个不计费的功能端点，正在对任何持 Key 的用户开放，而它从未被使用过。**
+
+### 6.64 分组统计接口返回硬编码 0，但前端根本没调用它（2026-11-15 第 62 轮）
+
+`group_handler.go:932` 的 `GetStats`：
+
+```go
+// GET /api/v1/admin/groups/:id/stats
+groupID, err := strconv.ParseInt(c.Param("id"), 10, 64)
+...
+// Return mock data for now
+response.Success(c, gin.H{
+    "total_api_keys":  0,
+    "active_api_keys": 0,
+    "total_requests":  0,
+    "total_cost":      0.0,
+})
+_ = groupID // TODO: implement actual stats
+```
+
+**无论哪个分组、实际有多少 Key 和请求，这个接口永远返回全零。**
+
+**但查了前端：没有任何组件调用它。**
+
+```
+frontend/src/api/admin/groups.ts:248   export async function getStats(id)
+frontend/src/api/admin/groups.ts:486   getStats,        ← 只在导出对象里
+（.vue 组件里零调用）
+```
+
+真正被用的是**另一个**接口：
+
+```
+frontend/src/api/admin/dashboard.ts:162  getGroupStats() → /admin/dashboard/groups   ← 真实数据
+```
+
+**所以这是个死接口**：后端返回假数据、前端定义了函数但没人调。**用户看不到任何错误数字。**
+
+**同一组里的其他统计接口都是真的**：
+
+| 接口 | 实现 |
+|---|---|
+| `GET /groups/:id/stats` | **硬编码 0** ❌ |
+| `GET /groups/usage-summary` | `dashboardService.GetGroupUsageSummary` ✅ |
+| `GET /groups/capacity-summary` | `groupCapacityService.GetAllGroupCapacity` ✅ |
+| `GET /groups/:id/api-keys` | 真实查询 ✅ |
+
+**结论：无害，但建议删掉。** 理由不是「它会显示错数字」（它不会，没人用），
+而是「它留在代码里会让下一个接手的人以为分组统计是坏的」，或者花了时间接上才发现
+前端从来没用过。删一个没人调用的接口是零风险的，但那是代码改动，需要发版，这轮不动。
+
+**这轮的方法值得记一笔**：从 TODO 出发 → 读实现（确认返回假数据）→ **查前端调用方**（确认无人使用）。
+三步里最有价值的是第三步——如果只做前两步，我会报一个「用户看到全零」的假问题，
+和 6.42 那次（拿历史 404 当当前故障）是同一个错误。
