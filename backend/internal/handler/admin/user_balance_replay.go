@@ -30,7 +30,7 @@ func (h *UserHandler) ReplayBalanceUpdate(c *gin.Context) {
 		Body   UpdateBalanceRequest `json:"body"`
 	}{UserID: userID, Body: req}
 	result, err := service.DefaultIdempotencyCoordinator().Replay(c.Request.Context(), service.IdempotencyExecuteOptions{
-		Scope: "admin.users.balance.update", ActorScope: adminActorScope(c),
+		Scope: "admin.users.balance.update", ActorScope: adminReplayActorScope(c),
 		Method: c.Request.Method, Route: strings.TrimSuffix(c.FullPath(), "/replay"),
 		IdempotencyKey: c.GetHeader("Idempotency-Key"), Payload: payload,
 	})

@@ -72,13 +72,18 @@ func executeAdminIdempotentWithTimeout(
 }
 
 func adminActorScope(c *gin.Context) string {
-	// A real scoped key always has a stable KeyID. Treat an ID-less principal as
-	// the JWT actor context used by the original write so replay routes can
-	// confirm a result after authorization middleware has attached an incomplete
-	// synthetic/test principal.
-	if principal := adminaccess.FromContext(c.Request.Context()); principal != nil && principal.KeyID != "" {
+	// Bind idempotency to the effective authorization principal. A scoped
+	// principal may have no KeyID in compatibility or synthetic contexts, but a
+	// non-empty policy still must not share a replay scope with a JWT admin or
+	// another policy. An empty principal is the compatibility representation of
+	// the JWT actor and intentionally keeps that actor's scope for replay.
+	if principal := adminaccess.FromContext(c.Request.Context()); principal != nil &&
+		(principal.KeyID != "" || principal.Policy.FullAccess || len(principal.Policy.Rules) > 0 || len(principal.Policy.GlobalPermissions) > 0) {
 		policy, _ := json.Marshal(principal.Policy)
 		digest := sha256.Sum256(policy)
+		if principal.KeyID == "" {
+			return "admin-principal:" + strconv.FormatInt(principal.CreatorID, 10) + ":" + hex.EncodeToString(digest[:])
+		}
 		return "admin-key:" + principal.KeyID + ":" + hex.EncodeToString(digest[:])
 	}
 	actorScope := "admin:0"
@@ -86,6 +91,18 @@ func adminActorScope(c *gin.Context) string {
 		actorScope = "admin:" + strconv.FormatInt(subject.UserID, 10)
 	}
 	return actorScope
+}
+
+// Replay routes may be authorized by a compatibility principal without a
+// KeyID. They must still locate a result created by the same JWT actor, while
+// keyed principals keep their own isolated replay namespace.
+func adminReplayActorScope(c *gin.Context) string {
+	if principal := adminaccess.FromContext(c.Request.Context()); principal != nil && principal.KeyID == "" {
+		if subject, ok := middleware2.GetAuthSubjectFromContext(c); ok {
+			return "admin:" + strconv.FormatInt(subject.UserID, 10)
+		}
+	}
+	return adminActorScope(c)
 }
 
 func executeAdminIdempotentJSON(

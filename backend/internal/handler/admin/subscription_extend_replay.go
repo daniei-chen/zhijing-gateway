@@ -27,7 +27,7 @@ func (h *SubscriptionHandler) ReplayExtend(c *gin.Context) {
 		Body           AdjustSubscriptionRequest `json:"body"`
 	}{SubscriptionID: id, Body: req}
 	result, err := service.DefaultIdempotencyCoordinator().Replay(c.Request.Context(), service.IdempotencyExecuteOptions{
-		Scope: "admin.subscriptions.extend", ActorScope: adminActorScope(c),
+		Scope: "admin.subscriptions.extend", ActorScope: adminReplayActorScope(c),
 		Method: c.Request.Method, Route: strings.TrimSuffix(c.FullPath(), "/replay"),
 		IdempotencyKey: c.GetHeader("Idempotency-Key"), Payload: payload,
 	})
