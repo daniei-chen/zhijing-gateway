@@ -15,17 +15,17 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 
 ## 2. 当前已验证生产状态
 
-截至 2026-11-15 02:20（北京时间），生产版本是 **v0.1.13**（告警邮件失败不再静默）：
+截至 2026-11-15 03:20（北京时间），生产版本是 **v0.1.14**（删除分组前必须解绑 API Key）：
 
-- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.13（「智境网关 0.1.13」）
-- 源码提交：`222ea950c`
-- GHCR digest：`sha256:c3955e7f931cf734e9569727f935047027a399d941d0e7e40a4e671bab4156f7`
-- 当前容器：`zhijing-api-v0113-final`，loopback 端口 **18810**
-- 回滚容器：18809（v0.1.12）、18808（v0.1.11）、18807（v0.1.10）、18806（v0.1.9）
-- **v0.1.13 切换证据**：`candidate: business readiness ok (deep probe)` 之后
+- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.14（「智境网关 0.1.14」）
+- 源码提交：`01622b632`
+- GHCR digest：`sha256:50d842703bd6bb73f5d7bcf1f388ed955fc3c9bdac446c21c399d43bfbba8d08`
+- 当前容器：`zhijing-api-v0114-final`，loopback 端口 **18811**
+- 回滚容器：18810（v0.1.13）、18809（v0.1.12）、18808（v0.1.11）、18807（v0.1.10）、18806（v0.1.9）
+- **v0.1.14 切换证据**：`candidate: business readiness ok (deep probe)` 之后
   `observe: 0 new 5xx within 180s, within limit`；容器 `restart=0`，切换窗口 0 条错误日志。
-- **v0.1.13 修复**：告警邮件发送失败不再静默。逐收件人记录脱敏地址 + 事件 ID + 规则名 + 错误，
-  0/N 全失败时额外记汇总提示查 SMTP。见 6.9——这条链路此前整条断裂（334 条事件、0 发送）。
+- **v0.1.14 行为变化**：`DELETE /api/v1/admin/groups/:id` 在该分组仍有活跃 API Key 时返回
+  `409 GROUP_HAS_ACTIVE_KEYS`；要强制删除必须显式 `?force=true`。详见 6.12。
 
 ### 2.1 这一夜（00:30–02:20）发布的四个版本
 
@@ -538,3 +538,30 @@ git am deploy/zhijing/patches/0001-ci-race-job.patch   # 在有 workflow scope �
 
 或者直接在 GitHub 网页编辑 `backend-ci.yml`，把 patch 里的 `race:` job 粘进去
 （它插在 `test:` 与 `frontend:` 之间）。
+
+### 6.12 删除分组会静默制造孤儿 Key（2026-11-15 第 2 轮，v0.1.14 已修）
+
+`api_keys.group_id` 的外键定义是 **`ON DELETE SET NULL`**：
+
+```sql
+api_keys | api_keys_group_id_fkey | FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE SET NULL
+```
+
+所以删掉一个分组，它名下所有 API Key 的 `group_id` 会被**静默置空**，这些 key 立刻无法调度。
+2026-11-14 19:10 的全站 503 正是这个形态：27 个 5xx，而 `/readyz`、账号状态、Redis 全绿。
+
+更糟的是**非 simple mode 完全没有保护**——`DeleteGroup` 直接调 `groupRepo.DeleteCascade`，
+管理员误点一次就中断服务。simple mode 走的 `DeleteGroupIfEmpty` 才有守卫。
+
+v0.1.14 起：
+
+- `DeleteGroup` 先查 `ListKeysByGroupID`，有活跃 key 就返回
+  `409 GROUP_HAS_ACTIVE_KEYS`，消息里带数量。
+- 逃生门显式化：`DeleteGroupForce`，handler 只在 `?force=true|1|yes` 时走它。
+  让「绕过保护」成为写出来的决定，而不是一次误点。
+- `DeleteGroupIfEmpty` 行为不变。
+
+**运维口诀**：要删分组，先把 key 换到别的分组或删掉。别用 force 图省事——
+那等于把 key 变孤儿。
+
+顺带把删分组相关的 8 个测试都跑了一遍（含新增的「有 key 拒绝」「无 key 放行」），全绿。
