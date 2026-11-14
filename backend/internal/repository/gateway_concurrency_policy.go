@@ -158,9 +158,28 @@ func (c *concurrencyCache) gatewayPolicyResult(result int64, maximum int) (bool,
 	return result == 1, nil
 }
 
-func (c *concurrencyCache) gatewayUserMaximum(maximum int) int {
-	if c.memberLimit > 0 && (maximum <= 0 || c.memberLimit < maximum) {
-		return c.memberLimit
+// effectiveMemberHardLimit 返回仓库层认可的硬上限。
+//
+// 2026-11-14：过去这里固定用 c.memberLimit，导致 service 层按动态策略算好的放宽值
+// （活跃用户 <=1 时的 peak）在这里被抹回静态值——线上表现为配了 PEAK=5，第 4 个
+// 并发仍被拒并提示"上限 3"。现在硬上限本身也随活跃用户数动态取值：
+// 只有 0-1 个用户在线时才允许放宽到 memberLimitPeak。读不到就退回静态值。
+func (c *concurrencyCache) effectiveMemberHardLimit(ctx context.Context) int {
+	hard := c.memberLimit
+	if c.memberLimitPeak <= hard {
+		return hard
+	}
+	active, err := c.ActiveUserCount(ctx)
+	if err != nil || active < 0 || active > 1 {
+		return hard
+	}
+	return c.memberLimitPeak
+}
+
+func (c *concurrencyCache) gatewayUserMaximum(ctx context.Context, maximum int) int {
+	hard := c.effectiveMemberHardLimit(ctx)
+	if hard > 0 && (maximum <= 0 || hard < maximum) {
+		return hard
 	}
 	return maximum
 }
@@ -169,7 +188,7 @@ func (c *concurrencyCache) acquireGatewayUserSlot(ctx context.Context, userID in
 	if err := c.ensureGatewayUserIndex(ctx); err != nil {
 		return false, err
 	}
-	maximum = c.gatewayUserMaximum(maximum)
+	maximum = c.gatewayUserMaximum(ctx, maximum)
 	result, _, err := runScriptInt64Pair(ctx, c.rdb, gatewayUserAdmissionScript,
 		[]string{userSlotKey(userID), liveUserSlotKey(userID), userActiveIndexKey, gatewayUserIndexKey},
 		c.slotTTLSeconds, requestID, maximum, c.globalLimit, fmt.Sprint(userID), userSlotKeyPrefix, liveUserSlotKeyPrefix)
@@ -183,7 +202,7 @@ func (c *concurrencyCache) acquireGatewayLiveLease(ctx context.Context, accountI
 	if err := c.ensureGatewayUserIndex(ctx); err != nil {
 		return false, err
 	}
-	userMax = c.gatewayUserMaximum(userMax)
+	userMax = c.gatewayUserMaximum(ctx, userMax)
 	result, _, err := runScriptInt64Pair(ctx, c.rdb, gatewayLiveAdmissionScript,
 		[]string{userSlotKey(userID), liveUserSlotKey(userID), userActiveIndexKey, gatewayUserIndexKey,
 			accountSlotKey(accountID), liveAccountSlotKey(accountID), liveAPIKeySlotKey(apiKeyID)},

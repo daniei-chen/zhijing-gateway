@@ -27,6 +27,7 @@ func ProvideConcurrencyCache(rdb *redis.Client, cfg *config.Config) service.Conc
 	cache := NewConcurrencyCache(rdb, cfg.Gateway.ConcurrencySlotTTLMinutes, waitTTLSeconds)
 	if concrete, ok := cache.(*concurrencyCache); ok {
 		concrete.memberLimit = cfg.Gateway.MemberConcurrencyLimit
+		concrete.memberLimitPeak = cfg.Gateway.MemberConcurrencyLimitPeak
 		concrete.globalLimit = cfg.Gateway.GlobalConcurrencyLimit
 	}
 	return cache

@@ -356,8 +356,11 @@ var (
 )
 
 type concurrencyCache struct {
-	rdb                 *redis.Client
-	memberLimit         int
+	rdb         *redis.Client
+	memberLimit int
+	// memberLimitPeak：活跃用户 <=1 时允许的放宽上限（0 = 不启用）。
+	// 与 service 层的动态策略配套，用于让仓库层的硬上限也跟着放宽。
+	memberLimitPeak     int
 	globalLimit         int
 	policyMu            sync.Mutex
 	policyReady         bool
