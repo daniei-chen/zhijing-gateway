@@ -15,20 +15,19 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 
 ## 2. 当前已验证生产状态
 
-截至 2026-11-15 00:40（北京时间），生产版本是 **v0.1.10**（新增分组强制服务档位）：
+截至 2026-11-15 01:05（北京时间），生产版本是 **v0.1.11**（强制档位能力守卫）：
 
-- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.10（「智境网关 0.1.10」）
-- 源码提交：`45d13c83d9d494644fb5e4b11ce4a426fdc86f2b`
-- GHCR digest：`sha256:ce93394944b9a36b3d878b08d14399fb4c65167d98555b222fd12991aaa953a6`
-- 当前容器：`zhijing-api-v0110-final`，loopback 端口 **18807**
-- 回滚容器：18806（v0.1.9）、18805（v0.1.8）、18803（v0.1.6）、18804（v0.1.7）、18802（v0.1.5）、18801（v0.1.4）；历史 18799/18793
-- **v0.1.10 切换证据**：`observe: 0 new 5xx within 180s, within limit`；切换后真实用户流量
-  （user 4 / `gpt-6.1-sol`）在 16:36:55 之后连续 200，容器 `restart=0`，日志 0 条 error。
-- **v0.1.10 新增能力**：分组可强制 OpenAI `service_tier`（跟随客户端 / priority / ultrafast）。
-  两个开关互斥，后端以 `GROUP_OPENAI_FORCED_SERVICE_TIER_CONFLICT` 拒绝并存；全局 Fast/Flex
-  策略仍在之后做权威判定。认证快照版本 v27→v28，升级后首次请求会重载 API Key 分组快照。
-- **v0.1.10 数据库变更**：迁移 `252_group_force_openai_ultrafast.sql` 新增
-  `groups.force_openai_ultrafast BOOLEAN NOT NULL DEFAULT FALSE`（已验证落库，旧版本不读该列）。
+- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.11（「智境网关 0.1.11」）
+- 源码提交：`96edb2e52`
+- GHCR digest：`sha256:6e923bc88acc4337fb8dcfb3a638cb4a1d329d5202040044f27012edb6ba4475`
+- 当前容器：`zhijing-api-v0111-final`，loopback 端口 **18808**
+- 回滚容器：18807（v0.1.10）、18806（v0.1.9）、18805（v0.1.8）、18803（v0.1.6）、18804（v0.1.7）、18802（v0.1.5）、18801（v0.1.4）；历史 18799/18793
+- **v0.1.11 切换证据**：`observe: 0 new 5xx within 180s, within limit`；切换后 7 个真实请求
+  （user 4）全部成功，容器 `restart=0`，8 分钟内 0 条 error。
+- **v0.1.11 的行为变化**：分组强制 Ultra Fast 时，先读账号
+  `extra.upstream_model_metadata` 里该模型的 `service_tiers`；只有目录声明了 `ultrafast`
+  才注入，否则回退 `priority`（并记 `[OpenAI Fast] ... only advertises priority; falling back`），
+  目录里没有任何兼容档位时不注入。无目录快照的账号行为不变。
 - **动态并发（已实测）**：`GATEWAY_MEMBER_CONCURRENCY_LIMIT=3` 为基础，
   `GATEWAY_MEMBER_CONCURRENCY_LIMIT_PEAK=5` 为活跃用户 ≤1 时的放宽值。
   **验收方式必须是打真实请求**：单用户发 5 个并发应全部 200；v0.1.8 因为仓库层
@@ -54,6 +53,8 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
   `codex_tool_capabilities.service_tiers` 只有 `{"id":"priority","name":"Fast"}`，
   **没有任何模型声明 `ultrafast`**。v0.1.10 的分组强制 Ultra Fast 对本账号无效——
   开了要么被上游忽略、要么 4xx。要用加速请选 **Fast（priority）**。
+  v0.1.11 起守卫会自动拦下：选了 Ultra Fast 也会回落 priority 并记日志，不会再把这个
+  未声明的档位发出去。
 - 账号额度现状（2026-11-15 00:44）：7 天窗口用量 **43%**，5 小时窗口刚重置（0%），
   credits 余额 250，重置卡 3 张，`auto_reset_credit_enabled=false`（不会自动用卡）。
 - 发布脚本已支持 `EXTRA_ENV="KEY=VALUE ..."`（追加到候选容器的 env-file），
@@ -221,11 +222,27 @@ bash /root/zhijing-zero-downtime-deploy-v0.1.0.sh
 
 ## 10. Release Notes 约定（2026-11-15 起）
 
-`v0.1.0` ~ `v0.1.10` 的 Release 说明已全部补齐（更新内容 / 修复 / 数据库变更 / 升级说明）。
+`v0.1.0` ~ `v0.1.11` 的 Release 说明已全部补齐（更新内容 / 修复 / 数据库变更 / 升级说明）。
 此前所有版本的 body 只有安装模板，没有任何变更说明——这是明确的质量缺口，不要回退到那个状态。
 
 - 发版时必须写清楚：**做了什么、修了什么、有没有迁移/新环境变量、怎么回滚**。
 - 有已知问题的版本要显式标注「不要部署」或「不要作为回滚目标」（v0.1.7 账号池回归、
   v0.1.2/v0.1.3 迁移校验和门禁失败）。
-- `release.yml` 里没有 changelog 生成逻辑，Release body 由 GoReleaser/模板决定；
-  想自动化需要改 `.goreleaser.yaml`（该文件不需要 workflow scope，可以推送）。
+
+### 自动进 Release 的机制（已实测）
+
+不需要改任何配置，**把 tag 打成多行即可**：
+
+- `.goreleaser.yaml`：`release.header` 里就是 `{{ .Env.TAG_MESSAGE }}`，且 `changelog.disable: true`。
+- `release.yml`：`TAG_MESSAGE=$(git tag -l --format='%(contents:body)' "$RELEASE_TAG")` —— 取的是
+  tag 消息的 **body**（第一行标题之后、第一个空行之后的部分）。
+
+所以：
+
+```bash
+git tag -a v0.1.12 --cleanup=verbatim -F notes.md   # notes.md 第一行当 subject，其余进 release body
+```
+
+**坑（v0.1.11 实测踩到）**：`git tag -a -F file` 默认走 `--cleanup=strip`，会把以 `#` 开头的行
+当注释删掉——所以笔记里的 `## 修复` 这类标题会静默消失。要么加 `--cleanup=verbatim`，
+要么正文不要用 `#` 开头。标题层级用 `**加粗**` 更稳。
