@@ -61,7 +61,8 @@ func TestBodyObservationRecordsBlockingNotPayload(t *testing.T) {
 	if snapshot["body_wire_bytes"] != int64(len("synthetic-private")) || snapshot["body_read_result"] != "complete" {
 		t.Fatalf("bad body counters: %v", snapshot)
 	}
-	if snapshot["body_read_block_ms"].(int64) < 20 {
+	blocked, ok := snapshot["body_read_block_ms"].(int64)
+	if !ok || blocked < 20 {
 		t.Fatal("blocking was not measured")
 	}
 	encoded, _ := json.Marshal(snapshot)

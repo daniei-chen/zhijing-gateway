@@ -29,7 +29,10 @@ func gatewayPolicyFixture(t *testing.T, member, global int) (*concurrencyCache, 
 		require.NoError(t, client.Ping(context.Background()).Err())
 		require.NoError(t, client.FlushDB(context.Background()).Err())
 	}
-	cache := NewConcurrencyCache(client, 30, 60).(*concurrencyCache)
+	cache, ok := NewConcurrencyCache(client, 30, 60).(*concurrencyCache)
+	if !ok {
+		t.Fatal("unexpected concurrency cache implementation")
+	}
 	cache.memberLimit, cache.globalLimit = member, global
 	return cache, server
 }
@@ -219,7 +222,10 @@ func TestGatewayConcurrencyPolicyIndependentInstancesShareOneCeiling(t *testing.
 	first, _ := gatewayPolicyFixture(t, 3, 9)
 	otherClient := redis.NewClient(&redis.Options{Addr: first.rdb.Options().Addr, MaxRetries: -1})
 	t.Cleanup(func() { _ = otherClient.Close() })
-	second := NewConcurrencyCache(otherClient, 30, 60).(*concurrencyCache)
+	second, ok := NewConcurrencyCache(otherClient, 30, 60).(*concurrencyCache)
+	if !ok {
+		t.Fatal("unexpected concurrency cache implementation")
+	}
 	second.memberLimit, second.globalLimit = 3, 9
 	instances := []*concurrencyCache{first, second}
 	ctx := context.Background()
@@ -245,10 +251,16 @@ func TestGatewayConcurrencyPolicyIndependentInstancesShareOneCeiling(t *testing.
 	workers.Wait()
 	count, perMember := 0, make(map[int64]int)
 	admitted.Range(func(requestID, user any) bool {
+		userID, userOK := user.(int64)
+		request, requestOK := requestID.(string)
+		if !userOK || !requestOK {
+			t.Errorf("unexpected admission key types: %T/%T", user, requestID)
+			return false
+		}
 		count++
-		perMember[user.(int64)]++
+		perMember[userID]++
 		// A different API instance may perform completion cleanup.
-		require.NoError(t, second.ReleaseUserSlot(ctx, user.(int64), requestID.(string)))
+		require.NoError(t, second.ReleaseUserSlot(ctx, userID, request))
 		return true
 	})
 	require.Equal(t, 9, count)

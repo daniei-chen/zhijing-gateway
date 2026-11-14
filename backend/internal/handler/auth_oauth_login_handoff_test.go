@@ -63,7 +63,11 @@ func TestOAuthLoginHandoffBrowserBoundSingleConsumption(t *testing.T) {
 			require.Equal(t, http.StatusOK, success.Code, success.Body.String())
 			data := decodeJSONResponseData(t, success)
 			require.NotEmpty(t, data["access_token"])
-			claims, err := h.authService.ValidateToken(data["access_token"].(string))
+			accessToken, ok := data["access_token"].(string)
+			if !ok {
+				t.Fatal("access token has unexpected shape")
+			}
+			claims, err := h.authService.ValidateToken(accessToken)
 			require.NoError(t, err)
 			require.Equal(t, u.ID, claims.UserID)
 			require.GreaterOrEqual(t, exchange(false).Code, 400, "completion must be single use")

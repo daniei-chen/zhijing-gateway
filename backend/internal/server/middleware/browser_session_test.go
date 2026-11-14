@@ -56,9 +56,17 @@ func TestBrowserSessionLoginStoresOnlyPublicSelectorsInJSON(t *testing.T) {
 			require.NoError(t, json.Unmarshal(w.Body.Bytes(), &envelope))
 			data := envelope
 			if wrapped {
-				data = envelope["data"].(map[string]any)
+				wrappedData, ok := envelope["data"].(map[string]any)
+				if !ok {
+					t.Fatal("wrapped response data has unexpected shape")
+				}
+				data = wrappedData
 			}
-			handle, ok := parseBrowserSessionHandle(data["access_token"].(string))
+			accessToken, ok := data["access_token"].(string)
+			if !ok {
+				t.Fatal("access token has unexpected shape")
+			}
+			handle, ok := parseBrowserSessionHandle(accessToken)
 			require.True(t, ok)
 			require.Equal(t, fixtureBrowserID, handle.id)
 			require.Equal(t, handle.refresh(), data["refresh_token"])

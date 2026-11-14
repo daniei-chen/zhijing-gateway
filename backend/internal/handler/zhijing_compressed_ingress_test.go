@@ -85,7 +85,7 @@ func zhijingEncodeIngress(t *testing.T, encoding string, plain []byte) []byte {
 	case "zstd":
 		encoder, err := zstd.NewWriter(nil)
 		require.NoError(t, err)
-		defer encoder.Close()
+		defer func() { _ = encoder.Close() }()
 		return encoder.EncodeAll(plain, nil)
 	default:
 		return plain

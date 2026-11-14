@@ -43,7 +43,7 @@ func TestChatSemanticOutputFlushesBeforeTerminalForLargeBody(t *testing.T) {
 			defer close(terminal)
 			written := make(chan struct{})
 			go func() {
-				defer writer.Close()
+				defer func() { _ = writer.Close() }()
 				_, _ = io.WriteString(writer, "data: {\"type\":\"response.created\",\"response\":{\"id\":\"synthetic\",\"model\":\"gpt-5.4\"}}\n\n")
 				payload := map[string]string{
 					"text":      `{"type":"response.output_text.delta","delta":"hello","output_index":0,"content_index":0}`,

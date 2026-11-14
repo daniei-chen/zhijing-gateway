@@ -96,7 +96,7 @@ func TestOpsWSSessionRevocationAndCurrentAdminPrivileges(t *testing.T) {
 				if err != nil {
 					return
 				}
-				defer conn.Close()
+				defer func() { _ = conn.Close() }()
 				handleQPSWebSocket(c.Request.Context(), conn, servermiddleware.AdminSessionRevalidator(c.Request.Context()))
 			})
 			// API-key handshakes use their original settings-backed authentication.
@@ -107,7 +107,7 @@ func TestOpsWSSessionRevocationAndCurrentAdminPrivileges(t *testing.T) {
 					if err != nil {
 						return
 					}
-					defer conn.Close()
+					defer func() { _ = conn.Close() }()
 					handleQPSWebSocket(c.Request.Context(), conn, servermiddleware.AdminSessionRevalidator(c.Request.Context()))
 				})
 			}
@@ -125,10 +125,11 @@ func TestOpsWSSessionRevocationAndCurrentAdminPrivileges(t *testing.T) {
 				protocols = []string{"sub2api-admin"}
 				headers.Set("x-api-key", "synthetic-admin-key")
 			}
-			dialer := websocket.Dialer{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, Subprotocols: protocols}
+			// The server is a local httptest TLS endpoint with a synthetic certificate.
+			dialer := websocket.Dialer{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, Subprotocols: protocols} //nolint:gosec // local test server only
 			conn, _, err := dialer.Dial("wss"+strings.TrimPrefix(httpServer.URL, "https")+"/api/v1/admin/ops/ws/qps", headers)
 			require.NoError(t, err)
-			defer conn.Close()
+			defer func() { _ = conn.Close() }()
 			require.NoError(t, conn.SetReadDeadline(time.Now().Add(8*time.Second)))
 			if scenario != "expiry" {
 				kind, payload, err := conn.ReadMessage()

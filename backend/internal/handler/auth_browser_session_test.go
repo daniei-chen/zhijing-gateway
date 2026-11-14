@@ -75,8 +75,14 @@ func TestBrowserSessionRealLoginJWTRefreshAndLogout(t *testing.T) {
 	login := call("/api/v1/auth/login", "init."+id, `{"email":"browser@example.invalid","password":"SyntheticPassword2026!"}`, nil)
 	require.Equal(t, 200, login.Code, login.Body.String())
 	data := decodeJSONResponseData(t, login)
-	handle := data["access_token"].(string)
-	refresh := data["refresh_token"].(string)
+	handle, ok := data["access_token"].(string)
+	if !ok {
+		t.Fatal("access token has unexpected shape")
+	}
+	refresh, ok := data["refresh_token"].(string)
+	if !ok {
+		t.Fatal("refresh token has unexpected shape")
+	}
 	require.True(t, strings.HasPrefix(handle, "zjs."))
 	require.True(t, strings.HasPrefix(refresh, "zjr."))
 	cookies := login.Result().Cookies()
@@ -102,9 +108,17 @@ func TestBrowserSessionRealLoginJWTRefreshAndLogout(t *testing.T) {
 	require.NotEqual(t, refresh, rotated["refresh_token"])
 	require.GreaterOrEqual(t, call("/api/v1/auth/refresh", handle, `{"refresh_token":"`+refresh+`"}`, cookies).Code, 400, "old refresh credential must be consumed")
 	newCookies := rotation.Result().Cookies()
-	logout := call("/api/v1/auth/logout", rotated["access_token"].(string), `{"refresh_token":"`+rotated["refresh_token"].(string)+`"}`, newCookies)
+	rotatedAccessToken, ok := rotated["access_token"].(string)
+	if !ok {
+		t.Fatal("rotated access token has unexpected shape")
+	}
+	rotatedRefreshToken, ok := rotated["refresh_token"].(string)
+	if !ok {
+		t.Fatal("rotated refresh token has unexpected shape")
+	}
+	logout := call("/api/v1/auth/logout", rotatedAccessToken, `{"refresh_token":"`+rotatedRefreshToken+`"}`, newCookies)
 	require.Equal(t, 200, logout.Code)
-	require.GreaterOrEqual(t, call("/api/v1/auth/refresh", rotated["access_token"].(string), `{"refresh_token":"`+rotated["refresh_token"].(string)+`"}`, newCookies).Code, 400)
+	require.GreaterOrEqual(t, call("/api/v1/auth/refresh", rotatedAccessToken, `{"refresh_token":"`+rotatedRefreshToken+`"}`, newCookies).Code, 400)
 	// Public JSON remains ordinary data, with no JWT returned through /auth/me.
 	var profile map[string]any
 	require.NoError(t, json.Unmarshal(me.Body.Bytes(), &profile))

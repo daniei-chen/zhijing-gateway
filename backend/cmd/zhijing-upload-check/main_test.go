@@ -25,7 +25,7 @@ func TestDecodedHashAndLengthAcrossEncodings(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer encoder.Close()
+	defer func() { _ = encoder.Close() }()
 	variants := map[string][]byte{"identity": body, "gzip": gz.Bytes(), "zstd": encoder.EncodeAll(body, nil)}
 	for encoding, wire := range variants {
 		t.Run(encoding, func(t *testing.T) {

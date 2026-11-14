@@ -334,21 +334,6 @@ func (s *OpsAlertEvaluatorService) pruneRuleStates(rules []*OpsAlertRule) {
 	}
 }
 
-func (s *OpsAlertEvaluatorService) resetRuleState(ruleID int64, now time.Time) {
-	if ruleID <= 0 {
-		return
-	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	state, ok := s.ruleStates[ruleID]
-	if !ok {
-		state = &opsAlertRuleState{}
-		s.ruleStates[ruleID] = state
-	}
-	state.LastEvaluatedAt = now
-	state.ConsecutiveBreaches = 0
-}
-
 func (s *OpsAlertEvaluatorService) updateRuleBreaches(ruleID int64, now time.Time, interval time.Duration, breached bool) int {
 	if ruleID <= 0 {
 		return 0

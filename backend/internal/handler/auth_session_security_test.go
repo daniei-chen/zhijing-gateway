@@ -126,7 +126,28 @@ func securityFlowLogin(t *testing.T, r *gin.Engine) (string, string, []*http.Coo
 	w := securityFlowCall(r, "/api/v1/auth/login", "init.12345678123442348234123456789abc", `{"email":"session-security@example.invalid","password":"SyntheticPassword2026!"}`, nil)
 	require.Equal(t, 200, w.Code, w.Body.String())
 	data := decodeJSONResponseData(t, w)
-	return data["access_token"].(string), data["refresh_token"].(string), w.Result().Cookies()
+	accessToken, ok := data["access_token"].(string)
+	if !ok {
+		t.Fatal("access token has unexpected shape")
+	}
+	refreshToken, ok := data["refresh_token"].(string)
+	if !ok {
+		t.Fatal("refresh token has unexpected shape")
+	}
+	return accessToken, refreshToken, w.Result().Cookies()
+}
+
+func securityCredentialPair(t *testing.T, data map[string]any) (string, string) {
+	t.Helper()
+	accessToken, ok := data["access_token"].(string)
+	if !ok {
+		t.Fatal("access token has unexpected shape")
+	}
+	refreshToken, ok := data["refresh_token"].(string)
+	if !ok {
+		t.Fatal("refresh token has unexpected shape")
+	}
+	return accessToken, refreshToken
 }
 func securityWaitForReads(t *testing.T, cache *securityFlowCache, count int) {
 	t.Helper()
@@ -179,9 +200,10 @@ func TestSessionSecurityConcurrentRefreshConsumesOnlyOnce(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		select {
 		case w := <-results:
-			if w.Code == 200 {
+			switch w.Code {
+			case 200:
 				successes++
-			} else if w.Code == 401 {
+			case 401:
 				rejections++
 			}
 		case <-time.After(5 * time.Second):
@@ -261,7 +283,11 @@ func TestSessionSecurityLogoutOfConsumedRefreshWithoutAccessCookie(t *testing.T)
 	}
 	logout := securityFlowCall(r, "/api/v1/auth/logout", handle, `{"refresh_token":"`+refresh+`"}`, refreshOnly)
 	require.Equal(t, 200, logout.Code, logout.Body.String())
-	require.Equal(t, 401, securityFlowCall(r, "/api/v1/auth/me", data["access_token"].(string), "", rotated.Result().Cookies()).Code, "the late replacement pair must be revoked even when the old access cookie was absent")
+	accessToken, ok := data["access_token"].(string)
+	if !ok {
+		t.Fatal("rotated access token has unexpected shape")
+	}
+	require.Equal(t, 401, securityFlowCall(r, "/api/v1/auth/me", accessToken, "", rotated.Result().Cookies()).Code, "the late replacement pair must be revoked even when the old access cookie was absent")
 }
 
 func securityFlowLegacyLogin(t *testing.T, r *gin.Engine, email string) (string, string) {
@@ -269,7 +295,15 @@ func securityFlowLegacyLogin(t *testing.T, r *gin.Engine, email string) (string,
 	w := securityFlowCall(r, "/api/v1/auth/login", "", `{"email":"`+email+`","password":"SyntheticPassword2026!"}`, nil)
 	require.Equal(t, http.StatusOK, w.Code, w.Body.String())
 	data := decodeJSONResponseData(t, w)
-	return data["access_token"].(string), data["refresh_token"].(string)
+	accessToken, ok := data["access_token"].(string)
+	if !ok {
+		t.Fatal("access token has unexpected shape")
+	}
+	refreshToken, ok := data["refresh_token"].(string)
+	if !ok {
+		t.Fatal("refresh token has unexpected shape")
+	}
+	return accessToken, refreshToken
 }
 
 func TestSessionSecurityLogoutRejectsMixedBearerFamiliesBeforeAnyRevocation(t *testing.T) {
@@ -288,7 +322,7 @@ func TestSessionSecurityLogoutRejectsMixedBearerFamiliesBeforeAnyRevocation(t *t
 				if consumed {
 					rotation := securityFlowCall(r, "/api/v1/auth/refresh", accessA, `{"refresh_token":"`+refreshA+`"}`, nil)
 					require.Equal(t, http.StatusOK, rotation.Code, rotation.Body.String())
-					currentRefreshA = decodeJSONResponseData(t, rotation)["refresh_token"].(string)
+					_, currentRefreshA = securityCredentialPair(t, decodeJSONResponseData(t, rotation))
 				}
 				accessB, refreshB := securityFlowLegacyLogin(t, r, emailB)
 				logout := securityFlowCall(r, "/api/v1/auth/logout", accessB, `{"refresh_token":"`+refreshA+`"}`, nil)
@@ -315,7 +349,7 @@ func TestSessionSecurityLogoutPreservesSameFamilyAndLegacyCompatibility(t *testi
 			rotation := securityFlowCall(r, "/api/v1/auth/refresh", oldAccess, `{"refresh_token":"`+oldRefresh+`"}`, nil)
 			require.Equal(t, http.StatusOK, rotation.Code, rotation.Body.String())
 			data := decodeJSONResponseData(t, rotation)
-			newAccess, newRefresh := data["access_token"].(string), data["refresh_token"].(string)
+			newAccess, newRefresh := securityCredentialPair(t, data)
 			access, refresh := oldAccess, newRefresh
 			switch scenario {
 			case "new_access_consumed_refresh":
@@ -377,7 +411,7 @@ func TestSessionSecurityLogoutExpiredBearerKeepsRefreshTokenTarget(t *testing.T)
 				rotated := securityFlowCall(r, "/api/v1/auth/refresh", accessA, `{"refresh_token":"`+refreshA+`"}`, nil)
 				require.Equal(t, http.StatusOK, rotated.Code, rotated.Body.String())
 				data := decodeJSONResponseData(t, rotated)
-				currentAccessA, currentRefreshA = data["access_token"].(string), data["refresh_token"].(string)
+				currentAccessA, currentRefreshA = securityCredentialPair(t, data)
 			}
 			accessB, refreshB := securityFlowLegacyLogin(t, r, "session-security@example.invalid")
 			claims, err := h.authService.ValidateToken(accessB)
@@ -435,7 +469,7 @@ func TestSessionSecurityLogoutFamilyWriteFailureCannotBecomeRefreshNoopSuccess(t
 			case "consumed_alias":
 				rotated := securityFlowCall(r, "/api/v1/auth/refresh", access, `{"refresh_token":"`+refresh+`"}`, nil)
 				require.Equal(t, http.StatusOK, rotated.Code, rotated.Body.String())
-				currentAccess = decodeJSONResponseData(t, rotated)["access_token"].(string)
+				currentAccess, _ = securityCredentialPair(t, decodeJSONResponseData(t, rotated))
 			case "missing_refresh":
 				submittedRefresh = "rt_" + strings.Repeat("0", len(refresh)-3)
 			case "no_refresh":
@@ -466,7 +500,7 @@ func TestSessionSecurityLogoutWithoutBearerFamilyStillUsesRefreshRevocation(t *t
 				if consumed {
 					rotated := securityFlowCall(r, "/api/v1/auth/refresh", access, `{"refresh_token":"`+refresh+`"}`, nil)
 					require.Equal(t, http.StatusOK, rotated.Code, rotated.Body.String())
-					currentAccess = decodeJSONResponseData(t, rotated)["access_token"].(string)
+					currentAccess, _ = securityCredentialPair(t, decodeJSONResponseData(t, rotated))
 				}
 				submittedAccess := ""
 				if credential == "legacy_no_sid" {

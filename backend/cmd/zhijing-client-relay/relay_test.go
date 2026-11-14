@@ -34,8 +34,16 @@ func relayFixture(t *testing.T, handler http.Handler, options relayOptions, h2 b
 	} else {
 		upstream.Start()
 	}
-	target, _ := url.Parse(upstream.URL)
-	transport := upstream.Client().Transport.(*http.Transport).Clone()
+	target, err := url.Parse(upstream.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := upstream.Client()
+	baseTransport, ok := client.Transport.(*http.Transport)
+	if !ok {
+		t.Fatalf("unexpected test transport type %T", client.Transport)
+	}
+	transport := baseTransport.Clone()
 	transport.Proxy = nil
 	transport.ForceAttemptHTTP2 = h2
 	transport.DisableCompression = true
@@ -86,7 +94,7 @@ func TestRelayLosslessJSONCompressionEveryPOSTRoute(t *testing.T) {
 					w.WriteHeader(400)
 					return
 				}
-				defer decoder.Close()
+				defer func() { _ = decoder.Close() }()
 				got, _ := io.ReadAll(decoder)
 				received <- got
 				_, _ = io.WriteString(w, "synthetic-ok")
@@ -128,7 +136,7 @@ func TestRelayPreservesSmallSignedNonJSONAndAlreadyEncodedBodies(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer response.Body.Close()
+			defer func() { _ = response.Body.Close() }()
 			if response.StatusCode != 204 {
 				t.Fatalf("status %d", response.StatusCode)
 			}
@@ -163,7 +171,7 @@ func TestRelayRejectsBeforeAnyUpstreamDispatch(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			defer response.Body.Close()
+			defer func() { _ = response.Body.Close() }()
 			if response.StatusCode != item.status {
 				t.Fatalf("want %d, got %d", item.status, response.StatusCode)
 			}
@@ -198,7 +206,7 @@ func TestRelayForwardsQuotaErrorAndTraceExactlyOnceWithoutBodyRewind(t *testing.
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	body, _ := io.ReadAll(response.Body)
 	if response.StatusCode != 429 || calls.Load() != 1 || response.Header.Get("Retry-After") != "2" || response.Header.Get("X-Zhijing-Trace-ID") != "synthetic-trace" || response.Header.Get("Set-Cookie") != "" || string(body) != `{"error":{"code":"gateway_global_concurrency_limit"}}` {
 		t.Fatal("upstream rejection was modified or replayed")
@@ -211,7 +219,11 @@ func TestRelayEOFDoesNotReplayDispatchedPOSTOrLeakRawError(t *testing.T) {
 	relay, _ := relayFixture(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		calls.Add(1)
 		_, _ = io.Copy(io.Discard, r.Body)
-		conn, _, err := w.(http.Hijacker).Hijack()
+		hijacker, ok := w.(http.Hijacker)
+		if !ok {
+			return
+		}
+		conn, _, err := hijacker.Hijack()
 		if err == nil {
 			_ = conn.Close()
 		}
@@ -245,7 +257,9 @@ func TestRelayHTTP2SSEFlushesBeforeCompletionAndPreservesTerminalUsage(t *testin
 		}
 		w.Header().Set("Content-Type", "text/event-stream")
 		_, _ = io.WriteString(w, first)
-		w.(http.Flusher).Flush()
+		if err := http.NewResponseController(w).Flush(); err != nil {
+			t.Errorf("flush synthetic SSE event: %v", err)
+		}
 		select {
 		case <-finish:
 			_, _ = io.WriteString(w, last)
@@ -275,7 +289,9 @@ func TestRelayMidStreamHTTP2FailureIsNotReplayedOrForgedComplete(t *testing.T) {
 		calls.Add(1)
 		w.Header().Set("Content-Type", "text/event-stream")
 		_, _ = io.WriteString(w, "data: {\"type\":\"response.created\"}\n\n")
-		w.(http.Flusher).Flush()
+		if err := http.NewResponseController(w).Flush(); err != nil {
+			t.Errorf("flush synthetic SSE event: %v", err)
+		}
 		select {
 		case <-abort:
 		case <-r.Context().Done():
@@ -300,7 +316,9 @@ func TestRelayClientDisconnectCancelsLocalUpstream(t *testing.T) {
 	relay, _ := relayFixture(t, http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/event-stream")
 		_, _ = io.WriteString(w, "data: {\"synthetic\":true}\n\n")
-		w.(http.Flusher).Flush()
+		if err := http.NewResponseController(w).Flush(); err != nil {
+			t.Errorf("flush synthetic SSE event: %v", err)
+		}
 		<-r.Context().Done()
 		close(canceled)
 	}), relayOptions{}, true)
@@ -366,14 +384,14 @@ func TestRelayPartialLocalUploadTimesOutWithoutUpstreamDispatch(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 	_ = conn.SetDeadline(time.Now().Add(2 * time.Second))
 	_, _ = fmt.Fprintf(conn, "POST /v1/responses HTTP/1.1\r\nHost: %s\r\nAuthorization: %s\r\nContent-Length: 1000000\r\nContent-Type: application/json\r\n\r\n{", parsed.Host, syntheticAuthorization)
 	response, err := http.ReadResponse(bufio.NewReader(conn), nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer response.Body.Close()
+	defer func() { _ = response.Body.Close() }()
 	if response.StatusCode != 408 || calls.Load() != 0 {
 		t.Fatal("partial local upload escaped its deadline or reached upstream")
 	}
@@ -496,7 +514,7 @@ func TestRelayUnreadDownstreamCannotHoldSlotForever(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 	_, _ = fmt.Fprintf(conn, "POST /v1/responses HTTP/1.1\r\nHost: %s\r\nAuthorization: %s\r\nContent-Length: 2\r\nContent-Type: application/json\r\n\r\n{}", parsed.Host, syntheticAuthorization)
 	// Intentionally never read the response, exercising a blocked TCP write.
 	select {

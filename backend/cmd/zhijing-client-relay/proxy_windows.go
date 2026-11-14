@@ -48,7 +48,7 @@ func currentSystemProxy(*http.Request) (*url.URL, error) {
 	if err != nil {
 		return nil, fmt.Errorf("system_proxy_read_failed")
 	}
-	defer key.Close()
+	defer func() { _ = key.Close() }()
 	enabled, _, err := key.GetIntegerValue("ProxyEnable")
 	if err == registry.ErrNotExist || (err == nil && enabled == 0) {
 		// With system proxy disabled, the operating system/TUN owns routing.

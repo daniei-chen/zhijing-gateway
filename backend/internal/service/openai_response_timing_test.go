@@ -54,13 +54,13 @@ func TestResponsesUsefulOutputFlushesWhileUpstreamStillOpen(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			ctx := gatewaytiming.Start(context.Background())
 			reader, writer := io.Pipe()
-			defer reader.Close()
+			defer func() { _ = reader.Close() }()
 			release := make(chan struct{})
 			defer close(release)
 			writerDone := make(chan struct{})
 			go func() {
 				defer close(writerDone)
-				defer writer.Close()
+				defer func() { _ = writer.Close() }()
 				_, _ = io.WriteString(writer, "data: {\"type\":\"response.created\",\"response\":{\"id\":\"fixture\"}}\n\n")
 				_, _ = io.WriteString(writer, "data: {\"type\":\"response.output_text.delta\",\"delta\":\"fixture\"}\n\n")
 				<-release

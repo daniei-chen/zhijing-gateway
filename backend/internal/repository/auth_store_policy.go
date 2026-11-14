@@ -25,7 +25,7 @@ func provideRedisWithAuthPolicy(ctx context.Context, cfg *config.Config) (*redis
 	options.PoolSize = 1
 	options.MinIdleConns = 0
 	policyClient := redis.NewClient(options)
-	defer policyClient.Close()
+	defer func() { _ = policyClient.Close() }()
 	// A socket deadline alone does not interrupt a read on early cancellation.
 	// Only this temporary pool is closed; the shared business pool is separate.
 	stopCancellation := context.AfterFunc(ctx, func() { _ = policyClient.Close() })

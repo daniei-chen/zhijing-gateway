@@ -31,7 +31,7 @@ func TestVerifyAppliedMigrationsRollbackOptIn(t *testing.T) {
 	t.Run("default refuses unknown applied migrations", func(t *testing.T) {
 		t.Setenv(allowUnknownAppliedMigrationsEnv, "")
 		db, mock := newDB(t)
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 		mock.ExpectQuery("SELECT filename, checksum FROM schema_migrations").WillReturnRows(
 			sqlmock.NewRows([]string{"filename", "checksum"}).
 				AddRow("001_init.sql", checksum).
@@ -45,7 +45,7 @@ func TestVerifyAppliedMigrationsRollbackOptIn(t *testing.T) {
 	t.Run("opt-in allows unknown applied migrations", func(t *testing.T) {
 		t.Setenv(allowUnknownAppliedMigrationsEnv, "1")
 		db, mock := newDB(t)
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 		mock.ExpectQuery("SELECT filename, checksum FROM schema_migrations").WillReturnRows(
 			sqlmock.NewRows([]string{"filename", "checksum"}).
 				AddRow("001_init.sql", checksum).
@@ -59,7 +59,7 @@ func TestVerifyAppliedMigrationsRollbackOptIn(t *testing.T) {
 	t.Run("opt-in still refuses checksum mismatch", func(t *testing.T) {
 		t.Setenv(allowUnknownAppliedMigrationsEnv, "1")
 		db, mock := newDB(t)
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 		mock.ExpectQuery("SELECT filename, checksum FROM schema_migrations").WillReturnRows(
 			sqlmock.NewRows([]string{"filename", "checksum"}).AddRow("001_init.sql", "tampered"),
 		)
@@ -71,7 +71,7 @@ func TestVerifyAppliedMigrationsRollbackOptIn(t *testing.T) {
 	t.Run("opt-in does not mask a missing migration", func(t *testing.T) {
 		t.Setenv(allowUnknownAppliedMigrationsEnv, "1")
 		db, mock := newDB(t)
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 		mock.ExpectQuery("SELECT filename, checksum FROM schema_migrations").WillReturnRows(
 			sqlmock.NewRows([]string{"filename", "checksum"}),
 		)

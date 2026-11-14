@@ -147,7 +147,7 @@ func syntheticNetworkBody(size int) []byte {
 	const prefix, suffix = `{"synthetic_source":"`, `"}`
 	var buffer bytes.Buffer
 	buffer.Grow(size + 256)
-	buffer.WriteString(prefix)
+	_, _ = buffer.WriteString(prefix)
 	for index := 0; buffer.Len() < size-len(suffix); index++ {
 		digest := sha256.Sum256([]byte(strconv.Itoa(index)))
 		fmt.Fprintf(&buffer, "export const item%d = { id: '%x', enabled: true, route: 'synthetic', value: null }; ", index, digest)

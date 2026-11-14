@@ -121,7 +121,7 @@ func TestRefreshSessionRedisLegacyFamilyNeverGuessesExpiration(t *testing.T) {
 	data := sessionTestData("")
 	raw, err := json.Marshal(data)
 	require.NoError(t, err)
-	server.Set(refreshTokenKey("legacy"), string(raw))
+	_ = server.Set(refreshTokenKey("legacy"), string(raw))
 	server.SetTTL(refreshTokenKey("legacy"), time.Hour)
 	require.NoError(t, one.RotateRefreshToken(ctx, "legacy", "next", data, time.Hour))
 	require.NoError(t, two.DeleteTokenFamily(ctx, data.FamilyID, time.Hour))

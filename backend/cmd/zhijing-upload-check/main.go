@@ -119,7 +119,11 @@ func run() error {
 	go func() { input.Scan(); stop() }()
 	timer := time.AfterFunc(time.Duration(config.TTLSeconds)*time.Second, stop)
 	defer timer.Stop()
-	_ = json.NewEncoder(os.Stdout).Encode(map[string]any{"ready": true, "port": listener.Addr().(*net.TCPAddr).Port})
+	tcpAddr, ok := listener.Addr().(*net.TCPAddr)
+	if !ok {
+		return fmt.Errorf("probe_listener_address_invalid")
+	}
+	_ = json.NewEncoder(os.Stdout).Encode(map[string]any{"ready": true, "port": tcpAddr.Port})
 	err = <-done
 	if err != nil && err != http.ErrServerClosed {
 		return fmt.Errorf("probe_server_failed")

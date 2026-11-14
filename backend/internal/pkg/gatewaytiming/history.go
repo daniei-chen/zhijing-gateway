@@ -82,7 +82,11 @@ func boundedHistoryKey(scope Scope, id string) (historyKey, bool) {
 
 func (h *History) pruneRetired(now time.Time) {
 	for front := h.retired.Front(); front != nil; front = h.retired.Front() {
-		item := front.Value.(retiredAlias)
+		item, ok := front.Value.(retiredAlias)
+		if !ok {
+			h.retired.Remove(front)
+			continue
+		}
 		if !now.After(item.until) {
 			break
 		}
@@ -151,11 +155,20 @@ func (h *History) Publish(scope Scope, ids []string, snapshot map[string]any) {
 	for _, key := range keys {
 		_, collisions[key] = h.retiredIndex[key]
 		if previous, exists := h.index[key]; exists {
-			collisions[key] = collisions[key] || now.Sub(previous.entry.Value.(*historyEntry).record.ObservedAt) < h.ttl
+			previousEntry, ok := previous.entry.Value.(*historyEntry)
+			if !ok {
+				collisions[key] = true
+				continue
+			}
+			collisions[key] = collisions[key] || now.Sub(previousEntry.record.ObservedAt) < h.ttl
 		}
 	}
 	for front := h.entries.Front(); front != nil; front = h.entries.Front() {
-		entry := front.Value.(*historyEntry)
+		entry, ok := front.Value.(*historyEntry)
+		if !ok {
+			h.entries.Remove(front)
+			continue
+		}
 		if h.entries.Len() < h.capacity && now.Sub(entry.record.ObservedAt) < h.ttl {
 			break
 		}
@@ -191,7 +204,12 @@ func (h *History) Lookup(scope Scope, id string, createdAt time.Time) *Record {
 		h.mu.Unlock()
 		return nil
 	}
-	entry := indexed.entry.Value.(*historyEntry)
+	entry, ok := indexed.entry.Value.(*historyEntry)
+	if !ok {
+		delete(h.index, key)
+		h.mu.Unlock()
+		return nil
+	}
 	if h.now().Sub(entry.record.ObservedAt) >= h.ttl {
 		h.remove(indexed.entry, h.now())
 		h.mu.Unlock()
@@ -215,12 +233,16 @@ func (h *History) Lookup(scope Scope, id string, createdAt time.Time) *Record {
 }
 
 func (h *History) remove(element *list.Element, now time.Time) bool {
-	entry := element.Value.(*historyEntry)
+	entry, ok := element.Value.(*historyEntry)
+	if !ok {
+		return false
+	}
 	until := entry.record.ObservedAt.Add(2 * historyMatchWindow)
 	for _, key := range entry.keys {
 		if !now.After(until) {
 			if retired := h.retiredIndex[key]; retired != nil {
-				if until.After(retired.Value.(retiredAlias).until) {
+				previous, ok := retired.Value.(retiredAlias)
+				if !ok || until.After(previous.until) {
 					retired.Value = retiredAlias{key, until}
 					h.retired.MoveToBack(retired)
 				}

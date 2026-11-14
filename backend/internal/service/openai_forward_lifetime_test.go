@@ -9,14 +9,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type syntheticForwardContextKey string
+
+const syntheticForwardKey syntheticForwardContextKey = "synthetic-key"
+
 func TestOpenAIForwardLifetimeDrainsThenCancels(t *testing.T) {
-	client, cancel := context.WithCancel(context.WithValue(context.Background(), "synthetic-key", "synthetic-value"))
+	client, cancel := context.WithCancel(context.WithValue(context.Background(), syntheticForwardKey, "synthetic-value"))
 	defer cancel()
 	ctx, finish := beginOpenAIForwardLifetimeWithTimeouts(client, time.Second, 80*time.Millisecond)
 	defer finish()
 	upstream, constructionRelease := detachUpstreamContext(ctx)
 	constructionRelease()
-	require.Equal(t, "synthetic-value", upstream.Value("synthetic-key"))
+	require.Equal(t, "synthetic-value", upstream.Value(syntheticForwardKey))
 	cancel()
 	require.ErrorIs(t, ctx.Err(), context.Canceled)
 	require.NoError(t, upstream.Err(), "client cancellation must permit terminal usage collection")

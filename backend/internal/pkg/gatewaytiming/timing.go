@@ -328,9 +328,10 @@ func Trace(req *http.Request) (*http.Request, func(*http.Response, error)) {
 			c.add("upstream_transport_errors", 1)
 		}
 		if resp != nil {
-			if resp.ProtoMajor == 2 {
+			switch resp.ProtoMajor {
+			case 2:
 				c.add("http2_responses", 1)
-			} else if resp.ProtoMajor == 1 {
+			case 1:
 				c.add("http1_responses", 1)
 			}
 		}

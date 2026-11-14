@@ -310,7 +310,7 @@ func normalizeLenientJSONRequestBody(ctx context.Context, body []byte, maxNormal
 	// "\\n"), not literal control bytes. bytes.IndexAny uses the optimized
 	// byte-search path here; only malformed lenient JSON takes the slower
 	// quote/escape-aware pass below.
-	if bytes.IndexAny(body, jsonRawControlChars) < 0 {
+	if !bytes.ContainsAny(body, jsonRawControlChars) {
 		return requestBodyBuffer{data: body}, nil
 	}
 

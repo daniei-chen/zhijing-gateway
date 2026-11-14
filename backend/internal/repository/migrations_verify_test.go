@@ -19,7 +19,7 @@ func TestVerifyAppliedMigrationsOnlyReadsExactSet(t *testing.T) {
 		t.Run(outcome, func(t *testing.T) {
 			db, mock, err := sqlmock.New()
 			require.NoError(t, err)
-			defer db.Close()
+			defer func() { _ = db.Close() }()
 			mock.ExpectBegin()
 			query := mock.ExpectQuery("SELECT filename, checksum FROM schema_migrations")
 			rows := sqlmock.NewRows([]string{"filename", "checksum"})
