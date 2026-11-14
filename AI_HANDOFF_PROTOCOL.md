@@ -746,3 +746,24 @@ cd backend && golangci-lint run --timeout=30m
 ```
 
 v0.1.19 在打 tag 之前跑了，`0 issues`，CI 一次过。**以后每次发版都跑**。
+
+**nginx 已接通（2026-11-15 第 8 轮）**：主域名 HTTPS 块里加了 `location = /metrics`，
+`proxy_pass http://zhijing_api/metrics;`，公网和内网都能到达。未设 `METRICS_TOKEN` 时
+后端返回 404，所以现在这条路径**已接通但默认不可用**——配置 token 后无需再动 nginx。
+
+实测：
+
+```
+源站  https://127.0.0.1/metrics  (Host: zhijing.kaogong.art)  → 404
+公网  https://zhijing.kaogong.art/metrics                    → 404
+对照  /readyz?deep=1                                          → 200（其他端点不受影响）
+```
+
+**踩到的坑**：第一次插入时脚本匹配了**最后一个** `location = /readyz`，那是
+`154-36-187-147.sslip.io` 的 server 块，不是主域名的块。结果公网请求仍被 `location /` 的
+`try_files` 接走，返回 `200 text/html`（SPA fallback）。nginx 的 location 是**按 server 块
+生效**的，改之前先确认插进的是哪个块——这次是靠返回 `text/html` 才发现的，
+404 和 200 的差别在这里就是"转发成功"和"根本没转发"。
+
+备份：`/root/zhijing-nginx-metrics-20261114T210733Z.bak`（首次插入）、
+`/root/zhijing-nginx-metrics2-*.bak`（修正到正确 server 块之前）。
