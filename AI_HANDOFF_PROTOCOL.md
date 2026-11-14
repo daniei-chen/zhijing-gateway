@@ -2535,3 +2535,51 @@ WHERE deleted_at IS NULL
 `select` 会立刻命中已关闭的 channel，goroutine 直接退出——服务**静默地不再工作**。
 实际使用中 `Stop` 只在进程退出时调用，不会重启，所以这不会发生。但如果将来有人写
 「热重载配置」之类的逻辑去 Stop/Start，就会踩到。记在这里。
+
+### 6.61 handler 的 241 个零覆盖函数：API Key CRUD 全无测试，但越权保护是对的（2026-11-15 第 59 轮）
+
+`internal/handler` 覆盖率 56.6%，241 个函数 0% 覆盖。筛掉简单取值和 admin 包之后，
+最值得看的是**用户管理 API Key 的核心接口**：
+
+```
+api_key_handler.go  List      0.0%
+api_key_handler.go  Create    0.0%
+api_key_handler.go  Update    0.0%
+api_key_handler.go  Delete    0.0%
+```
+
+**这是「用户可以删别人 Key 吗」这类问题的所在**，所以直接读了删除路径。
+
+**handler 只做转发，归属检查在 service**：
+
+```go
+// api_key_handler.go
+err = h.apiKeyService.Delete(c.Request.Context(), keyID, subject.UserID)
+
+// api_key_service.go:949
+key, ownerID, err := s.apiKeyRepo.GetKeyAndOwnerID(ctx, id)
+if ownerID != userID {
+    return ErrInsufficientPerms      // ← 越权在这里被挡住
+}
+s.apiKeyRepo.DeleteWithAudit(ctx, id)    // 事务内：写审计 + 软删除
+s.InvalidateAuthCacheByKey(ctx, key)     // 删除成功后才清缓存
+s.lastUsedTouchL1.Delete(id)
+```
+
+**四点都做对了**：
+
+1. **归属检查**：`ownerID != userID` 直接拒绝，不是「查不到就删」
+2. **软删除 + 审计在同一事务**：不会出现「删了但没审计」
+3. **缓存清理放在删除成功之后**：注释写了「避免缓存已清但删除失败」的竞态
+4. **不清零创建计数**：注释写明「否则删除后反复新建即可绕过创建限流」
+
+**结论：零测试，但逻辑正确。** 这是第 58 轮之后第二个同类结论——
+覆盖率低不等于有缺陷，但这四个函数的**回归保护确实是空的**：任何人改动这段代码，
+没有任何测试会拦住他。
+
+**其余 0% 覆盖的大多是未启用的登录方式**（`auth_dingtalk_*`、`auth_linuxdo_*` 等），
+以及 `announcement_handler`（公告功能，当前无公告数据）。
+
+**建议（未实施）**：`api_key_service.Delete` 的归属检查值得一个测试——
+它是唯一的越权防线，而现在它只靠代码审查保护。这是我在 59 轮里第一次明确建议
+「加测试」而不是「改实现」，因为实现是对的。
