@@ -859,3 +859,35 @@ restored original, still valid
 
 `accounts-refresh-stability`（刷新时保留行与配额）没做列级验证：`accounts` 表里只有
 `quota_dimension`，实际配额数据不在该表，需要另找承载表才能确认。
+
+### 6.22 账号配额存在哪、刷新会不会丢（2026-11-15 第 12 轮）
+
+补上 6.21 里没验证完的那条（上游 `accounts-refresh-stability`：刷新时保留行与配额值）。
+
+**配额不在 `accounts` 表的列里**，而在 `accounts.extra` 这个 JSONB 里：
+
+```
+codex_5h_used_percent / codex_7d_used_percent
+codex_5h_reset_at     / codex_7d_reset_at
+codex_credits_snapshot（含 balance / unlimited / has_credits / fetched_at）
+auto_reset_credit_enabled / auto_reset_credit_5h_threshold / auto_reset_credit_7d_threshold
+codex_5h_window_minutes / codex_7d_window_minutes
+```
+
+`accounts` 表本身只有 `quota_dimension` 一列——难怪按列找会扑空。
+
+**当前实测值**（账号 #2「ChatGPT pro 200」）：
+
+```
+used_5h = 0     used_7d = 43     reset_7d = 2026-11-20T07:15:08+08:00
+credits = {"balance":"250.0000000000","unlimited":false,"has_credits":true}
+fetched_at = 1794579066  → 2026-11-14 12:51 北京时间
+auto_reset_credit_enabled = false
+```
+
+**结论（有边界）**：这些值来自 11-14 12:51 那次刷新，之后 20 小时没有新请求
+（凌晨无流量），值仍然完整保留在 `extra` 里——**没有出现刷新后被清空的现象**。
+
+但这是**观察到的状态**，不是我主动触发一次刷新再看结果。要严格验证「刷新不会丢」，
+需要在有流量的时段记录刷新前后两帧 `extra` 做对比。生产上凌晨无人请求，这一条留作待办，
+不要当成已经证过。
