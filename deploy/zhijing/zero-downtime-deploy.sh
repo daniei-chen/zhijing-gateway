@@ -47,6 +47,19 @@ umask 077
 docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$CURRENT_CONTAINER" \
   | awk '!/^ZHIJING_API_ONLY=/' >"$env_file"
 
+# 2026-11-14：候选实例的环境变量来自「当前容器」，而容器 env 在启动时即固化，
+# 所以想新增/覆盖某个变量（例如动态并发的 GATEWAY_MEMBER_CONCURRENCY_LIMIT_PEAK）
+# 无法靠改数据库或改宿主机文件实现。这里留一个显式入口：
+#   EXTRA_ENV="KEY=VALUE" 或多个 KEY=VALUE 用空格分隔
+# 每一行都会追加到临时 env 文件；同名变量后写覆盖前写（docker --env-file 语义）。
+if [[ -n "${EXTRA_ENV:-}" ]]; then
+  for pair in $EXTRA_ENV; do
+    key=${pair%%=*}
+    [[ "$key" =~ ^[A-Z0-9_]+$ ]] || die "EXTRA_ENV key is not a valid env name: $key"
+    printf '%s\n' "$pair" >>"$env_file"
+  done
+fi
+
 data_type=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/app/data"}}{{.Type}}{{end}}{{end}}' "$CURRENT_CONTAINER")
 data_source=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/app/data"}}{{.Source}}{{end}}{{end}}' "$CURRENT_CONTAINER")
 [[ "$data_type" == bind || "$data_type" == volume ]] || die "unsupported /app/data mount type: $data_type"
