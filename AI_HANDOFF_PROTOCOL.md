@@ -2135,3 +2135,49 @@ usage_logs_group_id_fkey    → ON DELETE SET NULL
 所以级联永远走不到。**账务历史有数据库层面的硬保护。**
 
 `users` 表有 1 条软删除记录（`deleted_at` 非空），软删除不动行、不触发外键，所以不受影响。
+
+### 6.52 唯一性核对：差点因为查错了表而误判（2026-11-15 第 48 轮）
+
+先查数据，五个关键字段**全部无重复**：
+
+```
+users.email              0 组重复
+api_keys.key             0 组重复
+groups.name              0 组重复
+accounts.name            0 组重复
+usage_logs.request_id    0 组重复
+```
+
+然后查 `pg_constraint` 里的 UNIQUE 约束——**没找到 `users.email` 和 `groups.name`**，
+一度以为「这两个字段没有唯一约束，靠应用层检查，存在并发写入重复的窗口」。
+
+**查索引才发现我查错了地方。** 唯一性是以**部分唯一索引**的形式实现的：
+
+```sql
+users_email_unique_active   UNIQUE (email) WHERE deleted_at IS NULL
+groups_name_unique_active   UNIQUE (name)  WHERE deleted_at IS NULL
+idx_groups_duplicate_operation_id_active  UNIQUE (duplicate_operation_id) WHERE ... deleted_at IS NULL
+uq_accounts_spark_shadow_per_parent       UNIQUE (parent_account_id) WHERE ... deleted_at IS NULL
+```
+
+`pg_constraint` 只看得到表级/列级 `UNIQUE` **约束**，**看不到 `CREATE UNIQUE INDEX`**。
+这个系统用「软删除 + 部分唯一索引」的组合，正是正确做法：
+
+- 未删除的行里 email 唯一（`WHERE deleted_at IS NULL`）
+- 删掉的行保留历史，不占用 email
+
+**差点写进报告的错误结论**：如果止步于 `pg_constraint`，我会说「users.email 缺唯一约束」——
+一个看起来严重、实际完全错误的发现。
+
+**`accounts.name` 确实没有唯一索引**，这是**有意的**：
+
+```
+1  ChatGPT Pro 200
+2  ChatGPT pro 200      ← 仅大小写不同，共存
+3  API
+```
+
+账号名允许重复（管理员可能建多个同名账号指向不同凭证），唯一性对账号没有业务意义。
+
+**结论**：关键业务字段的唯一性都有数据库层保护，实测数据也没有任何重复。
+唯一性缺口不存在——但我差点因为查错元数据表而报一个假问题。
