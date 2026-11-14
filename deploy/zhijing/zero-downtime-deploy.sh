@@ -105,6 +105,22 @@ while (( SECONDS < deadline )); do
 done
 [[ "$ready" == true ]] || die "candidate did not become ready within ${HEALTH_TIMEOUT_SECONDS}s"
 
+# 业务就绪（2026-11-15）：/readyz 只证明 database/Redis 可用，不证明账号池已构建。
+# 2026-11-14 19:10 就是这样：探针全绿、账号 active，但 API Key 指向已删除的分组，
+# 调度池为空，用户请求全部 503。v0.1.12 起 /readyz?deep=1 会回答这个问题。
+#
+# 向后兼容：旧镜像不认识 deep 参数，会忽略它并正常返回 200，所以对回滚部署无害。
+# 全环境变量可关：DEEP_READY_CHECK=0。
+DEEP_READY_CHECK="${DEEP_READY_CHECK:-1}"
+if [[ "$DEEP_READY_CHECK" == "1" ]]; then
+  if curl --fail --silent --show-error --max-time 5 \
+      "http://127.0.0.1:${NEW_PORT}/readyz?deep=1" >/dev/null; then
+    printf 'candidate: business readiness ok (deep probe)\n'
+  else
+    die "candidate has no schedulable account (readyz?deep=1 rejected); not switching traffic"
+  fi
+fi
+
 old_port=$(nginx -T 2>/dev/null | awk '
   /upstream zhijing_api[[:space:]]*\{/ {inside=1; next}
   inside && /server 127\.0\.0\.1:[0-9]+ weight=/ {
