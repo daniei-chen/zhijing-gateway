@@ -565,3 +565,27 @@ v0.1.14 起：
 那等于把 key 变孤儿。
 
 顺带把删分组相关的 8 个测试都跑了一遍（含新增的「有 key 拒绝」「无 key 放行」），全绿。
+
+### 6.13 边界与不变量实测（2026-11-15 第 3 轮）
+
+**请求体上限是双层的，外层才是真限制**：
+
+| 层 | 配置 | 位置 |
+|---|---|---|
+| 边缘 / 源站 nginx | `client_max_body_size 24m` | `/etc/nginx/sites-available/zhijing.kaogong.art` |
+| 应用 | `gateway.max_body_size` 默认 **256MB**、`text_max_body_size` **32MB** | `config.go:2647/2653` |
+
+实测 26MB 空 body POST `/v1/responses` → **413 Request Entity Too Large**（不是 401），
+说明拦截发生在认证之前、模型调用之前。小请求对照返回 401 `API_KEY_REQUIRED`，链路正常。
+
+**别被 256MB 误导**：外层 nginx 卡在 24m，超过就 413。要放宽必须两层一起改。
+
+**认证覆盖**：`/v1`、`/v1beta`、`/backend-api/codex`、`/antigravity/v1` 各路由组都挂载了
+`apiKeyAuth`（Gemini 用 `APIKeyAuthWithSubscriptionGoogle`）且都在 `bodyLimit` 之后；
+直接挂在 `r` 上的顶层路由只有 `/health`、`/readyz`、`/setup/status`、`/.well-known/*`
+和 Claude Code 的遥测桩 `/api/event_logging/batch`（直接 200，不读 body）。
+
+**日志脱敏**：`ops_error_logs` 里用正则扫 `sk-…` / `Bearer …` / `password=…`，**0 条命中**。
+唯一遗留是 `attempted_key_prefix` 列——**没有任何代码写入它**（grep 零结果），
+所以 401 排查时看不到调用方用的是什么 key 前缀。该列留着无害（预留），删列需要迁移，
+收益不抵风险，暂不动。
