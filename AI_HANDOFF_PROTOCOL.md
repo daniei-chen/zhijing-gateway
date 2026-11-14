@@ -15,22 +15,20 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 
 ## 2. 当前已验证生产状态
 
-截至 2026-11-15 01:05（北京时间），生产版本是 **v0.1.11**（强制档位能力守卫）：
+截至 2026-11-15 01:42（北京时间），生产版本是 **v0.1.12**（深度就绪探针）：
 
-- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.11（「智境网关 0.1.11」）
-- 源码提交：`96edb2e52`
-- GHCR digest：`sha256:6e923bc88acc4337fb8dcfb3a638cb4a1d329d5202040044f27012edb6ba4475`
-- 当前容器：`zhijing-api-v0111-final`，loopback 端口 **18808**
-- 回滚容器：18807（v0.1.10）、18806（v0.1.9）。2026-11-15 已清理 18805/18804/18803/18802/18801/18799/18793
-  七个容器连同它们在 nginx peers 块里的条目，磁盘 42%→35%（镜像 7.1GB→4.0GB）。
-  要回到更老的版本只能重新 `docker pull` 镜像 + 起容器 + 把 `server 127.0.0.1:<port> backup;`
-  加回 peers 块（改完必须 `nginx -t` 再 `systemctl reload nginx`）。
-- **v0.1.11 切换证据**：`observe: 0 new 5xx within 180s, within limit`；切换后 7 个真实请求
-  （user 4）全部成功，容器 `restart=0`，8 分钟内 0 条 error。
-- **v0.1.11 的行为变化**：分组强制 Ultra Fast 时，先读账号
-  `extra.upstream_model_metadata` 里该模型的 `service_tiers`；只有目录声明了 `ultrafast`
-  才注入，否则回退 `priority`（并记 `[OpenAI Fast] ... only advertises priority; falling back`），
-  目录里没有任何兼容档位时不注入。无目录快照的账号行为不变。
+- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.12（「智境网关 0.1.12」）
+- 源码提交：`4e8d60f3d`
+- GHCR digest：`sha256:94b0bc7c61364fbbbe4184715b9b406219e35c49dcac32e41ff885773897438f`
+- 当前容器：`zhijing-api-v0112-final`，loopback 端口 **18809**
+- 回滚容器：18808（v0.1.11）、18807（v0.1.10）、18806（v0.1.9）
+- **v0.1.12 切换证据**：部署脚本新加的业务就绪检查打印
+  `candidate: business readiness ok (deep probe)`，随后
+  `observe: 0 new 5xx within 180s, within limit`；容器 `restart=0`，切换窗口 0 条错误日志。
+- **v0.1.12 新增能力**：`/readyz?deep=1` 在 DB/Redis 之外回答「有没有可调度账号」，
+  返回 `schedulable_accounts`，为 0 时 503。浅探针语义不变。部署脚本在改写 peers 之前
+  会调用它，拒绝把流量切到没有账号的实例（`DEEP_READY_CHECK=0` 可关；旧镜像不认识该参数、
+  照常返回 200，所以回滚部署不受影响）。
 - **动态并发（已实测）**：`GATEWAY_MEMBER_CONCURRENCY_LIMIT=3` 为基础，
   `GATEWAY_MEMBER_CONCURRENCY_LIMIT_PEAK=5` 为活跃用户 ≤1 时的放宽值。
   **验收方式必须是打真实请求**：单用户发 5 个并发应全部 200；v0.1.8 因为仓库层
@@ -401,3 +399,17 @@ context.Canceled                                                      -> 499
 ```
 
 也就是说 Redis 运行期失联时用户拿到的是 **503**，不是「你被限流了」。这个区分是对的。
+
+**深度就绪探针（v0.1.12 起）**：`/readyz?deep=1` 在 DB/Redis 之外额外返回
+`schedulable_accounts`，为 0 时整条探针返回 503。什么时候用哪个：
+
+```bash
+curl -s 'http://127.0.0.1:<port>/readyz'          # 浅：进程 + 依赖活着（监控/healthcheck 用这个）
+curl -s 'http://127.0.0.1:<port>/readyz?deep=1'   # 深：再加上「有没有账号可用」
+```
+
+部署脚本在改写 peers 之前会调深探针，失败就 `die`，不切流量。旧镜像不认识 `deep` 参数会
+忽略它并照常返回 200，所以回滚到老版本不受影响；`DEEP_READY_CHECK=0` 可整体关闭。
+
+判断「这实例到底能不能服务业务请求」时用深的，别只看浅的——2026-11-14 19:10 那次就是
+浅探针全绿、业务全 503。
