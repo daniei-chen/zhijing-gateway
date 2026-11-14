@@ -2087,3 +2087,51 @@ nextBackoff        = 当前值 × 1.5，封顶 pollMaxInterval
 **边界**：这是**推算**，不是实测。反事实（「如果当初是 2000ms 会怎样」）在生产上无法测量。
 如果将来并发用户变多（比如 10 个请求同时排队），Redis 压力会线性上升：
 10 个并发等待 × 4 QPS ≈ 40 QPS，那时值得重新评估。
+
+### 6.51 数据库约束核对：孤儿 Key 的根源在 `ON DELETE SET NULL`（2026-11-15 第 47 轮）
+
+逐表查了外键约束（全库 84 个外键，分布在 50 张表）。最相关的一条：
+
+```
+api_keys_group_id_fkey | FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE SET NULL
+```
+
+**这就是 11-14 那次事故的数据库层面机制**：删分组时，Postgres 会自动把
+`api_keys.group_id` 置成 NULL，Key 立刻变成孤儿——应用层再也没法从 `group_id` 找到分组，
+调度器只能返回「No available OpenAI accounts」。
+
+**v0.1.14 的应用层保护（有 Key 绑定就拒绝删除）之所以必要**，正是因为它阻止了这个 SET NULL。
+不是应用层多此一举，是数据库默认行为太宽松。
+
+**顺手确认了 NULL 不是合法状态**：
+
+```
+api_keys 活跃 6 个，group_id IS NULL 的 0 个
+```
+
+6 个 Key 全部有分组。也就是说 `group_id = NULL` 在当前系统里**只代表孤儿**，
+不存在「故意不设分组」的合法场景。
+
+**所以可以再加一道保险**：把约束改成 `ON DELETE RESTRICT`，让数据库也拒绝删除仍有 Key 的分组，
+与应用层保护形成双保险。**这轮没有执行**，因为：
+
+- 应用层已经拦住（v0.1.14），DB 层属于冗余加固，不是修复现有缺陷
+- 改约束要迁移 + 发版，而 `api_keys` 有 12 行，`ALTER TABLE` 虽然瞬间完成，仍是一次 schema 变更
+- 收益是「如果将来有人绕过应用层（直接 SQL、新代码路径漏检）时兜住」
+
+**另外两条也是好消息**：
+
+`usage_logs` 的外键设计是**保护账务**的：
+
+```
+usage_logs_user_id_fkey     → ON DELETE RESTRICT
+usage_logs_api_key_id_fkey  → ON DELETE RESTRICT
+usage_logs_account_id_fkey  → ON DELETE RESTRICT
+usage_logs_group_id_fkey    → ON DELETE SET NULL
+```
+
+用户、Key、账号都是 **RESTRICT**——**有用量记录就删不掉**。而 `billing_usage_entries` 那几条
+是 CASCADE，看似危险，但 `usage_logs` 的 RESTRICT 会先拦住删除动作，
+所以级联永远走不到。**账务历史有数据库层面的硬保护。**
+
+`users` 表有 1 条软删除记录（`deleted_at` 非空），软删除不动行、不触发外键，所以不受影响。
