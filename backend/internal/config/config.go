@@ -2668,6 +2668,7 @@ func setDefaults() {
 	viper.SetDefault("gateway.openai_forward_max_seconds", 1500)
 	viper.SetDefault("gateway.openai_disconnect_drain_seconds", 30)
 	viper.SetDefault("gateway.member_concurrency_limit", 0)
+	viper.SetDefault("gateway.member_concurrency_limit_peak", 0)
 	viper.SetDefault("gateway.global_concurrency_limit", 0)
 	viper.SetDefault("gateway.stream_data_interval_timeout", 180)
 	viper.SetDefault("gateway.stream_keepalive_interval", 10)

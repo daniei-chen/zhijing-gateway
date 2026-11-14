@@ -25,12 +25,12 @@ func (s *dynamicActiveStub) ActiveUserCount(context.Context) (int, error) {
 // peak 未配置或读取失败时必须保持 base，绝不能因为异常放大配额。
 func TestEffectiveMemberLimit(t *testing.T) {
 	cases := []struct {
-		name        string
-		base        int
-		peak        int
-		active      int
-		err         error
-		want        int
+		name   string
+		base   int
+		peak   int
+		active int
+		err    error
+		want   int
 	}{
 		{name: "peak 未配置时保持 base", base: 3, peak: 0, active: 0, want: 3},
 		{name: "peak 不大于 base 时视为未启用", base: 5, peak: 5, active: 0, want: 5},

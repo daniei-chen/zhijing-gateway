@@ -42,6 +42,9 @@ func (c StubConcurrencyCache) GetAccountWaitingCount(_ context.Context, _ int64)
 func (c StubConcurrencyCache) AcquireUserSlot(_ context.Context, _ int64, _ int, _ string) (bool, error) {
 	return true, nil
 }
+func (c StubConcurrencyCache) ActiveUserCount(_ context.Context) (int, error) {
+	return 0, nil
+}
 func (c StubConcurrencyCache) ReleaseUserSlot(_ context.Context, _ int64, _ string) error {
 	return nil
 }
