@@ -15,13 +15,20 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 
 ## 2. 当前已验证生产状态
 
-截至 2026-11-14 23:00（北京时间），生产版本是 **v0.1.9**（动态并发已验证生效）：
+截至 2026-11-15 00:40（北京时间），生产版本是 **v0.1.10**（新增分组强制服务档位）：
 
-- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.9（「智境网关 0.1.9」）
-- 源码提交：`0845a427df2a53033dad209bea6a0740516e4517`
-- GHCR digest：`sha256:1d474a20117a73067746861bf7aef57977d9f3fd9f97de5bb445d4fe92e3e9fb`
-- 当前容器：`zhijing-api-v019-final`，loopback 端口 **18806**
-- 回滚容器：18805（v0.1.8）、18803（v0.1.6）、18804（v0.1.7）、18802（v0.1.5）、18801（v0.1.4）；历史 18799/18793
+- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.10（「智境网关 0.1.10」）
+- 源码提交：`45d13c83d9d494644fb5e4b11ce4a426fdc86f2b`
+- GHCR digest：`sha256:ce93394944b9a36b3d878b08d14399fb4c65167d98555b222fd12991aaa953a6`
+- 当前容器：`zhijing-api-v0110-final`，loopback 端口 **18807**
+- 回滚容器：18806（v0.1.9）、18805（v0.1.8）、18803（v0.1.6）、18804（v0.1.7）、18802（v0.1.5）、18801（v0.1.4）；历史 18799/18793
+- **v0.1.10 切换证据**：`observe: 0 new 5xx within 180s, within limit`；切换后真实用户流量
+  （user 4 / `gpt-6.1-sol`）在 16:36:55 之后连续 200，容器 `restart=0`，日志 0 条 error。
+- **v0.1.10 新增能力**：分组可强制 OpenAI `service_tier`（跟随客户端 / priority / ultrafast）。
+  两个开关互斥，后端以 `GROUP_OPENAI_FORCED_SERVICE_TIER_CONFLICT` 拒绝并存；全局 Fast/Flex
+  策略仍在之后做权威判定。认证快照版本 v27→v28，升级后首次请求会重载 API Key 分组快照。
+- **v0.1.10 数据库变更**：迁移 `252_group_force_openai_ultrafast.sql` 新增
+  `groups.force_openai_ultrafast BOOLEAN NOT NULL DEFAULT FALSE`（已验证落库，旧版本不读该列）。
 - **动态并发（已实测）**：`GATEWAY_MEMBER_CONCURRENCY_LIMIT=3` 为基础，
   `GATEWAY_MEMBER_CONCURRENCY_LIMIT_PEAK=5` 为活跃用户 ≤1 时的放宽值。
   **验收方式必须是打真实请求**：单用户发 5 个并发应全部 200；v0.1.8 因为仓库层
@@ -29,8 +36,6 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
   （429 响应体写着"上限 3"），v0.1.9 修复后实测 5/5 全部 200。
 - **两层都要一致**：service 的 `effectiveMemberLimit()` 与 repository 的
   `effectiveMemberHardLimit()` 必须用同一套活跃用户口径，否则任一层压回静态值都会让 peak 失效。
-- 账号：仅 #2「ChatGPT pro 200」可用，`concurrency=10`；分组：仅「pro 200」
-  （`model_allowlist.enabled=false`）。
 - 账号：仅 #2「ChatGPT pro 200」可用（#1 Plus 订阅 2026-11-02 过期且已删除、#3 API 已删除），
   `concurrency=10`；分组：仅「pro 200」（`model_allowlist.enabled=false`）。
 - 该账号真实可用模型 12 个：`codex-auto-review`、`gpt-5.6-luna/sol/terra`、`gpt-6-astra/luna/sol`、
@@ -197,3 +202,14 @@ bash /root/zhijing-zero-downtime-deploy-v0.1.0.sh
 
 如果发现新失败，先把失败写进审计记录，再修复；不得为了让交接文档看起来漂亮而删除失败历史。后续 AI 的目标是保持可验证、可回滚、可审计和诚实的工程状态，而不是追求没有证据的“完美”措辞。
 
+
+## 10. Release Notes 约定（2026-11-15 起）
+
+`v0.1.0` ~ `v0.1.10` 的 Release 说明已全部补齐（更新内容 / 修复 / 数据库变更 / 升级说明）。
+此前所有版本的 body 只有安装模板，没有任何变更说明——这是明确的质量缺口，不要回退到那个状态。
+
+- 发版时必须写清楚：**做了什么、修了什么、有没有迁移/新环境变量、怎么回滚**。
+- 有已知问题的版本要显式标注「不要部署」或「不要作为回滚目标」（v0.1.7 账号池回归、
+  v0.1.2/v0.1.3 迁移校验和门禁失败）。
+- `release.yml` 里没有 changelog 生成逻辑，Release body 由 GoReleaser/模板决定；
+  想自动化需要改 `.goreleaser.yaml`（该文件不需要 workflow scope，可以推送）。
