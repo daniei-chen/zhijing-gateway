@@ -908,9 +908,15 @@ func (h *GroupHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	if h.isSimpleMode() {
+	// 默认走带保护的 DeleteGroup：分组下还有活跃 API Key 时返回 409，
+	// 因为外键是 ON DELETE SET NULL——删掉分组会让这些 key 立即无法调度
+	// （2026-11-14 19:10 全站 503 就是这么来的）。要绕过必须显式 ?force=true。
+	switch {
+	case h.isSimpleMode():
 		err = h.adminService.DeleteGroupIfEmpty(c.Request.Context(), groupID)
-	} else {
+	case isTruthyQueryFlag(c.Query("force")):
+		err = h.adminService.DeleteGroupForce(c.Request.Context(), groupID)
+	default:
 		err = h.adminService.DeleteGroup(c.Request.Context(), groupID)
 	}
 	if err != nil {
@@ -1161,4 +1167,15 @@ func (h *GroupHandler) UpdateSortOrder(c *gin.Context) {
 	}
 
 	response.Success(c, gin.H{"message": "Sort order updated successfully"})
+}
+
+// isTruthyQueryFlag 识别 ?force=true / ?force=1（大小写与空白不敏感）。
+// 只有显式写出这些值才算「我要绕过保护」，其余一律按保护路径处理。
+func isTruthyQueryFlag(raw string) bool {
+	switch strings.ToLower(strings.TrimSpace(raw)) {
+	case "1", "true", "yes":
+		return true
+	default:
+		return false
+	}
 }

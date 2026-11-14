@@ -400,6 +400,11 @@ func (s *stubAdminService) DeleteGroup(ctx context.Context, id int64) error {
 	return nil
 }
 
+func (s *stubAdminService) DeleteGroupForce(ctx context.Context, id int64) error {
+	s.deletedGroupIDs = append(s.deletedGroupIDs, id)
+	return nil
+}
+
 func (s *stubAdminService) DeleteGroupIfEmpty(ctx context.Context, id int64) error {
 	s.guardedDeletedGroupIDs = append(s.guardedDeletedGroupIDs, id)
 	return s.deleteGroupIfEmptyErr

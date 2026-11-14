@@ -679,6 +679,28 @@ func TestAdminService_DeleteGroup_Success_WithCacheInvalidation(t *testing.T) {
 	}, calls)
 }
 
+// 默认路径必须挡住「删掉分组导致名下 key 失去归属」——外键是 ON DELETE SET NULL，
+// key 会立刻无法调度（2026-11-14 19:10 全站 503 的形态）。
+func TestAdminService_DeleteGroup_RejectsWhenKeysBound(t *testing.T) {
+	repo := &groupRepoStub{}
+	apiKeyRepo := &deleteGroupAPIKeyRepoStub{keys: []string{"k1", "k2"}}
+	svc := &adminServiceImpl{groupRepo: repo, apiKeyRepo: apiKeyRepo}
+
+	err := svc.DeleteGroup(context.Background(), 5)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "GROUP_HAS_ACTIVE_KEYS")
+	require.Empty(t, repo.deleteCalls, "guarded deletion must never reach the repository")
+}
+
+// 分组下没有活跃 key 时默认路径照常工作。
+func TestAdminService_DeleteGroup_AllowedWhenNoKeysBound(t *testing.T) {
+	repo := &groupRepoStub{}
+	apiKeyRepo := &deleteGroupAPIKeyRepoStub{}
+	svc := &adminServiceImpl{groupRepo: repo, apiKeyRepo: apiKeyRepo}
+
+	require.NoError(t, svc.DeleteGroup(context.Background(), 7))
+	require.Equal(t, []int64{7}, repo.deleteCalls)
+}
 func TestAdminService_DeleteGroup_InvalidatesAuthCacheForBoundKeys(t *testing.T) {
 	repo := &groupRepoStub{}
 	apiKeyRepo := &deleteGroupAPIKeyRepoStub{keys: []string{"k1", "k2"}}
@@ -689,7 +711,8 @@ func TestAdminService_DeleteGroup_InvalidatesAuthCacheForBoundKeys(t *testing.T)
 		authCacheInvalidator: invalidator,
 	}
 
-	err := svc.DeleteGroup(context.Background(), 5)
+	// 有绑定 key 时必须显式 force——默认路径会拒绝（见 DeleteGroup 的保护）。
+	err := svc.DeleteGroupForce(context.Background(), 5)
 	require.NoError(t, err)
 	require.Equal(t, []int64{5}, repo.deleteCalls)
 	require.Equal(t, []int64{5}, apiKeyRepo.listGroupIDs)

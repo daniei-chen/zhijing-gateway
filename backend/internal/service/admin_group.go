@@ -1223,14 +1223,24 @@ func normalizeGroupModelPricing(platform string, pricing []ChannelModelPricing) 
 }
 
 func (s *adminServiceImpl) DeleteGroup(ctx context.Context, id int64) error {
-	return s.deleteGroup(ctx, id, false)
+	return s.deleteGroup(ctx, id, false, false)
+}
+
+// DeleteGroupForce 跳过「分组下还有活跃 API Key」的保护并强制删除。
+//
+// 之所以要单独一个方法而不是加参数：默认路径必须安全。直接删分组会把名下所有
+// key 的 group_id 置空（外键是 ON DELETE SET NULL），它们立刻无法调度——
+// 2026-11-14 19:10 的全站 503 就是这样一次误删造成的。调用方要强制删除必须
+// 显式选择这个方法，让「我要绕过保护」成为一个写出来的决定。
+func (s *adminServiceImpl) DeleteGroupForce(ctx context.Context, id int64) error {
+	return s.deleteGroup(ctx, id, false, true)
 }
 
 func (s *adminServiceImpl) DeleteGroupIfEmpty(ctx context.Context, id int64) error {
-	return s.deleteGroup(ctx, id, true)
+	return s.deleteGroup(ctx, id, true, false)
 }
 
-func (s *adminServiceImpl) deleteGroup(ctx context.Context, id int64, requireEmpty bool) error {
+func (s *adminServiceImpl) deleteGroup(ctx context.Context, id int64, requireEmpty, force bool) error {
 	if s.cfg != nil && s.cfg.RunMode == config.RunModeSimple {
 		group, err := s.groupRepo.GetByIDLite(ctx, id)
 		if err != nil {
@@ -1242,6 +1252,19 @@ func (s *adminServiceImpl) deleteGroup(ctx context.Context, id int64, requireEmp
 	}
 	if requireEmpty && s.emptyGroupDeleteRepo == nil {
 		return fmt.Errorf("guarded group deletion is unavailable")
+	}
+
+	// 2026-11-15：groups 的外键是 ON DELETE SET NULL——直接删分组会把它名下所有
+	// API Key 的 group_id 置空，key 立刻无法调度。2026-11-14 19:10 的全站 503
+	// 就是这个形态（27 个 5xx，而所有技术探针全绿）。非 simple mode 此前没有任何
+	// 保护，管理员误点一次就会中断服务，所以这里要求先把 key 解绑。
+	if !requireEmpty && !force && s.apiKeyRepo != nil {
+		boundKeys, listErr := s.apiKeyRepo.ListKeysByGroupID(ctx, id)
+		if listErr == nil && len(boundKeys) > 0 {
+			return infraerrors.New(http.StatusConflict, "GROUP_HAS_ACTIVE_KEYS",
+				fmt.Sprintf("group %d still owns %d active API key(s); move them to another group or delete them first",
+					id, len(boundKeys)))
+		}
 	}
 
 	var groupKeys []string
