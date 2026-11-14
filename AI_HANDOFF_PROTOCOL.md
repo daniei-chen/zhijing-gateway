@@ -2488,3 +2488,50 @@ time   11-15 05:40:45
 **顺带看到一个使用特征**：这个系统的管理几乎全部由一个人完成（534/716 = 75%），
 而且前两项 action 是批量查询统计（269 条）——说明管理员主要通过后台观察状态，
 而不是频繁改动配置。
+
+### 6.60 覆盖率测绘：72.8% / 56.6% / 33.3%，以及一个零测试的服务（2026-11-15 第 58 轮）
+
+三个核心包的实测覆盖率：
+
+```
+internal/service     72.8% of statements    243s
+internal/handler     56.6%                 71s
+internal/repository  33.3%                 12s
+```
+
+**repository 33.3% 不代表风险高**：它大部分是 SQL 构造，真正的数据库行为靠集成测试
+（需要 `integration` tag + 真实 PG），单测覆盖不到是正常结构。
+
+**service 里 1,329 个函数覆盖率 0%**，逐个筛掉 `Get*` / `Is*` / `Has*` 这类简单取值之后，
+剩下的值得注意的只有几个：
+
+| 函数 | 说明 |
+|---|---|
+| `account_expiry_service.go` 全部（New / Start / Stop / runOnce） | **整个服务零测试** |
+| `CheckWindowCostSchedulability` | 调度相关（窗口成本可调度性） |
+| `account_service.go` 的 List / UpdateStatus / UpdateLastUsed | 简单 CRUD |
+
+**`AccountExpiryService` 是唯一「完整服务零测试」的模块**，它每天在跑——自动暂停过期账号。
+所以查了它真正做事的地方（`AutoPauseExpiredAccounts` 的 SQL）：
+
+```sql
+UPDATE accounts SET schedulable = FALSE
+WHERE deleted_at IS NULL
+  AND schedulable = TRUE
+  AND auto_pause_on_expired = TRUE
+  AND expires_at IS NOT NULL
+  AND expires_at <= $1
+```
+
+**五个条件全部收紧**：排除已删、只在当前可调度时、只对显式开启自动暂停的账号、必须有到期时间、
+必须真的过期。逻辑没问题。
+
+**实测当前会被暂停的账号数：0**。
+
+**结论：低风险，不是缺陷。** 服务本身是薄壳（一个 ticker + 一次 repo 调用），
+真正的判定逻辑在那个 SQL 里，而 SQL 是正确的。
+
+**唯一潜在隐患**：`Stop()` 用了 `stopOnce`，`stopCh` 只能关闭一次。如果先 `Stop` 再 `Start`，
+`select` 会立刻命中已关闭的 channel，goroutine 直接退出——服务**静默地不再工作**。
+实际使用中 `Stop` 只在进程退出时调用，不会重启，所以这不会发生。但如果将来有人写
+「热重载配置」之类的逻辑去 Stop/Start，就会踩到。记在这里。
