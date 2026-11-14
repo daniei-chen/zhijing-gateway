@@ -444,3 +444,29 @@ Strict-Transport-Security: max-age=2592000, max-age=31536000; includeSubDomains
 18808 (v0.1.11)  deep=1 → 200 {"checks":{"database":"ok","redis":"ok"}}
 18809 (v0.1.12)  deep=1 → 200 {"checks":{"business":"ok",...,"schedulable_accounts":1}}
 ```
+
+### 6.9 告警邮件链路曾经整条断裂（2026-11-15 发现）
+
+`ops_alert_events` 共 334 条，**`email_sent` 全部为 false**，包括 2026-11-14 19:15 那次事故的
+两条 P0（错误率极高 / 成功率过低）。也就是说：规则在正确触发、事件在正确入库，但**一封邮件都没发出去**。
+
+两层原因叠在一起：
+
+1. **配置缺口**：`smtp_host`(smtp.qq.com) / `smtp_port`(465) / `smtp_username` / `smtp_from` 都有值，
+   但 `settings` 表**没有 `smtp_password` 这一行**。QQ 邮箱要求用授权码认证，密码为空必然被拒。
+   （代码里 `SettingKeySMTPPassword = "smtp_password"`，加密存储，缺失时读到空串。）
+2. **失败不可见**：`maybeSendAlertEmail` 的每个失败分支都是裸 `continue`，不打日志、不写原因。
+   所以「通知完全不通」和「这两周很安静」在日志里没有区别——这才是它能潜伏这么久的原因。
+
+v0.1.13 修掉了第 2 点：单个收件人失败记录脱敏地址 + 事件 ID + 规则名 + 错误；
+0/N 全失败时额外记一条汇总并提示检查 SMTP。第 1 点需要人工在后台补填。
+
+**验证告警通道是否真的通了**：后台 → 系统设置 → 邮件 → 保存 → 点「发送测试邮件」
+（`POST /api/v1/admin/settings/send-test-email`），不要只看「保存成功」。
+
+排查时的判据：
+
+```sql
+select count(*) total, count(*) filter (where email_sent) sent from ops_alert_events;
+-- sent 长期为 0 且 total 在涨 => 通道是断的
+```
