@@ -206,6 +206,51 @@ bash /root/zhijing-zero-downtime-deploy-v0.1.0.sh
 - 不把上游的品牌、release workflow、镜像和仓库链接重新带回本项目。
 - 给每个同步结论留下 commit、文件、测试和影响范围证据。
 
+### 6.1 判断「缺什么」必须以 upstream HEAD 为准，不是看某个历史提交
+
+2026-11-15 连续误判两次，根因都是同一个：拿某个历史提交**新增的行**去比对本地代码。
+两个坑：
+
+1. 本项目的模块路径（`daniei-chen/zhijing-gateway` vs `Wei-Shaw/sub2api`）和变量命名已经改过，
+   行文本天然对不上，但功能是有的（例如上游写死 `8e-6`，本项目引用 `claude52FallbackPricing`）。
+2. **上游可能后来又把那个改动删了**。`applyOpenAIReasoningEffortPolicyForGLMFromContext`
+   是 `aa245176a` 引入的，`upstream/main` 现在**已经没有这个函数**；照历史提交回灌会引入
+   上游已废弃的行为，并让本地 4 个测试失败。
+
+正确顺序：
+
+```bash
+git grep -n '<符号>' upstream/main -- 'backend/*.go'   # 上游当前还有没有
+git grep -n '<符号>' HEAD -- 'backend/*.go'            # 本项目有没有等价实现
+```
+
+上游 HEAD 已经删除的东西不要回灌。结论要写清「已存在 / 已废弃 / 真缺失」三分类，
+而不是笼统说「缺」。
+
+### 6.2 运维巡检（japan_maintenance.py watch）
+
+systemd `zhijing-japan-health.timer` 每 60 秒执行 `python3 /opt/zhijing-sub2api/japan_maintenance.py watch`，
+结果写 `/opt/zhijing-sub2api/maintenance/health.json`。任一 `OPS_ALERT_KEYS` 为 `False` 时，
+watch 会置 `manual_review_required: true`；值为 `None` 表示该项探测不到，不告警。
+
+当前纳入告警的 key：
+
+```
+cert_ok  backup_ok  disk_ok  db_ok  billing_ok  pitr_ok
+gateway_ok  accounts_ok  model_catalog_ok  model_route_ok
+```
+
+后两个是 2026-11-15 加的，起因是 gpt-5.6-luna 那 4 次 404：当时 `/readyz` 全绿、账号可调度、
+5xx 为 0，**坏的只有「某个模型还能不能用」**。
+
+- `model_catalog_age_hours` / `model_catalog_ok`：账号 `extra.upstream_model_metadata.synced_at`
+  距今小时数，> 72h 告警。
+- `model_not_found_6h` / `model_route_ok`：近 6 小时 `model_not_found` 计数，≥ 10 告警
+  （客户端偶尔试一个不存在的模型名属正常，不算）。
+
+改这个脚本后必须：`python3 -m py_compile` → 上传到 `japan_maintenance.py.new` → 远端再编译 →
+`mv` 覆盖（原子替换，避免 timer 撞上半个文件）→ 手动跑一次 `watch` 确认新字段出现。
+
 ## 7. 交接报告格式
 
 每次工作结束必须报告：
