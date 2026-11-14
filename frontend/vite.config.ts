@@ -102,6 +102,14 @@ export default defineConfig(({ mode }) => {
   build: {
     outDir: '../backend/internal/web/dist',
     emptyOutDir: true,
+    // exceljs 只在「导出用量」时通过动态 import 使用，但构建产物把它塞进了入口的
+    // modulepreload 列表——于是每个打开首页的人都要先下载 938KB（gzip 271KB），
+    // 哪怕他永远不点导出。这里把它从预加载里摘掉：动态 import 照常工作，
+    // 只是改成点导出时再取。
+    modulePreload: {
+      resolveDependencies: (_filename: string, deps: string[]) =>
+        deps.filter((dep) => !dep.includes('vendor-excel')),
+    },
     rollupOptions: {
       output: {
         /**
