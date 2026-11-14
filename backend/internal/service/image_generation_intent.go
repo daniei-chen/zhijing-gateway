@@ -399,7 +399,7 @@ func openAIAnyToolChoiceSelectsImageGeneration(choice any) bool {
 	return false
 }
 
-func getAPIKeyFromContext(c interface{ Get(string) (any, bool) }) *APIKey {
+func getAPIKeyFromContext(c interface{ Get(any) (any, bool) }) *APIKey {
 	if c == nil {
 		return nil
 	}
