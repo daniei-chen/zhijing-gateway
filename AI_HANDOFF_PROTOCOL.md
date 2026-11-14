@@ -2352,3 +2352,50 @@ mixins.SoftDeleteMixin{},   // 提供软删除功能（deleted_at）
 **这是第三次同类错误**，前两次是 6.43（跨时间聚合）和 6.44（覆盖语义），
 这次的形状是**跨抽象层**：用 SQL 层的观测去推断 ORM 层的结论。
 三次的共同点都一样——**用一个便宜的口径去替代真实的执行路径**。
+
+### 6.57 `ops_system_logs` 的 94 条 error：主要是价格表在只读文件系统上挣扎（2026-11-15 第 55 轮）
+
+这是唯一还没系统查过的日志表。`warn` 4,549 条、`error` **94 条**，error 少到可以逐条看。
+
+**94 条的构成**：
+
+| 组件 | 消息 | 次数 | 最后 |
+|---|---|---|---|
+| `service.pricing` | Failed to fetch remote hash（拉 GitHub） | 57 | 11-02 |
+| `stdlog` | exchange-code 失败 | 9 | 11-02 |
+| `service.pricing` | **Failed to save hash: read-only file system** | 7 | 11-14 02:55 |
+| `service.pricing` | **Failed to save file: read-only file system** | 7 | 11-14 02:55 |
+| `stdlog` | balance: numeric field overflow | 4 | 11-05 |
+| 其余 | context canceled / 超时 / 单次 | 10 | — |
+
+**一半的 error（71 条）来自价格表服务。**
+
+**只读那 14 条是什么**：pricing 服务尝试把拉下来的价格表写回 `data/model_pricing.json`，
+但容器根文件系统是只读的（`ReadonlyRootfs=true`），写入被拒。
+
+**但当前容器其实是可写的**：
+
+```
+bind /opt/zhijing-sub2api/upgrade-v0011/data -> /app/data rw=true
+docker exec ... touch /app/data/.write-probe  →  WRITABLE
+```
+
+`/app/data` 是**独立 bind mount**，`rw=true`。所以那 14 条错误都发生在 11-14 02:55 之前——
+旧容器的挂载方式不同。**v0.1.19 之后没有新的只读错误。**
+
+**但更重要的一件事实**：价格表文件的修改时间是 **Nov 14 02:50**，正等于 v0.1.19 的镜像构建时间。
+也就是说：
+
+**价格表从来没有在运行时更新成功过。** 它跟着镜像走——每次发版打进去一份，运行期一行都没变。
+
+这不是缺陷（价格表本来就是镜像内嵌、随版本发布），但它意味着：
+- **上游调价后，必须重新发版才能生效**，不会自动跟
+- 那 57 次「Failed to fetch remote hash」+ 14 次「read-only」说明这套运行时更新链路
+  **一直在尝试、一直在失败、失败了只记日志**
+
+**判断**：功能上无害（价格表跟着镜像走是对的），但**代码在做一个注定失败的动作并留下错误记录**。
+要清掉这个噪音，得让 pricing 服务在只读环境下跳过写入——那是代码改动，需要发版。
+现在把它记下来，不改。
+
+**顺带确认**：`numeric field overflow` 那 4 条就是 6.44 里追过的天文数字余额操作（1e16 / 1e20），
+数据库拦住了，符合预期。
