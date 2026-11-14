@@ -647,3 +647,48 @@ SPA handler，所以这个修复对现有用户**没有直接可见变化**（ng
 
 v0.1.16 的构建约束写错了（文件无 tag 而调用者在 embed 里），导致 golangci-lint 把三个符号
 判成 unused、CI 红灯——**测试是过的，红的只是 lint**。v0.1.17 把约束改成 `embed || unit` 修好。
+
+### 6.16 备份恢复演练（2026-11-15 第 6 轮，已实测）
+
+「备份文件存在」不等于「备份能恢复」。这一轮把最新备份真的恢复到一个临时 PostgreSQL 里验证。
+
+**备份内容**：`/var/backups/zhijing-sub2api/20261114T181850Z/`（UTC 18:18 = 北京 02:18）
+
+```
+database.dump   7,526,494 B  sha256 a0cc7571…  ← 与 receipt.json 记录一致
+redis.rdb          44,495 B  sha256 2d8f87dd…
+config.tar.gz     212,632 B  sha256 92dd0ef0…
+```
+
+dump 头部是 `PGDMP` 1.16（pg_dump custom 格式）。
+
+**恢复方法**（用生产同一个 PG 镜像 ID，起临时容器 + tmpfs，不碰生产卷）：
+
+```bash
+docker run -d --name pg-restore-test --tmpfs /var/lib/postgresql \
+  -e POSTGRES_PASSWORD=test -e POSTGRES_DB=zhijing_trial \
+  -p 127.0.0.1:15432:5432 <生产 PG 镜像 ID>
+docker exec -i pg-restore-test pg_restore -U postgres -d zhijing_trial \
+  --no-owner --no-privileges --exit-on-error < database.dump
+```
+
+**结果**：
+
+- `pg_restore --exit-on-error` **零错误**
+- 106 张表全部恢复
+- 行数与生产逐表一致：
+
+| 表 | 恢复库 | 生产 |
+|---|---|---|
+| schema_migrations | 305 | 305 |
+| users | 6 | 6 |
+| api_keys | 12 | 12 |
+| groups | 3 | 3 |
+| accounts | 3 | 3 |
+| usage_logs | 36410 | 36410 |
+| ops_error_logs | 3343 | 3343 |
+
+**陷阱**：PostgreSQL 18 的官方镜像要求挂载 `/var/lib/postgresql`（不是 `/var/lib/postgresql/data`），
+挂错位置容器会直接退出，日志里只有一段迁移提示。用 `--tmpfs /var/lib/postgresql` 即可。
+
+恢复完临时容器与 tmpfs 已删除，生产未受影响（行数、深探针均不变）。
