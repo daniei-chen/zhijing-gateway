@@ -2258,3 +2258,42 @@ keys_on_deleted_groups  = 0
 **改动性质**：纯巡检（只读查询 + 结果写日志），
 不需要发版、不影响任何请求路径、失败时 `key_group_ok = None` 而不是报错。
 备份在 `japan_maintenance.py.bak-round52`。
+
+### 6.55 巡检再加一项：账务台账一致性（2026-11-15 第 53 轮）
+
+先确认了 `billing_ok` **已经**在查 `billing_failures where status='pending'`（脚本第 248 行），
+所以「漏扣无人知」这条其实早就有监控——我之前列清单时低估了它。**没有重复造轮子。**
+
+缺的是另一条：**每一行 `usage_logs` 是否恰好对应一条去重记录**。
+这是「没有重复计费、没有漏计」的唯一证据，第 24 轮我手工算过一次（36,410 = 36,410），
+但**没有任何东西持续盯着它**。
+
+**不变量要写成 `usage = dedup + archive`**，不是 `usage = dedup`：两张表保留期不同，
+`usage_logs` 30 天先清理，`dedup` 365 天后归档到 `usage_billing_dedup_archive`。
+直接比 `usage` 和 `dedup` 会在第一次清理之后就开始误报。
+
+```sql
+select (select count(*) from usage_logs)
+     - (select count(*) from usage_billing_dedup)
+     - (select count(*) from usage_billing_dedup_archive)
+```
+
+**实测**：
+
+```
+ledger_ok              = True
+ledger_delta           = 0
+key_group_ok           = True
+billing_ok             = True
+billing_failures_pending = 0
+gateway_ok             = True
+accounts_ok            = True
+failed_set             = None
+```
+
+**巡检项 11 → 13**（第 52 轮加 `key_group_ok`，本轮加 `ledger_ok`），全部为绿。
+备份 `japan_maintenance.py.bak-round53`。
+
+**这一项能抓到什么**：如果某次 `Apply` 在写 `usage_logs` 之后、写 dedup 之前崩了，
+或者反过来，`ledger_delta` 就不再是 0。它是账务侧第一个**主动**的完整性检查
+（之前只有 `billing_failures` 那种被动的失败记录）。

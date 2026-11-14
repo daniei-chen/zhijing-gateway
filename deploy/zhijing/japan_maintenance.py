@@ -253,6 +253,24 @@ def check_ops_baselines():
             out['billing_ok'] = (_n == 0)
     except (OSError, subprocess.SubprocessError, ValueError):
         out['billing_ok'] = None
+    # ── 账务台账一致性（2026-11-15 round 53）────────────────────────────────
+    # 每一条 usage_logs 必须恰好对应一条去重记录，这是"没有重复计费、没有漏计"
+    # 的唯一证据（round 24 手算过一次 36,410 = 36,410）。两张表保留期不同
+    # （usage_logs 先清理、dedup 365 天后归档），所以不变量是 usage = dedup + archive。
+    try:
+        _r = subprocess.run(
+            ['docker', 'exec', 'zhijing-sub2api-japan-postgres-1',
+             'psql', '-U', 'zhijing_trial', '-d', 'zhijing_trial', '-Atc',
+             "select (select count(*) from usage_logs)"
+             " - (select count(*) from usage_billing_dedup)"
+             " - (select count(*) from usage_billing_dedup_archive)"],
+            capture_output=True, timeout=8)
+        if _r.returncode == 0:
+            _n = int((_r.stdout or b'0').strip() or b'0')
+            out['ledger_delta'] = _n
+            out['ledger_ok'] = _n == 0
+    except (OSError, subprocess.SubprocessError, ValueError):
+        out['ledger_ok'] = None
     # ── 网关业务健康（2026-11-14 round 10）─────────────────────────────
     # 技术健康 ≠ 业务可用：账号配额打满或白名单放行了账号不支持的模型时，
     # /readyz 依然报 database/redis ok、看门狗依然 healthy，但用户请求全部 503
