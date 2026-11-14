@@ -38,8 +38,24 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
   `effectiveMemberHardLimit()` 必须用同一套活跃用户口径，否则任一层压回静态值都会让 peak 失效。
 - 账号：仅 #2「ChatGPT pro 200」可用（#1 Plus 订阅 2026-11-02 过期且已删除、#3 API 已删除），
   `concurrency=10`；分组：仅「pro 200」（`model_allowlist.enabled=false`）。
-- 该账号真实可用模型 12 个：`codex-auto-review`、`gpt-5.6-luna/sol/terra`、`gpt-6-astra/luna/sol`、
-  `gpt-6.1-sol/terra`、`gpt-reserve` + 生图 `gpt-image-2.5-flare`、`gpt-image-2.5-sunburst`。
+- **可用模型：配置 12 个，实测成功 7 个，别把「配置里有」当成「能用」**。
+  - 配置（`accounts.credentials.model_mapping`，1:1 同名映射）12 个：
+    `codex-auto-review`、`gpt-5.6-luna/sol/terra`、`gpt-6-astra/luna/sol`、`gpt-6.1-sol/terra`、
+    `gpt-reserve`，加生图 `gpt-image-2.5-flare`、`gpt-image-2.5-sunburst`。
+  - `usage_logs` 里有成功记录的只有 **7 个**：`gpt-6.1-sol`（绝对主力）、`gpt-6-astra`、
+    `gpt-6.1-terra`、`gpt-6-luna`、`gpt-6-sol`、`gpt-image-2.5-flare`、`gpt-image-2.5-sunburst`。
+  - `gpt-5.6-luna` 曾连续 4 次 404（11-14 11:35 / 18:37 / 18:43），根因是当时账号的
+    `extra.upstream_model_metadata` 还没同步到 5.6 系列；该快照已于 19:44 同步进来，
+    之后再没有 404。**仍未用真实请求验证过**，需要时先小流量试。
+  - `codex-auto-review`、`gpt-reserve` 从未被请求过，属于未验证。
+  - 生图模型不在 `upstream_model_metadata` 里（那里只有 10 个文本模型），但调度按
+    `model_mapping` 判定，所以可用且已实测。
+- **该账号没有 ultrafast 档位**：`extra.upstream_model_metadata` 里每个模型的
+  `codex_tool_capabilities.service_tiers` 只有 `{"id":"priority","name":"Fast"}`，
+  **没有任何模型声明 `ultrafast`**。v0.1.10 的分组强制 Ultra Fast 对本账号无效——
+  开了要么被上游忽略、要么 4xx。要用加速请选 **Fast（priority）**。
+- 账号额度现状（2026-11-15 00:44）：7 天窗口用量 **43%**，5 小时窗口刚重置（0%），
+  credits 余额 250，重置卡 3 张，`auto_reset_credit_enabled=false`（不会自动用卡）。
 - 发布脚本已支持 `EXTRA_ENV="KEY=VALUE ..."`（追加到候选容器的 env-file），
   用于在零停机发布时引入新环境变量。
 - 容器安全项：UID 1000、只读根、cap drop ALL、no-new-privileges、pids 256、mem 768MiB、CPU 1.5 核。
