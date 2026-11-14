@@ -450,6 +450,7 @@ def watch():
             # 整段被跳过——证书到期、备份新鲜度、磁盘、DB 连通性、计费积压、PITR
             # 六项观测在实际生产上从未执行过。观测必须在任何分支都跑。
             result['ops']=check_ops_baselines()
+            record_infra_alert(result['ops'])
             if ops_requires_review(result['ops']):
                 result['ops_alert']=True
             maybe_pitr_maintenance(now,result)
@@ -468,6 +469,7 @@ def watch():
             run(['docker','restart','--time','60',APP],timeout=90)
             result.update(restarted=True,last_restart_epoch=now)
     result['ops']=check_ops_baselines()
+    record_infra_alert(result['ops'])
     if ops_requires_review(result['ops']):
         result['ops_alert']=True
         result['manual_review_required']=True
@@ -478,6 +480,55 @@ def watch():
         'manual_review_required':result.get('manual_review_required',False),
         'ops_alert':result.get('ops_alert',False),
         'ops':result['ops'],'pitr':result.get('pitr')}))
+
+
+def record_infra_alert(ops):
+    """把基础设施检查的失败写进 ops_system_logs，让它在后台看得见。
+
+    2026-11-15：在此之前这 11 项检查只写 maintenance/health.json，而那个文件
+    没有任何界面在读——告警等于只存在于服务器磁盘上，要靠人 ssh 上去 cat。
+    这里复用应用自己的 ops_system_logs（后台「系统日志」页面直接可见）。
+    只在失败集合发生变化时写，避免每 60 秒刷一条相同的记录。
+    """
+    if not isinstance(ops, dict):
+        return
+    failed = sorted([key for key in OPS_ALERT_KEYS if ops.get(key) is False])
+    state_file = STATE / 'infra_alert.json'
+    previous = {}
+    if state_file.exists():
+        try:
+            previous = json.loads(state_file.read_text())
+        except (ValueError, OSError):
+            previous = {}
+    if not isinstance(previous, dict):
+        previous = {}
+    if failed == sorted(previous.get('failed') or []):
+        return
+
+    if failed:
+        level = 'error'
+        message = '[InfraWatchdog] 基础设施检查未通过：' + ', '.join(failed)
+        detail = {key: ops.get(key) for key in failed}
+    else:
+        level = 'info'
+        message = '[InfraWatchdog] 基础设施检查已全部恢复'
+        detail = {key: True for key in OPS_ALERT_KEYS}
+
+    sql = ("insert into ops_system_logs (level, component, message, extra) values ("
+           "'%s', 'infra_watchdog', '%s', '%s')"
+           % (level,
+              message.replace("'", "''"),
+              json.dumps(detail, ensure_ascii=False).replace("'", "''")))
+    try:
+        subprocess.run(['docker', 'exec', 'zhijing-sub2api-japan-postgres-1',
+                        'psql', '-U', 'zhijing_trial', '-d', 'zhijing_trial', '-c', sql],
+                       capture_output=True, timeout=8)
+    except (OSError, subprocess.SubprocessError):
+        return
+    try:
+        private_json(state_file, {'failed': failed, 'at': int(time.time())})
+    except OSError:
+        pass
 
 
 def backup_sources():

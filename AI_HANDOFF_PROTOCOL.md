@@ -470,3 +470,11 @@ v0.1.13 修掉了第 2 点：单个收件人失败记录脱敏地址 + 事件 ID
 select count(*) total, count(*) filter (where email_sent) sent from ops_alert_events;
 -- sent 长期为 0 且 total 在涨 => 通道是断的
 ```
+
+**基础设施告警现在后台可见（2026-11-15 第 13 轮）**：此前 11 项检查只写 `maintenance/health.json`，而那个文件**没有任何界面在读**——grep 过 backend 和 frontend，零引用，等于告警只存在于服务器磁盘上，要靠人 ssh 上去 cat。
+
+现在 record_infra_alert() 在失败集合**发生变化**时写一条 ops_system_logs（component=infra_watchdog）：失败写 error，恢复写 info。后台「系统日志」页面直接能看到。去重状态存在 maintenance/infra_alert.json，全绿时不写任何记录，不会每 60 秒刷屏。
+
+注入验证过：假失败→一条 error；同样失败再调→不重复写；恢复→一条 info。测试记录已删除，状态文件回到 failed=[]。
+
+**这仍然不是推送**：它把「只在磁盘上」变成了「登录后台能看到」，但不会主动找人。真正的推送需要凭据——SMTP 授权码（走应用既有告警邮件）或 Telegram bot token，服务器上目前两样都没有。
