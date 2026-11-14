@@ -692,3 +692,57 @@ docker exec -i pg-restore-test pg_restore -U postgres -d zhijing_trial \
 挂错位置容器会直接退出，日志里只有一段迁移提示。用 `--tmpfs /var/lib/postgresql` 即可。
 
 恢复完临时容器与 tmpfs 已删除，生产未受影响（行数、深探针均不变）。
+
+### 6.17 Prometheus `/metrics`（v0.1.18/0.1.19，默认关闭）
+
+在此之前外部监控只能探 `/health` 和 `/readyz`，**看不到请求量和状态码分布**，go.mod 里也没有
+任何 prometheus 依赖。
+
+新增 `/metrics`，输出 Prometheus 文本格式 0.0.4：
+
+```
+zhijing_uptime_seconds
+zhijing_http_requests_total
+zhijing_http_requests_by_class_total{class="1xx|2xx|3xx|4xx|5xx"}
+zhijing_go_goroutines
+```
+
+**零新增依赖**：计数器是 `atomic.Int64`，文本格式手写，没有引入 `prometheus/client_golang`。
+计数中间件挂在链条最前面——被 CORS 或鉴权提前拒绝的请求同样计入。
+
+**启用方式**（默认不暴露）：
+
+```bash
+EXTRA_ENV="METRICS_TOKEN=<随机串>"
+curl -H "Authorization: Bearer <随机串>" http://127.0.0.1:<port>/metrics
+curl "http://127.0.0.1:<port>/metrics?token=<随机串>"
+```
+
+**安全默认值**（实测）：
+
+| 请求 | 结果 |
+|---|---|
+| 未设 `METRICS_TOKEN` | **404**（不是 401，不确认端点存在） |
+| token 错误 | **404** |
+| token 正确 | 200 + text/plain |
+| v0.1.17 对照 | 200 **text/html**（SPA fallback 吞掉了） |
+
+token 比较用 `crypto/subtle` 常量时间。`/metrics` 已加入 SPA 放行列表，否则会被内嵌前端
+当成路由返回 index.html——**这正是 v0.1.17 上的实测结果**。
+
+外网抓取需要自己加一条 nginx location；当前 nginx 用 `try_files` 走静态目录，不转发该路径。
+
+### 6.18 教训：发版前必须跑本地 golangci-lint
+
+v0.1.16 和 v0.1.18 两次 CI 红灯都是 **lint**（不是测试）：
+
+- v0.1.16：新文件无 build tag，调用者在 embed 里 → `unused`
+- v0.1.18：`errcheck` 要求检查 `(*strings.Builder).WriteString` 的返回值
+
+本地 `%USERPROFILE%\go\bin\golangci-lint.exe` 是 **v2.14.0，与 CI 同版本**，跑一次就能提前发现：
+
+```powershell
+cd backend && golangci-lint run --timeout=30m
+```
+
+v0.1.19 在打 tag 之前跑了，`0 issues`，CI 一次过。**以后每次发版都跑**。
