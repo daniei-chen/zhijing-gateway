@@ -298,3 +298,21 @@ git tag -a v0.1.12 --cleanup=verbatim -F notes.md   # notes.md 第一行当 subj
 **坑（v0.1.11 实测踩到）**：`git tag -a -F file` 默认走 `--cleanup=strip`，会把以 `#` 开头的行
 当注释删掉——所以笔记里的 `## 修复` 这类标题会静默消失。要么加 `--cleanup=verbatim`，
 要么正文不要用 `#` 开头。标题层级用 `**加粗**` 更稳。
+
+### 6.3 磁盘可回收项（评估过，暂不动）
+
+2026-11-15 清理容器与镜像后磁盘 35%（38G 可用）。还有一处约 2.2G 的历史部署产物：
+
+```
+/opt/zhijing-sub2api/backend-releases   1.1G
+/opt/zhijing-sub2api/release-v005       565M
+/opt/zhijing-sub2api/releases           160M   (11-13，最新的一份)
+/opt/zhijing-sub2api/release-v0.0.7     168M
+/opt/zhijing-sub2api/release-v0.1.0-dev 116M
+/opt/zhijing-sub2api/upgrade-v008/009/021 约 257M
+```
+
+它们是 docker 化之前的二进制/前端快照，当前容器只挂载 `data/`，运行完全不依赖它们。
+**暂不删除**的理由：`/root/build_v007.sh`、`/root/build_v010_dev_image.sh`、`/root/github-push.sh`
+和 `japan_maintenance.py` 里仍有字符串引用，删掉会打断这些历史脚本的可用性；而磁盘还有 38G，
+不值得为 2G 冒这个险。真要回收时先 `grep` 这四处引用，并保留 `releases/` 最新一份。
