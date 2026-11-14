@@ -6,7 +6,7 @@ set -Eeuo pipefail
 CURRENT_CONTAINER="${CURRENT_CONTAINER:-zhijing-api-v010-u3-canary}"
 NEW_CONTAINER="${NEW_CONTAINER:-zhijing-api-candidate}"
 NEW_PORT="${NEW_PORT:-18798}"
-NGINX_SITE="${NGINX_SITE:-/etc/nginx/sites-available/zhijing.kaogong.art}"
+NGINX_SITE="${NGINX_SITE:-/etc/nginx/sites-enabled/zhijing.kaogong.art}"
 PUBLIC_HOST="${PUBLIC_HOST:-zhijing.kaogong.art}"
 HEALTH_TIMEOUT_SECONDS="${HEALTH_TIMEOUT_SECONDS:-180}"
 MEMORY_LIMIT="${MEMORY_LIMIT:-768m}"
@@ -22,7 +22,7 @@ docker inspect "$CURRENT_CONTAINER" >/dev/null 2>&1 || die "current container no
 
 timestamp=$(date -u +%Y%m%dT%H%M%SZ)
 env_file=$(mktemp "/run/zhijing-release-env.XXXXXX")
-nginx_backup="${NGINX_SITE}.bak-${timestamp}"
+nginx_backup="/root/zhijing-nginx-$(basename "$NGINX_SITE").bak-${timestamp}"
 candidate_started=false
 cleanup() {
   rm -f "$env_file"
@@ -48,7 +48,7 @@ data_source=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/app/dat
 [[ "$data_type" == bind || "$data_type" == volume ]] || die "unsupported /app/data mount type: $data_type"
 test -n "$data_source" || die "current container has no /app/data mount"
 
-mapfile -t networks < <(docker inspect -f '{{range $name, $network := .NetworkSettings.Networks}}{{println $name}}{{end}}' "$CURRENT_CONTAINER")
+mapfile -t networks < <(docker inspect -f '{{range $name, $network := .NetworkSettings.Networks}}{{println $name}}{{end}}' "$CURRENT_CONTAINER" | awk 'NF')
 test "${#networks[@]}" -gt 0 || die "current container has no Docker network"
 
 docker pull "$IMAGE"
@@ -101,7 +101,7 @@ test -n "$old_port" || die "cannot determine current Nginx primary"
 [[ "$old_port" != "$NEW_PORT" ]] || die "candidate port is already the current primary"
 
 cp --preserve=mode,ownership,timestamps "$NGINX_SITE" "$nginx_backup"
-tmp_site=$(mktemp "${NGINX_SITE}.tmp.XXXXXX")
+tmp_site=$(mktemp "/tmp/zhijing-nginx.XXXXXX")
 awk -v new_port="$NEW_PORT" -v old_port="$old_port" '
   /# ---- zhijing-peers-begin ----/ {
     print
@@ -121,10 +121,10 @@ mv "$tmp_site" "$NGINX_SITE"
 nginx -t
 systemctl reload nginx
 
-curl --fail --silent --show-error --max-time 10 --resolve "${PUBLIC_HOST}:443:127.0.0.1" \
+curl --http1.1 --fail --silent --show-error --max-time 10 --resolve "${PUBLIC_HOST}:443:127.0.0.1" \
   "https://${PUBLIC_HOST}/readyz" >/dev/null
 for _ in 1 2 3 4 5; do
-  curl --fail --silent --show-error --max-time 10 --resolve "${PUBLIC_HOST}:443:127.0.0.1" \
+  curl --http1.1 --fail --silent --show-error --max-time 10 --resolve "${PUBLIC_HOST}:443:127.0.0.1" \
     "https://${PUBLIC_HOST}/readyz" >/dev/null
 done
 
