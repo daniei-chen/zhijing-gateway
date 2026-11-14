@@ -1007,3 +1007,58 @@ func wrapReleaseOnDone(ctx context.Context, releaseFunc func()) func() {
 
 **结论：没有找到泄漏分支。** 获取端原子、释放端有 ctx 兜底且幂等，两条路都堵住了。
 这不能证明「永远不会有泄漏」，但把每个 return 分支都走了一遍，没有发现漏释放的路径。
+
+### 6.26 「故意不绑 ctx」的那条路径为什么安全（2026-11-15 第 18 轮）
+
+上一轮留了个疑问：`wrapReleaseAfterForward` 旁边写着
+
+> HTTP forwarding can drain upstream usage after the client disconnects. Its slots
+> belong to the forwarding cleanup, not to the client context lifetime.
+
+也就是说有些槽位**故意不绑客户端 ctx**——因为客户端断开后还要继续收上游 usage。这类「故意不释放」
+的地方最容易积累泄漏：一旦 forwarding cleanup 本身没兜住，槽位就挂到 TTL（40 分钟）。
+
+逐条走完，结论是安全的，靠的是三道锁。
+
+**第一道：veto 分支自己释放，并且返回 nil**
+
+```go
+if vetoed {
+    if fastReleaseFunc != nil {
+        fastReleaseFunc()
+    }
+    return nil, openAISlotAcquireProfitVetoed   // release 返回 nil，调用方拿不到可再次释放的东西
+}
+return wrapReleaseAfterForward(fastReleaseFunc), openAISlotAcquireOK
+```
+
+快速抢槽路径（2414-2419）和排队路径（2470-2475）都是这个形状。
+
+**第二道：调用方用 defer 包住整个 Forward**
+
+```go
+result, err := func() (*service.OpenAIForwardResult, error) {
+    defer func() {
+        if accountReleaseFunc != nil {
+            accountReleaseFunc()
+        }
+    }()
+    return h.gatewayService.Forward(c.Request.Context(), c, account, attemptBody)
+}()
+```
+
+不管 Forward 返回成功、报错还是 panic，defer 都会执行。
+
+**第三道：Forward 有硬上限，不可能永久挂起**
+
+```go
+maximum := 25 * time.Minute          // cfg.Gateway.OpenAIForwardMaxSeconds 可配
+upstream, cancel := context.WithTimeout(context.WithoutCancel(ctx), maximum)
+```
+
+`WithoutCancel` 让上游请求在客户端断开后继续（为了收完 usage），但**25 分钟硬超时**保证 Forward
+一定会返回。而槽位 TTL 是 40 分钟 > 25 分钟，所以即使前两道全失效，TTL 还能兜住。
+
+**结论**：这条「不绑 ctx」的路径不是疏忽，是被三道锁共同保证的。
+25 分钟 / 40 分钟这两个数字的关系（上限 < TTL）是关键——如果哪天有人把
+`OpenAIForwardMaxSeconds` 调大到 40 分钟以上，这个保证就破了。**改这个配置时要看一眼槽位 TTL**。
