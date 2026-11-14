@@ -2297,3 +2297,58 @@ failed_set             = None
 **这一项能抓到什么**：如果某次 `Apply` 在写 `usage_logs` 之后、写 dedup 之前崩了，
 或者反过来，`ledger_delta` 就不再是 0。它是账务侧第一个**主动**的完整性检查
 （之前只有 `billing_failures` 那种被动的失败记录）。
+
+### 6.56 我误判了一个「缺软删除过滤」的 bug，改了代码又撤回（2026-11-15 第 54 轮）
+
+**这轮我改了一行代码，然后自己把它撤回了。**
+
+**起因**：查「账号有 error_message 但仍在调度池」这个静默异常时，发现
+`accounts` 表里有两个已软删的账号（id 1 于 11-02、id 3 于 11-12），但它们的
+`status` 仍是 `active`、`schedulable` 仍是 `true`。
+
+接着读 `schedulableAccountsQuery`（`ListSchedulable` / `ListSchedulableAccountLoads` 的查询构造器），
+谓词列表里有 status、schedulable、temp_unschedulable、expires、overload、rate_limit——
+**没有 `DeletedAtIsNil()`**。
+
+对照 `queryAccountsByGroup`（按分组调度），它**有**这一条。看起来像明确的不一致。
+
+**然后我用原生 SQL 算了两组数**：
+
+```sql
+count(*) FILTER (WHERE deleted_at IS NULL)  →  1 个账号 / 容量 10
+count(*)                                     →  3 个账号 / 容量 26
+```
+
+看起来坐实了：模型列表和容量指标会把已删账号算进去，虚高 2.6 倍。
+
+**我改了代码**：在 `schedulableAccountsQuery` 里加上 `dbaccount.DeletedAtIsNil()`，
+写了一段注释说明「实测 1 被算成 3」，`go build` 通过，`go test ./internal/repository/` 通过。
+
+**然后我验证了修复是否必要**——把改动 stash 掉，用原有代码跑测试：
+
+```
+=== RUN   TestListSchedulableAccountLoadsUsesSingleProjectionQuery
+--- PASS: TestListSchedulableAccountLoadsUsesSingleProjectionQuery (0.00s)
+```
+
+**没有我的修复，测试照样通过。** 而且那个测试第 75 行的断言列表里**本来就写着 `"deleted_at"`**——
+它要求 SQL 里出现这一列。也就是说，**修复之前的 SQL 里已经有 `deleted_at`**。
+
+**查 schema 才明白**：
+
+```go
+// backend/ent/schema/account.go
+mixins.SoftDeleteMixin{},   // 提供软删除功能（deleted_at）
+```
+
+**ent 的 `SoftDeleteMixin` 会自动给所有查询加 `deleted_at IS NULL`。** 显式写
+`dbaccount.DeletedAtIsNil()` 是冗余的（`queryAccountsByGroup` 里那条也是冗余，只是无害）。
+
+**我错在**：用**原生 SQL** 去模拟一个 **ORM 查询**的行为。SQL 直查当然会算上已删行，
+但 ORM 不会。那个「1 vs 3」根本不能证明 `ListSchedulable` 的行为。
+
+**处理**：`git checkout -- backend/internal/repository/account_repo.go` 还原。
+
+**这是第三次同类错误**，前两次是 6.43（跨时间聚合）和 6.44（覆盖语义），
+这次的形状是**跨抽象层**：用 SQL 层的观测去推断 ORM 层的结论。
+三次的共同点都一样——**用一个便宜的口径去替代真实的执行路径**。
