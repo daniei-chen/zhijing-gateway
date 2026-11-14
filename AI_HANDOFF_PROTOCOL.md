@@ -2734,3 +2734,44 @@ frontend/src/api/admin/dashboard.ts:162  getGroupStats() → /admin/dashboard/gr
 **这轮的方法值得记一笔**：从 TODO 出发 → 读实现（确认返回假数据）→ **查前端调用方**（确认无人使用）。
 三步里最有价值的是第三步——如果只做前两步，我会报一个「用户看到全零」的假问题，
 和 6.42 那次（拿历史 404 当当前故障）是同一个错误。
+
+### 6.65 「刷新账号凭证」是个空壳，但没有路由调用它（2026-11-15 第 63 轮）
+
+`admin_account.go:1309`：
+
+```go
+func (s *adminServiceImpl) RefreshAccountCredentials(ctx context.Context, id int64) (*Account, error) {
+	account, err := s.accountRepo.GetByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	// TODO: Implement refresh logic
+	return account, nil          // ← 读出来原样返回，什么都没刷新
+}
+```
+
+**这个比 62 轮那个更危险的功能形态**：如果它有对外接口，管理员点「刷新凭证」会拿到
+`200 OK` 和一份看起来正常的账号数据，**以为刷新成功了，实际什么都没发生**。
+「假成功」比「返回错误」更糟——错误至少会被人看见。
+
+**但查了调用链——它没有对外接口**：
+
+```
+admin_account.go:1309   func (s *adminServiceImpl) RefreshAccountCredentials
+admin_service.go:101    接口声明
+（handler 层：零调用；路由：不存在）
+```
+
+只有实现和接口声明两处引用，**没有任何 handler 方法调用它，也没有注册路由**。
+
+**所以这是死代码**：空壳实现 + 没人能用。
+
+**和 62 轮那个 mock 统计接口是同一类**：功能没做完，但也没接上，所以不影响任何人。
+
+**两轮下来一个有价值的观察**：13 条真 TODO 里，已经查的两条（mock 统计、空壳刷新）
+**都是未接线的死代码**。这符合直觉——作者写 TODO 时通常知道「这个还不能上线」，
+所以没接路由。真正危险的是那些**接了线但实现不全**的 TODO，比如 61 轮的 `/v1/live`：
+它有路由、能调用、只是不计费。
+
+**剩下还没查的 TODO** 里，`content_moderation.go:2039`（该禁用触发的 Key）最接近这一类——
+它在审核流程里，如果确实接了线，就属于「行为不全但生效」的形状。下一轮查它。
