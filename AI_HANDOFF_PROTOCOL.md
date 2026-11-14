@@ -244,16 +244,23 @@ watch 会置 `manual_review_required: true`；值为 `None` 表示该项探测�
 
 ```
 cert_ok  backup_ok  disk_ok  db_ok  billing_ok  pitr_ok
-gateway_ok  accounts_ok  model_catalog_ok  model_route_ok
+gateway_ok  accounts_ok  model_catalog_ok  model_route_ok  stream_ok
 ```
 
-后两个是 2026-11-15 加的，起因是 gpt-5.6-luna 那 4 次 404：当时 `/readyz` 全绿、账号可调度、
-5xx 为 0，**坏的只有「某个模型还能不能用」**。
+`model_catalog_ok` / `model_route_ok` 是 2026-11-15 加的，起因是 gpt-5.6-luna 那 4 次 404：
+当时 `/readyz` 全绿、账号可调度、5xx 为 0，**坏的只有「某个模型还能不能用」**。
 
 - `model_catalog_age_hours` / `model_catalog_ok`：账号 `extra.upstream_model_metadata.synced_at`
   距今小时数，> 72h 告警。
 - `model_not_found_6h` / `model_route_ok`：近 6 小时 `model_not_found` 计数，≥ 10 告警
   （客户端偶尔试一个不存在的模型名属正常，不算）。
+
+`stream_ok` 是 2026-11-15 第 5 轮加的，补的是一个**真实的监控盲区**：
+`gateway_ok` 只看 `status_code >= 500`，但流式请求在发过 200 头之后上游才失败，
+落库是 `status_code=200` + `upstream_status_code=503`。这类故障用户体感就是失败，
+监控却全绿——11-12/11-13 上游抖动期间每小时 10~24 次，而 `gateway_5xx_15m` 一直是 0。
+
+- `upstream_stream_5xx_15m` / `stream_ok`：15 分钟内「已提交响应但上游 5xx」的条数，≥ 5 告警。
 
 改这个脚本后必须：`python3 -m py_compile` → 上传到 `japan_maintenance.py.new` → 远端再编译 →
 `mv` 覆盖（原子替换，避免 timer 撞上半个文件）→ 手动跑一次 `watch` 确认新字段出现。
@@ -316,3 +323,26 @@ git tag -a v0.1.12 --cleanup=verbatim -F notes.md   # notes.md 第一行当 subj
 **暂不删除**的理由：`/root/build_v007.sh`、`/root/build_v010_dev_image.sh`、`/root/github-push.sh`
 和 `japan_maintenance.py` 里仍有字符串引用，删掉会打断这些历史脚本的可用性；而磁盘还有 38G，
 不值得为 2G 冒这个险。真要回收时先 `grep` 这四处引用，并保留 `releases/` 最新一份。
+
+### 6.4 性能基线（2026-11-15 实测）
+
+结论：这套部署在性能上没有瓶颈，**不要为「看起来更快」去动索引、缓存或重试策略**。数据留在这里，
+是为了下次审计不用重跑一遍。
+
+- **数据库慢查询**：`log_min_duration_statement = 2000ms`（已开启，日志走容器 stderr），
+  24 小时内 **0 条**超过 2 秒的语句。
+- **usage_logs 体积**：表 18MB / 索引 33MB / 合计 51MB，36409 行。`pg_stat_database.stats_reset`
+  为空，说明统计自建库累积——因此 `idx_scan = 0` 是可信的「从没用过」。共有 6 个：
+  `effective_upstream_model_created`(3.1MB)、`model_created_at`(2.5MB)、`sub_created`(1.1MB)、
+  `subscription_id`(376KB)、`upstream_model_mismatch_created_at`(8KB)、`upstream_request_id`(8KB)。
+  合计约 7.2MB。**不删**：它们是上游 schema 自带的，删除会让 schema 与上游分叉（后续同步冲突），
+  而低频统计报表仍可能用到。
+- **autovacuum**：所有业务表 `n_dead_tup = 0`、`n_tup_del = 0`（保留策略还没到期过），健康。
+- **缓存**：Redis `keyspace_hits 3.94M / misses 1.72M`（命中率 69.7%），`used_memory` 2.34M / 64M，
+  `evicted_keys = 0`、`rejected_connections = 0`。
+- **容器**：API 进程 CPU < 1%、内存 37MB / 768MB。
+- **上游质量**：流内 503 集中在 11-11~11-13（每天 70~130 次），**11-14 起归零**——属上游波动，网关侧无解。
+- **同账号重试为什么没做**：`RetryableOnSameAccount` 在 OpenAI 路径上是
+  `!shouldDisable && account.IsPoolMode() && account.IsPoolModeRetryableStatus(code)`，本项目单账号
+  非 pool 模式，所以不重试。7 天里可重试的上游错误只有 45 次（占总请求 0.12%），
+  为这点收益去改核心错误路径、并承担重复请求/重复计费风险，不划算。

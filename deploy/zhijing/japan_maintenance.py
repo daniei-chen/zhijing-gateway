@@ -39,7 +39,7 @@ def auto_restart_enabled():
 
 
 OPS_ALERT_KEYS=('cert_ok','backup_ok','disk_ok','db_ok','billing_ok','pitr_ok',
-                'gateway_ok','accounts_ok','model_catalog_ok','model_route_ok')
+                'gateway_ok','accounts_ok','model_catalog_ok','model_route_ok','stream_ok')
 
 
 def ops_requires_review(ops):
@@ -282,6 +282,25 @@ def check_ops_baselines():
             out['accounts_ok'] = _n > 0
     except (OSError, subprocess.SubprocessError, ValueError):
         out['accounts_ok'] = None
+    # ── 流内上游故障（2026-11-15 round 5）──────────────────────────────
+    # gateway_ok 只看 status_code >= 500，但流式请求在发过 200 头之后上游才失败，
+    # 落库是 status_code=200 + upstream_status_code=503。这类故障用户体感就是失败，
+    # 监控却全绿：11-12/11-13 上游抖动期间每小时 10~24 次，而 gateway_5xx_15m 一直是 0。
+    # 这里把「已提交响应但上游崩了」单独计出来。
+    try:
+        _r = subprocess.run(
+            ['docker', 'exec', 'zhijing-sub2api-japan-postgres-1',
+             'psql', '-U', 'zhijing_trial', '-d', 'zhijing_trial', '-Atc',
+             "select count(*) from ops_error_logs "
+             "where created_at > now() - interval '15 minutes' "
+             "and upstream_status_code >= 500 and status_code < 500"],
+            capture_output=True, timeout=8)
+        if _r.returncode == 0:
+            _n = int((_r.stdout or b'0').strip() or b'0')
+            out['upstream_stream_5xx_15m'] = _n
+            out['stream_ok'] = _n < 5
+    except (OSError, subprocess.SubprocessError, ValueError):
+        out['stream_ok'] = None
     # ── 上游模型目录新鲜度（2026-11-15 round 2）─────────────────────────
     # 2026-11-14 有 4 次 `Model "gpt-5.6-luna" is not supported by any configured
     # account`（11:35 / 18:37 / 18:43），根因不是网关判定错，而是账号
