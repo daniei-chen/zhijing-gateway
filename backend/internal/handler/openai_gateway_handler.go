@@ -3884,6 +3884,14 @@ func (h *OpenAIGatewayHandler) handleStreamingAwareErrorWithCode(
 	}
 
 	// Normal case: return JSON response with proper status code
+	//
+	// 2026-11-14：容量类错误要带 Retry-After。当天观察到「无可用账号」持续时，
+	// 客户端以极高频率立刻重放，把账号的 5h 窗口更快打满（80% 失败率下
+	// 15 分钟内仍有多轮重试）。给 503/429 显式退避提示，让客户端按节奏重试，
+	// 而不是让失败率自我放大。仅在非流式分支设置：流式响应头此时已提交。
+	if status == http.StatusServiceUnavailable || status == http.StatusTooManyRequests {
+		c.Header("Retry-After", "30")
+	}
 	if code == "" {
 		h.errorResponse(c, status, errType, message)
 		return

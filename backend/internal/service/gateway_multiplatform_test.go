@@ -2157,6 +2157,8 @@ func (m *mockConcurrencyCache) ReleaseUserSlot(ctx context.Context, userID int64
 	return nil
 }
 
+func (m *mockConcurrencyCache) ActiveUserCount(context.Context) (int, error) { return 0, nil }
+
 func (m *mockConcurrencyCache) GetUserConcurrency(ctx context.Context, userID int64) (int, error) {
 	return 0, nil
 }

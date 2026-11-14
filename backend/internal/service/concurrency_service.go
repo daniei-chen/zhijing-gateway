@@ -39,6 +39,13 @@ type ConcurrencyCache interface {
 	ReleaseUserSlot(ctx context.Context, userID int64, requestID string) error
 	GetUserConcurrency(ctx context.Context, userID int64) (int, error)
 
+	// ActiveUserCount 返回当前"有并发槽位或在排队"的用户数量。
+	//
+	// 2026-11-14 新增，用于动态并发上限：实现方按活跃索引（成员 score 为绝对
+	// 过期时间）统计尚未过期的用户数，只读、不做清理。返回错误时调用方必须
+	// 回退到保守的静态上限（不能因为读不到就放大配额）。
+	ActiveUserCount(ctx context.Context) (int, error)
+
 	// 等待队列计数（每次入队都会刷新 TTL，避免长时间排队时计数提前过期）
 	IncrementWaitCount(ctx context.Context, userID int64, maxWait int) (bool, error)
 	DecrementWaitCount(ctx context.Context, userID int64) error
@@ -231,7 +238,10 @@ const (
 type ConcurrencyService struct {
 	cache       ConcurrencyCache
 	memberLimit int
-	globalLimit int
+	// memberLimitPeak 是活跃用户 <=1 时放宽的单用户上限（0 表示不启用）。
+	// 与 memberLimit 配合：多人同时在线时仍用 memberLimit，避免总量超卖。
+	memberLimitPeak int
+	globalLimit     int
 
 	accountLoadCacheTTL atomic.Int64
 	accountLoadCacheMu  sync.RWMutex
@@ -378,12 +388,34 @@ func (s *ConcurrencyService) AcquireAccountSlot(ctx context.Context, accountID i
 	}, nil
 }
 
+// effectiveMemberLimit 返回当前生效的单用户并发上限。
+//
+// 动态放宽（2026-11-14）：活跃用户 <= 1 时取 memberLimitPeak，让一两个人使用时
+// 不必卡在 memberLimit 上（2 人 × peak 正好吃满账号并发）；一旦已有 2 个用户在
+// 跑（此时第 3 个人正在进来），回落到 memberLimit，避免总量超卖。
+//
+// 任何读取失败都回退到 memberLimit：宁可保守，也不能因为 Redis 抖动把配额放大。
+func (s *ConcurrencyService) effectiveMemberLimit(ctx context.Context) int {
+	base := s.memberLimit
+	if base <= 0 || s.memberLimitPeak <= base || s.cache == nil {
+		return base
+	}
+	active, err := s.cache.ActiveUserCount(ctx)
+	if err != nil || active < 0 {
+		return base
+	}
+	if active <= 1 {
+		return s.memberLimitPeak
+	}
+	return base
+}
+
 // AcquireUserSlot attempts to acquire a concurrency slot for a user.
 // If the user is at max concurrency, it waits until a slot is available or timeout.
 // Returns a release function that MUST be called when the request completes.
 func (s *ConcurrencyService) AcquireUserSlot(ctx context.Context, userID int64, maxConcurrency int) (*AcquireResult, error) {
-	if s.memberLimit > 0 && (maxConcurrency <= 0 || s.memberLimit < maxConcurrency) {
-		maxConcurrency = s.memberLimit
+	if effective := s.effectiveMemberLimit(ctx); effective > 0 && (maxConcurrency <= 0 || effective < maxConcurrency) {
+		maxConcurrency = effective
 	}
 	// If maxConcurrency is 0 or negative, no limit
 	if maxConcurrency <= 0 && s.globalLimit <= 0 {

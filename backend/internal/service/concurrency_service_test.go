@@ -123,6 +123,8 @@ func (c *stubConcurrencyCacheForTest) AcquireUserSlot(_ context.Context, _ int64
 func (c *stubConcurrencyCacheForTest) ReleaseUserSlot(_ context.Context, _ int64, _ string) error {
 	return c.releaseErr
 }
+func (c *stubConcurrencyCacheForTest) ActiveUserCount(_ context.Context) (int, error) { return 0, nil }
+
 func (c *stubConcurrencyCacheForTest) GetUserConcurrency(_ context.Context, _ int64) (int, error) {
 	return c.concurrency, c.concurrencyErr
 }

@@ -1161,7 +1161,16 @@ type GatewayConfig struct {
 	OpenAIDisconnectDrainSeconds int `mapstructure:"openai_disconnect_drain_seconds"`
 	// Optional deployment-wide admission caps, independent of upstream accounts.
 	MemberConcurrencyLimit int `mapstructure:"member_concurrency_limit"`
-	GlobalConcurrencyLimit int `mapstructure:"global_concurrency_limit"`
+	// MemberConcurrencyLimitPeak：活跃用户很少时放宽的单用户并发上限（2026-11-14）。
+	//
+	// 语义：当前"正在并发的用户数" <= 1 时，单用户上限取本值；一旦有第 2 个用户
+	// 同时在线（即即将变成 2 人以上），回落到 MemberConcurrencyLimit。
+	// 目的：单人/双人使用时不必被 3 卡住（2 人 × 5 = 10，正好吃满账号并发）；
+	// 3 人以上时回到保守值，避免总量超卖。
+	//
+	// 0 或 <= MemberConcurrencyLimit 表示不启用动态放宽，行为与旧版完全一致。
+	MemberConcurrencyLimitPeak int `mapstructure:"member_concurrency_limit_peak"`
+	GlobalConcurrencyLimit     int `mapstructure:"global_concurrency_limit"`
 	// SessionIdleTimeoutMinutes: 会话空闲超时时间（分钟），默认 5 分钟
 	// 用于 Anthropic OAuth/SetupToken 账号的会话数量限制功能
 	// 空闲超过此时间的会话将被自动释放
@@ -3569,6 +3578,9 @@ func (c *Config) Validate() error {
 	}
 	if c.Gateway.MemberConcurrencyLimit < 0 || c.Gateway.MemberConcurrencyLimit > 1000 || c.Gateway.GlobalConcurrencyLimit < 0 || c.Gateway.GlobalConcurrencyLimit > 10000 {
 		return fmt.Errorf("gateway member/global concurrency limits are out of range")
+	}
+	if c.Gateway.MemberConcurrencyLimitPeak < 0 || c.Gateway.MemberConcurrencyLimitPeak > 1000 {
+		return fmt.Errorf("gateway.member_concurrency_limit_peak is out of range")
 	}
 	if c.Gateway.OpenAIForwardMaxSeconds < 0 || c.Gateway.OpenAIDisconnectDrainSeconds < 0 {
 		return fmt.Errorf("gateway OpenAI forwarding and disconnect drain timeouts must not be negative")

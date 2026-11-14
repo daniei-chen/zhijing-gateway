@@ -747,6 +747,25 @@ func (c *concurrencyCache) GetUserConcurrency(ctx context.Context, userID int64)
 	return result, nil
 }
 
+// ActiveUserCount 返回当前活跃用户数。
+//
+// 活跃索引（userActiveIndexKey）的成员 score 是「绝对过期时间（Redis Unix 秒）」，
+// 因此用 ZCOUNT(now, +inf) 即可统计尚未过期的用户，无需先清理。只读，不改索引。
+func (c *concurrencyCache) ActiveUserCount(ctx context.Context) (int, error) {
+	if c == nil || c.rdb == nil {
+		return 0, nil
+	}
+	now, err := c.redisUnixSeconds(ctx)
+	if err != nil {
+		return 0, err
+	}
+	count, err := c.rdb.ZCount(ctx, userActiveIndexKey, strconv.FormatInt(now, 10), "+inf").Result()
+	if err != nil {
+		return 0, err
+	}
+	return int(count), nil
+}
+
 func (c *concurrencyCache) TrackAPIKeySlot(ctx context.Context, apiKeyID int64, requestID string) error {
 	key := apiKeySlotKey(apiKeyID)
 	_, err := trackSlotScript.Run(ctx, c.rdb, []string{key}, c.slotTTLSeconds, requestID).Result()

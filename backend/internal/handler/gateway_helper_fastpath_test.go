@@ -68,6 +68,10 @@ func (m *concurrencyCacheMock) ReleaseUserSlot(ctx context.Context, userID int64
 	return nil
 }
 
+// ActiveUserCount 让 mock 满足 ConcurrencyCache：返回 0 表示无并发用户，
+// 在测试里若未设置 memberLimitPeak（默认 0）则动态放宽不会生效。
+func (m *concurrencyCacheMock) ActiveUserCount(context.Context) (int, error) { return 0, nil }
+
 func (m *concurrencyCacheMock) GetUserConcurrency(ctx context.Context, userID int64) (int, error) {
 	return 0, nil
 }

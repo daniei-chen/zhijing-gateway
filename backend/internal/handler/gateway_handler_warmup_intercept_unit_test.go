@@ -134,6 +134,7 @@ func (f *fakeConcurrencyCache) AcquireUserSlot(context.Context, int64, int, stri
 	return true, nil
 }
 func (f *fakeConcurrencyCache) ReleaseUserSlot(context.Context, int64, string) error   { return nil }
+func (f *fakeConcurrencyCache) ActiveUserCount(context.Context) (int, error)   { return 0, nil }
 func (f *fakeConcurrencyCache) GetUserConcurrency(context.Context, int64) (int, error) { return 0, nil }
 func (f *fakeConcurrencyCache) IncrementWaitCount(context.Context, int64, int) (bool, error) {
 	return true, nil

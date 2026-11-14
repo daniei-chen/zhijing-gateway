@@ -2023,6 +2023,12 @@ func (h *GatewayHandler) handleStreamingAwareErrorWithCode(c *gin.Context, statu
 	}
 
 	// Normal case: return JSON response with proper status code
+	//
+	// 2026-11-14：与 OpenAI 网关保持一致，容量类错误带 Retry-After，
+	// 让客户端按退避节奏重试而不是立刻重放把上游额度更快打满。
+	if status == http.StatusServiceUnavailable || status == http.StatusTooManyRequests {
+		c.Header("Retry-After", "30")
+	}
 	h.errorResponseWithCode(c, status, errType, code, message)
 }
 

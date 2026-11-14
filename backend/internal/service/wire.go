@@ -497,6 +497,7 @@ func ProvideConcurrencyService(cache ConcurrencyCache, accountRepo AccountReposi
 	svc := NewConcurrencyService(cache)
 	if cfg != nil {
 		svc.memberLimit = cfg.Gateway.MemberConcurrencyLimit
+		svc.memberLimitPeak = cfg.Gateway.MemberConcurrencyLimitPeak
 		svc.globalLimit = cfg.Gateway.GlobalConcurrencyLimit
 	}
 	if !processrole.APIOnly() {
