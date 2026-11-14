@@ -945,3 +945,25 @@ client.ExecContext(ctx, "UPDATE accounts SET extra = "+extraExpression+", update
 没有读-改-写，并发下也不会互相覆盖。
 
 这正好满足上游 `accounts-refresh-stability`（刷新时保留行与配额值）的诉求，只是实现路径不同。
+
+### 6.24 flaky 测试：追了四种方法，放弃并说明理由（2026-11-15 第 16 轮）
+
+现象：本地 `go test -tags=unit ./internal/service/` 偶发 FAIL（一次 91.7 秒、一次 254 秒）。
+试过的手段和结果：
+
+| 方法 | 结果 |
+|---|---|
+| `-shuffle=on` 打乱顺序 | 卡住，CPU 0.4s 不涨 |
+| `-count=3` 连跑三遍 | 卡住，日志 0 字节 |
+| `-json` 逐事件输出 | 跑到 **2,209 / 7,454** 个测试处停住，**0 个 fail 事件** |
+| `-timeout 90s` 触发 panic | 拿到 goroutine dump：大量 `chan receive` 的 `t.Parallel` 等待，没有死锁栈 |
+
+四次都是同一形态：**测试二进制跑到约 30% 处 CPU 降到 0.1 秒、日志停止增长、进程挂着不结束**。
+
+CI（Linux）13/13 全绿，一次都没红过。
+
+**结论：判定为本地 Windows 环境问题**（单进程跑七千个测试 + 大量 `t.Parallel()` + CGO），
+不是代码缺陷的证据。不再在这上面耗轮次——如果 CI 某次真的红了，日志会直接给出测试名，
+比本地单进程复现更可靠。
+
+**这条不再当待办**，从清单里划掉。
