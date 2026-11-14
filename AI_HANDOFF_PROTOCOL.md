@@ -922,3 +922,26 @@ watermark 也在动（`2026-11-15 05:15:17`，刚刚）。
 
 顺带一提，`usage_dashboard_*` 的 `idx_scan` 数字看着很大（daily 30,672、hourly 73,419），
 那是**聚合任务自己的 DELETE/INSERT** 在用索引定位，不是查询读取——别被这个数字骗了。
+
+**闭环补充（第 15 轮）**：不用等流量了，代码本身就能回答「刷新会不会清掉配额」。
+
+`OpenAIQuotaService.CacheCreditsSnapshot` 写快照时只传一个 key：
+
+```go
+s.accountRepo.UpdateExtra(ctx, accountID, map[string]any{
+    openaiQuotaCreditsKey: openAICreditsSnapshot{...},
+})
+```
+
+而 `UpdateExtra` 的实现是** JSONB 合并**：
+
+```go
+extraExpression := "COALESCE(extra, '{}'::jsonb) || $1::jsonb"
+client.ExecContext(ctx, "UPDATE accounts SET extra = "+extraExpression+", updated_at = NOW() WHERE id = $2 AND deleted_at IS NULL", ...)
+```
+
+`||` 是 JSONB 合并操作符，不是覆盖。所以刷新 `codex_credits_snapshot` 时，`codex_5h_used_percent`、
+`codex_7d_used_percent`、`codex_*_reset_at` 这些 key 原样保留；而且是一条 `UPDATE`，
+没有读-改-写，并发下也不会互相覆盖。
+
+这正好满足上游 `accounts-refresh-stability`（刷新时保留行与配额值）的诉求，只是实现路径不同。
