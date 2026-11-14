@@ -1835,3 +1835,47 @@ c.cleanupStaleProcessSlotsForIndex(ctx, userSlotIndex, userMembers, ...)
 
 **结论**：这是 best-effort 语义下的正常残留，有明确的产生路径、明确的兜底机制、明确的恢复路径。
 证据表里最后一条「推断」可以关掉了——**不是漏清，是允许失败的设计**。
+
+### 6.47 上游修复：从「符号存在」升级到「行为通过」（2026-11-15 第 41 轮）
+
+6.21 的比对是**符号级**的——「我们的树里有这个函数」。这轮改成**行为级**：
+把上游修复自带的测试跑一遍，看实现是不是真的按要求工作。
+
+**三个修复的验证结果**：
+
+**① `slot-leak-on-hydrate-error`**
+
+上游带了两个用例：hydrate 失败时必须释放已占槽位、hydrate 成功时不能提前释放。
+我们的树里有等价测试（`gateway_scheduling_slot_release_test.go`），实跑：
+
+```
+--- PASS: TestGatewayServiceNewSelectionResultReleasesSlotOnHydrationError
+--- PASS: TestGatewayServiceNewSelectionResultKeepsReleaseOnSuccess
+```
+
+**② `balance-recharge-multiplier-6-decimals`**
+
+```
+--- PASS: TestUpdatePaymentConfig_PersistsBalanceRechargeMultiplierWithUpToSixDecimals
+          /six_decimals  /two_decimals  /float_artifact  /integer
+--- PASS: TestUpdatePaymentConfig_RejectsBalanceRechargeMultiplierWithMoreThanSixDecimals
+--- PASS: TestCalculateCreditedBalanceStillUsesRechargeMultiplier
+```
+
+四个子用例分别覆盖 6 位小数、2 位小数、浮点伪影（`0.140845` 这类）和整数，
+**比上游那个 commit 测得更全**。
+
+**③ `atomic-refresh-token-rotation`**
+
+```
+ok  github.com/daniei-chen/zhijing-gateway/internal/service      4.058s
+ok  github.com/daniei-chen/zhijing-gateway/internal/repository   0.671s
+```
+
+**结论**：6.21 里说的「7 项已同步」中，这 3 项从「有对应实现」升级为
+「**有等价测试且实测通过**」。剩下的 4 项（utf-8 校验、page-context、image-error-status、
+usage index）仍然是符号级比对，没有做行为验证。
+
+**这个差别值得说清楚**：符号存在只能证明「有人搬了这个函数」，测试通过才证明
+「搬过来之后行为是对的」。前者可能因为上下文差异（类型、默认值、调用链）而失效，
+后者不会。
