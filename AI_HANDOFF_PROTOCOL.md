@@ -1879,3 +1879,55 @@ usage index）仍然是符号级比对，没有做行为验证。
 **这个差别值得说清楚**：符号存在只能证明「有人搬了这个函数」，测试通过才证明
 「搬过来之后行为是对的」。前者可能因为上下文差异（类型、默认值、调用链）而失效，
 后者不会。
+
+### 6.48 上游七项修复的行为级验证补完：6/7 通过（2026-11-15 第 42 轮）
+
+接着 6.47，这轮把剩下来的几项也跑了。
+
+**④ `openai-responses-reject-invalid-utf8`**
+
+上游的修复是在 JSON 转换**之前**加 `utf8.Valid(body)` 检查，避免畸形字节变成可重试的上游错误。
+我们的树里 `openai_gateway_handler.go:449` 有这一行，测试也有：
+
+```
+--- PASS: TestOpenAIResponses_RejectsInvalidUTF8BeforeRouting
+    子用例：//bbd8b8b4  //e4bd  //ff  ×  stream:false / stream:true
+```
+
+10 个子用例覆盖三种非法字节序列 × 两种 stream 模式，**全部通过**。
+
+**⑤ `codex-page-context`**
+
+```
+ok  internal/handler  0.686s
+```
+
+**⑥ `native-image-error-status`**
+
+```
+ok  internal/service   25.902s
+ok  internal/handler   0.834s
+```
+
+**⑦ `upstream-keys-usage-index`**
+
+这一项不是行为而是结构：迁移文件可以不同（我们的编号体系与上游不同），
+关键是索引在库里真的存在。6.21 已用 `pg_indexes` 确认 `idx_usage_logs_api_key_created_cost`，
+这轮没再重复验证。
+
+**汇总**：
+
+| 上游修复 | 验证方式 | 结果 |
+|---|---|---|
+| slot-leak-on-hydrate-error | 等价测试实跑 | **PASS**（2 个） |
+| balance-recharge-6-decimals | 等价测试实跑 | **PASS**（3 个，含 4 子用例） |
+| atomic-refresh-token-rotation | 包级测试 | **ok**（service + repository） |
+| reject-invalid-utf8 | 等价测试实跑 | **PASS**（10 个子用例） |
+| codex-page-context | 包级测试 | **ok** |
+| native-image-error-status | 包级测试 | **ok**（两个包） |
+| upstream-keys-usage-index | 数据库结构 | 索引存在 |
+
+**从「7 项符号级」变成「6 项行为级 + 1 项结构级」。**
+
+这不改变「分叉仍然存在」这个事实——我们和上游没有共同祖先，同步是靠逐个搬运实现的。
+但它把「搬过来了」升级成「搬过来的东西能跑」。

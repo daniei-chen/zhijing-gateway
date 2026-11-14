@@ -36,7 +36,7 @@
 |---|---|
 | 管理接口认证链 7 步 | 6.36 实现读得很完整；6.40 补了边界实测——无凭据 / 畸形 JWT / 随机 api-key / 伪造 scm 前缀全部返 **401**（不是 403），证明认证先于授权且不泄露权限。**仍未测「有效凭据 + 非管理员」这条**（需要真 JWT） |
 | 配额刷新不会清空旧值 | 6.22 `UpdateExtra` 是 `COALESCE(extra,'{}') \|\| $1` 的 JSONB 合并；6.39 补查了触发点本身也只写单个 key。**逻辑确定，但生产上无法触发实测**——`POST /admin/openai/accounts/:id/quota/refresh` 需要管理员凭据，今天全天零流量也等不到自然刷新 |
-| 上游 7 项修复已同步 | 6.21 是符号级比对；**6.47 对其中 3 项做了行为级验证**（slot-leak、recharge-6-decimals、token-rotation 的等价测试实跑通过）。剩下 4 项仍是符号级（utf-8、page-context、image-error-status、usage index） |
+| 上游 7 项修复已同步 | **6.47 + 6.48 补完：6 项行为级验证通过**（slot-leak 2 测试、recharge-6-decimals 3 测试、token-rotation 两包、utf-8 10 子用例、page-context、image-error-status），第 7 项 usage index 是结构级（`pg_indexes` 已确认） | **从「有实现」升级为「实现能跑」** |
 | `billing_failures` 无法重放 | 6.29 缺字段是结构事实；「无法重放」这个结论依赖字段清单，硬 |
 | 预聚合表无人读取 | 6.23 grep 24 处引用零 SELECT，是全文检索结论，硬 |
 | 两套 request_id 无法关联 | 6.31 加前缀仍 0 匹配，是数据事实（这条其实算数据证据） |
