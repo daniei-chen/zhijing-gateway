@@ -15,19 +15,22 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 
 ## 2. 当前已验证生产状态
 
-截至 2026-11-14 22:42（北京时间），生产版本是 **v0.1.8**（引入动态并发）：
+截至 2026-11-14 23:00（北京时间），生产版本是 **v0.1.9**（动态并发已验证生效）：
 
-- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.8（「智境网关 0.1.8」）
-- 源码提交：`1e7c43fc44633bdfdac3921766835a8aeda3199c`
-- GHCR digest：`sha256:c3009fc956120d4e6b17bce1a53ed023af9e02328916cfc83de7113cf6e542ec`
-- 当前容器：`zhijing-api-v018-final`，loopback 端口 **18805**
-- 回滚容器：18803（v0.1.6）、18804（v0.1.7）、18802（v0.1.5）、18801（v0.1.4）；历史 18799/18793
-- **动态并发（本版核心）**：`GATEWAY_MEMBER_CONCURRENCY_LIMIT=3` 为基础上限，
+- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.9（「智境网关 0.1.9」）
+- 源码提交：`0845a427df2a53033dad209bea6a0740516e4517`
+- GHCR digest：`sha256:1d474a20117a73067746861bf7aef57977d9f3fd9f97de5bb445d4fe92e3e9fb`
+- 当前容器：`zhijing-api-v019-final`，loopback 端口 **18806**
+- 回滚容器：18805（v0.1.8）、18803（v0.1.6）、18804（v0.1.7）、18802（v0.1.5）、18801（v0.1.4）；历史 18799/18793
+- **动态并发（已实测）**：`GATEWAY_MEMBER_CONCURRENCY_LIMIT=3` 为基础，
   `GATEWAY_MEMBER_CONCURRENCY_LIMIT_PEAK=5` 为活跃用户 ≤1 时的放宽值。
-  活跃用户 ≥2（即有第 3 人正在进来）时自动回落到 3。两个值都由容器环境变量控制，
-  改动需重建容器（发布脚本的 `EXTRA_ENV` 可传），**不能靠改数据库生效**。
-- 该动态上限读 Redis 活跃索引（`concurrency:zhijing:user_index:v1`，score 为绝对过期秒）；
-  **读取失败一律回退到 3**，不会因异常放大配额。
+  **验收方式必须是打真实请求**：单用户发 5 个并发应全部 200；v0.1.8 因为仓库层
+  `gatewayUserMaximum` 又用静态 memberLimit 压了一次，配了 PEAK=5 实际仍是 3
+  （429 响应体写着"上限 3"），v0.1.9 修复后实测 5/5 全部 200。
+- **两层都要一致**：service 的 `effectiveMemberLimit()` 与 repository 的
+  `effectiveMemberHardLimit()` 必须用同一套活跃用户口径，否则任一层压回静态值都会让 peak 失效。
+- 账号：仅 #2「ChatGPT pro 200」可用，`concurrency=10`；分组：仅「pro 200」
+  （`model_allowlist.enabled=false`）。
 - 账号：仅 #2「ChatGPT pro 200」可用（#1 Plus 订阅 2026-11-02 过期且已删除、#3 API 已删除），
   `concurrency=10`；分组：仅「pro 200」（`model_allowlist.enabled=false`）。
 - 该账号真实可用模型 12 个：`codex-auto-review`、`gpt-5.6-luna/sol/terra`、`gpt-6-astra/luna/sol`、
