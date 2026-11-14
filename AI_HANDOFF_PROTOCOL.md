@@ -967,3 +967,43 @@ CI（Linux）13/13 全绿，一次都没红过。
 比本地单进程复现更可靠。
 
 **这条不再当待办**，从清单里划掉。
+
+### 6.25 槽位释放路径逐分支核对（2026-11-15 第 17 轮）
+
+这是并发系统最容易漏的地方：获取了槽位，然后某个中途失败的分支提前 return，把槽位留在 Redis 里等 TTL。
+上游 11-10 的 `slot-leak-on-hydrate-error` 就是这类问题。这里逐条核了一遍。
+
+**获取端只有两个入口**（`gateway_helper.go:400 / 465`），错误分支都直接 `return nil, err`。
+危险的是「函数返回 error 但其实已经占了槽」——查了实现，不存在：
+
+`acquireGatewayUserSlot` 是 `runScriptInt64Pair(gatewayUserAdmissionScript, ...)`，
+Lua 脚本原子执行：要么占成功返回 1，要么返回 0，**error 时脚本根本没执行**，不会留下半占状态。
+
+**释放端的设计是「ctx 兜底 + 手动幂等」**：
+
+```go
+func wrapReleaseOnDone(ctx context.Context, releaseFunc func()) func() {
+    var once sync.Once
+    releaseOnce := func() { once.Do(releaseFunc) }
+    stop := context.AfterFunc(ctx, releaseOnce)   // 请求结束自动释放
+    return func() { _ = stop(); releaseOnce() }   // 手动调用也释放，once 保证只放一次
+}
+```
+
+所以即便某个分支忘了手动释放，请求结束（ctx Done）时也会释放；`sync.Once` 保证不会重复释放。
+
+**以 `/v1/responses` 为例逐分支核对**（其余 handler 同构）：
+
+| 位置 | 分支 | 释放 |
+|---|---|---|
+| 240 | 获取 account slot 失败 | 未获取，无需释放 |
+| 248-252 | `err != nil` → return | 同上 |
+| 258-269 | profit veto → 释放后 `continue`/`return` | **手动释放** |
+| 278 | 正常路径 | **绑定 ctx Done** |
+| 288-295 | Antigravity 未配置 → return | **手动释放** |
+| 302-304 | 转发完成 | **手动释放** |
+
+`wrapReleaseOnDone` 在 7 个 handler 文件里共 23 处调用，覆盖 user slot、account slot 和 queue slot。
+
+**结论：没有找到泄漏分支。** 获取端原子、释放端有 ctx 兜底且幂等，两条路都堵住了。
+这不能证明「永远不会有泄漏」，但把每个 return 分支都走了一遍，没有发现漏释放的路径。
