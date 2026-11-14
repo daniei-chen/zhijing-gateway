@@ -1494,3 +1494,27 @@ jifengxian   balance:300   11-14 16:25
 **没有找到可以复现的具体来源，但量级在 1e-4 以下，不值得追**。
 
 **结论：账务是平的。** 初始余额 + 兑换码 − 消费 = 当前余额，四个用户精确成立。
+
+### 6.39 配额刷新为什么在生产上实测不到（2026-11-15 第 32 轮）
+
+想把 6.22 那条「刷新不会清空旧值」从「仅代码」升级成实测，查了触发条件，结论是**做不到**。
+
+**两个触发点都需要管理员凭据**：
+
+```
+POST /api/v1/admin/openai/accounts/:id/quota/refresh   →  RefreshQuota
+custom_admin_key_openai.go:98                          →  scoped admin key 查询路径
+```
+
+`RefreshQuota` 的流程是 `QueryUsage`（查上游）→ `CacheCreditsSnapshot`（写 credits）→
+`CacheResetCreditsSnapshot`（写 reset credits）。三个写操作都走 `UpdateExtra`，
+而 `UpdateExtra` 是 `COALESCE(extra,'{}'::jsonb) || $1`——**单 key 合并，不是整块覆盖**。
+
+所以**代码层面这条是确定的**：写 `codex_credits_snapshot` 不会碰 `codex_7d_used_percent`
+或 `codex_*_reset_at`。
+
+**但生产上触发不了**：需要管理员 JWT，而今天全天零流量（最近一次计费请求是 01:32），
+也等不到自然刷新。用数据库手工改 `extra` 再观察，那是模拟不是实测，我不拿它冒充证据。
+
+**处理方式**：在 `AUDIT-EVIDENCE-20261115.md` 里把这条明确写成
+「逻辑确定，但生产上无法触发实测」，而不是留在含糊的「仅代码」。
