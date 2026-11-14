@@ -1141,3 +1141,36 @@ tx.Commit()
 
 这就是为什么「告警凭据」在技术债清单里是 P1 而不是可选项：它不只是收不到通知，
 而是**账务异常的最后一环没有出口**。
+
+### 6.29 `billing_failures` 的重放能力：设计了一半（2026-11-15 第 21 轮）
+
+上一轮说补偿是人工的。这一轮查了「能不能自动重放」，结论是**目前不能，而且连数据都不够**。
+
+**表结构留了重放的痕迹，但没有实现**：
+
+`billing_failures` 有 `replay_attempts` 和 `last_replay_at` 两列，从名字看就是为重放准备的。
+但 grep 整个 `backend/internal`：**零处引用**——没有代码写它们，也没有任何东西读这张表。
+和 `attempted_key_prefix` 一样，是预留但没用起来的列。
+
+**更关键的问题：表里存的字段不足以重建一条计费命令。**
+
+`UsageBillingCommand` 需要 22 个字段，其中这些在 `billing_failures` 里**没有**：
+
+| 缺失字段 | 为什么重要 |
+|---|---|
+| `BalanceCost` / `SubscriptionCost` / `APIKeyQuotaCost` / `APIKeyRateLimitCost` / `AccountQuotaCost` | 五类金额是分开扣的，只知道 `total_cost` 无法还原每一项该扣多少 |
+| `BillingType` / `AccountType` | 决定走哪条扣费分支（订阅 vs 余额 vs 账号配额） |
+| `RequestFingerprint` / `RequestPayloadHash` | 幂等指纹的一部分 |
+| `SubscriptionID` | 订阅扣费必须知道扣哪个订阅 |
+| `CacheCreationTokens` / `ImageCount` / `MediaType` | 影响计费口径 |
+| `AccountQuotaHasDailyLimit` / `AccountQuotaHasWeeklyLimit` | 决定账号配额累加哪几个维度 |
+
+所以**即使现在写一个重放脚本，也重建不出正确的扣费**——只能拿到一个总金额，不知道该往哪儿扣。
+
+**好消息是这条链路的「重放安全性」本身是对的**：`Apply` 的 dedup 占位在同一个事务里，
+失败时连占位一起回滚，所以同一个 `request_id` 重新调用会重新走完整流程，不会被幂等检查误跳过。
+也就是说**底层是支持重放的，缺的是数据和方法**。
+
+**没有动手的原因**：补字段要加迁移（10 列），写重放要动账务。当前 `billing_failures` 是 0 行，
+没有任何真实需求；而「自动补扣钱」这类逻辑一旦写错，后果比漏扣更严重。
+这件事应该由主人决定要不要做，不是我在审计里顺手加上的。
