@@ -1554,3 +1554,49 @@ custom_admin_key_openai.go:98                          →  scoped admin key 查
   会把 `/health`、`/readyz` 这些公开端点一起挡掉，代价远大于收益
 
 同类系统（Kubernetes API、GitHub API）也都有这个特征。记录在案，不作为缺陷。
+
+### 6.41 配置完整性扫描：286 项里 76 项为空（2026-11-15 第 34 轮）
+
+扫了 `settings` 表全部 286 个 key，空值（NULL 或空串）76 个，占 26.6%。逐个看过，
+绝大多数是**正常的空**——没启用的登录方式（OIDC 的 endpoint）、没配的第三方集成、
+默认为空的列表字段。
+
+**唯一实质缺失的是 SMTP 密码**：
+
+```
+smtp_host      = smtp.qq.com              SET
+smtp_port      = 465                      SET
+smtp_use_tls   = true                     SET
+smtp_username  = 2421873411@qq.com        SET
+smtp_from      = 2421873411@qq.com        SET
+smtp_from_name = 智境网关                   SET
+smtp_password  = （这一行根本不存在）        MISSING
+```
+
+六项里五项配好了，**只差密码**。这是典型的「看起来配好了」——后台邮件设置页面
+host/port/账号/发件人都有值，只有密码框空着，而保存时不校验这一项。
+
+**触发时会发生什么**（`TestSMTP` 的逻辑）：
+
+```go
+password := strings.TrimSpace(req.SMTPPassword)
+if password == "" && savedConfig != nil {
+    password = savedConfig.Password
+}
+if req.SMTPHost == "" {
+    response.BadRequest(c, "SMTP host is required")
+    return
+}
+```
+
+host 有必填校验，密码没有——空密码会一路传到 `TestSMTPConnectionWithConfig`，
+由 SMTP 服务器返回认证失败。所以**「发送测试邮件」这个按钮确实能暴露问题**，
+错误信息是底层连接错误而不是「密码未配置」。
+
+**判断：不算缺陷，但体验有改进空间。** 保存 SMTP 配置时如果 host 有值、password 为空，
+可以给一句提示。没有改——因为测试按钮已经能发现问题，而且密码字段在表单上是明确的一项，
+不填是用户的选择。真要改属于产品体验范畴，不是稳定性问题。
+
+**顺带确认**：`ops_email_notification_config` 是 SET 状态、`alert.enabled = true`、
+有收件人。也就是说**告警规则是开着的，只是发不出去**（见 6.9）——这比「规则没配」更隐蔽：
+系统自认为在告警，实际一封都发不出去。
