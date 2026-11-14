@@ -1,3 +1,5 @@
+//go:build embed || unit
+
 package web
 
 import (
