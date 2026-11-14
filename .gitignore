@@ -1,4 +1,6 @@
 out/
+# 本地审计/构建证据目录（不随代码发布）
+.out/
 backend/internal/web/dist/
 
 # 后端运行时缓存数据
@@ -56,4 +58,7 @@ output/
 .codegraph/
 issues/
 .vite/
+# 运维脚本的 Python 字节码缓存
+__pycache__/
+*.pyc
 /plugins/
