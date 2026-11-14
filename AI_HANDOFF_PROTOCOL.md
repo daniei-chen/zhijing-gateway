@@ -834,3 +834,28 @@ restored original, still valid
 **风险**：这是**用户可见的界面替换**——11-01 的旧前端换成当前源码构建。功能上更完整
 （含 v0.1.10 的分组强制档位选择器），但界面细节可能与用户记忆中的不同。
 备份目录 `/root/zhijing-frontend-switch/`。
+
+### 6.21 上游修复同步状态（2026-11-15 第 11 轮，抽查结论）
+
+上游 `Wei-Shaw/sub2api` 的 `main` HEAD 仍是 **530c5e3a4（2026-11-11）**，未再前进；
+最新 tag 是 **v0.2.21**（我们的 `0.1.x` 是分叉版本号，与上游编号体系不同）。
+
+我们的历史与上游**没有共同祖先**，所以不能靠 `git diff` 判断缺什么。这一轮改成
+「按 commit 找对应实现」抽查了最近 15 个提交里最相关的 7 个：
+
+| 上游修复 | 我们的状态 | 证据 |
+|---|---|---|
+| `slot-leak-on-hydrate-error` | **已同步** | `newSelectionResult` 里 hydrate 失败时调用 `release()`，注释与上游一致 |
+| `balance-recharge-multiplier-6-decimals` | **已同步** | `balanceRechargeMultiplierHasExcessPrecision` + `formatBalanceRechargeMultiplier`，上限 6 位 |
+| `openai-responses-reject-invalid-utf8` | **已同步** | `openai_gateway_handler.go` 有对应校验 |
+| `codex-page-context` | **已同步** | `openai_page_context.go` 存在 |
+| `native-image-error-status` | **已同步** | `openai_images_json_keepalive.go` 存在 |
+| `atomic-refresh-token-rotation` | **已同步** | `refresh_token_cache.go` 用 `consumeRefreshTokenScript`（Lua）原子读删 |
+| `upstream-keys-usage-index` | **已同步** | 库里存在 `idx_usage_logs_api_key_created_cost`（迁移文件编号与我们不同，索引在） |
+
+**结论**：分叉虽然早，但这几个直接影响计费精度、并发槽位和 token 轮转的修复都已经在前面
+的迭代里搬过来了。这是「抽查最近 15 个里的 7 个」，不是全量比对——上游历史更长，
+不能据此宣称「完全一致」。
+
+`accounts-refresh-stability`（刷新时保留行与配额）没做列级验证：`accounts` 表里只有
+`quota_dimension`，实际配额数据不在该表，需要另找承载表才能确认。
