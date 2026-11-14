@@ -613,3 +613,37 @@ modulepreload，也没有 vendor-excel。改动本身无害（对未来部署是
 
 要真正让线上前端与源码一致，需要把 `dist` 部署到 `/var/www/` 下的某个目录并让 nginx 指过去。
 **这是用户可见的界面替换，必须由主人决定**，不能自行执行。
+
+### 6.15 缺失的静态资源曾被假扮成 index.html（2026-11-15 第 5 轮，v0.1.16/0.1.17 已修）
+
+内嵌 SPA 中间件原来的逻辑是「文件找不到 → 返回 index.html」，而且是 **HTTP 200**：
+
+```
+curl http://<容器>/assets/does-not-exist.js
+v0.1.15: 200  text/html  3371 bytes
+v0.1.17: 404  text/plain
+```
+
+后果是浏览器把 HTML 当 JavaScript 解析 → 语法错误 → 白屏；而 200 表示成功，浏览器
+**不会重试**。客户端缓存着旧 index.html、却去请求新 hash 的 chunk 时，就一直白屏到清缓存为止。
+这就是「发版后打不开」的真实成因。
+
+现在的规则（`shouldServeIndexFallback`）：
+
+| 路径 | 行为 |
+|---|---|
+| 空 / `index.html` | 回退 index.html |
+| 存在的文件 | 直接文件服务 |
+| 不存在且扩展名属静态资源（js/css/png/svg/woff2/json…） | **404** |
+| 其余（前端路由，含 `/user/john.doe` 这种带点的） | 回退 index.html |
+
+**影响范围要说清楚**：当前公网 nginx 用 `try_files` 走 `/var/www` 的静态副本，**不经过**后端的
+SPA handler，所以这个修复对现有用户**没有直接可见变化**（nginx 本来就对缺失静态资源返 404）。
+它修的是后端直连场景、以及将来把 nginx 改成 proxy 到后端（见 6.14）时的正确性。
+
+**顺带修好的测试盲区**：这段逻辑原本只有 `//go:build embed` 的测试覆盖，而 CI 跑 `-tags=unit`，
+等于从没被测过。判断逻辑已抽到 `spa_fallback.go`（`//go:build embed || unit`），
+配套测试用 `//go:build unit`，CI 会跑。
+
+v0.1.16 的构建约束写错了（文件无 tag 而调用者在 embed 里），导致 golangci-lint 把三个符号
+判成 unused、CI 红灯——**测试是过的，红的只是 lint**。v0.1.17 把约束改成 `embed || unit` 修好。
