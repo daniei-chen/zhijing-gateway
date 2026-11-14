@@ -218,6 +218,19 @@ func testEntClient(t *testing.T) *dbent.Client {
 	return integrationEntClient
 }
 
+// resetUserDomainTables gives repository suites a real clean boundary. DELETE
+// based cleanup is insufficient here because other integration tables retain
+// foreign-key references; ignoring those errors leaves rows behind and makes
+// later suites fail with duplicate keys or polluted list assertions.
+func resetUserDomainTables(t *testing.T) {
+	t.Helper()
+	_, err := integrationDB.ExecContext(context.Background(), `
+		TRUNCATE TABLE users, groups, api_keys
+		RESTART IDENTITY CASCADE
+	`)
+	require.NoError(t, err, "reset user-domain integration tables")
+}
+
 // testEntTx 返回一个 ent 事务，用于需要事务隔离的测试。
 // 测试结束后会自动回滚，不会影响数据库状态。
 func testEntTx(t *testing.T) *dbent.Tx {
