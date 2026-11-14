@@ -2181,3 +2181,47 @@ uq_accounts_spark_shadow_per_parent       UNIQUE (parent_account_id) WHERE ... d
 
 **结论**：关键业务字段的唯一性都有数据库层保护，实测数据也没有任何重复。
 唯一性缺口不存在——但我差点因为查错元数据表而报一个假问题。
+
+### 6.53 软删除的分组仍可被调度——但入口已经堵死（2026-11-15 第 49 轮）
+
+追孤儿 Key 的历史痕迹，撞到一个机制细节。
+
+**11-14 的时间线重建**：
+
+```
+19:10  事故，141 条 503
+19:35  keys.create {group_id:3, name:"key2"}
+20:01  admin.groups.delete（删分组 3「API 200美元」）→ HTTP 200
+20:13  key 3 改到 group_id=2
+20:50  key 5 改到 2
+20:56  key 12（key2）成功调用 3 次        ← 此时它仍指向已删的分组 3
+20:58  key 12 改到 2
+```
+
+**`admin.groups.delete` 是软删除**（`UPDATE groups SET deleted_at`），行还在，
+所以**外键不触发**，`api_keys.group_id` 保持 3。
+
+**而调度查询不看分组的 `deleted_at`**：
+
+```go
+q := r.client.AccountGroup.Query().Where(dbaccountgroup.GroupIDEQ(groupID))
+preds = append(preds, dbaccount.DeletedAtIsNil())   // 只看账号自己有没有删
+```
+
+它按 `group_id` 查 `account_groups` 中间表，**从不检查这个分组是否已被软删除**。
+
+所以 20:56 那次调用能成功——**指向已删分组的 Key 仍然在正常调度、正常计费**。
+管理员以为删掉分组就停用了服务，实际没有。
+
+**但当前无风险，因为入口已经堵死**：v0.1.14 之后「有 Key 绑定的分组不允许删除」，
+所以**不可能再产生**「Key 指向已删分组」的状态。实测 6 个活跃 Key 全部 `group_id=2`，
+没有任何一个指向已软删的分组（1 和 3）。
+
+**性质判断**：这不是待修的缺陷，是**一个依赖应用层保证的不变量**。数据库和查询层都不拦，
+挡住的只有 `DeleteGroup` 那一处检查。如果将来有人写新代码路径删分组（或直接跑 SQL），
+这个不变量就破了，而且破了之后不会有任何报错——只有「删了还在跑」这种沉默的错。
+
+**没动手改**：给 `queryAccountsByGroup` 加 `deleted_at IS NULL` 检查属于安全加固，
+但它会改变「软删分组下的 Key 立即失效」这个行为（现在是继续可用），
+而这个行为在某些恢复场景下可能是有意的（误删后先把分组恢复，期间服务不断）。
+该不该改是产品判断，不是审计能定的。
