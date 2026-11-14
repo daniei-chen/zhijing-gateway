@@ -512,3 +512,29 @@ ZHIJING_ALERT_WEBHOOK=https://your-endpoint/path
 
 已验证：注入假失败 → 收到 error payload（含明细）；恢复 → info payload；连续 5 次调用 5/5 送达；
 无配置时 `notify_webhook` 返回 False 且无副作用。测试数据与临时接收器均已清理，当前 hook 为空（静默）。
+
+### 6.11 竞态检测（2026-11-15 第 15 轮）
+
+`go vet`、`golangci-lint`（含 staticcheck/gosec）都看不出数据竞争，只有 `-race` 能。
+全量 `-race` 跑 `internal/service` 需要十几分钟，不适合 CI，因此收敛到并发相关测试：
+
+```bash
+cd backend && make test-race
+# 等价于
+CGO_ENABLED=1 go test -race -tags=unit -timeout 600s ./internal/service/ ./internal/handler/ \
+  -run 'Concurren|Limiter|Limit|Cache|Schedul|Pool|Slot|Race|Parallel|Atomic'
+```
+
+实测：service **80.8s**、handler **14.1s**，两者全部通过，没有 DATA RACE。
+也就是说槽位、限流、缓存、调度这几条最危险的并发路径目前是干净的。
+
+**CI 那一半推不上去**：当前 GitHub token 缺 `workflow` scope，无法修改
+`.github/workflows/*`。改动已导出为 `deploy/zhijing/patches/0001-ci-race-job.patch`，
+二选一应用：
+
+```bash
+git am deploy/zhijing/patches/0001-ci-race-job.patch   # 在有 workflow scope 的环境
+```
+
+或者直接在 GitHub 网页编辑 `backend-ci.yml`，把 patch 里的 `race:` job 粘进去
+（它插在 `test:` 与 `frontend:` 之间）。
