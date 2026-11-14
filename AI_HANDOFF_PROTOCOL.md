@@ -1174,3 +1174,36 @@ tx.Commit()
 **没有动手的原因**：补字段要加迁移（10 列），写重放要动账务。当前 `billing_failures` 是 0 行，
 没有任何真实需求；而「自动补扣钱」这类逻辑一旦写错，后果比漏扣更严重。
 这件事应该由主人决定要不要做，不是我在审计里顺手加上的。
+
+### 6.30 生产配置 vs 代码默认值（2026-11-15 第 22 轮）
+
+网关的行为由二十多个环境变量控制。只要有一个被改过而没人记着，行为就会静默变化。
+这里把生产实际生效的值和 `config.go` 的默认值做了对照。
+
+| 配置 | 代码默认 | 生产 | 说明 |
+|---|---|---|---|
+| `gateway.member_concurrency_limit` | **0（不限）** | **3** | 开启成员并发限制 |
+| `gateway.member_concurrency_limit_peak` | **0** | **5** | 开启活跃用户 ≤1 时的放宽 |
+| `gateway.global_concurrency_limit` | **0（不限）** | **16** | 开启全局限流 |
+| `gateway.concurrency_slot_ttl_minutes` | **30** | **40** | 槽位 TTL 调大 10 分钟 |
+| `gateway.openai_forward_max_seconds` | 1500 | 1500 | 一致（25 分钟） |
+| `gateway.openai_disconnect_drain_seconds` | 30 | 30 | 一致 |
+| `gateway.openai_response_header_timeout` | **0（无超时）** | **900** | 开启 15 分钟上游响应头超时 |
+| `gateway.idle_conn_timeout_seconds` | **90** | **120** | 空闲连接超时调大 |
+| `gateway.downstream_write_timeout_seconds` | 120 | 120 | 一致 |
+| `gateway.request_body_read_timeout_seconds` | 120 | 120 | 一致 |
+| `concurrency.openai_poll_max_interval_ms` | **2000** | **250** | **轮询最大退避降了 8 倍** |
+
+**大部分是合理的收紧**：把默认「不限制」的三项打开（成员 3 / 峰值 5 / 全局 16），
+给上游响应头加 15 分钟超时（默认 0 表示不超时，等着挂死），槽位 TTL 从 30 调到 40 给长请求留余量。
+
+**两项值得记一笔**：
+
+1. **`slot_ttl_minutes = 40` 与 `forward_max = 25 分钟` 的关系是安全的**（25 < 40）。
+   这正好印证了 6.26 里那条结论：只要 Forward 的硬上限小于槽位 TTL，`defer release` 就一定能
+   在 TTL 之前执行完。**以后谁要把 `openai_forward_max_seconds` 改到 2400 秒以上，这条就不成立了。**
+
+2. **`openai_poll_max_interval_ms` 从 2000 降到 250**：这是等待槽位时的最大退避间隔。
+   调小意味着等待中的请求更频繁地重试抢占，**抢到槽位更快、但 Redis 查询更密**。
+   当前只有 1 个活跃用户，影响可以忽略；如果并发用户变多（比如 10 个请求同时等），
+   每秒会多出约 40 次 Redis 查询。这是取舍，不是错误，但要知道它和默认值差了 8 倍。
