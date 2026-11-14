@@ -1,347 +1,2843 @@
-YªçŠx-®éÜj×¢ëiºÚ+Š§j[h‘éÜ¢éíßn¸ñ:-jZ.¶›­–)Ş³W6¶vR6öæf–p ¦–×÷'B€ ’&f×B  ’&ÖF‚  ’&÷2  ’'F‚öf–ÆWF‚  ’'7G&–æw2  ’'7–æ2  ’'FW7F–ær  ’'F–ÖR   ’&v—F‡V"æ6öÒõvV’Õ6†r÷7V#&’ö–çFW&æÂ÷WF–Â÷W&ÇfÆ–FF÷"  ’&v—F‡V"æ6öÒ÷7c2÷f—W"  ’&v—F‡V"æ6öÒ÷7G&WF6‡"÷FW7F–g’÷&WV—&R ¢ ¦gVæ2&W6WEf—W%v—F„¥uE6V7&WB‡B§FW7F–æråB’° —Bä†VÇW"‚ —f—W"å&W6WB‚ —Bä6ÆVçW‡f—W"å&W6WB —Bå6WFVçb‚$4ôäd”uôd”ÄR"Â"" —Bå6WFVçb‚$DDôD•""Â"" —Bå6WFVçb‚$¥uEõ4T5$UB"Â7G&–æw2å&WVB‚'‚"Â3"’ —7GV$ÖVÖ÷'”Æ–Ö—B‡BÂ§Ğ ¦gVæ27GV$ÖVÖ÷'”Æ–Ö—B‡B§FW7F–æråBÂÆ–Ö—BV–çCcB’° —Bä†VÇW"‚ –÷&–v–æÂ£ÒFWFV7DÖVÖ÷'”Æ–Ö—D'—FW0 –FWFV7DÖVÖ÷'”Æ–Ö—D'—FW2ÒgVæ2‚’V–çCcB²&WGW&âÆ–Ö—BĞ —Bä6ÆVçW†gVæ2‚’²FWFV7DÖVÖ÷'”Æ–Ö—D'—FW2Ò÷&–v–æÂÒ§Ğ ¦gVæ2FW7DWFõ&WVW7D&öG”ÖVÖ÷'”'VFvWB‡B§FW7F–æråB’° —&WV—&RäWVÂ‡BÂ–çCcBƒÃÃ3’ÂWFõ&WVW7D&öG”ÖVÖ÷'”'VFvWBƒ’ —&WV—&RäWVÂ‡BÂ–çCcBƒÃÃ3’ÂWFõ&WVW7D&öG”ÖVÖ÷'”'VFvWBƒ#ÃÃ3’ —&WV—&RäWVÂ‡BÂ–çCcBƒ#ÃÃ3’ÂWFõ&WVW7D&öG”ÖVÖ÷'”'VFvWBƒƒÃÃ3’ —&WV—&RäWVÂ‡BÂ–çCcBƒ3#ÃÃ3’ÂWFõ&WVW7D&öG”ÖVÖ÷'”'VFvWBƒ#ƒÃÃ3’ —&WV—&RäWVÂ‡BÂ–çCcB†ÖF‚äÖ…V–çCcBóB’ÂWFõ&WVW7D&öG”ÖVÖ÷'”'VFvWB†ÖF‚äÖ…V–çCcB’§Ğ ¦gVæ2FW7DÆöE&WVW7D&öG”ÖVÖ÷'”'VFvWB‡B§FW7F–æråB’° —Bå'Vâ‚&WFò×6—¦VBg&öÒÖVÖ÷'’Æ–Ö—Bv†VâVç6WB"ÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —7GV$ÖVÖ÷'”Æ–Ö—B‡BÂ#ƒÃÃ3 –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ–çCcBƒ3#ÃÃ3’Â6frävFWv’å&WVW7D&öG”ÖVÖ÷'”'VFvWD'—FW2 —Ò  —Bå'Vâ‚&W‡Æ–6—BVçf—&öæÖVçBfÇVRv–ç2Â–æ6ÇVF–ær"ÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —7GV$ÖVÖ÷'”Æ–Ö—B‡BÂ#ƒÃÃ3 —Bå6WFVçb‚$tDUt•õ$UTU5Eô$ôE•ôÔTÔõ%•ô%TDtUEô%•DU2"Â#" –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&Rå¦W&ò‡BÂ6frävFWv’å&WVW7D&öG”ÖVÖ÷'”'VFvWD'—FW2 —Ò  —Bå'Vâ‚&V×G’Vçf—&öæÖVçBfÇVR—2–væ÷&VBÆ–¶Rf—W"FöW2"ÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —7GV$ÖVÖ÷'”Æ–Ö—B‡BÂ#ƒÃÃ3 —Bå6WFVçb‚$tDUt•õ$UTU5Eô$ôE•ôÔTÔõ%•ô%TDtUEô%•DU2"Â"" –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ–çCcBƒ3#ÃÃ3’Â6frävFWv’å&WVW7D&öG”ÖVÖ÷'”'VFvWD'—FW2 —Ò  —Bå'Vâ‚&W‡Æ–6—BVçf—&öæÖVçBfÇVRv–ç2÷fW"WFò×6—¦–ær"ÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —7GV$ÖVÖ÷'”Æ–Ö—B‡BÂ#ƒÃÃ3 —Bå6WFVçb‚$tDUt•õ$UTU5Eô$ôE•ôÔTÔõ%•ô%TDtUEô%•DU2"Â##CsCƒ3cC‚" –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ–çCcBƒ#ÃÃ3’Â6frävFWv’å&WVW7D&öG”ÖVÖ÷'”'VFvWD'—FW2 —Ò  —Bå'Vâ‚&W‡Æ–6—B6öæf–rf–ÆRF—6&ÆW2F†R'VFvWB"ÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —7GV$ÖVÖ÷'”Æ–Ö—B‡BÂ#ƒÃÃ3 –6öæf–tf–ÆR£Òf–ÆWF‚ä¦ö–â‡BåFV×F—"‚’Â&6öæf–rç–ÖÂ" —&WV—&RäæôW'&÷"‡BÂ÷2åw&—FTf–ÆR†6öæf–tf–ÆRÂµÖ'—FR‚&vFWv“¥Æâ&WVW7Eö&öG•öÖVÖ÷'•ö'VFvWEö'—FW3¢Æâ"’Âóc’ —Bå6WFVçb‚$4ôäd”uôd”ÄR"Â6öæf–tf–ÆR –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&Rå¦W&ò‡BÂ6frävFWv’å&WVW7D&öG”ÖVÖ÷'”'VFvWD'—FW2 —Ò  —Bå'Vâ‚&6öæf–rf–ÆRv—F†÷WBF†R¶W’—2WFò×6—¦VB"ÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —7GV$ÖVÖ÷'”Æ–Ö—B‡BÂ#ƒÃÃ3 –6öæf–tf–ÆR£Òf–ÆWF‚ä¦ö–â‡BåFV×F—"‚’Â&6öæf–rç–ÖÂ" —&WV—&RäæôW'&÷"‡BÂ÷2åw&—FTf–ÆR†6öæf–tf–ÆRÂµÖ'—FR‚&vFWv“¥ÆâÖ…ö&öG•÷6—¦S¢#cƒC3SCSeÆâ"’Âóc’ —Bå6WFVçb‚$4ôäd”uôd”ÄR"Â6öæf–tf–ÆR –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ–çCcBƒ3#ÃÃ3’Â6frävFWv’å&WVW7D&öG”ÖVÖ÷'”'VFvWD'—FW2 —Ò  —Bå'Vâ‚&W‡Æ–6—B6öæf–rf–ÆRfÇVRv–ç2"ÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —7GV$ÖVÖ÷'”Æ–Ö—B‡BÂ#ƒÃÃ3 –6öæf–tf–ÆR£Òf–ÆWF‚ä¦ö–â‡BåFV×F—"‚’Â&6öæf–rç–ÖÂ" —&WV—&RäæôW'&÷"‡BÂ÷2åw&—FTf–ÆR†6öæf–tf–ÆRÂµÖ'—FR‚&vFWv“¥Æâ&WVW7Eö&öG•öÖVÖ÷'•ö'VFvWEö'—FW3¢s3sCƒ#EÆâ"’Âóc’ —Bå6WFVçb‚$4ôäd”uôd”ÄR"Â6öæf–tf–ÆR –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ–çCcBƒÃÃ3’Â6frävFWv’å&WVW7D&öG”ÖVÖ÷'”'VFvWD'—FW2 —Ò§Ğ ¦gVæ2FW7DÆöDFVfVÇDÖöFVÇ4Æ—7E&VDÖ„'—FW2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂFVfVÇDÖöFVÇ4Æ—7E&VDÖ„'—FW2Â6frävFWv’äÖöFVÇ4Æ—7E&VDÖ„'—FW2§Ğ ¦gVæ2FW7DÆöDFVfVÇDÖ–ä÷WGWEFö¶Vç2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ#‚Â6frävFWv’äÖ–ä÷WGWEFö¶Vç2§Ğ ¦gVæ2FW7DÆöDÖ–ä÷WGWEFö¶Vç4g&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ôÔ”åôõUEUEõDô´Tå2"Â#b" –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂbÂ6frävFWv’äÖ–ä÷WGWEFö¶Vç2§Ğ ¦gVæ2FW7DÆöDvVÖ–æ•6ÖT66÷VçE&WG&–W2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂBÂ6frävFWv’äÖ…6ÖT66÷VçE&WG&–W4vVÖ–æ’  —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ôÔ…õ4ÔUô44õTåEõ$UE$”U5ôtTÔ”ä’"Â#" –6frÂW'"ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&Rå¦W&ò‡BÂ6frävFWv’äÖ…6ÖT66÷VçE&WG&–W4vVÖ–æ’§Ğ ¦gVæ2FW7EfÆ–FFTÖ–ä÷WGWEFö¶Vç4Ö–æ–×VÒ‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" –6frävFWv’äÖ–ä÷WGWEFö¶Vç2ÒP —&WV—&RäWVÄW'&÷"‡BÂ6fråfÆ–FFR‚’Â&vFWv’æÖ–åö÷WGWE÷Fö¶Vç2×W7B&RBÆV7Bb"§Ğ ¦gVæ2FW7DÆöEF–ÖW¦öæU&V6VFVæ6R‡B§FW7F–æråB’° —FW7G2£Òµ×7G'V7B° –æÖR7G&–æp –f–ÆUF–ÖW¦öæR7G&–æp —F–ÖW¦öæTVçb7G&–æp —G¤Vçb7G&–æp —vçB7G&–æp —×° —¶æÖS¢&FVfVÇB"ÂvçC¢$6–õ6†æv†’'ÒÀ —¶æÖS¢&6öæf–uöf–ÆR"Âf–ÆUF–ÖW¦öæS¢$WW&÷RôÆöæFöâ"ÂvçC¢$WW&÷RôÆöæFöâ'ÒÀ —¶æÖS¢'F–ÖW¦öæUöVçb"Âf–ÆUF–ÖW¦öæS¢$WW&÷RôÆöæFöâ"ÂF–ÖW¦öæTVçc¢%UD2"ÂvçC¢%UD2'ÒÀ —¶æÖS¢'G¥öVçb"Âf–ÆUF–ÖW¦öæS¢$WW&÷RôÆöæFöâ"ÂF–ÖW¦öæTVçc¢%UD2"ÂG¤Vçc¢$ÖW&–6ôæWuõ–÷&²"ÂvçC¢$ÖW&–6ôæWuõ–÷&²'ÒÀ —Ğ  –f÷"òÂGB£Ò&ævRFW7G2° —Bå'Vâ‡GBææÖRÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚%D”ÔU¤ôäR"ÂGBçF–ÖW¦öæTVçb —Bå6WFVçb‚%E¢"ÂGBçG¤Vçb ––bGBæf–ÆUF–ÖW¦öæRÒ""° –6öæf–tf–ÆR£Òf–ÆWF‚ä¦ö–â‡BåFV×F—"‚’Â&6öæf–rç–ÖÂ" —&WV—&RäæôW'&÷"‡BÂ÷2åw&—FTf–ÆR†6öæf–tf–ÆRÂµÖ'—FR‚'F–ÖW¦öæS¢"·GBæf–ÆUF–ÖW¦öæR²%Æâ"’Âóc’ —Bå6WFVçb‚$4ôäd”uôd”ÄR"Â6öæf–tf–ÆR —Ğ  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂGBçvçBÂ6fråF–ÖW¦öæR —Ò —Ğ§Ğ ¦gVæ2FW7DÆöE6W'fW%F–Ö–æt6öæf–r‡B§FW7F–æråB’° —Bå'Vâ‚&F—6&ÆVB'’FVfVÇB"ÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäfÇ6R‡BÂ6frå6W'fW"äVæ&ÆU6W'fW%F–Ö–ær —Ò  —Bå'Vâ‚&Væ&ÆVB'’W†7BVçf—&öæÖVçBf&–&ÆR"ÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$Tä$ÄUõ4U%dU%õD”Ô”är"Â'G'VR" –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RåG'VR‡BÂ6frå6W'fW"äVæ&ÆU6W'fW%F–Ö–ær —Ò§Ğ ¦gVæ2FW7DÆöE6–×ÆTÖöFT¶W•&FTÆ–Ö—DVæ&ÆVDg&öÔVçf—&öæÖVçB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚%4”ÕÄUôÔôDUô´U•õ$DUôÄ”Ô•EôTä$ÄTB"Â'G'VR"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RåG'VR‡BÂ6frå6–×ÆTÖöFT¶W•&FTÆ–Ö—DVæ&ÆVB§Ğ ¦gVæ2FW7DÆöE&VF—5W6W&æÖTg&öÔVçf—&öæÖVçB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚%$TD•5õU4U$äÔR"Â&×W6W""  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ&×W6W""Â6frå&VF—2åW6W&æÖR§Ğ ¦gVæ2FW7DÆöD…EE–æw&W756fWG”FVfVÇG2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂÂ6frå6W'fW"å&VD†VFW%F–ÖV÷WB —&WV—&RäWVÂ‡BÂcB£#BÂ6frå6W'fW"äÖ„†VFW$'—FW2 —&WV—&RäV×G’‡BÂ6frå6W'fW"åG'W7FVE&÷†–W2 —&WV—&RäfÇ6R‡BÂ6frå6W'fW"åG'W7FVE&÷†–W46öæf–wW&VB —&WV—&RåG'VR‡BÂ6fråG'W7Df÷'v&FVD•f÷$”¶W”4Â‚’ —&WV—&RäWVÂ‡BÂ–çCcBƒ3"£#B£#B’Â6frävFWv’åFW‡DÖ„&öG•6—¦R —&WV—&RäWVÂ‡BÂ–çCcBƒÃÃ3’Â6frävFWv’å&WVW7D&öG”ÖVÖ÷'”'VFvWD'—FW2 —&WV—&RäWVÂ‡BÂ#Â6frävFWv’å&WVW7D&öG•&VEF–ÖV÷WE6V6öæG2 —&WV—&RäWVÂ‡BÂ#Â6frävFWv’äF÷vç7G&VÕw&—FUF–ÖV÷WE6V6öæG2 —&WV—&RäWVÂ‡BÂSÃÃ#Â6frävFWv’äÖ„Æ–æU6—¦R —&WV—&RäWVÂ‡BÂ–çCcBƒƒÃÃ#’Â6frävFWv’å54UVWVTÖ„'—FW2 —&WV—&RäWVÂ‡BÂC“bÂ6frävFWv’å54TWfVçDÖ„Æ–æW2 —&WV—&RåG'VR‡BÂ6frä”¶W”WF‚ä–çfÆ–D'W6RäVæ&ÆVB —&WV—&RäWVÂ‡BÂ#Â6frä”¶W”WF‚ä–çfÆ–D'W6RåF‡&W6†öÆB —&WV—&RäWVÂ‡BÂc3ƒBÂ6frä”¶W”WF‚ä–çfÆ–D'W6Rä66—G’§Ğ ¦gVæ2FW7Dæ÷&ÖÆ—¦Tf÷'v&FVD6Æ–VçD•†VFW'2‡B§FW7F–æråB’° –†VFW'2ÂW'"£Òæ÷&ÖÆ—¦Tf÷'v&FVD6Æ–VçD•†VFW'2…µ×7G&–æw° ’"‚Ö6FâÖ6Æ–VçBÖ—"À ’%‚Ô4DâÔ4Ä”TåBÔ•"À ’'G'VRÖ6Æ–VçBÖ—"À —Ò —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂµ×7G&–æw²%‚Ô6FâÔ6Æ–VçBÔ—"Â%G'VRÔ6Æ–VçBÔ—'ÒÂ†VFW'2  •òÂW'"Òæ÷&ÖÆ—¦Tf÷'v&FVD6Æ–VçD•†VFW'2…µ×7G&–æw²%‚–çfÆ–B'Ò —&WV—&RäW'&÷$6öçF–ç2‡BÂW'"Â&–çfÆ–B…EE†VFW"f–VÆBæÖR"§Ğ ¦gVæ2FW7Dæ÷&ÖÆ—¦Tf÷'v&FVD6Æ–VçD•†VFW'4Æ–Ö—B‡B§FW7F–æråB’° –†VFW'2£ÒÖ¶R…µ×7G&–ærÂÂÖ„f÷'v&FVD6Æ–VçD•†VFW'2³ –f÷"’£Ò²’ÃÒÖ„f÷'v&FVD6Æ–VçD•†VFW'3²’²²° –†VFW'2ÒVæB††VFW'2Âf×Bå7&–çFb‚%‚Ô4DâÔ•ÒVB"Â’’ —Ğ  •òÂW'"£Òæ÷&ÖÆ—¦Tf÷'v&FVD6Æ–VçD•†VFW'2††VFW'2 —&WV—&RäW'&÷$6öçF–ç2‡BÂW'"Â&BÖ÷7BbVæ—VRæÖW2"§Ğ ¦gVæ2FW7DÆöDf÷'v&FVD6Æ–VçD•†VFW'4æ÷&ÖÆ—¦W4æE6æ6†÷G2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —f—W"å6WB‚'6V7W&—G’æf÷'v&FVEö6Æ–VçEö—ö†VFW'2"Âµ×7G&–æw²"‚Ö6FâÖ—"Â%‚Ô4DâÔ•"Â'G'VRÖ6Æ–VçBÖ—'Ò  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —6æ6†÷B£Ò6fräf÷'v&FVD6Æ–VçD•6WGF–æw2‚ —&WV—&RäWVÂ‡BÂµ×7G&–æw²%‚Ô6FâÔ—"Â%G'VRÔ6Æ–VçBÔ—'ÒÂ6æ6†÷Bä†VFW'2  —6æ6†÷Bä†VFW'5³ÒÒ%‚Ô×WFFVB  —&WV—&RäWVÂ‡BÂµ×7G&–æw²%‚Ô6FâÔ—"Â%G'VRÔ6Æ–VçBÔ—'ÒÂ6fräf÷'v&FVD6Æ–VçD•6WGF–æw2‚’ä†VFW'2§Ğ ¦gVæ2FW7Df÷'v&FVD6Æ–VçD•6WGF–æw46öæ7W'&VçEV&Æ–6F–öâ‡B§FW7F–æråB’° –6fr£Òd6öæf–w·Ğ –6frå6WDf÷'v&FVD6Æ–VçD•6WGF–æw2‡G'VRÂµ×7G&–æw²%‚ÕV&Æ–2Ô'Ò  –6öç7B—FW&F–öç2Ò#  —7F'B£ÒÖ¶R†6†â7G'V7G·Ò –W'$6‚£ÒÖ¶R†6†âW'&÷"Â‚ —f"vr7–æ2åv—Dw&÷W   –f÷"òÂ6WGF–æw2£Ò&ævRµÔf÷'v&FVD6Æ–VçD•6WGF–æw7° —µG'W7Df÷'v&FVD•¢G'VRÂ†VFW'3¢µ×7G&–æw²%‚ÕV&Æ–2Ô'×ÒÀ —µG'W7Df÷'v&FVD•¢fÇ6RÂ†VFW'3¢µ×7G&–æw²%‚ÕV&Æ–2Ô"'×ÒÀ —Ò° —6WGF–æw2£Ò6WGF–æw0 —vräFBƒ –vògVæ2‚’° –FVfW"vräFöæR‚ “Â×7F'@ –f÷"’£Ò²’Â—FW&F–öç3²’²²° –6frå6WDf÷'v&FVD6Æ–VçD•6WGF–æw2‡6WGF–æw2åG'W7Df÷'v&FVD•Â6WGF–æw2ä†VFW'2 —Ğ —Ò‚ —Ğ  –f÷"’£Ò²’Â6†W'$6‚“²’²²° —vräFBƒ –vògVæ2‚’° –FVfW"vräFöæR‚ “Â×7F'@ –f÷"¢£Ò²¢Â—FW&F–öç3²¢²²° —6æ6†÷B£Ò6fräf÷'v&FVD6Æ–VçD•6WGF–æw2‚ —fÆ–D£Ò6æ6†÷BåG'W7Df÷'v&FVD•bbÆVâ‡6æ6†÷Bä†VFW'2’ÓÒbb6æ6†÷Bä†VFW'5³ÒÓÒ%‚ÕV&Æ–2Ô  —fÆ–D"£Ò6æ6†÷BåG'W7Df÷'v&FVD•bbÆVâ‡6æ6†÷Bä†VFW'2’ÓÒbb6æ6†÷Bä†VFW'5³ÒÓÒ%‚ÕV&Æ–2Ô"  ––bfÆ–DbbfÆ–D"° –W'$6‚ÂÒf×BäW'&÷&b‚&ö'6W'fVB–æ6öç6—7FVçBf÷'v&FVB•6WGF–æw3¢R·b"Â6æ6†÷B —&WGW&à —Ğ —Ğ —Ò‚ —Ğ  –6Æ÷6R‡7F'B —vråv—B‚ –6Æ÷6R†W'$6‚ –f÷"W'"£Ò&ævRW'$6‚° —&WV—&RäæôW'&÷"‡BÂW'" —Ğ§Ğ ¦gVæ2FW7DÆöDf÷'v&FVD6Æ–VçD•†VFW'4g&öÔVçf—&öæÖVçB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚%4T5U$•E•ôdõ%t$DTEô4Ä”TåEô•ô„TDU%2"Â"‚Ö6FâÖ—Â‚Ô4DâÔ•ÂG'VRÖ6Æ–VçBÖ—"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂµ×7G&–æw²%‚Ô6FâÔ—"Â%G'VRÔ6Æ–VçBÔ—'ÒÂ6fräf÷'v&FVD6Æ–VçD•6WGF–æw2‚’ä†VFW'2§Ğ ¦gVæ2FW7DÆöDW‡Æ–6—DV×G”f÷'v&FVD6Æ–VçD•†VFW'4g&öÔVçf—&öæÖVçB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —f—W"å6WB‚'6V7W&—G’æf÷'v&FVEö6Æ–VçEö—ö†VFW'2"Âµ×7G&–æw²%‚Õ–ÖÂÔ•'Ò —Bå6WFVçb‚%4T5U$•E•ôdõ%t$DTEô4Ä”TåEô•ô„TDU%2"Â""  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäV×G’‡BÂ6fräf÷'v&FVD6Æ–VçD•6WGF–æw2‚’ä†VFW'2§Ğ ¦gVæ2FW7DÆöE&V¦V7G4–çfÆ–Df÷'v&FVD6Æ–VçD•†VFW$g&öÔVçf—&öæÖVçB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚%4T5U$•E•ôdõ%t$DTEô4Ä”TåEô•ô„TDU%2"Â%‚ÕfÆ–BÔ•Â‚–çfÆ–B"  •òÂW'"£ÒÆöB‚ —&WV—&RäW'&÷$6öçF–ç2‡BÂW'"Â'6V7W&—G’æf÷'v&FVEö6Æ–VçEö—ö†VFW'2"§Ğ ¦gVæ2FW7DÆöE&V¦V7G4–çfÆ–Df÷'v&FVD6Æ–VçD•†VFW"‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —f—W"å6WB‚'6V7W&—G’æf÷'v&FVEö6Æ–VçEö—ö†VFW'2"Âµ×7G&–æw²%‚–çfÆ–B'Ò  •òÂW'"£ÒÆöB‚ —&WV—&RäW'&÷$6öçF–ç2‡BÂW'"Â'6V7W&—G’æf÷'v&FVEö6Æ–VçEö—ö†VFW'2"§Ğ ¦gVæ2FW7DÆöDW‡Æ–6—DV×G•G'W7FVE&÷†–W4Væ&ÆW46öæf–wW&VDÖöFR‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —f—W"å6WB‚'6W'fW"çG'W7FVE÷&÷†–W2"Âµ×7G&–æw·Ò  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäV×G’‡BÂ6frå6W'fW"åG'W7FVE&÷†–W2 —&WV—&RåG'VR‡BÂ6frå6W'fW"åG'W7FVE&÷†–W46öæf–wW&VB§Ğ ¦gVæ2FW7DÆöDW‡Æ–6—EG'W7FVE&÷†–W4Væ&ÆW46öæf–wW&VDÖöFR‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —f—W"å6WB‚'6W'fW"çG'W7FVE÷&÷†–W2"Âµ×7G&–æw²##rãããó3"'Ò  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂµ×7G&–æw²##rãããó3"'ÒÂ6frå6W'fW"åG'W7FVE&÷†–W2 —&WV—&RåG'VR‡BÂ6frå6W'fW"åG'W7FVE&÷†–W46öæf–wW&VB§Ğ ¦gVæ2FW7DÆöEG'W7FVE&÷†–W4g&öÔVçf—&öæÖVçB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚%4U%dU%õE%U5DTEõ$õ„”U2"Â##rãããó3"Â££ó#‚"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂµ×7G&–æw²##rãããó3""Â#££ó#‚'ÒÂ6frå6W'fW"åG'W7FVE&÷†–W2 —&WV—&RåG'VR‡BÂ6frå6W'fW"åG'W7FVE&÷†–W46öæf–wW&VB§Ğ ¦gVæ2FW7DÆöDW‡Æ–6—DV×G•G'W7FVE&÷†–W4g&öÔVçf—&öæÖVçB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚%4U%dU%õE%U5DTEõ$õ„”U2"Â""  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäV×G’‡BÂ6frå6W'fW"åG'W7FVE&÷†–W2 —&WV—&RåG'VR‡BÂ6frå6W'fW"åG'W7FVE&÷†–W46öæf–wW&VB§Ğ ¦gVæ2FW7DÆöEG'W7FVE&÷†–W5&W6Væ6Tg&öÕ”ÔÂ‡B§FW7F–æråB’° —FW7G2£Òµ×7G'V7B° –æÖR7G&–æp —–ÖÂ7G&–æp —vçBµ×7G&–æp –6öæf–wW&VB&ööÀ —×° —¶æÖS¢&'6VçB"Â–ÖÃ¢'6W'fW#¥ÆâÖöFS¢FV'VuÆâ"Â6öæf–wW&VC¢fÇ6WÒÀ —¶æÖS¢&W‡Æ–6—BV×G’"Â–ÖÃ¢'6W'fW#¥ÆâG'W7FVE÷&÷†–W3¢µÕÆâ"ÂvçC¢µ×7G&–æw·ÒÂ6öæf–wW&VC¢G'VWÒÀ —° –æÖS¢'÷VÆFVB"À —–ÖÃ¢'6W'fW#¥ÆâG'W7FVE÷&÷†–W3¥ÆâÒ#rãããó3%ÆâÒ££ó#…Æâ"À —vçC¢µ×7G&–æw²##rãããó3""Â#££ó#‚'ÒÀ –6öæf–wW&VC¢G'VRÀ —ÒÀ —Ğ  –f÷"òÂFW7B£Ò&ævRFW7G2° —Bå'Vâ‡FW7BææÖRÂgVæ2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B –6öæf–tF—"£ÒBåFV×F—"‚ —&WV—&RäæôW'&÷"‡BÂ÷2åw&—FTf–ÆR†f–ÆWF‚ä¦ö–â†6öæf–tF—"Â&6öæf–rç–ÖÂ"’ÂµÖ'—FR‡FW7Bç–ÖÂ’Âóc’ —Bå6WFVçb‚$DDôD•""Â6öæf–tF—"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂFW7BçvçBÂ6frå6W'fW"åG'W7FVE&÷†–W2 —&WV—&RäWVÂ‡BÂFW7Bæ6öæf–wW&VBÂ6frå6W'fW"åG'W7FVE&÷†–W46öæf–wW&VB —Ò —Ğ§Ğ ¦gVæ2FW7DÆöEG'W7FVE&÷†–W4g&öÔ6öæf–tf–ÆR‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B –6öæf–tf–ÆR£Òf–ÆWF‚ä¦ö–â‡BåFV×F—"‚’Â'&W÷'FW"Ö6öæf–rç–ÖÂ" —&WV—&RäæôW'&÷"‡BÂ÷2åw&—FTf–ÆR†6öæf–tf–ÆRÂµÖ'—FR†6W'fW# ¢†÷7C¢“"ãã"ã ¢G'W7FVE÷&÷†–W3 ¢Ò#rãããó3 ¢Òãããó€¢Òs"ãbããó ¢Ò“"ãc‚ããó`¦’Âóc’ —Bå6WFVçb‚$4ôäd”uôd”ÄR"Â6öæf–tf–ÆR  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ#“"ãã"ã"Â6frå6W'fW"ä†÷7B —&WV—&RäWVÂ‡BÂµ×7G&–æw²##rãããó3""Â#ãããó‚"Â#s"ãbããó""Â#“"ãc‚ããób'ÒÂ6frå6W'fW"åG'W7FVE&÷†–W2 —&WV—&RåG'VR‡BÂ6frå6W'fW"åG'W7FVE&÷†–W46öæf–wW&VB§Ğ ¦gVæ2FW7D6öæf–tf–ÆUF¶W5&V6VFVæ6T÷fW$FFF—"‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B –FFF—"£ÒBåFV×F—"‚ —&WV—&RäæôW'&÷"‡BÂ÷2åw&—FTf–ÆR†f–ÆWF‚ä¦ö–â†FFF—"Â&6öæf–rç–ÖÂ"’ÂµÖ'—FR‚'6W'fW#¥Æâ†÷7C¢“"ãã"ã#Æâ"’Âóc’ –6öæf–tf–ÆR£Òf–ÆWF‚ä¦ö–â‡BåFV×F—"‚’Â&W‡Æ–6—Bç–ÖÂ" —&WV—&RäæôW'&÷"‡BÂ÷2åw&—FTf–ÆR†6öæf–tf–ÆRÂµÖ'—FR‚'6W'fW#¥Æâ†÷7C¢“"ãã"ã3Æâ"’Âóc’ —Bå6WFVçb‚$DDôD•""ÂFFF—" —Bå6WFVçb‚$4ôäd”uôd”ÄR"Â6öæf–tf–ÆR  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ#“"ãã"ã3"Â6frå6W'fW"ä†÷7B§Ğ ¦gVæ2FW7DÆöE&WGW&ç4W'&÷$f÷$Ö—76–æt6öæf–tf–ÆR‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$4ôäd”uôd”ÄR"Âf–ÆWF‚ä¦ö–â‡BåFV×F—"‚’Â&Ö—76–ærç–ÖÂ"’  •òÂW'"£ÒÆöB‚ —&WV—&RäW'&÷$6öçF–ç2‡BÂW'"Â'&VB6öæf–rW'&÷""§Ğ ¦gVæ2FW7DÆöDf÷$&ö÷G7G&ÆÆ÷w4Ö—76–æt¥uE6V7&WB‡B§FW7F–æråB’° —f—W"å&W6WB‚ —Bä6ÆVçW‡f—W"å&W6WB —Bå6WFVçb‚$4ôäd”uôd”ÄR"Â"" —Bå6WFVçb‚$DDôD•""Â"" —Bå6WFVçb‚$¥uEõ4T5$UB"Â""  –6frÂW'"£ÒÆöDf÷$&ö÷G7G&‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöDf÷$&ö÷G7G&‚’W'&÷#¢Wb"ÂW'" —Ğ ––b6frä¥uBå6V7&WBÒ""° —BäfFÆb‚$ÆöDf÷$&ö÷G7G&‚’6†÷VÆB¶VWV×G’§wBç6V7&WBGW&–ær&ö÷G7G&" —Ğ§Ğ ¦gVæ2FW7Dæ÷&ÖÆ—¦U'VäÖöFR‡B§FW7F–æråB’° —FW7G2£Òµ×7G'V7B° ––çWB7G&–æp –W‡V7FVB7G&–æp —×° —²'6–×ÆR"Â'6–×ÆR'ÒÀ —²%4”ÕÄR"Â'6–×ÆR'ÒÀ —²'7FæF&B"Â'7FæF&B'ÒÀ —²&–çfÆ–B"Â'7FæF&B'ÒÀ —²""Â'7FæF&B'ÒÀ —Ğ  –f÷"òÂGB£Ò&ævRFW7G2° —&W7VÇB£Òæ÷&ÖÆ—¦U'VäÖöFR‡GBæ–çWB ––b&W7VÇBÒGBæW‡V7FVB° —BäW'&÷&b‚$æ÷&ÖÆ—¦U'VäÖöFR‚W’ÒWÂvçBW"ÂGBæ–çWBÂ&W7VÇBÂGBæW‡V7FVB —Ğ —Ğ§Ğ ¦gVæ2FW7DÆöDFVfVÇE66†VGVÆ–æt6öæf–r‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6frävFWv’å66†VGVÆ–ærå7F–6·•6W76–öäÖ…v—F–ærÒ2° —BäfFÆb‚%7F–6·•6W76–öäÖ…v—F–ærÒVBÂvçB2"Â6frävFWv’å66†VGVÆ–ærå7F–6·•6W76–öäÖ…v—F–ær —Ğ ––b6frävFWv’å66†VGVÆ–ærå7F–6·•6W76–öåv—EF–ÖV÷WBÒ#§F–ÖRå6V6öæB° —BäfFÆb‚%7F–6·•6W76–öåv—EF–ÖV÷WBÒWbÂvçB#2"Â6frävFWv’å66†VGVÆ–ærå7F–6·•6W76–öåv—EF–ÖV÷WB —Ğ ––b6frävFWv’å66†VGVÆ–æräfÆÆ&6µv—EF–ÖV÷WBÒ3§F–ÖRå6V6öæB° —BäfFÆb‚$fÆÆ&6µv—EF–ÖV÷WBÒWbÂvçB32"Â6frävFWv’å66†VGVÆ–æräfÆÆ&6µv—EF–ÖV÷WB —Ğ ––b6frävFWv’å66†VGVÆ–æräfÆÆ&6´Ö…v—F–ærÒ° —BäfFÆb‚$fÆÆ&6´Ö…v—F–ærÒVBÂvçB"Â6frävFWv’å66†VGVÆ–æräfÆÆ&6´Ö…v—F–ær —Ğ ––b6frävFWv’å66†VGVÆ–æräÆöD&F6„Væ&ÆVB° —BäfFÆb‚$ÆöD&F6„Væ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ ––b6frävFWv’å66†VGVÆ–æräÆöD&F6„66†UEDÄÕ2Ò#° —BäfFÆb‚$ÆöD&F6„66†UEDÄÕ2ÒVBÂvçB#"Â6frävFWv’å66†VGVÆ–æräÆöD&F6„66†UEDÄÕ2 —Ğ ––b6frävFWv’å66†VGVÆ–ærå6Æ÷D6ÆVçW–çFW'fÂÒ3§F–ÖRå6V6öæB° —BäfFÆb‚%6Æ÷D6ÆVçW–çFW'fÂÒWbÂvçB32"Â6frävFWv’å66†VGVÆ–ærå6Æ÷D6ÆVçW–çFW'fÂ —Ğ§Ğ ¦gVæ2FW7DÆöDFVfVÇD÷Vä”f—'7D÷WGWEF–ÖV÷WG4F—6&ÆVB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&Rå¦W&ò‡BÂ6frävFWv’ä÷Vä”f—'7D÷WGWEF–ÖV÷WE6V6öæG2 —&WV—&Rå¦W&ò‡BÂ6frävFWv’ä÷Vä”†–v„Vff÷'Df—'7D÷WGWEF–ÖV÷WE6V6öæG2§Ğ ¦gVæ2FW7DÆöD÷Vä”f—'7D÷WGWEF–ÖV÷WG4g&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ôõTä•ôd•%5EôõUEUEõD”ÔTõUEõ4T4ôäE2"Â#“" —Bå6WFVçb‚$tDUt•ôõTä•ô„”t…ôTddõ%Eôd•%5EôõUEUEõD”ÔTõUEõ4T4ôäE2"Â##C"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ“Â6frävFWv’ä÷Vä”f—'7D÷WGWEF–ÖV÷WE6V6öæG2 —&WV—&RäWVÂ‡BÂ#CÂ6frävFWv’ä÷Vä”†–v„Vff÷'Df—'7D÷WGWEF–ÖV÷WE6V6öæG2§Ğ ¦gVæ2FW7EfÆ–FFT÷Vä”f—'7D÷WGWEF–ÖV÷WDÖ–æ–×VÒ‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" –6frävFWv’ä÷Vä”f—'7D÷WGWEF–ÖV÷WE6V6öæG2Ò3  —&WV—&RäæôW'&÷"‡BÂ6fråfÆ–FFR‚’§Ğ ¦gVæ2FW7DÆöDFVfVÇD÷Vä•u46öæf–r‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6frävFWv’ä÷Vä•u2äVæ&ÆVB° —BäfFÆb‚$vFWv’ä÷Vä•u2äVæ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ ––b6frävFWv’ä÷Vä•u2å&W7öç6W5vV'6ö6¶WG5c"° —BäfFÆb‚$vFWv’ä÷Vä•u2å&W7öç6W5vV'6ö6¶WG5c"ÒfÇ6RÂvçBG'VR" —Ğ ––b6frävFWv’ä÷Vä•u2å&W7öç6W5vV'6ö6¶WG2° —BäfFÆb‚$vFWv’ä÷Vä•u2å&W7öç6W5vV'6ö6¶WG2ÒG'VRÂvçBfÇ6R" —Ğ ––b6frävFWv’ä÷Vä•u2äG–æÖ–4Ö„6öæç4'”66÷VçD6öæ7W'&Væ7”Væ&ÆVB° —BäfFÆb‚$vFWv’ä÷Vä•u2äG–æÖ–4Ö„6öæç4'”66÷VçD6öæ7W'&Væ7”Væ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ ––b6frävFWv’ä÷Vä•u2äôWF„Ö„6öæç4f7F÷"ÒRã° —BäfFÆb‚$vFWv’ä÷Vä•u2äôWF„Ö„6öæç4f7F÷"ÒWbÂvçBRã"Â6frävFWv’ä÷Vä•u2äôWF„Ö„6öæç4f7F÷" —Ğ ––b6frävFWv’ä÷Vä•u2ä”¶W”Ö„6öæç4f7F÷"ÒRã° —BäfFÆb‚$vFWv’ä÷Vä•u2ä”¶W”Ö„6öæç4f7F÷"ÒWbÂvçBRã"Â6frävFWv’ä÷Vä•u2ä”¶W”Ö„6öæç4f7F÷" —Ğ ––b6frävFWv’ä÷Vä•u2å7F–6·•6W76–öåEDÅ6V6öæG2Ò3c° —BäfFÆb‚$vFWv’ä÷Vä•u2å7F–6·•6W76–öåEDÅ6V6öæG2ÒVBÂvçB3c"Â6frävFWv’ä÷Vä•u2å7F–6·•6W76–öåEDÅ6V6öæG2 —Ğ ––b6frävFWv’ä÷Vä•66†VGVÆW"å7F–6·”W66TVæ&ÆVB° —BäfFÆb‚$vFWv’ä÷Vä•66†VGVÆW"å7F–6·”W66TVæ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ ––b6frävFWv’ä÷Vä•66†VGVÆW"å7F–6·”W66UEDeD×2ÒS° —BäfFÆb‚$vFWv’ä÷Vä•66†VGVÆW"å7F–6·”W66UEDeD×2ÒVBÂvçBS"Â6frävFWv’ä÷Vä•66†VGVÆW"å7F–6·”W66UEDeD×2 —Ğ ––b6frävFWv’ä÷Vä•66†VGVÆW"å7F–6·”W66TW'&÷%&FRÒãR° —BäfFÆb‚$vFWv’ä÷Vä•66†VGVÆW"å7F–6·”W66TW'&÷%&FRÒWbÂvçBãR"Â6frävFWv’ä÷Vä•66†VGVÆW"å7F–6·”W66TW'&÷%&FR —Ğ ––b6frävFWv’ä÷Vä•u2å6W76–öä†6…&VDöÆDfÆÆ&6²° —BäfFÆb‚$vFWv’ä÷Vä•u2å6W76–öä†6…&VDöÆDfÆÆ&6²ÒfÇ6RÂvçBG'VR" —Ğ ––b6frävFWv’ä÷Vä•u2å6W76–öä†6„GVÅw&—FTöÆB° —BäfFÆb‚$vFWv’ä÷Vä•u2å6W76–öä†6„GVÅw&—FTöÆBÒfÇ6RÂvçBG'VR" —Ğ ––b6frävFWv’ä÷Vä•u2äÖWFFF'&–FvTVæ&ÆVB° —BäfFÆb‚$vFWv’ä÷Vä•u2äÖWFFF'&–FvTVæ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ ––b6frävFWv’ä÷Vä•u2å7F–6·•&W7öç6T”EEDÅ6V6öæG2Ò3c° —BäfFÆb‚$vFWv’ä÷Vä•u2å7F–6·•&W7öç6T”EEDÅ6V6öæG2ÒVBÂvçB3c"Â6frävFWv’ä÷Vä•u2å7F–6·•&W7öç6T”EEDÅ6V6öæG2 —Ğ ––b6frävFWv’ä÷Vä•u2äfÆÆ&6´6ööÆF÷vå6V6öæG2Ò3° —BäfFÆb‚$vFWv’ä÷Vä•u2äfÆÆ&6´6ööÆF÷vå6V6öæG2ÒVBÂvçB3"Â6frävFWv’ä÷Vä•u2äfÆÆ&6´6ööÆF÷vå6V6öæG2 —Ğ ––b6frävFWv’ä÷Vä•u2äWfVçDfÇW6„&F6…6—¦RÒ° —BäfFÆb‚$vFWv’ä÷Vä•u2äWfVçDfÇW6„&F6…6—¦RÒVBÂvçB"Â6frävFWv’ä÷Vä•u2äWfVçDfÇW6„&F6…6—¦R —Ğ ––b6frävFWv’ä÷Vä•u2äWfVçDfÇW6„–çFW'fÄÕ2Ò° —BäfFÆb‚$vFWv’ä÷Vä•u2äWfVçDfÇW6„–çFW'fÄÕ2ÒVBÂvçB"Â6frävFWv’ä÷Vä•u2äWfVçDfÇW6„–çFW'fÄÕ2 —Ğ ––b6frävFWv’ä÷Vä•u2å&Wv&Ô6ööÆF÷väÕ2Ò3° —BäfFÆb‚$vFWv’ä÷Vä•u2å&Wv&Ô6ööÆF÷väÕ2ÒVBÂvçB3"Â6frävFWv’ä÷Vä•u2å&Wv&Ô6ööÆF÷väÕ2 —Ğ ––b6frävFWv’ä÷Vä•u2ä6Æ–VçE&VDÆ–Ö—D'—FW2ÒcB£#B£#B° —BäfFÆb‚$vFWv’ä÷Vä•u2ä6Æ–VçE&VDÆ–Ö—D'—FW2ÒVBÂvçBVB"Â6frävFWv’ä÷Vä•u2ä6Æ–VçE&VDÆ–Ö—D'—FW2ÂcB£#B£#B —Ğ ––b6frävFWv’ä÷Vä•u2ä…EE'&–FvTVæ&ÆVB° —BäfFÆb‚$vFWv’ä÷Vä•u2ä…EE'&–FvTVæ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ ––b6frävFWv’ä÷Vä•u2ä…EE'&–FvUF‡&W6†öÆD'—FW2ÒR£#B£#B° —BäfFÆb‚$vFWv’ä÷Vä•u2ä…EE'&–FvUF‡&W6†öÆD'—FW2ÒVBÂvçBVB"Â6frävFWv’ä÷Vä•u2ä…EE'&–FvUF‡&W6†öÆD'—FW2ÂR£#B£#B —Ğ ––b6frävFWv’ä÷Vä•u2å&WG'”&6¶öfd–æ—F–ÄÕ2Ò#° —BäfFÆb‚$vFWv’ä÷Vä•u2å&WG'”&6¶öfd–æ—F–ÄÕ2ÒVBÂvçB#"Â6frävFWv’ä÷Vä•u2å&WG'”&6¶öfd–æ—F–ÄÕ2 —Ğ ––b6frävFWv’ä÷Vä•u2å&WG'”&6¶öfdÖ„Õ2Ò#° —BäfFÆb‚$vFWv’ä÷Vä•u2å&WG'”&6¶öfdÖ„Õ2ÒVBÂvçB#"Â6frävFWv’ä÷Vä•u2å&WG'”&6¶öfdÖ„Õ2 —Ğ ––b6frävFWv’ä÷Vä•u2å&WG'”¦—GFW%&F–òÒã"° —BäfFÆb‚$vFWv’ä÷Vä•u2å&WG'”¦—GFW%&F–òÒWbÂvçBã""Â6frävFWv’ä÷Vä•u2å&WG'”¦—GFW%&F–ò —Ğ ––b6frävFWv’ä÷Vä•u2å&WG'•F÷FÄ'VFvWDÕ2ÒS° —BäfFÆb‚$vFWv’ä÷Vä•u2å&WG'•F÷FÄ'VFvWDÕ2ÒVBÂvçBS"Â6frävFWv’ä÷Vä•u2å&WG'•F÷FÄ'VFvWDÕ2 —Ğ ––b6frävFWv’ä÷Vä•u2å–ÆöDÆöu6×ÆU&FRÒã"° —BäfFÆb‚$vFWv’ä÷Vä•u2å–ÆöDÆöu6×ÆU&FRÒWbÂvçBã""Â6frävFWv’ä÷Vä•u2å–ÆöDÆöu6×ÆU&FR —Ğ ––b6frävFWv’ä÷Vä•u2å66†VGVÆW%66÷&UvV–v‡G2åV÷F†VG&ööÒÒ° —BäfFÆb‚$vFWv’ä÷Vä•u2å66†VGVÆW%66÷&UvV–v‡G2åV÷F†VG&ööÒÒWbÂvçB"Â6frävFWv’ä÷Vä•u2å66†VGVÆW%66÷&UvV–v‡G2åV÷F†VG&ööÒ —Ğ ––b6frävFWv’ä÷Vä•u2å66†VGVÆW%66÷&UvV–v‡G2åW7G&VÔ6÷7BÒ° —BäfFÆb‚$vFWv’ä÷Vä•u2å66†VGVÆW%66÷&UvV–v‡G2åW7G&VÔ6÷7BÒWbÂvçB"Â6frävFWv’ä÷Vä•u2å66†VGVÆW%66÷&UvV–v‡G2åW7G&VÔ6÷7B —Ğ ––b6frävFWv’ä÷Vä•u2å7F÷&TF—6&ÆVDf÷&6TæWt6öæâ° —BäfFÆb‚$vFWv’ä÷Vä•u2å7F÷&TF—6&ÆVDf÷&6TæWt6öæâÒfÇ6RÂvçBG'VR" —Ğ ––b6frävFWv’ä÷Vä•u2å7F÷&TF—6&ÆVD6öæäÖöFRÒ'7G&–7B"° —BäfFÆb‚$vFWv’ä÷Vä•u2å7F÷&TF—6&ÆVD6öæäÖöFRÒWÂvçBW"Â6frävFWv’ä÷Vä•u2å7F÷&TF—6&ÆVD6öæäÖöFRÂ'7G&–7B" —Ğ ––b6frävFWv’ä÷Vä•u2äÖöFU&÷WFW%c$Væ&ÆVB° —BäfFÆb‚$vFWv’ä÷Vä•u2äÖöFU&÷WFW%c$Væ&ÆVBÒG'VRÂvçBfÇ6R" —Ğ ––b6frävFWv’ä÷Vä•u2ä–æw&W74ÖöFTFVfVÇBÒ&7G…÷ööÂ"° —BäfFÆb‚$vFWv’ä÷Vä•u2ä–æw&W74ÖöFTFVfVÇBÒWÂvçBW"Â6frävFWv’ä÷Vä•u2ä–æw&W74ÖöFTFVfVÇBÂ&7G…÷ööÂ" —Ğ ––b6frävFWv’ä÷Vä•u2ä6Æ–VçDf—'7DÖW76vUF–ÖV÷WE6V6öæG2ÒFVfVÇD÷Vä•u46Æ–VçDf—'7DÖW76vUF–ÖV÷WE6V6öæG2° —BäfFÆb€ ’$vFWv’ä÷Vä•u2ä6Æ–VçDf—'7DÖW76vUF–ÖV÷WE6V6öæG2ÒVBÂvçBVB"À –6frävFWv’ä÷Vä•u2ä6Æ–VçDf—'7DÖW76vUF–ÖV÷WE6V6öæG2À ”FVfVÇD÷Vä•u46Æ–VçDf—'7DÖW76vUF–ÖV÷WE6V6öæG2À ’ —Ğ ––b6frävFWv’ä÷Vä•u2ä–æw&W74–çFW%GW&ä–FÆUF–ÖV÷WE6V6öæG2Ò3° —BäfFÆb‚$vFWv’ä÷Vä•u2ä–æw&W74–çFW%GW&ä–FÆUF–ÖV÷WE6V6öæG2ÒVBÂvçB3"Â6frävFWv’ä÷Vä•u2ä–æw&W74–çFW%GW&ä–FÆUF–ÖV÷WE6V6öæG2 —Ğ ––b6frävFWv’ä÷Vä•u2äÖ„–æw&W746öææV7F–öç5W$”¶W’ÒcB° —BäfFÆb‚$vFWv’ä÷Vä•u2äÖ„–æw&W746öææV7F–öç5W$”¶W’ÒVBÂvçBcB"Â6frävFWv’ä÷Vä•u2äÖ„–æw&W746öææV7F–öç5W$”¶W’ —Ğ§Ğ ¦gVæ2FW7DÆöD÷Vä•u46Æ–VçDf—'7DÖW76vUF–ÖV÷WDg&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ôõTä•õu5ô4Ä”TåEôd•%5EôÔU54tUõD”ÔTõUEõ4T4ôäE2"Â##"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ#Â6frävFWv’ä÷Vä•u2ä6Æ–VçDf—'7DÖW76vUF–ÖV÷WE6V6öæG2§Ğ ¦gVæ2FW7DÆöD÷Vä•u4f÷&6T…EEg&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ôõTä•õu5ôdõ$4Uô…EE"Â'G'VR"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RåG'VR‡BÂ6frävFWv’ä÷Vä•u2äf÷&6T…EE§Ğ ¦gVæ2FW7DÆöDFVfVÇD÷Vä”6ö×7DÖöFVÂ‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ&wBÓRãR"Â6frävFWv’ä÷Vä”6ö×7DÖöFVÂ§Ğ ¦gVæ2FW7DÆöD÷Vä”6ö×7DÖöFVÄg&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ôõTä•ô4ôÕ5EôÔôDTÂ"Â&wBÓRã2Ö6öFW‚"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ&wBÓRã2Ö6öFW‚"Â6frävFWv’ä÷Vä”6ö×7DÖöFVÂ§Ğ ¦gVæ2FW7DÆöDFVfVÇDw&ö´g&VUV÷F6ögDvFR‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäfÇ6R‡BÂ6frävFWv’äw&ö²å77v÷&DWF„Væ&ÆVB —&WV—&RåG'VR‡BÂ6frävFWv’äw&ö²äg&VUV÷F6ögDvFTVæ&ÆVB —&WV—&RäWVÂ‡BÂ–çCcBƒSó’Â6frävFWv’äw&ö²äg&VUV÷FFö¶VäÆ–Ö—B —&WV—&RäWVÂ‡BÂ“RÂ6frävFWv’äw&ö²äg&VUV÷F6ögDvFUW&6VçB —&WV—&RäWVÂ‡BÂ#BÂ6frävFWv’äw&ö²äg&VUV÷Fv–æF÷t†÷W'2 —&WV—&RäWVÂ‡BÂcÂ6frävFWv’äw&ö²äg&VUV÷F7FG466†U6V6öæG2§Ğ ¦gVæ2FW7DÆöDFVfVÇD÷Vä”…EE$Væ&ÆVB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RåG'VR‡BÂ6frävFWv’ä÷Vä”…EE"äVæ&ÆVB —&WV—&RåG'VR‡BÂ6frävFWv’ä÷Vä”…EE"äÆÆ÷u&÷‡”fÆÆ&6µFô…EE —&WV—&RäfÇ6R‡BÂ6frävFWv’ä÷Vä•&÷‡•7G&VÔ6—&7V—BäF—6&ÆVB —&WV—&RäWVÂ‡BÂ"Â6frävFWv’ä÷Vä•&÷‡•7G&VÔ6—&7V—Bäf–ÇW&UF‡&W6†öÆB —&WV—&RäWVÂ‡BÂcÂ6frävFWv’ä÷Vä•&÷‡•7G&VÔ6—&7V—Båv–æF÷u6V6öæG2 —&WV—&RäWVÂ‡BÂcÂ6frävFWv’ä÷Vä•&÷‡•7G&VÔ6—&7V—BåEDÅ6V6öæG2§Ğ ¦gVæ2FW7DÆöD÷Vä•&÷‡•7G&VÔ6—&7V—Dg&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ôõTä•õ$õ…•õ5E$TÕô4•$5T•EôD•4$ÄTB"Â'G'VR" —Bå6WFVçb‚$tDUt•ôõTä•õ$õ…•õ5E$TÕô4•$5T•Eôd”ÅU$UõD…$U4„ôÄB"Â#2" —Bå6WFVçb‚$tDUt•ôõTä•õ$õ…•õ5E$TÕô4•$5T•Eõt”äDõuõ4T4ôäE2"Â#“" —Bå6WFVçb‚$tDUt•ôõTä•õ$õ…•õ5E$TÕô4•$5T•EõEDÅõ4T4ôäE2"Â#C#"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RåG'VR‡BÂ6frävFWv’ä÷Vä•&÷‡•7G&VÔ6—&7V—BäF—6&ÆVB —&WV—&RäWVÂ‡BÂ2Â6frävFWv’ä÷Vä•&÷‡•7G&VÔ6—&7V—Bäf–ÇW&UF‡&W6†öÆB —&WV—&RäWVÂ‡BÂ“Â6frävFWv’ä÷Vä•&÷‡•7G&VÔ6—&7V—Båv–æF÷u6V6öæG2 —&WV—&RäWVÂ‡BÂC#Â6frävFWv’ä÷Vä•&÷‡•7G&VÔ6—&7V—BåEDÅ6V6öæG2§Ğ ¦gVæ2FW7DÆöD÷Vä”…EE$F—6&ÆVDg&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ôõTä•ô…EE%ôTä$ÄTB"Â&fÇ6R"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäfÇ6R‡BÂ6frävFWv’ä÷Vä”…EE"äVæ&ÆVB§Ğ ¦gVæ2FW7DÆöDFVfVÇD÷Vä•&W7öç6T†VFW%F–ÖV÷WEVæÆ–Ö—FVB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂÂ6frävFWv’ä÷Vä•&W7öç6T†VFW%F–ÖV÷WB§Ğ ¦gVæ2FW7DÆöD÷Vä•&W7öç6T†VFW%F–ÖV÷WDg&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ôõTä•õ$U5ôå4Uô„TDU%õD”ÔTõUB"Â#ƒ"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂƒÂ6frävFWv’ä÷Vä•&W7öç6T†VFW%F–ÖV÷WB§Ğ ¦gVæ2FW7DÆöD–ÖvTæöç7G&VÔ¶VWÆ—fTg&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ô”ÔtUôäôå5E$TÕô´TUÄ•dUô”åDU%dÂ"Â#R"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂRÂ6frävFWv’ä–ÖvTæöç7G&VÔ¶VWÆ—fT–çFW'fÂ§Ğ ¦gVæ2FW7DÆöD÷Vä•u57F–6·•EDÄ6ö×F–&–Æ—G’‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•ôõTä•õu5õ5D”4µ•õ$U5ôå4Uô”EõEDÅõ4T4ôäE2"Â#" —Bå6WFVçb‚$tDUt•ôõTä•õu5õ5D”4µ•õ$Ud”õU5õ$U5ôå4UõEDÅõ4T4ôäE2"Â#s#"  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6frävFWv’ä÷Vä•u2å7F–6·•&W7öç6T”EEDÅ6V6öæG2Òs#° —BäfFÆb‚%7F–6·•&W7öç6T”EEDÅ6V6öæG2ÒVBÂvçBs#"Â6frävFWv’ä÷Vä•u2å7F–6·•&W7öç6T”EEDÅ6V6öæG2 —Ğ§Ğ ¦gVæ2FW7DÆöDFVfVÇD–FV×÷FVæ7”6öæf–r‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6frä–FV×÷FVæ7’äö'6W'fTöæÇ’° —BäfFÆb‚$–FV×÷FVæ7’äö'6W'fTöæÇ’ÒfÇ6RÂvçBG'VR" —Ğ ––b6frä–FV×÷FVæ7’äFVfVÇEEDÅ6V6öæG2ÒƒcC° —BäfFÆb‚$–FV×÷FVæ7’äFVfVÇEEDÅ6V6öæG2ÒVBÂvçBƒcC"Â6frä–FV×÷FVæ7’äFVfVÇEEDÅ6V6öæG2 —Ğ ––b6frä–FV×÷FVæ7’å7—7FVÔ÷W&F–öåEDÅ6V6öæG2Ò3c° —BäfFÆb‚$–FV×÷FVæ7’å7—7FVÔ÷W&F–öåEDÅ6V6öæG2ÒVBÂvçB3c"Â6frä–FV×÷FVæ7’å7—7FVÔ÷W&F–öåEDÅ6V6öæG2 —Ğ§Ğ ¦gVæ2FW7DÆöDFVfVÇD&F6„–ÖvUVWVTF—6&ÆVB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäfÇ6R‡BÂ6frä&F6„–ÖvRåVWVTVæ&ÆVB§Ğ ¦gVæ2FW7DÆöD–FV×÷FVæ7”6öæf–tg&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$”DTÕõDTä5•ôô%4U%dUôôäÅ’"Â&fÇ6R" —Bå6WFVçb‚$”DTÕõDTä5•ôDTdTÅEõEDÅõ4T4ôäE2"Â#c"  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ ––b6frä–FV×÷FVæ7’äö'6W'fTöæÇ’° —BäfFÆb‚$–FV×÷FVæ7’äö'6W'fTöæÇ’ÒG'VRÂvçBfÇ6R" —Ğ ––b6frä–FV×÷FVæ7’äFVfVÇEEDÅ6V6öæG2Òc° —BäfFÆb‚$–FV×÷FVæ7’äFVfVÇEEDÅ6V6öæG2ÒVBÂvçBc"Â6frä–FV×÷FVæ7’äFVfVÇEEDÅ6V6öæG2 —Ğ§Ğ ¦gVæ2FW7DÆöE66†VGVÆ–æt6öæf–tg&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$tDUt•õ44„TETÄ”äuõ5D”4µ•õ4U54”ôåôÔ…õt•D”är"Â#R"  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6frävFWv’å66†VGVÆ–ærå7F–6·•6W76–öäÖ…v—F–ærÒR° —BäfFÆb‚%7F–6·•6W76–öäÖ…v—F–ærÒVBÂvçBR"Â6frävFWv’å66†VGVÆ–ærå7F–6·•6W76–öäÖ…v—F–ær —Ğ§Ğ ¦gVæ2FW7DÆöEvT6†D6öææV7D6öæf–tg&öÔÆVv7”Vçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚%tT4„EôôUD…ôõTåôô”B"Â'w‚Ö÷VâÖ" —Bå6WFVçb‚%tT4„EôôUD…ôõTåôõ4T5$UB"Â'w‚Ö÷Vâ×6V7&WB" —Bå6WFVçb‚%tT4„EôôUD…ôÕôô”B"Â'w‚Ö×Ö" —Bå6WFVçb‚%tT4„EôôUD…ôÕôõ4T5$UB"Â'w‚Ö××6V7&WB" —Bå6WFVçb‚%tT4„EôôUD…ôe$ôåDTäEõ$TD•$T5EõU$Â"Â"öWF‚÷vV6†BöÆVv7’Ö6ÆÆ&6²"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RåG'VR‡BÂ6fråvT6†BäVæ&ÆVB —&WV—&RåG'VR‡BÂ6fråvT6†Bä÷VäVæ&ÆVB —&WV—&RåG'VR‡BÂ6fråvT6†BäÕVæ&ÆVB —&WV—&RäfÇ6R‡BÂ6fråvT6†BäÖö&–ÆTVæ&ÆVB —&WV—&RäWVÂ‡BÂ&÷Vâ"Â6fråvT6†BäÖöFR —&WV—&RäWVÂ‡BÂ'w‚Ö÷VâÖ"Â6fråvT6†Bä÷Vä”B —&WV—&RäWVÂ‡BÂ'w‚Ö÷Vâ×6V7&WB"Â6fråvT6†Bä÷Vä6V7&WB —&WV—&RäWVÂ‡BÂ'w‚Ö×Ö"Â6fråvT6†BäÕ”B —&WV—&RäWVÂ‡BÂ'w‚Ö××6V7&WB"Â6fråvT6†BäÕ6V7&WB —&WV—&RäWVÂ‡BÂ"öWF‚÷vV6†BöÆVv7’Ö6ÆÆ&6²"Â6fråvT6†Bäg&öçFVæE&VF—&V7EU$Â§Ğ ¦gVæ2FW7DÆöDFVfVÇDô”D56V7W&—G”FVfVÇG2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RåG'VR‡BÂ6fräô”D2åW6U´4R —&WV—&RåG'VR‡BÂ6fräô”D2åfÆ–FFT”EFö¶Vâ —&WV—&RäfÇ6R‡BÂ6fräô”D2åW6U´4TW‡Æ–6—B —&WV—&RäfÇ6R‡BÂ6fräô”D2åfÆ–FFT”EFö¶VäW‡Æ–6—B§Ğ ¦gVæ2FW7DÆöDW‡Æ–6—Dô”D56V7W&—G”FVfVÇG4g&öÔVçdÖ&·4fÆw4W‡Æ–6—B‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$ô”D5ô4ôääT5EõU4Uõ´4R"Â&fÇ6R" —Bå6WFVçb‚$ô”D5ô4ôääT5EõdÄ”DDUô”EõDô´Tâ"Â&fÇ6R"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäfÇ6R‡BÂ6fräô”D2åW6U´4R —&WV—&RäfÇ6R‡BÂ6fräô”D2åfÆ–FFT”EFö¶Vâ —&WV—&RåG'VR‡BÂ6fräô”D2åW6U´4TW‡Æ–6—B —&WV—&RåG'VR‡BÂ6fräô”D2åfÆ–FFT”EFö¶VäW‡Æ–6—B§Ğ ¦gVæ2FW7DÆöDf÷&6VD6öFW„–ç7G'V7F–öç5FV×ÆFR‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  —FV×F—"£ÒBåFV×F—"‚ —FV×ÆFUF‚£Òf–ÆWF‚ä¦ö–â‡FV×F—"Â&6öFW‚Ö–ç7G'V7F–öç2æÖBçF×Â" –6öæf–uF‚£Òf–ÆWF‚ä¦ö–â‡FV×F—"Â&6öæf–rç–ÖÂ"  —&WV—&RäæôW'&÷"‡BÂ÷2åw&—FTf–ÆR‡FV×ÆFUF‚ÂµÖ'—FR‚'6W'fW"×&Vf—…ÆåÆç·²äW†—7F–æt–ç7G'V7F–öç2×Ò"’ÂócCB’ —–ÖÅ6fUF‚£Òf–ÆWF‚åFõ6Æ6‚‡FV×ÆFUF‚ —&WV—&RäæôW'&÷"‡BÂ÷2åw&—FTf–ÆR†6öæf–uF‚ÂµÖ'—FR‚&vFWv“¥Æâf÷&6VEö6öFW…ö–ç7G'V7F–öç5÷FV×ÆFUöf–ÆS¢Â""·–ÖÅ6fUF‚²%Â%Æâ"’ÂócCB’ —Bå6WFVçb‚$DDôD•""ÂFV×F—"  –6frÂW'"£ÒÆöB‚ —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂ–ÖÅ6fUF‚Â6frävFWv’äf÷&6VD6öFW„–ç7G'V7F–öç5FV×ÆFTf–ÆR —&WV—&RäWVÂ‡BÂ'6W'fW"×&Vf—…ÆåÆç·²äW†—7F–æt–ç7G'V7F–öç2×Ò"Â6frävFWv’äf÷&6VD6öFW„–ç7G'V7F–öç5FV×ÆFR§Ğ ¦gVæ2FW7DÆöDFVfVÇE6V7W&—G•FövvÆW2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6frå6V7W&—G’åU$ÄÆÆ÷vÆ—7BäVæ&ÆVB° —BäfFÆb‚%U$ÄÆÆ÷vÆ—7BäVæ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ ––b6frå6V7W&—G’åU$ÄÆÆ÷vÆ—7BäÆÆ÷t–ç6V7W&T…EE° —BäfFÆb‚%U$ÄÆÆ÷vÆ—7BäÆÆ÷t–ç6V7W&T…EEÒG'VRÂvçBfÇ6R" —Ğ ––b6frå6V7W&—G’åU$ÄÆÆ÷vÆ—7BäÆÆ÷u&—fFT†÷7G2° —BäfFÆb‚%U$ÄÆÆ÷vÆ—7BäÆÆ÷u&—fFT†÷7G2ÒG'VRÂvçBfÇ6R" —Ğ ––b6frå6V7W&—G’å&W7öç6T†VFW'2äVæ&ÆVB° —BäfFÆb‚%&W7öç6T†VFW'2äVæ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ  —vçD†÷7G2£Òµ×7G&–æw° ’&’æ¶–Ö’æ6öÒ"À ’&’æ¶–Ö’æ’"À ’&’æÖööç6†÷Bæ’"À ’&’æÖööç6†÷Bæ6â"À —Ğ –†÷7E6WB£ÒÖ¶R†Ö·7G&–æu×7G'V7G·ÒÂÆVâ†6frå6V7W&—G’åU$ÄÆÆ÷vÆ—7BåW7G&VÔ†÷7G2’ –f÷"òÂ‚£Ò&ævR6frå6V7W&—G’åU$ÄÆÆ÷vÆ—7BåW7G&VÔ†÷7G2° –†÷7E6WE¶…ÒÒ7G'V7G·×·Ğ —Ğ –f÷"òÂvçB£Ò&ævRvçD†÷7G2° ––bòÂö²£Ò†÷7E6WE·vçEÓ²ö²° —BäfFÆb‚%U$ÄÆÆ÷vÆ—7BåW7G&VÔ†÷7G2Ö—76–ærW²v÷BWb"ÂvçBÂ6frå6V7W&—G’åU$ÄÆÆ÷vÆ—7BåW7G&VÔ†÷7G2 —Ğ —Ğ –÷G2£ÒW&ÇfÆ–FF÷"åfÆ–FF–öä÷F–öç7° ”ÆÆ÷vVD†÷7G3¢6frå6V7W&—G’åU$ÄÆÆ÷vÆ—7BåW7G&VÔ†÷7G2À •&WV—&TÆÆ÷vÆ—7C¢G'VRÀ ”ÆÆ÷u&—fFS¢6frå6V7W&—G’åU$ÄÆÆ÷vÆ—7BäÆÆ÷u&—fFT†÷7G2À —Ğ –f÷"òÂ†÷7B£Ò&ævRµ×7G&–æw²&’æ¶–Ö’æ6öÒ"Â&’æ¶–Ö’æ’'Ò° —F&vWB£Ò&‡GG3¢òò"²†÷7B²"ö6öF–ær÷c÷W6vW2  –æ÷&ÖÆ—¦VBÂW'"£ÒW&ÇfÆ–FF÷"åfÆ–FFT…EE5U$Â‡F&vWBÂ÷G2 —&WV—&RäæôW'&÷"‡BÂW'" —&WV—&RäWVÂ‡BÂF&vWBÂæ÷&ÖÆ—¦VB •òÂW'"ÒW&ÇfÆ–FF÷"åfÆ–FFT…EE5U$Â‚&‡GG3¢òò"¶†÷7B²"æGF6¶W"æW†×ÆRö6öF–ær÷c÷W6vW2"Â÷G2 —&WV—&RäW'&÷"‡BÂW'" —Ğ§Ğ ¦gVæ2FW7DÆöDFVfVÇE6W'fW$ÖöFR‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6frå6W'fW"äÖöFRÒ'&VÆV6R"° —BäfFÆb‚%6W'fW"äÖöFRÒWÂvçBW"Â6frå6W'fW"äÖöFRÂ'&VÆV6R" —Ğ§Ğ ¦gVæ2FW7DÆöDFVfVÇD¥uD66W75Fö¶VäW‡—&TÖ–çWFW2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6frä¥uBäW‡—&T†÷W"Ò#B° —BäfFÆb‚$¥uBäW‡—&T†÷W"ÒVBÂvçB#B"Â6frä¥uBäW‡—&T†÷W" —Ğ ––b6frä¥uBä66W75Fö¶VäW‡—&TÖ–çWFW2Ò° —BäfFÆb‚$¥uBä66W75Fö¶VäW‡—&TÖ–çWFW2ÒVBÂvçB"Â6frä¥uBä66W75Fö¶VäW‡—&TÖ–çWFW2 —Ğ§Ğ ¦gVæ2FW7DÆöD¥uD66W75Fö¶VäW‡—&TÖ–çWFW4g&öÔVçb‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B —Bå6WFVçb‚$¥uEô44U55õDô´TåôU…•$UôÔ”åUDU2"Â#“"  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6frä¥uBä66W75Fö¶VäW‡—&TÖ–çWFW2Ò“° —BäfFÆb‚$¥uBä66W75Fö¶VäW‡—&TÖ–çWFW2ÒVBÂvçB“"Â6frä¥uBä66W75Fö¶VäW‡—&TÖ–çWFW2 —Ğ§Ğ ¦gVæ2FW7DÆöDFVfVÇDFF&6U54ÄÖöFR‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6fräFF&6Rå54ÄÖöFRÒ'&VfW""° —BäfFÆb‚$FF&6Rå54ÄÖöFRÒWÂvçBW"Â6fräFF&6Rå54ÄÖöFRÂ'&VfW"" —Ğ§Ğ ¦gVæ2FW7EfÆ–FFTÆ–çW„Fôg&öçFVæE&VF—&V7EU$Â‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  –6fräÆ–çW„FòäVæ&ÆVBÒG'VP –6fräÆ–çW„Fòä6Æ–VçD”BÒ'FW7BÖ6Æ–VçB  –6fräÆ–çW„Fòä6Æ–VçE6V7&WBÒ'FW7B×6V7&WB  –6fräÆ–çW„Fòå&VF—&V7EU$ÂÒ&‡GG3¢òöW†×ÆRæ6öÒö’÷cöWF‚ööWF‚öÆ–çW†Fòö6ÆÆ&6²  –6fräÆ–çW„FòåFö¶VäWF„ÖWF†öBÒ&6Æ–VçE÷6V7&WE÷÷7B  –6fräÆ–çW„FòåW6U´4RÒG'VP  –6fräÆ–çW„Fòäg&öçFVæE&VF—&V7EU$ÂÒ&¦f67&—C¦ÆW'Bƒ’  –W'"Ò6fråfÆ–FFR‚ ––bW'"ÓÒæ–Â° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVBW'&÷"f÷"¦f67&—B66†VÖRÂv÷Bæ–Â" —Ğ ––b7G&–æw2ä6öçF–ç2†W'"äW'&÷"‚’Â&Æ–çW†Fõö6öææV7Bæg&öçFVæE÷&VF—&V7E÷W&Â"’° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVBg&öçFVæE÷&VF—&V7E÷W&ÂW'&÷"Âv÷C¢Wb"ÂW'" —Ğ§Ğ ¦gVæ2FW7EfÆ–FFTÆ–çW„FôÆÆ÷w4F—6&Æ–æu´4Tf÷$6ö×F–&–Æ—G’‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  –6fräÆ–çW„FòäVæ&ÆVBÒG'VP –6fräÆ–çW„Fòä6Æ–VçD”BÒ'FW7BÖ6Æ–VçB  –6fräÆ–çW„Fòä6Æ–VçE6V7&WBÒ"  –6fräÆ–çW„Fòå&VF—&V7EU$ÂÒ&‡GG3¢òöW†×ÆRæ6öÒö’÷cöWF‚ööWF‚öÆ–çW†Fòö6ÆÆ&6²  –6fräÆ–çW„Fòäg&öçFVæE&VF—&V7EU$ÂÒ"öWF‚öÆ–çW†Fòö6ÆÆ&6²  –6fräÆ–çW„FòåFö¶VäWF„ÖWF†öBÒ&æöæR  –6fräÆ–çW„FòåW6U´4RÒfÇ6P  –W'"Ò6fråfÆ–FFR‚ ––bW'"Òæ–Â° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVBÆ–çW„Fò6öæf–rv—F†÷WB´4RFò72f÷"6ö×F–&–Æ—G’Âv÷C¢Wb"ÂW'" —Ğ§Ğ ¦gVæ2FW7EfÆ–FFTô”D566÷W4×W7D6öçF–ä÷Vä”B‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  –6fräô”D2äVæ&ÆVBÒG'VP –6fräô”D2ä6Æ–VçD”BÒ&ö–F2Ö6Æ–VçB  –6fräô”D2ä6Æ–VçE6V7&WBÒ&ö–F2×6V7&WB  –6fräô”D2ä—77VW%U$ÂÒ&‡GG3¢òö—77VW"æW†×ÆRæ6öÒ  –6fräô”D2äWF†÷&—¦UU$ÂÒ&‡GG3¢òö—77VW"æW†×ÆRæ6öÒöWF‚  –6fräô”D2åFö¶VåU$ÂÒ&‡GG3¢òö—77VW"æW†×ÆRæ6öÒ÷Fö¶Vâ  –6fräô”D2ä¥tµ5U$ÂÒ&‡GG3¢òö—77VW"æW†×ÆRæ6öÒö§v·2  –6fräô”D2å&VF—&V7EU$ÂÒ&‡GG3¢òöW†×ÆRæ6öÒö’÷cöWF‚ööWF‚öö–F2ö6ÆÆ&6²  –6fräô”D2äg&öçFVæE&VF—&V7EU$ÂÒ"öWF‚öö–F2ö6ÆÆ&6²  –6fräô”D2å66÷W2Ò'&öf–ÆRVÖ–Â  –6fräô”D2åW6U´4RÒG'VP  –W'"Ò6fråfÆ–FFR‚ ––bW'"ÓÒæ–Â° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVBW'&÷"v†Vâ66÷W2Fòæ÷B–æ6ÇVFR÷Væ–BÂv÷Bæ–Â" —Ğ ––b7G&–æw2ä6öçF–ç2†W'"äW'&÷"‚’Â&ö–F5ö6öææV7Bç66÷W2"’° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVBö–F5ö6öææV7Bç66÷W2W'&÷"Âv÷C¢Wb"ÂW'" —Ğ§Ğ ¦gVæ2FW7EfÆ–FFTô”D4ÆÆ÷w4—77VW$öæÇ”VæGö–çG5v—F„F—66÷fW'”fÆÆ&6²‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  –6fräô”D2äVæ&ÆVBÒG'VP –6fräô”D2ä6Æ–VçD”BÒ&ö–F2Ö6Æ–VçB  –6fräô”D2ä6Æ–VçE6V7&WBÒ&ö–F2×6V7&WB  –6fräô”D2ä—77VW%U$ÂÒ&‡GG3¢òö—77VW"æW†×ÆRæ6öÒ  –6fräô”D2äWF†÷&—¦UU$ÂÒ"  –6fräô”D2åFö¶VåU$ÂÒ"  –6fräô”D2ä¥tµ5U$ÂÒ"  –6fräô”D2å&VF—&V7EU$ÂÒ&‡GG3¢òöW†×ÆRæ6öÒö’÷cöWF‚ööWF‚öö–F2ö6ÆÆ&6²  –6fräô”D2äg&öçFVæE&VF—&V7EU$ÂÒ"öWF‚öö–F2ö6ÆÆ&6²  –6fräô”D2å66÷W2Ò&÷Væ–BVÖ–Â&öf–ÆR  –6fräô”D2åfÆ–FFT”EFö¶VâÒG'VP –6fräô”D2åW6U´4RÒG'VP  –W'"Ò6fråfÆ–FFR‚ ––bW'"Òæ–Â° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVB—77VW"ÖöæÇ’ô”D26öæf–rFò72v—F‚F—66÷fW'’fÆÆ&6²Âv÷C¢Wb"ÂW'" —Ğ§Ğ ¦gVæ2FW7EfÆ–FFTô”D4ÆÆ÷w4W‡Æ–6—D6ö×F–&–Æ—G”÷fW'&–FW4f÷%´4TæD”EFö¶VåfÆ–FF–öâ‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  –6fräô”D2äVæ&ÆVBÒG'VP –6fräô”D2ä6Æ–VçD”BÒ&ö–F2Ö6Æ–VçB  –6fräô”D2ä6Æ–VçE6V7&WBÒ&ö–F2×6V7&WB  –6fräô”D2ä—77VW%U$ÂÒ&‡GG3¢òö—77VW"æW†×ÆRæ6öÒ  –6fräô”D2äWF†÷&—¦UU$ÂÒ&‡GG3¢òö—77VW"æW†×ÆRæ6öÒöWF‚  –6fräô”D2åFö¶VåU$ÂÒ&‡GG3¢òö—77VW"æW†×ÆRæ6öÒ÷Fö¶Vâ  –6fräô”D2åW6W$–æfõU$ÂÒ&‡GG3¢òö—77VW"æW†×ÆRæ6öÒ÷W6W&–æfò  –6fräô”D2å&VF—&V7EU$ÂÒ&‡GG3¢òöW†×ÆRæ6öÒö’÷cöWF‚ööWF‚öö–F2ö6ÆÆ&6²  –6fräô”D2äg&öçFVæE&VF—&V7EU$ÂÒ"öWF‚öö–F2ö6ÆÆ&6²  –6fräô”D2å66÷W2Ò&÷Væ–BVÖ–Â&öf–ÆR  –6fräô”D2åW6U´4RÒfÇ6P –6fräô”D2åfÆ–FFT”EFö¶VâÒfÇ6P –6fräô”D2ä¥tµ5U$ÂÒ"  –6fräô”D2äÆÆ÷vVE6–væ–ætÆw2Ò"   –W'"Ò6fråfÆ–FFR‚ ––bW'"Òæ–Â° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVBô”D26öæf–rv—F†÷WB´4Rö–E÷Fö¶VâfÆ–FF–öâFò72f÷"6ö×F–&–Æ—G’Âv÷C¢Wb"ÂW'" —Ğ§Ğ ¦gVæ2FW7DÆöDFVfVÇDF6†&ö&D66†T6öæf–r‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6fräF6†&ö&BäVæ&ÆVB° —BäfFÆb‚$F6†&ö&BäVæ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ ––b6fräF6†&ö&Bä¶W•&Vf—‚Ò'7V#&“¢"° —BäfFÆb‚$F6†&ö&Bä¶W•&Vf—‚ÒWÂvçBW"Â6fräF6†&ö&Bä¶W•&Vf—‚Â'7V#&“¢" —Ğ ––b6fräF6†&ö&Bå7FG4g&W6…EDÅ6V6öæG2ÒR° —BäfFÆb‚$F6†&ö&Bå7FG4g&W6…EDÅ6V6öæG2ÒVBÂvçBR"Â6fräF6†&ö&Bå7FG4g&W6…EDÅ6V6öæG2 —Ğ ––b6fräF6†&ö&Bå7FG5EDÅ6V6öæG2Ò3° —BäfFÆb‚$F6†&ö&Bå7FG5EDÅ6V6öæG2ÒVBÂvçB3"Â6fräF6†&ö&Bå7FG5EDÅ6V6öæG2 —Ğ ––b6fräF6†&ö&Bå7FG5&Vg&W6…F–ÖV÷WE6V6öæG2Ò3° —BäfFÆb‚$F6†&ö&Bå7FG5&Vg&W6…F–ÖV÷WE6V6öæG2ÒVBÂvçB3"Â6fräF6†&ö&Bå7FG5&Vg&W6…F–ÖV÷WE6V6öæG2 —Ğ§Ğ ¦gVæ2FW7EfÆ–FFTF6†&ö&D66†T6öæf–tVæ&ÆVB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  –6fräF6†&ö&BäVæ&ÆVBÒG'VP –6fräF6†&ö&Bå7FG4g&W6…EDÅ6V6öæG2Ò  –6fräF6†&ö&Bå7FG5EDÅ6V6öæG2ÒP –W'"Ò6fråfÆ–FFR‚ ––bW'"ÓÒæ–Â° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVBW'&÷"f÷"7FG5ög&W6…÷GFÅ÷6V6öæG2â7FG5÷GFÅ÷6V6öæG2Âv÷Bæ–Â" —Ğ ––b7G&–æw2ä6öçF–ç2†W'"äW'&÷"‚’Â&F6†&ö&Eö66†Rç7FG5ög&W6…÷GFÅ÷6V6öæG2"’° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVB7FG5ög&W6…÷GFÅ÷6V6öæG2W'&÷"Âv÷C¢Wb"ÂW'" —Ğ§Ğ ¦gVæ2FW7EfÆ–FFTF6†&ö&D66†T6öæf–tF—6&ÆVB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  –6fräF6†&ö&BäVæ&ÆVBÒfÇ6P –6fräF6†&ö&Bå7FG5EDÅ6V6öæG2ÒÓ –W'"Ò6fråfÆ–FFR‚ ––bW'"ÓÒæ–Â° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVBW'&÷"f÷"æVvF—fR7FG5÷GFÅ÷6V6öæG2Âv÷Bæ–Â" —Ğ ––b7G&–æw2ä6öçF–ç2†W'"äW'&÷"‚’Â&F6†&ö&Eö66†Rç7FG5÷GFÅ÷6V6öæG2"’° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVB7FG5÷GFÅ÷6V6öæG2W'&÷"Âv÷C¢Wb"ÂW'" —Ğ§Ğ ¦gVæ2FW7DÆöDFVfVÇDF6†&ö&Dvw&VvF–öä6öæf–r‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6fräF6†&ö&DvräVæ&ÆVB° —BäfFÆb‚$F6†&ö&DvräVæ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ ––b6fräF6†&ö&Dvrä–çFW'fÅ6V6öæG2Òc° —BäfFÆb‚$F6†&ö&Dvrä–çFW'fÅ6V6öæG2ÒVBÂvçBc"Â6fräF6†&ö&Dvrä–çFW'fÅ6V6öæG2 —Ğ ––b6fräF6†&ö&DvräÆöö¶&6µ6V6öæG2Ò#° —BäfFÆb‚$F6†&ö&DvräÆöö¶&6µ6V6öæG2ÒVBÂvçB#"Â6fräF6†&ö&DvräÆöö¶&6µ6V6öæG2 —Ğ ––b6fräF6†&ö&Dvrä&6¶f–ÆÄVæ&ÆVB° —BäfFÆb‚$F6†&ö&Dvrä&6¶f–ÆÄVæ&ÆVBÒG'VRÂvçBfÇ6R" —Ğ ––b6fräF6†&ö&Dvrä&6¶f–ÆÄÖ„F—2Ò3° —BäfFÆb‚$F6†&ö&Dvrä&6¶f–ÆÄÖ„F—2ÒVBÂvçB3"Â6fräF6†&ö&Dvrä&6¶f–ÆÄÖ„F—2 —Ğ ––b6fräF6†&ö&Dvrå&WFVçF–öâåW6vTÆöw4F—2Ò“° —BäfFÆb‚$F6†&ö&Dvrå&WFVçF–öâåW6vTÆöw4F—2ÒVBÂvçB“"Â6fräF6†&ö&Dvrå&WFVçF–öâåW6vTÆöw4F—2 —Ğ ––b6fräF6†&ö&Dvrå&WFVçF–öâåW6vT&–ÆÆ–ætFVGWF—2Ò3cR° —BäfFÆb‚$F6†&ö&Dvrå&WFVçF–öâåW6vT&–ÆÆ–ætFVGWF—2ÒVBÂvçB3cR"Â6fräF6†&ö&Dvrå&WFVçF–öâåW6vT&–ÆÆ–ætFVGWF—2 —Ğ ––b6fräF6†&ö&Dvrå&WFVçF–öâä†÷W&Ç”F—2Òƒ° —BäfFÆb‚$F6†&ö&Dvrå&WFVçF–öâä†÷W&Ç”F—2ÒVBÂvçBƒ"Â6fräF6†&ö&Dvrå&WFVçF–öâä†÷W&Ç”F—2 —Ğ ––b6fräF6†&ö&Dvrå&WFVçF–öâäF–Ç”F—2Òs3° —BäfFÆb‚$F6†&ö&Dvrå&WFVçF–öâäF–Ç”F—2ÒVBÂvçBs3"Â6fräF6†&ö&Dvrå&WFVçF–öâäF–Ç”F—2 —Ğ ––b6fräF6†&ö&Dvrå&V6ö×WFTF—2Ò"° —BäfFÆb‚$F6†&ö&Dvrå&V6ö×WFTF—2ÒVBÂvçB""Â6fräF6†&ö&Dvrå&V6ö×WFTF—2 —Ğ§Ğ ¦gVæ2FW7EfÆ–FFTF6†&ö&Dvw&VvF–öä6öæf–tF—6&ÆVB‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  –6fräF6†&ö&DvräVæ&ÆVBÒfÇ6P –6fräF6†&ö&Dvrä–çFW'fÅ6V6öæG2ÒÓ –W'"Ò6fråfÆ–FFR‚ ––bW'"ÓÒæ–Â° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVBW'&÷"f÷"æVvF—fRF6†&ö&Eövw&VvF–öâæ–çFW'fÅ÷6V6öæG2Âv÷Bæ–Â" —Ğ ––b7G&–æw2ä6öçF–ç2†W'"äW'&÷"‚’Â&F6†&ö&Eövw&VvF–öâæ–çFW'fÅ÷6V6öæG2"’° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVB–çFW'fÅ÷6V6öæG2W'&÷"Âv÷C¢Wb"ÂW'" —Ğ§Ğ ¦gVæ2FW7EfÆ–FFTF6†&ö&Dvw&VvF–öä&6¶f–ÆÄÖ„F—2‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  –6fräF6†&ö&Dvrä&6¶f–ÆÄVæ&ÆVBÒG'VP –6fräF6†&ö&Dvrä&6¶f–ÆÄÖ„F—2Ò  –W'"Ò6fråfÆ–FFR‚ ––bW'"ÓÒæ–Â° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVBW'&÷"f÷"F6†&ö&Eövw&VvF–öâæ&6¶f–ÆÅöÖ…öF—2Âv÷Bæ–Â" —Ğ ––b7G&–æw2ä6öçF–ç2†W'"äW'&÷"‚’Â&F6†&ö&Eövw&VvF–öâæ&6¶f–ÆÅöÖ…öF—2"’° —BäfFÆb‚%fÆ–FFR‚’W‡V7FVB&6¶f–ÆÅöÖ…öF—2W'&÷"Âv÷C¢Wb"ÂW'" —Ğ§Ğ ¦gVæ2FW7DÆöDFVfVÇEW6vT6ÆVçW6öæf–r‡B§FW7F–æråB’° —&W6WEf—W%v—F„¥uE6V7&WB‡B  –6frÂW'"£ÒÆöB‚ ––bW'"Òæ–Â° —BäfFÆb‚$ÆöB‚’W'&÷#¢Wb"ÂW'" —Ğ  ––b6fråW6vT6ÆVçWäVæ&ÆVB° —BäfFÆb‚%W6vT6ÆVçWäVæ&ÆVBÒfÇ6RÂvçBG'VR" —Ğ ––b6fråW6vT6ÆVçWäÖ…&ævTF—2Ò3° —BäfFÆb‚%W6vT6ÆVçWäÖ…&ævTF—2ÒVBÂvçB3"Â6fråW6vT6ÆVçWäÖ…&ævTF—2 —Ğ ––b6fråW6vT6ÆVçWä&F6…6—¦RÒS° —BäfFÆb‚%W6vT6ÆVçWä&F6…6—¦RÒVBÂvçBS"Â6fråW6vT6ÆVçWä&F6…6—¦R­ºãËh‘éì¶»§q«^u
-B‚ZYˆË\œˆH›İšYPÛÛ™šYÊ
-NÈ\œˆOHš[Â‚B]‘˜][Š”›İšYPÛÛ™šYÊ
-H\œ›Üˆ	]ˆ‹\œŠB‚_BŸB‚™[˜È\İ˜[Y]PÛÛ™šYÕÚ][^Ñ[˜X›Y
-
-\İ[™Ë•
-HÂ‚\™\Ù]š\\•Ú]•ÕÙXÜ™]
-
-B‚‚XÙ™Ë\œˆHØY
+package config
 
-B‚ZYˆ\œˆOHš[Â‚B]‘˜][Š“ØY
+import (
+	"fmt"
+	"math"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+	"testing"
+	"time"
 
-H\œ›Üˆ	]ˆ‹\œŠB‚_B‚‚XÙ™Ë”ÙXİ\š]KÔÔ‘[˜X›YHYB‚XÙ™Ë”ÙXİ\š]KÔÔ”ÛXŞHH™Y˜][\Ü˜È	ÜÙ[‰È‚‚‚XÙ™Ë“[^Ë‘[˜X›YHYB‚XÙ™Ë“[^ËÛY[QH˜ÛY[‚‚XÙ™Ë“[^ËÛY[ÙXÜ™]HœÙXÜ™]‚‚XÙ™Ë“[^Ë]]Üš^™UT“HšÎ‹ËÙ^[\K˜ÛÛKÛØ]]‹Ø]]Üš^™H‚‚XÙ™Ë“[^Ë•ÚÙ[•T“HšÎ‹ËÙ^[\K˜ÛÛKÛØ]]‹İÚÙ[ˆ‚‚XÙ™Ë“[^Ë•\Ù\’[™›ÕT“HšÎ‹ËÙ^[\K˜ÛÛKÛØ]]‹İ\Ù\š[™›È‚‚XÙ™Ë“[^Ë”™Y\™XİT“HšÎ‹ËÙ^[\K˜ÛÛKØ\KİŒKØ]]ÛØ]]Û[^ËØØ[˜XÚÈ‚‚XÙ™Ë“[^Ë‘œ›Û[™™Y\™XİT“H‹Ø]]Û[^ËØØ[˜XÚÈ‚‚XÙ™Ë“[^Ë•ÚÙ[]]Y]ÙH˜ÛY[ÜÙXÜ™]ÜÜİ‚‚XÙ™Ë“[^Ë•\ÙTĞÑHHYB‚‚ZYˆ\œˆHÙ™Ë•˜[Y]J
-NÈ\œˆOHš[Â‚B]‘˜][Š•˜[Y]J
-H[™^XİY\œ›Üˆ	]ˆ‹\œŠB‚_BŸB‚™[˜È\İ˜[Y]R•ÕÙXÜ™]İ™[™İ
-
-\İ[™Ë•
-HÂ‚ZYˆZ\ÕÙXZÒ•ÕÙXÜ™]
-˜Ú[™ÙK[YKZ[‹\›ÙXİ[ÛˆŠHÂ‚B]‘˜][Šš\ÕÙXZÒ•ÕÙXÜ™]Úİ[]XİÙXZÈÙXÜ™]ŠB‚_B‚ZYˆ\ÕÙXZÒ•ÕÙXÜ™]
-”İ›Û™ÔÙXÜ™]˜[YHŠHÂ‚B]‘˜][Šš\ÕÙXZÒ•ÕÙXÜ™]Úİ[XØÙ\İ›Û™ÈÙXÜ™]ŠB‚_BŸB‚™[˜È\İÙ[™\˜]R•ÕÙXÜ™]Ú][™İ
-
-\İ[™Ë•
-HÂ‚\ÙXÜ™]\œˆHÙ[™\˜]R•ÕÙXÜ™]
-MŠB‚ZYˆ\œˆOHš[Â‚B]‘˜][Š™Ù[™\˜]R•ÕÙXÜ™]\œ›Üˆ	]ˆ‹\œŠB‚_B‚ZYˆ[ŠÙXÜ™]
-HOHÂ‚B]‘˜][Š™Ù[™\˜]R•ÕÙXÜ™]™]\›™Y[\Hİš[™ÈŠB‚_BŸB‚™[˜È\İ]X˜\ÙQÓ•Ú][Y^›Û™WÕÚ]\ÜİÛÜ™
-
-\İ[™Ë•
-HÂ‚YH	‘]X˜\ÙPÛÛ™šYŞÂ‚BRÜİˆ›ØØ[Üİ‹‚BTÜˆMÌ‹‚BU\Ù\ˆH‹‚BT\ÜİÛÜ™ˆœ‹‚BQ“˜[YNˆ™ˆ‹‚BTÔÓ[ÙNˆœ™Y™\ˆ‹‚_B‚YÛİH‘Ó•Ú][Y^›Û™J•UÈŠB‚ZYˆ\İš[™ÜËÛÛZ[œÊÛİœ\ÜİÛÜ™\ŠHÂ‚B]‘˜][Š‘Ó•Ú][Y^›Û™HÚİ[[˜ÛYH\ÜİÛÜ™ˆ	\H‹Ûİ
-B‚_B‚ZYˆ\İš[™ÜËÛÛZ[œÊÛİ•[YV›Û™OUUÈŠHÂ‚B]‘˜][Š‘Ó•Ú][Y^›Û™HÚİ[[˜ÛYH[YV›Û™OUUÎˆ	\H‹Ûİ
-B‚_BŸB‚™[˜È\İ˜[Y]PXœÛÛ]RT“Z\ÜÚ[™ÒÜİ
-
-\İ[™Ë•
-HÂ‚ZYˆ\œˆH˜[Y]PXœÛÛ]RT“
-šÎ‹ËÈŠNÈ\œˆOHš[Â‚B]‘˜][Š•˜[Y]PXœÛÛ]RT“Úİ[™Z™XİZ\ÜÚ[™ÈÜİŠB‚_BŸB‚™[˜È\İ˜[Y]Qœ›Û[™™Y\™XİT“[˜[YÚ\œÊ
-\İ[™Ë•
-HÂ‚ZYˆ\œˆH˜[Y]Qœ›Û[™™Y\™XİT“
-‹Ø]]×˜Ø[˜XÚÈŠNÈ\œˆOHš[Â‚B]‘˜][Š•˜[Y]Qœ›Û[™™Y\™XİT“Úİ[™Z™Xİ[˜[YÚ\œÈŠB‚_B‚ZYˆ\œˆH˜[Y]Qœ›Û[™™Y\™XİT“
-š‹ËÈŠNÈ\œˆOHš[Â‚B]‘˜][Š•˜[Y]Qœ›Û[™™Y\™XİT“Úİ[™Z™XİZ\ÜÚ[™ÈÜİŠB‚_B‚ZYˆ\œˆH˜[Y]Qœ›Û[™™Y\™XİT“
-›XZ[Î\Ù\^[\K˜ÛÛHŠNÈ\œˆOHš[Â‚B]‘˜][Š•˜[Y]Qœ›Û[™™Y\™XİT“Úİ[™Z™XİXZ[ÈŠB‚_BŸB‚™[˜È\İØ\›’Y’[œÙXİ\™UT“Ê
-\İ[™Ë•
-HÂ‚]Ø\›’Y’[œÙXİ\™UT“
-œÙXİ\™H‹šÎ‹ËÙ^[\K˜ÛÛHŠBŸB‚™[˜È\İ˜[Y]R•ÕÙXÜ™]ÕU]\Ê
-\İ[™Ë•
-HÂ‚\™\Ù]š\\•Ú]•ÕÙXÜ™]
-
-B‚XÙ™Ë\œˆHØY
+	"github.com/Wei-Shaw/sub2api/internal/util/urlvalidator"
+	"github.com/spf13/viper"
+	"github.com/stretchr/testify/require"
+)
 
-B‚ZYˆ\œˆOHš[Â‚B]‘˜][Š“ØY
+func resetViperWithJWTSecret(t *testing.T) {
+	t.Helper()
+	viper.Reset()
+	t.Cleanup(viper.Reset)
+	t.Setenv("CONFIG_FILE", "")
+	t.Setenv("DATA_DIR", "")
+	t.Setenv("JWT_SECRET", strings.Repeat("x", 32))
+	stubMemoryLimit(t, 0)
+}
 
-H\œ›Üˆ	]ˆ‹\œŠB‚_B‚‚KËÈÌH]\È
-ÌŠH]™[ˆİYÚ]	ÜÈÌHÚ\˜Xİ\œË‚‚XÙ™Ë’•Õ”ÙXÜ™]Hİš[™ÜË”™\X]
-˜H‹ÌJB‚Y\œˆHÙ™Ë•˜[Y]J
-B‚ZYˆ\œˆOHš[Â‚B]‘˜][Š•˜[Y]J
-HÚİ[™Z™XİÌKX]HÙXÜ™]ŠB‚_B‚ZYˆ\İš[™ÜËÛÛZ[œÊ\œ‹‘\œ›ÜŠ
-K˜]X\İÌˆ]\ÈŠHÂ‚B]‘˜][Š•˜[Y]J
-H\œ›ÜˆH	]ˆ‹\œŠB‚_B‚‚KËÈÌˆ]\ÈÒË‚‚XÙ™Ë’•Õ”ÙXÜ™]Hİš[™ÜË”™\X]
-˜H‹ÌŠB‚Y\œˆHÙ™Ë•˜[Y]J
-B‚ZYˆ\œˆOHš[Â‚B]‘˜][Š•˜[Y]J
-HÚİ[XØÙ\Ì‹X]HÙXÜ™]ˆ	]ˆ‹\œŠB‚_BŸB‚™[˜È\İ˜[Y]PÛÛ™šYÑ\œ›ÜœÊ
-\İ[™Ë•
-HÂ‚XZ[˜[YH[˜Ê
-\İ[™Ë•
-H
-ÛÛ™šYÈÂ‚B]’[\Š
-B‚B\™\Ù]š\\•Ú]•ÕÙXÜ™]
-
-B‚BXÙ™Ë\œˆHØY
+func stubMemoryLimit(t *testing.T, limit uint64) {
+	t.Helper()
+	original := detectMemoryLimitBytes
+	detectMemoryLimitBytes = func() uint64 { return limit }
+	t.Cleanup(func() { detectMemoryLimitBytes = original })
+}
 
-B‚BZYˆ\œˆOHš[Â‚BB]‘˜][Š“ØY
+func TestAutoRequestBodyMemoryBudget(t *testing.T) {
+	require.Equal(t, int64(1<<30), autoRequestBodyMemoryBudget(0))
+	require.Equal(t, int64(1<<30), autoRequestBodyMemoryBudget(2<<30))
+	require.Equal(t, int64(2<<30), autoRequestBodyMemoryBudget(8<<30))
+	require.Equal(t, int64(32<<30), autoRequestBodyMemoryBudget(128<<30))
+	require.Equal(t, int64(math.MaxUint64/4), autoRequestBodyMemoryBudget(math.MaxUint64))
+}
 
-H\œ›Üˆ	]ˆ‹\œŠB‚B_B‚B\™]\›ˆÙ™Â‚_B‚‚XØ\Ù\ÈH×\İXİÂ‚B[˜[YHİš[™Â‚B[]]]H[˜Ê
-ÛÛ™šYÊB‚B]Ø[\œˆİš[™Â‚_^Â‚B^Â‚BB[˜[YNˆ›™YØ]]™H[™Ü™\ÜÈY[[ÜHYÙ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K”™\]Y\İ›ÙSY[[ÜPYÙ]]\ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^Kœ™\]Y\İØ›ÙWÛY[[ÜWØYÙ]Ø]\È‹‚B_K‚B^Â‚BB[˜[YNˆ›™YØ]]™H\ØY[Y[İ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K”™\]Y\İ›ÙT™XY[Y[İ]ÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^Kœ™\]Y\İØ›ÙWÜ™XYİ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆœÙ\™\ˆ™XYXY\ˆ[Y[İ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”Ù\™\‹”™XYXY\•[Y[İ]HK‚BB]Ø[\œˆœÙ\™\‹œ™XYÚXY\—İ[Y[İ]‹‚B_K‚B^Â‚BB[˜[YNˆœÙ\™\ˆX^XY\ˆ]\ÈÛÈÛX[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”Ù\™\‹“X^XY\]\ÈHMˆK‚BB]Ø[\œˆœÙ\™\‹›X^ÚXY\—Ø]\È‹‚B_K‚B^Â‚BB[˜[YNˆœÙ\™\ˆX^™\]Y\İ›ÙHÚ^™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”Ù\™\‹“X^™\]Y\İ›ÙTÚ^™HHLHK‚BB]Ø[\œˆœÙ\™\‹›X^Ü™\]Y\İØ›ÙWÜÚ^™H‹‚B_K‚B^Â‚BB[˜[YNˆš˜È™\›ÈÛÛ˜İ\œ™[İ™X[\È‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË”Ù\™\‹’Ë‘[˜X›YHYB‚BBBXË”Ù\™\‹’Ë“X^ÛÛ˜İ\œ™[İ™X[\ÈH‚BB_K‚BB]Ø[\œˆœÙ\™\‹š˜Ë›X^ØÛÛ˜İ\œ™[Üİ™X[\È‹‚B_K‚B^Â‚BB[˜[YNˆš˜Èİ™\œÚ^™Y™XYœ˜[YH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË”Ù\™\‹’Ë‘[˜X›YHYB‚BBBXË”Ù\™\‹’Ë“X^™XYœ˜[YTÚ^™HHMˆ
-ˆL
-ˆL‚BB_K‚BB]Ø[\œˆœÙ\™\‹š˜Ë›X^Ü™XYÙœ˜[YWÜÚ^™H‹‚B_K‚B^Â‚BB[˜[YNˆš[˜[Y]]X\ÙH™\ÚÛÛÈÛX[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXËTRÙ^P]]’[˜[YX\ÙK•™\ÚÛHB‚BB_K‚BB]Ø[\œˆ˜\WÚÙ^WØ]]ØØXÚKš[˜[YØX\ÙK™\ÚÛ‹‚B_K‚B^Â‚BB[˜[YNˆš[˜[Y]]X\ÙHØ\XÚ]HÛÈÛX[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXËTRÙ^P]]’[˜[YX\ÙKØ\XÚ]HHMB‚BB_K‚BB]Ø[\œˆ˜\WÚÙ^WØ]]ØØXÚKš[˜[YØX\ÙK˜Ø\XÚ]H‹‚B_K‚B^Â‚BB[˜[YNˆšİÙXÜ™]™\]Z\™Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË’•Õ”ÙXÜ™]HˆˆK‚BB]Ø[\œˆšİœÙXÜ™]\È™\]Z\™Y‹‚B_K‚B^Â‚BB[˜[YNˆšİÙXÜ™]Z[ˆ]\È‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË’•Õ”ÙXÜ™]Hİš[™ÜË”™\X]
-˜H‹ÌJHK‚BB]Ø[\œˆšİœÙXÜ™]]\İ™H]X\İÌˆ]\È‹‚B_K‚B^Â‚BB[˜[YNˆœİXœØÜš\[ÛˆXZ[[˜[˜ÙHÛÜšÙ\—ØÛİ[›Û‹[™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”İXœØÜš\[Û“XZ[[˜[˜ÙK•ÛÜšÙ\Ûİ[HLHK‚BB]Ø[\œˆœİXœØÜš\[Û—ÛXZ[[˜[˜ÙKÛÜšÙ\—ØÛİ[‹‚B_K‚B^Â‚BB[˜[YNˆœİXœØÜš\[ÛˆXZ[[˜[˜ÙH]Y]YWÜÚ^™H›Û‹[™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”İXœØÜš\[Û“XZ[[˜[˜ÙK”]Y]YTÚ^™HHLHK‚BB]Ø[\œˆœİXœØÜš\[Û—ÛXZ[[˜[˜ÙKœ]Y]YWÜÚ^™H‹‚B_K‚B^Â‚BB[˜[YNˆšİ^\™Hİ\ˆÜÚ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË’•Õ‘^\™Rİ\ˆHK‚BB]Ø[\œˆšİ™^\™WÚİ\ˆ]\İ™HÜÚ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆšİ^\™Hİ\ˆX^‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË’•Õ‘^\™Rİ\ˆHŒK‚BB]Ø[\œˆšİ™^\™WÚİ\ˆ]\İ™HHM‹‚B_K‚B^Â‚BB[˜[YNˆšİXØÙ\ÜÈÚÙ[ˆ^\™HZ[]\È›Û‹[™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË’•ÕXØÙ\ÜÕÚÙ[‘^\™SZ[]\ÈHLHK‚BB]Ø[\œˆšİ˜XØÙ\Ü×İÚÙ[—Ù^\™WÛZ[]\È]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ˜ÜÜÛXŞH™\]Z\™Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”ÙXİ\š]KÔÔ‘[˜X›YHYNÈË”ÙXİ\š]KÔÔ”ÛXŞHHˆˆK‚BB]Ø[\œˆœÙXİ\š]K˜ÜÜœÛXŞH‹‚B_K‚B^Â‚BB[˜[YNˆ›[^ÈÛY[Y™\]Z\™Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË“[^Ë‘[˜X›YHYB‚BBBXË“[^Ë•\ÙTĞÑHHYB‚BBBXË“[^ËÛY[QHˆ‚‚BB_K‚BB]Ø[\œˆ›[^×ØÛÛ›™Xİ˜ÛY[ÚY‹‚B_K‚B^Â‚BB[˜[YNˆ›[^ÈÚÙ[ˆ]]Y]Ù‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË“[^Ë‘[˜X›YHYB‚BBBXË“[^Ë•\ÙTĞÑHHYB‚BBBXË“[^ËÛY[QH˜ÛY[‚‚BBBXË“[^ËÛY[ÙXÜ™]HœÙXÜ™]‚‚BBBXË“[^Ë]]Üš^™UT“HšÎ‹ËÙ^[\K˜ÛÛKØ]]Üš^™H‚‚BBBXË“[^Ë•ÚÙ[•T“HšÎ‹ËÙ^[\K˜ÛÛKİÚÙ[ˆ‚‚BBBXË“[^Ë•\Ù\’[™›ÕT“HšÎ‹ËÙ^[\K˜ÛÛKİ\Ù\š[™›È‚‚BBBXË“[^Ë”™Y\™XİT“HšÎ‹ËÙ^[\K˜ÛÛKØØ[˜XÚÈ‚‚BBBXË“[^Ë‘œ›Û[™™Y\™XİT“H‹Ø]]ØØ[˜XÚÈ‚‚BBBXË“[^Ë•ÚÙ[]]Y]ÙHš[˜[Y‚‚BB_K‚BB]Ø[\œˆ›[^×ØÛÛ›™XİÚÙ[—Ø]]ÛY]Ù‹‚B_K‚B^Â‚BB[˜[YNˆ˜š[[™ÈÚ\˜İZ]œ™XZÙ\ˆ™\ÚÛ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈËš[[™ËÚ\˜İZ]œ™XZÙ\‹‘˜Z[\™U™\ÚÛHK‚BB]Ø[\œˆ˜š[[™Ë˜Ú\˜İZ]Øœ™XZÙ\‹™˜Z[\™Wİ™\ÚÛ‹‚B_K‚B^Â‚BB[˜[YNˆ˜š[[™ÈÚ\˜İZ]œ™XZÙ\ˆ™\Ù]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈËš[[™ËÚ\˜İZ]œ™XZÙ\‹”™\Ù][Y[İ]ÙXÛÛ™ÈHK‚BB]Ø[\œˆ˜š[[™Ë˜Ú\˜İZ]Øœ™XZÙ\‹œ™\Ù]İ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ˜š[[™ÈÚ\˜İZ]œ™XZÙ\ˆ[ˆÜ[ˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈËš[[™ËÚ\˜İZ]œ™XZÙ\‹’[“Ü[”™\]Y\İÈHK‚BB]Ø[\œˆ˜š[[™Ë˜Ú\˜İZ]Øœ™XZÙ\‹š[—ÛÜ[—Ü™\]Y\İÈ‹‚B_K‚B^Â‚BB[˜[YNˆ˜š[[™ÈZ[š[][H˜[[˜ÙH™\Ù\™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈËš[[™Ë“Z[š[][P˜[[˜ÙT™\Ù\™HHLŒHK‚BB]Ø[\œˆ˜š[[™Ë›Z[š[][WØ˜[[˜ÙWÜ™\Ù\™H‹‚B_K‚B^Â‚BB[˜[YNˆ™]X˜\ÙHX^Ü[ˆÛÛ›œÈ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘]X˜\ÙK“X^Ü[ÛÛ›œÈHK‚BB]Ø[\œˆ™]X˜\ÙK›X^ÛÜ[—ØÛÛ›œÈ‹‚B_K‚B^Â‚BB[˜[YNˆ™]X˜\ÙHX^Y™][YH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘]X˜\ÙKÛÛ›“X^Y™][YSZ[]\ÈHLHK‚BB]Ø[\œˆ™]X˜\ÙK˜ÛÛ›—ÛX^ÛY™][YWÛZ[]\È‹‚B_K‚B^Â‚BB[˜[YNˆ™]X˜\ÙHYH^ÙYYÈÜ[ˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘]X˜\ÙK“X^YPÛÛ›œÈHË‘]X˜\ÙK“X^Ü[ÛÛ›œÈ
-ÈHK‚BB]Ø[\œˆ™]X˜\ÙK›X^ÚYWØÛÛ›œÈØ[››İ^ÙYY‹‚B_K‚B^Â‚BB[˜[YNˆœ™Y\ÈX[[Y[İ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”™Y\Ë‘X[[Y[İ]ÙXÛÛ™ÈHK‚BB]Ø[\œˆœ™Y\Ë™X[İ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆœ™Y\È™XY[Y[İ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”™Y\Ë”™XY[Y[İ]ÙXÛÛ™ÈHK‚BB]Ø[\œˆœ™Y\Ëœ™XYİ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆœ™Y\ÈÜš]H[Y[İ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”™Y\Ë•Üš]U[Y[İ]ÙXÛÛ™ÈHK‚BB]Ø[\œˆœ™Y\ËÜš]Wİ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆœ™Y\ÈÛÛÚ^™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”™Y\Ë”ÛÛÚ^™HHK‚BB]Ø[\œˆœ™Y\ËœÛÛÜÚ^™H‹‚B_K‚B^Â‚BB[˜[YNˆœ™Y\ÈYH^ÙYYÈÛÛ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË”™Y\Ë“Z[’YPÛÛ›œÈHË”™Y\Ë”ÛÛÚ^™H
-ÈHK‚BB]Ø[\œˆœ™Y\Ë›Z[—ÚYWØÛÛ›œÈØ[››İ^ÙYY‹‚B_K‚B^Â‚BB[˜[YNˆ™\Ú›Ø\™ØXÚH\ØX›Y™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘\Ú›Ø\™‘[˜X›YH˜[ÙNÈË‘\Ú›Ø\™”İ]ÕÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™\Ú›Ø\™ØØXÚKœİ]×İÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™\Ú›Ø\™ØXÚHœ™\ÚÜÚ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘\Ú›Ø\™‘[˜X›YHYNÈË‘\Ú›Ø\™”İ]Ñœ™\ÚÙXÛÛ™ÈHK‚BB]Ø[\œˆ™\Ú›Ø\™ØØXÚKœİ]×Ùœ™\ÚİÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™\Ú›Ø\™YÙÜ™YØ][Ûˆ[˜X›Y[\˜[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘\Ú›Ø\™YÙË‘[˜X›YHYNÈË‘\Ú›Ø\™YÙË’[\˜[ÙXÛÛ™ÈHK‚BB]Ø[\œˆ™\Ú›Ø\™ØYÙÜ™YØ][Û‹š[\˜[ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™\Ú›Ø\™YÙÜ™YØ][Ûˆ˜XÚÙš[ÜÚ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘\Ú›Ø\™YÙË‘[˜X›YHYB‚BBBXË‘\Ú›Ø\™YÙË˜XÚÙš[[˜X›YHYB‚BBBXË‘\Ú›Ø\™YÙË˜XÚÙš[X^^\ÈH‚BB_K‚BB]Ø[\œˆ™\Ú›Ø\™ØYÙÜ™YØ][Û‹˜˜XÚÙš[ÛX^Ù^\È‹‚B_K‚B^Â‚BB[˜[YNˆ™\Ú›Ø\™YÙÜ™YØ][Ûˆ™][[Ûˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘\Ú›Ø\™YÙË‘[˜X›YHYNÈË‘\Ú›Ø\™YÙË”™][[Û‹•\ØYÙSÙÜÑ^\ÈHK‚BB]Ø[\œˆ™\Ú›Ø\™ØYÙÜ™YØ][Û‹œ™][[Û‹\ØYÙWÛÙÜ×Ù^\È‹‚B_K‚B^Â‚BB[˜[YNˆ™\Ú›Ø\™YÙÜ™YØ][ÛˆY\™][[Ûˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘\Ú›Ø\™YÙË‘[˜X›YHYB‚BBBXË‘\Ú›Ø\™YÙË”™][[Û‹•\ØYÙPš[[™ÑY\^\ÈH‚BB_K‚BB]Ø[\œˆ™\Ú›Ø\™ØYÙÜ™YØ][Û‹œ™][[Û‹\ØYÙWØš[[™×ÙY\Ù^\È‹‚B_K‚B^Â‚BB[˜[YNˆ™\Ú›Ø\™YÙÜ™YØ][ÛˆY\™][[ÛˆÛX[\ˆ[ˆ\ØYÙHÙÜÈ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘\Ú›Ø\™YÙË‘[˜X›YHYB‚BBBXË‘\Ú›Ø\™YÙË”™][[Û‹•\ØYÙSÙÜÑ^\ÈHÌ‚BBBXË‘\Ú›Ø\™YÙË”™][[Û‹•\ØYÙPš[[™ÑY\^\ÈHB‚BB_K‚BB]Ø[\œˆ™\Ú›Ø\™ØYÙÜ™YØ][Û‹œ™][[Û‹\ØYÙWØš[[™×ÙY\Ù^\È‹‚B_K‚B^Â‚BB[˜[YNˆ™\Ú›Ø\™YÙÜ™YØ][Ûˆ\ØX›Y[\˜[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘\Ú›Ø\™YÙË‘[˜X›YH˜[ÙNÈË‘\Ú›Ø\™YÙË’[\˜[ÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™\Ú›Ø\™ØYÙÜ™YØ][Û‹š[\˜[ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ\ØYÙHÛX[\X^˜[™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË•\ØYÙPÛX[\‘[˜X›YHYNÈË•\ØYÙPÛX[\“X^˜[™ÙQ^\ÈHK‚BB]Ø[\œˆ\ØYÙWØÛX[\›X^Ü˜[™ÙWÙ^\È‹‚B_K‚B^Â‚BB[˜[YNˆ\ØYÙHÛX[\ÛÜšÙ\ˆ[\˜[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË•\ØYÙPÛX[\‘[˜X›YHYNÈË•\ØYÙPÛX[\•ÛÜšÙ\’[\˜[ÙXÛÛ™ÈHK‚BB]Ø[\œˆ\ØYÙWØÛX[\ÛÜšÙ\—Ú[\˜[ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ\ØYÙHÛX[\˜]ÚÚ^™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË•\ØYÙPÛX[\‘[˜X›YHYNÈË•\ØYÙPÛX[\˜]ÚÚ^™HHK‚BB]Ø[\œˆ\ØYÙWØÛX[\˜˜]ÚÜÚ^™H‹‚B_K‚B^Â‚BB[˜[YNˆ\ØYÙHÛX[\\ØX›Y™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË•\ØYÙPÛX[\‘[˜X›YH˜[ÙNÈË•\ØYÙPÛX[\˜]ÚÚ^™HHLHK‚BB]Ø[\œˆ\ØYÙWØÛX[\˜˜]ÚÜÚ^™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HX^›ÙHÚ^™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“X^›ÙTÚ^™HHK‚BB]Ø[\œˆ™Ø]]Ø^K›X^Ø›ÙWÜÚ^™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H^›ÙH^ÙYYÈYYXH›ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K•^X^›ÙTÚ^™HHË‘Ø]]Ø^K“X^›ÙTÚ^™H
-ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K^ÛX^Ø›ÙWÜÚ^™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[Ù[È\İ™XY[Z]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“[Ù[Ó\İ™XYX^]\ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K›[Ù[×Û\İÜ™XYÛX^Ø]\È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H™\ÜÛœÙHXY\ˆ[Y[İ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K”™\ÜÛœÙRXY\•[Y[İ]HLHK‚BB]Ø[\œˆ™Ø]]Ø^Kœ™\ÜÛœÙWÚXY\—İ[Y[İ]‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZH™\ÜÛœÙHXY\ˆ[Y[İ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RT™\ÜÛœÙRXY\•[Y[İ]HLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÜ™\ÜÛœÙWÚXY\—İ[Y[İ]‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÙ[Z[šHØ[YHXØÛİ[™]šY\È™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“X^Ø[YPXØÛİ[™]šY\ÑÙ[Z[šHHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›X^ÜØ[YWØXØÛİ[Ü™]šY\×ÙÙ[Z[šH‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÙ[Z[šHØ[YHXØÛİ[™]šY\ÈÛÈ\™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“X^Ø[YPXØÛİ[™]šY\ÑÙ[Z[šHHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›X^ÜØ[YWØXØÛİ[Ü™]šY\×ÙÙ[Z[šH‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZHš\œİİ]][Y[İ]™[İÈZ[š[][H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RQš\œİİ]][Y[İ]ÙXÛÛ™ÈHHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÙš\œİÛİ]]İ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZHYÚY™›Üš\œİİ]][Y[İ]ÛÈ\™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RRYÚY™›Üš\œİİ]][Y[İ]ÙXÛÛ™ÈHNHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÚYÚÙY™›ÜÙš\œİÛİ]]İ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HX^YHÛÛ›œÈ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“X^YPÛÛ›œÈHK‚BB]Ø[\œˆ™Ø]]Ø^K›X^ÚYWØÛÛ›œÈ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HX^YHÛÛ›œÈ\ˆÜİ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“X^YPÛÛ›œÔ\’ÜİHK‚BB]Ø[\œˆ™Ø]]Ø^K›X^ÚYWØÛÛ›œ×Ü\—ÚÜİ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HYH[Y[İ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’YPÛÛ›•[Y[İ]ÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^KšYWØÛÛ›—İ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HX^\İ™X[HÛY[È‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“X^\İ™X[PÛY[ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K›X^İ\İ™X[WØÛY[È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÛY[YH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^KÛY[YUÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K˜ÛY[ÚYWİÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÛÛ˜İ\œ™[˜ŞHÛİ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^KÛÛ˜İ\œ™[˜ŞTÛİZ[]\ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K˜ÛÛ˜İ\œ™[˜ŞWÜÛİİÛZ[]\È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HX^ÛÛ›œÈ\ˆÜİ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“X^ÛÛ›œÔ\’ÜİHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›X^ØÛÛ›œ×Ü\—ÚÜİ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÛÛ›™Xİ[Ûˆ\ÛÛ][Ûˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^KÛÛ›™Xİ[Û”ÛÛ\ÛÛ][ÛˆHš[˜[YˆK‚BB]Ø[\œˆ™Ø]]Ø^K˜ÛÛ›™Xİ[Û—ÜÛÛÚ\ÛÛ][Ûˆ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^Hİ™X[HÙY\[]™H˜[™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K”İ™X[RÙY\[]™R[\˜[HK‚BB]Ø[\œˆ™Ø]]Ø^Kœİ™X[WÚÙY\[]™WÚ[\˜[‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZHÜÈØ]]X^ÛÛ›œÈ˜XİÜˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË“Ğ]]X^ÛÛ›œÑ˜XİÜˆHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË›Ø]]ÛX^ØÛÛ›œ×Ù˜XİÜˆ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZHÜÈ\ZÙ^HX^ÛÛ›œÈ˜XİÜˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔËTRÙ^SX^ÛÛ›œÑ˜XİÜˆHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË˜\ZÙ^WÛX^ØÛÛ›œ×Ù˜XİÜˆ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZHˆ˜[˜XÚÈ™\ÚÛ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RR‹‘˜[˜XÚÑ\œ›Ü•™\ÚÛHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÚ‹™˜[˜XÚ×Ù\œ›Ü—İ™\ÚÛ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZHˆ˜[˜XÚÈÚ[™İÈ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RR‹‘˜[˜XÚÕÚ[™İÔÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÚ‹™˜[˜XÚ×İÚ[™İ×ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZHˆ˜[˜XÚÈ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RR‹‘˜[˜XÚÕÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÚ‹™˜[˜XÚ×İÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZH›ŞHİ™X[HÚ\˜İZ]™\ÚÛ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RT›ŞTİ™X[PÚ\˜İZ]‘˜Z[\™U™\ÚÛHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÜ›ŞWÜİ™X[WØÚ\˜İZ]™˜Z[\™Wİ™\ÚÛ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZH›ŞHİ™X[HÚ\˜İZ]Ú[™İÈ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RT›ŞTİ™X[PÚ\˜İZ]•Ú[™İÔÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÜ›ŞWÜİ™X[WØÚ\˜İZ]Ú[™İ×ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HÜ[˜ZH›ŞHİ™X[HÚ\˜İZ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RT›ŞTİ™X[PÚ\˜İZ]•ÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÜ›ŞWÜİ™X[WØÚ\˜İZ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^Hİ™X[H]H[\˜[˜[™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K”İ™X[Q]R[\˜[[Y[İ]HHK‚BB]Ø[\œˆ™Ø]]Ø^Kœİ™X[WÙ]WÚ[\˜[İ[Y[İ]‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^Hİ™X[H]H[\˜[™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K”İ™X[Q]R[\˜[[Y[İ]HLHK‚BB]Ø[\œˆ™Ø]]Ø^Kœİ™X[WÙ]WÚ[\˜[İ[Y[İ]]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[XYÙHİ™X[HÙY\[]™H˜[™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’[XYÙTİ™X[RÙY\[]™R[\˜[HK‚BB]Ø[\œˆ™Ø]]Ø^Kš[XYÙWÜİ™X[WÚÙY\[]™WÚ[\˜[‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[XYÙHİ™X[HÙY\[]™H™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’[XYÙTİ™X[RÙY\[]™R[\˜[HLHK‚BB]Ø[\œˆ™Ø]]Ø^Kš[XYÙWÜİ™X[WÚÙY\[]™WÚ[\˜[]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[XYÙH›Ûœİ™X[HÙY\[]™H˜[™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’[XYÙS›Ûœİ™X[RÙY\[]™R[\˜[HK‚BB]Ø[\œˆ™Ø]]Ø^Kš[XYÙWÛ›Ûœİ™X[WÚÙY\[]™WÚ[\˜[‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[XYÙH›Ûœİ™X[HÙY\[]™H™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’[XYÙS›Ûœİ™X[RÙY\[]™R[\˜[HLHK‚BB]Ø[\œˆ™Ø]]Ø^Kš[XYÙWÛ›Ûœİ™X[WÚÙY\[]™WÚ[\˜[]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[XYÙHİ™X[H]H[\˜[˜[™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’[XYÙTİ™X[Q]R[\˜[[Y[İ]HÌK‚BB]Ø[\œˆ™Ø]]Ø^Kš[XYÙWÜİ™X[WÙ]WÚ[\˜[İ[Y[İ]‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[XYÙHİ™X[H]H[\˜[™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’[XYÙTİ™X[Q]R[\˜[[Y[İ]HLHK‚BB]Ø[\œˆ™Ø]]Ø^Kš[XYÙWÜİ™X[WÙ]WÚ[\˜[İ[Y[İ]]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[XYÙHÛÛ˜İ\œ™[˜ŞHX^™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK“X^ÛÛ˜İ\œ™[™\]Y\İÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^Kš[XYÙWØÛÛ˜İ\œ™[˜ŞK›X^ØÛÛ˜İ\œ™[Ü™\]Y\İÈ]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[XYÙHÛÛ˜İ\œ™[˜ŞHİ™\™›İÈ[ÙH[˜[Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK“İ™\™›İÓ[ÙHHœ]Y]YHˆK‚BB]Ø[\œˆ™Ø]]Ø^Kš[XYÙWØÛÛ˜İ\œ™[˜ŞK›İ™\™›İ×Û[ÙH‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[XYÙHÛÛ˜İ\œ™[˜ŞHØZ][Y[İ]™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK•ØZ][Y[İ]ÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^Kš[XYÙWØÛÛ˜İ\œ™[˜ŞKØZ]İ[Y[İ]ÜÙXÛÛ™È]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[XYÙHÛÛ˜İ\œ™[˜ŞHX^ØZ][™È™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK“X^ØZ][™Ô™\]Y\İÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^Kš[XYÙWØÛÛ˜İ\œ™[˜ŞK›X^İØZ][™×Ü™\]Y\İÈ]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HX^[™HÚ^™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“X^[™TÚ^™HHLK‚BB]Ø[\œˆ™Ø]]Ø^K›X^Û[™WÜÚ^™H]\İ™H]X\İ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HX^[™HÚ^™H™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“X^[™TÚ^™HHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›X^Û[™WÜÚ^™H]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™ÛÜšÙ\ˆÛİ[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K•\ØYÙT™XÛÜ™•ÛÜšÙ\Ûİ[HK‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™ÛÜšÙ\—ØÛİ[‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™]Y]YHÚ^™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K•\ØYÙT™XÛÜ™”]Y]YTÚ^™HHK‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™œ]Y]YWÜÚ^™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™[Y[İ]‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K•\ØYÙT™XÛÜ™•\ÚÕ[Y[İ]ÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™\Ú×İ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™İ™\™›İÈÛXŞH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K•\ØYÙT™XÛÜ™“İ™\™›İÔÛXŞHHš[˜[YˆK‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™›İ™\™›İ×ÜÛXŞH‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™Ø[\H\˜Ù[˜[™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K•\ØYÙT™XÛÜ™“İ™\™›İÔØ[\T\˜Ù[HLHK‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™›İ™\™›İ×ÜØ[\WÜ\˜Ù[‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™Ø[\H\˜Ù[™\]Z\™Y›ÜˆØ[\HÛXŞH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K•\ØYÙT™XÛÜ™“İ™\™›İÔÛXŞHH\ØYÙT™XÛÜ™İ™\™›İÔÛXŞTØ[\B‚BBBXË‘Ø]]Ø^K•\ØYÙT™XÛÜ™“İ™\™›İÔØ[\T\˜Ù[H‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™›İ™\™›İ×ÜØ[\WÜ\˜Ù[]\İ™HÜÚ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™]]ÈØØ[HX^İHZ[ˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[SZ[•ÛÜšÙ\œÈHM‚‚BBBXË‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[SX^ÛÜšÙ\œÈHL‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™˜]]×ÜØØ[WÛX^İÛÜšÙ\œÈ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™ÛÜšÙ\ˆ[ˆ]]ÈØØ[H˜[™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[SZ[•ÛÜšÙ\œÈHŒ‚BBBXË‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[SX^ÛÜšÙ\œÈHÌ‚BBBXË‘Ø]]Ø^K•\ØYÙT™XÛÜ™•ÛÜšÙ\Ûİ[HL‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™ÛÜšÙ\—ØÛİ[]\İ™H™]ÙY[ˆ]]×ÜØØ[WÛZ[—İÛÜšÙ\œÈ[™]]×ÜØØ[WÛX^İÛÜšÙ\œÈ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™]]ÈØØ[H]Y]YH™\ÚÛÈÜ™\ˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[U\]Y]YT\˜Ù[HL‚BBBXË‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[QİÛ”]Y]YT\˜Ù[HL‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™˜]]×ÜØØ[WÙİÛ—Ü]Y]YWÜ\˜Ù[]\İ™H\ÜÈ‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™]]ÈØØ[H\İ\‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[U\İ\HK‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™˜]]×ÜØØ[Wİ\Üİ\‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\ØYÙH™XÛÜ™]]ÈØØ[H[\˜[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[PÚXÚÒ[\˜[ÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K\ØYÙWÜ™XÛÜ™˜]]×ÜØØ[WØÚXÚ×Ú[\˜[ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H\Ù\ˆÜ›İ\˜]HØXÚH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K•\Ù\‘Ü›İ\˜]PØXÚUÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K\Ù\—ÙÜ›İ\Ü˜]WØØXÚWİÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^H[Ù[È\İØXÚH˜[™ÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“[Ù[Ó\İØXÚUÙXÛÛ™ÈHÌHK‚BB]Ø[\œˆ™Ø]]Ø^K›[Ù[×Û\İØØXÚWİÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HØÚY[[™ÈİXÚŞHØZ][™È‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K”ØÚY[[™Ë”İXÚŞTÙ\ÜÚ[Û“X^ØZ][™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^KœØÚY[[™ËœİXÚŞWÜÙ\ÜÚ[Û—ÛX^İØZ][™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HØÚY[[™ÈØY˜]ÚØXÚH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K”ØÚY[[™Ë“ØY˜]ÚØXÚUTÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^KœØÚY[[™Ë›ØYØ˜]ÚØØXÚWİÛ\È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HØÚY[[™Èİ]›ŞÛ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K”ØÚY[[™Ë“İ]›ŞÛ[\˜[ÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^KœØÚY[[™Ë›İ]›ŞÜÛÚ[\˜[ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^HØÚY[[™Èİ]›Ş˜Z[\™\È‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K”ØÚY[[™Ë“İ]›ŞYÔ™XZ[˜Z[\™\ÈHK‚BB]Ø[\œˆ™Ø]]Ø^KœØÚY[[™Ë›İ]›ŞÛY×Ü™XZ[Ù˜Z[\™\È‹‚B_K‚B^Â‚BB[˜[YNˆ™Ø]]Ø^Hİ]›ŞYÈ™XZ[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K”ØÚY[[™Ë“İ]›ŞYÕØ\›”ÙXÛÛ™ÈHL‚BBBXË‘Ø]]Ø^K”ØÚY[[™Ë“İ]›ŞYÔ™XZ[ÙXÛÛ™ÈHB‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^KœØÚY[[™Ë›İ]›ŞÛY×Ü™XZ[ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ›ÙÈ]™[[˜[Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË“ÙË“]™[H˜XÙHˆK‚BB]Ø[\œˆ›ÙË›]™[‹‚B_K‚B^Â‚BB[˜[YNˆ›ÙÈ›Ü›X][˜[Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË“ÙË‘›Ü›X]HœZ[ˆˆK‚BB]Ø[\œˆ›ÙË™›Ü›X]‹‚B_K‚B^Â‚BB[˜[YNˆ›ÙÈİ]]\ØX›Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË“ÙË“İ]]•Ôİİ]H˜[ÙB‚BBBXË“ÙË“İ]]•Ñš[HH˜[ÙB‚BB_K‚BB]Ø[\œˆ›ÙË›İ]]×Üİİ][™ÙË›İ]]×Ùš[HØ[››İ›İ™H˜[ÙH‹‚B_K‚B^Â‚BB[˜[YNˆ›ÙÈ›İ][ÛˆÚ^™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË“ÙË”›İ][Û‹“X^Ú^™SPˆHK‚BB]Ø[\œˆ›ÙËœ›İ][Û‹›X^ÜÚ^™WÛXˆ‹‚B_K‚B^Â‚BB[˜[YNˆ›ÙÈØ[\[™È[˜X›Y[˜[Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË“ÙË”Ø[\[™Ë‘[˜X›YHYB‚BBBXË“ÙË”Ø[\[™Ë’[š]X[H‚BB_K‚BB]Ø[\œˆ›ÙËœØ[\[™Ëš[š]X[‹‚B_K‚B^Â‚BB[˜[YNˆ›ÜÈY]šXÜÈÛÛXİÜˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË“ÜË“Y]šXÜĞÛÛXİÜØXÚK•HLHK‚BB]Ø[\œˆ›ÜË›Y]šXÜ×ØÛÛXİÜ—ØØXÚK‹‚B_K‚B^Â‚BB[˜[YNˆ›ÜÈÛX[\™][[Ûˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË“ÜËÛX[\‘\œ›Ü“ÙÔ™][[Û‘^\ÈHLHK‚BB]Ø[\œˆ›ÜË˜ÛX[\™\œ›Ü—ÛÙ×Ü™][[Û—Ù^\È‹‚B_K‚B^Â‚BB[˜[YNˆ›ÜÈÛX[\Ş\İ[HÙÈ™][[Ûˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË“ÜËÛX[\”Ş\İ[SÙÔ™][[Û‘^\ÈHK‚BB]Ø[\œˆ›ÜË˜ÛX[\œŞ\İ[WÛÙ×Ü™][[Û—Ù^\È‹‚B_K‚B^Â‚BB[˜[YNˆ›ÜÈÛX[\Z[]H™][[Ûˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË“ÜËÛX[\“Z[]SY]šXÜÔ™][[Û‘^\ÈHLHK‚BB]Ø[\œˆ›ÜË˜ÛX[\›Z[]WÛY]šXÜ×Ü™][[Û—Ù^\È‹‚B_K‚_B‚‚Y›ÜˆËH˜[™ÙHØ\Ù\ÈÂ‚B]”[Š›˜[YK[˜Ê
-\İ[™Ë•
-HÂ‚BBXÙ™ÈHZ[˜[Y
-
-B‚BB]›]]]JÙ™ÊB‚BBY\œˆHÙ™Ë•˜[Y]J
-B‚BBZYˆ\œˆOHš[\İš[™ÜËÛÛZ[œÊ\œ‹‘\œ›ÜŠ
-KØ[\œŠHÂ‚BBB]‘˜][Š•˜[Y]J
-H\œ›ÜˆH	]‹Ø[	\H‹\œ‹Ø[\œŠB‚BB_B‚B_JB‚_BŸB‚™[˜È\İ˜[Y]PÛÛ™šY×ÓÜ[RUÔÔ[\Ê
-\İ[™Ë•
-HÂ‚XZ[˜[YH[˜Ê
-\İ[™Ë•
-H
-ÛÛ™šYÈÂ‚B]’[\Š
-B‚B\™\Ù]š\\•Ú]•ÕÙXÜ™]
-
-B‚BXÙ™Ë\œˆHØY
+func TestLoadRequestBodyMemoryBudget(t *testing.T) {
+	t.Run("auto-sized from memory limit when unset", func(t *testing.T) {
+		resetViperWithJWTSecret(t)
+		stubMemoryLimit(t, 128<<30)
+		cfg, err := Load()
+		require.NoError(t, err)
+		require.Equal(t, int64(32<<30), cfg.Gateway.RequestBodyMemoryBudgetBytes)
+	})
 
-B‚B\™\]Z\™K“›Ñ\œ›ÜŠ\œŠB‚B\™]\›ˆÙ™Â‚_B‚‚]”[ŠœİXÚŞH™\ÜÛœÙHY9ao9k®y¥éúe+¹fç¹hjÈ‹[˜Ê
-\İ[™Ë•
-HÂ‚BXÙ™ÈHZ[˜[Y
-
-B‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”İXÚŞT™\ÜÛœÙRQÙXÛÛ™ÈH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”İXÚŞT™]š[İ\Ô™\ÜÛœÙUÙXÛÛ™ÈHÌŒ‚‚B\™\]Z\™K“›Ñ\œ›ÜŠÙ™Ë•˜[Y]J
-JB‚B\™\]Z\™K‘\]X[
-ÌŒÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”İXÚŞT™\ÜÛœÙRQÙXÛÛ™ÊB‚_JB‚‚XØ\Ù\ÈH×\İXİÂ‚B[˜[YHİš[™Â‚B[]]]H[˜Ê
-ÛÛ™šYÊB‚B]Ø[\œˆİš[™Â‚_^Â‚B^Â‚BB[˜[YNˆ›X^ØÛÛ›œ×Ü\—ØXØÛİ[9oázhnù..¹«hù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË“X^ÛÛ›œÔ\XØÛİ[HK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË›X^ØÛÛ›œ×Ü\—ØXØÛİ[‹‚B_K‚B^Â‚BB[˜[YNˆ˜ÛY[Ùš\œİÛY\ÜØYÙWİ[Y[İ]ÜÙXÛÛ™È9oázhnù..¹«hù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔËÛY[š\œİY\ÜØYÙU[Y[İ]ÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË˜ÛY[Ùš\œİÛY\ÜØYÙWİ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ˜ÛY[Ùš\œİÛY\ÜØYÙWİ[Y[İ]ÜÙXÛÛ™È9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔËÛY[š\œİY\ÜØYÙU[Y[İ]ÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË˜ÛY[Ùš\œİÛY\ÜØYÙWİ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆš[™Ü™\Ü×Ú[\—İ\›—ÚYWİ[Y[İ]ÜÙXÛÛ™È9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË’[™Ü™\ÜÒ[\•\›’YU[Y[İ]ÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËš[™Ü™\Ü×Ú[\—İ\›—ÚYWİ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆ›X^Ú[™Ü™\Ü×ØÛÛ›™Xİ[Ûœ×Ü\—Ø\WÚÙ^H9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË“X^[™Ü™\ÜĞÛÛ›™Xİ[ÛœÔ\TRÙ^HHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË›X^Ú[™Ü™\Ü×ØÛÛ›™Xİ[Ûœ×Ü\—Ø\WÚÙ^H‹‚B_K‚B^Â‚BB[˜[YNˆ›Z[—ÚYWÜ\—ØXØÛİ[9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË“Z[’YT\XØÛİ[HLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË›Z[—ÚYWÜ\—ØXØÛİ[‹‚B_K‚B^Â‚BB[˜[YNˆ›X^ÚYWÜ\—ØXØÛİ[9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË“X^YT\XØÛİ[HLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË›X^ÚYWÜ\—ØXØÛİ[‹‚B_K‚B^Â‚BB[˜[YNˆ›Z[—ÚYWÜ\—ØXØÛİ[9.#z ïyi)ù.£ˆX^ÚYWÜ\—ØXØÛİ[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K“Ü[RUÔË“Z[’YT\XØÛİ[HÂ‚BBBXË‘Ø]]Ø^K“Ü[RUÔË“X^YT\XØÛİ[H‚‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË›Z[—ÚYWÜ\—ØXØÛİ[]\İ™HHX^ÚYWÜ\—ØXØÛİ[‹‚B_K‚B^Â‚BB[˜[YNˆ›X^ÚYWÜ\—ØXØÛİ[9.#z ïyi)ù.£ˆX^ØÛÛ›œ×Ü\—ØXØÛİ[‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K“Ü[RUÔË“X^ÛÛ›œÔ\XØÛİ[H‚‚BBBXË‘Ø]]Ø^K“Ü[RUÔË“Z[’YT\XØÛİ[HB‚BBBXË‘Ø]]Ø^K“Ü[RUÔË“X^YT\XØÛİ[HÂ‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË›X^ÚYWÜ\—ØXØÛİ[]\İ™HHX^ØÛÛ›œ×Ü\—ØXØÛİ[‹‚B_K‚B^Â‚BB[˜[YNˆ™X[İ[Y[İ]ÜÙXÛÛ™È9oázhnù..¹«hù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË‘X[[Y[İ]ÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË™X[İ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆœ™XYİ[Y[İ]ÜÙXÛÛ™È9oázhnù..¹«hù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”™XY[Y[İ]ÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœ™XYİ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆÜš]Wİ[Y[İ]ÜÙXÛÛ™È9oázhnù..¹«hù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË•Üš]U[Y[İ]ÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËÜš]Wİ[Y[İ]ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆœÛÛİ\™Ù]İ][^˜][Ûˆ9oázhnùg*
-WH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”ÛÛ\™Ù]][^˜][ÛˆHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœÛÛİ\™Ù]İ][^˜][Ûˆ‹‚B_K‚B^Â‚BB[˜[YNˆœ]Y]YWÛ[Z]Ü\—ØÛÛ›ˆ9oázhnù..¹«hù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”]Y]YS[Z]\ÛÛ›ˆHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœ]Y]YWÛ[Z]Ü\—ØÛÛ›ˆ‹‚B_K‚B^Â‚BB[˜[YNˆ™˜[˜XÚ×ØÛÛÛİÛ—ÜÙXÛÛ™È9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË‘˜[˜XÚĞÛÛÛİÛ”ÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË™˜[˜XÚ×ØÛÛÛİÛ—ÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆœİÜ™WÙ\ØX›YØÛÛ›—Û[ÙH9oázhnù..ˆİšXİY\]™_Ù™ˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”İÜ™Q\ØX›YÛÛ›“[ÙHHš[˜[YˆK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœİÜ™WÙ\ØX›YØÛÛ›—Û[ÙH‹‚B_K‚B^Â‚BB[˜[YNˆš[™Ü™\Ü×Û[ÙWÙY˜][9oázhnù..ˆÙ™ŸİÜÛÛ\Üİ›İYÚØœšYÙH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË’[™Ü™\ÜÓ[ÙQY˜][Hš[˜[YˆK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËš[™Ü™\Ü×Û[ÙWÙY˜][‹‚B_K‚B^Â‚BB[˜[YNˆœ^[ØYÛÙ×ÜØ[\WÜ˜]H9oázhnùg*ÌWH:# ùfí9a¡H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”^[ØYÙÔØ[\T˜]HHKŒˆK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœ^[ØYÛÙ×ÜØ[\WÜ˜]H‹‚B_K‚B^Â‚BB[˜[YNˆœ™]Wİİ[ØYÙ]Û\È9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”™]Uİ[YÙ]TÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœ™]Wİİ[ØYÙ]Û\È‹‚B_K‚B^Â‚BB[˜[YNˆ›—İÜÚÈ9oázhnù..¹«hù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË“•ÜÈHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜË›—İÜÚÈ‹‚B_K‚B^Â‚BB[˜[YNˆœİXÚŞWÜÙ\ÜÚ[Û—İÜÙXÛÛ™È9oázhnù..¹«hù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”İXÚŞTÙ\ÜÚ[Û•ÙXÛÛ™ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœİXÚŞWÜÙ\ÜÚ[Û—İÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆœİXÚŞWÜ™\ÜÛœÙWÚYİÜÙXÛÛ™È9oázhnù..¹«hù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”İXÚŞT™\ÜÛœÙRQÙXÛÛ™ÈH‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”İXÚŞT™]š[İ\Ô™\ÜÛœÙUÙXÛÛ™ÈH‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœİXÚŞWÜ™\ÜÛœÙWÚYİÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆœİXÚŞWÜ™]š[İ\×Ü™\ÜÛœÙWİÜÙXÛÛ™È9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”İXÚŞT™]š[İ\Ô™\ÜÛœÙUÙXÛÛ™ÈHLHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœİXÚŞWÜ™]š[İ\×Ü™\ÜÛœÙWİÜÙXÛÛ™È‹‚B_K‚B^Â‚BB[˜[YNˆœØÚY[\—ÜØÛÜ™WİÙZYÚÈ9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”]Y]YHHLŒHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœØÚY[\—ÜØÛÜ™WİÙZYÚËŠˆ]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆœØÚY[\—ÜØÛÜ™WİÙZYÚÈ][İWÚXY›ÛÛH9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”][İRXY›ÛÛHHLŒHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœØÚY[\—ÜØÛÜ™WİÙZYÚËŠˆ]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆœØÚY[\—ÜØÛÜ™WİÙZYÚÈ\İ™X[WØÛÜİ9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË•\İ™X[PÛÜİHLŒHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœØÚY[\—ÜØÛÜ™WİÙZYÚËŠˆ]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆœØÚY[\—ÜØÛÜ™WİÙZYÚÈ™\Ù]9.#z ïy..º-'ù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”™\Ù]HLŒHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœØÚY[\—ÜØÛÜ™WİÙZYÚËŠˆ]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆœØÚY[\—ÜØÛÜ™WİÙZYÚÈ9.#z ïy..ˆ˜Sˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”™]š[İ\Ô™\ÜÛœÙHHX]“˜SŠ
-HK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœØÚY[\—ÜØÛÜ™WİÙZYÚËŠˆ]\İ™H›Û‹[™YØ]]™H[™š[š]H‹‚B_K‚B^Â‚BB[˜[YNˆœØÚY[\—ÜØÛÜ™WİÙZYÚÈ9.#z ïy..ˆ[™ˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË•\İ™X[PÛÜİHX]’[™ŠJHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœØÚY[\—ÜØÛÜ™WİÙZYÚËŠˆ]\İ™H›Û‹[™YØ]]™H[™š[š]H‹‚B_K‚B^Â‚BB[˜[YNˆœØÚY[\—ÜØÛÜ™WİÙZYÚÈ9 .ùd£9.#z ïy®¨¹aîˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”š[Üš]HHX]“X^›Ø]‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË“ØYHX]“X^›Ø]‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœØÚY[\—ÜØÛÜ™WİÙZYÚÈ˜\ÙK]ÙZYÚİ[H]\İ™Hš[š]H‹‚B_K‚B^Â‚BB[˜[YNˆœØÚY[\—ÜØÛÜ™WİÙZYÚÈ9d*ÈİXÚŞH9 .ùd£9.#z ïy®¨¹aîˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”š[Üš]HHX]“X^›Ø]‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”™]š[İ\Ô™\ÜÛœÙHHX]“X^›Ø]‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœØÚY[\—ÜØÛÜ™WİÙZYÚÈİ[]ÙZYÚİ[H]\İ™Hš[š]H‹‚B_K‚B^Â‚BB[˜[YNˆœØÚY[\—ÜØÛÜ™WİÙZYÚÈ9.#z ïyaj9..ˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”š[Üš]HH‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË“ØYH‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”]Y]YHH‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË‘\œ›Ü”˜]HH‚BBBXË‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË••H‚BB_K‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWİÜËœØÚY[\—ÜØÛÜ™WİÙZYÚÈ]\İ›İ[™H™\›È‹‚B_K‚B^Â‚BB[˜[YNˆœİXÚŞWÙ\ØØ\WİÛ\È9oázhnù..¹«hù¥l‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RTØÚY[\‹”İXÚŞQ\ØØ\U•\ÈHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÜØÚY[\‹œİXÚŞWÙ\ØØ\WİÛ\È‹‚B_K‚B^Â‚BB[˜[YNˆœİXÚŞWÙ\ØØ\WÙ\œ›Ü—Ü˜]H9.#z ïyl#ù.£ˆ‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RTØÚY[\‹”İXÚŞQ\ØØ\Q\œ›Ü”˜]HHLŒHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÜØÚY[\‹œİXÚŞWÙ\ØØ\WÙ\œ›Ü—Ü˜]H‹‚B_K‚B^Â‚BB[˜[YNˆœİXÚŞWÙ\ØØ\WÙ\œ›Ü—Ü˜]H9.#z ïyi)ù.£ˆH‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÈË‘Ø]]Ø^K“Ü[RTØÚY[\‹”İXÚŞQ\ØØ\Q\œ›Ü”˜]HHKŒHK‚BB]Ø[\œˆ™Ø]]Ø^K›Ü[˜ZWÜØÚY[\‹œİXÚŞWÙ\ØØ\WÙ\œ›Ü—Ü˜]H‹‚B_K‚_B‚‚Y›ÜˆËÈH˜[™ÙHØ\Ù\ÈÂ‚B]ÈHÂ‚B]”[ŠË›˜[YK[˜Ê
-\İ[™Ë•
-HÂ‚BBXÙ™ÈHZ[˜[Y
-
-B‚BB]Ë›]]]JÙ™ÊB‚‚BBY\œˆHÙ™Ë•˜[Y]J
-B‚BB\™\]Z\™K‘\œ›ÜŠ\œŠB‚BB\™\]Z\™KÛÛZ[œÊ\œ‹‘\œ›ÜŠ
-KËØ[\œŠB‚B_JB‚_B‚‚]”[Šœ][İWÚXY›ÛÛH9cëù/g9..¹e+ù. 9§"y¥b:, ùn©¹§`úaãH‹[˜Ê
-\İ[™Ë•
-HÂ‚BXÙ™ÈHZ[˜[Y
-
-B‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”š[Üš]HH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË“ØYH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”]Y]YHH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË‘\œ›Ü”˜]HH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË••H‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”][İRXY›ÛÛHHŒB‚‚B\™\]Z\™K“›Ñ\œ›ÜŠÙ™Ë•˜[Y]J
-JB‚_JB‚‚]”[Š\İ™X[WØÛÜİ9cëù/g9..¹e+ù. 9§"y¥b:, ùn©¹§`úaãH‹[˜Ê
-\İ[™Ë•
-HÂ‚BXÙ™ÈHZ[˜[Y
-
-B‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”š[Üš]HH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË“ØYH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”]Y]YHH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË‘\œ›Ü”˜]HH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË••H‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË•\İ™X[PÛÜİHŒB‚‚B\™\]Z\™K“›Ñ\œ›ÜŠÙ™Ë•˜[Y]J
-JB‚_JB‚‚]”[Šœ™\Ù]9cëù/g9..¹e+ù. 9§"y¥b:, ùn©¹§`úaãH‹[˜Ê
-\İ[™Ë•
-HÂ‚BXÙ™ÈHZ[˜[Y
-
-B‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”š[Üš]HH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË“ØYH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”]Y]YHH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË‘\œ›Ü”˜]HH‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË••H‚BXÙ™Ë‘Ø]]Ø^K“Ü[RUÔË”ØÚY[\”ØÛÜ™UÙZYÚË”™\Ù]HŒB‚‚B\™\]Z\™K“›Ñ\œ›ÜŠÙ™Ë•˜[Y]J
-JB‚_JBŸB‚™[˜È\İ˜[Y]PÛÛ™šY×Ğ]]ÔØØ[Q\ØX›YYÛ›Ü™P]]ÔØØ[QšY[Ê
-\İ[™Ë•
-HÂ‚\™\Ù]š\\•Ú]•ÕÙXÜ™]
-
-B‚XÙ™Ë\œˆHØY
+	t.Run("explicit environment value wins, including 0", func(t *testing.T) {
+		resetViperWithJWTSecret(t)
+		stubMemoryLimit(t, 128<<30)
+		t.Setenv("GATEWAY_REQUEST_BODY_MEMORY_BUDGET_BYTES", "0")
+		cfg, err := Load()
+		require.NoError(t, err)
+		require.Zero(t, cfg.Gateway.RequestBodyMemoryBudgetBytes)
+	})
 
-B‚ZYˆ\œˆOHš[Â‚B]‘˜][Š“ØY
+	t.Run("empty environment value is ignored like viper does", func(t *testing.T) {
+		resetViperWithJWTSecret(t)
+		stubMemoryLimit(t, 128<<30)
+		t.Setenv("GATEWAY_REQUEST_BODY_MEMORY_BUDGET_BYTES", "")
+		cfg, err := Load()
+		require.NoError(t, err)
+		require.Equal(t, int64(32<<30), cfg.Gateway.RequestBodyMemoryBudgetBytes)
+	})
 
-H\œ›Üˆ	]ˆ‹\œŠB‚_B‚‚XÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[Q[˜X›YH˜[ÙB‚XÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™•ÛÜšÙ\Ûİ[H‚‚KËÈ:!ê¹bª9¢jyï*yk®yalúeëy¥í»ï#:/æy.¦ùkeù«­yn¥:(ªùoïyåi{ï#9.#yn¥9kï:!í9¨(zj£9i,z-)xà ‚‚XÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[SZ[•ÛÜšÙ\œÈH‚XÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[SX^ÛÜšÙ\œÈH‚XÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[U\]Y]YT\˜Ù[H‚XÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[QİÛ”]Y]YT\˜Ù[HL‚XÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[U\İ\H‚XÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[QİÛ”İ\H‚XÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[PÚXÚÒ[\˜[ÙXÛÛ™ÈH‚XÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[PÛÛÛİÛ”ÙXÛÛ™ÈHLB‚‚ZYˆ\œˆHÙ™Ë•˜[Y]J
-NÈ\œˆOHš[Â‚B]‘˜][Š•˜[Y]J
-HÚİ[YÛ›Ü™H]]ÈØØ[HšY[ÈÚ[ˆ\ØX›Yˆ	]ˆ‹\œŠB‚_BŸB‚™[˜È\İ˜[Y]PÛÛ™šY×ÓÙÔ™\]Z\™Y[™›İ][Û›İ[™Ê
-\İ[™Ë•
-HÂ‚\™\Ù]š\\•Ú]•ÕÙXÜ™]
-
-B‚‚XØ\Ù\ÈH×\İXİÂ‚B[˜[YHİš[™Â‚B[]]]H[˜Ê
-ÛÛ™šYÊB‚B]Ø[\œˆİš[™Â‚_^Â‚B^Â‚BB[˜[YNˆ›ÙÈ]™[™\]Z\™Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË“ÙË“]™[Hˆ‚‚BB_K‚BB]Ø[\œˆ›ÙË›]™[\È™\]Z\™Y‹‚B_K‚B^Â‚BB[˜[YNˆ›ÙÈ›Ü›X]™\]Z\™Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË“ÙË‘›Ü›X]Hˆ‚‚BB_K‚BB]Ø[\œˆ›ÙË™›Ü›X]\È™\]Z\™Y‹‚B_K‚B^Â‚BB[˜[YNˆ›ÙÈİXÚİ˜XÙH™\]Z\™Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË“ÙË”İXÚİ˜XÙS]™[Hˆ‚‚BB_K‚BB]Ø[\œˆ›ÙËœİXÚİ˜XÙWÛ]™[\È™\]Z\™Y‹‚B_K‚B^Â‚BB[˜[YNˆ›ÙÈX^˜XÚİ\È›Û‹[™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË“ÙË”›İ][Û‹“X^˜XÚİ\ÈHLB‚BB_K‚BB]Ø[\œˆ›ÙËœ›İ][Û‹›X^Ø˜XÚİ\È]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆ›ÙÈX^YÙH›Û‹[™YØ]]™H‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË“ÙË”›İ][Û‹“X^YÙQ^\ÈHLB‚BB_K‚BB]Ø[\œˆ›ÙËœ›İ][Û‹›X^ØYÙWÙ^\È]\İ™H›Û‹[™YØ]]™H‹‚B_K‚B^Â‚BB[˜[YNˆœØ[\[™È\™XY\ˆ›Û‹[™YØ]]™HÚ[ˆ\ØX›Y‹‚BB[]]]Nˆ[˜ÊÈ
-ÛÛ™šYÊHÂ‚BBBXË“ÙË”Ø[\[™Ë‘[˜X›YH˜[ÙB‚BBBXË“ÙË”Ø[\[™Ë•\™XY\ˆHLB‚BB_K‚BB]Ø[\œˆ›ÙËœØ[\[™Ë\™XY\ˆ]\İ™H›Û‹[™YØ]]™H‹‚B_K‚_B‚‚Y›ÜˆËH˜[™ÙHØ\Ù\ÈÂ‚B]”[Š›˜[YK[˜Ê
-\İ[™Ë•
-HÂ‚BBXÙ™Ë\œˆHØY
+	t.Run("explicit environment value wins over auto-sizing", func(t *testing.T) {
+		resetViperWithJWTSecret(t)
+		stubMemoryLimit(t, 128<<30)
+		t.Setenv("GATEWAY_REQUEST_BODY_MEMORY_BUDGET_BYTES", "2147483648")
+		cfg, err := Load()
+		require.NoError(t, err)
+		require.Equal(t, int64(2<<30), cfg.Gateway.RequestBodyMemoryBudgetBytes)
+	})
 
-B‚BBZYˆ\œˆOHš[Â‚BBB]‘˜][Š“ØY
+	t.Run("explicit config file 0 disables the budget", func(t *testing.T) {
+		resetViperWithJWTSecret(t)
+		stubMemoryLimit(t, 128<<30)
+		configFile := filepath.Join(t.TempDir(), "config.yaml")
+		require.NoError(t, os.WriteFile(configFile, []byte("gateway:\n  request_body_memory_budget_bytes: 0\n"), 0o600))
+		t.Setenv("CONFIG_FILE", configFile)
+		cfg, err := Load()
+		require.NoError(t, err)
+		require.Zero(t, cfg.Gateway.RequestBodyMemoryBudgetBytes)
+	})
 
-H\œ›Üˆ	]ˆ‹\œŠB‚BB_B‚BB]›]]]JÙ™ÊB‚BBY\œˆHÙ™Ë•˜[Y]J
-B‚BBZYˆ\œˆOHš[\İš[™ÜËÛÛZ[œÊ\œ‹‘\œ›ÜŠ
-KØ[\œŠHÂ‚BBB]‘˜][Š•˜[Y]J
-H\œ›ÜˆH	]‹Ø[	\H‹\œ‹Ø[\œŠB‚BB_B‚B_JB‚_BŸB‚™[˜È\İØYÑY˜][Ø]]Ø^U\ØYÙT™XÛÜ™ÛÛ™šYÊ
-\İ[™Ë•
-HÂ‚\™\Ù]š\\•Ú]•ÕÙXÜ™]
-
-B‚XÙ™Ë\œˆHØY
+	t.Run("config file without the key is auto-sized", func(t *testing.T) {
+		resetViperWithJWTSecret(t)
+		stubMemoryLimit(t, 128<<30)
+		configFile := filepath.Join(t.TempDir(), "config.yaml")
+		require.NoError(t, os.WriteFile(configFile, []byte("gateway:\n  max_body_size: 268435456\n"), 0o600))
+		t.Setenv("CONFIG_FILE", configFile)
+		cfg, err := Load()
+		require.NoError(t, err)
+		require.Equal(t, int64(32<<30), cfg.Gateway.RequestBodyMemoryBudgetBytes)
+	})
 
-B‚ZYˆ\œˆOHš[Â‚B]‘˜][Š“ØY
+	t.Run("explicit config file value wins", func(t *testing.T) {
+		resetViperWithJWTSecret(t)
+		stubMemoryLimit(t, 128<<30)
+		configFile := filepath.Join(t.TempDir(), "config.yaml")
+		require.NoError(t, os.WriteFile(configFile, []byte("gateway:\n  request_body_memory_budget_bytes: 1073741824\n"), 0o600))
+		t.Setenv("CONFIG_FILE", configFile)
+		cfg, err := Load()
+		require.NoError(t, err)
+		require.Equal(t, int64(1<<30), cfg.Gateway.RequestBodyMemoryBudgetBytes)
+	})
+}
 
-H\œ›Üˆ	]ˆ‹\œŠB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™•ÛÜšÙ\Ûİ[OHLÂ‚B]‘˜][ŠÛÜšÙ\—ØÛİ[H	YØ[L‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™•ÛÜšÙ\Ûİ[
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™”]Y]YTÚ^™HOHMŒÎÂ‚B]‘˜][Šœ]Y]YWÜÚ^™HH	YØ[MŒÎ‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™”]Y]YTÚ^™JB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™•\ÚÕ[Y[İ]ÙXÛÛ™ÈOHHÂ‚B]‘˜][Š\Ú×İ[Y[İ]ÜÙXÛÛ™ÈH	YØ[H‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™•\ÚÕ[Y[İ]ÙXÛÛ™ÊB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™“İ™\™›İÔÛXŞHOH\ØYÙT™XÛÜ™İ™\™›İÔÛXŞTŞ[˜ÈÂ‚B]‘˜][Š›İ™\™›İ×ÜÛXŞHH	\ËØ[	\È‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™“İ™\™›İÔÛXŞK\ØYÙT™XÛÜ™İ™\™›İÔÛXŞTŞ[˜ÊB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™“İ™\™›İÔØ[\T\˜Ù[OHLÂ‚B]‘˜][Š›İ™\™›İ×ÜØ[\WÜ\˜Ù[H	YØ[L‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™“İ™\™›İÔØ[\T\˜Ù[
-B‚_B‚ZYˆXÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[Q[˜X›YÂ‚B]‘˜][Š˜]]×ÜØØ[WÙ[˜X›YH˜[ÙKØ[YHŠB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[SZ[•ÛÜšÙ\œÈOHLÂ‚B]‘˜][Š˜]]×ÜØØ[WÛZ[—İÛÜšÙ\œÈH	YØ[L‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[SZ[•ÛÜšÙ\œÊB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[SX^ÛÜšÙ\œÈOHLLˆÂ‚B]‘˜][Š˜]]×ÜØØ[WÛX^İÛÜšÙ\œÈH	YØ[LLˆ‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[SX^ÛÜšÙ\œÊB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[U\]Y]YT\˜Ù[OHÌÂ‚B]‘˜][Š˜]]×ÜØØ[Wİ\Ü]Y]YWÜ\˜Ù[H	YØ[Ì‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[U\]Y]YT\˜Ù[
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[QİÛ”]Y]YT\˜Ù[OHMHÂ‚B]‘˜][Š˜]]×ÜØØ[WÙİÛ—Ü]Y]YWÜ\˜Ù[H	YØ[MH‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[QİÛ”]Y]YT\˜Ù[
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[U\İ\OHÌˆÂ‚B]‘˜][Š˜]]×ÜØØ[Wİ\Üİ\H	YØ[Ìˆ‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[U\İ\
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[QİÛ”İ\OHMˆÂ‚B]‘˜][Š˜]]×ÜØØ[WÙİÛ—Üİ\H	YØ[Mˆ‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[QİÛ”İ\
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[PÚXÚÒ[\˜[ÙXÛÛ™ÈOHÈÂ‚B]‘˜][Š˜]]×ÜØØ[WØÚXÚ×Ú[\˜[ÜÙXÛÛ™ÈH	YØ[È‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[PÚXÚÒ[\˜[ÙXÛÛ™ÊB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[PÛÛÛİÛ”ÙXÛÛ™ÈOHLÂ‚B]‘˜][Š˜]]×ÜØØ[WØÛÛÛİÛ—ÜÙXÛÛ™ÈH	YØ[L‹Ù™Ë‘Ø]]Ø^K•\ØYÙT™XÛÜ™]]ÔØØ[PÛÛÛİÛ”ÙXÛÛ™ÊB‚_BŸB‚™[˜È\İØYÑY˜][Ø]]Ø^R[XYÙTİ™X[PÛÛ™šYÊ
-\İ[™Ë•
-HÂ‚\™\Ù]š\\•Ú]•ÕÙXÜ™]
-
-B‚XÙ™Ë\œˆHØY
+func TestLoadDefaultModelsListReadMaxBytes(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, DefaultModelsListReadMaxBytes, cfg.Gateway.ModelsListReadMaxBytes)
+}
 
-B‚ZYˆ\œˆOHš[Â‚B]‘˜][Š“ØY
+func TestLoadDefaultMinOutputTokens(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, 128, cfg.Gateway.MinOutputTokens)
+}
 
-H\œ›Üˆ	]ˆ‹\œŠB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K”İ™X[Q]R[\˜[[Y[İ]OHNÂ‚B]‘˜][Šœİ™X[WÙ]WÚ[\˜[İ[Y[İ]H	YØ[N‹Ù™Ë‘Ø]]Ø^K”İ™X[Q]R[\˜[[Y[İ]
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K”İ™X[RÙY\[]™R[\˜[OHLÂ‚B]‘˜][Šœİ™X[WÚÙY\[]™WÚ[\˜[H	YØ[L‹Ù™Ë‘Ø]]Ø^K”İ™X[RÙY\[]™R[\˜[
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K’[XYÙTİ™X[Q]R[\˜[[Y[İ]OHLÂ‚B]‘˜][Šš[XYÙWÜİ™X[WÙ]WÚ[\˜[İ[Y[İ]H	YØ[L‹Ù™Ë‘Ø]]Ø^K’[XYÙTİ™X[Q]R[\˜[[Y[İ]
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K’[XYÙTİ™X[RÙY\[]™R[\˜[OHLÂ‚B]‘˜][Šš[XYÙWÜİ™X[WÚÙY\[]™WÚ[\˜[H	YØ[L‹Ù™Ë‘Ø]]Ø^K’[XYÙTİ™X[RÙY\[]™R[\˜[
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K’[XYÙS›Ûœİ™X[RÙY\[]™R[\˜[OHÂ‚B]‘˜][Šš[XYÙWÛ›Ûœİ™X[WÚÙY\[]™WÚ[\˜[H	YØ[‹Ù™Ë‘Ø]]Ø^K’[XYÙS›Ûœİ™X[RÙY\[]™R[\˜[
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK‘[˜X›YÂ‚B]‘˜][Šš[XYÙWØÛÛ˜İ\œ™[˜ŞK™[˜X›YHYKØ[˜[ÙHŠB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK“X^ÛÛ˜İ\œ™[™\]Y\İÈOHÂ‚B]‘˜][Šš[XYÙWØÛÛ˜İ\œ™[˜ŞK›X^ØÛÛ˜İ\œ™[Ü™\]Y\İÈH	YØ[‹Ù™Ë‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK“X^ÛÛ˜İ\œ™[™\]Y\İÊB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK“İ™\™›İÓ[ÙHOH[XYÙPÛÛ˜İ\œ™[˜ŞSİ™\™›İÓ[ÙT™Z™XİÂ‚B]‘˜][Šš[XYÙWØÛÛ˜İ\œ™[˜ŞK›İ™\™›İ×Û[ÙHH	\KØ[	\H‹Ù™Ë‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK“İ™\™›İÓ[ÙK[XYÙPÛÛ˜İ\œ™[˜ŞSİ™\™›İÓ[ÙT™Z™Xİ
-B‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK•ØZ][Y[İ]ÙXÛÛ™ÈOHÌÂ‚B]‘˜][Šš[XYÙWØÛÛ˜İ\œ™[˜ŞKØZ]İ[Y[İ]ÜÙXÛÛ™ÈH	YØ[Ì‹Ù™Ë‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK•ØZ][Y[İ]ÙXÛÛ™ÊB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK“X^ØZ][™Ô™\]Y\İÈOHLÂ‚B]‘˜][Šš[XYÙWØÛÛ˜İ\œ™[˜ŞK›X^İØZ][™×Ü™\]Y\İÈH	YØ[L‹Ù™Ë‘Ø]]Ø^K’[XYÙPÛÛ˜İ\œ™[˜ŞK“X^ØZ][™Ô™\]Y\İÊB‚_B‚ZYˆÙ™Ë‘Ø]]Ø^K’[XYÙTİ™X[Q]R[\˜[[Y[İ]HÙ™Ë‘Ø]]Ø^K”İ™X[Q]R[\˜[[Y[İ]Â‚B]‘˜][Šš[XYÙHİ™X[H[Y[İ]H	YØ[Ü™X]\ˆ[ˆÜ™[˜\Hİ™X[H[Y[İ]	Y‹Ù™Ë‘Ø]]Ø^K’[XYÙTİ™X[Q]R[\˜[[Y[İ]Ù™Ë‘Ø]]Ø^K”İ™X[Q]R[\˜[[Y[İ]
-B‚_BŸB‚™[˜È\İØYÚ[\S[ÙP]]ĞÜ™X]QY˜][Ü›İ\Ê
-\İ[™Ë•
-HÂ‚Y›ÜˆËØY\ˆH˜[™ÙH×\İXİÂ‚B[˜[YHİš[™Â‚B[ØY[˜Ê
-H
+func TestLoadMinOutputTokensFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_MIN_OUTPUT_TOKENS", "16")
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, 16, cfg.Gateway.MinOutputTokens)
+}
 
-ÛÛ™šYË\œ›ÜŠB‚_^ŞÈ“ØY‹ØYKÈ“ØY›Ü›Ûİİ˜\‹ØY›Ü›Ûİİ˜\_HÂ‚B]”[ŠØY\‹›˜[YK[˜Ê
-\İ[™Ë•
-HÂ‚BBY›ÜˆËH˜[™ÙH×\İXİÂ‚BBB[˜[YHİš[™Â‚BBB^X[[İš[™Â‚BBBY[ˆİš[™Â‚BBB][œÙ]›ÛÛ‚BBB]Ø[›ÛÛ‚BB_^Â‚BBB^Û˜[YNˆ[œÙ][ˆ\Ù\È\XØ][ÛˆY˜][‹[œÙ]ˆYKØ[ˆY_K‚BBB^Û˜[YNˆ™[\H[ˆ\Ù\È\XØ][ÛˆY˜][‹Ø[ˆY_K‚BBB^Û˜[YNˆ[œÙ][ˆ™\Ù\™\ÈX[[˜[ÙH‹[œÙ]ˆYKX[[ˆœÚ[\WÛ[ÙN—ˆ]]×ØÜ™X]WÙY˜][ÙÜ›İ\Îˆ˜[ÙWˆ‹Ø[ˆ˜[Ù_K‚BBB^Û˜[YNˆ™[\H[ˆ™\Ù\™\ÈX[[˜[ÙH‹X[[ˆœÚ[\WÛ[ÙN—ˆ]]×ØÜ™X]WÙY˜][ÙÜ›İ\Îˆ˜[ÙWˆ‹Ø[ˆ˜[Ù_K‚BBB^Û˜[YNˆ™[ˆ˜[ÙHİ™\œšY\ÈX[[YH‹X[[ˆœÚ[\WÛ[ÙN—ˆ]]×ØÜ™X]WÙY˜][ÙÜ›İ\ÎˆYWˆ‹[ˆ™˜[ÙH‹Ø[ˆ˜[Ù_K‚BBB^Û˜[YNˆ™[ˆ˜[ÙHÚ]İ]X[[‹[ˆ™˜[ÙH‹Ø[ˆ˜[Ù_K‚BBB^Û˜[YNˆ™[ˆYHİ™\œšY\ÈX[[˜[ÙH‹X[[ˆœÚ[\WÛ[ÙN—ˆ]]×ØÜ™X]WÙY˜][ÙÜ›İ\Îˆ˜[ÙWˆ‹[ˆYH‹Ø[ˆY_K‚BB_HÂ‚BBB]”[Š›˜[YK[˜Ê
-\İ[™Ë•
-HÂ‚BBBB\™\Ù]š\\•Ú]•ÕÙXÜ™]
-
-B‚BBBB]”Ù][Š”ÒSTWÓSÑWĞUU×ĞÔ‘PUWÑQUSÑÔ“ÕTÈ‹™[ŠB‚BBBBZYˆ[œÙ]Â‚BBBBB\™\]Z\™K“›Ñ\œ›ÜŠÜË•[œÙ][Š”ÒSTWÓSÑWĞUU×ĞÔ‘PUWÑQUSÑÔ“ÕTÈŠJB‚BBBB_B‚BBBB\]Hš[\]’›Ú[Š•[\\Š
-K˜ÛÛ™šYËX[[ŠB‚BBBB\™\]Z\™K“›Ñ\œ›ÜŠÜË•Üš]Qš[J]×X]Jœ[—Û[ÙNˆÚ[\WˆŠİX[[
-KÍŒ
-JB‚BBBB]”Ù][ŠÓÓ‘’Q×Ñ’SH‹]
-B‚BBBBXÙ™Ë\œˆHØY\‹›ØY
+func TestLoadGeminiSameAccountRetries(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, 4, cfg.Gateway.MaxSameAccountRetriesGemini)
 
-B‚BBBB\™\]Z\™K“›Ñ\œ›ÜŠ\œŠB‚BBBB\™\]Z\™K‘\]X[
-Ø[Ù™Ë”Ú[\S[ÙK]]ĞÜ™X]QY˜][Ü›İ\ÊB‚BBB_JB‚BB_B‚B_JB‚_BŸB
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_MAX_SAME_ACCOUNT_RETRIES_GEMINI", "0")
+	cfg, err = Load()
+	require.NoError(t, err)
+	require.Zero(t, cfg.Gateway.MaxSameAccountRetriesGemini)
+}
+
+func TestValidateMinOutputTokensMinimum(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	cfg, err := Load()
+	require.NoError(t, err)
+	cfg.Gateway.MinOutputTokens = 15
+	require.EqualError(t, cfg.Validate(), "gateway.min_output_tokens must be at least 16")
+}
+
+func TestLoadTimezonePrecedence(t *testing.T) {
+	tests := []struct {
+		name         string
+		fileTimezone string
+		timezoneEnv  string
+		tzEnv        string
+		want         string
+	}{
+		{name: "default", want: "Asia/Shanghai"},
+		{name: "config_file", fileTimezone: "Europe/London", want: "Europe/London"},
+		{name: "timezone_env", fileTimezone: "Europe/London", timezoneEnv: "UTC", want: "UTC"},
+		{name: "tz_env", fileTimezone: "Europe/London", timezoneEnv: "UTC", tzEnv: "America/New_York", want: "America/New_York"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			resetViperWithJWTSecret(t)
+			t.Setenv("TIMEZONE", tt.timezoneEnv)
+			t.Setenv("TZ", tt.tzEnv)
+			if tt.fileTimezone != "" {
+				configFile := filepath.Join(t.TempDir(), "config.yaml")
+				require.NoError(t, os.WriteFile(configFile, []byte("timezone: "+tt.fileTimezone+"\n"), 0o600))
+				t.Setenv("CONFIG_FILE", configFile)
+			}
+
+			cfg, err := Load()
+			require.NoError(t, err)
+			require.Equal(t, tt.want, cfg.Timezone)
+		})
+	}
+}
+
+func TestLoadServerTimingConfig(t *testing.T) {
+	t.Run("disabled by default", func(t *testing.T) {
+		resetViperWithJWTSecret(t)
+		cfg, err := Load()
+		require.NoError(t, err)
+		require.False(t, cfg.Server.EnableServerTiming)
+	})
+
+	t.Run("enabled by exact environment variable", func(t *testing.T) {
+		resetViperWithJWTSecret(t)
+		t.Setenv("ENABLE_SERVER_TIMING", "true")
+		cfg, err := Load()
+		require.NoError(t, err)
+		require.True(t, cfg.Server.EnableServerTiming)
+	})
+}
+
+func TestLoadSimpleModeKeyRateLimitEnabledFromEnvironment(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("SIMPLE_MODE_KEY_RATE_LIMIT_ENABLED", "true")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.True(t, cfg.SimpleModeKeyRateLimitEnabled)
+}
+
+func TestLoadRedisUsernameFromEnvironment(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("REDIS_USERNAME", "app-user")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "app-user", cfg.Redis.Username)
+}
+
+func TestLoadHTTPIngressSafetyDefaults(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, 10, cfg.Server.ReadHeaderTimeout)
+	require.Equal(t, 64*1024, cfg.Server.MaxHeaderBytes)
+	require.Empty(t, cfg.Server.TrustedProxies)
+	require.False(t, cfg.Server.TrustedProxiesConfigured)
+	require.True(t, cfg.TrustForwardedIPForAPIKeyACL())
+	require.Equal(t, int64(32*1024*1024), cfg.Gateway.TextMaxBodySize)
+	require.Equal(t, int64(1<<30), cfg.Gateway.RequestBodyMemoryBudgetBytes)
+	require.Equal(t, 120, cfg.Gateway.RequestBodyReadTimeoutSeconds)
+	require.Equal(t, 120, cfg.Gateway.DownstreamWriteTimeoutSeconds)
+	require.Equal(t, 500<<20, cfg.Gateway.MaxLineSize)
+	require.Equal(t, int64(8<<20), cfg.Gateway.SSEQueueMaxBytes)
+	require.Equal(t, 4096, cfg.Gateway.SSEEventMaxLines)
+	require.True(t, cfg.APIKeyAuth.InvalidAbuse.Enabled)
+	require.Equal(t, 120, cfg.APIKeyAuth.InvalidAbuse.Threshold)
+	require.Equal(t, 16384, cfg.APIKeyAuth.InvalidAbuse.Capacity)
+}
+
+func TestNormalizeForwardedClientIPHeaders(t *testing.T) {
+	headers, err := NormalizeForwardedClientIPHeaders([]string{
+		" x-cdn-client-ip ",
+		"X-CDN-CLIENT-IP",
+		"true-client-ip",
+	})
+	require.NoError(t, err)
+	require.Equal(t, []string{"X-Cdn-Client-Ip", "True-Client-Ip"}, headers)
+
+	_, err = NormalizeForwardedClientIPHeaders([]string{"X Invalid"})
+	require.ErrorContains(t, err, "invalid HTTP header field name")
+}
+
+func TestNormalizeForwardedClientIPHeadersLimit(t *testing.T) {
+	headers := make([]string, 0, MaxForwardedClientIPHeaders+1)
+	for i := 0; i <= MaxForwardedClientIPHeaders; i++ {
+		headers = append(headers, fmt.Sprintf("X-CDN-IP-%d", i))
+	}
+
+	_, err := NormalizeForwardedClientIPHeaders(headers)
+	require.ErrorContains(t, err, "at most 16 unique names")
+}
+
+func TestLoadForwardedClientIPHeadersNormalizesAndSnapshots(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	viper.Set("security.forwarded_client_ip_headers", []string{" x-cdn-ip ", "X-CDN-IP", "true-client-ip"})
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	snapshot := cfg.ForwardedClientIPSettings()
+	require.Equal(t, []string{"X-Cdn-Ip", "True-Client-Ip"}, snapshot.Headers)
+
+	snapshot.Headers[0] = "X-Mutated"
+	require.Equal(t, []string{"X-Cdn-Ip", "True-Client-Ip"}, cfg.ForwardedClientIPSettings().Headers)
+}
+
+func TestForwardedClientIPSettingsConcurrentPublication(t *testing.T) {
+	cfg := &Config{}
+	cfg.SetForwardedClientIPSettings(true, []string{"X-Public-A"})
+
+	const iterations = 2000
+	start := make(chan struct{})
+	errCh := make(chan error, 8)
+	var wg sync.WaitGroup
+
+	for _, settings := range []ForwardedClientIPSettings{
+		{TrustForwardedIP: true, Headers: []string{"X-Public-A"}},
+		{TrustForwardedIP: false, Headers: []string{"X-Public-B"}},
+	} {
+		settings := settings
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			for i := 0; i < iterations; i++ {
+				cfg.SetForwardedClientIPSettings(settings.TrustForwardedIP, settings.Headers)
+			}
+		}()
+	}
+
+	for i := 0; i < cap(errCh); i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			for j := 0; j < iterations; j++ {
+				snapshot := cfg.ForwardedClientIPSettings()
+				validA := snapshot.TrustForwardedIP && len(snapshot.Headers) == 1 && snapshot.Headers[0] == "X-Public-A"
+				validB := !snapshot.TrustForwardedIP && len(snapshot.Headers) == 1 && snapshot.Headers[0] == "X-Public-B"
+				if !validA && !validB {
+					errCh <- fmt.Errorf("observed inconsistent forwarded IP settings: %+v", snapshot)
+					return
+				}
+			}
+		}()
+	}
+
+	close(start)
+	wg.Wait()
+	close(errCh)
+	for err := range errCh {
+		require.NoError(t, err)
+	}
+}
+
+func TestLoadForwardedClientIPHeadersFromEnvironment(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("SECURITY_FORWARDED_CLIENT_IP_HEADERS", " x-cdn-ip , X-CDN-IP, true-client-ip ")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, []string{"X-Cdn-Ip", "True-Client-Ip"}, cfg.ForwardedClientIPSettings().Headers)
+}
+
+func TestLoadExplicitEmptyForwardedClientIPHeadersFromEnvironment(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	viper.Set("security.forwarded_client_ip_headers", []string{"X-Yaml-IP"})
+	t.Setenv("SECURITY_FORWARDED_CLIENT_IP_HEADERS", "")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Empty(t, cfg.ForwardedClientIPSettings().Headers)
+}
+
+func TestLoadRejectsInvalidForwardedClientIPHeaderFromEnvironment(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("SECURITY_FORWARDED_CLIENT_IP_HEADERS", "X-Valid-IP, X Invalid")
+
+	_, err := Load()
+	require.ErrorContains(t, err, "security.forwarded_client_ip_headers")
+}
+
+func TestLoadRejectsInvalidForwardedClientIPHeader(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	viper.Set("security.forwarded_client_ip_headers", []string{"X Invalid"})
+
+	_, err := Load()
+	require.ErrorContains(t, err, "security.forwarded_client_ip_headers")
+}
+
+func TestLoadExplicitEmptyTrustedProxiesEnablesConfiguredMode(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	viper.Set("server.trusted_proxies", []string{})
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Empty(t, cfg.Server.TrustedProxies)
+	require.True(t, cfg.Server.TrustedProxiesConfigured)
+}
+
+func TestLoadExplicitTrustedProxiesEnablesConfiguredMode(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	viper.Set("server.trusted_proxies", []string{"127.0.0.1/32"})
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, []string{"127.0.0.1/32"}, cfg.Server.TrustedProxies)
+	require.True(t, cfg.Server.TrustedProxiesConfigured)
+}
+
+func TestLoadTrustedProxiesFromEnvironment(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("SERVER_TRUSTED_PROXIES", "127.0.0.1/32, ::1/128")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, []string{"127.0.0.1/32", "::1/128"}, cfg.Server.TrustedProxies)
+	require.True(t, cfg.Server.TrustedProxiesConfigured)
+}
+
+func TestLoadExplicitEmptyTrustedProxiesFromEnvironment(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("SERVER_TRUSTED_PROXIES", "")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Empty(t, cfg.Server.TrustedProxies)
+	require.True(t, cfg.Server.TrustedProxiesConfigured)
+}
+
+func TestLoadTrustedProxiesPresenceFromYAML(t *testing.T) {
+	tests := []struct {
+		name       string
+		yaml       string
+		want       []string
+		configured bool
+	}{
+		{name: "absent", yaml: "server:\n  mode: debug\n", configured: false},
+		{name: "explicit empty", yaml: "server:\n  trusted_proxies: []\n", want: []string{}, configured: true},
+		{
+			name:       "populated",
+			yaml:       "server:\n  trusted_proxies:\n    - 127.0.0.1/32\n    - ::1/128\n",
+			want:       []string{"127.0.0.1/32", "::1/128"},
+			configured: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			resetViperWithJWTSecret(t)
+			configDir := t.TempDir()
+			require.NoError(t, os.WriteFile(filepath.Join(configDir, "config.yaml"), []byte(test.yaml), 0o600))
+			t.Setenv("DATA_DIR", configDir)
+
+			cfg, err := Load()
+			require.NoError(t, err)
+			require.Equal(t, test.want, cfg.Server.TrustedProxies)
+			require.Equal(t, test.configured, cfg.Server.TrustedProxiesConfigured)
+		})
+	}
+}
+
+func TestLoadTrustedProxiesFromConfigFile(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	configFile := filepath.Join(t.TempDir(), "reporter-config.yaml")
+	require.NoError(t, os.WriteFile(configFile, []byte(`server:
+  host: 192.0.2.10
+  trusted_proxies:
+    - 127.0.0.1/32
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+`), 0o600))
+	t.Setenv("CONFIG_FILE", configFile)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "192.0.2.10", cfg.Server.Host)
+	require.Equal(t, []string{"127.0.0.1/32", "10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"}, cfg.Server.TrustedProxies)
+	require.True(t, cfg.Server.TrustedProxiesConfigured)
+}
+
+func TestConfigFileTakesPrecedenceOverDataDir(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	dataDir := t.TempDir()
+	require.NoError(t, os.WriteFile(filepath.Join(dataDir, "config.yaml"), []byte("server:\n  host: 192.0.2.20\n"), 0o600))
+	configFile := filepath.Join(t.TempDir(), "explicit.yaml")
+	require.NoError(t, os.WriteFile(configFile, []byte("server:\n  host: 192.0.2.30\n"), 0o600))
+	t.Setenv("DATA_DIR", dataDir)
+	t.Setenv("CONFIG_FILE", configFile)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "192.0.2.30", cfg.Server.Host)
+}
+
+func TestLoadReturnsErrorForMissingConfigFile(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("CONFIG_FILE", filepath.Join(t.TempDir(), "missing.yaml"))
+
+	_, err := Load()
+	require.ErrorContains(t, err, "read config error")
+}
+
+func TestLoadForBootstrapAllowsMissingJWTSecret(t *testing.T) {
+	viper.Reset()
+	t.Cleanup(viper.Reset)
+	t.Setenv("CONFIG_FILE", "")
+	t.Setenv("DATA_DIR", "")
+	t.Setenv("JWT_SECRET", "")
+
+	cfg, err := LoadForBootstrap()
+	if err != nil {
+		t.Fatalf("LoadForBootstrap() error: %v", err)
+	}
+	if cfg.JWT.Secret != "" {
+		t.Fatalf("LoadForBootstrap() should keep empty jwt.secret during bootstrap")
+	}
+}
+
+func TestNormalizeRunMode(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"simple", "simple"},
+		{"SIMPLE", "simple"},
+		{"standard", "standard"},
+		{"invalid", "standard"},
+		{"", "standard"},
+	}
+
+	for _, tt := range tests {
+		result := NormalizeRunMode(tt.input)
+		if result != tt.expected {
+			t.Errorf("NormalizeRunMode(%q) = %q, want %q", tt.input, result, tt.expected)
+		}
+	}
+}
+
+func TestLoadDefaultSchedulingConfig(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if cfg.Gateway.Scheduling.StickySessionMaxWaiting != 3 {
+		t.Fatalf("StickySessionMaxWaiting = %d, want 3", cfg.Gateway.Scheduling.StickySessionMaxWaiting)
+	}
+	if cfg.Gateway.Scheduling.StickySessionWaitTimeout != 120*time.Second {
+		t.Fatalf("StickySessionWaitTimeout = %v, want 120s", cfg.Gateway.Scheduling.StickySessionWaitTimeout)
+	}
+	if cfg.Gateway.Scheduling.FallbackWaitTimeout != 30*time.Second {
+		t.Fatalf("FallbackWaitTimeout = %v, want 30s", cfg.Gateway.Scheduling.FallbackWaitTimeout)
+	}
+	if cfg.Gateway.Scheduling.FallbackMaxWaiting != 100 {
+		t.Fatalf("FallbackMaxWaiting = %d, want 100", cfg.Gateway.Scheduling.FallbackMaxWaiting)
+	}
+	if !cfg.Gateway.Scheduling.LoadBatchEnabled {
+		t.Fatalf("LoadBatchEnabled = false, want true")
+	}
+	if cfg.Gateway.Scheduling.LoadBatchCacheTTLMS != 200 {
+		t.Fatalf("LoadBatchCacheTTLMS = %d, want 200", cfg.Gateway.Scheduling.LoadBatchCacheTTLMS)
+	}
+	if cfg.Gateway.Scheduling.SlotCleanupInterval != 30*time.Second {
+		t.Fatalf("SlotCleanupInterval = %v, want 30s", cfg.Gateway.Scheduling.SlotCleanupInterval)
+	}
+}
+
+func TestLoadDefaultOpenAIFirstOutputTimeoutsDisabled(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Zero(t, cfg.Gateway.OpenAIFirstOutputTimeoutSeconds)
+	require.Zero(t, cfg.Gateway.OpenAIHighEffortFirstOutputTimeoutSeconds)
+}
+
+func TestLoadOpenAIFirstOutputTimeoutsFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_OPENAI_FIRST_OUTPUT_TIMEOUT_SECONDS", "90")
+	t.Setenv("GATEWAY_OPENAI_HIGH_EFFORT_FIRST_OUTPUT_TIMEOUT_SECONDS", "240")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, 90, cfg.Gateway.OpenAIFirstOutputTimeoutSeconds)
+	require.Equal(t, 240, cfg.Gateway.OpenAIHighEffortFirstOutputTimeoutSeconds)
+}
+
+func TestValidateOpenAIFirstOutputTimeoutMinimum(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	cfg, err := Load()
+	require.NoError(t, err)
+	cfg.Gateway.OpenAIFirstOutputTimeoutSeconds = 30
+	require.NoError(t, cfg.Validate())
+}
+
+func TestLoadDefaultOpenAIWSConfig(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if !cfg.Gateway.OpenAIWS.Enabled {
+		t.Fatalf("Gateway.OpenAIWS.Enabled = false, want true")
+	}
+	if !cfg.Gateway.OpenAIWS.ResponsesWebsocketsV2 {
+		t.Fatalf("Gateway.OpenAIWS.ResponsesWebsocketsV2 = false, want true")
+	}
+	if cfg.Gateway.OpenAIWS.ResponsesWebsockets {
+		t.Fatalf("Gateway.OpenAIWS.ResponsesWebsockets = true, want false")
+	}
+	if !cfg.Gateway.OpenAIWS.DynamicMaxConnsByAccountConcurrencyEnabled {
+		t.Fatalf("Gateway.OpenAIWS.DynamicMaxConnsByAccountConcurrencyEnabled = false, want true")
+	}
+	if cfg.Gateway.OpenAIWS.OAuthMaxConnsFactor != 5.0 {
+		t.Fatalf("Gateway.OpenAIWS.OAuthMaxConnsFactor = %v, want 5.0", cfg.Gateway.OpenAIWS.OAuthMaxConnsFactor)
+	}
+	if cfg.Gateway.OpenAIWS.APIKeyMaxConnsFactor != 5.0 {
+		t.Fatalf("Gateway.OpenAIWS.APIKeyMaxConnsFactor = %v, want 5.0", cfg.Gateway.OpenAIWS.APIKeyMaxConnsFactor)
+	}
+	if cfg.Gateway.OpenAIWS.StickySessionTTLSeconds != 3600 {
+		t.Fatalf("Gateway.OpenAIWS.StickySessionTTLSeconds = %d, want 3600", cfg.Gateway.OpenAIWS.StickySessionTTLSeconds)
+	}
+	if !cfg.Gateway.OpenAIScheduler.StickyEscapeEnabled {
+		t.Fatalf("Gateway.OpenAIScheduler.StickyEscapeEnabled = false, want true")
+	}
+	if cfg.Gateway.OpenAIScheduler.StickyEscapeTTFTMs != 15000 {
+		t.Fatalf("Gateway.OpenAIScheduler.StickyEscapeTTFTMs = %d, want 15000", cfg.Gateway.OpenAIScheduler.StickyEscapeTTFTMs)
+	}
+	if cfg.Gateway.OpenAIScheduler.StickyEscapeErrorRate != 0.5 {
+		t.Fatalf("Gateway.OpenAIScheduler.StickyEscapeErrorRate = %v, want 0.5", cfg.Gateway.OpenAIScheduler.StickyEscapeErrorRate)
+	}
+	if !cfg.Gateway.OpenAIWS.SessionHashReadOldFallback {
+		t.Fatalf("Gateway.OpenAIWS.SessionHashReadOldFallback = false, want true")
+	}
+	if !cfg.Gateway.OpenAIWS.SessionHashDualWriteOld {
+		t.Fatalf("Gateway.OpenAIWS.SessionHashDualWriteOld = false, want true")
+	}
+	if !cfg.Gateway.OpenAIWS.MetadataBridgeEnabled {
+		t.Fatalf("Gateway.OpenAIWS.MetadataBridgeEnabled = false, want true")
+	}
+	if cfg.Gateway.OpenAIWS.StickyResponseIDTTLSeconds != 3600 {
+		t.Fatalf("Gateway.OpenAIWS.StickyResponseIDTTLSeconds = %d, want 3600", cfg.Gateway.OpenAIWS.StickyResponseIDTTLSeconds)
+	}
+	if cfg.Gateway.OpenAIWS.FallbackCooldownSeconds != 30 {
+		t.Fatalf("Gateway.OpenAIWS.FallbackCooldownSeconds = %d, want 30", cfg.Gateway.OpenAIWS.FallbackCooldownSeconds)
+	}
+	if cfg.Gateway.OpenAIWS.EventFlushBatchSize != 1 {
+		t.Fatalf("Gateway.OpenAIWS.EventFlushBatchSize = %d, want 1", cfg.Gateway.OpenAIWS.EventFlushBatchSize)
+	}
+	if cfg.Gateway.OpenAIWS.EventFlushIntervalMS != 10 {
+		t.Fatalf("Gateway.OpenAIWS.EventFlushIntervalMS = %d, want 10", cfg.Gateway.OpenAIWS.EventFlushIntervalMS)
+	}
+	if cfg.Gateway.OpenAIWS.PrewarmCooldownMS != 300 {
+		t.Fatalf("Gateway.OpenAIWS.PrewarmCooldownMS = %d, want 300", cfg.Gateway.OpenAIWS.PrewarmCooldownMS)
+	}
+	if cfg.Gateway.OpenAIWS.ClientReadLimitBytes != 64*1024*1024 {
+		t.Fatalf("Gateway.OpenAIWS.ClientReadLimitBytes = %d, want %d", cfg.Gateway.OpenAIWS.ClientReadLimitBytes, 64*1024*1024)
+	}
+	if !cfg.Gateway.OpenAIWS.HTTPBridgeEnabled {
+		t.Fatalf("Gateway.OpenAIWS.HTTPBridgeEnabled = false, want true")
+	}
+	if cfg.Gateway.OpenAIWS.HTTPBridgeThresholdBytes != 15*1024*1024 {
+		t.Fatalf("Gateway.OpenAIWS.HTTPBridgeThresholdBytes = %d, want %d", cfg.Gateway.OpenAIWS.HTTPBridgeThresholdBytes, 15*1024*1024)
+	}
+	if cfg.Gateway.OpenAIWS.RetryBackoffInitialMS != 120 {
+		t.Fatalf("Gateway.OpenAIWS.RetryBackoffInitialMS = %d, want 120", cfg.Gateway.OpenAIWS.RetryBackoffInitialMS)
+	}
+	if cfg.Gateway.OpenAIWS.RetryBackoffMaxMS != 2000 {
+		t.Fatalf("Gateway.OpenAIWS.RetryBackoffMaxMS = %d, want 2000", cfg.Gateway.OpenAIWS.RetryBackoffMaxMS)
+	}
+	if cfg.Gateway.OpenAIWS.RetryJitterRatio != 0.2 {
+		t.Fatalf("Gateway.OpenAIWS.RetryJitterRatio = %v, want 0.2", cfg.Gateway.OpenAIWS.RetryJitterRatio)
+	}
+	if cfg.Gateway.OpenAIWS.RetryTotalBudgetMS != 5000 {
+		t.Fatalf("Gateway.OpenAIWS.RetryTotalBudgetMS = %d, want 5000", cfg.Gateway.OpenAIWS.RetryTotalBudgetMS)
+	}
+	if cfg.Gateway.OpenAIWS.PayloadLogSampleRate != 0.2 {
+		t.Fatalf("Gateway.OpenAIWS.PayloadLogSampleRate = %v, want 0.2", cfg.Gateway.OpenAIWS.PayloadLogSampleRate)
+	}
+	if cfg.Gateway.OpenAIWS.SchedulerScoreWeights.QuotaHeadroom != 0 {
+		t.Fatalf("Gateway.OpenAIWS.SchedulerScoreWeights.QuotaHeadroom = %v, want 0", cfg.Gateway.OpenAIWS.SchedulerScoreWeights.QuotaHeadroom)
+	}
+	if cfg.Gateway.OpenAIWS.SchedulerScoreWeights.UpstreamCost != 0 {
+		t.Fatalf("Gateway.OpenAIWS.SchedulerScoreWeights.UpstreamCost = %v, want 0", cfg.Gateway.OpenAIWS.SchedulerScoreWeights.UpstreamCost)
+	}
+	if !cfg.Gateway.OpenAIWS.StoreDisabledForceNewConn {
+		t.Fatalf("Gateway.OpenAIWS.StoreDisabledForceNewConn = false, want true")
+	}
+	if cfg.Gateway.OpenAIWS.StoreDisabledConnMode != "strict" {
+		t.Fatalf("Gateway.OpenAIWS.StoreDisabledConnMode = %q, want %q", cfg.Gateway.OpenAIWS.StoreDisabledConnMode, "strict")
+	}
+	if cfg.Gateway.OpenAIWS.ModeRouterV2Enabled {
+		t.Fatalf("Gateway.OpenAIWS.ModeRouterV2Enabled = true, want false")
+	}
+	if cfg.Gateway.OpenAIWS.IngressModeDefault != "ctx_pool" {
+		t.Fatalf("Gateway.OpenAIWS.IngressModeDefault = %q, want %q", cfg.Gateway.OpenAIWS.IngressModeDefault, "ctx_pool")
+	}
+	if cfg.Gateway.OpenAIWS.ClientFirstMessageTimeoutSeconds != DefaultOpenAIWSClientFirstMessageTimeoutSeconds {
+		t.Fatalf(
+			"Gateway.OpenAIWS.ClientFirstMessageTimeoutSeconds = %d, want %d",
+			cfg.Gateway.OpenAIWS.ClientFirstMessageTimeoutSeconds,
+			DefaultOpenAIWSClientFirstMessageTimeoutSeconds,
+		)
+	}
+	if cfg.Gateway.OpenAIWS.IngressInterTurnIdleTimeoutSeconds != 300 {
+		t.Fatalf("Gateway.OpenAIWS.IngressInterTurnIdleTimeoutSeconds = %d, want 300", cfg.Gateway.OpenAIWS.IngressInterTurnIdleTimeoutSeconds)
+	}
+	if cfg.Gateway.OpenAIWS.MaxIngressConnectionsPerAPIKey != 64 {
+		t.Fatalf("Gateway.OpenAIWS.MaxIngressConnectionsPerAPIKey = %d, want 64", cfg.Gateway.OpenAIWS.MaxIngressConnectionsPerAPIKey)
+	}
+}
+
+func TestLoadOpenAIWSClientFirstMessageTimeoutFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_OPENAI_WS_CLIENT_FIRST_MESSAGE_TIMEOUT_SECONDS", "120")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, 120, cfg.Gateway.OpenAIWS.ClientFirstMessageTimeoutSeconds)
+}
+
+func TestLoadOpenAIWSForceHTTPFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_OPENAI_WS_FORCE_HTTP", "true")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.True(t, cfg.Gateway.OpenAIWS.ForceHTTP)
+}
+
+func TestLoadDefaultOpenAICompactModel(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "gpt-5.5", cfg.Gateway.OpenAICompactModel)
+}
+
+func TestLoadOpenAICompactModelFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_OPENAI_COMPACT_MODEL", "gpt-5.3-codex")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, "gpt-5.3-codex", cfg.Gateway.OpenAICompactModel)
+}
+
+func TestLoadDefaultGrokFreeQuotaSoftGate(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.False(t, cfg.Gateway.Grok.PasswordAuthEnabled)
+	require.True(t, cfg.Gateway.Grok.FreeQuotaSoftGateEnabled)
+	require.Equal(t, int64(500_000), cfg.Gateway.Grok.FreeQuotaTokenLimit)
+	require.Equal(t, 95, cfg.Gateway.Grok.FreeQuotaSoftGatePercent)
+	require.Equal(t, 24, cfg.Gateway.Grok.FreeQuotaWindowHours)
+	require.Equal(t, 60, cfg.Gateway.Grok.FreeQuotaStatsCacheSeconds)
+}
+
+func TestLoadDefaultOpenAIHTTP2Enabled(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.True(t, cfg.Gateway.OpenAIHTTP2.Enabled)
+	require.True(t, cfg.Gateway.OpenAIHTTP2.AllowProxyFallbackToHTTP1)
+	require.False(t, cfg.Gateway.OpenAIProxyStreamCircuit.Disabled)
+	require.Equal(t, 2, cfg.Gateway.OpenAIProxyStreamCircuit.FailureThreshold)
+	require.Equal(t, 60, cfg.Gateway.OpenAIProxyStreamCircuit.WindowSeconds)
+	require.Equal(t, 600, cfg.Gateway.OpenAIProxyStreamCircuit.TTLSeconds)
+}
+
+func TestLoadOpenAIProxyStreamCircuitFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_OPENAI_PROXY_STREAM_CIRCUIT_DISABLED", "true")
+	t.Setenv("GATEWAY_OPENAI_PROXY_STREAM_CIRCUIT_FAILURE_THRESHOLD", "3")
+	t.Setenv("GATEWAY_OPENAI_PROXY_STREAM_CIRCUIT_WINDOW_SECONDS", "90")
+	t.Setenv("GATEWAY_OPENAI_PROXY_STREAM_CIRCUIT_TTL_SECONDS", "420")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.True(t, cfg.Gateway.OpenAIProxyStreamCircuit.Disabled)
+	require.Equal(t, 3, cfg.Gateway.OpenAIProxyStreamCircuit.FailureThreshold)
+	require.Equal(t, 90, cfg.Gateway.OpenAIProxyStreamCircuit.WindowSeconds)
+	require.Equal(t, 420, cfg.Gateway.OpenAIProxyStreamCircuit.TTLSeconds)
+}
+
+func TestLoadOpenAIHTTP2DisabledFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_OPENAI_HTTP2_ENABLED", "false")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.False(t, cfg.Gateway.OpenAIHTTP2.Enabled)
+}
+
+func TestLoadDefaultOpenAIResponseHeaderTimeoutUnlimited(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, 0, cfg.Gateway.OpenAIResponseHeaderTimeout)
+}
+
+func TestLoadOpenAIResponseHeaderTimeoutFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_OPENAI_RESPONSE_HEADER_TIMEOUT", "1800")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, 1800, cfg.Gateway.OpenAIResponseHeaderTimeout)
+}
+
+func TestLoadImageNonstreamKeepaliveFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_IMAGE_NONSTREAM_KEEPALIVE_INTERVAL", "15")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, 15, cfg.Gateway.ImageNonstreamKeepaliveInterval)
+}
+
+func TestLoadOpenAIWSStickyTTLCompatibility(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_OPENAI_WS_STICKY_RESPONSE_ID_TTL_SECONDS", "0")
+	t.Setenv("GATEWAY_OPENAI_WS_STICKY_PREVIOUS_RESPONSE_TTL_SECONDS", "7200")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if cfg.Gateway.OpenAIWS.StickyResponseIDTTLSeconds != 7200 {
+		t.Fatalf("StickyResponseIDTTLSeconds = %d, want 7200", cfg.Gateway.OpenAIWS.StickyResponseIDTTLSeconds)
+	}
+}
+
+func TestLoadDefaultIdempotencyConfig(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if !cfg.Idempotency.ObserveOnly {
+		t.Fatalf("Idempotency.ObserveOnly = false, want true")
+	}
+	if cfg.Idempotency.DefaultTTLSeconds != 86400 {
+		t.Fatalf("Idempotency.DefaultTTLSeconds = %d, want 86400", cfg.Idempotency.DefaultTTLSeconds)
+	}
+	if cfg.Idempotency.SystemOperationTTLSeconds != 3600 {
+		t.Fatalf("Idempotency.SystemOperationTTLSeconds = %d, want 3600", cfg.Idempotency.SystemOperationTTLSeconds)
+	}
+}
+
+func TestLoadDefaultBatchImageQueueDisabled(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.False(t, cfg.BatchImage.QueueEnabled)
+}
+
+func TestLoadIdempotencyConfigFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("IDEMPOTENCY_OBSERVE_ONLY", "false")
+	t.Setenv("IDEMPOTENCY_DEFAULT_TTL_SECONDS", "600")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+	if cfg.Idempotency.ObserveOnly {
+		t.Fatalf("Idempotency.ObserveOnly = true, want false")
+	}
+	if cfg.Idempotency.DefaultTTLSeconds != 600 {
+		t.Fatalf("Idempotency.DefaultTTLSeconds = %d, want 600", cfg.Idempotency.DefaultTTLSeconds)
+	}
+}
+
+func TestLoadSchedulingConfigFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("GATEWAY_SCHEDULING_STICKY_SESSION_MAX_WAITING", "5")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if cfg.Gateway.Scheduling.StickySessionMaxWaiting != 5 {
+		t.Fatalf("StickySessionMaxWaiting = %d, want 5", cfg.Gateway.Scheduling.StickySessionMaxWaiting)
+	}
+}
+
+func TestLoadWeChatConnectConfigFromLegacyEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("WECHAT_OAUTH_OPEN_APP_ID", "wx-open-app")
+	t.Setenv("WECHAT_OAUTH_OPEN_APP_SECRET", "wx-open-secret")
+	t.Setenv("WECHAT_OAUTH_MP_APP_ID", "wx-mp-app")
+	t.Setenv("WECHAT_OAUTH_MP_APP_SECRET", "wx-mp-secret")
+	t.Setenv("WECHAT_OAUTH_FRONTEND_REDIRECT_URL", "/auth/wechat/legacy-callback")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.True(t, cfg.WeChat.Enabled)
+	require.True(t, cfg.WeChat.OpenEnabled)
+	require.True(t, cfg.WeChat.MPEnabled)
+	require.False(t, cfg.WeChat.MobileEnabled)
+	require.Equal(t, "open", cfg.WeChat.Mode)
+	require.Equal(t, "wx-open-app", cfg.WeChat.OpenAppID)
+	require.Equal(t, "wx-open-secret", cfg.WeChat.OpenAppSecret)
+	require.Equal(t, "wx-mp-app", cfg.WeChat.MPAppID)
+	require.Equal(t, "wx-mp-secret", cfg.WeChat.MPAppSecret)
+	require.Equal(t, "/auth/wechat/legacy-callback", cfg.WeChat.FrontendRedirectURL)
+}
+
+func TestLoadDefaultOIDCSecurityDefaults(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.True(t, cfg.OIDC.UsePKCE)
+	require.True(t, cfg.OIDC.ValidateIDToken)
+	require.False(t, cfg.OIDC.UsePKCEExplicit)
+	require.False(t, cfg.OIDC.ValidateIDTokenExplicit)
+}
+
+func TestLoadExplicitOIDCSecurityDefaultsFromEnvMarksFlagsExplicit(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("OIDC_CONNECT_USE_PKCE", "false")
+	t.Setenv("OIDC_CONNECT_VALIDATE_ID_TOKEN", "false")
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.False(t, cfg.OIDC.UsePKCE)
+	require.False(t, cfg.OIDC.ValidateIDToken)
+	require.True(t, cfg.OIDC.UsePKCEExplicit)
+	require.True(t, cfg.OIDC.ValidateIDTokenExplicit)
+}
+
+func TestLoadForcedCodexInstructionsTemplate(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	tempDir := t.TempDir()
+	templatePath := filepath.Join(tempDir, "codex-instructions.md.tmpl")
+	configPath := filepath.Join(tempDir, "config.yaml")
+
+	require.NoError(t, os.WriteFile(templatePath, []byte("server-prefix\n\n{{ .ExistingInstructions }}"), 0o644))
+	yamlSafePath := filepath.ToSlash(templatePath)
+	require.NoError(t, os.WriteFile(configPath, []byte("gateway:\n  forced_codex_instructions_template_file: \""+yamlSafePath+"\"\n"), 0o644))
+	t.Setenv("DATA_DIR", tempDir)
+
+	cfg, err := Load()
+	require.NoError(t, err)
+	require.Equal(t, yamlSafePath, cfg.Gateway.ForcedCodexInstructionsTemplateFile)
+	require.Equal(t, "server-prefix\n\n{{ .ExistingInstructions }}", cfg.Gateway.ForcedCodexInstructionsTemplate)
+}
+
+func TestLoadDefaultSecurityToggles(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if !cfg.Security.URLAllowlist.Enabled {
+		t.Fatalf("URLAllowlist.Enabled = false, want true")
+	}
+	if cfg.Security.URLAllowlist.AllowInsecureHTTP {
+		t.Fatalf("URLAllowlist.AllowInsecureHTTP = true, want false")
+	}
+	if cfg.Security.URLAllowlist.AllowPrivateHosts {
+		t.Fatalf("URLAllowlist.AllowPrivateHosts = true, want false")
+	}
+	if !cfg.Security.ResponseHeaders.Enabled {
+		t.Fatalf("ResponseHeaders.Enabled = false, want true")
+	}
+
+	wantHosts := []string{
+		"api.kimi.com",
+		"api.kimi.ai",
+		"api.moonshot.ai",
+		"api.moonshot.cn",
+	}
+	hostSet := make(map[string]struct{}, len(cfg.Security.URLAllowlist.UpstreamHosts))
+	for _, h := range cfg.Security.URLAllowlist.UpstreamHosts {
+		hostSet[h] = struct{}{}
+	}
+	for _, want := range wantHosts {
+		if _, ok := hostSet[want]; !ok {
+			t.Fatalf("URLAllowlist.UpstreamHosts missing %q; got %v", want, cfg.Security.URLAllowlist.UpstreamHosts)
+		}
+	}
+	opts := urlvalidator.ValidationOptions{
+		AllowedHosts:     cfg.Security.URLAllowlist.UpstreamHosts,
+		RequireAllowlist: true,
+		AllowPrivate:     cfg.Security.URLAllowlist.AllowPrivateHosts,
+	}
+	for _, host := range []string{"api.kimi.com", "api.kimi.ai"} {
+		target := "https://" + host + "/coding/v1/usages"
+		normalized, err := urlvalidator.ValidateHTTPSURL(target, opts)
+		require.NoError(t, err)
+		require.Equal(t, target, normalized)
+		_, err = urlvalidator.ValidateHTTPSURL("https://"+host+".attacker.example/coding/v1/usages", opts)
+		require.Error(t, err)
+	}
+}
+
+func TestLoadDefaultServerMode(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if cfg.Server.Mode != "release" {
+		t.Fatalf("Server.Mode = %q, want %q", cfg.Server.Mode, "release")
+	}
+}
+
+func TestLoadDefaultJWTAccessTokenExpireMinutes(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if cfg.JWT.ExpireHour != 24 {
+		t.Fatalf("JWT.ExpireHour = %d, want 24", cfg.JWT.ExpireHour)
+	}
+	if cfg.JWT.AccessTokenExpireMinutes != 0 {
+		t.Fatalf("JWT.AccessTokenExpireMinutes = %d, want 0", cfg.JWT.AccessTokenExpireMinutes)
+	}
+}
+
+func TestLoadJWTAccessTokenExpireMinutesFromEnv(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	t.Setenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "90")
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if cfg.JWT.AccessTokenExpireMinutes != 90 {
+		t.Fatalf("JWT.AccessTokenExpireMinutes = %d, want 90", cfg.JWT.AccessTokenExpireMinutes)
+	}
+}
+
+func TestLoadDefaultDatabaseSSLMode(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if cfg.Database.SSLMode != "prefer" {
+		t.Fatalf("Database.SSLMode = %q, want %q", cfg.Database.SSLMode, "prefer")
+	}
+}
+
+func TestValidateLinuxDoFrontendRedirectURL(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.LinuxDo.Enabled = true
+	cfg.LinuxDo.ClientID = "test-client"
+	cfg.LinuxDo.ClientSecret = "test-secret"
+	cfg.LinuxDo.RedirectURL = "https://example.com/api/v1/auth/oauth/linuxdo/callback"
+	cfg.LinuxDo.TokenAuthMethod = "client_secret_post"
+	cfg.LinuxDo.UsePKCE = true
+
+	cfg.LinuxDo.FrontendRedirectURL = "javascript:alert(1)"
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() expected error for javascript scheme, got nil")
+	}
+	if !strings.Contains(err.Error(), "linuxdo_connect.frontend_redirect_url") {
+		t.Fatalf("Validate() expected frontend_redirect_url error, got: %v", err)
+	}
+}
+
+func TestValidateLinuxDoAllowsDisablingPKCEForCompatibility(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.LinuxDo.Enabled = true
+	cfg.LinuxDo.ClientID = "test-client"
+	cfg.LinuxDo.ClientSecret = ""
+	cfg.LinuxDo.RedirectURL = "https://example.com/api/v1/auth/oauth/linuxdo/callback"
+	cfg.LinuxDo.FrontendRedirectURL = "/auth/linuxdo/callback"
+	cfg.LinuxDo.TokenAuthMethod = "none"
+	cfg.LinuxDo.UsePKCE = false
+
+	err = cfg.Validate()
+	if err != nil {
+		t.Fatalf("Validate() expected LinuxDo config without PKCE to pass for compatibility, got: %v", err)
+	}
+}
+
+func TestValidateOIDCScopesMustContainOpenID(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.OIDC.Enabled = true
+	cfg.OIDC.ClientID = "oidc-client"
+	cfg.OIDC.ClientSecret = "oidc-secret"
+	cfg.OIDC.IssuerURL = "https://issuer.example.com"
+	cfg.OIDC.AuthorizeURL = "https://issuer.example.com/auth"
+	cfg.OIDC.TokenURL = "https://issuer.example.com/token"
+	cfg.OIDC.JWKSURL = "https://issuer.example.com/jwks"
+	cfg.OIDC.RedirectURL = "https://example.com/api/v1/auth/oauth/oidc/callback"
+	cfg.OIDC.FrontendRedirectURL = "/auth/oidc/callback"
+	cfg.OIDC.Scopes = "profile email"
+	cfg.OIDC.UsePKCE = true
+
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() expected error when scopes do not include openid, got nil")
+	}
+	if !strings.Contains(err.Error(), "oidc_connect.scopes") {
+		t.Fatalf("Validate() expected oidc_connect.scopes error, got: %v", err)
+	}
+}
+
+func TestValidateOIDCAllowsIssuerOnlyEndpointsWithDiscoveryFallback(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.OIDC.Enabled = true
+	cfg.OIDC.ClientID = "oidc-client"
+	cfg.OIDC.ClientSecret = "oidc-secret"
+	cfg.OIDC.IssuerURL = "https://issuer.example.com"
+	cfg.OIDC.AuthorizeURL = ""
+	cfg.OIDC.TokenURL = ""
+	cfg.OIDC.JWKSURL = ""
+	cfg.OIDC.RedirectURL = "https://example.com/api/v1/auth/oauth/oidc/callback"
+	cfg.OIDC.FrontendRedirectURL = "/auth/oidc/callback"
+	cfg.OIDC.Scopes = "openid email profile"
+	cfg.OIDC.ValidateIDToken = true
+	cfg.OIDC.UsePKCE = true
+
+	err = cfg.Validate()
+	if err != nil {
+		t.Fatalf("Validate() expected issuer-only OIDC config to pass with discovery fallback, got: %v", err)
+	}
+}
+
+func TestValidateOIDCAllowsExplicitCompatibilityOverridesForPKCEAndIDTokenValidation(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.OIDC.Enabled = true
+	cfg.OIDC.ClientID = "oidc-client"
+	cfg.OIDC.ClientSecret = "oidc-secret"
+	cfg.OIDC.IssuerURL = "https://issuer.example.com"
+	cfg.OIDC.AuthorizeURL = "https://issuer.example.com/auth"
+	cfg.OIDC.TokenURL = "https://issuer.example.com/token"
+	cfg.OIDC.UserInfoURL = "https://issuer.example.com/userinfo"
+	cfg.OIDC.RedirectURL = "https://example.com/api/v1/auth/oauth/oidc/callback"
+	cfg.OIDC.FrontendRedirectURL = "/auth/oidc/callback"
+	cfg.OIDC.Scopes = "openid email profile"
+	cfg.OIDC.UsePKCE = false
+	cfg.OIDC.ValidateIDToken = false
+	cfg.OIDC.JWKSURL = ""
+	cfg.OIDC.AllowedSigningAlgs = ""
+
+	err = cfg.Validate()
+	if err != nil {
+		t.Fatalf("Validate() expected OIDC config without PKCE/id_token validation to pass for compatibility, got: %v", err)
+	}
+}
+
+func TestLoadDefaultDashboardCacheConfig(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if !cfg.Dashboard.Enabled {
+		t.Fatalf("Dashboard.Enabled = false, want true")
+	}
+	if cfg.Dashboard.KeyPrefix != "sub2api:" {
+		t.Fatalf("Dashboard.KeyPrefix = %q, want %q", cfg.Dashboard.KeyPrefix, "sub2api:")
+	}
+	if cfg.Dashboard.StatsFreshTTLSeconds != 15 {
+		t.Fatalf("Dashboard.StatsFreshTTLSeconds = %d, want 15", cfg.Dashboard.StatsFreshTTLSeconds)
+	}
+	if cfg.Dashboard.StatsTTLSeconds != 30 {
+		t.Fatalf("Dashboard.StatsTTLSeconds = %d, want 30", cfg.Dashboard.StatsTTLSeconds)
+	}
+	if cfg.Dashboard.StatsRefreshTimeoutSeconds != 30 {
+		t.Fatalf("Dashboard.StatsRefreshTimeoutSeconds = %d, want 30", cfg.Dashboard.StatsRefreshTimeoutSeconds)
+	}
+}
+
+func TestValidateDashboardCacheConfigEnabled(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.Dashboard.Enabled = true
+	cfg.Dashboard.StatsFreshTTLSeconds = 10
+	cfg.Dashboard.StatsTTLSeconds = 5
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() expected error for stats_fresh_ttl_seconds > stats_ttl_seconds, got nil")
+	}
+	if !strings.Contains(err.Error(), "dashboard_cache.stats_fresh_ttl_seconds") {
+		t.Fatalf("Validate() expected stats_fresh_ttl_seconds error, got: %v", err)
+	}
+}
+
+func TestValidateDashboardCacheConfigDisabled(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.Dashboard.Enabled = false
+	cfg.Dashboard.StatsTTLSeconds = -1
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() expected error for negative stats_ttl_seconds, got nil")
+	}
+	if !strings.Contains(err.Error(), "dashboard_cache.stats_ttl_seconds") {
+		t.Fatalf("Validate() expected stats_ttl_seconds error, got: %v", err)
+	}
+}
+
+func TestLoadDefaultDashboardAggregationConfig(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if !cfg.DashboardAgg.Enabled {
+		t.Fatalf("DashboardAgg.Enabled = false, want true")
+	}
+	if cfg.DashboardAgg.IntervalSeconds != 60 {
+		t.Fatalf("DashboardAgg.IntervalSeconds = %d, want 60", cfg.DashboardAgg.IntervalSeconds)
+	}
+	if cfg.DashboardAgg.LookbackSeconds != 120 {
+		t.Fatalf("DashboardAgg.LookbackSeconds = %d, want 120", cfg.DashboardAgg.LookbackSeconds)
+	}
+	if cfg.DashboardAgg.BackfillEnabled {
+		t.Fatalf("DashboardAgg.BackfillEnabled = true, want false")
+	}
+	if cfg.DashboardAgg.BackfillMaxDays != 31 {
+		t.Fatalf("DashboardAgg.BackfillMaxDays = %d, want 31", cfg.DashboardAgg.BackfillMaxDays)
+	}
+	if cfg.DashboardAgg.Retention.UsageLogsDays != 90 {
+		t.Fatalf("DashboardAgg.Retention.UsageLogsDays = %d, want 90", cfg.DashboardAgg.Retention.UsageLogsDays)
+	}
+	if cfg.DashboardAgg.Retention.UsageBillingDedupDays != 365 {
+		t.Fatalf("DashboardAgg.Retention.UsageBillingDedupDays = %d, want 365", cfg.DashboardAgg.Retention.UsageBillingDedupDays)
+	}
+	if cfg.DashboardAgg.Retention.HourlyDays != 180 {
+		t.Fatalf("DashboardAgg.Retention.HourlyDays = %d, want 180", cfg.DashboardAgg.Retention.HourlyDays)
+	}
+	if cfg.DashboardAgg.Retention.DailyDays != 730 {
+		t.Fatalf("DashboardAgg.Retention.DailyDays = %d, want 730", cfg.DashboardAgg.Retention.DailyDays)
+	}
+	if cfg.DashboardAgg.RecomputeDays != 2 {
+		t.Fatalf("DashboardAgg.RecomputeDays = %d, want 2", cfg.DashboardAgg.RecomputeDays)
+	}
+}
+
+func TestValidateDashboardAggregationConfigDisabled(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.DashboardAgg.Enabled = false
+	cfg.DashboardAgg.IntervalSeconds = -1
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() expected error for negative dashboard_aggregation.interval_seconds, got nil")
+	}
+	if !strings.Contains(err.Error(), "dashboard_aggregation.interval_seconds") {
+		t.Fatalf("Validate() expected interval_seconds error, got: %v", err)
+	}
+}
+
+func TestValidateDashboardAggregationBackfillMaxDays(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.DashboardAgg.BackfillEnabled = true
+	cfg.DashboardAgg.BackfillMaxDays = 0
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() expected error for dashboard_aggregation.backfill_max_days, got nil")
+	}
+	if !strings.Contains(err.Error(), "dashboard_aggregation.backfill_max_days") {
+		t.Fatalf("Validate() expected backfill_max_days error, got: %v", err)
+	}
+}
+
+func TestLoadDefaultUsageCleanupConfig(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	if !cfg.UsageCleanup.Enabled {
+		t.Fatalf("UsageCleanup.Enabled = false, want true")
+	}
+	if cfg.UsageCleanup.MaxRangeDays != 31 {
+		t.Fatalf("UsageCleanup.MaxRangeDays = %d, want 31", cfg.UsageCleanup.MaxRangeDays)
+	}
+	if cfg.UsageCleanup.BatchSize != 5000 {
+		t.Fatalf("UsageCleanup.BatchSize = %d, want 5000", cfg.UsageCleanup.BatchSize)
+	}
+	if cfg.UsageCleanup.WorkerIntervalSeconds != 10 {
+		t.Fatalf("UsageCleanup.WorkerIntervalSeconds = %d, want 10", cfg.UsageCleanup.WorkerIntervalSeconds)
+	}
+	if cfg.UsageCleanup.TaskTimeoutSeconds != 1800 {
+		t.Fatalf("UsageCleanup.TaskTimeoutSeconds = %d, want 1800", cfg.UsageCleanup.TaskTimeoutSeconds)
+	}
+}
+
+func TestLoadDefaultOpsCleanupConfig(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+	if !cfg.Ops.Cleanup.Enabled {
+		t.Fatal("Ops.Cleanup.Enabled = false, want true")
+	}
+	if cfg.Ops.Cleanup.SystemLogRetentionDays != 30 {
+		t.Fatalf("Ops.Cleanup.SystemLogRetentionDays = %d, want 30", cfg.Ops.Cleanup.SystemLogRetentionDays)
+	}
+}
+
+func TestValidateUsageCleanupConfigEnabled(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.UsageCleanup.Enabled = true
+	cfg.UsageCleanup.MaxRangeDays = 0
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() expected error for usage_cleanup.max_range_days, got nil")
+	}
+	if !strings.Contains(err.Error(), "usage_cleanup.max_range_days") {
+		t.Fatalf("Validate() expected max_range_days error, got: %v", err)
+	}
+}
+
+func TestValidateUsageCleanupConfigDisabled(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.UsageCleanup.Enabled = false
+	cfg.UsageCleanup.BatchSize = -1
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() expected error for usage_cleanup.batch_size, got nil")
+	}
+	if !strings.Contains(err.Error(), "usage_cleanup.batch_size") {
+		t.Fatalf("Validate() expected batch_size error, got: %v", err)
+	}
+}
+
+func TestConfigAddressHelpers(t *testing.T) {
+	server := ServerConfig{Host: "127.0.0.1", Port: 9000}
+	if server.Address() != "127.0.0.1:9000" {
+		t.Fatalf("ServerConfig.Address() = %q", server.Address())
+	}
+
+	dbCfg := DatabaseConfig{
+		Host:     "localhost",
+		Port:     5432,
+		User:     "postgres",
+		Password: "",
+		DBName:   "sub2api",
+		SSLMode:  "disable",
+	}
+	if !strings.Contains(dbCfg.DSN(), "password=") {
+	} else {
+		t.Fatalf("DatabaseConfig.DSN() should not include password when empty")
+	}
+
+	dbCfg.Password = "secret"
+	if !strings.Contains(dbCfg.DSN(), "password=secret") {
+		t.Fatalf("DatabaseConfig.DSN() missing password")
+	}
+
+	dbCfg.Password = ""
+	if strings.Contains(dbCfg.DSNWithTimezone("UTC"), "password=") {
+		t.Fatalf("DatabaseConfig.DSNWithTimezone() should omit password when empty")
+	}
+
+	if !strings.Contains(dbCfg.DSNWithTimezone(""), "TimeZone=Asia/Shanghai") {
+		t.Fatalf("DatabaseConfig.DSNWithTimezone() should use default timezone")
+	}
+	if !strings.Contains(dbCfg.DSNWithTimezone("UTC"), "TimeZone=UTC") {
+		t.Fatalf("DatabaseConfig.DSNWithTimezone() should use provided timezone")
+	}
+
+	redis := RedisConfig{Host: "redis", Port: 6379}
+	if redis.Address() != "redis:6379" {
+		t.Fatalf("RedisConfig.Address() = %q", redis.Address())
+	}
+}
+
+func TestNormalizeStringSlice(t *testing.T) {
+	values := normalizeStringSlice([]string{" a ", "", "b", "   ", "c"})
+	if len(values) != 3 || values[0] != "a" || values[1] != "b" || values[2] != "c" {
+		t.Fatalf("normalizeStringSlice() unexpected result: %#v", values)
+	}
+	if normalizeStringSlice(nil) != nil {
+		t.Fatalf("normalizeStringSlice(nil) expected nil slice")
+	}
+}
+
+func TestGetServerAddressFromEnv(t *testing.T) {
+	t.Setenv("CONFIG_FILE", "")
+	t.Setenv("DATA_DIR", "")
+	t.Setenv("SERVER_HOST", "127.0.0.1")
+	t.Setenv("SERVER_PORT", "9090")
+
+	address := GetServerAddress()
+	if address != "127.0.0.1:9090" {
+		t.Fatalf("GetServerAddress() = %q", address)
+	}
+}
+
+func TestGetServerAddressFromConfigFile(t *testing.T) {
+	configFile := filepath.Join(t.TempDir(), "setup.yaml")
+	require.NoError(t, os.WriteFile(configFile, []byte("server:\n  host: 192.0.2.40\n  port: 9191\n"), 0o600))
+	t.Setenv("CONFIG_FILE", configFile)
+	t.Setenv("DATA_DIR", "")
+	t.Setenv("SERVER_HOST", "")
+	t.Setenv("SERVER_PORT", "")
+
+	require.Equal(t, "192.0.2.40:9191", GetServerAddress())
+}
+
+func TestValidateAbsoluteHTTPURL(t *testing.T) {
+	if err := ValidateAbsoluteHTTPURL("https://example.com/path"); err != nil {
+		t.Fatalf("ValidateAbsoluteHTTPURL valid url error: %v", err)
+	}
+	if err := ValidateAbsoluteHTTPURL(""); err == nil {
+		t.Fatalf("ValidateAbsoluteHTTPURL should reject empty url")
+	}
+	if err := ValidateAbsoluteHTTPURL("/relative"); err == nil {
+		t.Fatalf("ValidateAbsoluteHTTPURL should reject relative url")
+	}
+	if err := ValidateAbsoluteHTTPURL("ftp://example.com"); err == nil {
+		t.Fatalf("ValidateAbsoluteHTTPURL should reject ftp scheme")
+	}
+	if err := ValidateAbsoluteHTTPURL("https://example.com/#frag"); err == nil {
+		t.Fatalf("ValidateAbsoluteHTTPURL should reject fragment")
+	}
+}
+
+func TestValidateServerFrontendURL(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.Server.FrontendURL = "https://example.com"
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("Validate() frontend_url valid error: %v", err)
+	}
+
+	cfg.Server.FrontendURL = "https://example.com/path"
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("Validate() frontend_url with path valid error: %v", err)
+	}
+
+	cfg.Server.FrontendURL = "https://example.com?utm=1"
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should reject server.frontend_url with query")
+	}
+
+	cfg.Server.FrontendURL = "https://user:pass@example.com"
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should reject server.frontend_url with userinfo")
+	}
+
+	cfg.Server.FrontendURL = "/relative"
+	if err := cfg.Validate(); err == nil {
+		t.Fatalf("Validate() should reject relative server.frontend_url")
+	}
+}
+
+func TestValidateFrontendRedirectURL(t *testing.T) {
+	if err := ValidateFrontendRedirectURL("/auth/callback"); err != nil {
+		t.Fatalf("ValidateFrontendRedirectURL relative error: %v", err)
+	}
+	if err := ValidateFrontendRedirectURL("https://example.com/auth"); err != nil {
+		t.Fatalf("ValidateFrontendRedirectURL absolute error: %v", err)
+	}
+	if err := ValidateFrontendRedirectURL("example.com/path"); err == nil {
+		t.Fatalf("ValidateFrontendRedirectURL should reject non-absolute url")
+	}
+	if err := ValidateFrontendRedirectURL("//evil.com"); err == nil {
+		t.Fatalf("ValidateFrontendRedirectURL should reject // prefix")
+	}
+	if err := ValidateFrontendRedirectURL("javascript:alert(1)"); err == nil {
+		t.Fatalf("ValidateFrontendRedirectURL should reject javascript scheme")
+	}
+}
+
+func TestWarnIfInsecureURL(t *testing.T) {
+	warnIfInsecureURL("test", "http://example.com")
+	warnIfInsecureURL("test", "bad://url")
+	warnIfInsecureURL("test", "://invalid")
+}
+
+func TestGenerateJWTSecretDefaultLength(t *testing.T) {
+	secret, err := generateJWTSecret(0)
+	if err != nil {
+		t.Fatalf("generateJWTSecret error: %v", err)
+	}
+	if len(secret) == 0 {
+		t.Fatalf("generateJWTSecret returned empty string")
+	}
+}
+
+func TestValidateOpsCleanupScheduleRequired(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+	cfg.Ops.Cleanup.Enabled = true
+	cfg.Ops.Cleanup.Schedule = ""
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() expected error for ops.cleanup.schedule")
+	}
+	if !strings.Contains(err.Error(), "ops.cleanup.schedule") {
+		t.Fatalf("Validate() expected ops.cleanup.schedule error, got: %v", err)
+	}
+}
+
+func TestValidateConcurrencyPingInterval(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+	cfg.Concurrency.PingInterval = 3
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() expected error for concurrency.ping_interval")
+	}
+	if !strings.Contains(err.Error(), "concurrency.ping_interval") {
+		t.Fatalf("Validate() expected concurrency.ping_interval error, got: %v", err)
+	}
+}
+
+func TestProvideConfig(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	if _, err := ProvideConfig(); err != nil {
+		t.Fatalf("ProvideConfig() error: %v", err)
+	}
+}
+
+func TestValidateConfigWithLinuxDoEnabled(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.Security.CSP.Enabled = true
+	cfg.Security.CSP.Policy = "default-src 'self'"
+
+	cfg.LinuxDo.Enabled = true
+	cfg.LinuxDo.ClientID = "client"
+	cfg.LinuxDo.ClientSecret = "secret"
+	cfg.LinuxDo.AuthorizeURL = "https://example.com/oauth2/authorize"
+	cfg.LinuxDo.TokenURL = "https://example.com/oauth2/token"
+	cfg.LinuxDo.UserInfoURL = "https://example.com/oauth2/userinfo"
+	cfg.LinuxDo.RedirectURL = "https://example.com/api/v1/auth/oauth/linuxdo/callback"
+	cfg.LinuxDo.FrontendRedirectURL = "/auth/linuxdo/callback"
+	cfg.LinuxDo.TokenAuthMethod = "client_secret_post"
+	cfg.LinuxDo.UsePKCE = true
+
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("Validate() unexpected error: %v", err)
+	}
+}
+
+func TestValidateJWTSecretStrength(t *testing.T) {
+	if !isWeakJWTSecret("change-me-in-production") {
+		t.Fatalf("isWeakJWTSecret should detect weak secret")
+	}
+	if isWeakJWTSecret("StrongSecretValue") {
+		t.Fatalf("isWeakJWTSecret should accept strong secret")
+	}
+}
+
+func TestGenerateJWTSecretWithLength(t *testing.T) {
+	secret, err := generateJWTSecret(16)
+	if err != nil {
+		t.Fatalf("generateJWTSecret error: %v", err)
+	}
+	if len(secret) == 0 {
+		t.Fatalf("generateJWTSecret returned empty string")
+	}
+}
+
+func TestDatabaseDSNWithTimezone_WithPassword(t *testing.T) {
+	d := &DatabaseConfig{
+		Host:     "localhost",
+		Port:     5432,
+		User:     "u",
+		Password: "p",
+		DBName:   "db",
+		SSLMode:  "prefer",
+	}
+	got := d.DSNWithTimezone("UTC")
+	if !strings.Contains(got, "password=p") {
+		t.Fatalf("DSNWithTimezone should include password: %q", got)
+	}
+	if !strings.Contains(got, "TimeZone=UTC") {
+		t.Fatalf("DSNWithTimezone should include TimeZone=UTC: %q", got)
+	}
+}
+
+func TestValidateAbsoluteHTTPURLMissingHost(t *testing.T) {
+	if err := ValidateAbsoluteHTTPURL("https://"); err == nil {
+		t.Fatalf("ValidateAbsoluteHTTPURL should reject missing host")
+	}
+}
+
+func TestValidateFrontendRedirectURLInvalidChars(t *testing.T) {
+	if err := ValidateFrontendRedirectURL("/auth/\ncallback"); err == nil {
+		t.Fatalf("ValidateFrontendRedirectURL should reject invalid chars")
+	}
+	if err := ValidateFrontendRedirectURL("http://"); err == nil {
+		t.Fatalf("ValidateFrontendRedirectURL should reject missing host")
+	}
+	if err := ValidateFrontendRedirectURL("mailto:user@example.com"); err == nil {
+		t.Fatalf("ValidateFrontendRedirectURL should reject mailto")
+	}
+}
+
+func TestWarnIfInsecureURLHTTPS(t *testing.T) {
+	warnIfInsecureURL("secure", "https://example.com")
+}
+
+func TestValidateJWTSecret_UTF8Bytes(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	// 31 bytes (< 32) even though it's 31 characters.
+	cfg.JWT.Secret = strings.Repeat("a", 31)
+	err = cfg.Validate()
+	if err == nil {
+		t.Fatalf("Validate() should reject 31-byte secret")
+	}
+	if !strings.Contains(err.Error(), "at least 32 bytes") {
+		t.Fatalf("Validate() error = %v", err)
+	}
+
+	// 32 bytes OK.
+	cfg.JWT.Secret = strings.Repeat("a", 32)
+	err = cfg.Validate()
+	if err != nil {
+		t.Fatalf("Validate() should accept 32-byte secret: %v", err)
+	}
+}
+
+func TestValidateConfigErrors(t *testing.T) {
+	buildValid := func(t *testing.T) *Config {
+		t.Helper()
+		resetViperWithJWTSecret(t)
+		cfg, err := Load()
+		if err != nil {
+			t.Fatalf("Load() error: %v", err)
+		}
+		return cfg
+	}
+
+	cases := []struct {
+		name    string
+		mutate  func(*Config)
+		wantErr string
+	}{
+		{
+			name:    "negative ingress memory budget",
+			mutate:  func(c *Config) { c.Gateway.RequestBodyMemoryBudgetBytes = -1 },
+			wantErr: "gateway.request_body_memory_budget_bytes",
+		},
+		{
+			name:    "negative upload timeout",
+			mutate:  func(c *Config) { c.Gateway.RequestBodyReadTimeoutSeconds = -1 },
+			wantErr: "gateway.request_body_read_timeout_seconds",
+		},
+		{
+			name:    "server read header timeout",
+			mutate:  func(c *Config) { c.Server.ReadHeaderTimeout = 0 },
+			wantErr: "server.read_header_timeout",
+		},
+		{
+			name:    "server max header bytes too small",
+			mutate:  func(c *Config) { c.Server.MaxHeaderBytes = 4096 },
+			wantErr: "server.max_header_bytes",
+		},
+		{
+			name:    "server max request body size",
+			mutate:  func(c *Config) { c.Server.MaxRequestBodySize = -1 },
+			wantErr: "server.max_request_body_size",
+		},
+		{
+			name: "h2c zero concurrent streams",
+			mutate: func(c *Config) {
+				c.Server.H2C.Enabled = true
+				c.Server.H2C.MaxConcurrentStreams = 0
+			},
+			wantErr: "server.h2c.max_concurrent_streams",
+		},
+		{
+			name: "h2c oversized read frame",
+			mutate: func(c *Config) {
+				c.Server.H2C.Enabled = true
+				c.Server.H2C.MaxReadFrameSize = 16 * 1024 * 1024
+			},
+			wantErr: "server.h2c.max_read_frame_size",
+		},
+		{
+			name: "invalid auth abuse threshold too small",
+			mutate: func(c *Config) {
+				c.APIKeyAuth.InvalidAbuse.Threshold = 9
+			},
+			wantErr: "api_key_auth_cache.invalid_abuse.threshold",
+		},
+		{
+			name: "invalid auth abuse capacity too small",
+			mutate: func(c *Config) {
+				c.APIKeyAuth.InvalidAbuse.Capacity = 255
+			},
+			wantErr: "api_key_auth_cache.invalid_abuse.capacity",
+		},
+		{
+			name:    "jwt secret required",
+			mutate:  func(c *Config) { c.JWT.Secret = "" },
+			wantErr: "jwt.secret is required",
+		},
+		{
+			name:    "jwt secret min bytes",
+			mutate:  func(c *Config) { c.JWT.Secret = strings.Repeat("a", 31) },
+			wantErr: "jwt.secret must be at least 32 bytes",
+		},
+		{
+			name:    "subscription maintenance worker_count non-negative",
+			mutate:  func(c *Config) { c.SubscriptionMaintenance.WorkerCount = -1 },
+			wantErr: "subscription_maintenance.worker_count",
+		},
+		{
+			name:    "subscription maintenance queue_size non-negative",
+			mutate:  func(c *Config) { c.SubscriptionMaintenance.QueueSize = -1 },
+			wantErr: "subscription_maintenance.queue_size",
+		},
+		{
+			name:    "jwt expire hour positive",
+			mutate:  func(c *Config) { c.JWT.ExpireHour = 0 },
+			wantErr: "jwt.expire_hour must be positive",
+		},
+		{
+			name:    "jwt expire hour max",
+			mutate:  func(c *Config) { c.JWT.ExpireHour = 200 },
+			wantErr: "jwt.expire_hour must be <= 168",
+		},
+		{
+			name:    "jwt access token expire minutes non-negative",
+			mutate:  func(c *Config) { c.JWT.AccessTokenExpireMinutes = -1 },
+			wantErr: "jwt.access_token_expire_minutes must be non-negative",
+		},
+		{
+			name:    "csp policy required",
+			mutate:  func(c *Config) { c.Security.CSP.Enabled = true; c.Security.CSP.Policy = "" },
+			wantErr: "security.csp.policy",
+		},
+		{
+			name: "linuxdo client id required",
+			mutate: func(c *Config) {
+				c.LinuxDo.Enabled = true
+				c.LinuxDo.UsePKCE = true
+				c.LinuxDo.ClientID = ""
+			},
+			wantErr: "linuxdo_connect.client_id",
+		},
+		{
+			name: "linuxdo token auth method",
+			mutate: func(c *Config) {
+				c.LinuxDo.Enabled = true
+				c.LinuxDo.UsePKCE = true
+				c.LinuxDo.ClientID = "client"
+				c.LinuxDo.ClientSecret = "secret"
+				c.LinuxDo.AuthorizeURL = "https://example.com/authorize"
+				c.LinuxDo.TokenURL = "https://example.com/token"
+				c.LinuxDo.UserInfoURL = "https://example.com/userinfo"
+				c.LinuxDo.RedirectURL = "https://example.com/callback"
+				c.LinuxDo.FrontendRedirectURL = "/auth/callback"
+				c.LinuxDo.TokenAuthMethod = "invalid"
+			},
+			wantErr: "linuxdo_connect.token_auth_method",
+		},
+		{
+			name:    "billing circuit breaker threshold",
+			mutate:  func(c *Config) { c.Billing.CircuitBreaker.FailureThreshold = 0 },
+			wantErr: "billing.circuit_breaker.failure_threshold",
+		},
+		{
+			name:    "billing circuit breaker reset",
+			mutate:  func(c *Config) { c.Billing.CircuitBreaker.ResetTimeoutSeconds = 0 },
+			wantErr: "billing.circuit_breaker.reset_timeout_seconds",
+		},
+		{
+			name:    "billing circuit breaker half open",
+			mutate:  func(c *Config) { c.Billing.CircuitBreaker.HalfOpenRequests = 0 },
+			wantErr: "billing.circuit_breaker.half_open_requests",
+		},
+		{
+			name:    "billing minimum balance reserve",
+			mutate:  func(c *Config) { c.Billing.MinimumBalanceReserve = -0.01 },
+			wantErr: "billing.minimum_balance_reserve",
+		},
+		{
+			name:    "database max open conns",
+			mutate:  func(c *Config) { c.Database.MaxOpenConns = 0 },
+			wantErr: "database.max_open_conns",
+		},
+		{
+			name:    "database max lifetime",
+			mutate:  func(c *Config) { c.Database.ConnMaxLifetimeMinutes = -1 },
+			wantErr: "database.conn_max_lifetime_minutes",
+		},
+		{
+			name:    "database idle exceeds open",
+			mutate:  func(c *Config) { c.Database.MaxIdleConns = c.Database.MaxOpenConns + 1 },
+			wantErr: "database.max_idle_conns cannot exceed",
+		},
+		{
+			name:    "redis dial timeout",
+			mutate:  func(c *Config) { c.Redis.DialTimeoutSeconds = 0 },
+			wantErr: "redis.dial_timeout_seconds",
+		},
+		{
+			name:    "redis read timeout",
+			mutate:  func(c *Config) { c.Redis.ReadTimeoutSeconds = 0 },
+			wantErr: "redis.read_timeout_seconds",
+		},
+		{
+			name:    "redis write timeout",
+			mutate:  func(c *Config) { c.Redis.WriteTimeoutSeconds = 0 },
+			wantErr: "redis.write_timeout_seconds",
+		},
+		{
+			name:    "redis pool size",
+			mutate:  func(c *Config) { c.Redis.PoolSize = 0 },
+			wantErr: "redis.pool_size",
+		},
+		{
+			name:    "redis idle exceeds pool",
+			mutate:  func(c *Config) { c.Redis.MinIdleConns = c.Redis.PoolSize + 1 },
+			wantErr: "redis.min_idle_conns cannot exceed",
+		},
+		{
+			name:    "dashboard cache disabled negative",
+			mutate:  func(c *Config) { c.Dashboard.Enabled = false; c.Dashboard.StatsTTLSeconds = -1 },
+			wantErr: "dashboard_cache.stats_ttl_seconds",
+		},
+		{
+			name:    "dashboard cache fresh ttl positive",
+			mutate:  func(c *Config) { c.Dashboard.Enabled = true; c.Dashboard.StatsFreshTTLSeconds = 0 },
+			wantErr: "dashboard_cache.stats_fresh_ttl_seconds",
+		},
+		{
+			name:    "dashboard aggregation enabled interval",
+			mutate:  func(c *Config) { c.DashboardAgg.Enabled = true; c.DashboardAgg.IntervalSeconds = 0 },
+			wantErr: "dashboard_aggregation.interval_seconds",
+		},
+		{
+			name: "dashboard aggregation backfill positive",
+			mutate: func(c *Config) {
+				c.DashboardAgg.Enabled = true
+				c.DashboardAgg.BackfillEnabled = true
+				c.DashboardAgg.BackfillMaxDays = 0
+			},
+			wantErr: "dashboard_aggregation.backfill_max_days",
+		},
+		{
+			name:    "dashboard aggregation retention",
+			mutate:  func(c *Config) { c.DashboardAgg.Enabled = true; c.DashboardAgg.Retention.UsageLogsDays = 0 },
+			wantErr: "dashboard_aggregation.retention.usage_logs_days",
+		},
+		{
+			name: "dashboard aggregation dedup retention",
+			mutate: func(c *Config) {
+				c.DashboardAgg.Enabled = true
+				c.DashboardAgg.Retention.UsageBillingDedupDays = 0
+			},
+			wantErr: "dashboard_aggregation.retention.usage_billing_dedup_days",
+		},
+		{
+			name: "dashboard aggregation dedup retention smaller than usage logs",
+			mutate: func(c *Config) {
+				c.DashboardAgg.Enabled = true
+				c.DashboardAgg.Retention.UsageLogsDays = 30
+				c.DashboardAgg.Retention.UsageBillingDedupDays = 29
+			},
+			wantErr: "dashboard_aggregation.retention.usage_billing_dedup_days",
+		},
+		{
+			name:    "dashboard aggregation disabled interval",
+			mutate:  func(c *Config) { c.DashboardAgg.Enabled = false; c.DashboardAgg.IntervalSeconds = -1 },
+			wantErr: "dashboard_aggregation.interval_seconds",
+		},
+		{
+			name:    "usage cleanup max range",
+			mutate:  func(c *Config) { c.UsageCleanup.Enabled = true; c.UsageCleanup.MaxRangeDays = 0 },
+			wantErr: "usage_cleanup.max_range_days",
+		},
+		{
+			name:    "usage cleanup worker interval",
+			mutate:  func(c *Config) { c.UsageCleanup.Enabled = true; c.UsageCleanup.WorkerIntervalSeconds = 0 },
+			wantErr: "usage_cleanup.worker_interval_seconds",
+		},
+		{
+			name:    "usage cleanup batch size",
+			mutate:  func(c *Config) { c.UsageCleanup.Enabled = true; c.UsageCleanup.BatchSize = 0 },
+			wantErr: "usage_cleanup.batch_size",
+		},
+		{
+			name:    "usage cleanup disabled negative",
+			mutate:  func(c *Config) { c.UsageCleanup.Enabled = false; c.UsageCleanup.BatchSize = -1 },
+			wantErr: "usage_cleanup.batch_size",
+		},
+		{
+			name:    "gateway max body size",
+			mutate:  func(c *Config) { c.Gateway.MaxBodySize = 0 },
+			wantErr: "gateway.max_body_size",
+		},
+		{
+			name:    "gateway text body exceeds media body",
+			mutate:  func(c *Config) { c.Gateway.TextMaxBodySize = c.Gateway.MaxBodySize + 1 },
+			wantErr: "gateway.text_max_body_size",
+		},
+		{
+			name:    "gateway models list read limit",
+			mutate:  func(c *Config) { c.Gateway.ModelsListReadMaxBytes = 0 },
+			wantErr: "gateway.models_list_read_max_bytes",
+		},
+		{
+			name:    "gateway response header timeout",
+			mutate:  func(c *Config) { c.Gateway.ResponseHeaderTimeout = -1 },
+			wantErr: "gateway.response_header_timeout",
+		},
+		{
+			name:    "gateway openai response header timeout",
+			mutate:  func(c *Config) { c.Gateway.OpenAIResponseHeaderTimeout = -1 },
+			wantErr: "gateway.openai_response_header_timeout",
+		},
+		{
+			name:    "gateway gemini same account retries negative",
+			mutate:  func(c *Config) { c.Gateway.MaxSameAccountRetriesGemini = -1 },
+			wantErr: "gateway.max_same_account_retries_gemini",
+		},
+		{
+			name:    "gateway gemini same account retries too large",
+			mutate:  func(c *Config) { c.Gateway.MaxSameAccountRetriesGemini = 11 },
+			wantErr: "gateway.max_same_account_retries_gemini",
+		},
+		{
+			name:    "gateway openai first output timeout below minimum",
+			mutate:  func(c *Config) { c.Gateway.OpenAIFirstOutputTimeoutSeconds = 29 },
+			wantErr: "gateway.openai_first_output_timeout_seconds",
+		},
+		{
+			name:    "gateway openai high effort first output timeout too large",
+			mutate:  func(c *Config) { c.Gateway.OpenAIHighEffortFirstOutputTimeoutSeconds = 1801 },
+			wantErr: "gateway.openai_high_effort_first_output_timeout_seconds",
+		},
+		{
+			name:    "gateway max idle conns",
+			mutate:  func(c *Config) { c.Gateway.MaxIdleConns = 0 },
+			wantErr: "gateway.max_idle_conns",
+		},
+		{
+			name:    "gateway max idle conns per host",
+			mutate:  func(c *Config) { c.Gateway.MaxIdleConnsPerHost = 0 },
+			wantErr: "gateway.max_idle_conns_per_host",
+		},
+		{
+			name:    "gateway idle timeout",
+			mutate:  func(c *Config) { c.Gateway.IdleConnTimeoutSeconds = 0 },
+			wantErr: "gateway.idle_conn_timeout_seconds",
+		},
+		{
+			name:    "gateway max upstream clients",
+			mutate:  func(c *Config) { c.Gateway.MaxUpstreamClients = 0 },
+			wantErr: "gateway.max_upstream_clients",
+		},
+		{
+			name:    "gateway client idle ttl",
+			mutate:  func(c *Config) { c.Gateway.ClientIdleTTLSeconds = 0 },
+			wantErr: "gateway.client_idle_ttl_seconds",
+		},
+		{
+			name:    "gateway concurrency slot ttl",
+			mutate:  func(c *Config) { c.Gateway.ConcurrencySlotTTLMinutes = 0 },
+			wantErr: "gateway.concurrency_slot_ttl_minutes",
+		},
+		{
+			name:    "gateway max conns per host",
+			mutate:  func(c *Config) { c.Gateway.MaxConnsPerHost = -1 },
+			wantErr: "gateway.max_conns_per_host",
+		},
+		{
+			name:    "gateway connection isolation",
+			mutate:  func(c *Config) { c.Gateway.ConnectionPoolIsolation = "invalid" },
+			wantErr: "gateway.connection_pool_isolation",
+		},
+		{
+			name:    "gateway stream keepalive range",
+			mutate:  func(c *Config) { c.Gateway.StreamKeepaliveInterval = 4 },
+			wantErr: "gateway.stream_keepalive_interval",
+		},
+		{
+			name:    "gateway openai ws oauth max conns factor",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.OAuthMaxConnsFactor = 0 },
+			wantErr: "gateway.openai_ws.oauth_max_conns_factor",
+		},
+		{
+			name:    "gateway openai ws apikey max conns factor",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.APIKeyMaxConnsFactor = 0 },
+			wantErr: "gateway.openai_ws.apikey_max_conns_factor",
+		},
+		{
+			name:    "gateway openai http2 fallback threshold",
+			mutate:  func(c *Config) { c.Gateway.OpenAIHTTP2.FallbackErrorThreshold = -1 },
+			wantErr: "gateway.openai_http2.fallback_error_threshold",
+		},
+		{
+			name:    "gateway openai http2 fallback window",
+			mutate:  func(c *Config) { c.Gateway.OpenAIHTTP2.FallbackWindowSeconds = -1 },
+			wantErr: "gateway.openai_http2.fallback_window_seconds",
+		},
+		{
+			name:    "gateway openai http2 fallback ttl",
+			mutate:  func(c *Config) { c.Gateway.OpenAIHTTP2.FallbackTTLSeconds = -1 },
+			wantErr: "gateway.openai_http2.fallback_ttl_seconds",
+		},
+		{
+			name:    "gateway openai proxy stream circuit threshold",
+			mutate:  func(c *Config) { c.Gateway.OpenAIProxyStreamCircuit.FailureThreshold = -1 },
+			wantErr: "gateway.openai_proxy_stream_circuit.failure_threshold",
+		},
+		{
+			name:    "gateway openai proxy stream circuit window",
+			mutate:  func(c *Config) { c.Gateway.OpenAIProxyStreamCircuit.WindowSeconds = -1 },
+			wantErr: "gateway.openai_proxy_stream_circuit.window_seconds",
+		},
+		{
+			name:    "gateway openai proxy stream circuit ttl",
+			mutate:  func(c *Config) { c.Gateway.OpenAIProxyStreamCircuit.TTLSeconds = -1 },
+			wantErr: "gateway.openai_proxy_stream_circuit.ttl_seconds",
+		},
+		{
+			name:    "gateway stream data interval range",
+			mutate:  func(c *Config) { c.Gateway.StreamDataIntervalTimeout = 5 },
+			wantErr: "gateway.stream_data_interval_timeout",
+		},
+		{
+			name:    "gateway stream data interval negative",
+			mutate:  func(c *Config) { c.Gateway.StreamDataIntervalTimeout = -1 },
+			wantErr: "gateway.stream_data_interval_timeout must be non-negative",
+		},
+		{
+			name:    "gateway image stream keepalive range",
+			mutate:  func(c *Config) { c.Gateway.ImageStreamKeepaliveInterval = 4 },
+			wantErr: "gateway.image_stream_keepalive_interval",
+		},
+		{
+			name:    "gateway image stream keepalive negative",
+			mutate:  func(c *Config) { c.Gateway.ImageStreamKeepaliveInterval = -1 },
+			wantErr: "gateway.image_stream_keepalive_interval must be non-negative",
+		},
+		{
+			name:    "gateway image nonstream keepalive range",
+			mutate:  func(c *Config) { c.Gateway.ImageNonstreamKeepaliveInterval = 4 },
+			wantErr: "gateway.image_nonstream_keepalive_interval",
+		},
+		{
+			name:    "gateway image nonstream keepalive negative",
+			mutate:  func(c *Config) { c.Gateway.ImageNonstreamKeepaliveInterval = -1 },
+			wantErr: "gateway.image_nonstream_keepalive_interval must be non-negative",
+		},
+		{
+			name:    "gateway image stream data interval range",
+			mutate:  func(c *Config) { c.Gateway.ImageStreamDataIntervalTimeout = 30 },
+			wantErr: "gateway.image_stream_data_interval_timeout",
+		},
+		{
+			name:    "gateway image stream data interval negative",
+			mutate:  func(c *Config) { c.Gateway.ImageStreamDataIntervalTimeout = -1 },
+			wantErr: "gateway.image_stream_data_interval_timeout must be non-negative",
+		},
+		{
+			name:    "gateway image concurrency max negative",
+			mutate:  func(c *Config) { c.Gateway.ImageConcurrency.MaxConcurrentRequests = -1 },
+			wantErr: "gateway.image_concurrency.max_concurrent_requests must be non-negative",
+		},
+		{
+			name:    "gateway image concurrency overflow mode invalid",
+			mutate:  func(c *Config) { c.Gateway.ImageConcurrency.OverflowMode = "queue" },
+			wantErr: "gateway.image_concurrency.overflow_mode",
+		},
+		{
+			name:    "gateway image concurrency wait timeout negative",
+			mutate:  func(c *Config) { c.Gateway.ImageConcurrency.WaitTimeoutSeconds = -1 },
+			wantErr: "gateway.image_concurrency.wait_timeout_seconds must be non-negative",
+		},
+		{
+			name:    "gateway image concurrency max waiting negative",
+			mutate:  func(c *Config) { c.Gateway.ImageConcurrency.MaxWaitingRequests = -1 },
+			wantErr: "gateway.image_concurrency.max_waiting_requests must be non-negative",
+		},
+		{
+			name:    "gateway max line size",
+			mutate:  func(c *Config) { c.Gateway.MaxLineSize = 1024 },
+			wantErr: "gateway.max_line_size must be at least",
+		},
+		{
+			name:    "gateway max line size negative",
+			mutate:  func(c *Config) { c.Gateway.MaxLineSize = -1 },
+			wantErr: "gateway.max_line_size must be non-negative",
+		},
+		{
+			name:    "gateway usage record worker count",
+			mutate:  func(c *Config) { c.Gateway.UsageRecord.WorkerCount = 0 },
+			wantErr: "gateway.usage_record.worker_count",
+		},
+		{
+			name:    "gateway usage record queue size",
+			mutate:  func(c *Config) { c.Gateway.UsageRecord.QueueSize = 0 },
+			wantErr: "gateway.usage_record.queue_size",
+		},
+		{
+			name:    "gateway usage record timeout",
+			mutate:  func(c *Config) { c.Gateway.UsageRecord.TaskTimeoutSeconds = 0 },
+			wantErr: "gateway.usage_record.task_timeout_seconds",
+		},
+		{
+			name:    "gateway usage record overflow policy",
+			mutate:  func(c *Config) { c.Gateway.UsageRecord.OverflowPolicy = "invalid" },
+			wantErr: "gateway.usage_record.overflow_policy",
+		},
+		{
+			name:    "gateway usage record sample percent range",
+			mutate:  func(c *Config) { c.Gateway.UsageRecord.OverflowSamplePercent = 101 },
+			wantErr: "gateway.usage_record.overflow_sample_percent",
+		},
+		{
+			name: "gateway usage record sample percent required for sample policy",
+			mutate: func(c *Config) {
+				c.Gateway.UsageRecord.OverflowPolicy = UsageRecordOverflowPolicySample
+				c.Gateway.UsageRecord.OverflowSamplePercent = 0
+			},
+			wantErr: "gateway.usage_record.overflow_sample_percent must be positive",
+		},
+		{
+			name: "gateway usage record auto scale max gte min",
+			mutate: func(c *Config) {
+				c.Gateway.UsageRecord.AutoScaleMinWorkers = 256
+				c.Gateway.UsageRecord.AutoScaleMaxWorkers = 128
+			},
+			wantErr: "gateway.usage_record.auto_scale_max_workers",
+		},
+		{
+			name: "gateway usage record worker in auto scale range",
+			mutate: func(c *Config) {
+				c.Gateway.UsageRecord.AutoScaleMinWorkers = 200
+				c.Gateway.UsageRecord.AutoScaleMaxWorkers = 300
+				c.Gateway.UsageRecord.WorkerCount = 128
+			},
+			wantErr: "gateway.usage_record.worker_count must be between auto_scale_min_workers and auto_scale_max_workers",
+		},
+		{
+			name: "gateway usage record auto scale queue thresholds order",
+			mutate: func(c *Config) {
+				c.Gateway.UsageRecord.AutoScaleUpQueuePercent = 50
+				c.Gateway.UsageRecord.AutoScaleDownQueuePercent = 50
+			},
+			wantErr: "gateway.usage_record.auto_scale_down_queue_percent must be less",
+		},
+		{
+			name:    "gateway usage record auto scale up step",
+			mutate:  func(c *Config) { c.Gateway.UsageRecord.AutoScaleUpStep = 0 },
+			wantErr: "gateway.usage_record.auto_scale_up_step",
+		},
+		{
+			name:    "gateway usage record auto scale interval",
+			mutate:  func(c *Config) { c.Gateway.UsageRecord.AutoScaleCheckIntervalSeconds = 0 },
+			wantErr: "gateway.usage_record.auto_scale_check_interval_seconds",
+		},
+		{
+			name:    "gateway user group rate cache ttl",
+			mutate:  func(c *Config) { c.Gateway.UserGroupRateCacheTTLSeconds = 0 },
+			wantErr: "gateway.user_group_rate_cache_ttl_seconds",
+		},
+		{
+			name:    "gateway models list cache ttl range",
+			mutate:  func(c *Config) { c.Gateway.ModelsListCacheTTLSeconds = 31 },
+			wantErr: "gateway.models_list_cache_ttl_seconds",
+		},
+		{
+			name:    "gateway scheduling sticky waiting",
+			mutate:  func(c *Config) { c.Gateway.Scheduling.StickySessionMaxWaiting = 0 },
+			wantErr: "gateway.scheduling.sticky_session_max_waiting",
+		},
+		{
+			name:    "gateway scheduling load batch cache ttl",
+			mutate:  func(c *Config) { c.Gateway.Scheduling.LoadBatchCacheTTLMS = -1 },
+			wantErr: "gateway.scheduling.load_batch_cache_ttl_ms",
+		},
+		{
+			name:    "gateway scheduling outbox poll",
+			mutate:  func(c *Config) { c.Gateway.Scheduling.OutboxPollIntervalSeconds = 0 },
+			wantErr: "gateway.scheduling.outbox_poll_interval_seconds",
+		},
+		{
+			name:    "gateway scheduling outbox failures",
+			mutate:  func(c *Config) { c.Gateway.Scheduling.OutboxLagRebuildFailures = 0 },
+			wantErr: "gateway.scheduling.outbox_lag_rebuild_failures",
+		},
+		{
+			name: "gateway outbox lag rebuild",
+			mutate: func(c *Config) {
+				c.Gateway.Scheduling.OutboxLagWarnSeconds = 10
+				c.Gateway.Scheduling.OutboxLagRebuildSeconds = 5
+			},
+			wantErr: "gateway.scheduling.outbox_lag_rebuild_seconds",
+		},
+		{
+			name:    "log level invalid",
+			mutate:  func(c *Config) { c.Log.Level = "trace" },
+			wantErr: "log.level",
+		},
+		{
+			name:    "log format invalid",
+			mutate:  func(c *Config) { c.Log.Format = "plain" },
+			wantErr: "log.format",
+		},
+		{
+			name: "log output disabled",
+			mutate: func(c *Config) {
+				c.Log.Output.ToStdout = false
+				c.Log.Output.ToFile = false
+			},
+			wantErr: "log.output.to_stdout and log.output.to_file cannot both be false",
+		},
+		{
+			name:    "log rotation size",
+			mutate:  func(c *Config) { c.Log.Rotation.MaxSizeMB = 0 },
+			wantErr: "log.rotation.max_size_mb",
+		},
+		{
+			name: "log sampling enabled invalid",
+			mutate: func(c *Config) {
+				c.Log.Sampling.Enabled = true
+				c.Log.Sampling.Initial = 0
+			},
+			wantErr: "log.sampling.initial",
+		},
+		{
+			name:    "ops metrics collector ttl",
+			mutate:  func(c *Config) { c.Ops.MetricsCollectorCache.TTL = -1 },
+			wantErr: "ops.metrics_collector_cache.ttl",
+		},
+		{
+			name:    "ops cleanup retention",
+			mutate:  func(c *Config) { c.Ops.Cleanup.ErrorLogRetentionDays = -1 },
+			wantErr: "ops.cleanup.error_log_retention_days",
+		},
+		{
+			name:    "ops cleanup system log retention",
+			mutate:  func(c *Config) { c.Ops.Cleanup.SystemLogRetentionDays = 0 },
+			wantErr: "ops.cleanup.system_log_retention_days",
+		},
+		{
+			name:    "ops cleanup minute retention",
+			mutate:  func(c *Config) { c.Ops.Cleanup.MinuteMetricsRetentionDays = -1 },
+			wantErr: "ops.cleanup.minute_metrics_retention_days",
+		},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := buildValid(t)
+			tt.mutate(cfg)
+			err := cfg.Validate()
+			if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("Validate() error = %v, want %q", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestValidateConfig_OpenAIWSRules(t *testing.T) {
+	buildValid := func(t *testing.T) *Config {
+		t.Helper()
+		resetViperWithJWTSecret(t)
+		cfg, err := Load()
+		require.NoError(t, err)
+		return cfg
+	}
+
+	t.Run("sticky response id ttl å…¼å®¹æ—§é”®å›å¡«", func(t *testing.T) {
+		cfg := buildValid(t)
+		cfg.Gateway.OpenAIWS.StickyResponseIDTTLSeconds = 0
+		cfg.Gateway.OpenAIWS.StickyPreviousResponseTTLSeconds = 7200
+
+		require.NoError(t, cfg.Validate())
+		require.Equal(t, 7200, cfg.Gateway.OpenAIWS.StickyResponseIDTTLSeconds)
+	})
+
+	cases := []struct {
+		name    string
+		mutate  func(*Config)
+		wantErr string
+	}{
+		{
+			name:    "max_conns_per_account å¿…é¡»ä¸ºæ­£æ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.MaxConnsPerAccount = 0 },
+			wantErr: "gateway.openai_ws.max_conns_per_account",
+		},
+		{
+			name:    "client_first_message_timeout_seconds å¿…é¡»ä¸ºæ­£æ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.ClientFirstMessageTimeoutSeconds = 0 },
+			wantErr: "gateway.openai_ws.client_first_message_timeout_seconds",
+		},
+		{
+			name:    "client_first_message_timeout_seconds ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.ClientFirstMessageTimeoutSeconds = -1 },
+			wantErr: "gateway.openai_ws.client_first_message_timeout_seconds",
+		},
+		{
+			name:    "ingress_inter_turn_idle_timeout_seconds ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.IngressInterTurnIdleTimeoutSeconds = -1 },
+			wantErr: "gateway.openai_ws.ingress_inter_turn_idle_timeout_seconds",
+		},
+		{
+			name:    "max_ingress_connections_per_api_key ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.MaxIngressConnectionsPerAPIKey = -1 },
+			wantErr: "gateway.openai_ws.max_ingress_connections_per_api_key",
+		},
+		{
+			name:    "min_idle_per_account ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.MinIdlePerAccount = -1 },
+			wantErr: "gateway.openai_ws.min_idle_per_account",
+		},
+		{
+			name:    "max_idle_per_account ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.MaxIdlePerAccount = -1 },
+			wantErr: "gateway.openai_ws.max_idle_per_account",
+		},
+		{
+			name: "min_idle_per_account ä¸èƒ½å¤§äº max_idle_per_account",
+			mutate: func(c *Config) {
+				c.Gateway.OpenAIWS.MinIdlePerAccount = 3
+				c.Gateway.OpenAIWS.MaxIdlePerAccount = 2
+			},
+			wantErr: "gateway.openai_ws.min_idle_per_account must be <= max_idle_per_account",
+		},
+		{
+			name: "max_idle_per_account ä¸èƒ½å¤§äº max_conns_per_account",
+			mutate: func(c *Config) {
+				c.Gateway.OpenAIWS.MaxConnsPerAccount = 2
+				c.Gateway.OpenAIWS.MinIdlePerAccount = 1
+				c.Gateway.OpenAIWS.MaxIdlePerAccount = 3
+			},
+			wantErr: "gateway.openai_ws.max_idle_per_account must be <= max_conns_per_account",
+		},
+		{
+			name:    "dial_timeout_seconds å¿…é¡»ä¸ºæ­£æ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.DialTimeoutSeconds = 0 },
+			wantErr: "gateway.openai_ws.dial_timeout_seconds",
+		},
+		{
+			name:    "read_timeout_seconds å¿…é¡»ä¸ºæ­£æ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.ReadTimeoutSeconds = 0 },
+			wantErr: "gateway.openai_ws.read_timeout_seconds",
+		},
+		{
+			name:    "write_timeout_seconds å¿…é¡»ä¸ºæ­£æ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.WriteTimeoutSeconds = 0 },
+			wantErr: "gateway.openai_ws.write_timeout_seconds",
+		},
+		{
+			name:    "pool_target_utilization å¿…é¡»åœ¨ (0,1]",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.PoolTargetUtilization = 0 },
+			wantErr: "gateway.openai_ws.pool_target_utilization",
+		},
+		{
+			name:    "queue_limit_per_conn å¿…é¡»ä¸ºæ­£æ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.QueueLimitPerConn = 0 },
+			wantErr: "gateway.openai_ws.queue_limit_per_conn",
+		},
+		{
+			name:    "fallback_cooldown_seconds ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.FallbackCooldownSeconds = -1 },
+			wantErr: "gateway.openai_ws.fallback_cooldown_seconds",
+		},
+		{
+			name:    "store_disabled_conn_mode å¿…é¡»ä¸º strict|adaptive|off",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.StoreDisabledConnMode = "invalid" },
+			wantErr: "gateway.openai_ws.store_disabled_conn_mode",
+		},
+		{
+			name:    "ingress_mode_default å¿…é¡»ä¸º off|ctx_pool|passthrough|http_bridge",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.IngressModeDefault = "invalid" },
+			wantErr: "gateway.openai_ws.ingress_mode_default",
+		},
+		{
+			name:    "payload_log_sample_rate å¿…é¡»åœ¨ [0,1] èŒƒå›´å†…",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.PayloadLogSampleRate = 1.2 },
+			wantErr: "gateway.openai_ws.payload_log_sample_rate",
+		},
+		{
+			name:    "retry_total_budget_ms ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.RetryTotalBudgetMS = -1 },
+			wantErr: "gateway.openai_ws.retry_total_budget_ms",
+		},
+		{
+			name:    "lb_top_k å¿…é¡»ä¸ºæ­£æ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.LBTopK = 0 },
+			wantErr: "gateway.openai_ws.lb_top_k",
+		},
+		{
+			name:    "sticky_session_ttl_seconds å¿…é¡»ä¸ºæ­£æ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.StickySessionTTLSeconds = 0 },
+			wantErr: "gateway.openai_ws.sticky_session_ttl_seconds",
+		},
+		{
+			name: "sticky_response_id_ttl_seconds å¿…é¡»ä¸ºæ­£æ•°",
+			mutate: func(c *Config) {
+				c.Gateway.OpenAIWS.StickyResponseIDTTLSeconds = 0
+				c.Gateway.OpenAIWS.StickyPreviousResponseTTLSeconds = 0
+			},
+			wantErr: "gateway.openai_ws.sticky_response_id_ttl_seconds",
+		},
+		{
+			name:    "sticky_previous_response_ttl_seconds ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.StickyPreviousResponseTTLSeconds = -1 },
+			wantErr: "gateway.openai_ws.sticky_previous_response_ttl_seconds",
+		},
+		{
+			name:    "scheduler_score_weights ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.SchedulerScoreWeights.Queue = -0.1 },
+			wantErr: "gateway.openai_ws.scheduler_score_weights.* must be non-negative",
+		},
+		{
+			name:    "scheduler_score_weights quota_headroom ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.SchedulerScoreWeights.QuotaHeadroom = -0.1 },
+			wantErr: "gateway.openai_ws.scheduler_score_weights.* must be non-negative",
+		},
+		{
+			name:    "scheduler_score_weights upstream_cost ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.SchedulerScoreWeights.UpstreamCost = -0.1 },
+			wantErr: "gateway.openai_ws.scheduler_score_weights.* must be non-negative",
+		},
+		{
+			name:    "scheduler_score_weights reset ä¸èƒ½ä¸ºè´Ÿæ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.SchedulerScoreWeights.Reset = -0.1 },
+			wantErr: "gateway.openai_ws.scheduler_score_weights.* must be non-negative",
+		},
+		{
+			name:    "scheduler_score_weights ä¸èƒ½ä¸º NaN",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.SchedulerScoreWeights.PreviousResponse = math.NaN() },
+			wantErr: "gateway.openai_ws.scheduler_score_weights.* must be non-negative and finite",
+		},
+		{
+			name:    "scheduler_score_weights ä¸èƒ½ä¸º Inf",
+			mutate:  func(c *Config) { c.Gateway.OpenAIWS.SchedulerScoreWeights.UpstreamCost = math.Inf(1) },
+			wantErr: "gateway.openai_ws.scheduler_score_weights.* must be non-negative and finite",
+		},
+		{
+			name: "scheduler_score_weights æ€»å’Œä¸èƒ½æº¢å‡º",
+			mutate: func(c *Config) {
+				c.Gateway.OpenAIWS.SchedulerScoreWeights.Priority = math.MaxFloat64
+				c.Gateway.OpenAIWS.SchedulerScoreWeights.Load = math.MaxFloat64
+			},
+			wantErr: "gateway.openai_ws.scheduler_score_weights base-weight sum must be finite",
+		},
+		{
+			name: "scheduler_score_weights å« sticky æ€»å’Œä¸èƒ½æº¢å‡º",
+			mutate: func(c *Config) {
+				c.Gateway.OpenAIWS.SchedulerScoreWeights.Priority = math.MaxFloat64
+				c.Gateway.OpenAIWS.SchedulerScoreWeights.PreviousResponse = math.MaxFloat64
+			},
+			wantErr: "gateway.openai_ws.scheduler_score_weights total-weight sum must be finite",
+		},
+		{
+			name: "scheduler_score_weights ä¸èƒ½å…¨ä¸º 0",
+			mutate: func(c *Config) {
+				c.Gateway.OpenAIWS.SchedulerScoreWeights.Priority = 0
+				c.Gateway.OpenAIWS.SchedulerScoreWeights.Load = 0
+				c.Gateway.OpenAIWS.SchedulerScoreWeights.Queue = 0
+				c.Gateway.OpenAIWS.SchedulerScoreWeights.ErrorRate = 0
+				c.Gateway.OpenAIWS.SchedulerScoreWeights.TTFT = 0
+			},
+			wantErr: "gateway.openai_ws.scheduler_score_weights must not all be zero",
+		},
+		{
+			name:    "sticky_escape_ttft_ms å¿…é¡»ä¸ºæ­£æ•°",
+			mutate:  func(c *Config) { c.Gateway.OpenAIScheduler.StickyEscapeTTFTMs = 0 },
+			wantErr: "gateway.openai_scheduler.sticky_escape_ttft_ms",
+		},
+		{
+			name:    "sticky_escape_error_rate ä¸èƒ½å°äº 0",
+			mutate:  func(c *Config) { c.Gateway.OpenAIScheduler.StickyEscapeErrorRate = -0.1 },
+			wantErr: "gateway.openai_scheduler.sticky_escape_error_rate",
+		},
+		{
+			name:    "sticky_escape_error_rate ä¸èƒ½å¤§äº 1",
+			mutate:  func(c *Config) { c.Gateway.OpenAIScheduler.StickyEscapeErrorRate = 1.1 },
+			wantErr: "gateway.openai_scheduler.sticky_escape_error_rate",
+		},
+	}
+
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			cfg := buildValid(t)
+			tc.mutate(cfg)
+
+			err := cfg.Validate()
+			require.Error(t, err)
+			require.Contains(t, err.Error(), tc.wantErr)
+		})
+	}
+
+	t.Run("quota_headroom å¯ä½œä¸ºå”¯ä¸€æœ‰æ•ˆè°ƒåº¦æƒé‡", func(t *testing.T) {
+		cfg := buildValid(t)
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.Priority = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.Load = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.Queue = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.ErrorRate = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.TTFT = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.QuotaHeadroom = 0.1
+
+		require.NoError(t, cfg.Validate())
+	})
+
+	t.Run("upstream_cost å¯ä½œä¸ºå”¯ä¸€æœ‰æ•ˆè°ƒåº¦æƒé‡", func(t *testing.T) {
+		cfg := buildValid(t)
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.Priority = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.Load = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.Queue = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.ErrorRate = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.TTFT = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.UpstreamCost = 0.1
+
+		require.NoError(t, cfg.Validate())
+	})
+
+	t.Run("reset å¯ä½œä¸ºå”¯ä¸€æœ‰æ•ˆè°ƒåº¦æƒé‡", func(t *testing.T) {
+		cfg := buildValid(t)
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.Priority = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.Load = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.Queue = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.ErrorRate = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.TTFT = 0
+		cfg.Gateway.OpenAIWS.SchedulerScoreWeights.Reset = 0.1
+
+		require.NoError(t, cfg.Validate())
+	})
+}
+
+func TestValidateConfig_AutoScaleDisabledIgnoreAutoScaleFields(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+
+	cfg.Gateway.UsageRecord.AutoScaleEnabled = false
+	cfg.Gateway.UsageRecord.WorkerCount = 64
+
+	// è‡ªåŠ¨æ‰©ç¼©å®¹å…³é—­æ—¶ï¼Œè¿™äº›å­—æ®µåº”è¢«å¿½ç•¥ï¼Œä¸åº”å¯¼è‡´æ ¡éªŒå¤±è´¥ã€‚
+	cfg.Gateway.UsageRecord.AutoScaleMinWorkers = 0
+	cfg.Gateway.UsageRecord.AutoScaleMaxWorkers = 0
+	cfg.Gateway.UsageRecord.AutoScaleUpQueuePercent = 0
+	cfg.Gateway.UsageRecord.AutoScaleDownQueuePercent = 100
+	cfg.Gateway.UsageRecord.AutoScaleUpStep = 0
+	cfg.Gateway.UsageRecord.AutoScaleDownStep = 0
+	cfg.Gateway.UsageRecord.AutoScaleCheckIntervalSeconds = 0
+	cfg.Gateway.UsageRecord.AutoScaleCooldownSeconds = -1
+
+	if err := cfg.Validate(); err != nil {
+		t.Fatalf("Validate() should ignore auto scale fields when disabled: %v", err)
+	}
+}
+
+func TestValidateConfig_LogRequiredAndRotationBounds(t *testing.T) {
+	resetViperWithJWTSecret(t)
+
+	cases := []struct {
+		name    string
+		mutate  func(*Config)
+		wantErr string
+	}{
+		{
+			name: "log level required",
+			mutate: func(c *Config) {
+				c.Log.Level = ""
+			},
+			wantErr: "log.level is required",
+		},
+		{
+			name: "log format required",
+			mutate: func(c *Config) {
+				c.Log.Format = ""
+			},
+			wantErr: "log.format is required",
+		},
+		{
+			name: "log stacktrace required",
+			mutate: func(c *Config) {
+				c.Log.StacktraceLevel = ""
+			},
+			wantErr: "log.stacktrace_level is required",
+		},
+		{
+			name: "log max backups non-negative",
+			mutate: func(c *Config) {
+				c.Log.Rotation.MaxBackups = -1
+			},
+			wantErr: "log.rotation.max_backups must be non-negative",
+		},
+		{
+			name: "log max age non-negative",
+			mutate: func(c *Config) {
+				c.Log.Rotation.MaxAgeDays = -1
+			},
+			wantErr: "log.rotation.max_age_days must be non-negative",
+		},
+		{
+			name: "sampling thereafter non-negative when disabled",
+			mutate: func(c *Config) {
+				c.Log.Sampling.Enabled = false
+				c.Log.Sampling.Thereafter = -1
+			},
+			wantErr: "log.sampling.thereafter must be non-negative",
+		},
+	}
+
+	for _, tt := range cases {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg, err := Load()
+			if err != nil {
+				t.Fatalf("Load() error: %v", err)
+			}
+			tt.mutate(cfg)
+			err = cfg.Validate()
+			if err == nil || !strings.Contains(err.Error(), tt.wantErr) {
+				t.Fatalf("Validate() error = %v, want %q", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestLoad_DefaultGatewayUsageRecordConfig(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+	if cfg.Gateway.UsageRecord.WorkerCount != 128 {
+		t.Fatalf("worker_count = %d, want 128", cfg.Gateway.UsageRecord.WorkerCount)
+	}
+	if cfg.Gateway.UsageRecord.QueueSize != 16384 {
+		t.Fatalf("queue_size = %d, want 16384", cfg.Gateway.UsageRecord.QueueSize)
+	}
+	if cfg.Gateway.UsageRecord.TaskTimeoutSeconds != 5 {
+		t.Fatalf("task_timeout_seconds = %d, want 5", cfg.Gateway.UsageRecord.TaskTimeoutSeconds)
+	}
+	if cfg.Gateway.UsageRecord.OverflowPolicy != UsageRecordOverflowPolicySync {
+		t.Fatalf("overflow_policy = %s, want %s", cfg.Gateway.UsageRecord.OverflowPolicy, UsageRecordOverflowPolicySync)
+	}
+	if cfg.Gateway.UsageRecord.OverflowSamplePercent != 10 {
+		t.Fatalf("overflow_sample_percent = %d, want 10", cfg.Gateway.UsageRecord.OverflowSamplePercent)
+	}
+	if !cfg.Gateway.UsageRecord.AutoScaleEnabled {
+		t.Fatalf("auto_scale_enabled = false, want true")
+	}
+	if cfg.Gateway.UsageRecord.AutoScaleMinWorkers != 128 {
+		t.Fatalf("auto_scale_min_workers = %d, want 128", cfg.Gateway.UsageRecord.AutoScaleMinWorkers)
+	}
+	if cfg.Gateway.UsageRecord.AutoScaleMaxWorkers != 512 {
+		t.Fatalf("auto_scale_max_workers = %d, want 512", cfg.Gateway.UsageRecord.AutoScaleMaxWorkers)
+	}
+	if cfg.Gateway.UsageRecord.AutoScaleUpQueuePercent != 70 {
+		t.Fatalf("auto_scale_up_queue_percent = %d, want 70", cfg.Gateway.UsageRecord.AutoScaleUpQueuePercent)
+	}
+	if cfg.Gateway.UsageRecord.AutoScaleDownQueuePercent != 15 {
+		t.Fatalf("auto_scale_down_queue_percent = %d, want 15", cfg.Gateway.UsageRecord.AutoScaleDownQueuePercent)
+	}
+	if cfg.Gateway.UsageRecord.AutoScaleUpStep != 32 {
+		t.Fatalf("auto_scale_up_step = %d, want 32", cfg.Gateway.UsageRecord.AutoScaleUpStep)
+	}
+	if cfg.Gateway.UsageRecord.AutoScaleDownStep != 16 {
+		t.Fatalf("auto_scale_down_step = %d, want 16", cfg.Gateway.UsageRecord.AutoScaleDownStep)
+	}
+	if cfg.Gateway.UsageRecord.AutoScaleCheckIntervalSeconds != 3 {
+		t.Fatalf("auto_scale_check_interval_seconds = %d, want 3", cfg.Gateway.UsageRecord.AutoScaleCheckIntervalSeconds)
+	}
+	if cfg.Gateway.UsageRecord.AutoScaleCooldownSeconds != 10 {
+		t.Fatalf("auto_scale_cooldown_seconds = %d, want 10", cfg.Gateway.UsageRecord.AutoScaleCooldownSeconds)
+	}
+}
+
+func TestLoad_DefaultGatewayImageStreamConfig(t *testing.T) {
+	resetViperWithJWTSecret(t)
+	cfg, err := Load()
+	if err != nil {
+		t.Fatalf("Load() error: %v", err)
+	}
+	if cfg.Gateway.StreamDataIntervalTimeout != 180 {
+		t.Fatalf("stream_data_interval_timeout = %d, want 180", cfg.Gateway.StreamDataIntervalTimeout)
+	}
+	if cfg.Gateway.StreamKeepaliveInterval != 10 {
+		t.Fatalf("stream_keepalive_interval = %d, want 10", cfg.Gateway.StreamKeepaliveInterval)
+	}
+	if cfg.Gateway.ImageStreamDataIntervalTimeout != 900 {
+		t.Fatalf("image_stream_data_interval_timeout = %d, want 900", cfg.Gateway.ImageStreamDataIntervalTimeout)
+	}
+	if cfg.Gateway.ImageStreamKeepaliveInterval != 10 {
+		t.Fatalf("image_stream_keepalive_interval = %d, want 10", cfg.Gateway.ImageStreamKeepaliveInterval)
+	}
+	if cfg.Gateway.ImageNonstreamKeepaliveInterval != 0 {
+		t.Fatalf("image_nonstream_keepalive_interval = %d, want 0", cfg.Gateway.ImageNonstreamKeepaliveInterval)
+	}
+	if cfg.Gateway.ImageConcurrency.Enabled {
+		t.Fatalf("image_concurrency.enabled = true, want false")
+	}
+	if cfg.Gateway.ImageConcurrency.MaxConcurrentRequests != 0 {
+		t.Fatalf("image_concurrency.max_concurrent_requests = %d, want 0", cfg.Gateway.ImageConcurrency.MaxConcurrentRequests)
+	}
+	if cfg.Gateway.ImageConcurrency.OverflowMode != ImageConcurrencyOverflowModeReject {
+		t.Fatalf("image_concurrency.overflow_mode = %q, want %q", cfg.Gateway.ImageConcurrency.OverflowMode, ImageConcurrencyOverflowModeReject)
+	}
+	if cfg.Gateway.ImageConcurrency.WaitTimeoutSeconds != 30 {
+		t.Fatalf("image_concurrency.wait_timeout_seconds = %d, want 30", cfg.Gateway.ImageConcurrency.WaitTimeoutSeconds)
+	}
+	if cfg.Gateway.ImageConcurrency.MaxWaitingRequests != 100 {
+		t.Fatalf("image_concurrency.max_waiting_requests = %d, want 100", cfg.Gateway.ImageConcurrency.MaxWaitingRequests)
+	}
+	if cfg.Gateway.ImageStreamDataIntervalTimeout <= cfg.Gateway.StreamDataIntervalTimeout {
+		t.Fatalf("image stream timeout = %d, want greater than ordinary stream timeout %d", cfg.Gateway.ImageStreamDataIntervalTimeout, cfg.Gateway.StreamDataIntervalTimeout)
+	}
+}
+
+func TestLoadSimpleModeAutoCreateDefaultGroups(t *testing.T) {
+	for _, loader := range []struct {
+		name string
+		load func() (*Config, error)
+	}{{"Load", Load}, {"LoadForBootstrap", LoadForBootstrap}} {
+		t.Run(loader.name, func(t *testing.T) {
+			for _, tt := range []struct {
+				name  string
+				yaml  string
+				env   string
+				unset bool
+				want  bool
+			}{
+				{name: "unset env uses application default", unset: true, want: true},
+				{name: "empty env uses application default", want: true},
+				{name: "unset env preserves yaml false", unset: true, yaml: "simple_mode:\n  auto_create_default_groups: false\n", want: false},
+				{name: "empty env preserves yaml false", yaml: "simple_mode:\n  auto_create_default_groups: false\n", want: false},
+				{name: "env false overrides yaml true", yaml: "simple_mode:\n  auto_create_default_groups: true\n", env: "false", want: false},
+				{name: "env false without yaml", env: "false", want: false},
+				{name: "env true overrides yaml false", yaml: "simple_mode:\n  auto_create_default_groups: false\n", env: "true", want: true},
+			} {
+				t.Run(tt.name, func(t *testing.T) {
+					resetViperWithJWTSecret(t)
+					t.Setenv("SIMPLE_MODE_AUTO_CREATE_DEFAULT_GROUPS", tt.env)
+					if tt.unset {
+						require.NoError(t, os.Unsetenv("SIMPLE_MODE_AUTO_CREATE_DEFAULT_GROUPS"))
+					}
+					path := filepath.Join(t.TempDir(), "config.yaml")
+					require.NoError(t, os.WriteFile(path, []byte("run_mode: simple\n"+tt.yaml), 0o600))
+					t.Setenv("CONFIG_FILE", path)
+					cfg, err := loader.load()
+					require.NoError(t, err)
+					require.Equal(t, tt.want, cfg.SimpleMode.AutoCreateDefaultGroups)
+				})
+			}
+		})
+	}
+}
