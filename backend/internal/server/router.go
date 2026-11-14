@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sync/atomic"
 	"time"
@@ -117,6 +118,21 @@ func registerRoutes(
 	routes.RegisterCommonRoutes(r, redisClient, func(ctx context.Context) error {
 		_, err := settingService.GetAllSettings(ctx)
 		return err
+	}, func(ctx context.Context) (map[string]any, error) {
+		// /readyz?deep=1：回答「有没有账号可用」。部署脚本在切流量之前调用它，
+		// 把「账号池为空」这类事故挡在用户前面（2026-11-14 19:10 的形态）。
+		if opsService == nil {
+			return nil, fmt.Errorf("ops service not configured")
+		}
+		readiness, err := opsService.GetBusinessReadiness(ctx)
+		if err != nil {
+			return nil, err
+		}
+		detail := map[string]any{"schedulable_accounts": readiness.SchedulableAccounts}
+		if !readiness.Ready() {
+			return detail, fmt.Errorf("no schedulable accounts")
+		}
+		return detail, nil
 	})
 
 	// API v1
