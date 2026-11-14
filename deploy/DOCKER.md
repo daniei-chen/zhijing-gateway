@@ -1,16 +1,16 @@
-# Sub2API Docker Image
+# 智境网关 Docker Image
 
-Sub2API is an AI API Gateway Platform for distributing and managing AI product subscription API quotas.
+智境网关 is an AI API Gateway Platform for distributing and managing AI product subscription API quotas.
 
 ## Quick Start
 
 ```bash
 docker run -d \
-  --name sub2api \
+  --name zhijing-gateway \
   -p 8080:8080 \
   -e DATABASE_URL="postgres://user:pass@host:5432/sub2api" \
   -e REDIS_URL="redis://host:6379" \
-  weishaw/sub2api:latest
+  ghcr.io/daniei-chen/zhijing-gateway:latest
 ```
 
 ## Docker Compose
@@ -19,8 +19,8 @@ docker run -d \
 version: '3.8'
 
 services:
-  sub2api:
-    image: weishaw/sub2api:latest
+  zhijing-gateway:
+    image: ghcr.io/daniei-chen/zhijing-gateway:latest
     ports:
       - "8080:8080"
     environment:
@@ -51,7 +51,7 @@ volumes:
 
 ## Startup and Database Recovery
 
-Sub2API runs database migrations while starting. PostgreSQL may still be
+智境网关 runs database migrations while starting. PostgreSQL may still be
 recovering briefly after a host or Docker daemon restart. The application
 retries transient PostgreSQL startup and connection errors with bounded
 exponential backoff, then continues startup when the database is ready.
@@ -86,5 +86,5 @@ Docker restores existing containers after a host restart.
 
 ## Links
 
-- [GitHub Repository](https://github.com/weishaw/sub2api)
-- [Documentation](https://github.com/weishaw/sub2api#readme)
+- [GitHub Repository](https://github.com/daniei-chen/zhijing-gateway)
+- [Documentation](https://github.com/daniei-chen/zhijing-gateway#readme)

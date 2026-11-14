@@ -1,6 +1,6 @@
-# Sub2API Deployment Files
+# 智境网关 Deployment Files
 
-This directory contains files for deploying Sub2API on Linux servers and Apple-silicon Macs.
+This directory contains files for deploying 智境网关 on Linux servers and Apple-silicon Macs.
 
 ## Deployment Methods
 
@@ -23,7 +23,7 @@ This directory contains files for deploying Sub2API on Linux servers and Apple-s
 | `DOCKER.md` | Docker Hub documentation |
 | `install.sh` | One-click binary installation script |
 | `install-datamanagementd.sh` | datamanagementd 一键安装脚本 |
-| `sub2api.service` | Systemd service unit file |
+| `zhijing-gateway.service` | Canonical systemd service unit file |
 | `sub2api-datamanagementd.service` | datamanagementd systemd service unit file |
 | `DATAMANAGEMENTD_CN.md` | datamanagementd 部署与联动说明（中文） |
 | `config.example.yaml` | Example configuration file |
@@ -33,7 +33,7 @@ This directory contains files for deploying Sub2API on Linux servers and Apple-s
 
 ## Apple container Deployment
 
-Apple-silicon Macs running macOS 26 can run the complete Sub2API, PostgreSQL, and Redis stack with Apple `container` 1.1.0 or newer:
+Apple-silicon Macs running macOS 26 can run the complete 智境网关, PostgreSQL, and Redis stack with Apple `container` 1.1.0 or newer:
 
 ```bash
 ./apple-container.sh init
@@ -42,7 +42,7 @@ Apple-silicon Macs running macOS 26 can run the complete Sub2API, PostgreSQL, an
 ./apple-container.sh logs app -f
 ```
 
-The script uses Apple named volumes, starts dependencies in order, and performs live readiness checks. The application container supervises the Sub2API process so the Web UI's update-and-restart flow can relaunch an updated binary. It does not provide host-level automatic startup; run `./apple-container.sh up` after a host reboot. Docker Compose remains the recommended production deployment path.
+The script uses Apple named volumes, starts dependencies in order, and performs live readiness checks. The application container supervises the 智境网关 process so the Web UI's update-and-restart flow can relaunch an updated binary. It does not provide host-level automatic startup; run `./apple-container.sh up` after a host reboot. Docker Compose remains the recommended production deployment path.
 
 See [APPLE_CONTAINER.md](./APPLE_CONTAINER.md) for configuration, upgrades, persistence, networking behavior, and limitations.
 
@@ -77,10 +77,10 @@ chmod +x docker-deploy.sh
 docker compose -f docker-compose.local.yml up -d
 
 # View logs
-docker compose -f docker-compose.local.yml logs -f sub2api
+docker compose -f docker-compose.local.yml logs -f zhijing-gateway
 
 # If admin email/password were auto-generated, find them in logs:
-docker compose -f docker-compose.local.yml logs sub2api | grep "Generated admin"
+docker compose -f docker-compose.local.yml logs zhijing-gateway | grep "Generated admin"
 
 # Access Web UI
 # http://localhost:8080
@@ -93,7 +93,7 @@ If you prefer manual control:
 ```bash
 # Clone repository
 git clone https://github.com/daniei-chen/zhijing-gateway.git
-cd sub2api/deploy
+cd zhijing-gateway/deploy
 
 # Configure environment
 cp .env.example .env
@@ -113,7 +113,7 @@ mkdir -p data postgres_data redis_data
 docker compose -f docker-compose.local.yml up -d
 
 # View logs (check for auto-generated admin email and password)
-docker compose -f docker-compose.local.yml logs -f sub2api
+docker compose -f docker-compose.local.yml logs -f zhijing-gateway
 
 # Access Web UI
 # http://localhost:8080
@@ -143,12 +143,12 @@ When using Docker Compose with `AUTO_SETUP=true`:
 
 3. If `ADMIN_EMAIL` / `ADMIN_PASSWORD` are not set, check logs for the generated admin email (login username) and password:
    ```bash
-   docker compose logs sub2api | grep "Generated admin"
+   docker compose logs zhijing-gateway | grep "Generated admin"
    ```
 
 ### Startup and Database Recovery
 
-Sub2API applies database migrations during application startup. PostgreSQL can
+智境网关 applies database migrations during application startup. PostgreSQL can
 remain in its recovery/startup phase briefly after a host or Docker daemon
 restart. The application retries transient PostgreSQL startup and connection
 errors with bounded exponential backoff, then starts automatically when the
@@ -162,9 +162,9 @@ replacement for application-level retries when Docker restores existing
 containers after a host restart.
 
 For systemd deployments, keep `Restart=always` and `RestartSec` configured in
-`sub2api.service`; the application retry covers transient database startup,
+`zhijing-gateway.service`; the application retry covers transient database startup,
 while systemd remains the supervisor for permanent process exits. For
-Kubernetes, use a PostgreSQL readiness probe and retain the Sub2API startup
+Kubernetes, use a PostgreSQL readiness probe and retain the 智境网关 startup
 retry behavior; configure the application liveness probe separately so a
 database recovery period is not treated as a permanent process failure.
 
@@ -212,10 +212,10 @@ docker compose -f docker-compose.local.yml up -d
 docker compose -f docker-compose.local.yml down
 
 # View logs
-docker compose -f docker-compose.local.yml logs -f sub2api
+docker compose -f docker-compose.local.yml logs -f zhijing-gateway
 
-# Restart Sub2API only
-docker compose -f docker-compose.local.yml restart sub2api
+# Restart 智境网关 only
+docker compose -f docker-compose.local.yml restart zhijing-gateway
 
 # Update to latest version
 docker compose -f docker-compose.local.yml pull
@@ -236,10 +236,10 @@ docker compose up -d
 docker compose down
 
 # View logs
-docker compose logs -f sub2api
+docker compose logs -f zhijing-gateway
 
-# Restart Sub2API only
-docker compose restart sub2api
+# Restart 智境网关 only
+docker compose restart zhijing-gateway
 
 # Update to latest version
 docker compose pull
@@ -296,7 +296,7 @@ Your entire deployment (configuration + data) is migrated!
 
 ## Gemini OAuth Configuration
 
-Sub2API supports three methods to connect to Gemini:
+智境网关 supports three methods to connect to Gemini:
 
 ### Method 1: Code Assist OAuth (Recommended for GCP Users)
 
@@ -341,7 +341,7 @@ Requires your own OAuth client credentials.
    - Go to "APIs & Services" → "Credentials"
    - Click "Create Credentials" → "OAuth client ID"
    - Application type: **Web application** (or **Desktop app**)
-   - Name: e.g., "Sub2API Gemini"
+   - Name: e.g., "智境网关 Gemini"
    - Authorized redirect URIs: Add `http://localhost:1455/auth/callback`
 6. Copy the **Client ID** and **Client Secret**
 7. **⚠️ Publish to Production (IMPORTANT):**
@@ -540,7 +540,7 @@ For **local directory version**:
 docker compose -f docker-compose.local.yml ps
 
 # View detailed logs
-docker compose -f docker-compose.local.yml logs --tail=100 sub2api
+docker compose -f docker-compose.local.yml logs --tail=100 zhijing-gateway
 
 # Check database connection
 docker compose -f docker-compose.local.yml exec postgres pg_isready
@@ -562,7 +562,7 @@ For **named volumes version**:
 docker compose ps
 
 # View detailed logs
-docker compose logs --tail=100 sub2api
+docker compose logs --tail=100 zhijing-gateway
 
 # Check database connection
 docker compose exec postgres pg_isready
@@ -604,7 +604,7 @@ sudo systemctl status redis
 
 ## TLS Fingerprint Configuration
 
-Sub2API supports TLS fingerprint simulation to make requests appear as if they come from the official Claude CLI (Node.js client).
+智境网关 supports TLS fingerprint simulation to make requests appear as if they come from the official Claude CLI (Node.js client).
 
 > **💡 Tip:** Visit **[tls.sub2api.org](https://tls.sub2api.org/)** to get TLS fingerprint information for different devices and browsers.
 
