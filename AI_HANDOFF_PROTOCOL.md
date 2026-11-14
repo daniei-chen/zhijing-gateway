@@ -1240,3 +1240,38 @@ Recovered upstream error: Post "https://chatgpt.com/backend-api/codex/..." 1
 
 **第 300 条 502 / 154 条 503 才是真的没救回来的**，这部分和 429 的 1,786 条一起，
 构成了错误日志的主体。
+
+### 6.32 有没有重复计费、有没有漏计（2026-11-15 第 24 轮）
+
+一个直接的判据：`usage_logs` 的每一行都应该在 `usage_billing_dedup` 里有一条对应的去重记录，
+而且一对一。
+
+```
+usage_logs               36,410
+usage_billing_dedup      36,410     ← 完全相等
+usage_billing_dedup_archive   0
+actual_cost > 0          36,391
+```
+
+**两个数字完全相等**，说明：
+
+- **没有重复计费**：每个 request_id 只登记一次，`ON CONFLICT DO NOTHING` 生效
+- **没有漏走计费流程**：每条用量记录都进过 `Apply`
+
+**19 行 0 成本**是什么：
+
+```
+模型 gpt-6.1-sol，input_tokens=0，output_tokens=0，total_cost=0
+时间集中在 11-11 14:36–15:11
+```
+
+请求没有任何 token 用量，所以成本算出来是 0。这是失败/中断请求被记录下来的结果，不是漏算。
+
+**429 和 5xx 根本不会出现在 `usage_logs` 里**——`usage_logs` 没有 `status_code` 列，
+它只记录走完计费流程的请求。限流和上游失败在计费之前就返回了，所以不计费。**这是对的。**
+
+**但这带来一个统计口径的缺口**：想算「总请求数」时，
+`usage_logs`（成功的）+ `ops_error_logs`（失败的）不能简单相加——因为两表的 request_id 不通
+（见 6.31），无法确认有没有重复，也无法确认有没有既没成功也没记录的情况。
+
+**当前能确定的是**：计费侧 36,410 = 36,410，一对一，干净。
