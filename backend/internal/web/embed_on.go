@@ -99,9 +99,16 @@ func (s *FrontendServer) Middleware() gin.HandlerFunc {
 			cleanPath = "index.html"
 		}
 
-		// For index.html or SPA routes, serve with injected settings
-		if cleanPath == "index.html" || !s.fileExists(cleanPath) {
+		// For index.html or SPA routes, serve with injected settings.
+		// 缺失的静态资源必须 404，不能回退成 index.html（否则浏览器把 HTML 当 JS 解析）。
+		exists := s.fileExists(cleanPath)
+		if shouldServeIndexFallback(cleanPath, exists) {
 			s.serveIndexHTML(c)
+			return
+		}
+		if !exists {
+			c.Status(http.StatusNotFound)
+			c.Abort()
 			return
 		}
 
@@ -333,6 +340,12 @@ func ServeEmbeddedFrontend() gin.HandlerFunc {
 			return
 		}
 
+		if !shouldServeIndexFallback(cleanPath, false) {
+			// 静态资源缺失：明确 404，绝不把 HTML 当成 JS/CSS 返回。
+			c.Status(http.StatusNotFound)
+			c.Abort()
+			return
+		}
 		serveIndexHTML(c, distFS)
 	}
 }
