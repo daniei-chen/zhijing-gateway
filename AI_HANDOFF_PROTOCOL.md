@@ -346,3 +346,32 @@ git tag -a v0.1.12 --cleanup=verbatim -F notes.md   # notes.md 第一行当 subj
   `!shouldDisable && account.IsPoolMode() && account.IsPoolModeRetryableStatus(code)`，本项目单账号
   非 pool 模式，所以不重试。7 天里可重试的上游错误只有 45 次（占总请求 0.12%），
   为这点收益去改核心错误路径、并承担重复请求/重复计费风险，不划算。
+
+### 6.5 回滚演练（2026-11-15 01:18 UTC+8，已实测）
+
+用 `deploy/zhijing/switch-primary.py` 把 primary 从 18808（v0.1.11）切到 18806（v0.1.9），
+观察 45 秒后切回。两次切换都只做了「改 peers + `systemctl reload nginx`」：
+
+```
+公网 /readyz            200 {"database":"ok","redis":"ok"}
+/v1/responses 无密钥     401 API_KEY_REQUIRED（契约正常）
+ops_error_logs 新增      0
+v0.1.9 容器 error 日志   0
+```
+
+这验证了两件此前只是「理论上成立」的事：
+
+1. **回滚不需要重启、不需要预热**，切完立刻可用；
+2. **schema 是向后兼容的**：v0.1.10 新增的 `groups.force_openai_ultrafast` 列，v0.1.9 的
+   ent 查询里根本没有这一列，照样正常服务。所以「先发带迁移的版本」不会把回滚路堵死。
+
+演练命令：
+
+```bash
+python3 /root/switch-primary.py 18806 && systemctl reload nginx
+# 验证后切回
+python3 /root/switch-primary.py 18808 && systemctl reload nginx
+```
+
+`switch-primary.py` 会先备份站点文件、跑 `nginx -t`，失败时自动还原；它**不自己 reload**，
+把「什么时候切流量」留给调用者。peers 里保留哪些回滚端口由 `prune-peers.py` 管理，两个工具互不重叠。
