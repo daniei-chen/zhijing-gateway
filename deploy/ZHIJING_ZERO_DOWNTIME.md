@@ -13,10 +13,10 @@
 示例：
 
 ```sh
-IMAGE=ghcr.io/daniei-chen/zhijing-gateway:0.1.1 \
-CURRENT_CONTAINER=zhijing-api-v010-u3-canary \
-NEW_CONTAINER=zhijing-api-v0101-canary \
-NEW_PORT=18798 \
+IMAGE=ghcr.io/daniei-chen/zhijing-gateway:0.1.4 \
+CURRENT_CONTAINER=zhijing-api-v0101-final-r1 \
+NEW_CONTAINER=zhijing-api-v014-final \
+NEW_PORT=18801 \
 deploy/zhijing/zero-downtime-deploy.sh
 ```
 
