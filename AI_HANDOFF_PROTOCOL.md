@@ -478,3 +478,28 @@ select count(*) total, count(*) filter (where email_sent) sent from ops_alert_ev
 注入验证过：假失败→一条 error；同样失败再调→不重复写；恢复→一条 info。测试记录已删除，状态文件回到 failed=[]。
 
 **这仍然不是推送**：它把「只在磁盘上」变成了「登录后台能看到」，但不会主动找人。真正的推送需要凭据——SMTP 授权码（走应用既有告警邮件）或 Telegram bot token，服务器上目前两样都没有。
+
+**基础设施告警可推送到任意 webhook（2026-11-15 第 14 轮）**：watchdog 支持通用推送，不需要我持有任何凭据。
+
+配置方式（二选一）：
+
+```bash
+# 推荐：写文件，systemd 重启后仍然有效
+echo 'https://your-endpoint/path' > /opt/zhijing-sub2api/maintenance/webhook_url
+# 或者环境变量
+ZHIJING_ALERT_WEBHOOK=https://your-endpoint/path
+```
+
+告警状态**变化**时 POST 一个 JSON 到该地址：
+
+```json
+{"level":"error","component":"infra_watchdog",
+ "message":"[InfraWatchdog] 基础设施检查未通过：backup_ok",
+ "detail":{"backup_ok":false},"host":"...","at":"2026-11-14T18:16:51Z"}
+```
+
+企业微信 / 钉钉 / Slack / 自建都可以接。没配置时静默跳过，不影响自愈和观测；推送失败也不抛错
+（通知不该拖垮看门狗）。刻意不内置某个具体渠道——那需要把 bot token 写进服务器，而 token 只能由主人提供。
+
+已验证：注入假失败 → 收到 error payload（含明细）；恢复 → info payload；连续 5 次调用 5/5 送达；
+无配置时 `notify_webhook` 返回 False 且无副作用。测试数据与临时接收器均已清理，当前 hook 为空（静默）。

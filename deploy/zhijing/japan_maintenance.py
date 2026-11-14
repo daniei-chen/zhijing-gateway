@@ -482,6 +482,57 @@ def watch():
         'ops':result['ops'],'pitr':result.get('pitr')}))
 
 
+ALERT_WEBHOOK_ENV = 'ZHIJING_ALERT_WEBHOOK'
+ALERT_WEBHOOK_FILE = 'webhook_url'
+
+
+def alert_webhook_url():
+    """返回告警推送地址：优先环境变量，其次 maintenance/webhook_url 文件。
+
+    刻意不内置任何推送渠道（Telegram / 钉钉 / 企业微信）：那需要把 bot token
+    写进服务器，而 token 只能由主人提供。这里只约定「告警时 POST 一个 JSON」，
+    任何能收 HTTP 的端点都能接——用户填一个 URL 就通了。
+    """
+    url = (os.environ.get(ALERT_WEBHOOK_ENV) or '').strip()
+    if url:
+        return url
+    path = STATE / ALERT_WEBHOOK_FILE
+    try:
+        if path.exists():
+            return path.read_text().strip()
+    except OSError:
+        return ''
+    return ''
+
+
+def notify_webhook(level, message, detail):
+    """把一次状态变化推给 ALERT_WEBHOOK_ENV 指向的地址；没配置就静默跳过。
+
+    绕过系统代理：目标通常在内网或本机，走代理只会超时。
+    任何失败都吞掉——通知不该影响看门狗本身的自愈与观测。
+    """
+    url = alert_webhook_url()
+    if not url:
+        return False
+    payload = json.dumps({
+        'level': level,
+        'component': 'infra_watchdog',
+        'message': message,
+        'detail': detail,
+        'host': os.uname().nodename,
+        'at': dt.datetime.now(dt.timezone.utc).isoformat(),
+    }, ensure_ascii=False).encode('utf-8')
+    request = urllib.request.Request(
+        url, data=payload, method='POST',
+        headers={'Content-Type': 'application/json; charset=utf-8'})
+    try:
+        opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+        with opener.open(request, timeout=8) as response:
+            return 200 <= response.status < 300
+    except (OSError, ValueError, urllib.error.URLError):
+        return False
+
+
 def record_infra_alert(ops):
     """把基础设施检查的失败写进 ops_system_logs，让它在后台看得见。
 
@@ -529,6 +580,7 @@ def record_infra_alert(ops):
         private_json(state_file, {'failed': failed, 'at': int(time.time())})
     except OSError:
         pass
+    notify_webhook(level, message, detail)
 
 
 def backup_sources():
