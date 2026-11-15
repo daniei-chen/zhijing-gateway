@@ -3470,3 +3470,47 @@ return apiKey.Group.AllowMessagesDispatch     ← OpenAI 分组要走到这里
 Anthropic 协议、批量图片、实时语音都是关着的。
 
 **如果哪天想接 Claude Code**，需要打开 `allow_messages_dispatch`——一条 SQL 或后台一次点击。
+
+### 6.81 图像开关是怎么打开的：一条没有操作者的脚本记录（2026-11-15 第 13/14 轮 / 256）
+
+第 12 轮发现分组 2 的 `allow_image_generation = true`，但代码默认对 OpenAI 平台是
+`false`，而 `admin.groups.update` 零记录。这轮追到了源头。
+
+**11-06 18:44:25 的审计记录**（id=495）：
+
+```json
+action: zhijing.groups.enable_image_generation
+body:   {"group_ids":[2,3],"allow_image_generation":true}
+actor:  （空）
+ip:     （空）
+```
+
+**它同时把分组 2 和 3 打开了**——这解释了为什么分组 3 创建时 audit 里是 `false`、
+现在却也是 `true`。
+
+**`zhijing.*` 前缀的操作一共 5 条**，全部无 actor、无 IP：
+
+| 时间 | action | 内容 |
+|---|---|---|
+| 11-03 18:55 | `zhijing.release.concurrency.apply` | `{"member_limit":3,"global_limit":9}` |
+| 11-03 23:12 | `zhijing.concurrency.uniform_3_9_9` | `{"member_limit":3,"global_limit":9,"account_limit":9}` |
+| 11-04 15:07 | `zhijing.user.platform_wallet_only` | `{"user_id":2,"platform":"openai",...}` |
+| 11-04 15:37 | `zhijing.users.remove_weekly_limits` | `{"scope":"all_non_deleted_users",...}` |
+| 11-06 18:44 | `zhijing.groups.enable_image_generation` | `{"group_ids":[2,3],...}` |
+
+**这五条都不是通过管理 API 做的**——代码里搜不到这些 action 名，而且 `actor_email`
+和 `client_ip` 都是空的。它们是**脚本或直接 SQL 写入**，写的时候顺手往 `audit_logs`
+里插了一行。
+
+**两面看这件事**：
+
+**好的一面**：这些运维动作**留了痕**。如果当时没插这行，我会看到「开关是 true 但
+没有任何修改记录」，那才是真的无法解释。写审计的人（或脚本）有这个意识。
+
+**不足的一面**：**没有操作者**。审计记录回答了「什么时候改了什么」，
+但答不出「是谁改的」。114 行之前（6.79）我说过 401 请求无 actor 是合理的，
+因为那时根本没有身份；这五条不一样——它们是**有权限的写操作**，只是绕过了认证。
+
+**这两轮没有发现问题，只是把一个悬着的问号填上了。** 图像开关不是神秘变成 true 的，
+是 11-06 一次明确的操作；而那次操作用的是绕过 API 的路径，所以审计里只有"做了什么"，
+没有"谁做的"。
