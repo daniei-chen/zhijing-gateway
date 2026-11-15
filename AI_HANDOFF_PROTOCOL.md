@@ -4037,3 +4037,119 @@ fmt.Fprint(c.Writer, out)                                      //nolint:errcheck
 
 **没有改动。** 这一轮的价值是排除了一个具体担忧：如果某处「计费失败但错误被吞」，
 那是静默漏扣；查下来没有。
+
+### 6.93 先撤回 6.57 对 pricing 的判断，再发 v0.1.20（2026-11-15 第 26 轮 / 256）
+
+本轮做两件事：纠正一条 30 轮前的错误结论，然后把四条一直卡着的遗留项做进 v0.1.20。
+
+#### 一、6.57 说「pricing 更新一直在失败」，这是错的
+
+6.57 我写过：
+
+> 那 57 次拉取失败 + 14 次只读失败说明：这套运行时更新链路**一直在尝试、
+> 一直在失败、失败了只记日志**。
+
+**只有「一直在尝试」是对的。** 决定性证据来自容器 stdout（`ops_system_logs`
+只收 warn/error，info 不入库，所以从数据库看不到成功记录）：
+
+```
+docker logs zhijing-api-v0119-final | grep -c "Hash check passed"
+→ 37
+
+07:13:17  Hash check passed, no update needed
+07:23:17  Hash check passed, no update needed
+... 每 10 分钟一次，连续 37 次，失败 0 次
+```
+
+失败的真实分布：
+
+```
+Failed to fetch remote hash   57 条   2026-11-01 19:27 → 11-02 20:56（约 25 小时）
+Failed to save file (只读)     7 条   2026-11-10 12:39 → 11-14 02:55（旧容器挂载）
+最近 24 小时                   0 条
+```
+
+两批都是**历史问题且已自行消失**：前者是 11-01/02 那两天的网络故障，后者是
+11-14 02:50 之前旧容器的挂载方式，v0.1.19 起 `/app/data` 已是 rw 的 bind mount。
+
+**所以「价格表跟随镜像」不是「更新失败」的结果，而是「远程哈希一直等于本地哈希」**——
+镜像里打的就是当时的最新价格，运行期没有新价格可下。6.57 把「mtime 等于构建时间」
+读成了失败证据，实际上它只说明这段时间上游没调价。
+
+**这条从技术债里划掉。** 教训与 6.43、6.52 同形：**用「没有成功日志」推断「一直失败」，
+而那个日志级别根本不入库**。要判断成功/失败，得去有成功记录的地方（容器 stdout）。
+
+#### 二、v0.1.20 的四项改动
+
+都不是新功能，是 20 多轮里记录在案、但一直卡在「需要决策」或「要发版」的遗留项。
+
+**① 删除三个空壳方法**（`AccountService.TestCredentials`、
+`ProxyService.TestConnection`、`adminServiceImpl.RefreshAccountCredentials`）
+
+三者的共同形状：**有方法名、有签名、永远返回成功或原样返回，零调用方**。
+第 65/66 轮我曾把它们当成「接了线的假成功」（用户点了 31 次测试按钮什么都没测），
+第 67 轮撤回：handler 走的是另外两条真实链路
+（`TestAccountConnection` / `TestProxy → ProbeProxy`）。
+
+所以它们的真实危害不是「骗了用户」，而是**骗下一个读代码的人**。删掉。
+
+**② 移除 `GET /admin/groups/:id/stats`**
+
+原实现返回四项硬编码 0。前端 `groups.ts` 定义了 `getStats`，但没有任何组件调用；
+真实分组用量走 `/admin/dashboard/groups` 与 `/admin/groups/usage-summary`。
+
+选择删除而不是补实现：补实现要给 `apiKeyRepo` 接口加方法（影响 5 个 stub），
+而收益是让一个没人调用的接口变成正确——不值。**一个永远返回全零的统计接口
+比不存在更危险。** 测试从断言 200 改为断言 404，把这个删除固化成回归。
+
+**③ `migrations/253`：`api_keys.group_id` 外键 `ON DELETE SET NULL` → `RESTRICT`**
+
+这是 11-14 事故的第二环，6.52 已查明机制但一直没做：
+
+```
+应用层允许删分组（v0.1.13 之前）
+→ DB 的 SET NULL 把 Key 的 group_id 置空
+→ 调度器找不到分组
+→ 503 "No available OpenAI accounts"
+→ 141 条 5xx
+```
+
+v0.1.14 修的是第一环（应用层拒绝删除），**数据库这一层当时仍然敞开着**——
+任何绕过 `DeleteGroup` 的删除路径都能重新制造孤儿。现在两层都堵上。
+执行前核实 `api_keys` 12 行、`group_id IS NULL` 为 0。
+
+与 `usage_logs` 的分工（6.53 的 251 迁移）：历史账目允许分组消失（保持 SET NULL），
+活跃配置不允许变孤儿（改为 RESTRICT）。
+
+**④ `AccountExpiryService`：Stop 之后 Start 会静默失效**
+
+`stopCh` 是一次性 channel。旧 `Start` 无任何防护，「先 Stop 再 Start」会起一个
+goroutine，它先跑一次 `runOnce`，然后立刻命中已关闭的 `stopCh` 退出——
+**定时暂停过期账号的功能再也不工作，且没有一条日志**。
+
+生产上 Stop 只在进程退出时调用，所以从未被走到。但只要有人写「热重载配置」，
+就会踩上。现在 Start 拒绝重复启动与 Stop 后重启，两种情况都留日志。
+
+这个服务此前**零测试**（6.60 记录的覆盖率盲区之一）。新增 6 个用例，
+其中两个用 `git stash` 验证过在旧实现下必然失败：
+
+```
+TestAccountExpiryServiceStartIsIdempotent        旧: calls=3 (期望 1)
+TestAccountExpiryServiceStartAfterStopIsRefused  旧: calls=2 (期望 1)
+```
+
+**「测试能区分修复前后」是这轮唯一值得强调的验证方式**——否则测试全绿只说明
+测试和实现自洽，不说明缺陷存在过。
+
+#### 三、发布状态
+
+```
+golangci-lint 2.14.0（与 CI 同版本）  0 issues
+go build ./...                       通过
+后端相关包测试                        全绿
+前端 vue-tsc -b                      通过
+```
+
+镜像由 tag `v0.1.20` 触发的 Release workflow 构建推 ghcr，服务器 pull 后走
+`/root/zhijing-zero-downtime-deploy-v0.1.0.sh` 零停机切换。
+
