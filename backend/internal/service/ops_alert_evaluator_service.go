@@ -54,6 +54,15 @@ type OpsAlertEvaluatorService struct {
 	skipLogMu sync.Mutex
 	skipLogAt time.Time
 
+	// emailSkip* 记录「告警事件产生了、但一封邮件都没尝试发」的原因。
+	// v0.1.13 只让发送失败可见，函数顶部那几个提前 return（没配置、没收件人、
+	// 规则未启邮件、低于最小级别）仍然完全静默——那才是「334 条事件 0 投递」
+	// 能潜伏两周的另一半原因。
+	emailSkipMu     sync.Mutex
+	emailSkipAt     time.Time
+	emailSkipReason string
+	emailSkipCount  int64
+
 	warnNoRedisOnce sync.Once
 }
 
@@ -313,8 +322,11 @@ func (s *OpsAlertEvaluatorService) evaluateOnce(interval time.Duration) {
 		}
 	}
 
-	result := truncateString(fmt.Sprintf("rules=%d enabled=%d evaluated=%d created=%d resolved=%d emails_sent=%d", rulesTotal, rulesEnabled, rulesEvaluated, eventsCreated, eventsResolved, emailsSent), 2048)
-	s.recordHeartbeatSuccess(runAt, time.Since(startedAt), result)
+	result := fmt.Sprintf("rules=%d enabled=%d evaluated=%d created=%d resolved=%d emails_sent=%d", rulesTotal, rulesEnabled, rulesEvaluated, eventsCreated, eventsResolved, emailsSent)
+	if skip := s.emailSkipSummary(); skip != "" {
+		result += " " + skip
+	}
+	s.recordHeartbeatSuccess(runAt, time.Since(startedAt), truncateString(result, 2048))
 }
 
 func (s *OpsAlertEvaluatorService) pruneRuleStates(rules []*OpsAlertRule) {
@@ -706,6 +718,56 @@ func buildOpsAlertDescription(rule *OpsAlertRule, value float64, windowMinutes i
 	)
 }
 
+// noteEmailSkip records, and at most once a minute logs, why an alert event did
+// not even attempt an email. Without it the four early returns above are silent,
+// which is how 334 firing events could sit at email_sent=false with nothing in
+// the logs pointing at the missing SMTP/recipient configuration.
+func (s *OpsAlertEvaluatorService) noteEmailSkip(reason string, rule *OpsAlertRule, event *OpsAlertEvent) {
+	if s == nil {
+		return
+	}
+	now := time.Now().UTC()
+
+	s.emailSkipMu.Lock()
+	s.emailSkipReason = reason
+	s.emailSkipCount++
+	logIt := s.emailSkipAt.IsZero() || now.Sub(s.emailSkipAt) >= opsAlertEvaluatorSkipLogInterval
+	if logIt {
+		s.emailSkipAt = now
+	}
+	s.emailSkipMu.Unlock()
+
+	if !logIt {
+		return
+	}
+
+	var ruleID, eventID int64
+	var ruleName string
+	if rule != nil {
+		ruleID = rule.ID
+		ruleName = strings.TrimSpace(rule.Name)
+	}
+	if event != nil {
+		eventID = event.ID
+	}
+	logger.LegacyPrintf("service.ops_alert_evaluator",
+		"[OpsAlertEvaluator] alert email skipped (%s) event=%d rule=%d/%s", reason, eventID, ruleID, ruleName)
+}
+
+// emailSkipSummary is appended to the job heartbeat so the reason survives in
+// the database even when nobody is watching container stdout.
+func (s *OpsAlertEvaluatorService) emailSkipSummary() string {
+	if s == nil {
+		return ""
+	}
+	s.emailSkipMu.Lock()
+	defer s.emailSkipMu.Unlock()
+	if s.emailSkipCount == 0 {
+		return ""
+	}
+	return fmt.Sprintf("email_skips_total=%d(last=%s)", s.emailSkipCount, s.emailSkipReason)
+}
+
 func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runtimeCfg *OpsAlertRuntimeSettings, rule *OpsAlertRule, event *OpsAlertEvent) bool {
 	if s == nil || s.emailService == nil || s.opsService == nil || event == nil || rule == nil {
 		return false
@@ -714,18 +776,26 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 		return false
 	}
 	if !rule.NotifyEmail {
+		s.noteEmailSkip("rule_notify_disabled", rule, event)
 		return false
 	}
 
 	emailCfg, err := s.opsService.GetEmailNotificationConfig(ctx)
-	if err != nil || emailCfg == nil || !emailCfg.Alert.Enabled {
+	if err != nil {
+		s.noteEmailSkip("config_unreadable", rule, event)
+		return false
+	}
+	if emailCfg == nil || !emailCfg.Alert.Enabled {
+		s.noteEmailSkip("notifications_disabled", rule, event)
 		return false
 	}
 
 	if len(emailCfg.Alert.Recipients) == 0 {
+		s.noteEmailSkip("no_recipients", rule, event)
 		return false
 	}
 	if !shouldSendOpsAlertEmailByMinSeverity(strings.TrimSpace(emailCfg.Alert.MinSeverity), strings.TrimSpace(rule.Severity)) {
+		s.noteEmailSkip("below_min_severity", rule, event)
 		return false
 	}
 

@@ -4,6 +4,7 @@ package service
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -250,5 +251,47 @@ func TestComputeRuleMetricNewIndicators(t *testing.T) {
 			}
 			require.InDelta(t, tt.wantValue, gotValue, 0.0001)
 		})
+	}
+}
+
+// v0.1.21: maybeSendAlertEmail 顶部的提前 return 曾经完全静默——没有 SMTP 收件人的
+// 网关照旧每 5 分钟创建告警事件，而日志和心跳里都没有「为什么一封都没发」。
+// 这两条用例把新行为钉住：跳过必须留原因，且原因要能出现在 job heartbeat 里。
+func TestMaybeSendAlertEmailRecordsSkipWhenRuleOptsOut(t *testing.T) {
+	svc := &OpsAlertEvaluatorService{
+		emailService: &EmailService{},
+		opsService:   &OpsService{},
+	}
+	if got := svc.emailSkipSummary(); got != "" {
+		t.Fatalf("summary should be empty before the first skip, got %q", got)
+	}
+
+	rule := &OpsAlertRule{ID: 7, Name: "disk pressure", NotifyEmail: false}
+	event := &OpsAlertEvent{ID: 42}
+
+	if sent := svc.maybeSendAlertEmail(context.Background(), nil, rule, event); sent {
+		t.Fatal("rule with NotifyEmail=false must not send")
+	}
+
+	summary := svc.emailSkipSummary()
+	if !strings.Contains(summary, "email_skips_total=1") {
+		t.Fatalf("summary should count the skip, got %q", summary)
+	}
+	if !strings.Contains(summary, "rule_notify_disabled") {
+		t.Fatalf("summary should carry the reason, got %q", summary)
+	}
+}
+
+func TestNoteEmailSkipKeepsLatestReason(t *testing.T) {
+	svc := &OpsAlertEvaluatorService{}
+	svc.noteEmailSkip("no_recipients", &OpsAlertRule{ID: 1}, &OpsAlertEvent{ID: 2})
+	svc.noteEmailSkip("notifications_disabled", &OpsAlertRule{ID: 1}, &OpsAlertEvent{ID: 3})
+
+	summary := svc.emailSkipSummary()
+	if !strings.Contains(summary, "email_skips_total=2") {
+		t.Fatalf("summary should count both skips, got %q", summary)
+	}
+	if !strings.Contains(summary, "notifications_disabled") {
+		t.Fatalf("summary should carry the latest reason, got %q", summary)
 	}
 }
