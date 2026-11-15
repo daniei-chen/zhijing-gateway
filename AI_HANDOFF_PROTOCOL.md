@@ -3425,3 +3425,48 @@ groups:  id=2  pro 200  platform=openai  allow_live = f(alse)  status=active
 **这是第七次误判**，而且和第 65/66 轮同类——**读了实现，没读准入链路**。
 区别在于前两次是「读错了方法」，这次是「读对了方法，但漏了调用它的 handler 里的前置检查」。
 `Live` 那 4 道闸就在 `openai_live.go:22-50`，我第 61 轮读了这个文件，却只看了 830 行的计费 TODO。
+
+### 6.80 分组的四个功能开关：只开了图像，Anthropic 协议是关的（2026-11-15 第 12 轮 / 256）
+
+`groups` 表上有四个 `allow_*` 开关，当前唯一分组的值：
+
+| 开关 | 值 | 控制什么 |
+|---|---|---|
+| `allow_image_generation` | **true** | 图像生成 → **开着** |
+| `allow_messages_dispatch` | **false** | `/v1/messages`（Anthropic 协议）→ **关着** |
+| `allow_batch_image_generation` | **false** | 批量图片 → 关着 |
+| `allow_live` | **false** | 实时语音 → 关着（6.79 那个） |
+
+**图像那个是 true，和第 9 轮发现的 4 次成功图像请求对得上**——开关和实际行为一致，
+这是一次干净的双向验证。
+
+**但 `allow_messages_dispatch = false` 值得说清楚**。
+
+它的判定逻辑（`openai_gateway_handler.go:311`）：
+
+```go
+if 平台 == Grok                    → true（豁免）
+if IsMultiProtocolAPIKeyProvider   → true（豁免，注释说 CN 分组的 /v1/messages 是主要形态）
+if Composite 且目标是 Grok/CN      → true（豁免）
+return apiKey.Group.AllowMessagesDispatch     ← OpenAI 分组要走到这里
+```
+
+**我们分组是 `platform=openai`，走最后一行，开关是 false。**
+
+**所以 `/v1/messages` 对当前配置是关闭的。**
+
+**这意味着**：任何走 Anthropic Messages 协议的客户端（Claude Code、`@anthropic-ai/sdk` 等）
+拿我们的 Key 调用，会拿到 403。
+
+**和实际数据吻合**：`usage_logs` 里 36,844 条记录，**没有一条是 Anthropic 协议的**——
+全是 `/v1/chat/completions` 和 `/v1/responses`。不是没人试，是试了也进不去。
+
+**性质判断**：这是**有意的开关**，不是缺陷。
+
+代码里 `sanitizeGroupMessagesDispatchFields` 会把非 openai/composite 平台的这个字段强制置 false，
+说明它是**专门给 OpenAI 型分组准备的可配置项**，默认关闭。
+
+**所以真实状态是**：这台网关当前只对外提供 **OpenAI 协议**（chat/responses）+ **图像生成**。
+Anthropic 协议、批量图片、实时语音都是关着的。
+
+**如果哪天想接 Claude Code**，需要打开 `allow_messages_dispatch`——一条 SQL 或后台一次点击。
