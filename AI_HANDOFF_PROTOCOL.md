@@ -2931,3 +2931,52 @@ func (s *AccountService) TestCredentials(ctx context.Context, id int64) error {
 **没改**：实现真正的凭证测试要给每个平台发一次最小请求（OpenAI 的 models 端点、
 Anthropic 的 messages 端点等），涉及配额消耗和超时策略，是完整的开发任务。
 **记录，不修。**
+
+### 6.69 纠正 6.65 和 6.66：两个「假成功」都是错的，真实测试一直工作正常（第 1 轮 / 256）
+
+**我在 65、66 两轮报的「测试按钮是空壳」是错的。撤回。**
+
+**真相**：handler 根本不调用我看的那两个方法。
+
+```
+ProxyHandler.Test  →  adminService.TestProxy  →  proxyProbeService.ProbeProxy   ← 真实探测，返回出口 IP、延迟、国家
+AccountHandler.Test →  accountTestService.TestAccountConnection               ← 真实实现，按平台分成 8 条路径
+```
+
+而那两轮我读到的空壳：
+
+```
+ProxyService.TestConnection    ← 零调用（唯一的 .TestConnection( 是 imageStorage 的，不同对象）
+AccountService.TestCredentials ← 零调用
+```
+
+**两者都是死代码，从来没有被任何 handler 调用过。**
+
+**证据**：
+
+- `admin_proxy.go:215` 的 `TestProxy` 调 `s.proxyProber.ProbeProxy(ctx, proxyURL)`，拿到 `exitInfo.IP / Country / LatencyMs`，失败时还会 `saveProxyLatency(Success: false)` 记录错误
+- `account_test_service.go:361` 的 `TestAccountConnection` 有完整的平台分流：OpenAI → `testOpenAIAccountConnection`、Gemini → `testGeminiAccountConnection`、Grok、Antigravity、TypeSafe、Claude、多协议 CN provider 各有专用实现，通过 SSE 推送测试进度
+- `proxy_probe_service.go:83` 的 `ProbeProxy` 是独立服务的真实实现
+
+**所以那 31 次点击（代理 15 + 账号 16）是真实测试，不是假成功。**
+
+**我错在哪**：`AccountService.TestCredentials` 和 `ProxyService.TestConnection` 的名字、签名、所在包都「看起来像」handler 会调的东西，我就假设了调用关系，**没有去读 handler 的那一行**。
+
+**这是第 5 次和第 6 次同类误判**，而且第 60 轮的教训（覆盖率推断测试覆盖）刚刚写过：
+
+| 轮次 | 我用什么推断什么 |
+|---|---|
+| 36 | 历史聚合 → 当前状态 |
+| 30 | 增量语义 → set 操作 |
+| 54 | 原生 SQL → ORM 行为 |
+| 60 | handler 覆盖率 → service 测试覆盖 |
+| **65** | **service 方法名 → handler 调用关系** |
+| **66** | **同上** |
+
+**六次同一个形状**：拿一个看起来相关的信号，跳过「实际调用是什么」这一步，直接下结论。
+
+**这次尤其不该**：65 轮我已经查了路由、前端组件、审计日志三项，全都指向「这个功能被真实使用」——
+唯独没查 handler 那 26 行代码。**最后一步最便宜，我却省了。**
+
+**修正后的 TODO 全表**：那两个「危害最高」的条目降级为**死代码**，与 62/63 轮同类。
+13 条 TODO 里**没有一条**是「接了线、被使用、实现是空壳」的。
