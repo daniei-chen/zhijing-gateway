@@ -3234,3 +3234,40 @@ accounts 表现状：
 这样至少在冗余消失的**那一刻**会有人知道，而不是等到它真的挂了才发现。
 
 现在的巡检里 `accounts_ok` 只检查「可调度账号数 > 0」，**1 个也算 ok**。
+
+### 6.76 巡检加了一项：账号冗余度（2026-11-15 第 8 轮 / 256）
+
+6.75 发现网关只剩一个可用账号，而巡检里的 `accounts_ok` 只判断「可调度账号数 > 0」，
+**从 2 个掉到 1 个不会触发任何东西**。
+
+这轮加了一个字段，但它**不进 failed 集合**：
+
+```python
+out['accounts_schedulable'] = _n
+out['accounts_ok']          = _n > 0      # 保持原样：服务可用性
+out['accounts_redundant']   = _n >= 2     # 新增：是否有冗余
+```
+
+**为什么分开**：如果把 `accounts_ok` 直接改成 `>= 2`，当前就会一直红灯——
+只有一个账号是现实，天天报警只会训练人忽略告警。所以：
+
+- `accounts_ok` 继续回答「服务能不能跑」
+- `accounts_redundant` 回答「挂了还有没有备的」
+
+**部署后实测**：
+
+```
+accounts_ok          = True
+accounts_schedulable = 1
+accounts_redundant   = False     ← 新字段，如实反映当前单点状态
+ledger_ok            = True
+key_group_ok         = True
+gateway_ok           = True
+failed               = None      ← 没有制造噪音
+```
+
+**这个字段的用法**：等你配了 webhook，如果想要「冗余消失就提醒」，可以针对
+`accounts_redundant` 单独设规则；如果觉得单账号可以接受，就不设，它只是静静地记录事实。
+**两种选择都行，但至少现在这个事实是可查的，而不是只能靠人想起来去数账号数。**
+
+备份在 `japan_maintenance.py.bak-round8`。巡检仍是 13 个 `*_ok` 项，新字段是信息性的。

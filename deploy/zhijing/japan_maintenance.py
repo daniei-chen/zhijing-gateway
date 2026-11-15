@@ -298,6 +298,10 @@ def check_ops_baselines():
             _n = int((_r.stdout or b'0').strip() or b'0')
             out['accounts_schedulable'] = _n
             out['accounts_ok'] = _n > 0
+            # 冗余度单独记，不并入 failed 集合：只有 1 个账号时服务仍可用，但已经失去
+            # 冗余——唯一账号失效就是全面中断（见 AI_HANDOFF 6.75）。单独成字段既不会
+            # 天天报警，又让「从 2 掉到 1」这件事可被查询。
+            out['accounts_redundant'] = _n >= 2
     except (OSError, subprocess.SubprocessError, ValueError):
         out['accounts_ok'] = None
     # ── 活跃 Key 指向已软删分组（2026-11-15 round 52）──────────────────────
