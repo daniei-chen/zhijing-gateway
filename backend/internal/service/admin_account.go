@@ -1306,14 +1306,10 @@ func (s *adminServiceImpl) DeleteAccount(ctx context.Context, id int64) error {
 	return nil
 }
 
-func (s *adminServiceImpl) RefreshAccountCredentials(ctx context.Context, id int64) (*Account, error) {
-	account, err := s.accountRepo.GetByID(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	// TODO: Implement refresh logic
-	return account, nil
-}
+// 说明（v0.1.20）：这里原本有一个 RefreshAccountCredentials 方法，读出账号后原样返回，
+// 注释写着 "TODO: Implement refresh logic"，但既没有 handler 调用也没有路由，
+// 属于未接线的死代码。类名容易让人误以为"刷新凭证"已可用，故连同接口声明一起删除。
+// 真正的凭证刷新走 OAuth 刷新链路（refresh_token 相关的 repository/service 实现）。
 
 func (s *adminServiceImpl) ClearAccountError(ctx context.Context, id int64) (*Account, error) {
 	if err := s.accountRepo.ClearError(ctx, id); err != nil {

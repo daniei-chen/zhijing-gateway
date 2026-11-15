@@ -927,27 +927,15 @@ func (h *GroupHandler) Delete(c *gin.Context) {
 	response.Success(c, gin.H{"message": "Group deleted successfully"})
 }
 
-// GetStats handles getting group statistics
-// GET /api/v1/admin/groups/:id/stats
-func (h *GroupHandler) GetStats(c *gin.Context) {
-	if h.rejectUnsupportedSimpleModeOperation(c, "stats") {
-		return
-	}
-	groupID, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		response.BadRequest(c, "Invalid group ID")
-		return
-	}
-
-	// Return mock data for now
-	response.Success(c, gin.H{
-		"total_api_keys":  0,
-		"active_api_keys": 0,
-		"total_requests":  0,
-		"total_cost":      0.0,
-	})
-	_ = groupID // TODO: implement actual stats
-}
+// 说明（v0.1.20）：这里原本有 GET /api/v1/admin/groups/:id/stats，返回四项硬编码 0
+// （total_api_keys / active_api_keys / total_requests / total_cost），注释写着
+// "Return mock data for now" + "TODO: implement actual stats"。前端 groups.ts 定义了
+// getStats 但没有任何组件调用它；管理员看分组用量走的是
+// GET /admin/dashboard/groups（真实查询）与 GET /admin/groups/usage-summary。
+//
+// 这里选择删除而不是补实现：一个永远返回全零的统计接口，比不存在更危险——
+// 下一个接手的人会以为分组统计是坏的，或者花时间接上才发现从来没人用过。
+// 分组维度的真实统计能力仍然可用，见上面那两个接口。
 
 // GetUsageSummary returns today's, yesterday's, and cumulative cost for all groups.
 // GET /api/v1/admin/groups/usage-summary

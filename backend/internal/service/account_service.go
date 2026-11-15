@@ -498,36 +498,7 @@ func (s *AccountService) GetCredential(ctx context.Context, id int64, key string
 	return account.GetCredential(key), nil
 }
 
-// TestCredentials 测试账号凭证是否有效（需要实现具体平台的测试逻辑）
-func (s *AccountService) TestCredentials(ctx context.Context, id int64) error {
-	account, err := s.accountRepo.GetByID(ctx, id)
-	if err != nil {
-		return fmt.Errorf("get account: %w", err)
-	}
-
-	// 根据平台执行不同的测试逻辑
-	switch account.Platform {
-	case PlatformAnthropic:
-		// TODO: 测试Anthropic API凭证
-		return nil
-	case PlatformOpenAI:
-		// TODO: 测试OpenAI API凭证
-		return nil
-	case PlatformGemini:
-		// TODO: 测试Gemini API凭证
-		return nil
-	case PlatformGrok:
-		// Grok OAuth credentials are validated via token exchange/refresh and request-path probes.
-		return nil
-	case PlatformTypeSafe:
-		// TypeSafe credentials are API keys; inference failures drive health and cooldown state.
-		return nil
-	default:
-		if IsMultiProtocolAPIKeyProvider(account.Platform) {
-			// 多协议 API Key 供应商（国产厂商与聚合平台）：凭证为 API Key，实际可用性
-			// 经余额/额度探测与转发路径验证。
-			return nil
-		}
-		return fmt.Errorf("unsupported platform: %s", account.Platform)
-	}
-}
+// 说明（v0.1.20）：这里原本有一个 TestCredentials 方法，按平台分支全部 return nil，
+// 从不发起任何真实校验。它没有任何调用方——后台的「测试连接」按钮走的是
+// accountTestService.TestAccountConnection（真正按平台探测，见 account_test_service.go）。
+// 保留一个永远成功、却从没被调用的方法只会让下一个人误判"凭证测试已实现"，故删除。

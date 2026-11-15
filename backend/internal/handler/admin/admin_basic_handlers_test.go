@@ -43,7 +43,6 @@ func setupAdminRouter() (*gin.Engine, *stubAdminService) {
 	router.POST("/api/v1/admin/groups", groupHandler.Create)
 	router.PUT("/api/v1/admin/groups/:id", groupHandler.Update)
 	router.DELETE("/api/v1/admin/groups/:id", groupHandler.Delete)
-	router.GET("/api/v1/admin/groups/:id/stats", groupHandler.GetStats)
 	router.GET("/api/v1/admin/groups/:id/api-keys", groupHandler.GetGroupAPIKeys)
 
 	router.GET("/api/v1/admin/proxies", proxyHandler.List)
@@ -255,10 +254,13 @@ func TestGroupHandlerEndpoints(t *testing.T) {
 	router.ServeHTTP(rec, req)
 	require.Equal(t, http.StatusOK, rec.Code)
 
+	// v0.1.20：分组统计接口已移除。原实现是一个永远返回四项 0 的 mock，
+	// 前端定义了 getStats 却没有任何组件调用。这里显式断言 404，
+	// 防止将来有人把"它应该返回 200"当成回归而重新挂上假数据。
 	rec = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodGet, "/api/v1/admin/groups/2/stats", nil)
 	router.ServeHTTP(rec, req)
-	require.Equal(t, http.StatusOK, rec.Code)
+	require.Equal(t, http.StatusNotFound, rec.Code)
 
 	rec = httptest.NewRecorder()
 	req = httptest.NewRequest(http.MethodGet, "/api/v1/admin/groups/2/api-keys", nil)

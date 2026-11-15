@@ -241,24 +241,14 @@ export async function toggleStatus(id: number, status: 'active' | 'inactive'): P
 }
 
 /**
- * Get group statistics
- * @param id - Group ID
- * @returns Group usage statistics
+ * 分组统计接口已于 v0.1.20 移除。
+ *
+ * 原 GET /admin/groups/:id/stats 返回四项硬编码 0，从来没有真实数据，也从来没有
+ * 任何组件调用过它。分组维度的真实用量请看：
+ *   - dashboard.getGroupStats()      → GET /admin/dashboard/groups
+ *   - groups.getUsageSummary()       → GET /admin/groups/usage-summary
+ *   - groups.getCapacitySummary()    → GET /admin/groups/capacity-summary
  */
-export async function getStats(id: number): Promise<{
-  total_api_keys: number
-  active_api_keys: number
-  total_requests: number
-  total_cost: number
-}> {
-  const { data } = await apiClient.get<{
-    total_api_keys: number
-    active_api_keys: number
-    total_requests: number
-    total_cost: number
-  }>(`/admin/groups/${id}/stats`)
-  return data
-}
 
 /**
  * Get API keys in a group
@@ -483,7 +473,6 @@ export const groupsAPI = {
   update,
   delete: deleteGroup,
   toggleStatus,
-  getStats,
   getGroupApiKeys,
   listCompositeRoutes,
   createCompositeRoute,
