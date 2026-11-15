@@ -3770,3 +3770,53 @@ permitrootlogin          without-password
 
 **风险等级：低。** 唯一真正的风险不是爆破，是**密钥泄露**或**服务器上有其它弱口令服务**。
 `passwordauthentication no` 这条配置已经挡掉了绝大多数自动化攻击。
+
+### 6.87 宿主机的另外两面：journal 有上限，HTTP 扫描几乎为零（2026-11-15 第 20 轮 / 256）
+
+上一轮看了 SSH，这轮补完宿主机的另外两面。
+
+**① journal 324 MB 会不会一直涨**
+
+```
+journalctl --disk-usage    →  323.5M
+/etc/systemd/journald.conf  →  全部注释掉（用默认值）
+```
+
+默认值是什么：`SystemMaxUse` 缺省是**磁盘的 10%，上限 4 GB**。
+这台机器 58 GB，所以上限是 **4 GB**，当前用了 323 MB，**余量 12 倍**。
+
+**journald 自己会按这个上限轮转**，不会无限增长。所以「324 MB 会不会变成 3 GB → 30 GB」
+这个担心不成立——它到 4 GB 就封顶了。
+
+如果想让这条线更紧，可以设 `SystemMaxUse=500M`；现在没必要，磁盘还有 36 GB 空。
+
+**② 80/443 有没有类似的扫描**
+
+源站 nginx 的 access log 只有 **353 行**：
+
+```
+8  /dashboard
+1  /zend/.env          1  /yii/.env           1  /www/phpinfo.php
+1  /www/.env           1  /wp/.env            1  /worker/.env
+1  /wp-admin/phpinfo.php
+```
+
+**典型的 WordPress / PHP 扫描器**——找 `.env`、`phpinfo.php`、`wp-admin`。
+但**每个路径只有 1 次**，总共不到 20 次。
+
+**原因是边缘 nginx 在前面挡着**（`175.27.132.225`）。源站只看到少量漏过来的，
+这和 SSH 每天一万次形成鲜明对比——**HTTP 面基本没被扫到**。
+
+而且这些路径全部返回 404（源站没有 PHP、没有 WordPress、没有 `.env` 文件），
+**扫也扫不出东西**。
+
+**宿主机三面收口**：
+
+| 面 | 状态 |
+|---|---|
+| SSH 22 | 每天约 1 万次爆破，**密码认证关闭所以无效** |
+| HTTP 80/443 | **不到 20 次扫描**，边缘挡住 + 无对应路径 |
+| journal | 323 MB，**4 GB 上限自动轮转** |
+
+**没有需要处理的问题。** 唯一的"噪音源"是 SSH 爆破——它不构成风险，
+但如果你改了 SSH 端口或加 fail2ban，`btmp` 和 `journal` 都会更清爽。
