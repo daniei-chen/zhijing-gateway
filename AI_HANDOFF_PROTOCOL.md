@@ -15,17 +15,22 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 
 ## 2. 当前已验证生产状态
 
-截至 2026-11-15 03:20（北京时间），生产版本是 **v0.1.14**（删除分组前必须解绑 API Key）：
+截至 2026-11-16 07:58（北京时间），生产版本是 **v0.1.22**：
 
-- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.14（「智境网关 0.1.14」）
-- 源码提交：`01622b632`
-- GHCR digest：`sha256:50d842703bd6bb73f5d7bcf1f388ed955fc3c9bdac446c21c399d43bfbba8d08`
-- 当前容器：`zhijing-api-v0114-final`，loopback 端口 **18811**
-- 回滚容器：18810（v0.1.13）、18809（v0.1.12）、18808（v0.1.11）、18807（v0.1.10）、18806（v0.1.9）
-- **v0.1.14 切换证据**：`candidate: business readiness ok (deep probe)` 之后
-  `observe: 0 new 5xx within 180s, within limit`；容器 `restart=0`，切换窗口 0 条错误日志。
-- **v0.1.14 行为变化**：`DELETE /api/v1/admin/groups/:id` 在该分组仍有活跃 API Key 时返回
-  `409 GROUP_HAS_ACTIVE_KEYS`；要强制删除必须显式 `?force=true`。详见 6.12。
+- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.22（「智境网关 0.1.22」）
+- 源码提交：`fb1ac9291`
+- 镜像：`ghcr.io/daniei-chen/zhijing-gateway:0.1.22`。**注意：GHCR 包是私有的，生产机没有
+  容器仓库凭据，所以这一个是用同一 commit 在生产机上 `docker build` 出来的**（Dockerfile
+  本轮刚修好，见 6.95）；镜像 label 里 version/revision 与实际一致。GHCR 那份由 CI 构建，
+  内容同源，将来把包改成 public 或配好凭据后可以直接 `docker pull` 替换。
+- 当前容器：`zhijing-api-v0122-final`，loopback 端口 **18816**
+- 回滚容器：18815（v0.1.20）、18814（v0.1.19）、18813（v0.1.17）。18812–18806 这 7 个
+  已停掉的端口在 2026-11-16 从 nginx peers 里清掉（`prune-peers.py 18816 18815 18814 18813`）。
+- **v0.1.22 切换证据**：`candidate: business readiness ok (deep probe)` →
+  `observe: 0 new 5xx within 180s, within limit`；容器 restart=0、OOMKilled=false、
+  启动日志 0 条 panic/fatal/error；公网 `/readyz` 200（约 40ms）。
+- **v0.1.22 行为变化**：告警邮件的四个静默早退分支现在记节流日志，并把
+  `email_skips_total=N(last=原因)` 追加到 `ops_job_heartbeats.last_result`。详见 6.95。
 
 ### 2.1 这一夜（00:30–02:20）发布的四个版本
 
@@ -4234,3 +4239,79 @@ GET /login  → /var/www/zhijing-workbench/index.html  (11-06)
 | 前端 base 改成 `/app-assets/` 以同时保留官网 | 要动构建配置 + 后端静态 handler + 发版，属于产品决策范围 |
 
 
+
+### 6.95 告警邮件静默分支 + 本地构建断裂（2026-11-16，第 28 轮）
+
+这轮从 v0.1.20 基线重新取证，没有推翻旧结论，只补了两个能落地的缺陷。
+
+#### 一、告警邮件的四个静默早退分支（v0.1.21，已上线）
+
+v0.1.13 修的是「发了但失败」，`maybeSendAlertEmail` 顶部还有四个提前 return 完全静默：
+配置读不到、通知未启用、没填收件人、低于最小级别。现状实测：
+
+```sql
+select count(*) total, count(*) filter (where email_sent) sent from ops_alert_events;
+-- 334 | 0
+select key from settings where key like '%smtp%';   -- 没有 smtp_password 这一行
+select value::jsonb->'alert'->>'enabled',
+       jsonb_array_length(value::jsonb->'alert'->'recipients')
+from settings where key='ops_email_notification_config';
+-- true | 1
+```
+
+也就是说：通知开关开着、有 1 个收件人，缺的是 SMTP 授权码。补上之前邮件一定失败，
+但**失败原因是哪一种，以前只能靠猜**。现在每个分支记一条节流日志（每分钟最多一条），
+并把 `email_skips_total=N(last=...)` 追加进心跳：
+
+```sql
+select last_result from ops_job_heartbeats where job_name='ops_alert_evaluator';
+-- rules=11 enabled=11 ... emails_sent=0 email_skips_total=7(last=no_recipients)
+```
+
+代码级证据：`TestMaybeSendAlertEmailRecordsSkipWhenRuleOptsOut` 与
+`TestNoteEmailSkipKeepsLatestReason`；`go test -tags=unit ./internal/service/` 全量 228 秒通过。
+
+**未验证**：到 07:57 的生产心跳里还没有 `email_skips_total`，因为这段时间 `created=0`
+（没有新告警事件），这条路径没被走到。下次真出告警时按上面的判据核对。
+
+#### 二、根 Dockerfile 的本地构建是坏的（v0.1.22，已上线）
+
+install 阶段只 COPY `package.json` + `pnpm-lock.yaml`，而 13 条 overrides 写在
+`pnpm-workspace.yaml` 里、会进 lockfile 的 root importer。实跑报：
+
+```
+#18 RUN pnpm install --frozen-lockfile --prefer-offline
+ERR_PNPM_LOCKFILE_CONFIG_MISMATCH: The current "overrides" configuration
+doesn't match the value found in the lockfile
+```
+
+发布流水线走 `Dockerfile.goreleaser`（预构建二进制打包），所以 CI 一直绿；坏掉的
+只有 `docker compose up` 和 `deploy/build_image.sh`。修法是把
+`frontend/pnpm-workspace.yaml` 与 `frontend/.npmrc` 一起 COPY 进 install 阶段；
+已在生产机用修好的 Dockerfile 完整构建出 0.1.22 镜像（前端 203 秒 + Go 编译约 6 分钟）。
+
+#### 三、CI race job 仍然没接上（权限，不是代码）
+
+`Makefile` 的 `test-race`（只跑并发相关用例，约 95 秒）从来没被 CI 调用；`go vet`
+与 `golangci-lint` 都看不出数据竞争。补丁在
+`deploy/zhijing/patches/0001-ci-race-job.patch`，`git apply --check` 干净通过。
+没推上去的原因是本机 GitHub OAuth token 只有 `gist, read:org, repo`，缺 `workflow`：
+
+```
+! [remote rejected] main -> main (refusing to allow an OAuth App to create or
+  update workflow `.github/workflows/backend-ci.yml` without `workflow` scope)
+```
+
+`gh auth refresh -s workflow` 之后 `git am` 该补丁并推一次即可。
+
+#### 四、本轮核对过、没有问题的
+
+- 上游 `Wei-Shaw/sub2api` 的 `origin/main` 仍是 `530c5e3a`（2026-11-11），无新提交；
+  新 fetch 到的 `v0.1.136/137` 指向 6 月的旧提交，不是新版本。
+- `govulncheck ./...`：No vulnerabilities found。
+- 前端 `pnpm test:run` 通过；10 处 `v-html` 全部经过 `DOMPurify.sanitize`。
+- 近 24h：容器 0 条 panic/fatal/OOM；nginx access log 0 个 5xx；
+  `ops_error_logs` 11-15 全天 11 条（前一日 192 条）。
+- 3 个网关实例各跑一份定时任务（每小时约 18 次 GitHub 价格拉取）。`tryAcquireLeaderLock`
+  只接在 5 个 ops 服务上，pricing 等业务任务没有锁；收益是每小时十几次 HTTP，
+  改动风险大于收益，本轮不改（与第 27 轮结论一致）。
