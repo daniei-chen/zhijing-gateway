@@ -4153,3 +4153,84 @@ go build ./...                       通过
 镜像由 tag `v0.1.20` 触发的 Release workflow 构建推 ghcr，服务器 pull 后走
 `/root/zhijing-zero-downtime-deploy-v0.1.0.sh` 零停机切换。
 
+### 6.94 优化轮：停掉 7 个旧容器，并撤回两条错误结论（2026-11-15 第 27 轮 / 256）
+
+#### 一、撤回「预聚合表只写不读」
+
+第 45 轮记过「`usage_dashboard_*` 24 处引用 0 次 SELECT，算得对但没人用」。
+**这条是错的。** 表统计直接推翻了它：
+
+```
+usage_dashboard_aggregation_watermark   seq_scan 34,040 | idx_scan 33,906  (1 行)
+usage_dashboard_hourly_users            seq_scan 23,952 | idx_scan 209,339
+usage_dashboard_daily                   seq_scan 436    | idx_scan 34,265
+```
+
+代码层面也确认：`GetDashboardStats()` → `fillDashboardUsageStatsAggregated()` →
+`SELECT ... FROM usage_dashboard_hourly / daily`。**这是主 dashboard 接口的路径**，
+只有带时间范围的 `GetDashboardStatsWithRange()` 才直接扫 `usage_logs`。
+
+- 聚合间隔默认 **60 秒**，lookback 120 秒，stale 阈值 180 秒（`interval + lookback`）——设计合理。
+- 我第 45 轮大概是 grep 的写法没匹配到那几个跨行 SQL，就下了「0 次 SELECT」的结论。
+
+**这是第五次同类误判**（用一个便宜口径替代真实执行）。这次的纠正入口仍然是「查真实统计」。
+
+#### 二、停掉 7 个不接流量的旧容器（真实优化）
+
+之前 10 个网关容器**同时在跑定时任务**，而且这些任务没有 leader lock：
+
+```
+v019-final    pricing 检查 77 次
+v0113-final   pricing 检查 58 次
+v0117-final   pricing 检查 44 次
+```
+
+10 个实例 = 每小时约 60 次对 GitHub raw 的无效拉取，外加 10 份 usage cleanup（10 秒一次）、
+token refresh（5 分钟一次）、email queue（3 worker）。**纯浪费。**
+
+处置：保留 **v0120（主）/ v0119（nginx backup，秒级回滚）/ v0117（备用）**，
+停掉 v019、v0110–v0115 共 7 个（`docker stop -t 5`，全部 `Exited (0)`，`docker start` 可恢复）。
+
+```
+used 内存    1500 MB  →  1133 MB   （释放 367 MB）
+available    2414 MB  →  2781 MB
+```
+
+镜像和容器都还在，回滚路径从「秒级」变成「秒级（start）+ 改 nginx」，深度从 10 代收窄到 3 代。
+
+#### 三、把「前端切换」从技术债改判为产品决策
+
+41–46 轮我一直写「线上前端陈旧，脚本就绪，只差一句话」。**那句话藏了一个后果。**
+
+实测（打到源站 443）：
+
+```
+GET /       → /var/www/zhijing-homepage/index.html   (11-01)
+              <title>智境 ZHIJING · 让顶尖智能，触手可及。</title>
+GET /login  → /var/www/zhijing-workbench/index.html  (11-06)
+              <title>智境 - AI API Gateway</title>
+```
+
+**线上是双前端**：`/` 是官网 landing page，SPA 在 `/login` 等路径；两者资源前缀不同
+（官网 `/assets/`，SPA `/app-assets/`）。后端内嵌 dist 是 **SPA**，前缀 `/assets/`，
+且实测不认 `/app-assets/`、也没有官网的任何资产（三个请求全 404）。
+
+所以 `switch-frontend-to-proxy.sh` 的真实效果是 **官网消失、`/` 变成 SPA 登录页**。
+脚本的 docstring 其实写了「nginx serves /var/www/zhijing-homepage for location /」——
+它知道这件事，只是把「停止读磁盘副本」当成了目标。
+
+**这不是技术债，是「域名首页给谁看」的产品选择。** 我之前把它包装成低风险技术操作，更正。
+
+「陈旧」本身是真的：11-06 之后 `frontend/` 有 10 个 commit，含
+`perf(frontend): stop preloading the 938KB excel chunk on first paint`。
+
+#### 四、这轮没有改的（以及为什么）
+
+| 候选 | 为什么不改 |
+|---|---|
+| PG `effective_cache_size=4GB`（物理内存 3.9GB）、`random_page_cost=4` | 表全在 128MB shared_buffers 里，planner 选什么都快；改了只是为了数字好看 |
+| `usage_logs` 上 3 个 `idx_scan=0` 的索引（4.7 MB） | 与上游 schema 分叉的代价大于 4.7 MB 写放大；且 `idx_scan` 可能被统计重置影响 |
+| `accounts` 的历史 37,775 次 UPDATE | 增量实测 10 分钟只涨 2 次——`DeferredService` 的批量更新已经生效，历史高频是早期版本行为 |
+| 前端 base 改成 `/app-assets/` 以同时保留官网 | 要动构建配置 + 后端静态 handler + 发版，属于产品决策范围 |
+
+
