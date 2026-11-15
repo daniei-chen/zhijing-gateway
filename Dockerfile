@@ -30,8 +30,12 @@ ENV NODE_OPTIONS=--max-old-space-size=2048
 # frontend package so lockfile resolution is reproducible in CI and releases.
 RUN corepack enable && corepack prepare pnpm@11.22.0 --activate
 
-# Install dependencies first (better caching)
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
+# Install dependencies first (better caching).
+# pnpm-workspace.yaml 里放着 13 条 overrides，pnpm 会把它们写进 lockfile 的
+# root importer；只 COPY package.json + lockfile 时 overrides 为空，
+# `pnpm install --frozen-lockfile` 会以 ERR_PNPM_LOCKFILE_CONFIG_MISMATCH 失败
+# （2026-11-16 实跑复现）。.npmrc 同理决定 legacy-peer-deps / ignore-scripts。
+COPY frontend/package.json frontend/pnpm-lock.yaml frontend/pnpm-workspace.yaml frontend/.npmrc ./
 RUN --mount=type=cache,id=zhijing-gateway-pnpm-store,target=/root/.local/share/pnpm/store \
     if [ -n "${NPM_CONFIG_REGISTRY}" ]; then pnpm config set registry "${NPM_CONFIG_REGISTRY}"; fi && \
     pnpm install --frozen-lockfile --prefer-offline
