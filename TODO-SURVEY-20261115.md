@@ -1,4 +1,11 @@
-# TODO 全表（2026-11-15，67 轮审计）
+# TODO 全表（2026-11-15，68 轮审计 · 已修正）
+
+> **2026-11-15 更正**：本文件初版把「代理连接测试」和「账号凭证测试」列为
+> **危害最高**，说它们「被点过 31 次、全部假成功」。**那个结论是错的**——
+> 我读的是 `ProxyService.TestConnection` 和 `AccountService.TestCredentials` 这两个
+> **零调用的死代码**，而 handler 实际走的是 `adminService.TestProxy`（真实探测，
+> 返回出口 IP 和延迟）和 `AccountTestService.TestAccountConnection`（按平台分 8 条
+> 真实路径）。**31 次测试都是真的。** 详见 `AI_HANDOFF_PROTOCOL.md` §6.69。
 
 全仓 13 条真 TODO（`// TODO` / `TODO(...)`，已排除注释里的 `xxx` 占位符）。
 每条都查了三件事：**是否接线**（有无路由/调用方）、**是否被用过**（审计日志/数据）、**危害等级**。
