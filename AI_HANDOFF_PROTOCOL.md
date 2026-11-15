@@ -3370,3 +3370,58 @@ openai.websocket_account_select_failed         3 次
 每次失败都发生在同一处（第一帧缺失），根本没走到真正转发的环节。
 
 **没有可修的东西**：如果强行"修复"，只能去猜客户端的意图。记录事实，不动代码。
+
+### 6.79 纠正 6.63：`/v1/live` 的门是锁着的，「任何持 Key 用户都能免费调用」是错的（第 11 轮 / 256）
+
+第 61 轮我说 `/v1/live`「端点可用、完全不计费、任何持有 API Key 的用户都能调用，门是开着的」。
+**「门开着」这个判断是错的。** 这轮读了完整的准入链路才发现。
+
+**`Live` handler 有四道闸**（`openai_live.go:22`）：
+
+```go
+1. GetAPIKeyFromContext           → 401 Invalid API key
+2. GetAuthSubjectFromContext      → 500 User context not found
+3. 分组平台必须是 openai/composite → 404 Live is not supported for this platform
+4. liveEnabledForAPIKey(apiKey)   → 403 Live is not enabled for this group
+```
+
+**第 4 道闸是关键**：
+
+```go
+func liveEnabledForAPIKey(apiKey *service.APIKey) bool {
+	return apiKey != nil &&
+		apiKey.Group != nil &&
+		(platform == OpenAI || Composite) &&
+		apiKey.Group.AllowLive        // ← 分组级开关
+}
+```
+
+**实测当前配置**：
+
+```
+groups:  id=2  pro 200  platform=openai  allow_live = f(alse)  status=active
+```
+
+**唯一的分组 `allow_live = false`。所以任何 Key 调 `/v1/live` 都会收到
+403 "Live is not enabled for this group"。**
+
+**这也解释了 `request_type=4`（live）为什么是零记录**——不是「没人想用」，
+是**用了也会被 403 挡在门外**，根本进不到转发和计费环节。
+
+**修正后的结论**：
+
+| 项 | 第 61 轮的说法 | 事实 |
+|---|---|---|
+| 端点注册了 | ✅ 对 | ✅ `gateway.POST("/live")` 确实在 |
+| 任何持 Key 用户可调用 | ❌ **错** | 需要 `group.allow_live = true`，**当前是 false** |
+| 完全不计费 | ✅ 对 | 代码确实跳过 `applyUsageBilling` |
+| 门开着 | ❌ **错** | **门是锁的** |
+| 从未被使用 | ✅ 对 | 但原因是**被拒绝**，不是没人试 |
+
+**所以真实风险等级要下调**：不计费是代码层面的真实缺口，但**当前不可达**。
+只有当有人把某个分组的 `allow_live` 打开时，这个缺口才会暴露。
+**在此之前，它是一段睡着的代码，不是一扇敞开的门。**
+
+**这是第七次误判**，而且和第 65/66 轮同类——**读了实现，没读准入链路**。
+区别在于前两次是「读错了方法」，这次是「读对了方法，但漏了调用它的 handler 里的前置检查」。
+`Live` 那 4 道闸就在 `openai_live.go:22-50`，我第 61 轮读了这个文件，却只看了 830 行的计费 TODO。
