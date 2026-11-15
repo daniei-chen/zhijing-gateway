@@ -3544,3 +3544,62 @@ ip:     （空）
 **审计记录证明的是动作发生过，不是动作还生效。**
 
 **没有发现问题，也没改任何东西。** 这轮只是把「5 条操作」从"存在"推进到"现在还剩几条"。
+
+### 6.83 Redis 全局状态：2.61 MB / 64 MB，但 noeviction 意味着没有退路（2026-11-15 第 16 轮 / 256）
+
+第一次系统看 Redis 的整体状态。
+
+```
+DBSIZE                 1,473 keys
+used_memory            2.61 MB
+used_memory_peak       2.77 MB
+maxmemory              64 MB
+maxmemory_policy       noeviction
+expired_keys           108,895（主动过期 102,460）
+evicted_keys           0
+keyspace_hits          4,486,941
+keyspace_misses        1,914,751
+avg_ttl                约 35 小时
+```
+
+**命中率 70.1%**（4.49M / 6.40M）。对缓存来说正常——里面有一半是短命的状态键（槽位、
+调度器快照），本来就不是命中率导向的。
+
+**key 结构**：
+
+| 前缀 | 数量 | 说明 |
+|---|---|---|
+| `sticky_session:2` | **1,060** | 用户 2 的粘性会话（72%） |
+| `sched:*` | 315 | 调度器快照（ver/epoch/ready/active/retired） |
+| `billing:user_platform_quota` | 3 | |
+| `concurrency:*` | **7** | 见下 |
+
+**`concurrency:*` 的实况**（第 29 轮我说过「连 slot key 都不存在」，现在有了）：
+
+```
+concurrency:user:4                zset  ttl=2395   ← 用户 4 正在跑
+concurrency:account:2             zset  ttl=2395   ← 账号 2 被占用
+concurrency:api_key:4             zset  ttl=2395   ← key 4 被占用
+concurrency:user:active_index     zset  ttl=-1     ← 索引（永久）
+concurrency:account:active_index  zset  ttl=-1
+concurrency:zhijing:user_index:v1 zset  ttl=-1
+```
+
+**这是实时槽位，不是泄漏。** 2395 秒 TTL 正是配置的 40 分钟，说明此刻用户 4 有请求在跑
+——和第 15 轮看到的 1,850 个 24 小时请求对得上。第 29 轮那次是空闲时刻，所以看到的是空。
+
+**1,060 个 sticky_session 看着多，实际正常**：用户 2 在 24 小时内有 471 个请求，
+而每个请求会写 2–3 个 session 键（`http-response-owner` + `response` 等），
+1060 / 471 ≈ 2.25，比例对得上。**内存占用约 100 KB，可以忽略。**
+
+**唯一值得记的是 `noeviction`**：
+
+内存满时 Redis **不淘汰旧 key，而是让写入失败**。这是**正确的选择**（淘汰掉槽位或
+session 会造成状态错乱，比报错更糟），但它意味着**没有退路**：
+
+- 现在 2.61 MB / 64 MB，**余量 24 倍**
+- 按当前的用量增长，还早得很
+- 但如果用户数或并发涨到 20 倍以上，写入就会开始失败，而失败点会落在**槽位写入**上
+  → 表现为请求被拒，而不是服务变慢
+
+**这不是待修的问题**，是一个**有明确阈值的前瞻信息**：64 MB 这条线在哪，涨到什么程度会碰到。
