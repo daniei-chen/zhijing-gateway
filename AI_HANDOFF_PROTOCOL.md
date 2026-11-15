@@ -3893,3 +3893,53 @@ close 1008, missing first response.create message, context deadline exceeded
 
 **没有需要修的东西。** 如果哪天想确认 WS 到底能不能跑，需要的是一个**正确发送
 `response.create` 首帧的客户端**——那是测试工作，不是修 bug。
+
+### 6.90 代码结构：110 个函数超过 200 行，最长的 1,982 行（2026-11-15 第 23 轮 / 256）
+
+第一次量化这个仓库的结构。统计非测试、非 ent 生成代码：
+
+```
+函数总数              14,611
+≥100 行                392
+≥200 行                110
+```
+
+**最长的 12 个**：
+
+| 行数 | 位置 | 函数 |
+|---|---|---|
+| **1,982** | `handler/admin/setting_handler_update.go:493` | `UpdateSettings` |
+| **1,965** | `service/openai_ws_forwarder_ingress.go:65` | `ProxyResponsesWebSocketFromClient` |
+| **1,354** | `service/openai_gateway_forward.go:23` | `Forward` |
+| **1,119** | `config/config.go:2843` | `Validate` |
+| **1,020** | `handler/gateway_handler.go:125` | `Messages` |
+| 988 | `service/openai_gateway_response_handling.go:52` | `handleStreamingResponseWithReasoning` |
+| 928 | `handler/openai_gateway_handler.go:2487` | `ResponsesWebSocket` |
+| 882 | `service/crs_sync_service.go:263` | `SyncFromCRS` |
+| 838 | `service/openai_ws_forwarder_v2.go:20` | `forwardOpenAIWSV2` |
+| 805 | `service/openai_ws_v2_passthrough_adapter.go:666` | `proxyResponsesWebSocketV2Passthrough` |
+| 769 | `service/gateway_forward.go:91` | `Forward` |
+| 713 | `service/billing_service.go:351` | `initFallbackPricing` |
+
+**三个观察**：
+
+**① `Forward` 是网关最核心的路径，1,354 行。** 每个请求都要经过它。
+一个 1,354 行的函数意味着**很难有一个测试能覆盖它的全部分支**——
+第 58 轮看到 service 覆盖率 72.8%，那 27% 没覆盖的很可能就躲在这样的函数里。
+
+**② WebSocket 相关的超长函数有四个**（1,965 + 928 + 838 + 805 = 4,536 行）。
+这和 6.78/6.89 的发现对照很有意思：**这部分代码量最大、结构最复杂，却从未被成功执行过。**
+没人跑过的 4,536 行，是这套代码里最"重"的未验证区域。
+
+**③ `UpdateSettings` 1,982 行**——一个函数处理所有设置项。第 15 轮查到「286 项配置」
+（6.41），这个函数大概是在用巨大的 switch/if 逐个处理它们。
+
+**这是结构性债务，不是缺陷。**
+
+代码能跑，15 个版本验证过，14,611 个函数里绝大多数是短的。而且这是**继承自上游的分叉**——
+重构长函数会立刻偏离上游，以后每次同步都要手工解冲突。**代价大于收益，不建议动。**
+
+**但它解释了一件事**：为什么第 58 轮覆盖率只有 72.8%——不是没写测试，
+是有些函数大到单个测试很难覆盖。
+
+**没有改动，只是把"代码有多复杂"变成了数字。**
