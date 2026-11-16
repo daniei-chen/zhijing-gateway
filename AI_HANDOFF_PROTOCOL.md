@@ -704,6 +704,47 @@ Manrope/Noto Sans SC/IBM Plex Mono、`zhijing-z.png`、扁平资源布局）变�
 - 发布后校验线上 `/login` 的标题与刚发布的 index 一致，不一致自动回滚 index。
 - 整份外壳归档在 `/root/zhijing-workbench-custom-20261116.tar.gz`（18MB）。
 
+#### 连带的第二个故障：登录被旧外壳自己的 409 拦死
+
+还原外壳之后用户仍然登不进去，页面提示
+`Authentication session changed. Please retry in the current session.`
+
+这句话不是后端返回的，是旧外壳**客户端**抛的 `AuthSessionChangedError`（code
+`AUTH_SESSION_CHANGED`，status 409）。它维护一条
+`localStorage.auth_session_identity_v1` 记录：
+
+```
+{generation, subject, phase:"ready"|"transition", credentials, writer?}
+credentials = sha256(JSON.stringify([auth_token, refresh_token]))
+subject     = String(auth_user.id)
+```
+
+每次请求前 `T()` 都要求 `phase==="ready"`、`subject` 与当前 `auth_user.id` 一致、
+`credentials` 与当前两个 token 的哈希一致，任一不符就抛 409，**请求不会发出**。
+只有在记录完全不存在时它才会自举一条新的。
+
+于是 19:52 那次在 stock 页面上完成的登录成了陷阱：stock 只写
+`auth_token`/`refresh_token`/`auth_user`，不写 `auth_session_identity_v1`，
+旧记录里的 `credentials` 因此与轮换后的 token 永久不符 —— 每次登录都被自己拦死。
+
+服务端证据：19:52:36 的 `POST /api/v1/auth/login` 是 **200**，随后 dashboard/keys/usage
+全 200，19:53、19:54 的 `/auth/me` 也是 200。后端从头到尾是好的。
+
+复现与验证（不靠推断）：
+
+- 受控浏览器里写入一条 `credentials` 错误的记录 → 页面**原样复现**上述 409 文案。
+- 删掉该记录 → 立刻恢复，提交错误密码时如实显示 `invalid email or password`。
+
+修复工具：`/app-assets/reset-session.html` + `/app-assets/reset-session.js`，源码在
+`deploy/zhijing/workbench-utils/`。它清掉 `auth_session_identity_v1`、`auth_token`、
+`refresh_token`、`auth_user`、`token_expires_at`、`register_data` 后跳回 `/login`，
+不触碰服务端数据。因为 CSP 是 `script-src 'self'`，逻辑必须放在同源外部 `.js` 里，
+不能内联。
+
+**教训**：这两套前端共用同一组 localStorage 键，但会话模型不兼容。任何一次“把
+stock 构建挂到工作台路径”的误操作，除了换掉界面，还会**污染用户浏览器里的会话**，
+即使把界面还原也不会自动恢复。恢复界面时必须同时考虑会话残留。
+
 ### 6.15 缺失的静态资源曾被假扮成 index.html（2026-11-15 第 5 轮，v0.1.16/0.1.17 已修）
 
 内嵌 SPA 中间件原来的逻辑是「文件找不到 → 返回 index.html」，而且是 **HTTP 200**：

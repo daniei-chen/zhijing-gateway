@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>重置登录会话 - 智境</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #f6f5fb;
+        color: #1d1b2b;
+        font-family: -apple-system, "Segoe UI", "Microsoft YaHei", sans-serif;
+      }
+      .card {
+        width: min(92vw, 460px);
+        background: #fff;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 18px 60px rgba(88, 64, 190, 0.14);
+      }
+      h1 { font-size: 20px; margin: 0 0 12px; }
+      p { font-size: 14px; line-height: 1.7; color: #5a5670; margin: 0 0 16px; }
+      #result {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #3d3852;
+        background: #f3f1fb;
+        border-radius: 12px;
+        padding: 12px 14px;
+        word-break: break-all;
+      }
+      a.btn {
+        display: inline-block;
+        margin-top: 18px;
+        padding: 12px 22px;
+        border-radius: 12px;
+        background: #7c5cf0;
+        color: #fff;
+        text-decoration: none;
+        font-size: 14px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>重置登录会话</h1>
+      <p>清理浏览器里残留的会话标识，然后回到登录页重新登录。不会影响服务器上的账号数据。</p>
+      <div id="result">正在清理…</div>
+      <a class="btn" id="go" href="/login" hidden>去登录</a>
+    </main>
+    <script src="/app-assets/reset-session.js"></script>
+  </body>
+</html>
