@@ -41,6 +41,20 @@ cp -a "${TARGET}/index.html" "${backup}/index.html"
 cp -a "${TARGET}/logo.svg" "${backup}/logo.svg" 2>/dev/null || true
 find "${TARGET}/app-assets" -type f -printf '%P\n' | sort >"${backup}/assets-before.txt"
 
+published=false
+restore_index_on_failure() {
+  status=$?
+  if (( status != 0 )) && [[ "$published" == true ]]; then
+    restore_tmp="${TARGET}/.index.html.restore"
+    cp -a "${backup}/index.html" "$restore_tmp"
+    chown --reference="${TARGET}/index.html" "$restore_tmp" 2>/dev/null || true
+    mv -f "$restore_tmp" "${TARGET}/index.html"
+    printf 'ROLLED BACK: previous workbench index restored from %s\n' "$backup" >&2
+  fi
+  exit "$status"
+}
+trap restore_index_on_failure EXIT
+
 # New hashed assets become available before any HTML can reference them.
 mkdir -p "$asset_destination"
 cp -a "${asset_source}/." "${asset_destination}/"
@@ -66,6 +80,7 @@ cp "${DIST}/index.html" "$index_tmp"
 chmod --reference="${TARGET}/index.html" "$index_tmp" 2>/dev/null || chmod 0644 "$index_tmp"
 chown --reference="${TARGET}/index.html" "$index_tmp" 2>/dev/null || true
 mv -f "$index_tmp" "${TARGET}/index.html"
+published=true
 
 new_entry=$(grep -oE '/app-assets/[^"]+\.js' "${TARGET}/index.html" | head -1)
 test -n "$new_entry" || die "new index has no workbench entry asset"
