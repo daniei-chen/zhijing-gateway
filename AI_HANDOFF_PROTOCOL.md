@@ -745,6 +745,35 @@ subject     = String(auth_user.id)
 stock 构建挂到工作台路径”的误操作，除了换掉界面，还会**污染用户浏览器里的会话**，
 即使把界面还原也不会自动恢复。恢复界面时必须同时考虑会话残留。
 
+#### 第三次修正：把自愈做进入口，而不是要求用户操作
+
+`reset-session.html` 没解决问题，原因有两个，都是我的判断失误：
+
+1. 用户实际访问的是 `154-36-187-147.sslip.io`，不是 `zhijing.kaogong.art`。两者是同一台
+   机器上的两个 server 块，服务同一份 `index.html`、同一个 `zhijing_api` 上游（18817 +
+   四个 backup），`/login` 的 md5 完全一致。
+2. `localStorage` 按 origin 隔离，`zhijing.kaogong.art` 上跑的清理脚本**碰不到**
+   sslip 域的存储。给出的链接对用户完全无效。
+
+现在 `index.html` 在模块脚本**之前**加载 `/app-assets/session-heal.js`。经典脚本在解析期
+同步执行，早于 `type="module"` 的延迟执行，因此一定先于应用启动：
+
+- 记录形状不合法，或 `subject` 与当前 `auth_user.id` 不一致 → 同步删除，不刷新。
+- 形状与主体都对，但 `credentials` 与 `sha256([auth_token, refresh_token])` 不符
+  （token 被别的构建轮换过，正是本例）→ 删除并 `location.reload()`，用 sessionStorage
+  打点保证 15 秒内只修一次，不会死循环。
+- 任何异常一律放行，绝不阻塞页面。
+
+实测三组：
+
+| 场景 | 结果 |
+|---|---|
+| 注入 `subject` 一致、`credentials` 全 0 的记录 | 自动修复，落到 `/login?redirect=/admin/dashboard`，提示「会话已过期，请重新登录。」 |
+| 清空存储后加载 `/login` | 不触发刷新（marker 为空），无告警 |
+| 提交错误密码 | 如实显示 `invalid email or password` |
+
+备份：`/root/zhijing-frontend-backups/index.before-heal-20261116T121338Z.html`。
+
 ### 6.15 缺失的静态资源曾被假扮成 index.html（2026-11-15 第 5 轮，v0.1.16/0.1.17 已修）
 
 内嵌 SPA 中间件原来的逻辑是「文件找不到 → 返回 index.html」，而且是 **HTTP 200**：
