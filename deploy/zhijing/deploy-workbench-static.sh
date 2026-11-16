@@ -4,6 +4,13 @@
 # Assets are copied first and the HTML entry is replaced last. Existing hashed
 # assets are intentionally retained so sessions that still hold the previous
 # index do not fail during rollout.
+#
+# /var/www/zhijing-workbench does NOT host the repository's frontend build. It
+# hosts a hand-crafted shell (智境 ZHIJING · 工作台, self-hosted fonts, flat
+# app-assets layout) whose sources live outside this repository. Publishing the
+# stock --base=/app-assets/ build over it replaces the owner's design with the
+# upstream interface, which is a regression rather than a deploy, so the
+# signature check below refuses that by default.
 set -Eeuo pipefail
 
 : "${DIST:?set DIST to the directory containing an index.html built with --base=/app-assets/}"
@@ -11,6 +18,8 @@ set -Eeuo pipefail
 TARGET="${TARGET:-/var/www/zhijing-workbench}"
 PUBLIC_HOST="${PUBLIC_HOST:-zhijing.kaogong.art}"
 BACKUP_ROOT="${BACKUP_ROOT:-/root/zhijing-frontend-backups}"
+WORKBENCH_TITLE="${WORKBENCH_TITLE:-智境 ZHIJING · 工作台}"
+WORKBENCH_MARKER="${WORKBENCH_MARKER:-/app-assets/zhijing-z.png}"
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -19,6 +28,17 @@ test -f "${TARGET}/index.html" || die "workbench target not found: ${TARGET}"
 grep -q '/app-assets/' "${DIST}/index.html" || die "index.html does not reference /app-assets/"
 if grep -Eq 'src="/assets/|href="/assets/' "${DIST}/index.html"; then
   die "index.html still references the homepage /assets namespace"
+fi
+
+# The served workbench is a hand-crafted shell, not ${DIST} as built by the repo.
+# Both the title and the brand icon must be present, otherwise the build belongs
+# to the stock frontend and must not land here.
+if ! grep -qF "<title>${WORKBENCH_TITLE}</title>" "${DIST}/index.html" ||
+   ! grep -qF "${WORKBENCH_MARKER}" "${DIST}/index.html"; then
+  if [[ "${ALLOW_STOCK_WORKBENCH:-0}" != "1" ]]; then
+    die "refusing to publish ${DIST}: this is not the hand-crafted workbench shell (expected title '${WORKBENCH_TITLE}' and ${WORKBENCH_MARKER}). Publishing the stock frontend build replaces the owner's design with the upstream interface. Set ALLOW_STOCK_WORKBENCH=1 only when that replacement is the intent."
+  fi
+  printf 'WARNING: publishing a non-workbench shell because ALLOW_STOCK_WORKBENCH=1\n' >&2
 fi
 
 # Vite --base=/app-assets/ emits URLs like /app-assets/assets/index-*.js.
@@ -94,5 +114,13 @@ case "$login_html" in
   *"<div id=\"app\"></div>"*) ;;
   *) die "login page is incomplete after workbench deployment" ;;
 esac
+
+# The served entry must be the one just published. A cached or shadowed index
+# would otherwise pass the check above while users still load the old shell.
+expected_title=$(grep -oE '<title>[^<]*</title>' "${DIST}/index.html" | head -1)
+served_title=$(printf '%s' "$login_html" | grep -oE '<title>[^<]*</title>' | head -1 || true)
+test -n "$served_title" || die "served login page has no title"
+test "$served_title" = "$expected_title" || \
+  die "served login title '${served_title}' does not match published '${expected_title}'"
 
 printf 'workbench_deployed stamp=%s backup=%s entry=%s\n' "$stamp" "$backup" "$new_entry"

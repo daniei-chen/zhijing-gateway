@@ -27,7 +27,8 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
   OOMKilled=false；公网 `/readyz` 200，工作台 `/login` 200。
 - **v0.1.23 行为变化**：告警恢复邮件、SMTP 实际送达语义、中文标准模板；
   管理员首页 HTML 白名单清洗；发布门禁覆盖候选日志、前端入口与流内上游失败。
-  工作台静态资源已更新到 `/app-assets/assets/index-eL3ZRLqE.js`，官网首页未替换。
+  工作台静态资源**不应**被这次发布替换：11:15 那次误发布已回滚，见 6.14 的事故记录；
+  官网首页未替换。
   告警配置已启用“包含恢复告警”，备份在
   `/root/ops-email-notification-config.before-v0123.json`。
 - **仍待处理**：应用数据库没有 `smtp_password`，本应用 SMTP 告警无法认证；用户收到的
@@ -674,6 +675,34 @@ modulepreload，也没有 vendor-excel。改动本身无害（对未来部署是
 
 要真正让线上前端与源码一致，需要把 `dist` 部署到 `/var/www/` 下的某个目录并让 nginx 指过去。
 **这是用户可见的界面替换，必须由主人决定**，不能自行执行。
+
+#### 2026-11-16 事故：v0.1.23 发布把工作台外壳换成了 stock 构建
+
+上面这条“必须由主人决定”的规则被违反了。发布 v0.1.23 时多跑了一步
+`deploy-workbench-static.sh DIST=artifacts/zhijing-web-v0.1.23`，把仓库 `frontend/`
+的 stock 构建发布到 `/var/www/zhijing-workbench/`，覆盖了手写外壳的 `index.html`
+与 `logo.svg`。用户看到的是登录页和工作台从 `智境 ZHIJING · 工作台`（自有字体
+Manrope/Noto Sans SC/IBM Plex Mono、`zhijing-z.png`、扁平资源布局）变成
+`智境网关 - AI API Gateway`。
+
+`logo.svg` 早在 10:05 就已被替换：那次部署在“index 引用的资源必须已存在”这步中断，
+按脚本设计资源已拷入、index 未发布，所以 11:15 的备份里 index 仍是原件。两处都已还原。
+
+回滚成本极低，原因是脚本设计正确：`assets-before.txt` 记录了 1228 个原文件、按设计
+只增不删，所以只需要把 `index.html` 与 `logo.svg` 从
+`/root/zhijing-frontend-backups/20261116T111533Z/` 原子换回，秒级完成、不重启容器、
+不碰数据库。核验：原文件被覆盖数 0，index 引用资源缺失数 0，`/login`、`/`、`/healthz`、
+`/readyz` 与四个静态入口全部 200。
+
+现在的规则（已落到脚本，不是口头约定）：
+
+- `/var/www/zhijing-workbench/` 是**手工构建的自有外壳**，源码不在本仓库，
+  任何时候都不允许用 `frontend/` 的 stock 构建覆盖它。
+- `deploy-workbench-static.sh` 要求输入的 index.html 同时含
+  `<title>智境 ZHIJING · 工作台</title>` 和 `/app-assets/zhijing-z.png`，缺一个就拒绝发布；
+  只有显式 `ALLOW_STOCK_WORKBENCH=1` 才放行。
+- 发布后校验线上 `/login` 的标题与刚发布的 index 一致，不一致自动回滚 index。
+- 整份外壳归档在 `/root/zhijing-workbench-custom-20261116.tar.gz`（18MB）。
 
 ### 6.15 缺失的静态资源曾被假扮成 index.html（2026-11-15 第 5 轮，v0.1.16/0.1.17 已修）
 
