@@ -295,3 +295,27 @@ func TestNoteEmailSkipKeepsLatestReason(t *testing.T) {
 		t.Fatalf("summary should carry the latest reason, got %q", summary)
 	}
 }
+
+func TestOpsAlertEmailVariablesCarryResolvedContext(t *testing.T) {
+	firedAt := time.Date(2026, 11, 16, 8, 0, 0, 0, time.UTC)
+	resolvedAt := firedAt.Add(5 * time.Minute)
+	rule := &OpsAlertRule{Name: "上游流式错误", Severity: "P1", MetricType: "upstream_error_rate", Operator: ">=", Threshold: 5}
+	event := &OpsAlertEvent{
+		ID:          42,
+		Status:      OpsAlertStatusResolved,
+		MetricValue: float64Ptr(7.5),
+		FiredAt:     firedAt,
+		ResolvedAt:  &resolvedAt,
+	}
+
+	variables := opsAlertEmailVariables(rule, event, "https://zhijing.example/admin/ops")
+	require.Equal(t, "已恢复", variables["alert_status_label"])
+	require.Equal(t, resolvedAt.Format(time.RFC3339), variables["resolved_at"])
+	require.Equal(t, "https://zhijing.example/admin/ops", variables["dashboard_url"])
+	require.Equal(t, "7.50", variables["metric_value"])
+
+	body := buildOpsAlertEmailBody(rule, event)
+	require.Contains(t, body, "已恢复")
+	require.Contains(t, body, "恢复时间")
+	require.Contains(t, body, resolvedAt.Format(time.RFC3339))
+}

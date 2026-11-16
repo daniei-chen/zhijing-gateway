@@ -94,7 +94,36 @@ describe('HomeView compact mode', () => {
     })
 
     expect(wrapper.get('iframe').attributes('src')).toBe('https://example.com/home')
+    expect(wrapper.get('iframe').attributes('sandbox')).toContain('allow-scripts')
+    expect(wrapper.get('iframe').attributes('referrerpolicy')).toBe('no-referrer')
     expect(wrapper.find('[data-testid="compact-home"]').exists()).toBe(false)
+  })
+
+  it('sanitizes executable custom HTML before rendering', () => {
+    const wrapper = mountHome({
+      compact_home_enabled: true,
+      home_content: `
+        <section id="custom-home" onclick="alert(1)">
+          <h1>Safe home</h1>
+          <script>window.__home_xss = true</script>
+          <img src="x" onerror="alert(2)">
+        </section>
+      `,
+    })
+
+    expect(wrapper.get('#custom-home').text()).toContain('Safe home')
+    expect(wrapper.find('#custom-home').attributes('onclick')).toBeUndefined()
+    expect(wrapper.find('script').exists()).toBe(false)
+    expect(wrapper.find('img').attributes('onerror')).toBeUndefined()
+  })
+
+  it('does not turn a non-http URL into an iframe', () => {
+    const wrapper = mountHome({
+      compact_home_enabled: true,
+      home_content: 'javascript:alert(document.cookie)',
+    })
+
+    expect(wrapper.find('iframe').exists()).toBe(false)
   })
 
   it('treats whitespace-only custom content as empty and selects compact mode', () => {

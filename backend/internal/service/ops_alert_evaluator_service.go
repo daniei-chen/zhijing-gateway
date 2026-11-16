@@ -208,6 +208,7 @@ func (s *OpsAlertEvaluatorService) evaluateOnce(interval time.Duration) {
 	eventsCreated := 0
 	eventsResolved := 0
 	emailsSent := 0
+	emailsResolvedSent := 0
 
 	now := time.Now().UTC()
 	safeEnd := now.Truncate(time.Minute)
@@ -318,11 +319,17 @@ func (s *OpsAlertEvaluatorService) evaluateOnce(interval time.Duration) {
 				logger.LegacyPrintf("service.ops_alert_evaluator", "[OpsAlertEvaluator] resolve event failed (event=%d): %v", activeEvent.ID, err)
 			} else {
 				eventsResolved++
+				activeEvent.Status = OpsAlertStatusResolved
+				activeEvent.ResolvedAt = &resolvedAt
+				if s.maybeSendAlertEmail(ctx, runtimeCfg, rule, activeEvent) {
+					emailsResolvedSent++
+				}
 			}
 		}
 	}
 
-	result := fmt.Sprintf("rules=%d enabled=%d evaluated=%d created=%d resolved=%d emails_sent=%d", rulesTotal, rulesEnabled, rulesEvaluated, eventsCreated, eventsResolved, emailsSent)
+	result := fmt.Sprintf("rules=%d enabled=%d evaluated=%d created=%d resolved=%d emails_sent=%d emails_resolved_sent=%d",
+		rulesTotal, rulesEnabled, rulesEvaluated, eventsCreated, eventsResolved, emailsSent, emailsResolvedSent)
 	if skip := s.emailSkipSummary(); skip != "" {
 		result += " " + skip
 	}
@@ -772,7 +779,8 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 	if s == nil || s.emailService == nil || s.opsService == nil || event == nil || rule == nil {
 		return false
 	}
-	if event.EmailSent {
+	resolved := event.Status == OpsAlertStatusResolved || event.Status == OpsAlertStatusManualResolved
+	if !resolved && event.EmailSent {
 		return false
 	}
 	if !rule.NotifyEmail {
@@ -789,7 +797,19 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 		s.noteEmailSkip("notifications_disabled", rule, event)
 		return false
 	}
-
+	if resolved {
+		if !emailCfg.Alert.IncludeResolvedAlerts {
+			s.noteEmailSkip("resolved_alerts_disabled", rule, event)
+			return false
+		}
+		// A recovery notice is only useful when the original firing notice
+		// reached at least one recipient. Otherwise the operator would receive
+		// a "recovered" message for an incident they were never told about.
+		if !event.EmailSent {
+			s.noteEmailSkip("trigger_not_delivered", rule, event)
+			return false
+		}
+	}
 	if len(emailCfg.Alert.Recipients) == 0 {
 		s.noteEmailSkip("no_recipients", rule, event)
 		return false
@@ -799,16 +819,21 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 		return false
 	}
 
-	if runtimeCfg != nil && runtimeCfg.Silencing.Enabled {
+	if !resolved && runtimeCfg != nil && runtimeCfg.Silencing.Enabled {
 		if isOpsAlertSilenced(time.Now().UTC(), rule, event, runtimeCfg.Silencing) {
 			return false
 		}
 	}
 
-	// Apply/update rate limiter.
+	// Apply/update rate limiter. Recovery notices still consume the same
+	// configured budget so a flapping upstream cannot bypass the operator's cap.
 	s.emailLimiter.SetLimit(emailCfg.Alert.RateLimitPerHour)
 
-	subject := fmt.Sprintf("[Ops Alert][%s] %s", strings.TrimSpace(rule.Severity), strings.TrimSpace(rule.Name))
+	statusLabel := "已触发"
+	if resolved {
+		statusLabel = "已恢复"
+	}
+	subject := fmt.Sprintf("[智境网关][%s][%s] %s", strings.TrimSpace(rule.Severity), statusLabel, strings.TrimSpace(rule.Name))
 	body := buildOpsAlertEmailBody(rule, event)
 
 	// 2026-11-15：此前这里每个失败分支都是静默 continue，结果是「SMTP 密码没配、
@@ -825,6 +850,18 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 		}
 		return local + addr[at:]
 	}
+	dashboardURL := "/admin/ops"
+	if notifier := s.emailService.notificationEmailService; notifier != nil {
+		if baseURL := notifier.baseURL(ctx); baseURL != "" {
+			dashboardURL = baseURL + "/admin/ops"
+		}
+	}
+	variables := opsAlertEmailVariables(rule, event, dashboardURL)
+	sourceID := fmt.Sprintf("%d", event.ID)
+	reminderKey := ""
+	if resolved {
+		reminderKey = "resolved"
+	}
 	attempted := 0
 	anySent := false
 	for _, to := range emailCfg.Alert.Recipients {
@@ -839,18 +876,28 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 			continue
 		}
 		attempted++
-		if s.emailService.notificationEmailService != nil {
-			if err := s.emailService.notificationEmailService.Send(ctx, NotificationEmailSendInput{
+		if notifier := s.emailService.notificationEmailService; notifier != nil {
+			outcome, err := notifier.SendWithOutcome(ctx, NotificationEmailSendInput{
 				Event:          NotificationEmailEventOpsAlert,
+				Locale:         notificationEmailLocaleChinese,
 				RecipientEmail: addr,
 				RecipientName:  emailRecipientName(addr),
 				SourceType:     "ops_alert",
-				SourceID:       fmt.Sprintf("%d", event.ID),
-				Variables:      opsAlertEmailVariables(rule, event),
-			}); err == nil {
-				anySent = true
+				SourceID:       sourceID,
+				ReminderKey:    reminderKey,
+				Variables:      variables,
+			})
+			if err == nil {
+				if outcome.Sent {
+					anySent = true
+				} else if outcome.Suppressed {
+					logger.LegacyPrintf("service.ops_alert_evaluator",
+						"[OpsAlertEvaluator] alert email suppressed (duplicate or preference) for %s (event=%d rule=%s status=%s)",
+						masked(addr), event.ID, rule.Name, event.Status)
+				}
 				continue
-			} else if !shouldFallbackNotificationEmail(err) {
+			}
+			if !shouldFallbackNotificationEmail(err) {
 				logger.LegacyPrintf("service.ops_alert_evaluator",
 					"[OpsAlertEvaluator] notification email failed for %s (event=%d rule=%s): %v",
 					masked(addr), event.ID, rule.Name, err)
@@ -868,26 +915,29 @@ func (s *OpsAlertEvaluatorService) maybeSendAlertEmail(ctx context.Context, runt
 
 	if !anySent && attempted > 0 {
 		logger.LegacyPrintf("service.ops_alert_evaluator",
-			"[OpsAlertEvaluator] alert email delivered to 0/%d recipients (event=%d rule=%s severity=%s); check SMTP settings",
-			attempted, event.ID, rule.Name, rule.Severity)
+			"[OpsAlertEvaluator] alert email delivered to 0/%d recipients (event=%d rule=%s severity=%s status=%s); check SMTP settings",
+			attempted, event.ID, rule.Name, rule.Severity, event.Status)
 	}
-	if anySent {
+	if anySent && !resolved {
 		_ = s.opsRepo.UpdateAlertEventEmailSent(context.Background(), event.ID, true)
 	}
 	return anySent
 }
 
-func opsAlertEmailVariables(rule *OpsAlertRule, event *OpsAlertEvent) map[string]string {
+func opsAlertEmailVariables(rule *OpsAlertRule, event *OpsAlertEvent, dashboardURL string) map[string]string {
 	variables := map[string]string{
-		"rule_name":         "-",
-		"severity":          "-",
-		"alert_status":      "-",
-		"metric_type":       "-",
-		"operator":          "-",
-		"metric_value":      "-",
-		"threshold_value":   "-",
-		"triggered_at":      time.Now().UTC().Format(time.RFC3339),
-		"alert_description": "-",
+		"rule_name":          "-",
+		"severity":           "-",
+		"alert_status":       "-",
+		"alert_status_label": "已触发",
+		"metric_type":        "-",
+		"operator":           "-",
+		"metric_value":       "-",
+		"threshold_value":    "-",
+		"triggered_at":       time.Now().UTC().Format(time.RFC3339),
+		"resolved_at":        "-",
+		"alert_description":  "-",
+		"dashboard_url":      dashboardURL,
 	}
 	if rule != nil {
 		variables["rule_name"] = strings.TrimSpace(rule.Name)
@@ -901,6 +951,9 @@ func opsAlertEmailVariables(rule *OpsAlertRule, event *OpsAlertEvent) map[string
 	}
 	if event != nil {
 		variables["alert_status"] = strings.TrimSpace(event.Status)
+		if event.Status == OpsAlertStatusResolved || event.Status == OpsAlertStatusManualResolved {
+			variables["alert_status_label"] = "已恢复"
+		}
 		if event.MetricValue != nil {
 			variables["metric_value"] = fmt.Sprintf("%.2f", *event.MetricValue)
 		}
@@ -909,6 +962,9 @@ func opsAlertEmailVariables(rule *OpsAlertRule, event *OpsAlertEvent) map[string
 		}
 		if !event.FiredAt.IsZero() {
 			variables["triggered_at"] = event.FiredAt.UTC().Format(time.RFC3339)
+		}
+		if event.ResolvedAt != nil && !event.ResolvedAt.IsZero() {
+			variables["resolved_at"] = event.ResolvedAt.UTC().Format(time.RFC3339)
 		}
 		if strings.TrimSpace(event.Description) != "" {
 			variables["alert_description"] = strings.TrimSpace(event.Description)
@@ -924,6 +980,14 @@ func buildOpsAlertEmailBody(rule *OpsAlertRule, event *OpsAlertEvent) string {
 	metric := strings.TrimSpace(rule.MetricType)
 	value := "-"
 	threshold := fmt.Sprintf("%.2f", rule.Threshold)
+	statusLabel := "已触发"
+	if event.Status == OpsAlertStatusResolved || event.Status == OpsAlertStatusManualResolved {
+		statusLabel = "已恢复"
+	}
+	resolvedAt := "-"
+	if event.ResolvedAt != nil && !event.ResolvedAt.IsZero() {
+		resolvedAt = event.ResolvedAt.Format(time.RFC3339)
+	}
 	if event.MetricValue != nil {
 		value = fmt.Sprintf("%.2f", *event.MetricValue)
 	}
@@ -931,21 +995,23 @@ func buildOpsAlertEmailBody(rule *OpsAlertRule, event *OpsAlertEvent) string {
 		threshold = fmt.Sprintf("%.2f", *event.ThresholdValue)
 	}
 	return fmt.Sprintf(`
-<h2>Ops Alert</h2>
-<p><b>Rule</b>: %s</p>
-<p><b>Severity</b>: %s</p>
-<p><b>Status</b>: %s</p>
-<p><b>Metric</b>: %s %s %s</p>
-<p><b>Fired at</b>: %s</p>
-<p><b>Description</b>: %s</p>
+<h2>智境网关 · 运维告警</h2>
+<p><b>规则</b>：%s</p>
+<p><b>严重级别</b>：%s</p>
+<p><b>状态</b>：%s</p>
+<p><b>指标</b>：%s %s %s</p>
+<p><b>触发时间</b>：%s</p>
+<p><b>恢复时间</b>：%s</p>
+<p><b>说明</b>：%s</p>
 `,
 		htmlEscape(rule.Name),
 		htmlEscape(rule.Severity),
-		htmlEscape(event.Status),
+		htmlEscape(statusLabel),
 		htmlEscape(metric),
 		htmlEscape(rule.Operator),
-		htmlEscape(fmt.Sprintf("%s (threshold %s)", value, threshold)),
+		htmlEscape(fmt.Sprintf("%s（阈值 %s）", value, threshold)),
 		event.FiredAt.Format(time.RFC3339),
+		htmlEscape(resolvedAt),
 		htmlEscape(event.Description),
 	)
 }
