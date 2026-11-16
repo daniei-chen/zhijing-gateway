@@ -128,6 +128,14 @@ type NotificationEmailSendInput struct {
 	RawHTMLVariables map[string]string
 }
 
+// NotificationEmailSendOutcome distinguishes a delivery from the cases where
+// Send intentionally returns nil without handing the message to SMTP:
+// duplicate delivery keys and optional-event unsubscribes.
+type NotificationEmailSendOutcome struct {
+	Sent       bool
+	Suppressed bool
+}
+
 type NotificationEmailUnsubscribeResult struct {
 	Event string `json:"event"`
 	Email string `json:"email"`
@@ -373,22 +381,30 @@ func (s *NotificationEmailService) PreviewTemplate(ctx context.Context, input No
 }
 
 func (s *NotificationEmailService) Send(ctx context.Context, input NotificationEmailSendInput) error {
+	_, err := s.SendWithOutcome(ctx, input)
+	return err
+}
+
+// SendWithOutcome sends a notification email and reports whether SMTP accepted
+// it. A nil error alone is not proof of delivery: duplicate keys and explicit
+// unsubscribe preferences also complete without sending.
+func (s *NotificationEmailService) SendWithOutcome(ctx context.Context, input NotificationEmailSendInput) (NotificationEmailSendOutcome, error) {
 	info, normalizedEvent, err := s.eventInfo(input.Event)
 	if err != nil {
-		return notificationEmailTemplateErr(err)
+		return NotificationEmailSendOutcome{}, notificationEmailTemplateErr(err)
 	}
 	recipient := strings.TrimSpace(input.RecipientEmail)
 	if recipient == "" {
-		return nil
+		return NotificationEmailSendOutcome{}, nil
 	}
 	if info.Optional {
 		unsubscribed, err := s.IsUnsubscribed(ctx, recipient, normalizedEvent)
 		if err != nil {
-			return err
+			return NotificationEmailSendOutcome{}, err
 		}
 		if unsubscribed {
 			slog.Info("notification email suppressed by unsubscribe preference", "event", normalizedEvent, "recipient_hash", notificationEmailHash(recipient))
-			return nil
+			return NotificationEmailSendOutcome{Suppressed: true}, nil
 		}
 	}
 
@@ -398,37 +414,37 @@ func (s *NotificationEmailService) Send(ctx context.Context, input NotificationE
 	}
 	tmpl, err := s.GetTemplate(ctx, normalizedEvent, locale)
 	if err != nil {
-		return notificationEmailTemplateErr(err)
+		return NotificationEmailSendOutcome{}, notificationEmailTemplateErr(err)
 	}
 	variables := s.runtimeVariables(ctx, normalizedEvent, locale, input)
 	rendered, err := renderNotificationEmail(normalizedEvent, tmpl.Subject, tmpl.HTML, variables, input.RawHTMLVariables)
 	if err != nil {
-		return notificationEmailTemplateErr(err)
+		return NotificationEmailSendOutcome{}, notificationEmailTemplateErr(err)
 	}
 
 	deliveryKey := notificationEmailDeliveryKey(normalizedEvent, input.SourceType, input.SourceID, recipient, input.ReminderKey)
 	if deliveryKey != "" {
 		sent, err := s.deliveryExists(ctx, deliveryKey, legacyNotificationEmailDeliveryKey(normalizedEvent, input.SourceType, input.SourceID, recipient, input.ReminderKey))
 		if err != nil {
-			return err
+			return NotificationEmailSendOutcome{}, err
 		}
 		if sent {
-			return nil
+			return NotificationEmailSendOutcome{Suppressed: true}, nil
 		}
 	}
 
 	if s.emailService == nil {
-		return notificationEmailConfigErr(errors.New("email service is not configured"))
+		return NotificationEmailSendOutcome{}, notificationEmailConfigErr(errors.New("email service is not configured"))
 	}
 	if err := s.emailService.SendEmail(ctx, recipient, rendered.Subject, rendered.HTML); err != nil {
-		return notificationEmailDeliveryErr(err)
+		return NotificationEmailSendOutcome{}, notificationEmailDeliveryErr(err)
 	}
 	if deliveryKey != "" {
 		if err := s.settingRepo.Set(ctx, deliveryKey, time.Now().UTC().Format(time.RFC3339Nano)); err != nil {
-			return err
+			return NotificationEmailSendOutcome{}, err
 		}
 	}
-	return nil
+	return NotificationEmailSendOutcome{Sent: true}, nil
 }
 
 func (s *NotificationEmailService) RememberRecipientLocale(ctx context.Context, userID int64, email, acceptLanguage string) {
@@ -931,11 +947,14 @@ func notificationEmailSampleVariables(locale string) map[string]string {
 			"rule_name":           "错误率过高",
 			"severity":            "critical",
 			"alert_status":        "firing",
+			"alert_status_label":  "已触发",
 			"metric_type":         "error_rate",
 			"operator":            ">=",
 			"metric_value":        "12.50",
 			"threshold_value":     "10.00",
 			"alert_description":   "最近 10 分钟错误率超过阈值",
+			"resolved_at":         "2026-05-20 12:05:00",
+			"dashboard_url":       "https://example.com/admin/ops",
 			"report_name":         "日报",
 			"report_type":         "daily_summary",
 			"report_start_time":   "2026-07-18T01:00:26Z",
@@ -979,11 +998,14 @@ func notificationEmailSampleVariables(locale string) map[string]string {
 		"rule_name":           "High error rate",
 		"severity":            "critical",
 		"alert_status":        "firing",
+		"alert_status_label":  "Firing",
 		"metric_type":         "error_rate",
 		"operator":            ">=",
 		"metric_value":        "12.50",
 		"threshold_value":     "10.00",
 		"alert_description":   "Error rate exceeded threshold in the last 10 minutes.",
+		"resolved_at":         "2026-05-20 12:05:00",
+		"dashboard_url":       "https://example.com/admin/ops",
 		"report_name":         "Daily summary",
 		"report_type":         "daily_summary",
 		"report_start_time":   "2026-07-18T01:00:26Z",
@@ -1136,7 +1158,7 @@ var notificationEmailEventDefinitions = map[string]NotificationEmailEventInfo{
 		Category:    "ops",
 		Optional:    false,
 		Placeholders: append(append([]string{}, notificationEmailCommonPlaceholders...),
-			"rule_name", "severity", "alert_status", "metric_type", "operator", "metric_value", "threshold_value", "triggered_at", "alert_description"),
+			"rule_name", "severity", "alert_status", "alert_status_label", "metric_type", "operator", "metric_value", "threshold_value", "triggered_at", "resolved_at", "alert_description", "dashboard_url"),
 	},
 	NotificationEmailEventOpsScheduledReport: {
 		Event:       NotificationEmailEventOpsScheduledReport,
@@ -1406,24 +1428,26 @@ var notificationEmailOfficialTemplates = map[string]map[string]notificationEmail
 	},
 	NotificationEmailEventOpsAlert: {
 		notificationEmailDefaultLocale: {
-			Subject: "[Ops Alert][{{severity}}] {{rule_name}}",
-			HTML: notificationEmailCard("#ea580c", "Ops alert", `
-<p><strong>Rule</strong>: {{rule_name}}</p>
+			Subject: "[{{site_name}}][{{severity}}][{{alert_status_label}}] {{rule_name}}",
+			HTML: notificationEmailCard("#ea580c", "{{alert_status_label}}: {{rule_name}}", `
 <p><strong>Severity</strong>: {{severity}}</p>
 <p><strong>Status</strong>: {{alert_status}}</p>
 <p><strong>Metric</strong>: {{metric_type}} {{operator}} {{metric_value}} (threshold {{threshold_value}})</p>
 <p><strong>Fired at</strong>: {{triggered_at}}</p>
-<p><strong>Description</strong>: {{alert_description}}</p>`),
+<p><strong>Resolved at</strong>: {{resolved_at}}</p>
+<p><strong>Description</strong>: {{alert_description}}</p>
+<p><a class="button" href="{{dashboard_url}}">Open ops dashboard</a></p>`),
 		},
 		notificationEmailLocaleChinese: {
-			Subject: "[运维告警][{{severity}}] {{rule_name}}",
-			HTML: notificationEmailCard("#ea580c", "运维告警", `
-<p><strong>规则</strong>：{{rule_name}}</p>
+			Subject: "[{{site_name}}][{{severity}}][{{alert_status_label}}] {{rule_name}}",
+			HTML: notificationEmailCard("#ea580c", "{{alert_status_label}}：{{rule_name}}", `
 <p><strong>严重级别</strong>：{{severity}}</p>
-<p><strong>状态</strong>：{{alert_status}}</p>
+<p><strong>当前状态</strong>：{{alert_status_label}}</p>
 <p><strong>指标</strong>：{{metric_type}} {{operator}} {{metric_value}}（阈值 {{threshold_value}}）</p>
 <p><strong>触发时间</strong>：{{triggered_at}}</p>
-<p><strong>说明</strong>：{{alert_description}}</p>`),
+<p><strong>恢复时间</strong>：{{resolved_at}}</p>
+<p><strong>说明</strong>：{{alert_description}}</p>
+<p><a class="button" href="{{dashboard_url}}">打开运维面板</a></p>`),
 		},
 	},
 	NotificationEmailEventOpsScheduledReport: {

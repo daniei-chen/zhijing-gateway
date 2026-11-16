@@ -12,6 +12,7 @@ import (
 	"sync"
 	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -473,6 +474,83 @@ func TestNotificationEmailSendRespectsLegacyDeliveryKey(t *testing.T) {
 	require.NoError(t, repo.Set(ctx, legacyKey, "sent"))
 
 	require.NoError(t, svc.Send(ctx, input))
+}
+
+func TestNotificationEmailOutcomeDistinguishesDuplicateFromDelivery(t *testing.T) {
+	ctx := context.Background()
+	repo := newNotificationEmailMemorySettingRepo()
+	svc := NewNotificationEmailService(repo, nil)
+	input := NotificationEmailSendInput{
+		Event:          NotificationEmailEventOpsAlert,
+		Locale:         "zh",
+		RecipientEmail: "ops@example.com",
+		SourceType:     "ops_alert",
+		SourceID:       "42",
+		Variables: map[string]string{
+			"rule_name":          "上游流式错误",
+			"severity":           "P1",
+			"alert_status":       "resolved",
+			"alert_status_label": "已恢复",
+			"metric_type":        "upstream_error_rate",
+			"operator":           ">=",
+			"metric_value":       "7.50",
+			"threshold_value":    "5.00",
+			"triggered_at":       "2026-11-16T08:00:00Z",
+			"resolved_at":        "2026-11-16T08:05:00Z",
+			"alert_description":  "上游错误率恢复",
+			"dashboard_url":      "https://example.com/admin/ops",
+		},
+	}
+
+	key := notificationEmailDeliveryKey(input.Event, input.SourceType, input.SourceID, input.RecipientEmail, input.ReminderKey)
+	require.NoError(t, repo.Set(ctx, key, "sent"))
+
+	outcome, err := svc.SendWithOutcome(ctx, input)
+	require.NoError(t, err)
+	require.False(t, outcome.Sent)
+	require.True(t, outcome.Suppressed)
+}
+
+func TestOpsAlertRecoveryEmailIsSentOnceAndUsesChineseStatus(t *testing.T) {
+	ctx := context.Background()
+	repo := newNotificationEmailMemorySettingRepo()
+	smtpServer := startNotificationEmailTestSMTPServer(t)
+	require.NoError(t, repo.SetMultiple(ctx, smtpServer.settings()))
+	require.NoError(t, repo.Set(ctx, SettingKeyOpsEmailNotificationConfig, `{
+		"alert":{"enabled":true,"recipients":["ops@example.com"],"min_severity":"info","rate_limit_per_hour":0,"batching_window_seconds":0,"include_resolved_alerts":true},
+		"report":{"enabled":false,"recipients":[]}
+	}`))
+
+	emailSvc := NewEmailService(repo, nil)
+	NewNotificationEmailService(repo, emailSvc)
+	svc := &OpsAlertEvaluatorService{
+		opsService:   &OpsService{settingRepo: repo},
+		emailService: emailSvc,
+		emailLimiter: newSlidingWindowLimiter(0, time.Hour),
+	}
+	firedAt := time.Now().UTC().Add(-5 * time.Minute)
+	resolvedAt := time.Now().UTC()
+	rule := &OpsAlertRule{ID: 1, Name: "上游流式错误", Severity: "P1", NotifyEmail: true}
+	event := &OpsAlertEvent{
+		ID:         42,
+		RuleID:     rule.ID,
+		Severity:   rule.Severity,
+		Status:     OpsAlertStatusResolved,
+		Title:      "P1: 上游流式错误",
+		FiredAt:    firedAt,
+		ResolvedAt: &resolvedAt,
+		EmailSent:  true,
+	}
+
+	require.True(t, svc.maybeSendAlertEmail(ctx, nil, rule, event))
+	require.Equal(t, int64(1), smtpServer.messageCount())
+	body := smtpServer.lastMessageBody(t)
+	require.Contains(t, body, "已恢复")
+	require.Contains(t, body, "上游流式错误")
+
+	// A retry of the same recovery event must not send a second message.
+	require.False(t, svc.maybeSendAlertEmail(ctx, nil, rule, event))
+	require.Equal(t, int64(1), smtpServer.messageCount())
 }
 
 type notificationEmailMemorySettingRepo struct {

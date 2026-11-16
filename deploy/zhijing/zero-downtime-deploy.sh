@@ -68,7 +68,11 @@ test -n "$data_source" || die "current container has no /app/data mount"
 mapfile -t networks < <(docker inspect -f '{{range $name, $network := .NetworkSettings.Networks}}{{println $name}}{{end}}' "$CURRENT_CONTAINER" | awk 'NF')
 test "${#networks[@]}" -gt 0 || die "current container has no Docker network"
 
-docker pull "$IMAGE"
+if docker image inspect "$IMAGE" >/dev/null 2>&1; then
+  printf 'image: using verified local image %s\n' "$IMAGE"
+else
+  docker pull "$IMAGE"
+fi
 docker rm -f "$NEW_CONTAINER" >/dev/null 2>&1 || true
 
 run_args=(
@@ -105,6 +109,21 @@ while (( SECONDS < deadline )); do
 done
 [[ "$ready" == true ]] || die "candidate did not become ready within ${HEALTH_TIMEOUT_SECONDS}s"
 
+candidate_state=$(docker inspect -f '{{.State.Status}} {{.RestartCount}} {{.State.OOMKilled}}' "$NEW_CONTAINER")
+case "$candidate_state" in
+  "running 0 false") ;;
+  *) die "candidate state is unsafe (${candidate_state}); refusing to switch traffic" ;;
+esac
+
+if [[ "${CHECK_CANDIDATE_LOGS:-1}" == "1" ]]; then
+  candidate_fatal_logs=$(docker logs "$NEW_CONTAINER" 2>&1 | grep -E \
+    '(^|[[:space:]])(panic:|fatal error:|FATAL|PANIC)|\tpanic:' || true)
+  if [[ -n "$candidate_fatal_logs" ]]; then
+    printf 'ERROR: candidate logged fatal startup errors:\n%s\n' "$candidate_fatal_logs" >&2
+    die "candidate startup logs contain panic/fatal errors; refusing to switch traffic"
+  fi
+fi
+
 # 业务就绪（2026-11-15）：/readyz 只证明 database/Redis 可用，不证明账号池已构建。
 # 2026-11-14 19:10 就是这样：探针全绿、账号 active，但 API Key 指向已删除的分组，
 # 调度池为空，用户请求全部 503。v0.1.12 起 /readyz?deep=1 会回答这个问题。
@@ -119,6 +138,14 @@ if [[ "$DEEP_READY_CHECK" == "1" ]]; then
   else
     die "candidate has no schedulable account (readyz?deep=1 rejected); not switching traffic"
   fi
+fi
+
+if [[ "${CHECK_CANDIDATE_FRONTEND:-1}" == "1" ]]; then
+  candidate_login=$(curl --fail --silent --show-error --max-time 10 \
+    "http://127.0.0.1:${NEW_PORT}/login" || true)
+  [[ "$candidate_login" == *'<div id="app"></div>'* ]] || \
+    die "candidate frontend /login is missing or incomplete; refusing to switch traffic"
+  printf 'candidate: embedded frontend smoke ok\n'
 fi
 
 old_port=$(nginx -T 2>/dev/null | awk '
@@ -153,6 +180,7 @@ chown --reference="$NGINX_SITE" "$tmp_site"
 chmod --reference="$NGINX_SITE" "$tmp_site"
 mv "$tmp_site" "$NGINX_SITE"
 
+switch_ts=$(date -u +"%Y-%m-%d %H:%M:%S.%6N+00")
 nginx -t
 systemctl reload nginx
 
@@ -163,52 +191,73 @@ for _ in 1 2 3 4 5; do
     "https://${PUBLIC_HOST}/readyz" >/dev/null
 done
 
-# ── 切换后业务观察窗口（2026-11-14 新增）──────────────────────────────
-# v0.1.7 的教训：/readyz 只证明 database/Redis 可用，**不证明账号池已构建**。
-# 那次发布 smoke check 全过、脚本报 release_ready 退出，随后 6 分钟内产生 27 个 5xx
-# （no available OpenAI accounts ... pool=0），只能靠人工发现再回滚。
-# 这里在切换后统计 ops_error_logs 的新增 5xx，超过阈值就恢复切换前的 Nginx 快照。
-# 全环境变量可关：OBSERVE_SECONDS=0。
+# ── 切换后业务观察窗口 ───────────────────────────────────────────────
+# /readyz 只证明依赖可用，不证明业务成功。v0.1.7 曾出现探针全绿、切换后
+# 6 分钟内 27 个 5xx；流式请求还可能 HTTP 200 但上游 5xx。这里同时观察：
+#   1. HTTP 5xx
+#   2. 非 provider 归属的 5xx（部署/网关自身故障）
+#   3. 已返回 200 但流内上游 5xx
+# 任一项越界或查询失败，立即恢复 Nginx 并保留候选容器供检查。
 PG_CONTAINER="${PG_CONTAINER:-zhijing-sub2api-japan-postgres-1}"
 PG_USER="${PG_USER:-zhijing_trial}"
 PG_DB="${PG_DB:-zhijing_trial}"
 OBSERVE_SECONDS="${OBSERVE_SECONDS:-180}"
+OBSERVE_STEP_SECONDS="${OBSERVE_STEP_SECONDS:-15}"
 MAX_NEW_5XX="${MAX_NEW_5XX:-10}"
+MAX_NEW_PLATFORM_5XX="${MAX_NEW_PLATFORM_5XX:-0}"
+MAX_NEW_STREAM_5XX="${MAX_NEW_STREAM_5XX:-30}"
 
-count_5xx_since() {
+count_release_failures_since() {
   docker exec "$PG_CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -Atc \
-    "select count(*) from ops_error_logs where created_at >= timestamptz '$1' and status_code >= 500" \
+    "select count(*) filter (where status_code >= 500)
+          || '|' || count(*) filter (where status_code >= 500 and coalesce(error_owner, '') <> 'provider')
+          || '|' || count(*) filter (where status_code < 500 and upstream_status_code >= 500)
+     from ops_error_logs where created_at >= timestamptz '$1'" \
     2>/dev/null | tr -d '[:space:]'
 }
 
-if [ "$OBSERVE_SECONDS" -gt 0 ] && docker inspect "$PG_CONTAINER" >/dev/null 2>&1; then
-  switch_ts=$(date -u +"%Y-%m-%d %H:%M:%S+00")
-  baseline=$(count_5xx_since "$switch_ts")
-  if [ -z "$baseline" ]; then
-    printf 'observe: skipped (cannot query ops_error_logs), verify manually\n'
-  else
-    printf 'observe: watching %ss for new 5xx (baseline=%s max=%s)\n' \
-      "$OBSERVE_SECONDS" "$baseline" "$MAX_NEW_5XX"
-    sleep "$OBSERVE_SECONDS"
-    after=$(count_5xx_since "$switch_ts")
-    if [ -z "$after" ]; then
-      printf 'observe: query failed after window; verify manually\n'
-    else
-      new_5xx=$((after - baseline))
-      if [ "$new_5xx" -gt "$MAX_NEW_5XX" ]; then
+if [ "$OBSERVE_SECONDS" -gt 0 ]; then
+  docker inspect "$PG_CONTAINER" >/dev/null 2>&1 || die "observe database container unavailable; cannot verify release safely"
+  printf 'observe: watching %ss in %ss intervals (max total=%s platform=%s stream=%s)\n' \
+    "$OBSERVE_SECONDS" "$OBSERVE_STEP_SECONDS" "$MAX_NEW_5XX" "$MAX_NEW_PLATFORM_5XX" "$MAX_NEW_STREAM_5XX"
+  elapsed=0
+  while (( elapsed < OBSERVE_SECONDS )); do
+    sleep_for=$OBSERVE_STEP_SECONDS
+    if (( elapsed + sleep_for > OBSERVE_SECONDS )); then
+      sleep_for=$((OBSERVE_SECONDS - elapsed))
+    fi
+    sleep "$sleep_for"
+    elapsed=$((elapsed + sleep_for))
+
+    counts=$(count_release_failures_since "$switch_ts") || die "cannot query release health metrics"
+    [[ "$counts" =~ ^[0-9]+\|[0-9]+\|[0-9]+$ ]] || die "invalid release health metrics: $counts"
+    IFS='|' read -r total_5xx platform_5xx stream_5xx <<< "$counts"
+    printf 'observe: elapsed=%ss total_5xx=%s platform_5xx=%s stream_5xx=%s\n' \
+      "$elapsed" "$total_5xx" "$platform_5xx" "$stream_5xx"
+    if (( total_5xx > MAX_NEW_5XX || platform_5xx > MAX_NEW_PLATFORM_5XX || stream_5xx > MAX_NEW_STREAM_5XX )); then
+      cp --preserve=mode,ownership,timestamps "$nginx_backup" "$NGINX_SITE"
+      nginx -t && systemctl reload nginx || true
+      trap - ERR
+      printf 'ROLLED BACK: release health exceeded limits within %ss; upstream restored to port %s\n' \
+        "$elapsed" "$old_port"
+      printf 'candidate kept for inspection: %s (port %s)\n' "$NEW_CONTAINER" "$NEW_PORT"
+      exit 1
+    fi
+    candidate_state=$(docker inspect -f '{{.State.Status}} {{.RestartCount}} {{.State.OOMKilled}}' "$NEW_CONTAINER")
+    case "$candidate_state" in
+      "running 0 false") ;;
+      *)
         cp --preserve=mode,ownership,timestamps "$nginx_backup" "$NGINX_SITE"
         nginx -t && systemctl reload nginx || true
         trap - ERR
-        printf 'ROLLED BACK: %s new 5xx within %ss (limit %s); upstream restored to port %s\n' \
-          "$new_5xx" "$OBSERVE_SECONDS" "$MAX_NEW_5XX" "$old_port"
-        printf 'candidate kept for inspection: %s (port %s)\n' "$NEW_CONTAINER" "$NEW_PORT"
+        printf 'ROLLED BACK: candidate state became unsafe (%s); upstream restored to port %s\n' \
+          "$candidate_state" "$old_port"
         exit 1
-      fi
-      printf 'observe: %s new 5xx within %ss, within limit\n' "$new_5xx" "$OBSERVE_SECONDS"
-    fi
-  fi
+        ;;
+    esac
+  done
 else
-  printf 'observe: disabled or postgres container unavailable; verify manually\n'
+  printf 'observe: WARNING disabled by OBSERVE_SECONDS=0; release must be verified manually\n'
 fi
 
 trap - ERR

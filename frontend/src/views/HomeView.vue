@@ -4,12 +4,15 @@
     <!-- iframe mode -->
     <iframe
       v-if="isHomeContentUrl"
-      :src="homeContent.trim()"
+      :src="homeContentUrl"
       class="h-screen w-full border-0"
+      sandbox="allow-forms allow-popups allow-popups-to-escape-sandbox allow-scripts"
+      referrerpolicy="no-referrer"
+      loading="lazy"
       allowfullscreen
     ></iframe>
-    <!-- HTML mode - SECURITY: homeContent is admin-only setting, XSS risk is acceptable -->
-    <div v-else v-html="homeContent"></div>
+    <!-- HTML mode: sanitize even though this setting is admin-owned. -->
+    <div v-else v-html="sanitizedHomeContent"></div>
   </div>
 
   <!-- Compact Home Page -->
@@ -500,6 +503,7 @@ import { useAuthStore, useAppStore } from '@/stores'
 import LocaleSwitcher from '@/components/common/LocaleSwitcher.vue'
 import Icon from '@/components/icons/Icon.vue'
 import { sanitizeUrl } from '@/utils/url'
+import { sanitizeHomeContent } from '@/utils/sanitize'
 import { FeatureFlags, isFeatureFlagEnabled } from '@/utils/featureFlags'
 
 const { t } = useI18n()
@@ -517,11 +521,14 @@ const hasHomeContent = computed(() => homeContent.value.trim().length > 0)
 const compactHomeEnabled = computed(() => appStore.cachedPublicSettings?.compact_home_enabled === true)
 const modelPlazaEnabled = computed(() => isFeatureFlagEnabled(FeatureFlags.modelPlaza))
 
-// Check if homeContent is a URL (for iframe display)
-const isHomeContentUrl = computed(() => {
+// Only an absolute, protocol-safe URL is promoted to iframe mode.
+const homeContentUrl = computed(() => {
   const content = homeContent.value.trim()
-  return content.startsWith('http://') || content.startsWith('https://')
+  if (!/^https?:\/\//i.test(content)) return ''
+  return sanitizeUrl(content)
 })
+const isHomeContentUrl = computed(() => homeContentUrl.value.length > 0)
+const sanitizedHomeContent = computed(() => sanitizeHomeContent(homeContent.value))
 
 // Theme
 const isDark = ref(document.documentElement.classList.contains('dark'))

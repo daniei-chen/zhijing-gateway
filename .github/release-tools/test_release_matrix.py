@@ -60,7 +60,7 @@ class ReleaseMatrixTest(unittest.TestCase):
     def test_leaf_keeps_packaging_and_selects_only_one_target(self):
         original = release.config()
         release.generate_config(argparse.Namespace(mode='build', simple=False, goos='darwin', goarch='arm64', output='leaf.yaml'))
-        leaf = yaml.safe_load(Path('leaf.yaml').read_text())
+        leaf = yaml.safe_load(Path('leaf.yaml').read_text(encoding='utf-8'))
         self.assertEqual(leaf['builds'][0]['goos'], ['darwin'])
         self.assertEqual(leaf['builds'][0]['goarch'], ['arm64'])
         self.assertEqual(leaf['builds'][0]['ignore'], [])
@@ -74,7 +74,7 @@ class ReleaseMatrixTest(unittest.TestCase):
             with self.subTest(simple=simple):
                 original = release.config(simple)
                 release.generate_config(argparse.Namespace(mode='publish', simple=simple, output='publisher.yaml'))
-                data = yaml.safe_load(Path('publisher.yaml').read_text())
+                data = yaml.safe_load(Path('publisher.yaml').read_text(encoding='utf-8'))
                 self.assertTrue(data['builds'][0]['skip'])
                 self.assertFalse(data['archives'])
                 self.assertFalse(data['dockers'])
@@ -119,7 +119,8 @@ class ReleaseMatrixTest(unittest.TestCase):
         for arch in ('amd64', 'arm64'):
             binary = Path('contexts') / arch / 'zhijing-gateway'
             self.assertEqual(binary.read_bytes(), b'fixture')
-            self.assertEqual(binary.stat().st_mode & 0o777, 0o755)
+            if os.name != 'nt':
+                self.assertEqual(binary.stat().st_mode & 0o777, 0o755)
 
     def test_plan_requires_a_tag_for_publication(self):
         args = argparse.Namespace(ref='main', dry_run=False, simple=False)

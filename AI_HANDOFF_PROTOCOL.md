@@ -15,22 +15,23 @@ sub2api 仍可能出现在数据库名、SUB2API_* 环境变量、旧协议标�
 
 ## 2. 当前已验证生产状态
 
-截至 2026-11-16 07:58（北京时间），生产版本是 **v0.1.22**：
+截至 2026-11-16 19:20（北京时间），生产版本是 **v0.1.23**：
 
-- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.22（「智境网关 0.1.22」）
-- 源码提交：`fb1ac9291`
-- 镜像：`ghcr.io/daniei-chen/zhijing-gateway:0.1.22`。**注意：GHCR 包是私有的，生产机没有
-  容器仓库凭据，所以这一个是用同一 commit 在生产机上 `docker build` 出来的**（Dockerfile
-  本轮刚修好，见 6.95）；镜像 label 里 version/revision 与实际一致。GHCR 那份由 CI 构建，
-  内容同源，将来把包改成 public 或配好凭据后可以直接 `docker pull` 替换。
-- 当前容器：`zhijing-api-v0122-final`，loopback 端口 **18816**
-- 回滚容器：18815（v0.1.20）、18814（v0.1.19）、18813（v0.1.17）。18812–18806 这 7 个
-  已停掉的端口在 2026-11-16 从 nginx peers 里清掉（`prune-peers.py 18816 18815 18814 18813`）。
-- **v0.1.22 切换证据**：`candidate: business readiness ok (deep probe)` →
-  `observe: 0 new 5xx within 180s, within limit`；容器 restart=0、OOMKilled=false、
-  启动日志 0 条 panic/fatal/error；公网 `/readyz` 200（约 40ms）。
-- **v0.1.22 行为变化**：告警邮件的四个静默早退分支现在记节流日志，并把
-  `email_skips_total=N(last=原因)` 追加到 `ops_job_heartbeats.last_result`。详见 6.95。
+- Release：https://github.com/daniei-chen/zhijing-gateway/releases/tag/v0.1.23（「智境网关 0.1.23」）
+- 运行源码提交：`b252df851`；镜像：`ghcr.io/daniei-chen/zhijing-gateway:0.1.23`
+  （生产机本地构建，version/revision label 与实际运行提交一致）。
+- 当前容器：`zhijing-api-v0123-final`，loopback 端口 **18817**
+- 回滚容器：18816（v0.1.22）、18815（v0.1.20）、18814（v0.1.19）、18813（v0.1.17）。
+- **v0.1.23 切换证据**：`candidate: business readiness ok (deep probe)` →
+  180 秒观察内 `total_5xx=0 platform_5xx=0 stream_5xx=0`；容器 restart=0、
+  OOMKilled=false；公网 `/readyz` 200，工作台 `/login` 200。
+- **v0.1.23 行为变化**：告警恢复邮件、SMTP 实际送达语义、中文标准模板；
+  管理员首页 HTML 白名单清洗；发布门禁覆盖候选日志、前端入口与流内上游失败。
+  工作台静态资源已更新到 `/app-assets/assets/index-eL3ZRLqE.js`，官网首页未替换。
+  告警配置已启用“包含恢复告警”，备份在
+  `/root/ops-email-notification-config.before-v0123.json`。
+- **仍待处理**：应用数据库没有 `smtp_password`，本应用 SMTP 告警无法认证；用户收到的
+  日常消息来自另一条外部渠道，需确认渠道后才能对其格式做精确适配。
 
 ### 2.1 这一夜（00:30–02:20）发布的四个版本
 
