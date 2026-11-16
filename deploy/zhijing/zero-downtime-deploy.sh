@@ -68,7 +68,11 @@ test -n "$data_source" || die "current container has no /app/data mount"
 mapfile -t networks < <(docker inspect -f '{{range $name, $network := .NetworkSettings.Networks}}{{println $name}}{{end}}' "$CURRENT_CONTAINER" | awk 'NF')
 test "${#networks[@]}" -gt 0 || die "current container has no Docker network"
 
-docker pull "$IMAGE"
+if docker image inspect "$IMAGE" >/dev/null 2>&1; then
+  printf 'image: using verified local image %s\n' "$IMAGE"
+else
+  docker pull "$IMAGE"
+fi
 docker rm -f "$NEW_CONTAINER" >/dev/null 2>&1 || true
 
 run_args=(
