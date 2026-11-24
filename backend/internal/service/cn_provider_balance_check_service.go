@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log"
 	"strings"
@@ -9,6 +10,16 @@ import (
 	"time"
 
 	"github.com/daniei-chen/zhijing-gateway/internal/config"
+	"github.com/google/uuid"
+)
+
+// cnProviderBalanceCheckLeaderLockKey 让周期探测在多实例下只跑一份。
+// 这个任务每个周期都会对每个可探测账号打一次上游，7 个实例同时跑就是 7 倍请求，
+// 既浪费上游配额，也会让账号的 extra 快照被并发覆盖。
+const (
+	cnProviderBalanceCheckLeaderLockKey = "cn:provider:balance:check:leader"
+	// TTL 取 5 分钟：一轮探测有 120s 的整体预算，留出余量保证锁不会中途过期。
+	cnProviderBalanceCheckLeaderLockTTL = 5 * time.Minute
 )
 
 // cnQuotaProber 抽象额度探测（*CNProviderQuotaService 实现，测试可替换）。
@@ -35,6 +46,9 @@ type CNProviderBalanceCheckService struct {
 	quotaService   cnQuotaProber
 	cfg            *config.Config
 	interval       time.Duration
+	lockCache      LeaderLockCache
+	db             *sql.DB
+	instanceID     string
 	stopCh         chan struct{}
 	stopOnce       sync.Once
 	wg             sync.WaitGroup
@@ -55,8 +69,19 @@ func NewCNProviderBalanceCheckService(
 		quotaService:   quotaService,
 		cfg:            cfg,
 		interval:       interval,
+		instanceID:     uuid.NewString(),
 		stopCh:         make(chan struct{}),
 	}
+}
+
+// SetLeaderLock 注入跨实例互斥所需的缓存与数据库。两者都为空时（单实例部署或
+// 单元测试）tryAcquireSingletonLeaderLock 会直接放行，不改变原有行为。
+func (s *CNProviderBalanceCheckService) SetLeaderLock(lockCache LeaderLockCache, db *sql.DB) {
+	if s == nil {
+		return
+	}
+	s.lockCache = lockCache
+	s.db = db
 }
 
 func (s *CNProviderBalanceCheckService) Start() {
@@ -99,6 +124,17 @@ func (s *CNProviderBalanceCheckService) Stop() {
 }
 
 func (s *CNProviderBalanceCheckService) runOnce() {
+	// Multi-instance guard：只有抢到锁的实例真正去探测上游。没抢到的跳过本轮，
+	// 下一轮重新竞争，所以领导权每个周期都会重新分配，不会钉死在一个实例上。
+	// 这层保护和 processrole.APIOnly() 是互补的：APIOnly 依赖部署方记得设环境变量，
+	// 而这里不依赖任何外部配置。
+	release, ok := tryAcquireSingletonLeaderLock(context.Background(), s.lockCache, s.db,
+		cnProviderBalanceCheckLeaderLockKey, s.instanceID, cnProviderBalanceCheckLeaderLockTTL)
+	if !ok {
+		return
+	}
+	defer release()
+
 	// 收集 coding 探测目标（kimi/deepseek + 智谱）与 payg 检查队列。
 	// coding 探测统一在收集完成后按 4 并发执行：单账号探测 15-20s，串行 ×
 	// 多账号会耗尽整体预算（120s 上限），排在后面的账号快照会饥饿，
