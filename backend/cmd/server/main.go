@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
@@ -184,7 +185,7 @@ func runMainServer() {
 
 	log.Println("Shutting down server...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), shutdownTimeout())
 	defer cancel()
 
 	if err := app.Server.Shutdown(ctx); err != nil {
@@ -192,4 +193,33 @@ func runMainServer() {
 	}
 
 	log.Println("Server exited")
+}
+
+// defaultShutdownTimeout 略小于 Docker 默认的 10 秒停止超时。
+// http.Server.Shutdown 超时后会强制断开仍在进行的响应，而推理流量是流式的，
+// 一次回答动辄十几秒；把窗口留在 10 秒以内，是为了拿到「优雅退出」而不是
+// 在 10 秒整被 SIGKILL 掐断。需要更长的排空时间时，同步把容器/编排的
+// stop grace period 调大，再用 SHUTDOWN_TIMEOUT_SECONDS 指定。
+const defaultShutdownTimeout = 8 * time.Second
+
+// maxShutdownTimeout 是对配置的上限保护：停止超时配得太离谱会让一次
+// 发布卡住不动，运维只会看到「服务停不下来」。
+const maxShutdownTimeout = 600 * time.Second
+
+// shutdownTimeout 解析 SHUTDOWN_TIMEOUT_SECONDS。取值非法或越界时回落到默认值，
+// 不因为一个写错的变量让进程停不下来。
+func shutdownTimeout() time.Duration {
+	raw := strings.TrimSpace(os.Getenv("SHUTDOWN_TIMEOUT_SECONDS"))
+	if raw == "" {
+		return defaultShutdownTimeout
+	}
+	seconds, err := strconv.Atoi(raw)
+	if err != nil || seconds <= 0 {
+		return defaultShutdownTimeout
+	}
+	timeout := time.Duration(seconds) * time.Second
+	if timeout > maxShutdownTimeout {
+		return maxShutdownTimeout
+	}
+	return timeout
 }

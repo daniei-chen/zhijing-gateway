@@ -15,6 +15,9 @@ PIDS_LIMIT="${PIDS_LIMIT:-256}"
 # （v0.1.4/v0.1.5 实测 CpuQuota/CpuPeriod/NanoCpus 全为 0）。这里显式带上，
 # 让候选实例与 compose 声明一致；--cpus 与 NanoCpus 等价，会同时设置 quota/period。
 CPU_LIMIT="${CPU_LIMIT:-1.5}"
+# docker stop 等实例自行退出的秒数。应用中 SHUTDOWN_TIMEOUT_SECONDS 必须比它小，
+# 否则还在排空的实例会先被 SIGKILL 掐掉，那段排空等于没做。
+STOP_TIMEOUT_SECONDS="${STOP_TIMEOUT_SECONDS:-10}"
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
 
@@ -79,6 +82,7 @@ run_args=(
   --detach
   --name "$NEW_CONTAINER"
   --restart unless-stopped
+  --stop-timeout "$STOP_TIMEOUT_SECONDS"
   --env-file "$env_file"
   --publish "127.0.0.1:${NEW_PORT}:8080"
   --mount "type=${data_type},src=${data_source},dst=/app/data"
