@@ -52,6 +52,17 @@ die() {
     exit 1
 }
 
+# stat 在 macOS 是 BSD 版本（-f），在 Linux 是 GNU 版本（-c）。这个脚本本身只服务
+# macOS 的 Apple Container，但它的测试要在 Linux 的 CI runner 上跑（没有 macOS
+# runner 排得上队），所以两种写法都认。
+file_owner() {
+    stat -f '%u' "$1" 2>/dev/null || stat -c '%u' "$1"
+}
+
+file_mode() {
+    stat -f '%Lp' "$1" 2>/dev/null || stat -c '%a' "$1"
+}
+
 usage() {
     cat <<'EOF'
 Usage: ./apple-container.sh <command> [options]
@@ -402,8 +413,8 @@ validate_env_file_security() {
     local owner mode permissions
 
     [[ -f "${ENV_FILE}" ]] || die "Environment file not found: ${ENV_FILE}. Run '$0 init' first."
-    owner="$(stat -f '%u' "${ENV_FILE}")" || die "Unable to read owner for ${ENV_FILE}."
-    mode="$(stat -f '%Lp' "${ENV_FILE}")" || die "Unable to read permissions for ${ENV_FILE}."
+    owner="$(file_owner "${ENV_FILE}")" || die "Unable to read owner for ${ENV_FILE}."
+    mode="$(file_mode "${ENV_FILE}")" || die "Unable to read permissions for ${ENV_FILE}."
     [[ "${owner}" == "${EUID}" ]] || die "Environment file must be owned by the current user: ${ENV_FILE}"
     [[ "${mode}" =~ ^[0-7]+$ ]] || die "Unable to parse permissions for ${ENV_FILE}: ${mode}"
     permissions=$((8#${mode}))

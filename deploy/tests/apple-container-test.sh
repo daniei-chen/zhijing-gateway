@@ -33,8 +33,14 @@ export SUB2API_ENV_FILE="${ENV_FILE}"
 
 mkdir -p "${STATE_DIR}"
 
+# stat 在 macOS 是 BSD 版本（-f），在 Linux 是 GNU 版本（-c）。这个测试跑在
+# Linux 的 CI runner 上，两种都要认。
+mode_of() {
+    stat -f '%Lp' "$1" 2>/dev/null || stat -c '%a' "$1"
+}
+
 "${SCRIPT}" init
-[[ "$(stat -f '%Lp' "${ENV_FILE}")" == "600" ]] || fail "init did not create a mode-600 env file"
+[[ "$(mode_of "${ENV_FILE}")" == "600" ]] || fail "init did not create a mode-600 env file"
 grep -q '^POSTGRES_PASSWORD=change_this_secure_password$' "${ENV_FILE}" && fail "init retained the placeholder password"
 
 chmod 644 "${ENV_FILE}"
