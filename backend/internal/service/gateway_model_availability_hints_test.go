@@ -25,7 +25,7 @@ func TestRecordAvailableModels_DedupesAndSorts(t *testing.T) {
 		"gpt-6.1-sol": "gpt-6.1-sol",
 	}), PlatformOpenAI)
 	recordAvailableModels(&diag, modelHintAccount(PlatformOpenAI, map[string]string{
-		"Gpt-6.2-sol": "gpt-6.2-sol", // 大小写重复项
+		"Gpt-6.2-sol":       "gpt-6.2-sol", // 大小写重复项
 		"codex-auto-review": "codex-auto-review",
 	}), PlatformOpenAI)
 
