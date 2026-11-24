@@ -35,3 +35,20 @@ sudo ./zhijing-canary-switch.sh rollback    # stable 100%，canary 转 backup
 同时去掉了注释里写死的版本号（`# canary 0.1.25`、`# stable 0.1.24`）——
 端口上跑的版本会被换掉，注释不跟着改就是在配置里留假信息。现在只标角色，
 真实版本用 `docker ps` 或 `/readyz` 确认。
+
+## 从一个能 ssh 的机器发布
+
+`release-to-host.sh` 把「打包 → 上传 → 构建 → 发布 → 初验」串成一条命令：
+
+```bash
+HOST=root@154.36.187.147 ./release-to-host.sh 0.1.28 132342b
+```
+
+它会先用 `git archive` 按 commit 打包（不是 tar 工作区，避免把没提交的改动带上线），
+再在主机上构建镜像、调用 `zero-downtime-deploy.sh`，最后读一次 `/readyz` 和新容器状态。
+
+`STOP_TIMEOUT_SECONDS` 默认 35，**必须大于应用的 `SHUTDOWN_TIMEOUT_SECONDS`**，
+否则还在排空的实例会先被 SIGKILL（v0.1.28 起才有这两个变量）。
+
+脚本只做机械步骤，**长流排空那一步要人工看**：起一条流，在第 5 秒
+`docker stop` 旧实例，流必须继续到 `[DONE]`。这是「发布不打断在途调用」的唯一硬证据。
