@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"sort"
 	"strings"
 
 	"github.com/daniei-chen/zhijing-gateway/internal/config"
@@ -24,6 +25,61 @@ type ModelAvailabilityDiagnosis struct {
 	// HasRetiredSubscriptionModel records a ChatGPT upstream blocked by model
 	// retirement, so an unsupported request can include migration guidance.
 	HasRetiredSubscriptionModel bool
+	// AvailableModels lists the models the candidate accounts declare in their
+	// model_mapping. It is only populated while HasModelSupport is still false,
+	// and exists so a 404 model_not_found response can name what the group
+	// actually serves instead of leaving the caller to guess.
+	AvailableModels []string
+}
+
+// maxModelAvailabilityHints caps how many model names a model_not_found
+// response advertises. The hint has to stay readable, and a client typo must
+// not turn into a multi-kilobyte error body.
+const maxModelAvailabilityHints = 8
+
+// recordAvailableModels collects the model names an account declares in its
+// model_mapping so a model_not_found response can tell the caller what the
+// group serves. Accounts pulled in through mixed scheduling only contribute
+// the models that belong to the listing platform, mirroring the rule used by
+// the model list endpoint.
+func recordAvailableModels(diag *ModelAvailabilityDiagnosis, account *Account, platform string) {
+	if diag == nil || account == nil {
+		return
+	}
+	for model := range account.GetModelMapping() {
+		if platform != "" && account.Platform != platform && !mixedListingModelAllowed(platform, model) {
+			continue
+		}
+		diag.AvailableModels = append(diag.AvailableModels, model)
+	}
+}
+
+// finalizeAvailableModels dedupes, sorts and truncates the advertised catalog.
+// Accounts with an empty model_mapping accept every model, so they contribute
+// nothing here and the caller keeps the original message.
+func finalizeAvailableModels(diag *ModelAvailabilityDiagnosis) {
+	if diag == nil || len(diag.AvailableModels) == 0 {
+		return
+	}
+	seen := make(map[string]struct{}, len(diag.AvailableModels))
+	unique := diag.AvailableModels[:0]
+	for _, model := range diag.AvailableModels {
+		model = strings.TrimSpace(model)
+		if model == "" {
+			continue
+		}
+		key := strings.ToLower(model)
+		if _, ok := seen[key]; ok {
+			continue
+		}
+		seen[key] = struct{}{}
+		unique = append(unique, model)
+	}
+	sort.Strings(unique)
+	if len(unique) > maxModelAvailabilityHints {
+		unique = unique[:maxModelAvailabilityHints]
+	}
+	diag.AvailableModels = unique
 }
 
 // ModelAvailabilityDiagnoser is implemented by gateway services that can
@@ -107,8 +163,11 @@ func (s *GatewayService) DiagnoseModelAvailabilityForPlatform(
 		diag.HasAccountsInPool = true
 		if s.isModelSupportedByAccountWithContext(ctx, &accounts[i], requestedModel) {
 			diag.HasModelSupport = true
+			diag.AvailableModels = nil
 			return diag
 		}
+		recordAvailableModels(&diag, &accounts[i], platform)
 	}
+	finalizeAvailableModels(&diag)
 	return diag
 }

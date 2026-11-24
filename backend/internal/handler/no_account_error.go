@@ -126,6 +126,12 @@ func classifyNoAccountError(
 		message := fmt.Sprintf("Model %q is not supported by any configured account in this group", displayModel)
 		if result.HasRetiredSubscriptionModel {
 			message = fmt.Sprintf("Model %q targets GPT-5.5, which retired from Codex with ChatGPT sign-in on October 14, 2026. Select an available replacement such as GPT-6.1 Sol or GPT-6 Luna, or configure an API-key upstream that supports GPT-5.5.", displayModel)
+		} else if hints := formatAvailableModelHints(result.AvailableModels); hints != "" {
+			// Naming the served catalog turns a dead end into an actionable
+			// error: the caller can retry with a model this group actually
+			// routes instead of guessing again (2026-11-20 saw six straight
+			// retries against a name no account serves).
+			message += fmt.Sprintf(". Available models: %s", hints)
 		}
 		return noAccountErrorClassification{
 			Status:        http.StatusNotFound,
@@ -135,6 +141,16 @@ func classifyNoAccountError(
 		}
 	}
 	return fallback
+}
+
+// formatAvailableModelHints renders the diagnosis catalog for a model_not_found
+// message. It returns an empty string when the catalog is unknown, so the
+// response keeps its original wording.
+func formatAvailableModelHints(models []string) string {
+	if len(models) == 0 {
+		return ""
+	}
+	return strings.Join(models, ", ")
 }
 
 // classifyNoAccountErrorFromGin is a thin wrapper that forwards the gin
