@@ -12,6 +12,7 @@ deploy/config.yaml
 backend/.installed
 
 # 其他本地产物和开发目录
+node_modules/
 tests
 !deploy/tests/
 !deploy/tests/**
