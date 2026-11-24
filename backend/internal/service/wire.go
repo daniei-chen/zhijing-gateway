@@ -454,6 +454,21 @@ func ProvideClaudeCodeVersionSyncService(
 	return svc
 }
 
+// ProvideUpstreamModelCatalogSyncService creates and starts UpstreamModelCatalogSyncService.
+// 上游模型目录此前只能靠管理员在账号页手动点「同步上游模型」，没人点就一直陈旧，
+// 新模型上线后网关会按旧目录判定「没有账号支持该模型」并回 404。本服务把这条路
+// 变成周期性自动同步；健康巡检的 model_catalog_ok 从此有对应的自愈路径。
+func ProvideUpstreamModelCatalogSyncService(
+	accountRepo AccountRepository,
+	accountTestService *AccountTestService,
+) *UpstreamModelCatalogSyncService {
+	svc := NewUpstreamModelCatalogSyncService(accountRepo, accountTestService, upstreamModelCatalogSyncInterval)
+	if !processrole.APIOnly() {
+		svc.Start()
+	}
+	return svc
+}
+
 // ProvideProxyExpiryService creates and starts ProxyExpiryService.
 func ProvideProxyExpiryService(proxyRepo ProxyRepository) *ProxyExpiryService {
 	svc := NewProxyExpiryService(proxyRepo, time.Minute)
@@ -1012,6 +1027,7 @@ var ProviderSet = wire.NewSet(
 	ProvideAccountExpiryService,
 	ProvideOpenAICodexVersionSyncService,
 	ProvideClaudeCodeVersionSyncService,
+	ProvideUpstreamModelCatalogSyncService,
 	ProvideProxyExpiryService,
 	ProvideSubscriptionExpiryService,
 	ProvideTimingWheelService,
