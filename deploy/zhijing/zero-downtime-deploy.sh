@@ -226,6 +226,45 @@ for _ in 1 2 3 4 5; do
     "https://${PUBLIC_HOST}/readyz" >/dev/null
 done
 
+# ── 切换后版本自证（2026-11-26 第 28 轮）─────────────────────────────
+# 切流量成功不等于「用户拿到的是新版本」：反代缓存、upstream 里残留的旧实例、
+# 端口写错，都会让 /readyz 全绿而实际仍在跑旧代码。0.1.30 起每个实例都能通过
+# /api/release 自报版本，这里用它做闭环 —— 版本对不上直接回滚，
+# 而不是等用户或几天后的对账来发现。
+EXPECTED_VERSION="${EXPECTED_VERSION:-${IMAGE##*:}}"
+EXPECTED_VERSION="${EXPECTED_VERSION#v}"
+release_tmp=$(mktemp)
+release_code=$(curl -o "$release_tmp" -w '%{http_code}' --silent --max-time 10 \
+  "http://127.0.0.1:${NEW_PORT}/api/release" || true)
+candidate_version=$(sed -n 's/.*"version":"\([^"]*\)".*/\1/p' "$release_tmp" 2>/dev/null || true)
+rm -f "$release_tmp"
+case "${release_code:-000}" in
+  200)
+    [[ -n "$candidate_version" ]] || die "candidate /api/release returned no version field"
+    [[ "$candidate_version" == "$EXPECTED_VERSION" ]] || \
+      die "candidate reports version ${candidate_version}, image tag says ${EXPECTED_VERSION}"
+    printf 'candidate: /api/release reports %s (matches image tag)\n' "$candidate_version"
+    ;;
+  404)
+    printf 'candidate: /api/release unavailable (build older than 0.1.30); skipping self-check\n'
+    ;;
+  *)
+    die "candidate /api/release returned HTTP ${release_code:-000}"
+    ;;
+esac
+
+# 公网入口也必须落到同一个构建：只验本机端口会漏掉
+# 「nginx 切了但 upstream 仍命中旧实例」这类情况。
+public_tmp=$(mktemp)
+public_code=$(curl -o "$public_tmp" -w '%{http_code}' --http1.1 --silent --max-time 10 \
+  --resolve "${PUBLIC_HOST}:443:127.0.0.1" "https://${PUBLIC_HOST}/api/release" || true)
+public_version=$(sed -n 's/.*"version":"\([^"]*\)".*/\1/p' "$public_tmp" 2>/dev/null || true)
+rm -f "$public_tmp"
+if [[ "${public_code:-000}" == "200" && -n "$public_version" && "$public_version" != "$EXPECTED_VERSION" ]]; then
+  die "public /api/release reports ${public_version}, expected ${EXPECTED_VERSION}"
+fi
+printf 'public: /api/release reports %s (http %s)\n' "${public_version:-unknown}" "${public_code:-000}"
+
 # ── 切换后业务观察窗口 ───────────────────────────────────────────────
 # /readyz 只证明依赖可用，不证明业务成功。v0.1.7 曾出现探针全绿、切换后
 # 6 分钟内 27 个 5xx；流式请求还可能 HTTP 200 但上游 5xx。这里同时观察：
