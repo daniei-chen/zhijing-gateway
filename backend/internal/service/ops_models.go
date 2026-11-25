@@ -93,6 +93,8 @@ type OpsErrorLogDetail struct {
 	UpstreamLatencyMs  *int64 `json:"upstream_latency_ms"`
 	ResponseLatencyMs  *int64 `json:"response_latency_ms"`
 	TimeToFirstTokenMs *int64 `json:"time_to_first_token_ms"`
+	// RetryAfterSeconds is what we actually told the client to wait, in seconds.
+	RetryAfterSeconds *int `json:"retry_after_seconds,omitempty"`
 
 	// vNext metric semantics
 	IsBusinessLimited bool `json:"is_business_limited"`

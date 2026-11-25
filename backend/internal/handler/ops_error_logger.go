@@ -1677,6 +1677,8 @@ func applyOpsLatencyFieldsFromContext(c *gin.Context, entry *service.OpsInsertEr
 	entry.UpstreamLatencyMs = getContextLatencyMs(c, service.OpsUpstreamLatencyMsKey)
 	entry.ResponseLatencyMs = getContextLatencyMs(c, service.OpsResponseLatencyMsKey)
 	entry.TimeToFirstTokenMs = getContextLatencyMs(c, service.OpsTimeToFirstTokenMsKey)
+	// 和延迟字段一起取：它同样是「这次拒绝实际发生了什么」的一部分。
+	entry.RetryAfterSeconds = opsRetryAfterSeconds(c)
 }
 
 // applyOpsUpstreamFieldsFromContext captures attempt-level upstream context.

@@ -119,6 +119,10 @@ type OpsInsertErrorLogInput struct {
 	UpstreamLatencyMs  *int64
 	ResponseLatencyMs  *int64
 	TimeToFirstTokenMs *int64
+	// RetryAfterSeconds is the Retry-After value (seconds) that this rejection
+	// actually carried in its response headers. The column has existed all along
+	// but was never written, so「被限流之后客户端被要求等多久」在库里查不到。
+	RetryAfterSeconds *int
 
 	CreatedAt time.Time
 

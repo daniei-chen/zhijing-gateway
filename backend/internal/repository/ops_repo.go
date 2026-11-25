@@ -54,10 +54,11 @@ INSERT INTO ops_error_logs (
   upstream_latency_ms,
   response_latency_ms,
   time_to_first_token_ms,
+  retry_after_seconds,
   created_at,
   api_key_prefix
 ) VALUES (
-  $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38
+  $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39
 )`
 
 func NewOpsRepository(db *sql.DB) service.OpsRepository {
@@ -165,6 +166,7 @@ func opsInsertErrorLogArgs(input *service.OpsInsertErrorLogInput) []any {
 		opsNullInt64(input.UpstreamLatencyMs),
 		opsNullInt64(input.ResponseLatencyMs),
 		opsNullInt64(input.TimeToFirstTokenMs),
+		opsNullInt(input.RetryAfterSeconds),
 		input.CreatedAt,
 		opsNullString(input.APIKeyPrefix),
 	}
@@ -447,6 +449,7 @@ SELECT
   e.upstream_latency_ms,
   e.response_latency_ms,
   e.time_to_first_token_ms,
+  e.retry_after_seconds,
   COALESCE(e.api_key_prefix, ''),
   COALESCE(ak.name, ''),
   ak.deleted_at
@@ -473,6 +476,7 @@ LIMIT 1`
 	var upstreamLatency sql.NullInt64
 	var responseLatency sql.NullInt64
 	var ttft sql.NullInt64
+	var retryAfter sql.NullInt64
 	var requestType sql.NullInt64
 	var detailAPIKeyName string
 	var detailAPIKeyDeletedAt sql.NullTime
@@ -521,6 +525,7 @@ LIMIT 1`
 		&upstreamLatency,
 		&responseLatency,
 		&ttft,
+		&retryAfter,
 		&out.APIKeyPrefix,
 		&detailAPIKeyName,
 		&detailAPIKeyDeletedAt,
@@ -581,6 +586,10 @@ LIMIT 1`
 	if ttft.Valid {
 		v := ttft.Int64
 		out.TimeToFirstTokenMs = &v
+	}
+	if retryAfter.Valid {
+		v := int(retryAfter.Int64)
+		out.RetryAfterSeconds = &v
 	}
 	if requestType.Valid {
 		v := int16(requestType.Int64)
