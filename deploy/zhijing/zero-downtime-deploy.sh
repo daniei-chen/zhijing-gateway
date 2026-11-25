@@ -97,7 +97,6 @@ fi
 docker rm -f "$NEW_CONTAINER" >/dev/null 2>&1 || true
 
 run_args=(
-  --detach
   --name "$NEW_CONTAINER"
   --restart unless-stopped
   --stop-timeout "$STOP_TIMEOUT_SECONDS"
@@ -117,12 +116,22 @@ run_args=(
 if [[ "$use_host_network" == true ]]; then
   run_args+=(--network host)
 fi
-docker run "${run_args[@]}" "$IMAGE" >/dev/null
+docker create "${run_args[@]}" "$IMAGE" >/dev/null
 candidate_started=true
 for network in "${networks[@]}"; do
   builtin_network "$network" && continue
   docker network connect "$network" "$NEW_CONTAINER"
 done
+# 先建容器、把网络接好、再启动（2026-11-26 第 27 轮）。
+#
+# 之前是 `docker run --detach` 之后才 connect 数据库网络：内置 DNS 在
+# 用户自定义网络生效前解析不了 postgres，第一次启动必然报
+# `lookup postgres on 127.0.0.11:53: connection refused` 然后退出，
+# 靠 --restart 兜底重启一次才好。能跑起来，但 RestartCount 变成 1，
+# 后面「state 必须是 running 0 false」的检查就把它判成不安全，整次发布
+# 直接拒绝切流量（0.1.30 第一次部署就是这样失败的）。
+# docker create → connect → start 让第一个进程看到的就是完整网络。
+docker start "$NEW_CONTAINER" >/dev/null
 
 deadline=$((SECONDS + HEALTH_TIMEOUT_SECONDS))
 ready=false
