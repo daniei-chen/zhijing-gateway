@@ -206,19 +206,48 @@ test -n "$old_port" || die "cannot determine current Nginx primary"
 [[ "$old_port" != "$NEW_PORT" ]] || die "candidate port is already the current primary"
 
 cp --preserve=mode,ownership,timestamps "$NGINX_SITE" "$nginx_backup"
+# backup 列表只增不减（2026-11-26 第 30 轮）：每次发布都往 upstream 里加一条 backup，
+# 旧的从不停用，列表就一直变长 —— 清点过 10 条 server 里有 6 条属于一周前的构建。
+# 它们平时不接流量，但主实例一旦失败，nginx 会按顺序去连这些死条目，每次都要等
+# fail_timeout 才轮到下一条。这里在切换的同一次重写里把列表收敛到
+# 「主 + 上一版 + (KEEP_BACKUPS-1) 条」，sibling pipeline 不动。
+KEEP_BACKUPS="${KEEP_BACKUPS:-2}"
+prune_report=$(mktemp "/tmp/zhijing-prune.XXXXXX")
 tmp_site=$(mktemp "/tmp/zhijing-nginx.XXXXXX")
-awk -v new_port="$NEW_PORT" -v old_port="$old_port" '
+awk -v new_port="$NEW_PORT" -v old_port="$old_port" -v keep="$KEEP_BACKUPS" -v report="$prune_report" '
   /# ---- zhijing-peers-begin ----/ {
     print
     print "    server 127.0.0.1:" new_port " weight=100 max_fails=1 fail_timeout=10s; # candidate"
     print "    server 127.0.0.1:" old_port " backup; # rollback"
     inside=1
+    kept=0
     next
   }
   /# ---- zhijing-peers-end ----/ { inside=0; print; next }
-  inside && (index($0, "127.0.0.1:" new_port) || index($0, "127.0.0.1:" old_port)) { next }
+  inside {
+    if (index($0, "127.0.0.1:" new_port)) next
+    if (index($0, "127.0.0.1:" old_port)) next
+    # sibling pipeline 是另一条发布管线，永远不碰
+    if ($0 ~ /sibling pipeline/) { print; next }
+    if ($0 ~ /server 127\.0\.0\.1:/) {
+      if (kept < keep - 1) { print; kept++; next }
+      line=$0
+      sub(/^.*127\.0\.0\.1:/, "", line)
+      sub(/[^0-9].*$/, "", line)
+      dropped = dropped " " line
+      next
+    }
+    print
+    next
+  }
   { print }
+  END { printf "%s\n", dropped > report }
 ' "$NGINX_SITE" >"$tmp_site"
+pruned_ports=$(tr -s ' ' < "$prune_report" | sed 's/^ //; s/ $//')
+rm -f "$prune_report"
+if [[ -n "$pruned_ports" ]]; then
+  printf 'pruned from upstream: %s (containers left running; stop them once you no longer need the rollback)\n' "$pruned_ports"
+fi
 chown --reference="$NGINX_SITE" "$tmp_site"
 chmod --reference="$NGINX_SITE" "$tmp_site"
 mv "$tmp_site" "$NGINX_SITE"
