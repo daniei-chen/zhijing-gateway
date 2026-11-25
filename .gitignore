@@ -34,6 +34,7 @@ docs/*
 !docs/moego-json-batching.md
 !docs/admin-api-keys.md
 !docs/mcp.md
+!docs/cache-decision-2026-11.md
 !docs/PAYMENT.md
 !docs/PAYMENT_CN.md
 !docs/ADMIN_PAYMENT_INTEGRATION_API.md
