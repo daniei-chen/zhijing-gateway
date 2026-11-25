@@ -391,6 +391,42 @@ else
   printf 'observe: WARNING disabled by OBSERVE_SECONDS=0; release must be verified manually\n'
 fi
 
+# ── 部署窗口的流量与失败数（2026-11-26 第 33 轮）──────────────────────
+# 规范里有一条：说「零 5xx」时必须同时给出窗口内请求数，不许把「没机会出错」当成
+# 「没出错」。这个数字以前靠人手工查库 —— 容易忘，也容易把窗口边界算错。
+# 让脚本自己算、自己打印，附带一条：窗口内根本没流量时明确说出来，
+# 那时的 0 不能拿来当连续性证据。
+summarize_deploy_window() {
+  docker exec "$PG_CONTAINER" psql -U "$PG_USER" -d "$PG_DB" -Atc \
+    "select (select count(*) from usage_logs
+               where created_at between timestamptz '$1' - interval '15 seconds'
+                                     and timestamptz '$1' + interval '15 seconds')
+          || '|' || (select count(*) from ops_error_logs
+               where created_at between timestamptz '$1' - interval '15 seconds'
+                                     and timestamptz '$1' + interval '15 seconds')
+          || '|' || (select count(*) from ops_error_logs
+               where created_at between timestamptz '$1' - interval '15 seconds'
+                                     and timestamptz '$1' + interval '15 seconds'
+                 and status_code >= 500)" \
+    2>/dev/null | tr -d '[:space:]'
+}
+
+window_counts=$(summarize_deploy_window "$switch_ts" || true)
+if [[ "$window_counts" =~ ^[0-9]+\|[0-9]+\|[0-9]+$ ]]; then
+  IFS='|' read -r w_billed w_errors w_5xx <<< "$window_counts"
+  printf 'deploy_window: switch=%s +/-15s billed=%s error_records=%s 5xx=%s\n' \
+    "$switch_ts" "$w_billed" "$w_errors" "$w_5xx"
+  if (( w_billed + w_errors == 0 )); then
+    printf 'deploy_window: WARNING no traffic in the window; a zero here does not prove continuity\n'
+  elif (( w_5xx > 0 )); then
+    printf 'deploy_window: WARNING %s 5xx inside the deploy window\n' "$w_5xx"
+  else
+    printf 'deploy_window: no 5xx among %s requests\n' "$((w_billed + w_errors))"
+  fi
+else
+  printf 'deploy_window: could not summarize (%s); report the window counts by hand\n' "$window_counts"
+fi
+
 # ── 收掉不在列表里的实例（2026-11-26 第 32 轮）────────────────────────
 # 上一轮我手工停容器时停错了对象：停掉仍在 upstream 里作备用的那个，留下一个指向
 # 已停容器的死条目 —— 正是再上一轮刚修掉的问题。人对着端口号做减法不可靠，
