@@ -1,0 +1,16 @@
+[zhijing-nginx-404]
+enabled  = true
+port     = http,https
+filter   = zhijing-nginx-404
+logpath  = /var/log/nginx/zhijing.access.log
+
+# 必须显式覆盖，不能省。
+# 全局 DEFAULT 里是 backend = systemd，那个后端只读 journal 并忽略 logpath；
+# nginx 的访问日志不写 journal，于是这条规则自 2026-11-14 启用以来 0 匹配 ——
+# jail 显示 running、正则测试能匹配 243 条、日志里 404 一直在涨，唯独它什么都没做。
+# 2026-11-26 修正：显式指定读文件。
+backend  = auto
+
+maxretry = 30
+findtime = 600
+bantime  = 3600
