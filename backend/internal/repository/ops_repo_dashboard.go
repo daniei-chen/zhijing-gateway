@@ -923,14 +923,19 @@ func (r *opsRepository) queryErrorCounts(ctx context.Context, filter *service.Op
 ) {
 	where, args, _ := buildErrorWhere(filter, start, end, 1)
 
+	// upstream_* 只统计「客户端确实看到失败」的请求（status_code >= 400）。
+	// 少了这个条件会把「重试后成功」的记录算成上游故障：这类记录 error_owner 仍是 provider、
+	// 上游确实返回过 5xx/429，但网关已经重试成功、客户端拿到的是 200。
+	// 2026-11-26 实测：7 天内 provider 记录里 status < 400 的 18 条全部是 recovered，
+	// 加上条件后该项从 54 变成 36 —— 不改的话上游错误数虚高三分之一。
 	q := `
 SELECT
   COALESCE(COUNT(*) FILTER (WHERE COALESCE(status_code, 0) >= 400), 0) AS error_total,
   COALESCE(COUNT(*) FILTER (WHERE COALESCE(status_code, 0) >= 400 AND is_business_limited), 0) AS business_limited,
   COALESCE(COUNT(*) FILTER (WHERE COALESCE(status_code, 0) >= 400 AND NOT is_business_limited), 0) AS error_sla,
-  COALESCE(COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(upstream_status_code, status_code, 0) NOT IN (429, 529)), 0) AS upstream_excl,
-  COALESCE(COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(upstream_status_code, status_code, 0) = 429), 0) AS upstream_429,
-  COALESCE(COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(upstream_status_code, status_code, 0) = 529), 0) AS upstream_529
+  COALESCE(COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(status_code, 0) >= 400 AND COALESCE(upstream_status_code, status_code, 0) NOT IN (429, 529)), 0) AS upstream_excl,
+  COALESCE(COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(status_code, 0) >= 400 AND COALESCE(upstream_status_code, status_code, 0) = 429), 0) AS upstream_429,
+  COALESCE(COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(status_code, 0) >= 400 AND COALESCE(upstream_status_code, status_code, 0) = 529), 0) AS upstream_529
 FROM ops_error_logs
 ` + where
 

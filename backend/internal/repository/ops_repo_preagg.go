@@ -86,6 +86,9 @@ error_base AS (
     AND is_count_tokens = FALSE
 ),
 error_agg AS (
+  -- upstream_* 只统计 client_status_code >= 400 的请求：重试后成功的记录（error_message 以
+  -- "Recovered " 开头）error_owner 仍是 provider、上游也真的报错过，但客户端最终拿到 200，
+  -- 算进上游故障会让错误率虚高（2026-11-26 实测 54 -> 36）。
   SELECT
     bucket_start,
     CASE WHEN GROUPING(platform) = 1 THEN NULL ELSE platform END AS platform,
@@ -93,9 +96,9 @@ error_agg AS (
     COUNT(*) FILTER (WHERE COALESCE(client_status_code, 0) >= 400) AS error_count_total,
     COUNT(*) FILTER (WHERE COALESCE(client_status_code, 0) >= 400 AND is_business_limited) AS business_limited_count,
     COUNT(*) FILTER (WHERE COALESCE(client_status_code, 0) >= 400 AND NOT is_business_limited) AS error_count_sla,
-    COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(effective_status_code, 0) NOT IN (429, 529)) AS upstream_error_count_excl_429_529,
-    COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(effective_status_code, 0) = 429) AS upstream_429_count,
-    COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(effective_status_code, 0) = 529) AS upstream_529_count
+    COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(client_status_code, 0) >= 400 AND COALESCE(effective_status_code, 0) NOT IN (429, 529)) AS upstream_error_count_excl_429_529,
+    COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(client_status_code, 0) >= 400 AND COALESCE(effective_status_code, 0) = 429) AS upstream_429_count,
+    COUNT(*) FILTER (WHERE error_owner = 'provider' AND NOT is_business_limited AND COALESCE(client_status_code, 0) >= 400 AND COALESCE(effective_status_code, 0) = 529) AS upstream_529_count
   FROM error_base
   GROUP BY GROUPING SETS (
     (bucket_start),
