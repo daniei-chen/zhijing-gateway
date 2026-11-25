@@ -68,8 +68,26 @@ data_source=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/app/dat
 [[ "$data_type" == bind || "$data_type" == volume ]] || die "unsupported /app/data mount type: $data_type"
 test -n "$data_source" || die "current container has no /app/data mount"
 
+# 2026-11-25：docker run 不允许同时 attach 内置网络与用户自定义网络
+# （实测报 "cannot attach both user-defined and non-user-defined network-modes"，exit 125）。
+# 运行实例同时连着内置 bridge（用于出网）与 internal 的用户自定义网络（用于连库/Redis），
+# 旧逻辑把两者都塞进 --network，发布在启动候选容器这一步就失败 —— 0.1.28/0.1.29 因此
+# 一直没能上线。现在内置网络交给 docker 的默认行为（或 --network host），
+# 用户自定义网络在容器启动后逐个 connect。
+builtin_network() {
+  case "$1" in
+    bridge|host|none) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 mapfile -t networks < <(docker inspect -f '{{range $name, $network := .NetworkSettings.Networks}}{{println $name}}{{end}}' "$CURRENT_CONTAINER" | awk 'NF')
 test "${#networks[@]}" -gt 0 || die "current container has no Docker network"
+use_host_network=false
+for network in "${networks[@]}"; do
+  if [[ "$network" == "host" ]]; then
+    use_host_network=true
+  fi
+done
 
 if docker image inspect "$IMAGE" >/dev/null 2>&1; then
   printf 'image: using verified local image %s\n' "$IMAGE"
@@ -96,11 +114,15 @@ run_args=(
   --tmpfs /tmp:rw,noexec,nosuid,nodev,size=64m
   --label "org.opencontainers.image.ref.name=${IMAGE}"
 )
-for network in "${networks[@]}"; do
-  run_args+=(--network "$network")
-done
+if [[ "$use_host_network" == true ]]; then
+  run_args+=(--network host)
+fi
 docker run "${run_args[@]}" "$IMAGE" >/dev/null
 candidate_started=true
+for network in "${networks[@]}"; do
+  builtin_network "$network" && continue
+  docker network connect "$network" "$NEW_CONTAINER"
+done
 
 deadline=$((SECONDS + HEALTH_TIMEOUT_SECONDS))
 ready=false

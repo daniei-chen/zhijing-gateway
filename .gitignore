@@ -63,3 +63,7 @@ issues/
 __pycache__/
 *.pyc
 /plugins/
+
+# local cross-compiled binaries (never commit release artifacts)
+build/
+
