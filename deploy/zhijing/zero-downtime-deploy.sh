@@ -42,6 +42,14 @@ rollback() {
   if [[ "$candidate_started" == true ]]; then
     docker rm -f "$NEW_CONTAINER" >/dev/null 2>&1 || true
   fi
+  # 回滚同样要能自证（2026-11-26 第 29 轮）：只恢复 nginx 配置不等于「用户又回到旧实例」。
+  # 这里不判失败——trap 里再 die 会盖住原始错误；只把公网当前构建打出来，
+  # 让人一眼看到回滚落到了哪个版本。
+  local back
+  back=$(curl --http1.1 --silent --max-time 8 --resolve "${PUBLIC_HOST}:443:127.0.0.1" \
+    "https://${PUBLIC_HOST}/api/release" 2>/dev/null \
+    | sed -n 's/.*"version":"\([^"]*\)".*/\1/p' || true)
+  printf 'ROLLBACK: public /api/release now reports %s\n' "${back:-unknown}" >&2
 }
 trap cleanup EXIT
 trap rollback ERR
@@ -226,24 +234,39 @@ for _ in 1 2 3 4 5; do
     "https://${PUBLIC_HOST}/readyz" >/dev/null
 done
 
-# ── 切换后版本自证（2026-11-26 第 28 轮）─────────────────────────────
+# ── 切换后构建自证（2026-11-26 第 28 轮，第 29 轮升级到 commit 级）────
 # 切流量成功不等于「用户拿到的是新版本」：反代缓存、upstream 里残留的旧实例、
-# 端口写错，都会让 /readyz 全绿而实际仍在跑旧代码。0.1.30 起每个实例都能通过
-# /api/release 自报版本，这里用它做闭环 —— 版本对不上直接回滚，
-# 而不是等用户或几天后的对账来发现。
-EXPECTED_VERSION="${EXPECTED_VERSION:-${IMAGE##*:}}"
+# 端口写错，都会让 /readyz 全绿而实际仍在跑旧代码。每个实例都能通过
+# /api/release 自报版本与提交号，这里用它做闭环 —— 对不上直接回滚。
+#
+# 只比版本号不够：同一个版本号可能被重建过（比如热修），那时镜像标签相同、
+# 代码不同。镜像自带的 OCI label 里有 revision，用它比 commit 才是真的构建自证。
+image_version=$(docker image inspect "$IMAGE" \
+  -f '{{index .Config.Labels "org.opencontainers.image.version"}}' 2>/dev/null || true)
+image_revision=$(docker image inspect "$IMAGE" \
+  -f '{{index .Config.Labels "org.opencontainers.image.revision"}}' 2>/dev/null || true)
+EXPECTED_VERSION="${EXPECTED_VERSION:-${image_version:-${IMAGE##*:}}}"
 EXPECTED_VERSION="${EXPECTED_VERSION#v}"
+EXPECTED_COMMIT="${EXPECTED_COMMIT:-${image_revision:-}}"
+if [[ -n "$EXPECTED_COMMIT" ]]; then
+  EXPECTED_COMMIT="${EXPECTED_COMMIT:0:12}"   # 截到 12 位，兼容短 sha
+fi
 release_tmp=$(mktemp)
 release_code=$(curl -o "$release_tmp" -w '%{http_code}' --silent --max-time 10 \
   "http://127.0.0.1:${NEW_PORT}/api/release" || true)
 candidate_version=$(sed -n 's/.*"version":"\([^"]*\)".*/\1/p' "$release_tmp" 2>/dev/null || true)
+candidate_commit=$(sed -n 's/.*"commit":"\([^"]*\)".*/\1/p' "$release_tmp" 2>/dev/null || true)
 rm -f "$release_tmp"
 case "${release_code:-000}" in
   200)
     [[ -n "$candidate_version" ]] || die "candidate /api/release returned no version field"
     [[ "$candidate_version" == "$EXPECTED_VERSION" ]] || \
-      die "candidate reports version ${candidate_version}, image tag says ${EXPECTED_VERSION}"
-    printf 'candidate: /api/release reports %s (matches image tag)\n' "$candidate_version"
+      die "candidate reports version ${candidate_version}, image says ${EXPECTED_VERSION}"
+    if [[ -n "$EXPECTED_COMMIT" && "${candidate_commit:0:12}" != "$EXPECTED_COMMIT" ]]; then
+      die "candidate reports commit ${candidate_commit:-<empty>}, image label says ${EXPECTED_COMMIT}"
+    fi
+    printf 'candidate: /api/release reports %s @ %s (matches image label)\n' \
+      "$candidate_version" "${candidate_commit:0:12}"
     ;;
   404)
     printf 'candidate: /api/release unavailable (build older than 0.1.30); skipping self-check\n'
@@ -259,11 +282,16 @@ public_tmp=$(mktemp)
 public_code=$(curl -o "$public_tmp" -w '%{http_code}' --http1.1 --silent --max-time 10 \
   --resolve "${PUBLIC_HOST}:443:127.0.0.1" "https://${PUBLIC_HOST}/api/release" || true)
 public_version=$(sed -n 's/.*"version":"\([^"]*\)".*/\1/p' "$public_tmp" 2>/dev/null || true)
+public_commit=$(sed -n 's/.*"commit":"\([^"]*\)".*/\1/p' "$public_tmp" 2>/dev/null || true)
 rm -f "$public_tmp"
 if [[ "${public_code:-000}" == "200" && -n "$public_version" && "$public_version" != "$EXPECTED_VERSION" ]]; then
   die "public /api/release reports ${public_version}, expected ${EXPECTED_VERSION}"
 fi
-printf 'public: /api/release reports %s (http %s)\n' "${public_version:-unknown}" "${public_code:-000}"
+if [[ "${public_code:-000}" == "200" && -n "$EXPECTED_COMMIT" && "${public_commit:0:12}" != "$EXPECTED_COMMIT" ]]; then
+  die "public /api/release reports commit ${public_commit:-<empty>}, expected ${EXPECTED_COMMIT}"
+fi
+printf 'public: /api/release reports %s @ %s (http %s)\n' \
+  "${public_version:-unknown}" "${public_commit:0:12}" "${public_code:-000}"
 
 # ── 切换后业务观察窗口 ───────────────────────────────────────────────
 # /readyz 只证明依赖可用，不证明业务成功。v0.1.7 曾出现探针全绿、切换后
