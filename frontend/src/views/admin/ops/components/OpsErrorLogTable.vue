@@ -111,6 +111,12 @@
             <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium" :class="getStatusClass(row.status_code)">
               {{ row.status_code }}
             </span>
+            <!-- 上游报错但重试成功：状态码仍是上游那个 5xx，不标出来会被当成真失败 -->
+            <span
+              v-if="row.recovered"
+              class="rounded px-1.5 py-0.5 text-[10px] font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-200"
+              :title="t('admin.ops.errorDetails.recoveredHint')"
+            >{{ t('admin.ops.errorDetails.recovered') }}</span>
             <span
               v-if="row.severity"
               :class="['rounded px-1.5 py-0.5 text-[10px] font-medium', getSeverityClass(row.severity)]"

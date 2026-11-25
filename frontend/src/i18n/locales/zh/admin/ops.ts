@@ -294,6 +294,8 @@ export default {
         requestErrors: '请求错误',
         unresolved: '未解决',
         resolved: '已解决',
+        recovered: '已自愈',
+        recoveredHint: '上游报过错，但网关重试后客户端正常拿到了结果；留档用于观察上游抖动，不是用户可感知的失败',
         viewErrors: '错误',
         viewExcluded: '排除项',
         statusCodeOther: '其他',

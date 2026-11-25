@@ -269,7 +269,8 @@ SELECT
   COALESCE(e.user_agent, ''),
   e.request_type,
   COALESCE(ak.name, ''),
-  ak.deleted_at
+  ak.deleted_at,
+  COALESCE(COALESCE(e.error_owner, '') = 'provider' AND COALESCE(e.status_code, 0) < 400, false)
 FROM ops_error_logs e
 LEFT JOIN accounts a ON e.account_id = a.id
 LEFT JOIN groups g ON e.group_id = g.id
@@ -340,6 +341,7 @@ LIMIT $` + itoa(len(args)+1) + ` OFFSET $` + itoa(len(args)+2)
 			&requestType,
 			&apiKeyName,
 			&apiKeyDeletedAt,
+			&item.Recovered,
 		); err != nil {
 			return nil, err
 		}
@@ -452,7 +454,8 @@ SELECT
   e.retry_after_seconds,
   COALESCE(e.api_key_prefix, ''),
   COALESCE(ak.name, ''),
-  ak.deleted_at
+  ak.deleted_at,
+  COALESCE(COALESCE(e.error_owner, '') = 'provider' AND COALESCE(e.status_code, 0) < 400, false)
 FROM ops_error_logs e
 LEFT JOIN users u ON e.user_id = u.id
 LEFT JOIN accounts a ON e.account_id = a.id
@@ -529,6 +532,7 @@ LIMIT 1`
 		&out.APIKeyPrefix,
 		&detailAPIKeyName,
 		&detailAPIKeyDeletedAt,
+		&out.Recovered,
 	)
 	if err != nil {
 		return nil, err

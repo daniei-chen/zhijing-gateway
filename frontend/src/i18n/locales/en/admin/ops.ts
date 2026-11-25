@@ -294,6 +294,8 @@ export default {
         requestErrors: 'Request Errors',
         unresolved: 'Unresolved',
         resolved: 'Resolved',
+        recovered: 'Recovered',
+        recoveredHint: 'The upstream did fail once, but the retry succeeded and the client got a normal result. Kept for spotting upstream flakiness; not a user-visible failure.',
         viewErrors: 'Errors',
         viewExcluded: 'Excluded',
         statusCodeOther: 'Other',

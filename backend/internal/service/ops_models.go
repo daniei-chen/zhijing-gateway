@@ -74,6 +74,12 @@ type OpsErrorLog struct {
 	// 关联 api_key 名称（LEFT JOIN api_keys 取得；软删只覆盖 key 列，name 保留，故已删 key 仍有原名）。
 	APIKeyName    string `json:"api_key_name,omitempty"`
 	APIKeyDeleted bool   `json:"api_key_deleted,omitempty"`
+
+	// Recovered 表示这条记录对应的请求**最终成功**了：上游确实报过错（owner=provider、
+	// 上游状态码是 5xx/429），但网关重试后客户端拿到了 200。
+	// 这类记录留在错误表里是为了观察上游抖动，但它不是用户可感知的失败：
+	// 界面上必须和真失败区分开，否则管理员看到一条 5xx 会去排查一个已经自愈的问题。
+	Recovered bool `json:"recovered"`
 }
 
 type OpsErrorLogDetail struct {

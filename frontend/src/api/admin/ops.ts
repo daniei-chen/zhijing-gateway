@@ -915,6 +915,10 @@ export interface OpsErrorLog {
   platform: string
   model: string
 
+  // 上游报错但网关重试后客户端最终成功（status_code 仍显示上游那个错误码）。
+  // 这类记录用于观察上游抖动，界面上要和真失败区分开。
+  recovered?: boolean
+
   resolved: boolean
   resolved_at?: string | null
   resolved_by_user_id?: number | null
