@@ -62,9 +62,9 @@ fi
 systemctl reload nginx && echo "nginx reloaded"
 
 echo "--- /health ---"
-curl -s -m 8 -w ' http=%{http_code}\n' "https://zhijing.kaogong.art/health" | head -c 200
+curl -s -m 8 -w ' http=%{http_code}\n' "https://154-36-187-147.sslip.io/health" | head -c 200
 echo
 echo "--- /healthz ---"
-curl -s -m 8 -w ' http=%{http_code}\n' "https://zhijing.kaogong.art/healthz" | head -c 200
+curl -s -m 8 -w ' http=%{http_code}\n' "https://154-36-187-147.sslip.io/healthz" | head -c 200
 echo
 echo "done $STAMP"

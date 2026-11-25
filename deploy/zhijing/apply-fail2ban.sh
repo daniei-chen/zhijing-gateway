@@ -17,7 +17,7 @@ DST_FILTER=/etc/fail2ban/filter.d
 DST_JAIL=/etc/fail2ban/jail.d
 JAIL=zhijing-nginx-404
 FBLOG=/var/log/fail2ban.log
-SITE=https://zhijing.kaogong.art
+SITE=https://154-36-187-147.sslip.io
 
 [ -d "$SRC" ] || { echo "missing source dir: $SRC" >&2; exit 2; }
 [ "$(id -u)" -eq 0 ] || { echo "must run as root" >&2; exit 2; }

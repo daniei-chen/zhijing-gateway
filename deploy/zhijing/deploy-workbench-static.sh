@@ -9,7 +9,7 @@ set -Eeuo pipefail
 : "${DIST:?set DIST to the directory containing an index.html built with --base=/app-assets/}"
 
 TARGET="${TARGET:-/var/www/zhijing-workbench}"
-PUBLIC_HOST="${PUBLIC_HOST:-zhijing.kaogong.art}"
+PUBLIC_HOST="${PUBLIC_HOST:-154-36-187-147.sslip.io}"
 BACKUP_ROOT="${BACKUP_ROOT:-/root/zhijing-frontend-backups}"
 
 die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
