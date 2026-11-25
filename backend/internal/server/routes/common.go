@@ -13,17 +13,55 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+// ReleaseInfo 描述当前实例的构建信息，只用于 /api/release 自省端点。
+//
+// 刻意与 service/handler 里的 BuildInfo 解耦：routes 包不反向依赖 service，
+// 这样以后调整内部构建信息结构时不会牵着路由层一起动。
+type ReleaseInfo struct {
+	Version   string
+	Commit    string
+	BuildTime string
+	BuildType string
+}
+
+// processStartedAt 记录进程启动时刻。取包级初始化时间而不是 main 里的时间，
+// 是为了让单测和实际运行时都能拿到一个稳定的值。
+var processStartedAt = time.Now()
+
+// releaseValue 把空字符串统一成 "unknown"：
+// 手工构建（没有链接期注入）时端点仍然可用，而不是返回一堆空字段。
+func releaseValue(v string) string {
+	if strings.TrimSpace(v) == "" {
+		return "unknown"
+	}
+	return strings.TrimSpace(v)
+}
+
 // RegisterCommonRoutes 注册通用路由（健康检查、状态等）。
 //
 // redisClient 可为 nil（届时 /readyz 只报告未配置，不判失败）。
 // businessCheck 只在 /readyz?deep=1 时调用，用于回答「有没有账号可用」；
 // 为 nil 时深度探针报告 not_configured 而不是判失败。
-func RegisterCommonRoutes(r *gin.Engine, redisClient *redis.Client, dbCheck func(context.Context) error, businessCheck func(context.Context) (map[string]any, error)) {
+func RegisterCommonRoutes(r *gin.Engine, redisClient *redis.Client, release ReleaseInfo, dbCheck func(context.Context) error, businessCheck func(context.Context) (map[string]any, error)) {
 	// 浅存活探针：只证明进程能响应 HTTP，不查依赖。
 	// 注意：它无法区分 "full-role 正常" 与 "全部实例都是 API-only"，
 	// 也不能发现 DB/Redis 故障，因此不能作为唯一判据（见审计 2026-11-09 后台停摆）。
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"status": "ok"})
+	})
+
+	// 版本自省（2026-11-25 第 26 轮审计 P1）：发布后必须能一条命令确认
+	// 「线上跑的到底是哪个构建」，否则多实例 rolling 时只能靠猜。
+	// 只暴露版本、提交、构建时间与运行时长 —— 不含路径、配置、依赖地址。
+	r.GET("/api/release", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"version":        releaseValue(release.Version),
+			"commit":         releaseValue(release.Commit),
+			"build_time":     releaseValue(release.BuildTime),
+			"build_type":     releaseValue(release.BuildType),
+			"started_at":     processStartedAt.UTC().Format(time.RFC3339),
+			"uptime_seconds": int64(time.Since(processStartedAt).Seconds()),
+		})
 	})
 
 	// 深度就绪探针：检查依赖可用性。

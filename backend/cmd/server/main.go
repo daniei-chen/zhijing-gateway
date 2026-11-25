@@ -147,6 +147,10 @@ func runMainServer() {
 	buildInfo := handler.BuildInfo{
 		Version:   Version,
 		BuildType: BuildType,
+		// Commit / Date 由构建脚本通过 -X 注入；漏注入时端点上会显示 unknown，
+		// 而不是把空字符串当成「没有这一版」。
+		Commit:    Commit,
+		BuildTime: Date,
 	}
 
 	app, err := initializeApplication(buildInfo)

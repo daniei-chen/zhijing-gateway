@@ -15,7 +15,7 @@ import (
 func newMetricsTestRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	RegisterCommonRoutes(r, nil, nil, nil)
+	RegisterCommonRoutes(r, nil, ReleaseInfo{}, nil, nil)
 	return r
 }
 

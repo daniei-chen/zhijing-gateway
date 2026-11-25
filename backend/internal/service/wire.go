@@ -32,6 +32,8 @@ func ProvideGrokOAuthService(proxyRepo ProxyRepository, oauthClient GrokOAuthCli
 type BuildInfo struct {
 	Version   string
 	BuildType string
+	Commit    string
+	BuildTime string
 }
 
 // ProvidePricingService creates and initializes PricingService

@@ -17,7 +17,7 @@ func newReadyzTestRouter(businessCheck func(context.Context) (map[string]any, er
 	r := gin.New()
 	// redisClient/dbCheck 都为 nil：探针报告 not_configured 而不判失败，
 	// 这样用例只聚焦深度探针本身。
-	RegisterCommonRoutes(r, nil, nil, businessCheck)
+	RegisterCommonRoutes(r, nil, ReleaseInfo{}, nil, businessCheck)
 	return r
 }
 
@@ -86,7 +86,7 @@ func TestReadyzDeepWithoutCheckIsNotConfigured(t *testing.T) {
 func TestReadyzDeepStillFailsOnDatabaseError(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.New()
-	RegisterCommonRoutes(r, nil, func(context.Context) error {
+	RegisterCommonRoutes(r, nil, ReleaseInfo{}, func(context.Context) error {
 		return errors.New("db down")
 	}, func(context.Context) (map[string]any, error) {
 		return map[string]any{"schedulable_accounts": 1}, nil

@@ -35,6 +35,7 @@ func SetupRouter(
 	opsService *service.OpsService,
 	settingService *service.SettingService,
 	compositeResolver *service.CompositeRouteResolver,
+	buildInfo service.BuildInfo,
 	cfg *config.Config,
 	redisClient *redis.Client,
 ) *gin.Engine {
@@ -92,7 +93,7 @@ func SetupRouter(
 	}
 
 	// 注册路由
-	registerRoutes(r, handlers, jwtAuth, optionalJWTAuth, adminAuth, apiKeyAuth, auditLog, stepUpAuth, apiKeyService, subscriptionService, opsService, settingService, compositeResolver, cfg, redisClient)
+	registerRoutes(r, handlers, jwtAuth, optionalJWTAuth, adminAuth, apiKeyAuth, auditLog, stepUpAuth, apiKeyService, subscriptionService, opsService, settingService, compositeResolver, buildInfo, cfg, redisClient)
 
 	return r
 }
@@ -112,11 +113,17 @@ func registerRoutes(
 	opsService *service.OpsService,
 	settingService *service.SettingService,
 	compositeResolver *service.CompositeRouteResolver,
+	buildInfo service.BuildInfo,
 	cfg *config.Config,
 	redisClient *redis.Client,
 ) {
-	// 通用路由（健康检查、状态等）
-	routes.RegisterCommonRoutes(r, redisClient, func(ctx context.Context) error {
+	// 通用路由（健康检查、版本自省等）
+	routes.RegisterCommonRoutes(r, redisClient, routes.ReleaseInfo{
+		Version:   buildInfo.Version,
+		Commit:    buildInfo.Commit,
+		BuildTime: buildInfo.BuildTime,
+		BuildType: buildInfo.BuildType,
+	}, func(ctx context.Context) error {
 		_, err := settingService.GetAllSettings(ctx)
 		return err
 	}, func(ctx context.Context) (map[string]any, error) {

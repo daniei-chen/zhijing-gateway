@@ -14,10 +14,15 @@ func TestProvideServiceBuildInfo(t *testing.T) {
 	in := handler.BuildInfo{
 		Version:   "v-test",
 		BuildType: "release",
+		Commit:    "deadbeefcafe",
+		BuildTime: "2026-11-26T00:00:00Z",
 	}
 	out := provideServiceBuildInfo(in)
 	require.Equal(t, in.Version, out.Version)
 	require.Equal(t, in.BuildType, out.BuildType)
+	// 版本自省端点（/api/release）依赖这两个字段透传，漏了就只剩 unknown。
+	require.Equal(t, in.Commit, out.Commit)
+	require.Equal(t, in.BuildTime, out.BuildTime)
 }
 
 func TestProvideCleanup_WithMinimalDependencies_NoPanic(t *testing.T) {

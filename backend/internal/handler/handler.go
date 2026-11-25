@@ -75,4 +75,7 @@ type Handlers struct {
 type BuildInfo struct {
 	Version   string
 	BuildType string // "source" for manual builds, "release" for CI builds
+	// Commit 与 BuildTime 由链接期变量注入；手工构建时为空，端点会回落成 "unknown"。
+	Commit    string
+	BuildTime string
 }
