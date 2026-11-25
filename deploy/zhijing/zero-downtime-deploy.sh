@@ -391,6 +391,54 @@ else
   printf 'observe: WARNING disabled by OBSERVE_SECONDS=0; release must be verified manually\n'
 fi
 
+# ── 收掉不在列表里的实例（2026-11-26 第 32 轮）────────────────────────
+# 上一轮我手工停容器时停错了对象：停掉仍在 upstream 里作备用的那个，留下一个指向
+# 已停容器的死条目 —— 正是再上一轮刚修掉的问题。人对着端口号做减法不可靠，
+# 这件事该由脚本按列表来办。
+#
+# 默认只报告、不停（PRUNE_STOPPED=0）。停容器是破坏性动作，先让它在真实发布里
+# 把判断跑熟（日志里能看到它认对了没有），确认无误再谈默认启用。
+prune_idle_instances() {
+  local peers_ports name ports port
+  peers_ports=$(awk '/# ---- zhijing-peers-begin ----/,/# ---- zhijing-peers-end ----/' "$NGINX_SITE" \
+    | grep -o '127\.0\.0\.1:[0-9]*' | cut -d: -f2 | sort -u)
+  [[ -n "$peers_ports" ]] || return 0
+  docker ps --format '{{.Names}}|{{.Ports}}' | while IFS='|' read -r name ports; do
+    case "$name" in
+      zhijing-api-*) ;;
+      *) continue ;;
+    esac
+    # 另一条发布管线的实例即便暂时不在列表里也不归本脚本处置。
+    case "$name" in
+      *final*|*sibling*) continue ;;
+    esac
+    port=$(printf '%s' "$ports" | sed -n 's/^127\.0\.0\.1:\([0-9][0-9]*\)->.*/\1/p' | head -1)
+    [[ -n "$port" ]] || continue
+    if printf '%s\n' "$peers_ports" | grep -qx "$port"; then
+      continue
+    fi
+    printf '%s %s\n' "$name" "$port"
+  done
+}
+
+idle_instances=$(prune_idle_instances || true)
+if [[ -n "$idle_instances" ]]; then
+  printf 'idle instances (running but not referenced by nginx):\n'
+  printf '%s\n' "$idle_instances" | while read -r name port; do
+    printf '  %s (port %s)\n' "$name" "$port"
+  done
+  if [[ "${PRUNE_STOPPED:-0}" == "1" ]]; then
+    printf '%s\n' "$idle_instances" | while read -r name port; do
+      printf 'stopping %s (port %s)\n' "$name" "$port"
+      docker stop "$name" >/dev/null 2>&1 || printf 'warning: could not stop %s\n' "$name" >&2
+    done
+  else
+    printf 'left running (set PRUNE_STOPPED=1 to stop them automatically)\n'
+  fi
+else
+  printf 'idle instances: none (every running gateway is referenced by nginx)\n'
+fi
+
 trap - ERR
 printf 'release_ready image=%s candidate=%s old_primary_port=%s nginx_backup=%s\n' \
   "$IMAGE" "$NEW_CONTAINER" "$old_port" "$nginx_backup"
