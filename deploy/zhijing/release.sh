@@ -90,6 +90,17 @@ curl -sf -m 5 -o /dev/null "http://127.0.0.1:$PRIMARY_PORT/health" \
   && echo "  primary health ok" || fail "primary $PRIMARY_PORT is not healthy right now"
 awk '/zhijing-peers-begin/,/zhijing-peers-end/' "$NGINX_SITE" | grep -c 'server 127\.0\.0\.1:' | sed 's/^/  peers in block /'
 
+# 探针体检。2026-11-26 的教训：探针脚本里写死了入口域名，域名一下线，
+# 127 次采样全部 502 —— 部署本身是好的，但「零中断」的证据链断了。
+# 这里在发布前就拦住，别等到看完日志才发现探针没在测真实链路。
+for probe in /root/rollout-traffic-probe.sh /root/rollout-stream-probe.sh; do
+  [ -f "$probe" ] || fail "probe script $probe is missing"
+  grep -q 'zhijing\.kaogong\.art' "$probe" \
+    && fail "probe script $probe still points at the retired domain"
+  grep -q "https://" "$probe" || fail "probe script $probe has no https target"
+done
+echo "  probes         ok"
+
 if [ "$DRY_RUN" = "1" ]; then
   echo "dry-run: nothing was changed"
   exit 0
