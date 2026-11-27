@@ -24,7 +24,7 @@ func RegisterAdminRoutes(
 	adminAuth middleware.AdminAuthMiddleware,
 	auditLog middleware.AuditLogMiddleware,
 	stepUpAuth middleware.StepUpAuthMiddleware,
-	forcedStepUpAuth middleware.StepUpAuthMiddleware,
+	forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware,
 	settingService *service.SettingService,
 	panelRateLimiter *middleware.PanelRateLimiter,
 ) {
@@ -143,7 +143,7 @@ func RegisterAdminRoutes(
 	}
 }
 
-func registerPromptAuditRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerPromptAuditRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	promptAudit := admin.Group("/prompt-audit")
 	{
 		promptAudit.GET("/config", h.Admin.PromptAudit.GetConfig)
@@ -177,7 +177,7 @@ func registerAdminComplianceRoutes(admin *gin.RouterGroup, h *handler.Handlers) 
 	}
 }
 
-func registerContentModerationRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerContentModerationRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	risk := admin.Group("/risk-control")
 	{
 		risk.GET("/config", h.Admin.ContentModeration.GetConfig)
@@ -198,7 +198,7 @@ func registerAdminAPIKeyRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerOpsRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerOpsRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	ops := admin.Group("/ops")
 	{
 		// Realtime ops signals
@@ -307,7 +307,7 @@ func registerDashboardRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	users := admin.Group("/users")
 	{
 		users.GET("", h.Admin.User.List)
@@ -337,7 +337,7 @@ func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, f
 	}
 }
 
-func registerGroupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerGroupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	groups := admin.Group("/groups")
 	groups.Use(h.Admin.Group.ScopedAdminKeyGroupModels)
 	{
@@ -367,7 +367,7 @@ func registerGroupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStep
 	}
 }
 
-func registerAccountRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerAccountRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	accounts := admin.Group("/accounts")
 	{
 		accounts.GET("", h.Admin.Account.List)
@@ -528,7 +528,7 @@ func registerCNProviderRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerProxyRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerProxyRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	proxies := admin.Group("/proxies")
 	{
 		proxies.GET("", h.Admin.Proxy.List)
@@ -549,7 +549,7 @@ func registerProxyRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStep
 	}
 }
 
-func registerRedeemCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerRedeemCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	codes := admin.Group("/redeem-codes")
 	{
 		codes.GET("", h.Admin.Redeem.List)
@@ -565,7 +565,7 @@ func registerRedeemCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers, force
 	}
 }
 
-func registerPromoCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerPromoCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	promoCodes := admin.Group("/promo-codes")
 	{
 		promoCodes.GET("", h.Admin.Promo.List)
@@ -577,7 +577,7 @@ func registerPromoCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers, forced
 	}
 }
 
-func registerSettingsRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerSettingsRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	adminSettings := admin.Group("/settings")
 	registerScopedAdminKeyRoutes(adminSettings, h, forcedStepUpAuth)
 	{
@@ -626,7 +626,7 @@ func registerSettingsRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedS
 	}
 }
 
-func registerDataManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerDataManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	dataManagement := admin.Group("/data-management")
 	{
 		dataManagement.GET("/agent/health", h.Admin.DataManagement.GetAgentHealth)
@@ -650,7 +650,7 @@ func registerDataManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, f
 	}
 }
 
-func registerBackupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerBackupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	backup := admin.Group("/backups")
 	{
 		// S3 存储配置
@@ -682,7 +682,7 @@ func registerBackupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedSte
 	}
 }
 
-func registerSystemRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerSystemRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	system := admin.Group("/system")
 	{
 		system.GET("/version", h.Admin.System.GetVersion)
@@ -698,7 +698,7 @@ func registerSystemRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAut
 	}
 }
 
-func registerSubscriptionRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerSubscriptionRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	subscriptions := admin.Group("/subscriptions")
 	{
 		subscriptions.GET("", h.Admin.Subscription.List)
@@ -723,7 +723,7 @@ func registerSubscriptionRoutes(admin *gin.RouterGroup, h *handler.Handlers, for
 	admin.GET("/users/:id/subscriptions", h.Admin.Subscription.ListByUser)
 }
 
-func registerUsageRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerUsageRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	usage := admin.Group("/usage")
 	{
 		usage.GET("", h.Admin.Usage.List)
@@ -782,7 +782,7 @@ func registerTLSFingerprintProfileRoutes(admin *gin.RouterGroup, h *handler.Hand
 	}
 }
 
-func registerPluginRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerPluginRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	plugins := admin.Group("/plugins")
 	{
 		plugins.GET("", h.Admin.Plugin.List)
@@ -799,7 +799,7 @@ func registerPluginRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedSte
 	}
 }
 
-func registerChannelRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerChannelRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	channels := admin.Group("/channels")
 	{
 		channels.GET("", h.Admin.Channel.List)
@@ -841,7 +841,7 @@ func registerChannelMonitorRoutes(admin *gin.RouterGroup, h *handler.Handlers, s
 }
 
 // registerAffiliateRoutes 注册邀请返利的管理端路由（专属用户配置）
-func registerAffiliateRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
+func registerAffiliateRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	affiliates := admin.Group("/affiliates")
 	{
 		affiliates.GET("/invites", h.Admin.Affiliate.ListInviteRecords)

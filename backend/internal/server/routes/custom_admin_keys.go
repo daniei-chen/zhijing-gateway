@@ -7,7 +7,7 @@ import (
 )
 
 // 管理密钥生命周期只接受管理员会话；写操作沿用二次验证。
-func registerScopedAdminKeyRoutes(settings *gin.RouterGroup, h *handler.Handlers, forcedStepUp middleware.StepUpAuthMiddleware) {
+func registerScopedAdminKeyRoutes(settings *gin.RouterGroup, h *handler.Handlers, forcedStepUp middleware.ForcedStepUpAuthMiddleware) {
 	keys := settings.Group("/admin-api-keys")
 	keys.GET("", h.Admin.Setting.ListScopedAdminKeys)
 	keys.POST("", gin.HandlerFunc(forcedStepUp), h.Admin.Setting.CreateScopedAdminKey)

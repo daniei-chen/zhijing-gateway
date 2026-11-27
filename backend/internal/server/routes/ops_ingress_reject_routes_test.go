@@ -25,7 +25,7 @@ func TestIngressRejectAdminRoutesRequireAdminAuthentication(t *testing.T) {
 	})
 	auditLog := servermiddleware.AuditLogMiddleware(func(c *gin.Context) { c.Next() })
 	stepUp := servermiddleware.StepUpAuthMiddleware(func(c *gin.Context) { c.Next() })
-	RegisterAdminRoutes(router.Group("/api/v1"), handlers, adminAuth, auditLog, stepUp, stepUp, nil, nil)
+	RegisterAdminRoutes(router.Group("/api/v1"), handlers, adminAuth, auditLog, stepUp, servermiddleware.ForcedStepUpAuthMiddleware(stepUp), nil, nil)
 
 	for _, path := range []string{
 		"/api/v1/admin/ops/ingress-rejections",

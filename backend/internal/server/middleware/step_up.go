@@ -10,8 +10,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// StepUpAuthMiddleware 敏感操作 step-up 2FA 门控中间件类型。
+// StepUpAuthMiddleware 敏感操作 step-up 2FA 门控中间件类型（读取 settings.step_up_enabled）。
 type StepUpAuthMiddleware gin.HandlerFunc
+
+// ForcedStepUpAuthMiddleware 不读 settings.step_up_enabled 的强制 step-up 门控类型。
+// 单独定义类型是为了让 wire 能按类型区分两套门（同类型两个 provider 会让 injector 无法生成）。
+type ForcedStepUpAuthMiddleware gin.HandlerFunc
 
 // 强制门写进管理面审计的两个字段（见 SetAuditExtra 的白名单）。
 const (
@@ -75,8 +79,8 @@ func NewStepUpAuthMiddleware(
 func NewForcedStepUpAuthMiddleware(
 	totpService *service.TotpService,
 	userService *service.UserService,
-) StepUpAuthMiddleware {
-	return StepUpAuthMiddleware(forcedStepUpAuth(totpService, userService))
+) ForcedStepUpAuthMiddleware {
+	return ForcedStepUpAuthMiddleware(forcedStepUpAuth(totpService, userService))
 }
 
 // forcedStepUpAuth 与 stepUpAuth 共用判定，只把 settings 固定为 nil（fail-closed）。
