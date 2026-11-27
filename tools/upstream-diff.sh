@@ -5,6 +5,12 @@
 # classify_area() 是那张表的可执行副本 —— 改边界表必须同时改这里，反之亦然。
 set -eu
 
+# diff 的输出是要被解析的：翻译过的「Files … differ」/「Only in …」会让下面的
+# 解析器一条都认不出来，而脚本照样成功退出、报出 0 个差异 —— 静默漏报是最坏的
+# 失败模式，所以这里自己锁死 locale，不看调用方的环境。
+LC_ALL=C
+export LC_ALL
+
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 repo_root=$(CDPATH= cd -- "$script_dir/.." && pwd)
 tab=$(printf '\t')
@@ -91,6 +97,9 @@ case $want_class in
   *) die "--class 只能是 all / mixed / local，收到: $want_class" ;;
 esac
 
+ours=$(CDPATH= cd -- "$ours" && pwd)
+upstream=$(CDPATH= cd -- "$upstream" && pwd)
+
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/upstream-diff.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT HUP INT TERM
 
@@ -161,9 +170,11 @@ differing=0
 while IFS= read -r line; do
   case $line in
     'Files '*)
+      # 不用 " and " 当分隔符：路径里本身就可能出现 " and "。两侧的根是已知的，
+      # 拿根当锚点才不会把一个含 " and " 的文件解析成一个不存在的路径。
       rest=${line#Files }
-      up_file=${rest%% and *}
-      our_file=${rest#* and }
+      up_file=${rest%%" and $ours/"*}
+      our_file=$ours/${rest#*" and $ours/"}
       our_file=${our_file% differ}
       rel=${up_file#"$up_tree"/}
       if is_noise "$rel"; then
@@ -183,8 +194,10 @@ while IFS= read -r line; do
         *'Binary files'*) lines=1 ;;
         *)
           # 行数口径同 git diff --numstat：新增行 + 删除行，不计文件头。
+          # 只跳过 diff -U0 的前两行文件头。按前缀过滤会把内容本身以 "--"
+          # 开头的删除行（Markdown 分隔线、SQL 注释）当成文件头丢掉。
           lines=$(printf '%s\n' "$diff_out" | awk '
-            /^\+\+\+|^---/ { next }
+            NR <= 2 { next }
             /^\+/ { n++ }
             /^-/ { n++ }
             END { print n + 0 }')

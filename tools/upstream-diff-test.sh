@@ -119,6 +119,31 @@ cat >"$up/assets/partners/partner.svg" <<'EOF'
 <svg></svg>
 EOF
 
+
+# 8) 上游有、本地删掉一行 Markdown 分隔线 —— 删除行以 "--" 开头，
+#    按前缀过滤文件头会把这条差异整条吞掉（0 行 → 文件从清单里消失）。
+cat >"$up/docs/PAYMENT.md" <<'EOF'
+line one
+---
+line two
+EOF
+cat >"$ours/docs/PAYMENT.md" <<'EOF'
+line one
+line two
+EOF
+
+# 9) 路径里含 " and " —— 用分隔符解析会把路径截断成不存在的东西。
+cat >"$up/backend/internal/service/foo and bar.go" <<'EOF'
+package service
+
+var A = 1
+EOF
+cat >"$ours/backend/internal/service/foo and bar.go" <<'EOF'
+package service
+
+var A = 2
+EOF
+
 run() {
   /bin/sh "$tool" --upstream "$up" --ours "$ours" "$@"
 }
@@ -189,6 +214,24 @@ if printf '%s\n' "$local_only" | awk -F'\t' '$2 == "mixed" {found = 1} END {exit
   fail '--class local 的输出里出现了 mixed 行'
 fi
 [ -n "$(row_of "$local_only" deploy/zhijing/run.sh)" ] || fail '--class local 漏掉了本地独有文件'
+
+
+# 8) 以 "--" 开头的删除行要计入
+row=$(row_of "$out" docs/PAYMENT.md)
+[ -n "$row" ] || fail '删掉一行 --- 的文件被整条漏掉了'
+[ "$(field "$row" 1)" -eq 1 ] || fail "PAYMENT.md 的改动行数应为 1，实际: $(field "$row" 1)"
+
+# 9) 含 " and " 的路径要完整解析
+row=$(row_of "$out" "backend/internal/service/foo and bar.go")
+[ -n "$row" ] || fail '路径含 " and " 的文件被漏掉了'
+[ "$(field "$row" 1)" -eq 2 ] || fail "含 and 的路径改动行数应为 2，实际: $(field "$row" 1)"
+
+# 10) 调用方的 locale 不该影响结果（diff 的输出会被解析）
+out_locale=$(LC_ALL=de_DE.UTF-8 LANG=de_DE.UTF-8 run --top 0)
+default_rows=$(printf '%s\n' "$out" | awk -F'\t' 'NF == 3' | wc -l | tr -d ' ')
+locale_rows=$(printf '%s\n' "$out_locale" | awk -F'\t' 'NF == 3' | wc -l | tr -d ' ')
+[ "$default_rows" = "$locale_rows" ] \
+  || fail "换 locale 后行数从 $default_rows 变成 $locale_rows，说明 diff 的输出被本地化了"
 
 # 参数校验：没有 --upstream 必须非零退出
 if /bin/sh "$tool" >/dev/null 2>&1; then

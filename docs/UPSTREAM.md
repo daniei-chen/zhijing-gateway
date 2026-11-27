@@ -146,7 +146,11 @@ tools/upstream-diff.sh --upstream ~/.capy/work/upstream-sub2api --baseline v0.2.
 - `local`——上游没有这个文件（本地新增，或落在本地独有目录）。
 - `missing`——上游有、本地没有，只在 `--missing` 时列出。多半是被删掉的上游能力，值得逐条问一句为什么。
 
-两个实现细节值得知道：比对前先把上游内容里的 module 路径换成我们的，所以机械改名不会进清单；构建产物（`frontend/dist`、`frontend/coverage`、`build/`、`backend/build`、`plugins/`）跳过，但 `backend/internal/web/dist` 不跳——那是随仓库发布的嵌入式前端产物，是真正要比对的文件。
+三个实现细节值得知道：
+
+- 比对前先把上游内容里的 module 路径换成我们的，所以机械改名不会进清单。
+- 构建产物（`frontend/dist`、`frontend/coverage`、`build/`、`backend/build`、`plugins/`）跳过，但 `backend/internal/web/dist` 不跳——那是随仓库发布的嵌入式前端产物，是真正要比对的文件。
+- 脚本自己锁 `LC_ALL=C`。`diff` 的输出是要被解析的，翻译过的「Files … differ」/「Only in …」会让解析器一条都认不出来，而脚本照样成功退出、报出 0 个差异——静默漏报比报错坏得多，所以不看调用方的 locale。
 
 自测（构造两个假目录，不联网、不需要上游 checkout，覆盖归一化、三种分类、排序、`--top` / `--class` 过滤与参数校验）：
 
