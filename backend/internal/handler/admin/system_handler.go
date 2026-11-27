@@ -20,6 +20,9 @@ import (
 type SystemHandler struct {
 	updateSvc systemUpdateService
 	lockSvc   *service.SystemOperationLockService
+	// updateGate 是 POST /system/update 的应用层硬门（默认关闭 + 对端 CIDR +
+	// 强制 step-up），由 wire 注入；见 middleware.NewAdminSystemUpdateGate。
+	updateGate gin.HandlerFunc
 }
 
 // systemUpdateTimeout bounds a full in-place update or rollback: the release
@@ -56,6 +59,23 @@ func NewSystemHandler(updateSvc systemUpdateService, lockSvc *service.SystemOper
 	return &SystemHandler{
 		updateSvc: updateSvc,
 		lockSvc:   lockSvc,
+	}
+}
+
+// SetUpdateGate 装配 POST /system/update 的应用层硬门。
+func (h *SystemHandler) SetUpdateGate(gate gin.HandlerFunc) {
+	h.updateGate = gate
+}
+
+// UpdateGate 返回 POST /system/update 的应用层硬门。未装配时 fail-closed：
+// 这个端点会替换服务二进制，宁可直接拒绝，也不能因为装配缺失而放行。
+func (h *SystemHandler) UpdateGate() gin.HandlerFunc {
+	if h != nil && h.updateGate != nil {
+		return h.updateGate
+	}
+	return func(c *gin.Context) {
+		middleware2.AbortWithError(c, http.StatusForbidden,
+			middleware2.SystemUpdateGateForbiddenCode, "This endpoint is disabled or the caller address is not allowed")
 	}
 }
 

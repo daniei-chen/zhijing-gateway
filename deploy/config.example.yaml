@@ -154,6 +154,35 @@ security:
   # forwarded_client_ip_headers:
   #   - "True-Client-IP"
   #   - "X-CDN-Client-IP"
+  # Application-level gate for POST /api/v1/admin/system/update, which downloads a
+  # release binary and replaces the running service (equivalent to host code
+  # execution). Closed by default: after an upgrade the endpoint answers 403 with
+  # code ADMIN_SYSTEM_UPDATE_FORBIDDEN until it is enabled here AND the caller
+  # address matches allow_cidrs AND the session completed a TOTP step-up.
+  # The step-up requirement is independent of settings.step_up_enabled.
+  # See deploy/ADMIN_SYSTEM_UPDATE.md before enabling it.
+  # /admin/system/update 的应用层硬门：该端点会下载发布二进制替换正在运行的服务，
+  # 等价于主机代码执行。默认关闭——升级后该端点返回 403（code
+  # ADMIN_SYSTEM_UPDATE_FORBIDDEN），必须在下面显式开启、调用方地址命中
+  # allow_cidrs、且当前会话完成过 TOTP step-up 才能使用。step-up 要求不受
+  # settings.step_up_enabled 影响。开启前先读 deploy/ADMIN_SYSTEM_UPDATE.md。
+  admin_system_update:
+    # 环境变量：SECURITY_ADMIN_SYSTEM_UPDATE_ENABLED
+    enabled: false
+    # Matched against the TCP peer. Forwarding headers are ignored unless that
+    # peer itself is listed in server.trusted_proxies; then the address resolved
+    # through the trusted chain is matched instead. Default allows only loopback
+    # (a reverse proxy on the same host / local operator). An empty list denies
+    # every caller. Add the entry machine's address when requests arrive from a
+    # separate edge host.
+    # 按 TCP 对端匹配。除非该对端本身在 server.trusted_proxies 里（此时改为匹配
+    # 可信代理链解析出的地址），否则完全不采信转发头。默认只放行回环（同机反向
+    # 代理 / 本机运维）。空列表表示谁都不放行。请求来自另一台入口机时必须把入口机
+    # 地址加进来。
+    # 环境变量：SECURITY_ADMIN_SYSTEM_UPDATE_ALLOW_CIDRS=127.0.0.1/32,175.27.132.225/32
+    allow_cidrs:
+      - "127.0.0.1/32"
+      - "::1/128"
   url_allowlist:
     # Enable URL allowlist validation. Keep this enabled in production.
     # 启用 URL 白名单验证，生产环境必须保持启用。
