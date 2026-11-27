@@ -11,9 +11,12 @@
 
 | 证据 | 结论 |
 |---|---|
-| `git cat-file -t 10ba8f9b4` → `fatal: could not get object info` | 上游基线的提交对象在本地不存在 |
-| 本地唯一 root 是 `e5247df`，提交信息自报 `source tar.gz @ 6b4b37db (0.2.20)` | 仓库从源码压缩包导入 |
-| `local-v002-baseline.json` 是导入时 78 个文件的 sha256 指纹 | 它是三方合并的参照物，不是上游基线 |
+| `git merge-base HEAD upstream/main` → 无输出，`$?` = 1 | 不存在任何共同祖先提交 |
+| `git merge-base --is-ancestor 10ba8f9b4 HEAD` → `$?` = 1 | 声明基线不是本仓库的祖先 |
+| 本地唯一 root 是 `e5247df`，提交信息：`follow upstream sub2api v0.2.20 (6b4b37db) and replay deployed v0.0.3 patch` | 新仓库重放上游 v0.2.20 + 已部署补丁，不是 fork |
+| `local-v002-baseline.json` 是导入时 78 个文件的 sha256 指纹 | 三方合并的参照物，不是上游基线 |
+
+（`10ba8f9b4` 未 fetch 前取不到对象、fetch 后能取到，但 `--is-ancestor` 为 1：本地有对象 ≠ 有血缘。）
 
 所以 **`git merge upstream/main` 在任何时候都是错的**：没有共同祖先，合并等于用上游整棵树覆盖本地，本 fork 的硬化（hash 锁、受保护字节、门禁清单）会静默消失，git 也不会报冲突。唯一安全的路径是 `fork-manifest.json` 那套逐文件判定 + 按文件三方合并，而它必须分片做。
 
