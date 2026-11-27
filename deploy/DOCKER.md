@@ -19,9 +19,10 @@ creates the administrator account. Two things follow from that:
 
 - **The wizard binds `127.0.0.1` inside the container by default.** A published
   port cannot reach the container's loopback, so a wizard deployment needs
-  `-e SERVER_HOST=0.0.0.0`. Publish the port on the host's loopback
-  (`-p 127.0.0.1:8080:8080`) and reach it through an SSH tunnel instead of
-  exposing it.
+  `-e SERVER_HOST=0.0.0.0`. The wizard never guesses that it runs in a
+  container: inside one it must be set explicitly. Publish the port on the
+  host's loopback (`-p 127.0.0.1:8080:8080`) and reach it through an SSH tunnel
+  instead of exposing it.
 - **The wizard requires a one-time setup token.** Read it from the container log
   and open the link it prints:
 
