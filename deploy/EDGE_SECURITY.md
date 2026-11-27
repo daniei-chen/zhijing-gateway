@@ -149,12 +149,12 @@ trusts no forwarded client IPs.
 On the first upgrade to this mode, a legacy `false` value is preserved: the
 process no longer rewrites it to `true` when `server.trusted_proxies` was not
 explicitly configured, and logs a warning naming the switch and how to enable
-it. New installations persist the configured value during database
-initialization, which is `false` unless `security.trust_forwarded_ip_for_api_key_acl`
-was explicitly set in YAML or in
-`SECURITY_TRUST_FORWARDED_IP_FOR_API_KEY_ACL`. Existing installations backfill a
-missing database value from the YAML configuration. A hidden migration marker
-prevents later administrator changes from being overwritten.
+it. A fresh installation stores no row for this switch, so the process uses the
+configured value: `false` unless
+`security.trust_forwarded_ip_for_api_key_acl` was explicitly set in YAML or in
+`SECURITY_TRUST_FORWARDED_IP_FOR_API_KEY_ACL`. The first start backfills a
+missing persisted header list and writes a hidden migration marker that prevents
+later administrator changes from being overwritten.
 If settings cannot be read or the persisted custom-header list is malformed,
 the process fails closed to trusted-proxy mode with no custom headers. If a
 migration write fails, the computed mode remains active for the current process
