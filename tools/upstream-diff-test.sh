@@ -257,7 +257,9 @@ case $control in
   *) fail '假 diff 没有生效，locale 断言会变成空跑' ;;
 esac
 
-shim_rows=$(PATH="$shim:$PATH" run --top 0 | awk -F'\t' 'NF == 3' | wc -l | tr -d ' ')
+# 调用方自己的 LC_ALL 不能影响这条断言：显式给一个非 C 的值，脚本若没锁
+# locale，假 diff 就会说德语。调用方本来就导出 LC_ALL=C 时，这一条也照样有效。
+shim_rows=$(LC_ALL=de_DE.UTF-8 PATH="$shim:$PATH" run --top 0 | awk -F'\t' 'NF == 3' | wc -l | tr -d ' ')
 [ "$default_rows" = "$shim_rows" ] \
   || fail "假 diff 生效后行数从 $default_rows 变成 $shim_rows，说明脚本没有自己锁 locale"
 
