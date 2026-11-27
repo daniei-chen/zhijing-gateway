@@ -19,6 +19,7 @@ jobs:
           /bin/sh deploy/tests/docker-compose-security-test.sh
           /bin/sh deploy/tests/docker-compose-gateway-env-test.sh
           /bin/sh deploy/tests/docker-runtime-resources-test.sh
+          /bin/sh deploy/tests/ci-race-job-test.sh
           /bin/sh deploy/test-caddyfile-cache.sh
 
   test:
@@ -42,6 +43,26 @@ jobs:
       - name: Integration tests
         working-directory: backend
         run: make test-integration
+
+  race:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/go.mod
+          check-latest: false
+          cache: true
+          cache-dependency-path: backend/go.sum
+      - name: Verify Go version
+        run: |
+          go version | grep -q 'go1.27.4'
+      # 并发是这个网关最危险的失效面（槽位泄漏、缓存竞态、限流计数）。
+      # go vet / golangci-lint 都看不出数据竞争，只有 -race 能。
+      # 全量 -race 要跑十几分钟，所以只挑并发相关的测试；约 95 秒。
+      - name: Race detector on concurrency-critical tests
+        working-directory: backend
+        run: make test-race
 
   frontend:
     runs-on: ubuntu-latest
