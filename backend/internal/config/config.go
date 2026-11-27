@@ -809,11 +809,30 @@ type SecurityConfig struct {
 	CSP             CSPConfig            `mapstructure:"csp"`
 	ProxyFallback   ProxyFallbackConfig  `mapstructure:"proxy_fallback"`
 	ProxyProbe      ProxyProbeConfig     `mapstructure:"proxy_probe"`
+	// AdminSystemUpdate gates POST /api/v1/admin/system/update, which replaces the
+	// running service binary. Closed by default; see AdminSystemUpdateConfig.
+	AdminSystemUpdate AdminSystemUpdateConfig `mapstructure:"admin_system_update"`
 	// TrustForwardedIPForAPIKeyACL enables legacy raw forwarded-header takeover.
 	// When disabled, server.trusted_proxies is authoritative for all client-IP consumers.
 	TrustForwardedIPForAPIKeyACL  bool                                       `mapstructure:"trust_forwarded_ip_for_api_key_acl"`
 	ForwardedClientIPHeaders      []string                                   `mapstructure:"forwarded_client_ip_headers" json:"forwarded_client_ip_headers" yaml:"forwarded_client_ip_headers"`
 	forwardedClientIPSettingsLive *atomic.Pointer[ForwardedClientIPSettings] `mapstructure:"-" json:"-" yaml:"-"`
+}
+
+// AdminSystemUpdateConfig controls the application-level gate on
+// POST /api/v1/admin/system/update.
+//
+// The endpoint downloads a release binary and swaps it in place, so one admin JWT
+// is otherwise equivalent to code execution on the host. The gate is closed by
+// default and, once open, still requires a caller address inside AllowCIDRs and a
+// TOTP step-up grant on the current session — the latter regardless of the
+// step_up_enabled setting.
+type AdminSystemUpdateConfig struct {
+	Enabled bool `mapstructure:"enabled"`
+	// AllowCIDRs matches the TCP peer, or the address resolved through
+	// server.trusted_proxies when that peer is a trusted proxy. Forwarding headers
+	// from any other peer are ignored. An empty list denies every caller.
+	AllowCIDRs []string `mapstructure:"allow_cidrs"`
 }
 
 func NormalizeForwardedClientIPHeaders(headers []string) ([]string, error) {
@@ -843,6 +862,33 @@ func cloneForwardedClientIPHeaders(headers []string) []string {
 		return []string{}
 	}
 	return append([]string(nil), headers...)
+}
+
+// normalizeAdminSystemUpdateAllowCIDRs 校验并规范化硬门允许的来源网段。
+// 非法条目直接让启动失败：ip.CompileIPRules 会静默忽略无法解析的规则，
+// 于是门看起来配好了、实际把来源全挡在外面，运维很难定位。
+func normalizeAdminSystemUpdateAllowCIDRs(patterns []string) ([]string, error) {
+	normalized := make([]string, 0, len(patterns))
+	seen := make(map[string]struct{}, len(patterns))
+	for _, pattern := range patterns {
+		pattern = strings.TrimSpace(pattern)
+		if pattern == "" {
+			continue
+		}
+		if strings.Contains(pattern, "/") {
+			if _, err := netip.ParsePrefix(pattern); err != nil {
+				return nil, fmt.Errorf("security.admin_system_update.allow_cidrs: invalid CIDR %q", pattern)
+			}
+		} else if _, err := netip.ParseAddr(pattern); err != nil {
+			return nil, fmt.Errorf("security.admin_system_update.allow_cidrs: invalid IP %q", pattern)
+		}
+		if _, exists := seen[pattern]; exists {
+			continue
+		}
+		seen[pattern] = struct{}{}
+		normalized = append(normalized, pattern)
+	}
+	return normalized, nil
 }
 
 func (c *Config) ForwardedClientIPSettings() ForwardedClientIPSettings {
@@ -2046,6 +2092,11 @@ func load(allowMissingJWTSecret bool) (*Config, error) {
 	}
 	cfg.Security.ForwardedClientIPHeaders = forwardedClientIPHeaders
 	cfg.SetForwardedClientIPSettings(cfg.Security.TrustForwardedIPForAPIKeyACL, forwardedClientIPHeaders)
+	adminSystemUpdateCIDRs, err := normalizeAdminSystemUpdateAllowCIDRs(cfg.Security.AdminSystemUpdate.AllowCIDRs)
+	if err != nil {
+		return nil, err
+	}
+	cfg.Security.AdminSystemUpdate.AllowCIDRs = adminSystemUpdateCIDRs
 	cfg.Log.Level = strings.ToLower(strings.TrimSpace(cfg.Log.Level))
 	cfg.Log.Format = strings.ToLower(strings.TrimSpace(cfg.Log.Format))
 	cfg.Log.ServiceName = strings.TrimSpace(cfg.Log.ServiceName)
@@ -2115,6 +2166,14 @@ func load(allowMissingJWTSecret bool) (*Config, error) {
 	}
 	if !cfg.Security.ResponseHeaders.Enabled {
 		slog.Warn("security.response_headers.enabled=false; configurable header filtering disabled (default allowlist only).")
+	}
+	if cfg.Security.AdminSystemUpdate.Enabled {
+		slog.Info("admin system update gate open",
+			"allow_cidrs", cfg.Security.AdminSystemUpdate.AllowCIDRs,
+			"step_up", "required",
+		)
+	} else {
+		slog.Info("admin system update gate closed: POST /api/v1/admin/system/update is rejected until security.admin_system_update.enabled=true and the caller matches allow_cidrs")
 	}
 
 	if cfg.JWT.Secret != "" && isWeakJWTSecret(cfg.JWT.Secret) {
@@ -2235,6 +2294,10 @@ func setDefaults() {
 	viper.SetDefault("security.csp.policy", DefaultCSPPolicy)
 	viper.SetDefault("security.proxy_probe.insecure_skip_verify", false)
 	viper.SetDefault("security.trust_forwarded_ip_for_api_key_acl", false)
+	// /admin/system/update 会用下载的二进制替换正在运行的服务（≈ 主机代码执行）：
+	// 默认关闭，开启后也只放行回环对端（本机反向代理 / 同机运维）。
+	viper.SetDefault("security.admin_system_update.enabled", false)
+	viper.SetDefault("security.admin_system_update.allow_cidrs", []string{"127.0.0.1/32", "::1/128"})
 
 	// Security - disable direct fallback on proxy error
 	viper.SetDefault("security.proxy_fallback.allow_direct_on_error", false)

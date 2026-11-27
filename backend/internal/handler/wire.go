@@ -4,6 +4,7 @@ import (
 	"github.com/daniei-chen/zhijing-gateway/internal/config"
 	"github.com/daniei-chen/zhijing-gateway/internal/handler/admin"
 	"github.com/daniei-chen/zhijing-gateway/internal/securityaudit"
+	"github.com/daniei-chen/zhijing-gateway/internal/server/middleware"
 	"github.com/daniei-chen/zhijing-gateway/internal/service"
 
 	"github.com/google/wire"
@@ -158,9 +159,27 @@ func ProvideBatchImageHandler(
 	return h
 }
 
-// ProvideSystemHandler creates admin.SystemHandler with UpdateService
-func ProvideSystemHandler(updateService *service.UpdateService, lockService *service.SystemOperationLockService) *admin.SystemHandler {
-	return admin.NewSystemHandler(updateService, lockService)
+// ProvideSystemHandler creates admin.SystemHandler with UpdateService.
+// The update endpoint gets its own application-level gate: closed by default,
+// CIDR-allowlisted by TCP peer, and always requiring a TOTP step-up grant.
+func ProvideSystemHandler(
+	updateService *service.UpdateService,
+	lockService *service.SystemOperationLockService,
+	cfg *config.Config,
+	totpService *service.TotpService,
+	userService *service.UserService,
+) *admin.SystemHandler {
+	h := admin.NewSystemHandler(updateService, lockService)
+	h.SetUpdateGate(middleware.NewAdminSystemUpdateGate(
+		middleware.AdminSystemUpdatePolicy{
+			Enabled:        cfg.Security.AdminSystemUpdate.Enabled,
+			AllowCIDRs:     cfg.Security.AdminSystemUpdate.AllowCIDRs,
+			TrustedProxies: cfg.Server.TrustedProxies,
+		},
+		totpService,
+		userService,
+	))
+	return h
 }
 
 // ProvideSettingHandler creates SettingHandler with version from BuildInfo

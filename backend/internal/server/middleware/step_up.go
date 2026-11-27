@@ -112,33 +112,40 @@ func MachineCredentialReason(c *gin.Context) (string, bool) {
 }
 
 func enforceStepUp(c *gin.Context, grantChecker stepUpGrantChecker, userReader stepUpUserReader, settings stepUpSettingReader) bool {
+	granted, _ := enforceStepUpWithReason(c, grantChecker, userReader, settings)
+	return granted
+}
+
+// enforceStepUpWithReason 的判定与 enforceStepUp 完全一致，额外返回拒绝原因码
+// （通过时为空串），供需要在审计里记录 step-up 状态的调用方使用。
+func enforceStepUpWithReason(c *gin.Context, grantChecker stepUpGrantChecker, userReader stepUpUserReader, settings stepUpSettingReader) (bool, string) {
 	// 功能开关关闭时直接放行（含 admin API key），恢复门控引入前的行为。
 	// settings 为 nil 时保持门控（fail-closed）：正常装配不会出现 nil。
 	if settings != nil && !settings.IsStepUpEnabled(c.Request.Context()) {
-		return true
+		return true, ""
 	}
 
 	if reason, machine := MachineCredentialReason(c); machine {
 		AbortWithError(c, 403, reason,
 			"Machine credentials cannot access this endpoint; a two-factor verified browser session is required")
-		return false
+		return false, reason
 	}
 
 	subject, ok := GetAuthSubjectFromContext(c)
 	if !ok || subject.UserID <= 0 {
 		AbortWithError(c, 401, "UNAUTHORIZED", "Authorization required")
-		return false
+		return false, "UNAUTHORIZED"
 	}
 
 	user, err := userReader.GetByID(c.Request.Context(), subject.UserID)
 	if err != nil {
 		AbortWithError(c, 500, "INTERNAL_ERROR", "Failed to load user")
-		return false
+		return false, "INTERNAL_ERROR"
 	}
 	if !user.TotpEnabled {
 		AbortWithError(c, 403, "STEP_UP_TOTP_NOT_ENABLED",
 			"This operation requires two-factor authentication; please enable TOTP first")
-		return false
+		return false, "STEP_UP_TOTP_NOT_ENABLED"
 	}
 
 	sessionKey := StepUpSessionKey(c, subject.UserID)
@@ -146,13 +153,13 @@ func enforceStepUp(c *gin.Context, grantChecker stepUpGrantChecker, userReader s
 	if err != nil {
 		// 安全门控故障时选择 fail-closed。
 		AbortWithError(c, 503, "STEP_UP_UNAVAILABLE", "Step-up verification service unavailable")
-		return false
+		return false, "STEP_UP_UNAVAILABLE"
 	}
 	if !granted {
 		AbortWithError(c, 403, "STEP_UP_REQUIRED",
 			"This operation requires recent two-factor verification")
-		return false
+		return false, "STEP_UP_REQUIRED"
 	}
 
-	return true
+	return true, ""
 }

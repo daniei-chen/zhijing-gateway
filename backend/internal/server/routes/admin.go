@@ -682,7 +682,9 @@ func registerSystemRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAut
 		system.GET("/rollback-versions", h.Admin.System.GetRollbackVersions)
 		// 三个写操作会触发服务升级/回滚/重启，属最高危动作 —— 挂 step-up 2FA（补丁 P2-02）。
 		// 是否真正要求二次验证由 settings.step_up_enabled 控制，默认关闭时行为不变。
-		system.POST("/update", gin.HandlerFunc(stepUpAuth), h.Admin.System.PerformUpdate)
+		// /update 额外挂应用层硬门：默认关闭 + 对端 CIDR 白名单 + 强制 step-up，
+		// 不受 step_up_enabled 影响（见 middleware.NewAdminSystemUpdateGate）。
+		system.POST("/update", h.Admin.System.UpdateGate(), gin.HandlerFunc(stepUpAuth), h.Admin.System.PerformUpdate)
 		system.POST("/rollback", gin.HandlerFunc(stepUpAuth), h.Admin.System.Rollback)
 		system.POST("/restart", gin.HandlerFunc(stepUpAuth), h.Admin.System.RestartService)
 	}

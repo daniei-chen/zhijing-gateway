@@ -267,6 +267,78 @@ func matchesCompiledRules(parsedIP net.IP, rules *CompiledIPRules) bool {
 	return false
 }
 
+// FirstMatchingRule 返回 rules 中第一条匹配 clientIP 的规则原文（CIDR 或单 IP），
+// 未匹配返回空串。matchesCompiledRules 只回答“是否匹配”，安全门的审计需要记下
+// 命中的具体规则，因此单独暴露。
+func FirstMatchingRule(clientIP string, rules *CompiledIPRules) string {
+	parsedIP := net.ParseIP(normalizeIP(clientIP))
+	if parsedIP == nil || rules == nil {
+		return ""
+	}
+	for _, cidr := range rules.CIDRs {
+		if cidr.Contains(parsedIP) {
+			return cidr.String()
+		}
+	}
+	for _, ruleIP := range rules.IPs {
+		if parsedIP.Equal(ruleIP) {
+			return ruleIP.String()
+		}
+	}
+	return ""
+}
+
+// ResolvePeerClientIP 按“最靠近服务的对端 + 可信代理链”解析调用方地址。
+//
+// 默认返回 TCP 对端（c.Request.RemoteAddr）本身，转发头一律不参与判定；
+// 只有当该对端命中 trustedProxies 时才读取 X-Forwarded-For（从右向左跳过
+// 可信代理，取第一个不可信地址），XFF 缺失时再看 X-Real-IP。
+//
+// 不复用 gin 的 c.ClientIP()：gin 引擎在未调用 SetTrustedProxies 时默认信任
+// 全部对端，安全门不能依赖引擎的装配状态来决定是否采信转发头。
+func ResolvePeerClientIP(c *gin.Context, trustedProxies *CompiledIPRules) string {
+	if c == nil || c.Request == nil {
+		return ""
+	}
+	peer := normalizeValidIP(c.Request.RemoteAddr)
+	if peer == "" {
+		return ""
+	}
+	if trustedProxies == nil || !matchesCompiledRules(net.ParseIP(peer), trustedProxies) {
+		return peer
+	}
+
+	// 把多个 X-Forwarded-For 字段按出现顺序拼成一条链再自右向左走：
+	// 保留客户端自带字段、另外追加真实调用方的代理会让 Header.Values 返回多个
+	// 字段，只从第一个字段的右侧找会采信客户端伪造的最左值。
+	var hops []string
+	for _, value := range c.Request.Header.Values("X-Forwarded-For") {
+		hops = append(hops, strings.Split(value, ",")...)
+	}
+	for i := len(hops) - 1; i >= 0; i-- {
+		candidate := normalizeValidIP(hops[i])
+		if candidate == "" {
+			// 链上有无法解析的跳数：整条链作废，返回空地址由调用方拒绝。
+			// 回落成对端（可信代理自身）会把 allow_cidrs 里最常见的回环条目
+			// 变成“能连到代理就通过”，一个格式错误的值就能绕过地址检查。
+			return ""
+		}
+		if !matchesCompiledRules(net.ParseIP(candidate), trustedProxies) {
+			return candidate
+		}
+	}
+	// X-Real-IP 只在完全没有 X-Forwarded-For 时作为兜底：XFF 已存在时再看它，
+	// 会让一个不改写 X-Real-IP 的代理把客户端自带的值透传成判定依据。
+	if len(hops) == 0 {
+		if realIP := normalizeValidIP(c.GetHeader("X-Real-IP")); realIP != "" {
+			if !matchesCompiledRules(net.ParseIP(realIP), trustedProxies) {
+				return realIP
+			}
+		}
+	}
+	return peer
+}
+
 func isPrivateIP(ipStr string) bool {
 	ip := net.ParseIP(ipStr)
 	if ip == nil {
