@@ -11,6 +11,10 @@ const SETUP_TOKEN_HEADER = 'X-Setup-Token'
 
 let setupToken = ''
 
+// A token the server rejected, so the address-bar copy of it is not read again
+// when the browser cannot persist the cleared state.
+let rejectedToken = ''
+
 function readTokenFromQuery(): string {
   if (typeof window === 'undefined') return ''
   try {
@@ -52,7 +56,7 @@ export function getSetupToken(): string {
   if (setupToken) return setupToken
 
   const fromQuery = readTokenFromQuery()
-  if (fromQuery) {
+  if (fromQuery && fromQuery !== rejectedToken) {
     // Without session storage the address bar is the only copy a reload can
     // read, so leave the link intact in that case.
     if (setSetupToken(fromQuery)) {
@@ -99,6 +103,7 @@ export function clearRejectedSetupToken(error: unknown): boolean {
   const status = (error as { response?: { status?: number } } | null)?.response?.status
   if (status !== 401) return false
 
+  rejectedToken = setupToken || readTokenFromQuery()
   setSetupToken('')
   return true
 }

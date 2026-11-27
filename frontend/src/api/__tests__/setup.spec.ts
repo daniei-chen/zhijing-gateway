@@ -95,6 +95,28 @@ describe('setup api token', () => {
     }
   })
 
+  it('does not resurrect a rejected link token when storage is blocked', async () => {
+    window.history.replaceState({}, '', '/setup?setup_token=rejected-link')
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('storage blocked')
+    })
+    const removeItem = vi.spyOn(Storage.prototype, 'removeItem').mockImplementation(() => {
+      throw new Error('storage blocked')
+    })
+
+    try {
+      const setupApi = await loadSetupApi()
+      expect(setupApi.getSetupToken()).toBe('rejected-link')
+
+      expect(setupApi.clearRejectedSetupToken({ response: { status: 401 } })).toBe(true)
+      expect(setupApi.hasSetupToken()).toBe(false)
+      expect(setupApi.getSetupToken()).toBe('')
+    } finally {
+      setItem.mockRestore()
+      removeItem.mockRestore()
+    }
+  })
+
   it('trims a pasted token and clears it when set to an empty value', async () => {
     const setupApi = await loadSetupApi()
 
