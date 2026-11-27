@@ -49,16 +49,25 @@ Only the TCP peer (`c.Request.RemoteAddr`) is trusted:
 - The peer address itself is matched against `allow_cidrs`.
 - `X-Forwarded-For`, `CF-Connecting-IP`, `X-Real-IP` and any custom client-IP
   header are ignored unless the peer is listed in `server.trusted_proxies`.
-- When the peer is a trusted proxy, the address is resolved through the
-  `X-Forwarded-For` chain from right to left, skipping trusted hops and taking
-  the first untrusted address; `X-Real-IP` is used only when `X-Forwarded-For`
-  is absent. That resolved address is what `allow_cidrs` matches.
+- When the peer is a trusted proxy, all `X-Forwarded-For` fields are combined in
+  order into one chain, walked from right to left, skipping trusted hops and
+  taking the first untrusted address; `X-Real-IP` is used only when
+  `X-Forwarded-For` is absent. That resolved address is what `allow_cidrs`
+  matches.
 
 `security.trust_forwarded_ip_for_api_key_acl` does not affect this endpoint.
-That legacy switch defaults to on, which makes raw forwarding headers
-authoritative for client-IP metadata; an IP allowlist built on it would be
-bypassable by adding a header. The gate therefore never reads the legacy
-resolution path.
+That legacy switch makes raw forwarding headers authoritative for client-IP
+metadata (it shipped as `true` historically and now defaults to `false`); an IP
+allowlist built on it is bypassable by adding a header whenever it is on. The
+gate therefore never reads the legacy resolution path.
+
+A forwarded chain that contains a value which is not an IP address is treated as
+unusable: the call is rejected rather than falling back to the proxy's own
+address. Falling back would turn the most common `allow_cidrs` entry (loopback)
+into "anyone who can reach the proxy passes", so one malformed value would
+disable the address check. The audit entry shows an empty
+`system_update_peer_ip` with `system_update_result=peer_not_allowed` in that
+case.
 
 ## Configuring the current topology
 

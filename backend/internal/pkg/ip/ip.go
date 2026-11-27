@@ -318,7 +318,10 @@ func ResolvePeerClientIP(c *gin.Context, trustedProxies *CompiledIPRules) string
 	for i := len(hops) - 1; i >= 0; i-- {
 		candidate := normalizeValidIP(hops[i])
 		if candidate == "" {
-			break
+			// 链上有无法解析的跳数：整条链作废，返回空地址由调用方拒绝。
+			// 回落成对端（可信代理自身）会把 allow_cidrs 里最常见的回环条目
+			// 变成“能连到代理就通过”，一个格式错误的值就能绕过地址检查。
+			return ""
 		}
 		if !matchesCompiledRules(net.ParseIP(candidate), trustedProxies) {
 			return candidate

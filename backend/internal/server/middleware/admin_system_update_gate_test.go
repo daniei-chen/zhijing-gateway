@@ -233,6 +233,30 @@ func TestAdminSystemUpdateGateRejectsSpoofedRepeatedXFFFields(t *testing.T) {
 	require.Equal(t, "203.0.113.50", probe.auditExtra["system_update_peer_ip"])
 }
 
+// 可信代理链上出现无法解析的跳数时整条链作废：不能回落成“可信对端本身”，
+// 否则默认 allow_cidrs 里的回环条目会让一个格式错误的值直接放行任何人。
+func TestAdminSystemUpdateGateRejectsMalformedForwardedChain(t *testing.T) {
+	policy := AdminSystemUpdatePolicy{
+		Enabled:        true,
+		AllowCIDRs:     []string{"127.0.0.1/32", "175.27.132.225/32"},
+		TrustedProxies: []string{"127.0.0.1/32"},
+	}
+	router, probe := newSystemUpdateGateRouter(t, systemUpdateGateOptions{
+		policy:      policy,
+		granted:     true,
+		totpEnabled: true,
+	})
+
+	rec := postSystemUpdate(router, "127.0.0.1:41234", map[string]string{
+		"X-Forwarded-For": "175.27.132.225, unknown",
+	})
+
+	require.Equal(t, http.StatusForbidden, rec.Code)
+	require.False(t, probe.called)
+	require.Equal(t, "peer_not_allowed", probe.auditExtra["system_update_result"])
+	require.Equal(t, "", probe.auditExtra["system_update_peer_ip"])
+}
+
 // 未启用 TOTP 的账号无法完成 step-up，硬门必须拒绝而不是放行。
 func TestAdminSystemUpdateGateRequiresTotpEnrollment(t *testing.T) {
 	policy := defaultAdminSystemUpdatePolicy()
