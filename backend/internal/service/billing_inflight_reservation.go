@@ -558,7 +558,11 @@ func (d inflightEstimateDeps) estimateOne(ctx context.Context, apiKey *APIKey, m
 		}
 		resolved = d.resolver.Resolve(ctx, in)
 	}
-	priced := resolved != nil
+	perRequestMode := resolved != nil && (resolved.Mode == BillingModePerRequest || resolved.Mode == BillingModeImage || resolved.Mode == BillingModeVideo)
+	// 只有真正拿到价目条目才算「有价」：Resolver 对未知模型也可能返回非 nil
+	// （族名兜底/空模式），不能拿它当定价来源。按次模式本身就是一条显式定价
+	// 配置（允许显式 0 元），所以直接算有价。
+	priced := perRequestMode
 
 	inputTokens, outputTokens := tokenCounts(cfg, req.BodyBytes, req.MaxTokens)
 	tokenCost := func() float64 {
@@ -577,7 +581,6 @@ func (d inflightEstimateDeps) estimateOne(ctx context.Context, apiKey *APIKey, m
 	}
 
 	var cost float64
-	perRequestMode := resolved != nil && (resolved.Mode == BillingModePerRequest || resolved.Mode == BillingModeImage || resolved.Mode == BillingModeVideo)
 	switch req.Kind {
 	case InflightEstimateImage:
 		if perRequestMode {
@@ -634,10 +637,11 @@ func (d inflightEstimateDeps) estimateOne(ctx context.Context, apiKey *APIKey, m
 			}
 		}
 	}
-	if !validCost(cost) {
-		return 0, priced
+	if validCost(cost) {
+		// 有任何正数估算就说明定价来源存在（媒体类没有 token 价格，走内置/分组价）。
+		return cost, true
 	}
-	return cost, priced
+	return 0, priced
 }
 
 // estimate 返回保守的单请求费用（USD，已乘倍率）；第二个返回值表示是否找到了
