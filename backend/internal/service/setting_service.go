@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
 	"sync/atomic"
 
@@ -360,11 +361,18 @@ func (s *SettingService) LoadForwardedClientIPSettings(ctx context.Context) erro
 	}
 	if values[settingKeyForwardedClientIPModeV2] != "true" {
 		updates[settingKeyForwardedClientIPModeV2] = "true"
-		// Before this migration, new installations persisted false by default.
-		// Restore compatibility only when no trusted-proxy policy was configured.
+		// Older releases flipped a stored false back to true here to keep the
+		// pre-hardening behavior for reverse-proxy deployments. That silently
+		// re-enabled a switch the operator had turned off, so the stored value is
+		// now authoritative: warn instead of rewriting it.
 		if headersErr == nil && hasStoredValue && !enabled && !s.cfg.Server.TrustedProxiesConfigured {
-			enabled = true
-			updates[SettingKeyAPIKeyACLTrustForwardedIP] = "true"
+			slog.Warn("security.trust_forwarded_ip_for_api_key_acl is disabled and stays disabled; "+
+				"client IPs now come from the TCP peer unless server.trusted_proxies is set",
+				"setting", SettingKeyAPIKeyACLTrustForwardedIP,
+				"stored_value", storedValue,
+				"trusted_proxies_configured", s.cfg.Server.TrustedProxiesConfigured,
+				"to_trust_forwarded_headers", "set server.trusted_proxies to the proxy CIDRs and security.trust_forwarded_ip_for_api_key_acl: true",
+			)
 		}
 	}
 	if len(updates) > 0 {

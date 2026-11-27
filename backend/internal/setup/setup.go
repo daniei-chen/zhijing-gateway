@@ -116,6 +116,32 @@ type ServerConfig struct {
 	Mode string `json:"mode" yaml:"mode"`
 }
 
+// setupSecurityConfig is the security block the setup wizard writes. It pins the
+// forwarded-IP trust switch off so a wizard deployment never starts trusting
+// spoofable X-Forwarded-For / CF-Connecting-IP headers; operators behind a
+// reverse proxy opt in through server.trusted_proxies plus this switch.
+type setupSecurityConfig struct {
+	TrustForwardedIPForAPIKeyACL bool `json:"trust_forwarded_ip_for_api_key_acl" yaml:"trust_forwarded_ip_for_api_key_acl"`
+}
+
+// MarshalYAML documents the switch in the generated file, which a plain struct
+// tag cannot do.
+func (c setupSecurityConfig) MarshalYAML() (any, error) {
+	return &yaml.Node{
+		Kind: yaml.MappingNode,
+		HeadComment: "Security hardening / 安全加固:\n" +
+			"Raw forwarding headers are not trusted unless this is explicitly true.\n" +
+			"Behind a reverse proxy, set server.trusted_proxies to the exact proxy\n" +
+			"CIDRs that connect directly to 智境网关, then set this to true.\n" +
+			"默认不信任原始转发头；反代部署请先把 server.trusted_proxies 设为直连代理的\n" +
+			"精确 CIDR，再显式改为 true。",
+		Content: []*yaml.Node{
+			{Kind: yaml.ScalarNode, Value: "trust_forwarded_ip_for_api_key_acl"},
+			{Kind: yaml.ScalarNode, Tag: "!!bool", Value: strconv.FormatBool(c.TrustForwardedIPForAPIKeyACL)},
+		},
+	}, nil
+}
+
 type JWTConfig struct {
 	Secret     string `json:"secret" yaml:"secret"`
 	ExpireHour int    `json:"expire_hour" yaml:"expire_hour"`
@@ -532,9 +558,10 @@ func writeConfigFile(cfg *SetupConfig) error {
 
 	// Prepare config for YAML (exclude sensitive data and admin config)
 	yamlConfig := struct {
-		Server   ServerConfig   `yaml:"server"`
-		Database DatabaseConfig `yaml:"database"`
-		Redis    RedisConfig    `yaml:"redis"`
+		Server   ServerConfig        `yaml:"server"`
+		Security setupSecurityConfig `yaml:"security"`
+		Database DatabaseConfig      `yaml:"database"`
+		Redis    RedisConfig         `yaml:"redis"`
 		JWT      struct {
 			Secret     string `yaml:"secret"`
 			ExpireHour int    `yaml:"expire_hour"`
@@ -548,6 +575,7 @@ func writeConfigFile(cfg *SetupConfig) error {
 		Timezone string `yaml:"timezone"`
 	}{
 		Server:   cfg.Server,
+		Security: setupSecurityConfig{TrustForwardedIPForAPIKeyACL: false},
 		Database: cfg.Database,
 		Redis:    cfg.Redis,
 		JWT: struct {
