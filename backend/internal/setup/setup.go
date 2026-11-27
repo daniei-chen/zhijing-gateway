@@ -131,10 +131,14 @@ func (c setupSecurityConfig) MarshalYAML() (any, error) {
 		Kind: yaml.MappingNode,
 		HeadComment: "Security hardening / 安全加固:\n" +
 			"Raw forwarding headers are not trusted unless this is explicitly true.\n" +
-			"Behind a reverse proxy, set server.trusted_proxies to the exact proxy\n" +
-			"CIDRs that connect directly to 智境网关, then set this to true.\n" +
-			"默认不信任原始转发头；反代部署请先把 server.trusted_proxies 设为直连代理的\n" +
-			"精确 CIDR，再显式改为 true。",
+			"Behind a reverse proxy, set\n" +
+			"server.trusted_proxies to the exact proxy CIDRs that connect directly to\n" +
+			"智境网关 and leave this false. The trusted-proxy chain then resolves the\n" +
+			"client address. Only a legacy proxy that cannot be listed needs true, and\n" +
+			"then the origin must be unreachable except through that proxy.\n" +
+			"反代部署：把 server.trusted_proxies 设为直连代理的精确 CIDR，并保持 false，\n" +
+			"可信代理链即可解析出客户端地址；只有无法列出代理地址的老部署才改为 true，\n" +
+			"且此时必须阻止绕过代理直连源站。",
 		Content: []*yaml.Node{
 			{Kind: yaml.ScalarNode, Value: "trust_forwarded_ip_for_api_key_acl"},
 			{Kind: yaml.ScalarNode, Tag: "!!bool", Value: strconv.FormatBool(c.TrustForwardedIPForAPIKeyACL)},

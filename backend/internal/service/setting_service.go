@@ -367,11 +367,12 @@ func (s *SettingService) LoadForwardedClientIPSettings(ctx context.Context) erro
 		// now authoritative: warn instead of rewriting it.
 		if headersErr == nil && hasStoredValue && !enabled && !s.cfg.Server.TrustedProxiesConfigured {
 			slog.Warn("security.trust_forwarded_ip_for_api_key_acl is disabled and stays disabled; "+
-				"client IPs now come from the TCP peer unless server.trusted_proxies is set",
+				"client IPs come from the TCP peer until server.trusted_proxies lists the proxies",
 				"setting", SettingKeyAPIKeyACLTrustForwardedIP,
 				"stored_value", storedValue,
 				"trusted_proxies_configured", s.cfg.Server.TrustedProxiesConfigured,
-				"to_trust_forwarded_headers", "set server.trusted_proxies to the proxy CIDRs and security.trust_forwarded_ip_for_api_key_acl: true",
+				"remediation", "set server.trusted_proxies to the exact proxy CIDRs and keep this false; "+
+					"only a proxy that cannot be listed needs this set to true, and then the origin must not be reachable directly",
 			)
 		}
 	}

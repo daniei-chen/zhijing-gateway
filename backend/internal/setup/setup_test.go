@@ -661,4 +661,7 @@ func TestWriteConfigFilePinsSecureForwardedIPDefault(t *testing.T) {
 	if !strings.Contains(string(data), "server.trusted_proxies") {
 		t.Fatalf("generated config does not explain server.trusted_proxies:\n%s", data)
 	}
+	if !strings.Contains(string(data), "leave this false") {
+		t.Fatalf("generated config must point reverse-proxy operators at trusted_proxies instead of enabling the switch:\n%s", data)
+	}
 }
