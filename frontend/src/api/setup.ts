@@ -4,6 +4,66 @@
 import axios from 'axios'
 import { buildGatewayUrl } from './url'
 
+// The first-run server prints a one-time token; the wizard must present it on
+// every write so a wizard reachable over the network is not a free admin account.
+const SETUP_TOKEN_STORAGE_KEY = 'zhijing_setup_token'
+const SETUP_TOKEN_HEADER = 'X-Setup-Token'
+
+let setupToken = ''
+
+function readTokenFromQuery(): string {
+  if (typeof window === 'undefined') return ''
+  try {
+    return (new URLSearchParams(window.location.search).get('setup_token') || '').trim()
+  } catch {
+    return ''
+  }
+}
+
+function readStoredToken(): string {
+  if (typeof window === 'undefined') return ''
+  try {
+    return (window.sessionStorage.getItem(SETUP_TOKEN_STORAGE_KEY) || '').trim()
+  } catch {
+    return ''
+  }
+}
+
+/**
+ * Returns the active setup token, preferring a `?setup_token=` query parameter
+ * (the link the server prints) over the one kept for this browser session.
+ */
+export function getSetupToken(): string {
+  if (setupToken) return setupToken
+
+  const fromQuery = readTokenFromQuery()
+  if (fromQuery) {
+    setSetupToken(fromQuery)
+    return setupToken
+  }
+
+  setupToken = readStoredToken()
+  return setupToken
+}
+
+export function hasSetupToken(): boolean {
+  return getSetupToken() !== ''
+}
+
+export function setSetupToken(token: string): void {
+  setupToken = token.trim()
+  if (typeof window === 'undefined') return
+  try {
+    if (setupToken) {
+      window.sessionStorage.setItem(SETUP_TOKEN_STORAGE_KEY, setupToken)
+    } else {
+      window.sessionStorage.removeItem(SETUP_TOKEN_STORAGE_KEY)
+    }
+  } catch {
+    // Storage can be unavailable (private mode); the in-memory value still works.
+  }
+}
+
 // Create a separate client for setup endpoints (not under /api/v1)
 const setupClient = axios.create({
   baseURL: buildGatewayUrl('/').replace(/\/+$/, ''),
@@ -13,9 +73,18 @@ const setupClient = axios.create({
   }
 })
 
+setupClient.interceptors.request.use((config) => {
+  const token = getSetupToken()
+  if (token) {
+    config.headers.set(SETUP_TOKEN_HEADER, token)
+  }
+  return config
+})
+
 export interface SetupStatus {
   needs_setup: boolean
   step: string
+  requires_token?: boolean
 }
 
 export interface DatabaseConfig {

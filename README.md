@@ -111,14 +111,36 @@ sudo systemctl start zhijing-gateway
 # 2. Enable auto-start on boot
 sudo systemctl enable zhijing-gateway
 
-# 3. Open Setup Wizard in browser
-# http://YOUR_SERVER_IP:8080
+# 3. Read the setup token and wizard link from the log
+sudo journalctl -u zhijing-gateway -n 50 | grep -E "Setup token|Open the wizard"
 ```
 
 The Setup Wizard will guide you through:
 - Database configuration
 - Redis configuration
 - Admin account creation
+
+The wizard creates the administrator account, so it is not meant to be reachable
+from the network. It binds the loopback interface (`127.0.0.1:8080`) by default,
+and every write it accepts must carry the one-time **setup token** that the
+server prints at startup (it is also written to the `setup-token` file in the
+data directory, mode `0600`). The token is revoked once the installation
+completes.
+
+The bundled systemd unit sets `Environment=SERVER_HOST=0.0.0.0`, which makes the
+wizard reachable on every interface. To keep it private instead, set
+`Environment=SERVER_HOST=127.0.0.1` in `/etc/systemd/system/zhijing-gateway.service`
+before the first start and forward the port from your own machine:
+
+```bash
+ssh -L 8080:127.0.0.1:8080 <user>@<server>
+```
+
+Then open the link from the log, which already includes the token:
+`http://127.0.0.1:8080/setup?setup_token=<token>`. Do not open
+`http://<server-ip>:8080/setup` in a browser — the wizard is an admin-granting
+endpoint, and the token exists to keep it from being claimed by whoever connects
+first.
 
 #### Upgrade
 
@@ -534,22 +556,30 @@ container, so it is read again after an image update or container recreation.
 
 #### ⚠️ Important: Creating the Admin Account
 
-The initial admin account is **only created via the setup wizard** (served at `http://<host>:8080` on first run). The `default.admin_email` / `default.admin_password` fields in `config.yaml` are **not used** to create it — they exist in the template for historical reasons.
+The initial admin account is **only created via the setup wizard** (served at `http://127.0.0.1:8080` on first run, protected by the one-time setup token printed at startup). The `default.admin_email` / `default.admin_password` fields in `config.yaml` are **not used** to create it — they exist in the template for historical reasons.
 
 Because step 5 above pre-creates `config.yaml`, the setup wizard will be **skipped on first run**: the server detects an existing config and boots straight into normal mode with an empty `users` table, so the first login attempt fails with `invalid email or password`.
 
 **Two ways to create the admin account:**
 
-1. **Recommended — let the wizard generate `config.yaml`:** Skip step 5 (do not run the `cp`). Start `./zhijing-gateway` directly; the setup wizard at `http://localhost:8080` walks you through database, Redis, and admin account setup, then writes `config.yaml` for you.
+1. **Recommended — let the wizard generate `config.yaml`:** Skip step 5 (do not run the `cp`). Start `./zhijing-gateway` directly; the setup wizard at `http://127.0.0.1:8080` walks you through database, Redis, and admin account setup, then writes `config.yaml` for you.
 
 2. **If you already created `config.yaml`:** Temporarily move it aside so the wizard can trigger on first run, then restore it afterwards:
    ```bash
    mv config.yaml config.yaml.bak
-   ./zhijing-gateway        # wizard runs at http://localhost:8080 and writes a fresh config.yaml
+   ./zhijing-gateway        # wizard runs at http://127.0.0.1:8080 and writes a fresh config.yaml
    # stop the server (Ctrl+C) once the wizard completes, then restore your config:
    mv config.yaml.bak config.yaml
    ./zhijing-gateway        # restart in normal mode and log in with the admin you just created
    ```
+
+The wizard listens on `127.0.0.1:8080` only, and it prints a one-time setup token
+at startup. Open the `http://127.0.0.1:8080/setup?setup_token=<token>` link from
+the log; if you run the binary on a remote host, forward the port first
+(`ssh -L 8080:127.0.0.1:8080 <user>@<server>`). Setting `SERVER_HOST` (or
+`server.host` in `config.yaml`) to a non-loopback address opens the wizard to the
+network; the server then logs a warning, and the token is what keeps a stranger
+from claiming the administrator account.
 
 ```bash
 # 6. Run the application

@@ -70,6 +70,20 @@
             </p>
           </div>
 
+          <div v-if="!hasToken" class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/20">
+            <label class="input-label">{{ t('setup.token.label') }}</label>
+            <input
+              v-model="tokenInput"
+              type="text"
+              class="input font-mono"
+              autocomplete="off"
+              :placeholder="t('setup.token.placeholder')"
+            />
+            <p class="mt-2 text-xs text-amber-700 dark:text-amber-300">
+              {{ t('setup.token.hint') }}
+            </p>
+          </div>
+
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label class="input-label">{{ t('setup.database.host') }}</label>
@@ -501,7 +515,7 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { testDatabase, testRedis, install, type InstallRequest } from '@/api/setup'
+import { testDatabase, testRedis, install, hasSetupToken, setSetupToken, type InstallRequest } from '@/api/setup'
 import { buildGatewayUrl } from '@/api/client'
 import Select from '@/components/common/Select.vue'
 import Toggle from '@/components/common/Toggle.vue'
@@ -528,6 +542,18 @@ const redisConnected = ref(false)
 const installing = ref(false)
 const confirmPassword = ref('')
 const serviceReady = ref(false)
+
+// The first-run server prints a one-time setup token; every setup write must
+// carry it, so the wizard asks for it until it has one.
+const hasToken = ref(hasSetupToken())
+const tokenInput = ref('')
+
+function applyTokenInput() {
+  const token = tokenInput.value.trim()
+  if (!token) return
+  setSetupToken(token)
+  hasToken.value = hasSetupToken()
+}
 
 // Default server port
 const getCurrentPort = (): number => {
@@ -570,7 +596,7 @@ const formData = reactive<InstallRequest>({
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 0:
-      return dbConnected.value
+      return hasToken.value && dbConnected.value
     case 1:
       return redisConnected.value
     case 2:
@@ -585,6 +611,7 @@ const canProceed = computed(() => {
 })
 
 async function testDatabaseConnection() {
+  applyTokenInput()
   testingDb.value = true
   errorMessage.value = ''
   dbConnected.value = false
@@ -602,6 +629,7 @@ async function testDatabaseConnection() {
 }
 
 async function testRedisConnection() {
+  applyTokenInput()
   testingRedis.value = true
   errorMessage.value = ''
   redisConnected.value = false
@@ -626,6 +654,7 @@ function nextStep() {
 }
 
 async function performInstall() {
+  applyTokenInput()
   installing.value = true
   errorMessage.value = ''
 

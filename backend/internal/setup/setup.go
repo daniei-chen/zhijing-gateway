@@ -356,6 +356,9 @@ func Install(cfg *SetupConfig) error {
 		return fmt.Errorf("failed to create install lock: %w", err)
 	}
 
+	// The wizard's one-time token is worthless once the instance is installed.
+	InvalidateSetupToken()
+
 	return nil
 }
 

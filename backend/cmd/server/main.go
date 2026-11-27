@@ -110,9 +110,25 @@ func runSetupServer() {
 	}
 
 	// Get server address from config.yaml or environment variables (SERVER_HOST, SERVER_PORT)
-	// This allows users to run setup on a different address if needed
-	addr := config.GetServerAddress()
-	log.Printf("Setup wizard available at http://%s", addr)
+	// This allows users to run setup on a different address if needed, but the
+	// wizard hands out administrator rights, so it stays on loopback by default.
+	setupAddr := config.GetSetupServerAddress()
+	if setupAddr.Explicit && !config.IsLoopbackHost(setupAddr.Host) {
+		log.Printf(
+			"WARNING: setup wizard is bound to %s, which is reachable from other hosts. Anyone who can reach it and read the setup token can become the administrator. Leave SERVER_HOST/server.host unset to keep it on 127.0.0.1 and use an SSH tunnel instead: ssh -L %d:127.0.0.1:%d <user>@<server>",
+			setupAddr.Address, setupAddr.Port, setupAddr.Port,
+		)
+	}
+
+	token, err := setup.EnsureSetupToken()
+	if err != nil {
+		log.Fatalf("Failed to create setup token: %v", err)
+	}
+
+	log.Printf("Setup wizard listening on http://%s", setupAddr.Address)
+	log.Printf("Setup token: %s (also written to %s)", token, setup.GetSetupTokenPath())
+	log.Printf("Open the wizard at http://127.0.0.1:%d/setup?setup_token=%s", setupAddr.Port, token)
+	log.Printf("From another machine, forward the port first: ssh -L %d:127.0.0.1:%d <user>@<server>", setupAddr.Port, setupAddr.Port)
 	log.Println("Complete the setup wizard to configure 智境网关")
 
 	protocols := new(http.Protocols)
@@ -120,7 +136,7 @@ func runSetupServer() {
 	protocols.SetUnencryptedHTTP2(true)
 
 	server := &http.Server{
-		Addr:              addr,
+		Addr:              setupAddr.Address,
 		Handler:           r,
 		ReadHeaderTimeout: 30 * time.Second,
 		IdleTimeout:       120 * time.Second,
