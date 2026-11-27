@@ -634,3 +634,34 @@ func TestPrepareAdminCredentialsAcceptsMinimumLengthPassword(t *testing.T) {
 		t.Fatalf("password = %q, want unchanged", admin.Password)
 	}
 }
+
+func TestWriteConfigFilePinsSecureForwardedIPDefault(t *testing.T) {
+	t.Setenv("DATA_DIR", t.TempDir())
+
+	if err := writeConfigFile(&SetupConfig{Timezone: "UTC"}); err != nil {
+		t.Fatalf("writeConfigFile() error = %v", err)
+	}
+
+	data, err := os.ReadFile(GetConfigFilePath())
+	if err != nil {
+		t.Fatalf("ReadFile() error = %v", err)
+	}
+	var config map[string]any
+	if err := yaml.Unmarshal(data, &config); err != nil {
+		t.Fatalf("generated config is invalid YAML: %v", err)
+	}
+	security, ok := config["security"].(map[string]any)
+	if !ok {
+		t.Fatalf("generated config is missing the security section:\n%s", data)
+	}
+	trust, present := security["trust_forwarded_ip_for_api_key_acl"]
+	if !present || trust != false {
+		t.Fatalf("generated security.trust_forwarded_ip_for_api_key_acl = (%v, present=%v), want explicit false:\n%s", trust, present, data)
+	}
+	if !strings.Contains(string(data), "server.trusted_proxies") {
+		t.Fatalf("generated config does not explain server.trusted_proxies:\n%s", data)
+	}
+	if !strings.Contains(string(data), "leave this false") {
+		t.Fatalf("generated config must point reverse-proxy operators at trusted_proxies instead of enabling the switch:\n%s", data)
+	}
+}

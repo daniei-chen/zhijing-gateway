@@ -696,10 +696,9 @@ func TestSettingService_LoadForwardedClientIPSettingsMigration(t *testing.T) {
 			wantMigrationMarkerSet: true,
 		},
 		{
-			name:                   "legacy false without proxy config migrates to compatibility",
+			name:                   "legacy false without proxy config stays disabled",
 			values:                 map[string]string{SettingKeyAPIKeyACLTrustForwardedIP: "false"},
-			wantEnabled:            true,
-			wantForwardedIPUpdate:  "true",
+			wantEnabled:            false,
 			wantMigrationMarkerSet: true,
 		},
 		{
@@ -737,6 +736,42 @@ func TestSettingService_LoadForwardedClientIPSettingsMigration(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestSettingService_LoadForwardedClientIPSettingsKeepsStoredFalseOnUpgrade(t *testing.T) {
+	repo := &forwardedIPMigrationRepoStub{values: map[string]string{
+		SettingKeyAPIKeyACLTrustForwardedIP: "false",
+	}}
+	cfg := &config.Config{}
+	svc := NewSettingService(repo, cfg)
+
+	require.NoError(t, svc.LoadForwardedClientIPSettings(context.Background()))
+
+	require.False(t, cfg.TrustForwardedIPForAPIKeyACL(), "stored false must survive the v2 migration")
+	require.NotContains(t, repo.updates, SettingKeyAPIKeyACLTrustForwardedIP, "migration must not overwrite the stored value")
+	require.Equal(t, "false", repo.values[SettingKeyAPIKeyACLTrustForwardedIP])
+	require.Equal(t, "true", repo.updates[settingKeyForwardedClientIPModeV2])
+	require.Equal(t, "[]", repo.updates[SettingKeyForwardedClientIPHeaders])
+}
+
+func TestSettingService_InitializeDefaultSettingsPersistsConfiguredForwardedIPTrust(t *testing.T) {
+	t.Run("secure default persists false", func(t *testing.T) {
+		repo := &forwardedIPMigrationRepoStub{values: map[string]string{}}
+		svc := NewSettingService(repo, &config.Config{})
+
+		require.NoError(t, svc.InitializeDefaultSettings(context.Background()))
+		require.Equal(t, "false", repo.values[SettingKeyAPIKeyACLTrustForwardedIP])
+	})
+
+	t.Run("explicit config true persists true", func(t *testing.T) {
+		repo := &forwardedIPMigrationRepoStub{values: map[string]string{}}
+		cfg := &config.Config{}
+		cfg.SetTrustForwardedIPForAPIKeyACL(true)
+		svc := NewSettingService(repo, cfg)
+
+		require.NoError(t, svc.InitializeDefaultSettings(context.Background()))
+		require.Equal(t, "true", repo.values[SettingKeyAPIKeyACLTrustForwardedIP])
+	})
 }
 
 func TestSettingService_LoadForwardedClientIPSettingsLoadsHeaders(t *testing.T) {
@@ -808,7 +843,7 @@ func TestSettingService_LoadForwardedClientIPSettingsWriteFailureUsesComputedMod
 		trustedProxiesSet bool
 		wantEnabled       bool
 	}{
-		{name: "compatibility migration remains effective", wantEnabled: true},
+		{name: "stored false stays disabled without proxy config", wantEnabled: false},
 		{name: "explicit proxy policy remains secure", trustedProxiesSet: true, wantEnabled: false},
 	}
 

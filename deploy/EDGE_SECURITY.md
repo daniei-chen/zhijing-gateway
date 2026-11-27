@@ -125,9 +125,10 @@ benchmarks are not retained heap or RSS.
 
 ## Trusted client IPs
 
-`security.trust_forwarded_ip_for_api_key_acl` is enabled by default for upgrade
-compatibility. While enabled, raw forwarding headers take over client-IP
-resolution for logs and security-sensitive paths. Custom headers from
+`security.trust_forwarded_ip_for_api_key_acl` is disabled by default, so client
+IPs resolve through Gin's `server.trusted_proxies` chain. While enabled, raw
+forwarding headers take over client-IP resolution for logs and
+security-sensitive paths. Custom headers from
 `security.forwarded_client_ip_headers` are checked in configured order before
 the built-in `CF-Connecting-IP`, `X-Real-IP`, and `X-Forwarded-For` fallback.
 Header names are case-insensitive, normalized when loaded, de-duplicated, and
@@ -145,12 +146,15 @@ headers are ignored completely when the switch is disabled. In that mode Gin's
 CIDR/IP addresses that connect directly to Sub2API. An explicit empty list
 trusts no forwarded client IPs.
 
-On the first upgrade to this mode, a legacy `false` value is changed to `true`
-only when `server.trusted_proxies` was not explicitly configured; explicit
-proxy policies remain in secure mode. New installations persist the configured
-custom header list during database initialization. Existing installations
-backfill a missing database value from the YAML configuration. A hidden
-migration marker prevents later administrator changes from being overwritten.
+On the first upgrade to this mode, a legacy `false` value is preserved: the
+process no longer rewrites it to `true` when `server.trusted_proxies` was not
+explicitly configured, and logs a warning naming the switch and how to enable
+it. A fresh installation stores no row for this switch, so the process uses the
+configured value: `false` unless
+`security.trust_forwarded_ip_for_api_key_acl` was explicitly set in YAML or in
+`SECURITY_TRUST_FORWARDED_IP_FOR_API_KEY_ACL`. The first start backfills a
+missing persisted header list and writes a hidden migration marker that prevents
+later administrator changes from being overwritten.
 If settings cannot be read or the persisted custom-header list is malformed,
 the process fails closed to trusted-proxy mode with no custom headers. If a
 migration write fails, the computed mode remains active for the current process
