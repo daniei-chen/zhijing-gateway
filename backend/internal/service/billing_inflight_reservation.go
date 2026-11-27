@@ -538,8 +538,12 @@ func maxPerRequestPrice(resolved *ResolvedPricing) float64 {
 
 func validCost(v float64) bool { return v > 0 && !math.IsNaN(v) && !math.IsInf(v, 0) }
 
-// estimateOne 估算单个候选计费模型（未乘倍率的 token 部分与按次部分分开返回，便于套用不同倍率）。
-func (d inflightEstimateDeps) estimateOne(ctx context.Context, apiKey *APIKey, model string, req InflightEstimateRequest, textRate, imageRate float64) float64 {
+// estimateOne 估算单个候选计费模型，并回报是否找到了定价来源。
+//
+// 第二个返回值刻意不以 cost > 0 判定：价格表里显式写 0 的免费模型是「有价」的，
+// 若把它当成无价，fail-closed 准入会误拒绝合法免费模型。只有「任何来源都查不到
+// 价格」才算无价。
+func (d inflightEstimateDeps) estimateOne(ctx context.Context, apiKey *APIKey, model string, req InflightEstimateRequest, textRate, imageRate float64) (float64, bool) {
 	cfg := inflightReservationCfg(d.cfg)
 	units := req.Units
 	if units <= 0 {
@@ -554,6 +558,7 @@ func (d inflightEstimateDeps) estimateOne(ctx context.Context, apiKey *APIKey, m
 		}
 		resolved = d.resolver.Resolve(ctx, in)
 	}
+	priced := resolved != nil
 
 	inputTokens, outputTokens := tokenCounts(cfg, req.BodyBytes, req.MaxTokens)
 	tokenCost := func() float64 {
@@ -567,6 +572,7 @@ func (d inflightEstimateDeps) estimateOne(ctx context.Context, apiKey *APIKey, m
 		if pricing == nil {
 			return 0
 		}
+		priced = true
 		return (float64(inputTokens)*pricing.InputPricePerToken + float64(outputTokens)*pricing.OutputPricePerToken) * textRate
 	}
 
@@ -629,12 +635,13 @@ func (d inflightEstimateDeps) estimateOne(ctx context.Context, apiKey *APIKey, m
 		}
 	}
 	if !validCost(cost) {
-		return 0
+		return 0, priced
 	}
-	return cost
+	return cost, priced
 }
 
-// estimate 返回保守的单请求费用（USD，已乘倍率）；无法定价返回 (0,false)。
+// estimate 返回保守的单请求费用（USD，已乘倍率）；第二个返回值表示是否找到了
+// 定价来源，false 即「无法定价」，调用方据此 fail-open 或 fail-closed。
 func (d inflightEstimateDeps) estimate(ctx context.Context, apiKey *APIKey, req InflightEstimateRequest) (float64, bool) {
 	if apiKey == nil || apiKey.User == nil {
 		return 0, false
@@ -649,32 +656,43 @@ func (d inflightEstimateDeps) estimate(ctx context.Context, apiKey *APIKey, req 
 		return 0, true
 	}
 	primary, fallbacks, upstreamInput := inflightBillingModelCandidates(ctx, d, apiKey, req.Model)
-	bestOf := func(models []string) float64 {
+	bestOf := func(models []string) (float64, bool) {
 		best := 0.0
+		priced := false
 		for _, m := range models {
-			if c := d.estimateOne(ctx, apiKey, m, req, textRate, imageRate); c > best {
+			c, p := d.estimateOne(ctx, apiKey, m, req, textRate, imageRate)
+			if p {
+				priced = true
+			}
+			if c > best {
 				best = c
 			}
 		}
-		return best
+		return best, priced
 	}
-	best := bestOf(primary)
+	best, priced := bestOf(primary)
 	// composite 分组：计费侧除非别名有显式渠道价，否则按实际转发的具体模型计费；
 	// 别名本身可能命中家族模糊价（低估），因此与候选具体模型一起取最高。
 	composite := apiKey.Group != nil && apiKey.Group.Platform == PlatformComposite
 	if best <= 0 || composite {
 		// 与 billableModelWithFallback 同口径：首选模型无价时回退到实际转发模型。
-		if c := bestOf(fallbacks); c > best {
-			best = c
+		if c, p := bestOf(fallbacks); c > best || p {
+			if c > best {
+				best = c
+			}
+			priced = priced || p
 		}
 		// 账号级映射候选（读调度器快照）仅在仍无法定价或 composite 时才查，已定价模型不触发。
 		if (best <= 0 || composite) && d.accountMappedModels != nil {
-			if c := bestOf(d.accountMappedModels(ctx, apiKey, upstreamInput)); c > best {
-				best = c
+			if c, p := bestOf(d.accountMappedModels(ctx, apiKey, upstreamInput)); c > best || p {
+				if c > best {
+					best = c
+				}
+				priced = priced || p
 			}
 		}
 	}
-	if best <= 0 {
+	if !priced {
 		logInflightUnpriced(req.Model, apiKey.GroupID)
 		return 0, false
 	}

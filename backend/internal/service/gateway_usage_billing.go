@@ -370,23 +370,17 @@ func applyUsageBilling(ctx context.Context, requestID string, usageLog *UsageLog
 		return true, nil
 	}
 
-	billingCtx, cancel := detachedBillingContext(ctx)
-	defer cancel()
-
-	result, err := repo.Apply(billingCtx, cmd)
+	result, err := applyUsageBillingWithRetry(ctx, repo, cmd)
 	if err != nil {
-		// 计费事务失败：usage_logs 已记（账记了）但余额/配额未扣（钱没扣）。
-		// 持久化到 billing_failures 以便对账与人工补录（审计 P0-4）。
-		// 独立超时 + 吞异常：留痕失败绝不能反过来影响计费错误本身的传播。
-		go func(c *UsageBillingCommand, cause error) {
-			rctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-			defer cancel()
-			if rerr := repo.RecordFailure(rctx, c, cause); rerr != nil {
-				logger.LegacyPrintf("service.gateway", "Warning: record billing failure failed for request %s: %v", c.RequestID, rerr)
-			}
-		}(cmd, err)
+		// 计费事务最终失败：usage_logs 不再写 actual_cost=0 的记录（那会把漏收
+		// 伪装成一笔免费单），billing_failures 是唯一可对账凭据。留痕用独立超时
+		// 并吞掉自身错误，绝不反过来影响计费错误本身的传播（审计 P0-4）。
+		recordUsageBillingFailure(repo, cmd, err)
 		return false, err
 	}
+
+	billingCtx, cancel := detachedBillingContext(ctx)
+	defer cancel()
 
 	if result == nil || !result.Applied {
 		deps.deferredService.ScheduleLastUsedUpdate(p.Account.ID)
@@ -401,6 +395,110 @@ func applyUsageBilling(ctx context.Context, requestID string, usageLog *UsageLog
 
 	finalizePostUsageBilling(billingCtx, p, deps, result)
 	return true, nil
+}
+
+const (
+	// usageBillingApplyAttempts 计费事务的总尝试次数（含首次）。一次 DB 抖动、
+	// 5s 任务超时或死锁不应变成一笔永久漏收，所以做有界重试；事务内以
+	// (request_id, api_key_id) 幂等占位，重试不会重复扣费。
+	usageBillingApplyAttempts = 3
+	// usageBillingApplyRetryBackoff 尝试之间的基础退避，按尝试序号线性放大：
+	// 第 1 次失败后等 50ms，第 2 次后等 100ms。总等待约 150ms，远小于单次
+	// 事务预算（postUsageBillingTimeout），不会把重试拖成新的超时。
+	usageBillingApplyRetryBackoff = 50 * time.Millisecond
+)
+
+// applyUsageBillingWithRetry 有界重试计费事务。幂等契约由 repo.Apply 内部
+// 的 usage_billing_dedup 占位保证：首次已提交但返回错误时，重试会命中重复键
+// 得到 Applied=false，不会二次扣款。
+func applyUsageBillingWithRetry(ctx context.Context, repo UsageBillingRepository, cmd *UsageBillingCommand) (*UsageBillingApplyResult, error) {
+	var (
+		result *UsageBillingApplyResult
+		err    error
+	)
+	for attempt := 1; attempt <= usageBillingApplyAttempts; attempt++ {
+		billingCtx, cancel := detachedBillingContext(ctx)
+		result, err = repo.Apply(billingCtx, cmd)
+		cancel()
+		if err == nil {
+			return result, nil
+		}
+		if attempt == usageBillingApplyAttempts || !isUsageBillingRetryableError(err) {
+			break
+		}
+		time.Sleep(time.Duration(attempt) * usageBillingApplyRetryBackoff)
+	}
+	return result, err
+}
+
+// isUsageBillingRetryableError 区分可重试的数据库/事务故障与永久性请求错误。
+// 请求 ID 缺失或指纹冲突重试多少次结果都一样，直接返回，避免无谓放大延迟。
+func isUsageBillingRetryableError(err error) bool {
+	if err == nil {
+		return false
+	}
+	return !errors.Is(err, ErrUsageBillingRequestIDRequired) &&
+		!errors.Is(err, ErrUsageBillingRequestConflict)
+}
+
+// recordUsageBillingFailure 把最终失败的计费事务持久化到 billing_failures。
+// 独立超时 + 吞异常：留痕失败绝不能反过来影响计费错误本身的传播。
+func recordUsageBillingFailure(repo UsageBillingRepository, cmd *UsageBillingCommand, cause error) {
+	if repo == nil || cmd == nil {
+		return
+	}
+	rctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	if rerr := repo.RecordFailure(rctx, cmd, cause); rerr != nil {
+		logger.LegacyPrintf("service.gateway", "Warning: record billing failure failed for request %s: %v", cmd.RequestID, rerr)
+	}
+}
+
+// recordUsagePricingFailure 在算价失败时把请求留痕到 billing_failures，并把错误
+// 交回调用方。total_cost=0 在这里的语义是「价格未知」，不是「免费」；错误信息
+// 写明原因，人工对账时按 pending 行补价。刻意不写 usage_logs：一条 0 成本的
+// usage_log 会被下游当成已结算的免费单，比没有记录更难发现。
+func recordUsagePricingFailure(
+	ctx context.Context,
+	repo UsageBillingRepository,
+	requestID string,
+	apiKey *APIKey,
+	user *User,
+	account *Account,
+	model string,
+	inputTokens, outputTokens, cacheReadTokens int,
+	cause error,
+) {
+	if repo == nil {
+		return
+	}
+	cmd := &UsageBillingCommand{
+		RequestID:       requestID,
+		Model:           model,
+		InputTokens:     inputTokens,
+		OutputTokens:    outputTokens,
+		CacheReadTokens: cacheReadTokens,
+	}
+	if apiKey != nil {
+		cmd.APIKeyID = apiKey.ID
+	}
+	if user != nil {
+		cmd.UserID = user.ID
+	}
+	if account != nil {
+		cmd.AccountID = account.ID
+	}
+	cmd.Normalize()
+
+	base := context.Background()
+	if ctx != nil {
+		base = context.WithoutCancel(ctx)
+	}
+	rctx, cancel := context.WithTimeout(base, 3*time.Second)
+	defer cancel()
+	if err := repo.RecordFailure(rctx, cmd, cause); err != nil {
+		logger.LegacyPrintf("service.gateway", "Warning: record pricing failure failed for request %s: %v", requestID, err)
+	}
 }
 
 func finalizePostUsageBilling(ctx context.Context, p *postUsageBillingParams, deps *billingDeps, result *UsageBillingApplyResult) {
@@ -830,8 +928,14 @@ func (s *GatewayService) recordUsageCore(ctx context.Context, input *recordUsage
 		requestedModel = input.OriginalModel
 	}
 
-	// 计算费用
-	cost := s.calculateRecordUsageCost(ctx, result, apiKey, billingModel, multiplier, imageMultiplier, pricingAt)
+	// 计算费用。算价失败必须失败关闭：没有价格就不能编一个 $0 出来成交。
+	cost, costErr := s.calculateRecordUsageCost(ctx, result, apiKey, billingModel, multiplier, imageMultiplier, pricingAt)
+	if costErr != nil {
+		recordUsagePricingFailure(ctx, s.usageBillingRepo, resolveUsageBillingRequestID(ctx, result.RequestID),
+			apiKey, user, account, billingModel,
+			result.Usage.InputTokens, result.Usage.OutputTokens, result.Usage.CacheReadInputTokens, costErr)
+		return costErr
+	}
 	// response_model：按上游成功响应自报的模型计费（渠道显式开启才生效）。
 	// 采纳条件见 responseModelBillingDeclaration + hasIdentifiedResponseModelPricing
 	// + responseModelBillingAdoptable。任一条件不满足都静默回落基线，即开启本模式前的
@@ -843,9 +947,9 @@ func (s *GatewayService) recordUsageCore(ctx context.Context, input *recordUsage
 		result.ImageCount > 0 || result.AudioUsage != nil || result.SearchCount > 0 || result.CacheStorageTokenHours > 0,
 	); responseModel != "" && !strings.EqualFold(responseModel, strings.TrimSpace(billingModel)) {
 		if identified, responseChannelPriced := s.hasIdentifiedResponseModelPricing(ctx, responseModel, apiKey); identified {
-			responseCost := s.calculateRecordUsageCost(ctx, result, apiKey, responseModel, multiplier, imageMultiplier, pricingAt)
+			responseCost, responseErr := s.calculateRecordUsageCost(ctx, result, apiKey, responseModel, multiplier, imageMultiplier, pricingAt)
 			baselineChannelPriced := s.resolveChannelPricing(ctx, billingModel, apiKey) != nil
-			if responseModelBillingAdoptable(cost, responseCost, baselineChannelPriced, responseChannelPriced) {
+			if responseErr == nil && responseModelBillingAdoptable(cost, responseCost, baselineChannelPriced, responseChannelPriced) {
 				// billingModel 到此为止只是定价查表的入参，后续流程只消费 cost，
 				// 因此这里不改写它，改由日志记录实际生效的计费基准。
 				logResponseModelBillingApplied("service.gateway", account, result.RequestID, billingModel, responseModel, cost, responseCost)
@@ -920,8 +1024,9 @@ func (s *GatewayService) recordUsageCore(ctx context.Context, input *recordUsage
 	}, s.billingDeps(), s.usageBillingRepo)
 
 	if billingErr != nil {
-		usageLog.ActualCost = 0
-		writeUsageLogBestEffort(ctx, s.usageLogRepo, usageLog, "service.gateway")
+		// 计费事务最终失败：不写 usage_log。写一条 actual_cost=0 的记录看起来
+		// 像「这单本来就免费」，比没有记录更难对账；失败已由 applyUsageBilling
+		// 登记到 billing_failures（含 total_cost 快照），错误原样交给调用方。
 		return billingErr
 	}
 	writeUsageLogBestEffort(ctx, s.usageLogRepo, usageLog, "service.gateway")
@@ -1018,8 +1123,8 @@ func (s *GatewayService) QuoteUsageCost(ctx context.Context, input *RecordUsageI
 	}
 	multiplier, imageMultiplier, pricingAt := s.recordUsageMultipliers(ctx, input.APIKey, user, input.PricingAt)
 	billingModel := s.recordUsageBillingModel(ctx, input.APIKey, input.Result, input.ChannelUsageFields)
-	cost := s.calculateRecordUsageCost(ctx, input.Result, input.APIKey, billingModel, multiplier, imageMultiplier, pricingAt)
-	if cost == nil {
+	cost, err := s.calculateRecordUsageCost(ctx, input.Result, input.APIKey, billingModel, multiplier, imageMultiplier, pricingAt)
+	if err != nil || cost == nil {
 		return 0
 	}
 	return cost.ActualCost
@@ -1044,7 +1149,7 @@ func (s *GatewayService) calculateRecordUsageCost(
 	multiplier float64,
 	imageMultiplier float64,
 	pricingAt time.Time,
-) *CostBreakdown {
+) (*CostBreakdown, error) {
 	// 图片生成：渠道定价为 token 计费时走 token 路径，否则走图片计费。
 	// 分组按张计费开关只对专用图片端点生效，混合请求仍按 token 计费。
 	if result.ImageCount > 0 {
@@ -1053,7 +1158,7 @@ func (s *GatewayService) calculateRecordUsageCost(
 				return s.calculateTokenCost(ctx, result, apiKey, billingModel, multiplier, pricingAt)
 			}
 		}
-		return s.calculateImageCost(ctx, result, apiKey, billingModel, imageMultiplier)
+		return s.calculateImageCost(ctx, result, apiKey, billingModel, imageMultiplier), nil
 	}
 
 	// Voice audio (TTS / STT / realtime) when present on the forward result.
@@ -1068,11 +1173,11 @@ func (s *GatewayService) calculateRecordUsageCost(
 				ReasoningEffort: optionalStringValue(result.ReasoningEffort),
 			})
 			if err == nil {
-				return cost
+				return cost, nil
 			}
 		}
 		cfg := groupAudioPriceConfigFromAPIKey(apiKey)
-		return s.billingService.CalculateAudioCost(result.AudioUsage.Mode, result.AudioUsage.DurationOrUnits, cfg, multiplier)
+		return s.billingService.CalculateAudioCost(result.AudioUsage.Mode, result.AudioUsage.DurationOrUnits, cfg, multiplier), nil
 	}
 
 	// Token 计费；SearchCount 为叠加 surcharge（不替代 token）。纯存储费不是一次模型请求，不计 token / 按次费用。
@@ -1080,7 +1185,11 @@ func (s *GatewayService) calculateRecordUsageCost(
 	if isCacheStorageOnlyResult(result) {
 		tokenCost = &CostBreakdown{}
 	} else {
-		tokenCost = s.calculateTokenCost(ctx, result, apiKey, billingModel, multiplier, pricingAt)
+		var err error
+		tokenCost, err = s.calculateTokenCost(ctx, result, apiKey, billingModel, multiplier, pricingAt)
+		if err != nil {
+			return nil, err
+		}
 	}
 	if result.SearchCount > 0 {
 		price := groupSearchPricePer1kFromAPIKey(apiKey)
@@ -1090,7 +1199,7 @@ func (s *GatewayService) calculateRecordUsageCost(
 		searchCost := s.billingService.CalculateSearchCost(result.SearchCount, price, multiplier)
 		if searchCost != nil && (searchCost.TotalCost > 0 || searchCost.ActualCost > 0) {
 			if tokenCost == nil {
-				return searchCost
+				return searchCost, nil
 			}
 			tokenCost.TotalCost += searchCost.TotalCost
 			tokenCost.ActualCost += searchCost.ActualCost
@@ -1104,7 +1213,7 @@ func (s *GatewayService) calculateRecordUsageCost(
 		tokenCost.TotalCost += storageCost
 		tokenCost.ActualCost += storageCost * multiplier
 	}
-	return tokenCost
+	return tokenCost, nil
 }
 
 // compositeBillableModel 决定 composite 分组请求的计费模型：来源覆盖把计费模型
@@ -1283,7 +1392,7 @@ func (s *GatewayService) calculateTokenCost(
 	billingModel string,
 	multiplier float64,
 	pricingAt time.Time,
-) *CostBreakdown {
+) (*CostBreakdown, error) {
 	tokens := UsageTokens{
 		InputTokens:           result.Usage.InputTokens,
 		OutputTokens:          result.Usage.OutputTokens,
@@ -1313,10 +1422,11 @@ func (s *GatewayService) calculateTokenCost(
 		Resolved:        resolved,
 	})
 	if err != nil {
-		logger.LegacyPrintf("service.gateway", "Calculate cost failed: %v", err)
-		return &CostBreakdown{ActualCost: 0}
+		// 不再按 $0 落账：调用方必须失败关闭（记 billing_failures 并把错误交出去），
+		// 否则新模型/新映射会以「免费」形态成交。
+		return nil, err
 	}
-	return cost
+	return cost, nil
 }
 
 // buildRecordUsageLog 构建使用日志并设置计费模式。

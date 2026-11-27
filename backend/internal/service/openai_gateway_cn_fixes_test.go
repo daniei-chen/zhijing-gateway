@@ -6,7 +6,7 @@ package service
 //  1. CN 分组不适用 /v1/messages 调度级模型映射（openai 的 gpt-5.x 默认值发给
 //     CN 上游必错）；
 //  2. 计费候选链对 CN 账号过滤 claude-* 兜底候选（防按 Claude 原价误计 CN 流量）；
-//  3. 空候选按 ErrModelPricingUnavailable 处理（零成本落账而非丢弃 usage 记录）；
+//  3. 空候选按 ErrModelPricingUnavailable 处理，上层失败关闭（不按 $0 落账）；
 //  4. Responses×anthropic 流式转换器客户端断开后继续排水、usage 汇总完整。
 
 import (
@@ -50,7 +50,7 @@ func TestFilterCNProviderBillingModelCandidates(t *testing.T) {
 
 	allClaude := svc.filterCNProviderBillingModelCandidates(context.Background(), cnAccount, apiKey,
 		[]string{"claude-sonnet-4-5", "claude-sonnet-4-5"})
-	require.Empty(t, allClaude, "全 claude 候选应被清空（上层走零成本+告警落账）")
+	require.Empty(t, allClaude, "全 claude 候选应被清空（上层走无价失败关闭）")
 
 	// 非 CN 账号完全不受影响。
 	openaiAccount := &Account{ID: 2, Platform: PlatformOpenAI}
@@ -77,7 +77,7 @@ func TestCalculateOpenAIRecordUsageCost_EmptyCandidatesIsPricingUnavailable(t *t
 	)
 	require.Error(t, err)
 	require.True(t, isUsagePricingUnavailableError(err),
-		"空候选必须按无价可循处理（上层零成本落账），而不是丢弃整条 usage 记录: %v", err)
+		"空候选必须按无价可循处理（上层失败关闭），而不是按 $0 成交: %v", err)
 }
 
 func TestResponsesStreamingFromNativeAnthropic_ClientDisconnectDrainsUsage(t *testing.T) {

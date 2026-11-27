@@ -267,8 +267,11 @@ func (s *OpenAIGatewayService) RecordUsage(ctx context.Context, input *OpenAIRec
 			zap.String("upstream_model", result.UpstreamModel),
 			zap.Int64("api_key_id", apiKey.ID),
 			zap.Int64("account_id", account.ID),
-		).Warn("openai_usage.pricing_missing_record_zero_cost", zap.Error(err))
-		cost = &CostBreakdown{BillingMode: string(BillingModeToken)}
+		).Warn("openai_usage.pricing_unavailable_fail_closed", zap.Error(err))
+		recordUsagePricingFailure(ctx, s.usageBillingRepo, resolveUsageBillingRequestID(ctx, result.RequestID),
+			apiKey, user, account, firstUsageBillingModel(billingModels),
+			result.Usage.InputTokens, result.Usage.OutputTokens, result.Usage.CacheReadInputTokens, err)
+		return err
 	}
 	// response_model：按上游成功响应自报的模型计费（渠道显式开启才生效）。
 	// 采纳条件见 responseModelBillingDeclaration + hasIdentifiedOpenAIResponsePricing
@@ -323,8 +326,8 @@ func (s *OpenAIGatewayService) RecordUsage(ctx context.Context, input *OpenAIRec
 		if standardErr != nil && !isUsagePricingUnavailableError(standardErr) {
 			return standardErr
 		}
-		// Missing pricing already fell back to a zero-cost log above; keep that
-		// usage row instead of dropping it on the Standard re-evaluation.
+		// Missing pricing already failed closed on the baseline above; a Standard
+		// re-evaluation that cannot price keeps the (valid) Fast-tier cost.
 		if standardErr == nil && cost != nil && standardCost != nil {
 			cost.ActualCost = standardCost.ActualCost
 		}
@@ -526,8 +529,8 @@ func (s *OpenAIGatewayService) RecordUsage(ctx context.Context, input *OpenAIRec
 	}, s.billingDeps(), s.usageBillingRepo)
 
 	if billingErr != nil {
-		usageLog.ActualCost = 0
-		writeUsageLogBestEffort(ctx, s.usageLogRepo, usageLog, "service.openai_gateway")
+		// 同 service.gateway：事务最终失败时不写 actual_cost=0 的 usage_log，
+		// 失败快照由 applyUsageBilling 落在 billing_failures，错误交给调用方。
 		return billingErr
 	}
 	writeUsageLogBestEffort(ctx, s.usageLogRepo, usageLog, "service.openai_gateway")
