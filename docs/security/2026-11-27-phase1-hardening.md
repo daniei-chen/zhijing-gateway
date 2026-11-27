@@ -2,21 +2,21 @@
 
 这份文档记录阶段一五条改动：改了什么、升级后会发生什么、之后还能怎么收紧。来源是阶段一四线程与应用层硬门的改动（父 issue DAN-4，子项 DAN-5 / DAN-6 / DAN-7 / DAN-8 / DAN-27），加上本 PR 把源站拒绝清单和校验脚本收进仓库的部分。
 
-**怎么读状态**：每条都标了「仓库状态」。标 pending 的表示本文写作时 `main` 上还是旧行为，具体实现以对应的 issue 与 PR 为准；标 PR #NN 的表示改动已经开 PR、尚未合并。这里不写没在仓库里验证过的东西，也不重述审计报告。
+**怎么读状态**：每条都标了「仓库状态」。标「已合并 #NN」的表示改动已在 `main` 上；标「PR #NN」的表示已开 PR、尚未合并；标 pending 的表示 `main` 上还是旧行为，具体实现以对应的 issue 为准。这里不写没在仓库里验证过的东西，也不重述审计报告。
 
 ## 一览
 
 | # | 改动 | issue | 仓库状态 |
 |---|---|---|---|
-| 1 | Docker / Apple container 发布端口默认回环 | DAN-5 | PR [#22](https://github.com/daniei-chen/zhijing-gateway/pull/22)，待合并 |
+| 1 | Docker / Apple container 发布端口默认回环 | DAN-5 | 已合并 [#22](https://github.com/daniei-chen/zhijing-gateway/pull/22) |
 | 2 | 转发头信任默认 `false`，不再静默回翻 | DAN-6 | pending |
 | 3 | 首启 setup 服务只绑回环 | DAN-7 | pending |
-| 4 | CI 增加 race 检测任务 | DAN-8 | pending |
+| 4 | CI 增加 race 检测任务 | DAN-8 | 已合并 [#23](https://github.com/daniei-chen/zhijing-gateway/pull/23) |
 | 5 | `/admin/system/update` 应用层硬门 + 源站 403 清单入仓 | DAN-27 | 硬门 pending；模板与校验脚本见本 PR |
 
 这五条的共同点是：它们各自都不算漏洞，但默认值拼起来就是一条链 —— 直连 8080 绕过反代、伪造转发头冒充内网来源、首启向导对全网开放、换二进制只靠一层运维记得配的 403。
 
-## 1. 发布端口默认回环（DAN-5）
+## 1. 发布端口默认回环（DAN-5，已合并 #22）
 
 **之前**：`deploy/docker-compose.yml:38`、`docker-compose.local.yml:46`、`docker-compose.standalone.yml:34` 都是 `${BIND_HOST:-0.0.0.0}`，`deploy/.env.example` 也写着 `BIND_HOST=0.0.0.0`，`deploy/apple-container.sh:431` 的回退默认值同样是 `0.0.0.0`。装完即可从任何网卡直连宿主 `8080`，反向代理上的 TLS、限流、来源限制全部可以绕开。
 
@@ -30,7 +30,7 @@
 
 **怎么继续收紧**：保持回环 + 反代。确实需要直连时，`BIND_HOST=0.0.0.0` 加防火墙限源，并记进变更单 —— 这两件事必须同时做，只做前一件就是回到阶段一之前。
 
-**怎么验证**：`deploy/tests/bind-host-default-test.sh`（随 PR #22 一起入库，断言四个 compose 的发布地址取自 `${BIND_HOST:-...}` 且默认回环，并覆盖 `.env.example` 与 `apple-container.sh` 的回退值）；手工确认 `docker compose -f deploy/docker-compose.yml config` 输出的 `host_ip` 是 `127.0.0.1`。
+**怎么验证**：`deploy/tests/bind-host-default-test.sh`（已在 `main` 上，断言四个 compose 的发布地址取自 `${BIND_HOST:-...}` 且默认回环，并覆盖 `.env.example` 与 `apple-container.sh` 的回退值）；手工确认 `docker compose -f deploy/docker-compose.yml config` 输出的 `host_ip` 是 `127.0.0.1`。
 
 ## 2. 转发头信任默认 `false`（DAN-6，pending）
 
@@ -52,15 +52,15 @@
 
 **怎么继续收紧**：初始化窗口本身就该当作敏感时段：不要在这段时间把端口暴露到公网；`AUTO_SETUP` 的部署把初始管理员口令从日志里取走之后立即轮换。
 
-## 4. CI 跑 race 检测（DAN-8，pending）
+## 4. CI 跑 race 检测（DAN-8，已合并 #23）
 
-**之前**：`backend/Makefile:23` 已经有 `test-race` 目标，但 `.github/workflows/backend-ci.yml` 里没有调用它（全文没有 `-race`），`deploy/zhijing/patches/0001-ci-race-job.patch` 也还是一份没应用的补丁。并发回归只能靠人记得本地跑。
+**之前**：`backend/Makefile` 已经有 `test-race` 目标，但 `.github/workflows/backend-ci.yml` 从不调用它，并发回归只能靠人记得本地跑。
 
-**改法（pending）**：CI 增加 race 检测任务，以 DAN-8 的 PR 为准。
+**改法**：CI 增加独立 `race` job：`ubuntu-latest`、`working-directory: backend`、跑 `make test-race`。全量 `-race` 要十几分钟，所以只挑并发相关用例（限流、缓存、调度池、槽位、原子计数），约 95 秒。`deploy/tests/ci-race-job-test.sh` 守住这个 job 的存在与内容，避免它被悄悄删掉或改成不跑 `-race`。
 
 **升级后会发生什么**：运行时行为没有任何变化；PR 会在数据竞争上变红。这是把「偶发 5xx」提前到合并之前的一步，短期可能多出一些原本看不见的红灯 —— 那正是它存在的意义。
 
-**怎么继续收紧**：先把 `test-race` 现有 `-run` 覆盖到的并发用例（限流、缓存、调度池、原子计数）在 CI 里稳定下来，再扩大包范围和运行时长。
+**怎么继续收紧**：把 `test-race` 的 `-run` 过滤逐步扩到更多包，再拉长观察面。
 
 ## 5. `/admin/system/update` 应用层硬门与源站拒绝清单（DAN-27 + 本 PR）
 
