@@ -119,6 +119,25 @@ docker compose -f docker-compose.local.yml logs -f zhijing-gateway
 # http://localhost:8080
 ```
 
+### Port Exposure and the Reverse Proxy
+
+Every Compose file publishes the gateway on `127.0.0.1` by default: `BIND_HOST`
+falls back to a loopback address, so `http://localhost:8080` works on the host
+and nothing is reachable from the network until you say so. Production traffic
+belongs behind a reverse proxy on the same host — see `EDGE_SECURITY.md` for the
+nginx and Caddy configurations; both proxy to `127.0.0.1:8080`.
+
+To publish the port directly instead, set `BIND_HOST=0.0.0.0` in `.env` and
+restrict the source addresses in the host firewall. Never leave the gateway port
+open to the internet.
+
+**Upgrade impact:** deployments that relied on the previous `0.0.0.0` default for
+direct access to `8080` must now set `BIND_HOST=0.0.0.0` explicitly, or they will
+stop answering on non-loopback addresses once the Compose file is updated
+(`docker-deploy.sh` re-downloads it; a manual deployment pulls the new `deploy/`
+directory). Deployments behind a reverse proxy are unaffected, because the proxy
+already connects to `127.0.0.1:8080`.
+
 ### Deployment Version Comparison
 
 | Version | Data Storage | Migration | Best For |
@@ -257,6 +276,7 @@ docker compose down -v
 | `JWT_SECRET` | **Recommended** | *(auto-generated)* | JWT secret (fixed for persistent sessions) |
 | `TOTP_ENCRYPTION_KEY` | **Recommended** | *(auto-generated)* | TOTP encryption key (fixed for persistent 2FA) |
 | `SERVER_PORT` | No | `8080` | Server port |
+| `BIND_HOST` | No | `127.0.0.1` | IPv4 address the host port is published on; `0.0.0.0` exposes it on every interface |
 | `ADMIN_EMAIL` | No | *(auto-generated)* | Admin email (login username) |
 | `ADMIN_PASSWORD` | No | *(auto-generated)* | Admin password (8-72 bytes) |
 | `TZ` | No | `Asia/Shanghai` | Timezone |

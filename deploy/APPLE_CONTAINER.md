@@ -47,7 +47,7 @@ Open `http://localhost:8080`. If `ADMIN_EMAIL` / `ADMIN_PASSWORD` are empty, ret
 ./apple-container.sh logs app
 ```
 
-The env file uses literal `KEY=value` syntax. Do not use Compose expressions such as `${VALUE:-default}`, and do not quote values unless the quote characters are part of the intended value. `BIND_HOST` must be an IPv4 address, and `SERVER_PORT` must be between 1025 and 65535.
+The env file uses literal `KEY=value` syntax. Do not use Compose expressions such as `${VALUE:-default}`, and do not quote values unless the quote characters are part of the intended value. `BIND_HOST` must be an IPv4 address, and `SERVER_PORT` must be between 1025 and 65535. `BIND_HOST` defaults to `127.0.0.1`, which publishes the port on the Mac only; set it to `0.0.0.0` to publish on every interface and restrict the port in the macOS firewall.
 
 ## Commands
 
