@@ -49,6 +49,8 @@ docs/*
 !docs/codex-credits.md
 !docs/legal/
 !docs/legal/*.md
+!docs/security/
+!docs/security/*.md
 !docs/screenshots/
 docs/screenshots/*
 !docs/screenshots/mobile-account-actions-menu.png

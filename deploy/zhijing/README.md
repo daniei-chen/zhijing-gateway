@@ -75,3 +75,16 @@ echo '17 */6 * * * root /usr/local/bin/zhijing-offsite-pull.sh' | sudo tee /etc/
 ## zero-downtime-deploy.sh
 
 零停机发布脚本，见 `../ZHIJING_ZERO_DOWNTIME.md`。要点：候选实例先在独立 loopback 端口通过 `/readyz`，再改 upstream、`nginx -t`、`reload`，失败自动恢复快照。
+
+## 源站敏感端点拒绝清单与校验
+
+`nginx/zhijing.origin.deny.conf` 是源站侧的 403 模板：换二进制（`/api/v1/admin/system/{update,rollback,restart}`）、备份整组、导出类接口都在 Nginx 层直接拒绝，不依赖源站站点配置里的手工条目。源站站点配置仍然不入仓，但这份清单入仓后可以 diff、可以检查 —— 在站点 `server { }` 块里 `include` 它即可。
+
+`verify-sensitive-endpoints.sh` 从外部逐条探测这些路径，不带凭据，任何一条不是 403 就非零退出并打印实际状态码：
+
+```sh
+deploy/zhijing/verify-sensitive-endpoints.sh --base-url https://<host>
+# 需要指定站点名或按 IP 校验时：--host <name> / --resolve <host>:443:<addr>
+```
+
+`zero-downtime-deploy.sh` 可以用 `VERIFY_SENSITIVE_ENDPOINTS=1` 把它接进发布流程（默认关闭）。

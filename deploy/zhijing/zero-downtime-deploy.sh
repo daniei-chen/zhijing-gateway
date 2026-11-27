@@ -322,6 +322,21 @@ fi
 printf 'public: /api/release reports %s @ %s (http %s)\n' \
   "${public_version:-unknown}" "${public_commit:0:12}" "${public_code:-000}"
 
+# ── 源站敏感端点拒绝清单的部署自证（可选，VERIFY_SENSITIVE_ENDPOINTS=1）──
+# /api/v1/admin/system/update 目前唯一的拦截是源站 nginx 的 403，而那份站点
+# 配置不入仓（deploy/zhijing/README.md）。拒绝清单模板在
+# deploy/zhijing/nginx/zhijing.origin.deny.conf。打开这个开关，发布时会逐条探测，
+# 任何一条不是 403 就判这次发布失败（触发回滚）——否则「清单没同步」看起来和
+# 发布成功一模一样。默认关闭：这一步依赖源站 nginx 已经带上模板。
+if [[ "${VERIFY_SENSITIVE_ENDPOINTS:-0}" == "1" ]]; then
+  verify_script="${VERIFY_SENSITIVE_ENDPOINTS_SCRIPT:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/verify-sensitive-endpoints.sh}"
+  [[ -f "$verify_script" ]] || die "sensitive endpoint verifier not found: $verify_script"
+  bash "$verify_script" --base-url "https://${PUBLIC_HOST}" \
+    --resolve "${PUBLIC_HOST}:443:127.0.0.1" \
+    || die "sensitive endpoints must answer 403; the origin nginx deny list is missing or stale"
+  printf 'sensitive endpoints: origin returns 403 on every deny-list path\n'
+fi
+
 # ── 切换后业务观察窗口 ───────────────────────────────────────────────
 # /readyz 只证明依赖可用，不证明业务成功。v0.1.7 曾出现探针全绿、切换后
 # 6 分钟内 27 个 5xx；流式请求还可能 HTTP 200 但上游 5xx。这里同时观察：
