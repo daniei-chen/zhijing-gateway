@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
+	"net"
 	"net/netip"
 	"net/textproto"
 	"net/url"
@@ -4027,6 +4028,75 @@ func GetServerAddress() string {
 	host := v.GetString("server.host")
 	port := v.GetInt("server.port")
 	return fmt.Sprintf("%s:%d", host, port)
+}
+
+const (
+	// setupWizardDefaultHost keeps the first-run setup wizard on the loopback
+	// interface: whoever reaches it first can create the administrator account.
+	setupWizardDefaultHost = "127.0.0.1"
+	setupWizardDefaultPort = 8080
+)
+
+// SetupServerAddress is the listen address of the first-run setup wizard.
+type SetupServerAddress struct {
+	// Address is the host:port to listen on.
+	Address string
+	// Host is the host part of Address.
+	Host string
+	// Port is the port part of Address.
+	Port int
+	// Explicit reports that the host came from SERVER_HOST or the config file
+	// instead of the loopback default, so the operator opted into that exposure.
+	Explicit bool
+}
+
+// GetSetupServerAddress returns the address the first-run setup wizard binds to.
+// It defaults to 127.0.0.1:8080 because the wizard hands out administrator
+// rights to whoever reaches it; an explicit SERVER_HOST or server.host in the
+// config file overrides that and is reported as Explicit.
+func GetSetupServerAddress() SetupServerAddress {
+	v := viper.New()
+	v.SetConfigName("config")
+	v.SetConfigType("yaml")
+	configureConfigSource(v.SetConfigFile, v.AddConfigPath)
+
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	// Try to read config file (ignore errors if not found)
+	_ = v.ReadInConfig()
+
+	port := v.GetInt("server.port")
+	if port <= 0 || port > 65535 {
+		port = setupWizardDefaultPort
+	}
+
+	host := strings.TrimSpace(v.GetString("server.host"))
+	explicit := host != ""
+	if !explicit {
+		host = setupWizardDefaultHost
+	}
+
+	return SetupServerAddress{
+		Address:  net.JoinHostPort(host, strconv.Itoa(port)),
+		Host:     host,
+		Port:     port,
+		Explicit: explicit,
+	}
+}
+
+// IsLoopbackHost reports whether host only accepts connections from the local
+// machine.
+func IsLoopbackHost(host string) bool {
+	trimmed := strings.Trim(strings.TrimSpace(host), "[]")
+	if trimmed == "" || strings.EqualFold(trimmed, "localhost") {
+		return true
+	}
+	addr, err := netip.ParseAddr(trimmed)
+	if err != nil {
+		return false
+	}
+	return addr.IsLoopback()
 }
 
 // ValidateAbsoluteHTTPURL 验证是否为有效的绝对 HTTP(S) URL

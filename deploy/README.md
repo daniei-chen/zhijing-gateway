@@ -432,7 +432,36 @@ curl -sSL https://raw.githubusercontent.com/daniei-chen/zhijing-gateway/main/dep
    sudo systemctl enable sub2api
    sudo systemctl start sub2api
    ```
-5. Open the Setup Wizard in your browser to complete configuration
+5. Open the Setup Wizard to complete configuration
+
+   The wizard creates the administrator account, so it binds `127.0.0.1:8080`
+   by default and every write it accepts must carry the one-time setup token
+   printed at startup. Read the token and the ready-made link from the service
+   log:
+
+   ```bash
+   # the unit you installed above is sub2api; use zhijing-gateway for the
+   # canonical unit shipped as deploy/zhijing-gateway.service
+   sudo journalctl -u sub2api -n 50 | grep -E "Setup token|Open the wizard"
+   ```
+
+   The bundled unit files set `Environment=SERVER_HOST=0.0.0.0`, which makes the
+   wizard reachable on every interface. To keep it private, set
+   `Environment=SERVER_HOST=127.0.0.1` in the unit you installed
+   (`/etc/systemd/system/sub2api.service` for the steps above,
+   `/etc/systemd/system/zhijing-gateway.service` for the canonical unit) before
+   the first start, forward the port from your own machine, and open the token
+   link it logged:
+
+   ```bash
+   ssh -L 8080:127.0.0.1:8080 <user>@<server>
+   # then open http://127.0.0.1:8080/setup?setup_token=<token>
+   ```
+
+   Opening `http://<server-ip>:8080/setup` directly is not recommended: the
+   wizard hands out administrator rights, and the token is what stops whoever
+   connects first from claiming them. The token is revoked once the
+   installation completes.
 
 ### Commands
 

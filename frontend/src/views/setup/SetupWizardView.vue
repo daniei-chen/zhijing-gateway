@@ -70,6 +70,20 @@
             </p>
           </div>
 
+          <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/20">
+            <label class="input-label">{{ t('setup.token.label') }}</label>
+            <input
+              v-model="tokenInput"
+              type="text"
+              class="input font-mono"
+              autocomplete="off"
+              :placeholder="t('setup.token.placeholder')"
+            />
+            <p class="mt-2 text-xs text-amber-700 dark:text-amber-300">
+              {{ t('setup.token.hint') }}
+            </p>
+          </div>
+
           <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label class="input-label">{{ t('setup.database.host') }}</label>
@@ -501,7 +515,14 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { testDatabase, testRedis, install, type InstallRequest } from '@/api/setup'
+import {
+  testDatabase,
+  testRedis,
+  install,
+  getSetupToken,
+  setSetupToken,
+  type InstallRequest
+} from '@/api/setup'
 import { buildGatewayUrl } from '@/api/client'
 import Select from '@/components/common/Select.vue'
 import Toggle from '@/components/common/Toggle.vue'
@@ -528,6 +549,24 @@ const redisConnected = ref(false)
 const installing = ref(false)
 const confirmPassword = ref('')
 const serviceReady = ref(false)
+
+// Every setup write must carry the one-time token the first-run server prints.
+// The field stays editable and pre-filled from the link, so a typo or a token
+// from a previous run is always one edit away instead of a dead end.
+const tokenInput = ref(getSetupToken())
+
+function applyTokenInput() {
+  const token = tokenInput.value.trim()
+  if (token) {
+    setSetupToken(token)
+  }
+}
+
+function handleSetupError(error: unknown, fallback: string) {
+  const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
+  errorMessage.value =
+    err.response?.data?.detail || err.response?.data?.message || err.message || fallback
+}
 
 // Default server port
 const getCurrentPort = (): number => {
@@ -585,6 +624,7 @@ const canProceed = computed(() => {
 })
 
 async function testDatabaseConnection() {
+  applyTokenInput()
   testingDb.value = true
   errorMessage.value = ''
   dbConnected.value = false
@@ -593,15 +633,14 @@ async function testDatabaseConnection() {
     await testDatabase(formData.database)
     dbConnected.value = true
   } catch (error: unknown) {
-    const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
-    errorMessage.value =
-      err.response?.data?.detail || err.response?.data?.message || err.message || 'Connection failed'
+    handleSetupError(error, 'Connection failed')
   } finally {
     testingDb.value = false
   }
 }
 
 async function testRedisConnection() {
+  applyTokenInput()
   testingRedis.value = true
   errorMessage.value = ''
   redisConnected.value = false
@@ -610,9 +649,7 @@ async function testRedisConnection() {
     await testRedis(formData.redis)
     redisConnected.value = true
   } catch (error: unknown) {
-    const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
-    errorMessage.value =
-      err.response?.data?.detail || err.response?.data?.message || err.message || 'Connection failed'
+    handleSetupError(error, 'Connection failed')
   } finally {
     testingRedis.value = false
   }
@@ -626,6 +663,7 @@ function nextStep() {
 }
 
 async function performInstall() {
+  applyTokenInput()
   installing.value = true
   errorMessage.value = ''
 
@@ -635,9 +673,7 @@ async function performInstall() {
     // Start polling for service restart
     waitForServiceRestart()
   } catch (error: unknown) {
-    const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
-    errorMessage.value =
-      err.response?.data?.detail || err.response?.data?.message || err.message || 'Installation failed'
+    handleSetupError(error, 'Installation failed')
   } finally {
     installing.value = false
   }

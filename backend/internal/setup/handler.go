@@ -29,6 +29,7 @@ func RegisterRoutes(r *gin.Engine) {
 		// All modification endpoints are protected by setupGuard
 		protected := setup.Group("")
 		protected.Use(setupGuard())
+		protected.Use(setupTokenGuard())
 		{
 			protected.POST("/test-db", testDatabase)
 			protected.POST("/test-redis", testRedis)
@@ -41,13 +42,17 @@ func RegisterRoutes(r *gin.Engine) {
 type SetupStatus struct {
 	NeedsSetup bool   `json:"needs_setup"`
 	Step       string `json:"step"`
+	// RequiresToken reports that write requests must carry the one-time setup
+	// token printed by the first-run server.
+	RequiresToken bool `json:"requires_token"`
 }
 
 // getStatus returns the current setup status
 func getStatus(c *gin.Context) {
 	response.Success(c, SetupStatus{
-		NeedsSetup: NeedsSetup(),
-		Step:       "welcome",
+		NeedsSetup:    NeedsSetup(),
+		Step:          "welcome",
+		RequiresToken: CurrentSetupToken() != "",
 	})
 }
 
@@ -56,6 +61,20 @@ func setupGuard() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		if !NeedsSetup() {
 			response.Error(c, http.StatusForbidden, "Setup is not allowed: system is already installed")
+			c.Abort()
+			return
+		}
+		c.Next()
+	}
+}
+
+// setupTokenGuard middleware requires the one-time setup token on every setup
+// write. Without it a wizard that is reachable from the network turns into a
+// free administrator account for whoever connects first.
+func setupTokenGuard() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if !SetupTokenMatches(c.GetHeader(SetupTokenHeader)) {
+			response.Error(c, http.StatusUnauthorized, "Setup token is missing or invalid. Read it from the server log or the "+SetupTokenFileName+" file in the data directory.")
 			c.Abort()
 			return
 		}

@@ -194,6 +194,11 @@ export default {
   setup: {
     title: '智境网关 安装向导',
     description: '配置您的 智境网关 实例',
+    token: {
+      label: '安装令牌 (setup token)',
+      placeholder: '粘贴服务器日志中的 setup token',
+      hint: '首次启动时服务日志会打印一个一次性 setup token，同时写入数据目录下的 setup-token 文件。测试连接与完成安装都需要它。'
+    },
     database: {
       title: '数据库配置',
       description: '连接到您的 PostgreSQL 数据库',

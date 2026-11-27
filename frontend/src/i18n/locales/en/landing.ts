@@ -194,6 +194,11 @@ export default {
   setup: {
     title: '智境网关 Setup',
     description: 'Configure your 智境网关 instance',
+    token: {
+      label: 'Setup Token',
+      placeholder: 'Paste the setup token from the server log',
+      hint: 'The first-run server printed this one-time token in its log and wrote it to the setup-token file in the data directory. It is required to test connections and complete the installation.'
+    },
     database: {
       title: 'Database Configuration',
       description: 'Connect to your PostgreSQL database',
