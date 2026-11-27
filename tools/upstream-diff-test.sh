@@ -227,11 +227,39 @@ row=$(row_of "$out" "backend/internal/service/foo and bar.go")
 [ "$(field "$row" 1)" -eq 2 ] || fail "含 and 的路径改动行数应为 2，实际: $(field "$row" 1)"
 
 # 10) 调用方的 locale 不该影响结果（diff 的输出会被解析）
+all_rows=$(run --top 0)
+default_rows=$(printf '%s\n' "$all_rows" | awk -F'\t' 'NF == 3' | wc -l | tr -d ' ')
 out_locale=$(LC_ALL=de_DE.UTF-8 LANG=de_DE.UTF-8 run --top 0)
-default_rows=$(printf '%s\n' "$out" | awk -F'\t' 'NF == 3' | wc -l | tr -d ' ')
 locale_rows=$(printf '%s\n' "$out_locale" | awk -F'\t' 'NF == 3' | wc -l | tr -d ' ')
 [ "$default_rows" = "$locale_rows" ] \
   || fail "换 locale 后行数从 $default_rows 变成 $locale_rows，说明 diff 的输出被本地化了"
+
+# 10b) 上面那条在本机没装 de_DE 时会空跑，所以再加一条不依赖系统 locale 的：
+# 把一个只在 LC_ALL=C 时才说英文的假 diff 放在 PATH 前面。脚本如果没自己锁
+# locale，解析器就会看到德语，一条差异都认不出来。
+real_diff=$(command -v diff)
+shim=$tmp/shim
+mkdir -p "$shim"
+cat >"$shim/diff" <<EOF
+#!/bin/sh
+if [ "\${LC_ALL:-}" != C ]; then
+  printf 'Dateien %s unterscheiden sich\n' "\$*"
+  exit 1
+fi
+exec "$real_diff" "\$@"
+EOF
+chmod +x "$shim/diff"
+
+# 控制组：确认假 diff 真的会跟着 locale 变，否则下面的断言是空的。
+control=$(PATH="$shim:$PATH" env -u LC_ALL diff -rq "$up/docs" "$ours/docs" 2>&1 || true)
+case $control in
+  Dateien*) ;;
+  *) fail '假 diff 没有生效，locale 断言会变成空跑' ;;
+esac
+
+shim_rows=$(PATH="$shim:$PATH" run --top 0 | awk -F'\t' 'NF == 3' | wc -l | tr -d ' ')
+[ "$default_rows" = "$shim_rows" ] \
+  || fail "假 diff 生效后行数从 $default_rows 变成 $shim_rows，说明脚本没有自己锁 locale"
 
 # 参数校验：没有 --upstream 必须非零退出
 if /bin/sh "$tool" >/dev/null 2>&1; then
