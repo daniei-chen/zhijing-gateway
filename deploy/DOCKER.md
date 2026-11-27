@@ -7,13 +7,22 @@
 ```bash
 docker run -d \
   --name zhijing-gateway \
-  -p 8080:8080 \
+  -p 127.0.0.1:8080:8080 \
   -e DATABASE_URL="postgres://user:pass@host:5432/sub2api" \
   -e REDIS_URL="redis://host:6379" \
   ghcr.io/daniei-chen/zhijing-gateway:latest
 ```
 
 ## Docker Compose
+
+The examples publish the container on `127.0.0.1:8080`, so the gateway answers
+only on the Docker host. Serve production traffic through a reverse proxy
+(nginx/Caddy) on that host; to publish the port directly instead, map
+`-p 8080:8080` and restrict the port in the host firewall. The Compose files in
+`deploy/` take the address from `BIND_HOST`, which defaults to `127.0.0.1` and
+must be set to `0.0.0.0` to expose the port. A deployment that relied on the
+previous `0.0.0.0` default keeps direct access only after setting it
+explicitly.
 
 ```yaml
 version: '3.8'
@@ -22,7 +31,7 @@ services:
   zhijing-gateway:
     image: ghcr.io/daniei-chen/zhijing-gateway:latest
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     environment:
       - DATABASE_URL=postgres://postgres:postgres@db:5432/sub2api?sslmode=disable
       - REDIS_URL=redis://redis:6379

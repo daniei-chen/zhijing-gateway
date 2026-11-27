@@ -171,6 +171,16 @@ server:
     - ::1/128
 ```
 
+## Published port
+
+The Compose deployments publish the gateway on `127.0.0.1:8080` and the Apple
+`container` stack does the same, so the proxy layouts below reach the gateway
+over loopback and no client on the network can bypass them. Publishing the port
+on every interface is an explicit opt-in: set `BIND_HOST=0.0.0.0` in `.env` and
+restrict the source addresses in the host firewall. An upgraded deployment that
+used the previous `0.0.0.0` default for direct access has to set it again;
+deployments behind a reverse proxy need no change.
+
 ## Nginx baseline
 
 Define shared zones in the `http` block. Tune rates to measured legitimate
