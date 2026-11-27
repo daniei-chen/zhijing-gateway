@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/daniei-chen/zhijing-gateway/internal/service"
 
@@ -11,6 +12,15 @@ import (
 
 // StepUpAuthMiddleware 敏感操作 step-up 2FA 门控中间件类型。
 type StepUpAuthMiddleware gin.HandlerFunc
+
+// 强制门写进管理面审计的两个字段（见 SetAuditExtra 的白名单）。
+const (
+	auditExtraForcedStepUpResult = "forced_step_up_result"
+	auditExtraForcedStepUpReason = "forced_step_up_reason"
+
+	auditForcedStepUpAllowed = "allowed"
+	auditForcedStepUpDenied  = "denied"
+)
 
 // stepUpGrantChecker 抽象 TOTP step-up 授权检查能力（由 TotpService 实现）。
 type stepUpGrantChecker interface {
@@ -51,6 +61,48 @@ func NewStepUpAuthMiddleware(
 	settingService *service.SettingService,
 ) StepUpAuthMiddleware {
 	return StepUpAuthMiddleware(stepUpAuth(totpService, userService, stepUpSettingsOrNil(settingService)))
+}
+
+// NewForcedStepUpAuthMiddleware 创建不读取 settings.step_up_enabled 的强制 step-up 门控。
+//
+// 判定与 NewStepUpAuthMiddleware 完全一致（同一个 enforceStepUpWithReason），唯一区别是
+// settings 传 nil：全局开关关闭时，挂在它上面的端点仍然要求「本人已启用 TOTP + 本会话完成过
+// step-up」。只用于一次调用即可造成服务替换、凭据外泄、权限提升、资金流失或不可逆销毁
+// 审计证据的端点；其余端点继续由全局开关决定，否则默认关闭的产品行为会被整体改掉。
+//
+// 升级代价（必读）：默认部署 totp_enabled 同样是 false，管理员未绑定 TOTP 时这些端点一律
+// 返回 STEP_UP_TOTP_NOT_ENABLED —— 即「先开 TOTP 功能并给管理员绑定，才能继续用这些功能」。
+func NewForcedStepUpAuthMiddleware(
+	totpService *service.TotpService,
+	userService *service.UserService,
+) StepUpAuthMiddleware {
+	return StepUpAuthMiddleware(forcedStepUpAuth(totpService, userService))
+}
+
+// forcedStepUpAuth 与 stepUpAuth 共用判定，只把 settings 固定为 nil（fail-closed）。
+func forcedStepUpAuth(grantChecker stepUpGrantChecker, userReader stepUpUserReader) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		granted, reason := enforceStepUpWithReason(c, grantChecker, userReader, nil)
+		result := auditForcedStepUpAllowed
+		if !granted {
+			result = auditForcedStepUpDenied
+		}
+		// 审计中间件在链路返回后读取这些字段：拒绝原因（机器凭证/未绑定 TOTP/无授权窗口）
+		// 是事后区分「脚本用错凭证」和「会话被劫持」的唯一线索。
+		SetAuditExtra(c, map[string]any{
+			auditExtraForcedStepUpResult: result,
+			auditExtraForcedStepUpReason: reason,
+		})
+		if !granted {
+			slog.WarnContext(c.Request.Context(), "forced step-up denied",
+				"method", c.Request.Method,
+				"path", c.FullPath(),
+				"reason", reason,
+			)
+			return
+		}
+		c.Next()
+	}
 }
 
 // stepUpSettingsOrNil 将可能为 nil 的具体指针归一化为接口，

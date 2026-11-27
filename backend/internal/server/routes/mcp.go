@@ -19,14 +19,15 @@ var mcpRateLimitOptions = ratelimit.RateLimitOptions{FailureMode: ratelimit.Rate
 // RegisterMCPRoutes exposes MCP over HTTP and reuses the normal management
 // routes in a private router, preserving ownership checks, guards and audit.
 func RegisterMCPRoutes(v1 *gin.RouterGroup, h *handler.Handlers, audit middleware.AuditLogMiddleware,
-	stepUp middleware.StepUpAuthMiddleware, settings *service.SettingService,
+	stepUp middleware.StepUpAuthMiddleware, forcedStepUp middleware.StepUpAuthMiddleware,
+	settings *service.SettingService,
 	limiter *middleware.PanelRateLimiter, allowedOrigins []string, redisClient *redis.Client,
 ) {
 	inner := gin.New()
 	inner.Use(gin.Recovery())
 	api := inner.Group("/api/v1")
 	RegisterUserRoutes(api, h, middleware.JWTAuthMiddleware(managementmcp.DispatchAuth(false)), audit, settings, limiter)
-	RegisterAdminRoutes(api, h, middleware.AdminAuthMiddleware(managementmcp.DispatchAuth(true)), audit, stepUp, settings, limiter)
+	RegisterAdminRoutes(api, h, middleware.AdminAuthMiddleware(managementmcp.DispatchAuth(true)), audit, stepUp, forcedStepUp, settings, limiter)
 	transport := managementmcp.NewHandler(inner, allowedOrigins)
 	var handlers []gin.HandlerFunc
 	if redisClient != nil {

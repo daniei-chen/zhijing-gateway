@@ -192,3 +192,68 @@ func TestEnforceStepUpTypedNilSettingServiceFailsClosed(t *testing.T) {
 	require.False(t, ok)
 	require.Equal(t, http.StatusUnauthorized, rec.Code)
 }
+
+// forcedStepUpAuditExtra 取出强制门写入的审计字段。
+func forcedStepUpAuditExtra(t *testing.T, c *gin.Context) map[string]any {
+	t.Helper()
+	value, ok := c.Get(auditCtxKeyExtra)
+	require.True(t, ok, "强制门必须写审计字段")
+	extra, ok := value.(map[string]any)
+	require.True(t, ok)
+	return extra
+}
+
+// TestForcedStepUpAuthDoesNotReadGlobalSwitch 是 DAN-48 的中间件级断言：
+// 同一个 settings（IsStepUpEnabled=false）下，软门放行、强制门拒绝。
+func TestForcedStepUpAuthDoesNotReadGlobalSwitch(t *testing.T) {
+	disabled := stubStepUpSettingReader{enabled: false}
+	grantChecker := stubStepUpGrantChecker{granted: false}
+	userReader := stubStepUpUserReader{user: &service.User{ID: 1, TotpEnabled: true}}
+
+	softContext, _ := newStepUpTestContext(t)
+	softContext.Set(string(ContextKeyUser), AuthSubject{UserID: 1})
+	stepUpAuth(grantChecker, userReader, disabled)(softContext)
+	require.False(t, softContext.IsAborted(), "全局开关关闭时软门应放行（对照组）")
+
+	forcedContext, rec := newStepUpTestContext(t)
+	forcedContext.Set(string(ContextKeyUser), AuthSubject{UserID: 1})
+	forcedStepUpAuth(grantChecker, userReader)(forcedContext)
+
+	require.True(t, forcedContext.IsAborted())
+	require.Equal(t, http.StatusForbidden, rec.Code)
+	require.Contains(t, rec.Body.String(), "STEP_UP_REQUIRED")
+	extra := forcedStepUpAuditExtra(t, forcedContext)
+	require.Equal(t, auditForcedStepUpDenied, extra[auditExtraForcedStepUpResult])
+	require.Equal(t, "STEP_UP_REQUIRED", extra[auditExtraForcedStepUpReason])
+}
+
+func TestForcedStepUpAuthPassesVerifiedSession(t *testing.T) {
+	c, _ := newStepUpTestContext(t)
+	c.Set(string(ContextKeyUser), AuthSubject{UserID: 1})
+
+	forcedStepUpAuth(
+		stubStepUpGrantChecker{granted: true},
+		stubStepUpUserReader{user: &service.User{ID: 1, TotpEnabled: true}},
+	)(c)
+
+	require.False(t, c.IsAborted())
+	extra := forcedStepUpAuditExtra(t, c)
+	require.Equal(t, auditForcedStepUpAllowed, extra[auditExtraForcedStepUpResult])
+	require.Equal(t, "", extra[auditExtraForcedStepUpReason])
+}
+
+func TestForcedStepUpAuthRejectsMachineCredentials(t *testing.T) {
+	c, rec := newStepUpTestContext(t)
+	c.Set("auth_method", service.AuditAuthMethodAdminAPIKey)
+	c.Set(string(ContextKeyUser), AuthSubject{UserID: 1})
+
+	forcedStepUpAuth(
+		stubStepUpGrantChecker{granted: true},
+		stubStepUpUserReader{user: &service.User{ID: 1, TotpEnabled: true}},
+	)(c)
+
+	require.True(t, c.IsAborted())
+	require.Contains(t, rec.Body.String(), "STEP_UP_ADMIN_API_KEY_FORBIDDEN")
+	extra := forcedStepUpAuditExtra(t, c)
+	require.Equal(t, "STEP_UP_ADMIN_API_KEY_FORBIDDEN", extra[auditExtraForcedStepUpReason])
+}

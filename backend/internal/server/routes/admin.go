@@ -10,13 +10,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// RegisterAdminRoutes 注册管理员路由
+// RegisterAdminRoutes 注册管理员路由。
+//
+// 管理面有两套 step-up 门控（见 middleware/step_up.go）：
+//   - stepUpAuth 按 settings.step_up_enabled 放行，默认关闭时行为不变，目前只剩 /system/update；
+//   - forcedStepUpAuth 不读全局开关，用于一次调用即可替换服务、外泄凭据、提权、动钱或销毁证据的端点。
+//
+// 哪些端点用哪一套是逐条判定的，判据与理由见 deploy/ADMIN_STEP_UP.md，
+// 逐条表在 admin_step_up_coverage_test.go：注册处新增管理端点未判定即测试失败。
 func RegisterAdminRoutes(
 	v1 *gin.RouterGroup,
 	h *handler.Handlers,
 	adminAuth middleware.AdminAuthMiddleware,
 	auditLog middleware.AuditLogMiddleware,
 	stepUpAuth middleware.StepUpAuthMiddleware,
+	forcedStepUpAuth middleware.StepUpAuthMiddleware,
 	settingService *service.SettingService,
 	panelRateLimiter *middleware.PanelRateLimiter,
 ) {
@@ -40,13 +48,13 @@ func RegisterAdminRoutes(
 		registerDashboardRoutes(admin, h)
 
 		// 用户管理
-		registerUserManagementRoutes(admin, h)
+		registerUserManagementRoutes(admin, h, forcedStepUpAuth)
 
 		// 分组管理
-		registerGroupRoutes(admin, h)
+		registerGroupRoutes(admin, h, forcedStepUpAuth)
 
 		// 账号管理
-		registerAccountRoutes(admin, h, stepUpAuth)
+		registerAccountRoutes(admin, h, forcedStepUpAuth)
 
 		// 公告管理
 		registerAnnouncementRoutes(admin, h)
@@ -67,34 +75,34 @@ func RegisterAdminRoutes(
 		registerCNProviderRoutes(admin, h)
 
 		// 代理管理
-		registerProxyRoutes(admin, h, stepUpAuth)
+		registerProxyRoutes(admin, h, forcedStepUpAuth)
 
 		// 卡密管理
-		registerRedeemCodeRoutes(admin, h)
+		registerRedeemCodeRoutes(admin, h, forcedStepUpAuth)
 
 		// 优惠码管理
-		registerPromoCodeRoutes(admin, h)
+		registerPromoCodeRoutes(admin, h, forcedStepUpAuth)
 
 		// 系统设置
-		registerSettingsRoutes(admin, h, stepUpAuth)
+		registerSettingsRoutes(admin, h, forcedStepUpAuth)
 
 		// 数据管理
-		registerDataManagementRoutes(admin, h, stepUpAuth)
+		registerDataManagementRoutes(admin, h, forcedStepUpAuth)
 
 		// 数据库备份恢复
-		registerBackupRoutes(admin, h, stepUpAuth)
+		registerBackupRoutes(admin, h, forcedStepUpAuth)
 
 		// 运维监控（Ops）
-		registerOpsRoutes(admin, h)
+		registerOpsRoutes(admin, h, forcedStepUpAuth)
 
 		// 系统管理
-		registerSystemRoutes(admin, h, stepUpAuth)
+		registerSystemRoutes(admin, h, stepUpAuth, forcedStepUpAuth)
 
 		// 订阅管理
-		registerSubscriptionRoutes(admin, h)
+		registerSubscriptionRoutes(admin, h, forcedStepUpAuth)
 
 		// 使用记录管理
-		registerUsageRoutes(admin, h)
+		registerUsageRoutes(admin, h, forcedStepUpAuth)
 
 		// 用户属性管理
 		registerUserAttributeRoutes(admin, h)
@@ -106,7 +114,7 @@ func RegisterAdminRoutes(
 		registerTLSFingerprintProfileRoutes(admin, h)
 
 		// 本地进程插件管理
-		registerPluginRoutes(admin, h, stepUpAuth)
+		registerPluginRoutes(admin, h, forcedStepUpAuth)
 
 		// API Key 管理
 		registerAdminAPIKeyRoutes(admin, h)
@@ -115,27 +123,27 @@ func RegisterAdminRoutes(
 		registerScheduledTestRoutes(admin, h)
 
 		// 渠道管理
-		registerChannelRoutes(admin, h)
+		registerChannelRoutes(admin, h, forcedStepUpAuth)
 
 		// 渠道监控
 		registerChannelMonitorRoutes(admin, h, settingService)
 		registerChannelMonitorV2Routes(admin, h, settingService)
 
 		// 风控中心
-		registerContentModerationRoutes(admin, h)
+		registerContentModerationRoutes(admin, h, forcedStepUpAuth)
 
 		// 独立提示词输入审计
-		registerPromptAuditRoutes(admin, h)
+		registerPromptAuditRoutes(admin, h, forcedStepUpAuth)
 
 		// 邀请返利（专属用户管理）
-		registerAffiliateRoutes(admin, h)
+		registerAffiliateRoutes(admin, h, forcedStepUpAuth)
 
 		// 操作审计日志
 		registerAuditLogRoutes(admin, h, stepUpAuth)
 	}
 }
 
-func registerPromptAuditRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerPromptAuditRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	promptAudit := admin.Group("/prompt-audit")
 	{
 		promptAudit.GET("/config", h.Admin.PromptAudit.GetConfig)
@@ -144,10 +152,10 @@ func registerPromptAuditRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		promptAudit.GET("/runtime", h.Admin.PromptAudit.GetRuntime)
 		promptAudit.GET("/events", h.Admin.PromptAudit.ListEvents)
 		promptAudit.GET("/events/:id", h.Admin.PromptAudit.GetEvent)
-		promptAudit.DELETE("/events/:id", h.Admin.PromptAudit.DeleteEvent)
-		promptAudit.POST("/events/batch-delete", h.Admin.PromptAudit.BatchDelete)
+		promptAudit.DELETE("/events/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.PromptAudit.DeleteEvent)
+		promptAudit.POST("/events/batch-delete", gin.HandlerFunc(forcedStepUpAuth), h.Admin.PromptAudit.BatchDelete)
 		promptAudit.POST("/events/delete-preview", h.Admin.PromptAudit.DeletePreview)
-		promptAudit.POST("/events/delete-by-filter", h.Admin.PromptAudit.DeleteByFilter)
+		promptAudit.POST("/events/delete-by-filter", gin.HandlerFunc(forcedStepUpAuth), h.Admin.PromptAudit.DeleteByFilter)
 	}
 }
 
@@ -169,7 +177,7 @@ func registerAdminComplianceRoutes(admin *gin.RouterGroup, h *handler.Handlers) 
 	}
 }
 
-func registerContentModerationRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerContentModerationRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	risk := admin.Group("/risk-control")
 	{
 		risk.GET("/config", h.Admin.ContentModeration.GetConfig)
@@ -179,7 +187,7 @@ func registerContentModerationRoutes(admin *gin.RouterGroup, h *handler.Handlers
 		risk.GET("/logs", h.Admin.ContentModeration.ListLogs)
 		risk.POST("/users/:user_id/unban", h.Admin.ContentModeration.UnbanUser)
 		risk.DELETE("/hashes", h.Admin.ContentModeration.DeleteFlaggedHash)
-		risk.DELETE("/hashes/all", h.Admin.ContentModeration.ClearFlaggedHashes)
+		risk.DELETE("/hashes/all", gin.HandlerFunc(forcedStepUpAuth), h.Admin.ContentModeration.ClearFlaggedHashes)
 	}
 }
 
@@ -190,7 +198,7 @@ func registerAdminAPIKeyRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerOpsRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerOpsRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	ops := admin.Group("/ops")
 	{
 		// Realtime ops signals
@@ -266,7 +274,7 @@ func registerOpsRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 
 		// Indexed system logs
 		ops.GET("/system-logs", h.Admin.Ops.ListSystemLogs)
-		ops.POST("/system-logs/cleanup", h.Admin.Ops.CleanupSystemLogs)
+		ops.POST("/system-logs/cleanup", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Ops.CleanupSystemLogs)
 		ops.GET("/system-logs/health", h.Admin.Ops.GetSystemLogIngestionHealth)
 
 		// Dashboard (vNext - raw path for MVP)
@@ -299,17 +307,17 @@ func registerDashboardRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	users := admin.Group("/users")
 	{
 		users.GET("", h.Admin.User.List)
 		users.GET("/:id", h.Admin.User.GetByID)
-		users.POST("/:id/auth-identities", h.Admin.User.BindAuthIdentity)
-		users.POST("", h.Admin.User.Create)
-		users.PUT("/:id", h.Admin.User.Update)
-		users.DELETE("/:id", h.Admin.User.Delete)
-		users.POST("/:id/balance", h.Admin.User.UpdateBalance)
-		users.POST("/:id/balance/replay", h.Admin.User.ReplayBalanceUpdate)
+		users.POST("/:id/auth-identities", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.BindAuthIdentity)
+		users.POST("", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.Create)
+		users.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.Update)
+		users.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.Delete)
+		users.POST("/:id/balance", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.UpdateBalance)
+		users.POST("/:id/balance/replay", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.ReplayBalanceUpdate)
 		users.GET("/:id/api-keys", h.Admin.User.GetUserAPIKeys)
 		users.GET("/:id/usage", h.Admin.User.GetUserUsage)
 		users.GET("/:id/balance-history", h.Admin.User.GetBalanceHistory)
@@ -329,7 +337,7 @@ func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerGroupRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerGroupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	groups := admin.Group("/groups")
 	groups.Use(h.Admin.Group.ScopedAdminKeyGroupModels)
 	{
@@ -351,15 +359,15 @@ func registerGroupRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		groups.PUT("/:id", h.Admin.Group.Update)
 		groups.DELETE("/:id", h.Admin.Group.Delete)
 		groups.GET("/:id/rate-multipliers", h.Admin.Group.GetGroupRateMultipliers)
-		groups.PUT("/:id/rate-multipliers", h.Admin.Group.BatchSetGroupRateMultipliers)
-		groups.DELETE("/:id/rate-multipliers", h.Admin.Group.ClearGroupRateMultipliers)
+		groups.PUT("/:id/rate-multipliers", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Group.BatchSetGroupRateMultipliers)
+		groups.DELETE("/:id/rate-multipliers", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Group.ClearGroupRateMultipliers)
 		groups.PUT("/:id/rpm-overrides", h.Admin.Group.BatchSetGroupRPMOverrides)
 		groups.DELETE("/:id/rpm-overrides", h.Admin.Group.ClearGroupRPMOverrides)
 		groups.GET("/:id/api-keys", h.Admin.Group.GetGroupAPIKeys)
 	}
 }
 
-func registerAccountRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware) {
+func registerAccountRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	accounts := admin.Group("/accounts")
 	{
 		accounts.GET("", h.Admin.Account.List)
@@ -418,9 +426,9 @@ func registerAccountRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAu
 		accounts.POST("/:id/models/sync-upstream", h.Admin.Account.SyncUpstreamModels)
 		accounts.POST("/batch", h.Admin.Account.BatchCreate)
 		// 账号导出泄露上游凭证原文——要求 step-up 2FA
-		accounts.GET("/data", gin.HandlerFunc(stepUpAuth), h.Admin.Account.ExportData)
-		accounts.POST("/data", h.Admin.Account.ImportData)
-		accounts.POST("/batch-update-credentials", h.Admin.Account.BatchUpdateCredentials)
+		accounts.GET("/data", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.ExportData)
+		accounts.POST("/data", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.ImportData)
+		accounts.POST("/batch-update-credentials", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.BatchUpdateCredentials)
 		accounts.POST("/batch-refresh-tier", h.Admin.Account.BatchRefreshTier)
 		accounts.POST("/bulk-update", h.Admin.Account.BulkUpdate)
 		accounts.POST("/batch-delete", h.Admin.Account.BatchDelete)
@@ -520,14 +528,14 @@ func registerCNProviderRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerProxyRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware) {
+func registerProxyRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	proxies := admin.Group("/proxies")
 	{
 		proxies.GET("", h.Admin.Proxy.List)
 		proxies.GET("/all", h.Admin.Proxy.GetAll)
 		// 代理导出泄露账号密码原文——要求 step-up 2FA
-		proxies.GET("/data", gin.HandlerFunc(stepUpAuth), h.Admin.Proxy.ExportData)
-		proxies.POST("/data", h.Admin.Proxy.ImportData)
+		proxies.GET("/data", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.ExportData)
+		proxies.POST("/data", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.ImportData)
 		proxies.GET("/:id", h.Admin.Proxy.GetByID)
 		proxies.POST("", h.Admin.Proxy.Create)
 		proxies.PUT("/:id", h.Admin.Proxy.Update)
@@ -541,37 +549,37 @@ func registerProxyRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth
 	}
 }
 
-func registerRedeemCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerRedeemCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	codes := admin.Group("/redeem-codes")
 	{
 		codes.GET("", h.Admin.Redeem.List)
 		codes.GET("/stats", h.Admin.Redeem.GetStats)
-		codes.GET("/export", h.Admin.Redeem.Export)
+		codes.GET("/export", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Export)
 		codes.GET("/:id", h.Admin.Redeem.GetByID)
-		codes.POST("/create-and-redeem", h.Admin.Redeem.CreateAndRedeem)
-		codes.POST("/generate", h.Admin.Redeem.Generate)
-		codes.DELETE("/:id", h.Admin.Redeem.Delete)
-		codes.POST("/batch-delete", h.Admin.Redeem.BatchDelete)
-		codes.POST("/batch-update", h.Admin.Redeem.BatchUpdate)
-		codes.POST("/:id/expire", h.Admin.Redeem.Expire)
+		codes.POST("/create-and-redeem", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.CreateAndRedeem)
+		codes.POST("/generate", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Generate)
+		codes.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Delete)
+		codes.POST("/batch-delete", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.BatchDelete)
+		codes.POST("/batch-update", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.BatchUpdate)
+		codes.POST("/:id/expire", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Expire)
 	}
 }
 
-func registerPromoCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerPromoCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	promoCodes := admin.Group("/promo-codes")
 	{
 		promoCodes.GET("", h.Admin.Promo.List)
 		promoCodes.GET("/:id", h.Admin.Promo.GetByID)
-		promoCodes.POST("", h.Admin.Promo.Create)
-		promoCodes.PUT("/:id", h.Admin.Promo.Update)
-		promoCodes.DELETE("/:id", h.Admin.Promo.Delete)
+		promoCodes.POST("", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Promo.Create)
+		promoCodes.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Promo.Update)
+		promoCodes.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Promo.Delete)
 		promoCodes.GET("/:id/usages", h.Admin.Promo.GetUsages)
 	}
 }
 
-func registerSettingsRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware) {
+func registerSettingsRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	adminSettings := admin.Group("/settings")
-	registerScopedAdminKeyRoutes(adminSettings, h, stepUpAuth)
+	registerScopedAdminKeyRoutes(adminSettings, h, forcedStepUpAuth)
 	{
 		adminSettings.GET("", h.Admin.Setting.GetSettings)
 		adminSettings.PUT("", h.Admin.Setting.UpdateSettings)
@@ -584,8 +592,8 @@ func registerSettingsRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpA
 		adminSettings.POST("/email-templates/:event/:locale/restore-official", h.Admin.Setting.RestoreOfficialEmailTemplate)
 		// Admin API Key 管理
 		adminSettings.GET("/admin-api-key", h.Admin.Setting.GetAdminAPIKey)
-		adminSettings.POST("/admin-api-key/regenerate", gin.HandlerFunc(stepUpAuth), h.Admin.Setting.RegenerateAdminAPIKey)
-		adminSettings.DELETE("/admin-api-key", gin.HandlerFunc(stepUpAuth), h.Admin.Setting.DeleteAdminAPIKey)
+		adminSettings.POST("/admin-api-key/regenerate", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Setting.RegenerateAdminAPIKey)
+		adminSettings.DELETE("/admin-api-key", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Setting.DeleteAdminAPIKey)
 		// 529过载冷却配置
 		adminSettings.GET("/overload-cooldown", h.Admin.Setting.GetOverloadCooldownSettings)
 		adminSettings.PUT("/overload-cooldown", h.Admin.Setting.UpdateOverloadCooldownSettings)
@@ -618,7 +626,7 @@ func registerSettingsRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpA
 	}
 }
 
-func registerDataManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware) {
+func registerDataManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	dataManagement := admin.Group("/data-management")
 	{
 		dataManagement.GET("/agent/health", h.Admin.DataManagement.GetAgentHealth)
@@ -632,29 +640,29 @@ func registerDataManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, s
 		dataManagement.POST("/s3/test", h.Admin.DataManagement.TestS3)
 		dataManagement.GET("/s3/profiles", h.Admin.DataManagement.ListS3Profiles)
 		// 修改 S3 目标可将数据备份外泄——要求 step-up 2FA
-		dataManagement.POST("/s3/profiles", gin.HandlerFunc(stepUpAuth), h.Admin.DataManagement.CreateS3Profile)
-		dataManagement.PUT("/s3/profiles/:profile_id", gin.HandlerFunc(stepUpAuth), h.Admin.DataManagement.UpdateS3Profile)
+		dataManagement.POST("/s3/profiles", gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.CreateS3Profile)
+		dataManagement.PUT("/s3/profiles/:profile_id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.UpdateS3Profile)
 		dataManagement.DELETE("/s3/profiles/:profile_id", h.Admin.DataManagement.DeleteS3Profile)
-		dataManagement.POST("/s3/profiles/:profile_id/activate", gin.HandlerFunc(stepUpAuth), h.Admin.DataManagement.SetActiveS3Profile)
-		dataManagement.POST("/backups", gin.HandlerFunc(stepUpAuth), h.Admin.DataManagement.CreateBackupJob)
+		dataManagement.POST("/s3/profiles/:profile_id/activate", gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.SetActiveS3Profile)
+		dataManagement.POST("/backups", gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.CreateBackupJob)
 		dataManagement.GET("/backups", h.Admin.DataManagement.ListBackupJobs)
 		dataManagement.GET("/backups/:job_id", h.Admin.DataManagement.GetBackupJob)
 	}
 }
 
-func registerBackupRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware) {
+func registerBackupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	backup := admin.Group("/backups")
 	{
 		// S3 存储配置
 		backup.GET("/s3-config", h.Admin.Backup.GetS3Config)
 		// 修改 S3 目标可将数据库备份外泄——要求 step-up 2FA
-		backup.PUT("/s3-config", gin.HandlerFunc(stepUpAuth), h.Admin.Backup.UpdateS3Config)
+		backup.PUT("/s3-config", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.UpdateS3Config)
 		backup.POST("/s3-config/test", h.Admin.Backup.TestS3Connection)
 
 		// 异步生图对象存储配置（与备份共用 S3 客户端，可直接复用备份凭证）
 		backup.GET("/image-storage", h.Admin.Backup.GetImageStorageConfig)
 		// 同 S3 配置：改写对象存储目标可将生成内容导向外部账号——要求 step-up 2FA
-		backup.PUT("/image-storage", gin.HandlerFunc(stepUpAuth), h.Admin.Backup.UpdateImageStorageConfig)
+		backup.PUT("/image-storage", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.UpdateImageStorageConfig)
 		backup.POST("/image-storage/test", h.Admin.Backup.TestImageStorageConnection)
 
 		// 定时备份配置
@@ -662,19 +670,19 @@ func registerBackupRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAut
 		backup.PUT("/schedule", h.Admin.Backup.UpdateSchedule)
 
 		// 备份操作
-		backup.POST("", gin.HandlerFunc(stepUpAuth), h.Admin.Backup.CreateBackup)
+		backup.POST("", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.CreateBackup)
 		backup.GET("", h.Admin.Backup.ListBackups)
 		backup.GET("/:id", h.Admin.Backup.GetBackup)
-		backup.DELETE("/:id", h.Admin.Backup.DeleteBackup)
+		backup.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.DeleteBackup)
 		// 备份下载链接可直接取走整库数据——要求 step-up 2FA
-		backup.GET("/:id/download-url", gin.HandlerFunc(stepUpAuth), h.Admin.Backup.GetDownloadURL)
+		backup.GET("/:id/download-url", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.GetDownloadURL)
 
 		// 恢复操作：整库覆盖可回滚安全设置（含 step-up 开关本身）——要求 step-up 2FA
-		backup.POST("/:id/restore", gin.HandlerFunc(stepUpAuth), h.Admin.Backup.RestoreBackup)
+		backup.POST("/:id/restore", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.RestoreBackup)
 	}
 }
 
-func registerSystemRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware) {
+func registerSystemRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	system := admin.Group("/system")
 	{
 		system.GET("/version", h.Admin.System.GetVersion)
@@ -685,27 +693,27 @@ func registerSystemRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAut
 		// /update 额外挂应用层硬门：默认关闭 + 对端 CIDR 白名单 + 强制 step-up，
 		// 不受 step_up_enabled 影响（见 middleware.NewAdminSystemUpdateGate）。
 		system.POST("/update", h.Admin.System.UpdateGate(), gin.HandlerFunc(stepUpAuth), h.Admin.System.PerformUpdate)
-		system.POST("/rollback", gin.HandlerFunc(stepUpAuth), h.Admin.System.Rollback)
-		system.POST("/restart", gin.HandlerFunc(stepUpAuth), h.Admin.System.RestartService)
+		system.POST("/rollback", gin.HandlerFunc(forcedStepUpAuth), h.Admin.System.Rollback)
+		system.POST("/restart", gin.HandlerFunc(forcedStepUpAuth), h.Admin.System.RestartService)
 	}
 }
 
-func registerSubscriptionRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerSubscriptionRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	subscriptions := admin.Group("/subscriptions")
 	{
 		subscriptions.GET("", h.Admin.Subscription.List)
 		subscriptions.GET("/:id", h.Admin.Subscription.GetByID)
 		subscriptions.GET("/:id/progress", h.Admin.Subscription.GetProgress)
-		subscriptions.POST("/assign", h.Admin.Subscription.Assign)
-		subscriptions.POST("/bulk-assign", h.Admin.Subscription.BulkAssign)
-		subscriptions.POST("/bulk-action", h.Admin.Subscription.BulkAction)
-		subscriptions.POST("/bulk-action/replay", h.Admin.Subscription.ReplayBulkAction)
-		subscriptions.POST("/:id/extend", h.Admin.Subscription.Extend)
-		subscriptions.POST("/:id/extend/replay", h.Admin.Subscription.ReplayExtend)
-		subscriptions.POST("/:id/reset-quota", h.Admin.Subscription.ResetQuota)
-		subscriptions.POST("/:id/revoke", h.Admin.Subscription.Revoke)
-		subscriptions.POST("/:id/restore", h.Admin.Subscription.Restore)
-		subscriptions.DELETE("/:id", h.Admin.Subscription.Revoke)
+		subscriptions.POST("/assign", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Assign)
+		subscriptions.POST("/bulk-assign", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.BulkAssign)
+		subscriptions.POST("/bulk-action", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.BulkAction)
+		subscriptions.POST("/bulk-action/replay", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.ReplayBulkAction)
+		subscriptions.POST("/:id/extend", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Extend)
+		subscriptions.POST("/:id/extend/replay", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.ReplayExtend)
+		subscriptions.POST("/:id/reset-quota", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.ResetQuota)
+		subscriptions.POST("/:id/revoke", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Revoke)
+		subscriptions.POST("/:id/restore", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Restore)
+		subscriptions.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Revoke)
 	}
 
 	// 分组下的订阅列表
@@ -715,7 +723,7 @@ func registerSubscriptionRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	admin.GET("/users/:id/subscriptions", h.Admin.Subscription.ListByUser)
 }
 
-func registerUsageRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerUsageRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	usage := admin.Group("/usage")
 	{
 		usage.GET("", h.Admin.Usage.List)
@@ -723,7 +731,7 @@ func registerUsageRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		usage.GET("/search-users", h.Admin.Usage.SearchUsers)
 		usage.GET("/search-api-keys", h.Admin.Usage.SearchAPIKeys)
 		usage.GET("/cleanup-tasks", h.Admin.Usage.ListCleanupTasks)
-		usage.POST("/cleanup-tasks", h.Admin.Usage.CreateCleanupTask)
+		usage.POST("/cleanup-tasks", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Usage.CreateCleanupTask)
 		usage.POST("/cleanup-tasks/:id/cancel", h.Admin.Usage.CancelCleanupTask)
 	}
 }
@@ -774,33 +782,33 @@ func registerTLSFingerprintProfileRoutes(admin *gin.RouterGroup, h *handler.Hand
 	}
 }
 
-func registerPluginRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAuth middleware.StepUpAuthMiddleware) {
+func registerPluginRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	plugins := admin.Group("/plugins")
 	{
 		plugins.GET("", h.Admin.Plugin.List)
 		plugins.GET("/:id", h.Admin.Plugin.Get)
-		plugins.POST("/upload", gin.HandlerFunc(stepUpAuth), h.Admin.Plugin.Upload)
-		plugins.POST("/:id/enable", gin.HandlerFunc(stepUpAuth), h.Admin.Plugin.Enable)
-		plugins.POST("/:id/disable", gin.HandlerFunc(stepUpAuth), h.Admin.Plugin.Disable)
-		plugins.DELETE("/:id", gin.HandlerFunc(stepUpAuth), h.Admin.Plugin.Delete)
+		plugins.POST("/upload", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Upload)
+		plugins.POST("/:id/enable", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Enable)
+		plugins.POST("/:id/disable", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Disable)
+		plugins.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Delete)
 		plugins.GET("/:id/config", h.Admin.Plugin.GetConfig)
 		plugins.GET("/:id/status", h.Admin.Plugin.Status)
-		plugins.PUT("/:id/config", gin.HandlerFunc(stepUpAuth), h.Admin.Plugin.SaveConfig)
-		plugins.POST("/:id/test", gin.HandlerFunc(stepUpAuth), h.Admin.Plugin.Test)
+		plugins.PUT("/:id/config", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.SaveConfig)
+		plugins.POST("/:id/test", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Test)
 		plugins.POST("/:id/ui-session", h.Admin.Plugin.CreateUISession)
 	}
 }
 
-func registerChannelRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerChannelRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	channels := admin.Group("/channels")
 	{
 		channels.GET("", h.Admin.Channel.List)
 		channels.GET("/model-pricing", h.Admin.Channel.GetModelDefaultPricing)
 		channels.GET("/pricing/sync-models", h.Admin.Channel.SyncPricingModels)
 		channels.GET("/:id", h.Admin.Channel.GetByID)
-		channels.POST("", h.Admin.Channel.Create)
-		channels.PUT("/:id", h.Admin.Channel.Update)
-		channels.DELETE("/:id", h.Admin.Channel.Delete)
+		channels.POST("", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Channel.Create)
+		channels.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Channel.Update)
+		channels.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Channel.Delete)
 	}
 }
 
@@ -833,7 +841,7 @@ func registerChannelMonitorRoutes(admin *gin.RouterGroup, h *handler.Handlers, s
 }
 
 // registerAffiliateRoutes 注册邀请返利的管理端路由（专属用户配置）
-func registerAffiliateRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerAffiliateRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.StepUpAuthMiddleware) {
 	affiliates := admin.Group("/affiliates")
 	{
 		affiliates.GET("/invites", h.Admin.Affiliate.ListInviteRecords)
@@ -844,11 +852,11 @@ func registerAffiliateRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 		{
 			users.GET("", h.Admin.Affiliate.ListUsers)
 			users.GET("/lookup", h.Admin.Affiliate.LookupUsers)
-			users.POST("/batch-rate", h.Admin.Affiliate.BatchSetRate)
+			users.POST("/batch-rate", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.BatchSetRate)
 			users.GET("/:user_id/overview", h.Admin.Affiliate.GetUserOverview)
-			users.POST("/:user_id/withdraw", h.Admin.Affiliate.WithdrawQuota)
-			users.PUT("/:user_id", h.Admin.Affiliate.UpdateUserSettings)
-			users.DELETE("/:user_id", h.Admin.Affiliate.ClearUserSettings)
+			users.POST("/:user_id/withdraw", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.WithdrawQuota)
+			users.PUT("/:user_id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.UpdateUserSettings)
+			users.DELETE("/:user_id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.ClearUserSettings)
 		}
 	}
 }

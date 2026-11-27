@@ -54,6 +54,8 @@ func SkipAudit(c *gin.Context) {
 var auditExtraAllowedKeys = map[string]struct{}{
 	"admin_key_id": {}, "full_access": {}, "full_access_before": {},
 	"mcp_grant_id": {}, "mcp_tool": {},
+	// 强制 step-up 门（middleware.forcedStepUpAuth）的判定结果与拒绝原因码。
+	"forced_step_up_result": {}, "forced_step_up_reason": {},
 	"result": {}, "error_code": {}, "enabled": {}, "blocking_enabled": {},
 	"config_version": {}, "endpoint_count": {}, "scanner_count": {},
 	"all_groups": {}, "group_count": {}, "guard_endpoint_id": {},

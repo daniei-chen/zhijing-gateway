@@ -32,6 +32,7 @@ func RegisterPaymentRoutes(
 	jwtAuth middleware.JWTAuthMiddleware,
 	adminAuth middleware.AdminAuthMiddleware,
 	auditLog middleware.AuditLogMiddleware,
+	forcedStepUpAuth middleware.StepUpAuthMiddleware,
 	settingService *service.SettingService,
 	panelRateLimiter *middleware.PanelRateLimiter,
 	redisClient *redis.Client,
@@ -100,35 +101,35 @@ func RegisterPaymentRoutes(
 
 		// Config
 		adminGroup.GET("/config", adminPaymentHandler.GetConfig)
-		adminGroup.PUT("/config", adminPaymentHandler.UpdateConfig)
+		adminGroup.PUT("/config", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.UpdateConfig)
 
 		// Orders
 		adminOrders := adminGroup.Group("/orders")
 		{
 			adminOrders.GET("", adminPaymentHandler.ListOrders)
 			adminOrders.GET("/:id", adminPaymentHandler.GetOrderDetail)
-			adminOrders.POST("/:id/cancel", adminPaymentHandler.CancelOrder)
-			adminOrders.POST("/:id/retry", adminPaymentHandler.RetryFulfillment)
-			adminOrders.POST("/:id/refund", adminPaymentHandler.ProcessRefund)
-			adminOrders.POST("/:id/refund/query", adminPaymentHandler.QueryAndFinalizeRefund)
+			adminOrders.POST("/:id/cancel", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.CancelOrder)
+			adminOrders.POST("/:id/retry", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.RetryFulfillment)
+			adminOrders.POST("/:id/refund", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.ProcessRefund)
+			adminOrders.POST("/:id/refund/query", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.QueryAndFinalizeRefund)
 		}
 
 		// Subscription Plans
 		plans := adminGroup.Group("/plans")
 		{
 			plans.GET("", adminPaymentHandler.ListPlans)
-			plans.POST("", adminPaymentHandler.CreatePlan)
-			plans.PUT("/:id", adminPaymentHandler.UpdatePlan)
-			plans.DELETE("/:id", adminPaymentHandler.DeletePlan)
+			plans.POST("", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.CreatePlan)
+			plans.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.UpdatePlan)
+			plans.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.DeletePlan)
 		}
 
 		// Provider Instances
 		providers := adminGroup.Group("/providers")
 		{
 			providers.GET("", adminPaymentHandler.ListProviders)
-			providers.POST("", adminPaymentHandler.CreateProvider)
-			providers.PUT("/:id", adminPaymentHandler.UpdateProvider)
-			providers.DELETE("/:id", adminPaymentHandler.DeleteProvider)
+			providers.POST("", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.CreateProvider)
+			providers.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.UpdateProvider)
+			providers.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), adminPaymentHandler.DeleteProvider)
 		}
 	}
 }
