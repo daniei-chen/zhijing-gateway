@@ -29,6 +29,21 @@ function readStoredToken(): string {
   }
 }
 
+// Taking the token out of the address bar keeps the link from resurrecting a
+// token the server rejected, and keeps the secret out of browser history.
+function stripTokenFromQuery(): void {
+  if (typeof window === 'undefined') return
+  try {
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has('setup_token')) return
+    url.searchParams.delete('setup_token')
+    window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
+  } catch {
+    // The token is already stored for this session, so a URL we cannot rewrite
+    // is not a reason to fail.
+  }
+}
+
 /**
  * Returns the active setup token, preferring a `?setup_token=` query parameter
  * (the link the server prints) over the one kept for this browser session.
@@ -39,6 +54,7 @@ export function getSetupToken(): string {
   const fromQuery = readTokenFromQuery()
   if (fromQuery) {
     setSetupToken(fromQuery)
+    stripTokenFromQuery()
     return setupToken
   }
 

@@ -57,6 +57,28 @@ describe('setup api token', () => {
     expect(setupApi.getSetupToken()).toBe('good-token')
   })
 
+  it('does not resurrect a rejected token that came from the setup link', async () => {
+    window.history.replaceState({}, '', '/setup?setup_token=stale-link')
+
+    const setupApi = await loadSetupApi()
+    expect(setupApi.getSetupToken()).toBe('stale-link')
+    expect(window.location.search).not.toContain('setup_token')
+
+    expect(setupApi.clearRejectedSetupToken({ response: { status: 401 } })).toBe(true)
+    expect(setupApi.hasSetupToken()).toBe(false)
+    expect(setupApi.getSetupToken()).toBe('')
+  })
+
+  it('keeps other query parameters when it drops the token', async () => {
+    window.history.replaceState({}, '', '/setup?lang=zh&setup_token=from-link')
+
+    const setupApi = await loadSetupApi()
+    setupApi.getSetupToken()
+
+    expect(window.location.search).toContain('lang=zh')
+    expect(window.location.search).not.toContain('setup_token')
+  })
+
   it('trims a pasted token and clears it when set to an empty value', async () => {
     const setupApi = await loadSetupApi()
 
