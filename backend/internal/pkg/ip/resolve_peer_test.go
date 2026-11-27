@@ -82,6 +82,23 @@ func TestResolvePeerClientIPCombinesRepeatedXFFFields(t *testing.T) {
 // 链上出现无法解析的跳数时整条链作废，返回空地址（调用方据此拒绝）。
 // 回落成“可信对端本身”会让 allow_cidrs 里最常见的回环条目直接放行任何人，
 // 一个格式错误的值就能把地址检查降级成“能连到代理就通过”。
+// X-Forwarded-For 存在时不再看 X-Real-IP：否则一个既不改写 X-Real-IP、又不追加
+// XFF 的代理，会让客户端自带的 X-Real-IP 直接满足白名单。
+func TestResolvePeerClientIPIgnoresXRealIPWhenXFFPresent(t *testing.T) {
+	got := resolvePeerForTest(t, "127.0.0.1:41234", map[string]string{
+		"X-Forwarded-For": "127.0.0.1",
+		"X-Real-IP":       "175.27.132.225",
+	}, []string{"127.0.0.1/32"})
+
+	require.Equal(t, "127.0.0.1", got)
+
+	got = resolvePeerForTest(t, "127.0.0.1:41234", map[string]string{
+		"X-Forwarded-For": "203.0.113.9",
+		"X-Real-IP":       "175.27.132.225",
+	}, []string{"127.0.0.1/32"})
+	require.Equal(t, "203.0.113.9", got)
+}
+
 func TestResolvePeerClientIPRejectsMalformedHop(t *testing.T) {
 	for _, header := range []string{
 		"203.0.113.9, unknown",

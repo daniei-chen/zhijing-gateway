@@ -257,6 +257,28 @@ func TestAdminSystemUpdateGateRejectsMalformedForwardedChain(t *testing.T) {
 	require.Equal(t, "", probe.auditExtra["system_update_peer_ip"])
 }
 
+// XFF 已存在时，客户端自带的 X-Real-IP 不能顶替 XFF 的判定结果。
+func TestAdminSystemUpdateGateIgnoresXRealIPWhenXFFPresent(t *testing.T) {
+	policy := AdminSystemUpdatePolicy{
+		Enabled:        true,
+		AllowCIDRs:     []string{"175.27.132.225/32"},
+		TrustedProxies: []string{"127.0.0.1/32"},
+	}
+	router, probe := newSystemUpdateGateRouter(t, systemUpdateGateOptions{
+		policy:      policy,
+		granted:     true,
+		totpEnabled: true,
+	})
+
+	rec := postSystemUpdate(router, "127.0.0.1:41234", map[string]string{
+		"X-Forwarded-For": "127.0.0.1",
+		"X-Real-IP":       "175.27.132.225",
+	})
+
+	require.Equal(t, http.StatusForbidden, rec.Code)
+	require.False(t, probe.called)
+}
+
 // 未启用 TOTP 的账号无法完成 step-up，硬门必须拒绝而不是放行。
 func TestAdminSystemUpdateGateRequiresTotpEnrollment(t *testing.T) {
 	policy := defaultAdminSystemUpdatePolicy()

@@ -327,9 +327,13 @@ func ResolvePeerClientIP(c *gin.Context, trustedProxies *CompiledIPRules) string
 			return candidate
 		}
 	}
-	if realIP := normalizeValidIP(c.GetHeader("X-Real-IP")); realIP != "" {
-		if !matchesCompiledRules(net.ParseIP(realIP), trustedProxies) {
-			return realIP
+	// X-Real-IP 只在完全没有 X-Forwarded-For 时作为兜底：XFF 已存在时再看它，
+	// 会让一个不改写 X-Real-IP 的代理把客户端自带的值透传成判定依据。
+	if len(hops) == 0 {
+		if realIP := normalizeValidIP(c.GetHeader("X-Real-IP")); realIP != "" {
+			if !matchesCompiledRules(net.ParseIP(realIP), trustedProxies) {
+				return realIP
+			}
 		}
 	}
 	return peer
