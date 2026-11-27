@@ -130,3 +130,12 @@ export function useStepUp() {
     run
   }
 }
+
+/**
+ * 全局 step-up 控制器。
+ *
+ * 由 `App.vue` 挂一个 `TotpStepUpDialog`，供 `api/client.ts` 在收到 `STEP_UP_REQUIRED`
+ * 时弹窗。管理面的 sudo 窗口是会话级的（`StepUpSessionKey` 绑当前会话），验证一次即覆盖
+ * 整段会话，所以单个全局控制器就够，不必让每个页面各自接线。
+ */
+export const globalStepUp = useStepUp()

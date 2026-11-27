@@ -398,6 +398,20 @@ type UpdateSettingsRequest struct {
 // ensureActorTotpForStepUp 校验当前操作者具备开启 step-up 门控的条件：
 // 必须是真人管理员会话（admin API key、MCP OAuth 等机器凭证无法完成 TOTP step-up，拒绝）且本人已启用 TOTP。
 // 校验失败时写入错误响应并返回 false。
+// recordSettingsStepUpState 在审计里标记本次设置写入有没有 step-up 授权。
+// 没有授权时只写标记、不拒绝：拒绝会让 TOTP 功能关闭的部署无法打开 TOTP。
+func recordSettingsStepUpState(c *gin.Context, totpService *service.TotpService) {
+	subject, ok := middleware.GetAuthSubjectFromContext(c)
+	if !ok || subject.UserID <= 0 || totpService == nil {
+		return
+	}
+	granted, err := totpService.HasStepUpGrant(
+		c.Request.Context(), subject.UserID, middleware.StepUpSessionKey(c, subject.UserID))
+	if err != nil || !granted {
+		middleware.SetAuditExtra(c, map[string]any{"settings_write_without_step_up": true})
+	}
+}
+
 func (h *SettingHandler) ensureActorTotpForStepUp(c *gin.Context) bool {
 	if reason, machine := middleware.MachineCredentialReason(c); machine {
 		response.ErrorWithDetails(c, http.StatusForbidden,
@@ -503,6 +517,10 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 	}
 	auditReq := settingsAuditRequest(req)
 	omitted := omittedSettingKeys(sentFields)
+	// 已知残留：PUT /admin/settings 不在强制 step-up 名单里（totp_enabled 默认 false 时，
+	// 它是唯一能打开 TOTP 的入口，拦了会让未绑定 TOTP 的部署无人可管）。这里给每次设置写入
+	// 记下本次是否带着 step-up 授权，事后可区分「sudo 窗口内改设置」与「仅凭管理员会话改设置」。
+	recordSettingsStepUpState(c, h.totpService)
 
 	previousSettings, err := h.settingService.GetAllSettings(c.Request.Context())
 	if err != nil {

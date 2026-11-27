@@ -60,16 +60,16 @@ func RegisterAdminRoutes(
 		registerAnnouncementRoutes(admin, h)
 
 		// OpenAI OAuth
-		registerOpenAIOAuthRoutes(admin, h)
+		registerOpenAIOAuthRoutes(admin, h, forcedStepUpAuth)
 
 		// Gemini OAuth
-		registerGeminiOAuthRoutes(admin, h)
+		registerGeminiOAuthRoutes(admin, h, forcedStepUpAuth)
 
 		// Antigravity OAuth
-		registerAntigravityOAuthRoutes(admin, h)
+		registerAntigravityOAuthRoutes(admin, h, forcedStepUpAuth)
 
 		// Grok OAuth
-		registerGrokOAuthRoutes(admin, h)
+		registerGrokOAuthRoutes(admin, h, forcedStepUpAuth)
 
 		// 国产供应商（kimi/zhipu/deepseek）额度与余额
 		registerCNProviderRoutes(admin, h)
@@ -152,10 +152,10 @@ func registerPromptAuditRoutes(admin *gin.RouterGroup, h *handler.Handlers, forc
 		promptAudit.GET("/runtime", h.Admin.PromptAudit.GetRuntime)
 		promptAudit.GET("/events", h.Admin.PromptAudit.ListEvents)
 		promptAudit.GET("/events/:id", h.Admin.PromptAudit.GetEvent)
-		promptAudit.DELETE("/events/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.PromptAudit.DeleteEvent)
-		promptAudit.POST("/events/batch-delete", gin.HandlerFunc(forcedStepUpAuth), h.Admin.PromptAudit.BatchDelete)
+		promptAudit.DELETE("/events/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.PromptAudit.DeleteEvent)
+		promptAudit.POST("/events/batch-delete", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.PromptAudit.BatchDelete)
 		promptAudit.POST("/events/delete-preview", h.Admin.PromptAudit.DeletePreview)
-		promptAudit.POST("/events/delete-by-filter", gin.HandlerFunc(forcedStepUpAuth), h.Admin.PromptAudit.DeleteByFilter)
+		promptAudit.POST("/events/delete-by-filter", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.PromptAudit.DeleteByFilter)
 	}
 }
 
@@ -187,7 +187,7 @@ func registerContentModerationRoutes(admin *gin.RouterGroup, h *handler.Handlers
 		risk.GET("/logs", h.Admin.ContentModeration.ListLogs)
 		risk.POST("/users/:user_id/unban", h.Admin.ContentModeration.UnbanUser)
 		risk.DELETE("/hashes", h.Admin.ContentModeration.DeleteFlaggedHash)
-		risk.DELETE("/hashes/all", gin.HandlerFunc(forcedStepUpAuth), h.Admin.ContentModeration.ClearFlaggedHashes)
+		risk.DELETE("/hashes/all", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.ContentModeration.ClearFlaggedHashes)
 	}
 }
 
@@ -274,7 +274,7 @@ func registerOpsRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUp
 
 		// Indexed system logs
 		ops.GET("/system-logs", h.Admin.Ops.ListSystemLogs)
-		ops.POST("/system-logs/cleanup", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Ops.CleanupSystemLogs)
+		ops.POST("/system-logs/cleanup", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Ops.CleanupSystemLogs)
 		ops.GET("/system-logs/health", h.Admin.Ops.GetSystemLogIngestionHealth)
 
 		// Dashboard (vNext - raw path for MVP)
@@ -312,12 +312,12 @@ func registerUserManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, f
 	{
 		users.GET("", h.Admin.User.List)
 		users.GET("/:id", h.Admin.User.GetByID)
-		users.POST("/:id/auth-identities", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.BindAuthIdentity)
-		users.POST("", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.Create)
-		users.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.Update)
-		users.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.Delete)
-		users.POST("/:id/balance", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.UpdateBalance)
-		users.POST("/:id/balance/replay", gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.ReplayBalanceUpdate)
+		users.POST("/:id/auth-identities", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.BindAuthIdentity)
+		users.POST("", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.Create)
+		users.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.Update)
+		users.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.Delete)
+		users.POST("/:id/balance", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.UpdateBalance)
+		users.POST("/:id/balance/replay", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.User.ReplayBalanceUpdate)
 		users.GET("/:id/api-keys", h.Admin.User.GetUserAPIKeys)
 		users.GET("/:id/usage", h.Admin.User.GetUserUsage)
 		users.GET("/:id/balance-history", h.Admin.User.GetBalanceHistory)
@@ -359,8 +359,8 @@ func registerGroupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStep
 		groups.PUT("/:id", h.Admin.Group.Update)
 		groups.DELETE("/:id", h.Admin.Group.Delete)
 		groups.GET("/:id/rate-multipliers", h.Admin.Group.GetGroupRateMultipliers)
-		groups.PUT("/:id/rate-multipliers", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Group.BatchSetGroupRateMultipliers)
-		groups.DELETE("/:id/rate-multipliers", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Group.ClearGroupRateMultipliers)
+		groups.PUT("/:id/rate-multipliers", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Group.BatchSetGroupRateMultipliers)
+		groups.DELETE("/:id/rate-multipliers", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Group.ClearGroupRateMultipliers)
 		groups.PUT("/:id/rpm-overrides", h.Admin.Group.BatchSetGroupRPMOverrides)
 		groups.DELETE("/:id/rpm-overrides", h.Admin.Group.ClearGroupRPMOverrides)
 		groups.GET("/:id/api-keys", h.Admin.Group.GetGroupAPIKeys)
@@ -383,13 +383,13 @@ func registerAccountRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedSt
 		accounts.GET("/:id/claude/reset-credits", h.Admin.Account.ClaudeResetCredits)
 		// Same protection as the Codex reset-quota route (admin auth, audit, compliance guard).
 		accounts.POST("/:id/claude/reset-credits/redeem", h.Admin.Account.RedeemClaudeResetCredit)
-		accounts.POST("", h.Admin.Account.Create)
-		accounts.POST("/:id/duplicate", h.Admin.Account.Duplicate)
+		accounts.POST("", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.Create)
+		accounts.POST("/:id/duplicate", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.Duplicate)
 		accounts.POST("/check-mixed-channel", h.Admin.Account.CheckMixedChannel)
-		accounts.POST("/import/codex-session", h.Admin.Account.ImportCodexSession)
-		accounts.POST("/sync/crs", h.Admin.Account.SyncFromCRS)
+		accounts.POST("/import/codex-session", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.ImportCodexSession)
+		accounts.POST("/sync/crs", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.SyncFromCRS)
 		accounts.POST("/sync/crs/preview", h.Admin.Account.PreviewFromCRS)
-		accounts.PUT("/:id", h.Admin.Account.Update)
+		accounts.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.Update)
 		accounts.GET("/:id/grok-media-eligibility", h.Admin.Account.GetGrokMediaEligibility)
 		accounts.PUT("/:id/grok-media-eligibility", h.Admin.Account.UpdateGrokMediaEligibility)
 		accounts.PUT("/:id/upstream-billing-probe", h.Admin.Account.SetUpstreamBillingProbeEnabled)
@@ -402,11 +402,11 @@ func registerAccountRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedSt
 		accounts.GET("/:id/opencode-go-usage", h.Admin.Account.GetOpenCodeGoUsage)
 		accounts.PUT("/:id/opencode-go-usage/auto-refresh", h.Admin.Account.SetOpenCodeGoUsageAutoRefresh)
 		accounts.POST("/:id/opencode-go-usage/refresh", h.Admin.Account.RefreshOpenCodeGoUsage)
-		accounts.DELETE("/:id", h.Admin.Account.Delete)
+		accounts.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.Delete)
 		accounts.POST("/:id/test", h.Admin.Account.Test)
 		accounts.POST("/:id/recover-state", h.Admin.Account.RecoverState)
 		accounts.POST("/:id/refresh", h.Admin.Account.Refresh)
-		accounts.POST("/:id/apply-oauth-credentials", h.Admin.Account.ApplyOAuthCredentials)
+		accounts.POST("/:id/apply-oauth-credentials", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.ApplyOAuthCredentials)
 		accounts.POST("/:id/set-privacy", h.Admin.Account.SetPrivacy)
 		accounts.POST("/:id/refresh-tier", h.Admin.Account.RefreshTier)
 		accounts.GET("/:id/stats", h.Admin.Account.GetStats)
@@ -424,14 +424,14 @@ func registerAccountRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedSt
 		accounts.POST("/models/sync-upstream-preview", h.Admin.Account.SyncUpstreamModelsPreview)
 		accounts.GET("/:id/models", h.Admin.Account.GetAvailableModels)
 		accounts.POST("/:id/models/sync-upstream", h.Admin.Account.SyncUpstreamModels)
-		accounts.POST("/batch", h.Admin.Account.BatchCreate)
+		accounts.POST("/batch", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.BatchCreate)
 		// 账号导出泄露上游凭证原文——要求 step-up 2FA
-		accounts.GET("/data", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.ExportData)
-		accounts.POST("/data", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.ImportData)
-		accounts.POST("/batch-update-credentials", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.BatchUpdateCredentials)
+		accounts.GET("/data", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.ExportData)
+		accounts.POST("/data", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.ImportData)
+		accounts.POST("/batch-update-credentials", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.BatchUpdateCredentials)
 		accounts.POST("/batch-refresh-tier", h.Admin.Account.BatchRefreshTier)
-		accounts.POST("/bulk-update", h.Admin.Account.BulkUpdate)
-		accounts.POST("/batch-delete", h.Admin.Account.BatchDelete)
+		accounts.POST("/bulk-update", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.BulkUpdate)
+		accounts.POST("/batch-delete", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Account.BatchDelete)
 		accounts.POST("/batch-clear-error", h.Admin.Account.BatchClearError)
 		accounts.POST("/batch-refresh", h.Admin.Account.BatchRefresh)
 
@@ -439,15 +439,15 @@ func registerAccountRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedSt
 		accounts.GET("/antigravity/default-model-mapping", h.Admin.Account.GetAntigravityDefaultModelMapping)
 
 		// Spark 影子账号
-		accounts.POST("/:id/shadow", h.Admin.OpenAIOAuth.CreateShadow)
+		accounts.POST("/:id/shadow", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OpenAIOAuth.CreateShadow)
 
 		// Claude OAuth routes
-		accounts.POST("/generate-auth-url", h.Admin.OAuth.GenerateAuthURL)
-		accounts.POST("/generate-setup-token-url", h.Admin.OAuth.GenerateSetupTokenURL)
-		accounts.POST("/exchange-code", h.Admin.OAuth.ExchangeCode)
-		accounts.POST("/exchange-setup-token-code", h.Admin.OAuth.ExchangeSetupTokenCode)
-		accounts.POST("/cookie-auth", h.Admin.OAuth.CookieAuth)
-		accounts.POST("/setup-token-cookie-auth", h.Admin.OAuth.SetupTokenCookieAuth)
+		accounts.POST("/generate-auth-url", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OAuth.GenerateAuthURL)
+		accounts.POST("/generate-setup-token-url", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OAuth.GenerateSetupTokenURL)
+		accounts.POST("/exchange-code", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OAuth.ExchangeCode)
+		accounts.POST("/exchange-setup-token-code", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OAuth.ExchangeSetupTokenCode)
+		accounts.POST("/cookie-auth", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OAuth.CookieAuth)
+		accounts.POST("/setup-token-cookie-auth", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OAuth.SetupTokenCookieAuth)
 	}
 }
 
@@ -463,15 +463,15 @@ func registerAnnouncementRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerOpenAIOAuthRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerOpenAIOAuthRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	openai := admin.Group("/openai")
 	{
-		openai.POST("/generate-auth-url", h.Admin.OpenAIOAuth.GenerateAuthURL)
-		openai.POST("/exchange-code", h.Admin.OpenAIOAuth.ExchangeCode)
-		openai.POST("/refresh-token", h.Admin.OpenAIOAuth.RefreshToken)
+		openai.POST("/generate-auth-url", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OpenAIOAuth.GenerateAuthURL)
+		openai.POST("/exchange-code", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OpenAIOAuth.ExchangeCode)
+		openai.POST("/refresh-token", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OpenAIOAuth.RefreshToken)
 		openai.POST("/accounts/:id/refresh", h.Admin.OpenAIOAuth.RefreshAccountToken)
-		openai.POST("/create-from-oauth", h.Admin.OpenAIOAuth.CreateAccountFromOAuth)
-		openai.POST("/create-from-codex-pat", h.Admin.OpenAIOAuth.CreateAccountFromCodexPAT)
+		openai.POST("/create-from-oauth", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OpenAIOAuth.CreateAccountFromOAuth)
+		openai.POST("/create-from-codex-pat", gin.HandlerFunc(forcedStepUpAuth), h.Admin.OpenAIOAuth.CreateAccountFromCodexPAT)
 		openai.GET("/accounts/:id/quota", h.Admin.OpenAIOAuth.QueryQuota)
 		openai.POST("/accounts/:id/quota/refresh", h.Admin.OpenAIOAuth.RefreshQuota)
 		openai.POST("/accounts/:id/reset-quota", h.Admin.OpenAIOAuth.ResetQuota)
@@ -480,35 +480,35 @@ func registerOpenAIOAuthRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
 	}
 }
 
-func registerGeminiOAuthRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerGeminiOAuthRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	gemini := admin.Group("/gemini")
 	{
-		gemini.POST("/oauth/auth-url", h.Admin.GeminiOAuth.GenerateAuthURL)
-		gemini.POST("/oauth/exchange-code", h.Admin.GeminiOAuth.ExchangeCode)
+		gemini.POST("/oauth/auth-url", gin.HandlerFunc(forcedStepUpAuth), h.Admin.GeminiOAuth.GenerateAuthURL)
+		gemini.POST("/oauth/exchange-code", gin.HandlerFunc(forcedStepUpAuth), h.Admin.GeminiOAuth.ExchangeCode)
 		gemini.GET("/oauth/capabilities", h.Admin.GeminiOAuth.GetCapabilities)
 	}
 }
 
-func registerAntigravityOAuthRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerAntigravityOAuthRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	antigravity := admin.Group("/antigravity")
 	{
-		antigravity.POST("/oauth/auth-url", h.Admin.AntigravityOAuth.GenerateAuthURL)
-		antigravity.POST("/oauth/exchange-code", h.Admin.AntigravityOAuth.ExchangeCode)
-		antigravity.POST("/oauth/refresh-token", h.Admin.AntigravityOAuth.RefreshToken)
+		antigravity.POST("/oauth/auth-url", gin.HandlerFunc(forcedStepUpAuth), h.Admin.AntigravityOAuth.GenerateAuthURL)
+		antigravity.POST("/oauth/exchange-code", gin.HandlerFunc(forcedStepUpAuth), h.Admin.AntigravityOAuth.ExchangeCode)
+		antigravity.POST("/oauth/refresh-token", gin.HandlerFunc(forcedStepUpAuth), h.Admin.AntigravityOAuth.RefreshToken)
 	}
 }
 
-func registerGrokOAuthRoutes(admin *gin.RouterGroup, h *handler.Handlers) {
+func registerGrokOAuthRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStepUpAuth middleware.ForcedStepUpAuthMiddleware) {
 	grok := admin.Group("/grok")
 	{
 		grok.GET("/oauth/capabilities", h.Admin.GrokOAuth.GetCapabilities)
-		grok.POST("/oauth/auth-url", h.Admin.GrokOAuth.GenerateAuthURL)
-		grok.POST("/oauth/exchange-code", h.Admin.GrokOAuth.ExchangeCode)
-		grok.POST("/oauth/refresh-token", h.Admin.GrokOAuth.RefreshToken)
-		grok.POST("/oauth/sso-token", h.Admin.GrokOAuth.ValidateSSOToken)
-		grok.POST("/oauth/password", h.Admin.GrokOAuth.AuthorizePassword)
-		grok.POST("/oauth/create-from-oauth", h.Admin.GrokOAuth.CreateAccountFromOAuth)
-		grok.POST("/sso-to-oauth", h.Admin.GrokOAuth.CreateAccountsFromSSO)
+		grok.POST("/oauth/auth-url", gin.HandlerFunc(forcedStepUpAuth), h.Admin.GrokOAuth.GenerateAuthURL)
+		grok.POST("/oauth/exchange-code", gin.HandlerFunc(forcedStepUpAuth), h.Admin.GrokOAuth.ExchangeCode)
+		grok.POST("/oauth/refresh-token", gin.HandlerFunc(forcedStepUpAuth), h.Admin.GrokOAuth.RefreshToken)
+		grok.POST("/oauth/sso-token", gin.HandlerFunc(forcedStepUpAuth), h.Admin.GrokOAuth.ValidateSSOToken)
+		grok.POST("/oauth/password", gin.HandlerFunc(forcedStepUpAuth), h.Admin.GrokOAuth.AuthorizePassword)
+		grok.POST("/oauth/create-from-oauth", gin.HandlerFunc(forcedStepUpAuth), h.Admin.GrokOAuth.CreateAccountFromOAuth)
+		grok.POST("/sso-to-oauth", gin.HandlerFunc(forcedStepUpAuth), h.Admin.GrokOAuth.CreateAccountsFromSSO)
 		grok.POST("/oauth/reconcile", h.Admin.GrokOAuth.ReconcileOAuthAccounts)
 		grok.POST("/accounts/:id/refresh", h.Admin.GrokOAuth.RefreshAccountToken)
 		grok.GET("/accounts/:id/quota", h.Admin.GrokOAuth.QueryQuota)
@@ -534,18 +534,18 @@ func registerProxyRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStep
 		proxies.GET("", h.Admin.Proxy.List)
 		proxies.GET("/all", h.Admin.Proxy.GetAll)
 		// 代理导出泄露账号密码原文——要求 step-up 2FA
-		proxies.GET("/data", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.ExportData)
-		proxies.POST("/data", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.ImportData)
+		proxies.GET("/data", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.ExportData)
+		proxies.POST("/data", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.ImportData)
 		proxies.GET("/:id", h.Admin.Proxy.GetByID)
-		proxies.POST("", h.Admin.Proxy.Create)
-		proxies.PUT("/:id", h.Admin.Proxy.Update)
-		proxies.DELETE("/:id", h.Admin.Proxy.Delete)
+		proxies.POST("", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.Create)
+		proxies.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.Update)
+		proxies.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.Delete)
 		proxies.POST("/:id/test", h.Admin.Proxy.Test)
 		proxies.POST("/:id/quality-check", h.Admin.Proxy.CheckQuality)
 		proxies.GET("/:id/stats", h.Admin.Proxy.GetStats)
 		proxies.GET("/:id/accounts", h.Admin.Proxy.GetProxyAccounts)
-		proxies.POST("/batch-delete", h.Admin.Proxy.BatchDelete)
-		proxies.POST("/batch", h.Admin.Proxy.BatchCreate)
+		proxies.POST("/batch-delete", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.BatchDelete)
+		proxies.POST("/batch", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Proxy.BatchCreate)
 	}
 }
 
@@ -554,14 +554,14 @@ func registerRedeemCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers, force
 	{
 		codes.GET("", h.Admin.Redeem.List)
 		codes.GET("/stats", h.Admin.Redeem.GetStats)
-		codes.GET("/export", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Export)
+		codes.GET("/export", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Export)
 		codes.GET("/:id", h.Admin.Redeem.GetByID)
-		codes.POST("/create-and-redeem", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.CreateAndRedeem)
-		codes.POST("/generate", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Generate)
-		codes.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Delete)
-		codes.POST("/batch-delete", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.BatchDelete)
-		codes.POST("/batch-update", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.BatchUpdate)
-		codes.POST("/:id/expire", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Expire)
+		codes.POST("/create-and-redeem", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.CreateAndRedeem)
+		codes.POST("/generate", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Generate)
+		codes.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Delete)
+		codes.POST("/batch-delete", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.BatchDelete)
+		codes.POST("/batch-update", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.BatchUpdate)
+		codes.POST("/:id/expire", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Redeem.Expire)
 	}
 }
 
@@ -570,9 +570,9 @@ func registerPromoCodeRoutes(admin *gin.RouterGroup, h *handler.Handlers, forced
 	{
 		promoCodes.GET("", h.Admin.Promo.List)
 		promoCodes.GET("/:id", h.Admin.Promo.GetByID)
-		promoCodes.POST("", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Promo.Create)
-		promoCodes.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Promo.Update)
-		promoCodes.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Promo.Delete)
+		promoCodes.POST("", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Promo.Create)
+		promoCodes.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Promo.Update)
+		promoCodes.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Promo.Delete)
 		promoCodes.GET("/:id/usages", h.Admin.Promo.GetUsages)
 	}
 }
@@ -592,8 +592,8 @@ func registerSettingsRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedS
 		adminSettings.POST("/email-templates/:event/:locale/restore-official", h.Admin.Setting.RestoreOfficialEmailTemplate)
 		// Admin API Key 管理
 		adminSettings.GET("/admin-api-key", h.Admin.Setting.GetAdminAPIKey)
-		adminSettings.POST("/admin-api-key/regenerate", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Setting.RegenerateAdminAPIKey)
-		adminSettings.DELETE("/admin-api-key", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Setting.DeleteAdminAPIKey)
+		adminSettings.POST("/admin-api-key/regenerate", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Setting.RegenerateAdminAPIKey)
+		adminSettings.DELETE("/admin-api-key", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Setting.DeleteAdminAPIKey)
 		// 529过载冷却配置
 		adminSettings.GET("/overload-cooldown", h.Admin.Setting.GetOverloadCooldownSettings)
 		adminSettings.PUT("/overload-cooldown", h.Admin.Setting.UpdateOverloadCooldownSettings)
@@ -640,11 +640,11 @@ func registerDataManagementRoutes(admin *gin.RouterGroup, h *handler.Handlers, f
 		dataManagement.POST("/s3/test", h.Admin.DataManagement.TestS3)
 		dataManagement.GET("/s3/profiles", h.Admin.DataManagement.ListS3Profiles)
 		// 修改 S3 目标可将数据备份外泄——要求 step-up 2FA
-		dataManagement.POST("/s3/profiles", gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.CreateS3Profile)
-		dataManagement.PUT("/s3/profiles/:profile_id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.UpdateS3Profile)
+		dataManagement.POST("/s3/profiles", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.CreateS3Profile)
+		dataManagement.PUT("/s3/profiles/:profile_id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.UpdateS3Profile)
 		dataManagement.DELETE("/s3/profiles/:profile_id", h.Admin.DataManagement.DeleteS3Profile)
-		dataManagement.POST("/s3/profiles/:profile_id/activate", gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.SetActiveS3Profile)
-		dataManagement.POST("/backups", gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.CreateBackupJob)
+		dataManagement.POST("/s3/profiles/:profile_id/activate", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.SetActiveS3Profile)
+		dataManagement.POST("/backups", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.DataManagement.CreateBackupJob)
 		dataManagement.GET("/backups", h.Admin.DataManagement.ListBackupJobs)
 		dataManagement.GET("/backups/:job_id", h.Admin.DataManagement.GetBackupJob)
 	}
@@ -656,13 +656,13 @@ func registerBackupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedSte
 		// S3 存储配置
 		backup.GET("/s3-config", h.Admin.Backup.GetS3Config)
 		// 修改 S3 目标可将数据库备份外泄——要求 step-up 2FA
-		backup.PUT("/s3-config", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.UpdateS3Config)
+		backup.PUT("/s3-config", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.UpdateS3Config)
 		backup.POST("/s3-config/test", h.Admin.Backup.TestS3Connection)
 
 		// 异步生图对象存储配置（与备份共用 S3 客户端，可直接复用备份凭证）
 		backup.GET("/image-storage", h.Admin.Backup.GetImageStorageConfig)
 		// 同 S3 配置：改写对象存储目标可将生成内容导向外部账号——要求 step-up 2FA
-		backup.PUT("/image-storage", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.UpdateImageStorageConfig)
+		backup.PUT("/image-storage", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.UpdateImageStorageConfig)
 		backup.POST("/image-storage/test", h.Admin.Backup.TestImageStorageConnection)
 
 		// 定时备份配置
@@ -670,15 +670,15 @@ func registerBackupRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedSte
 		backup.PUT("/schedule", h.Admin.Backup.UpdateSchedule)
 
 		// 备份操作
-		backup.POST("", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.CreateBackup)
+		backup.POST("", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.CreateBackup)
 		backup.GET("", h.Admin.Backup.ListBackups)
 		backup.GET("/:id", h.Admin.Backup.GetBackup)
-		backup.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.DeleteBackup)
+		backup.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.DeleteBackup)
 		// 备份下载链接可直接取走整库数据——要求 step-up 2FA
-		backup.GET("/:id/download-url", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.GetDownloadURL)
+		backup.GET("/:id/download-url", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.GetDownloadURL)
 
 		// 恢复操作：整库覆盖可回滚安全设置（含 step-up 开关本身）——要求 step-up 2FA
-		backup.POST("/:id/restore", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.RestoreBackup)
+		backup.POST("/:id/restore", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Backup.RestoreBackup)
 	}
 }
 
@@ -693,8 +693,8 @@ func registerSystemRoutes(admin *gin.RouterGroup, h *handler.Handlers, stepUpAut
 		// /update 额外挂应用层硬门：默认关闭 + 对端 CIDR 白名单 + 强制 step-up，
 		// 不受 step_up_enabled 影响（见 middleware.NewAdminSystemUpdateGate）。
 		system.POST("/update", h.Admin.System.UpdateGate(), gin.HandlerFunc(stepUpAuth), h.Admin.System.PerformUpdate)
-		system.POST("/rollback", gin.HandlerFunc(forcedStepUpAuth), h.Admin.System.Rollback)
-		system.POST("/restart", gin.HandlerFunc(forcedStepUpAuth), h.Admin.System.RestartService)
+		system.POST("/rollback", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.System.Rollback)
+		system.POST("/restart", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.System.RestartService)
 	}
 }
 
@@ -704,16 +704,16 @@ func registerSubscriptionRoutes(admin *gin.RouterGroup, h *handler.Handlers, for
 		subscriptions.GET("", h.Admin.Subscription.List)
 		subscriptions.GET("/:id", h.Admin.Subscription.GetByID)
 		subscriptions.GET("/:id/progress", h.Admin.Subscription.GetProgress)
-		subscriptions.POST("/assign", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Assign)
-		subscriptions.POST("/bulk-assign", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.BulkAssign)
-		subscriptions.POST("/bulk-action", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.BulkAction)
-		subscriptions.POST("/bulk-action/replay", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.ReplayBulkAction)
-		subscriptions.POST("/:id/extend", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Extend)
-		subscriptions.POST("/:id/extend/replay", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.ReplayExtend)
-		subscriptions.POST("/:id/reset-quota", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.ResetQuota)
-		subscriptions.POST("/:id/revoke", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Revoke)
-		subscriptions.POST("/:id/restore", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Restore)
-		subscriptions.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Revoke)
+		subscriptions.POST("/assign", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Assign)
+		subscriptions.POST("/bulk-assign", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.BulkAssign)
+		subscriptions.POST("/bulk-action", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.BulkAction)
+		subscriptions.POST("/bulk-action/replay", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.ReplayBulkAction)
+		subscriptions.POST("/:id/extend", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Extend)
+		subscriptions.POST("/:id/extend/replay", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.ReplayExtend)
+		subscriptions.POST("/:id/reset-quota", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.ResetQuota)
+		subscriptions.POST("/:id/revoke", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Revoke)
+		subscriptions.POST("/:id/restore", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Restore)
+		subscriptions.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Subscription.Revoke)
 	}
 
 	// 分组下的订阅列表
@@ -731,7 +731,7 @@ func registerUsageRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedStep
 		usage.GET("/search-users", h.Admin.Usage.SearchUsers)
 		usage.GET("/search-api-keys", h.Admin.Usage.SearchAPIKeys)
 		usage.GET("/cleanup-tasks", h.Admin.Usage.ListCleanupTasks)
-		usage.POST("/cleanup-tasks", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Usage.CreateCleanupTask)
+		usage.POST("/cleanup-tasks", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Usage.CreateCleanupTask)
 		usage.POST("/cleanup-tasks/:id/cancel", h.Admin.Usage.CancelCleanupTask)
 	}
 }
@@ -787,14 +787,14 @@ func registerPluginRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedSte
 	{
 		plugins.GET("", h.Admin.Plugin.List)
 		plugins.GET("/:id", h.Admin.Plugin.Get)
-		plugins.POST("/upload", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Upload)
-		plugins.POST("/:id/enable", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Enable)
-		plugins.POST("/:id/disable", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Disable)
-		plugins.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Delete)
+		plugins.POST("/upload", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Upload)
+		plugins.POST("/:id/enable", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Enable)
+		plugins.POST("/:id/disable", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Disable)
+		plugins.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Delete)
 		plugins.GET("/:id/config", h.Admin.Plugin.GetConfig)
 		plugins.GET("/:id/status", h.Admin.Plugin.Status)
-		plugins.PUT("/:id/config", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.SaveConfig)
-		plugins.POST("/:id/test", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Test)
+		plugins.PUT("/:id/config", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.SaveConfig)
+		plugins.POST("/:id/test", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Plugin.Test)
 		plugins.POST("/:id/ui-session", h.Admin.Plugin.CreateUISession)
 	}
 }
@@ -806,9 +806,9 @@ func registerChannelRoutes(admin *gin.RouterGroup, h *handler.Handlers, forcedSt
 		channels.GET("/model-pricing", h.Admin.Channel.GetModelDefaultPricing)
 		channels.GET("/pricing/sync-models", h.Admin.Channel.SyncPricingModels)
 		channels.GET("/:id", h.Admin.Channel.GetByID)
-		channels.POST("", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Channel.Create)
-		channels.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Channel.Update)
-		channels.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Channel.Delete)
+		channels.POST("", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Channel.Create)
+		channels.PUT("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Channel.Update)
+		channels.DELETE("/:id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Channel.Delete)
 	}
 }
 
@@ -852,11 +852,11 @@ func registerAffiliateRoutes(admin *gin.RouterGroup, h *handler.Handlers, forced
 		{
 			users.GET("", h.Admin.Affiliate.ListUsers)
 			users.GET("/lookup", h.Admin.Affiliate.LookupUsers)
-			users.POST("/batch-rate", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.BatchSetRate)
+			users.POST("/batch-rate", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.BatchSetRate)
 			users.GET("/:user_id/overview", h.Admin.Affiliate.GetUserOverview)
-			users.POST("/:user_id/withdraw", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.WithdrawQuota)
-			users.PUT("/:user_id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.UpdateUserSettings)
-			users.DELETE("/:user_id", gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.ClearUserSettings)
+			users.POST("/:user_id/withdraw", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.WithdrawQuota)
+			users.PUT("/:user_id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.UpdateUserSettings)
+			users.DELETE("/:user_id", gin.HandlerFunc(forcedStepUpAuth), gin.HandlerFunc(forcedStepUpAuth), h.Admin.Affiliate.ClearUserSettings)
 		}
 	}
 }
