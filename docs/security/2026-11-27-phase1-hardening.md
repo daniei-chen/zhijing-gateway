@@ -84,7 +84,7 @@
 
 三种失败共用错误码 `ADMIN_SYSTEM_UPDATE_FORBIDDEN`，精确原因写进审计（对端地址、命中的规则、step-up 状态、结果）。挂载点：`backend/internal/server/routes/admin.go` 的 `registerSystemRoutes`（`UpdateGate()` 在 `stepUpAuth` 之前），策略在 `backend/internal/handler/wire.go` 装配。
 
-**升级后会发生什么**：公网调用 `POST /api/v1/admin/system/update` 一律 403，即使是管理员带 step-up。只有显式 `enabled=true` 且解析出的对端命中 `allow_cidrs`（默认只允许回环）才放行。
+**升级后会发生什么**：默认状态下（`enabled=false`）公网调用 `POST /api/v1/admin/system/update` 一律 403，即使调用方是带 step-up 的管理员。只有显式 `enabled=true` 且解析出的对端命中 `allow_cidrs`（默认只允许回环）才放行。
 
 `enabled=true` 加默认白名单，本意是「只允许本机或隧道」，但它的实际强度取决于入口装配，两种分支都要认清：
 

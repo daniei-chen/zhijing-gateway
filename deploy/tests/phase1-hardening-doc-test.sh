@@ -87,6 +87,13 @@ for unsafe in '再考虑打开转发头信任' '必须在源站本机或隧道�
 done
 grep -Fq 'CF-Connecting-IP' "$doc" || \
   fail "${doc} must name the header that legacy forwarded-header trust accepts unchecked"
+# 「公网一律 403」只在默认关闭时成立；打开 enabled 后经本机反代的外部调用可能命中
+# 默认 allow_cidrs，所以这句话必须带默认状态，否则与下面的分支自相矛盾。
+grep -Fq '默认状态下（`enabled=false`）公网调用' "$doc" || \
+  fail "${doc} must scope the 403 statement to the default enabled=false state"
+if grep -Fq '一律 403，即使是管理员带 step-up' "$doc"; then
+  fail "${doc} states an unconditional 403 that enabled=true plus a trusted loopback proxy breaks"
+fi
 grep -Fq 'server.trusted_proxies' "$doc" || \
   fail "${doc} must reference server.trusted_proxies as the trust boundary"
 
