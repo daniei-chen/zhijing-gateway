@@ -39,25 +39,23 @@ func TestOpenAIGatewayServiceRecordUsage_AggregatorClaudeUsesDefaultPricing(t *t
 	}
 }
 
-func TestOpenAIGatewayServiceRecordUsage_CNAndOpenCodeClaudeRequireExplicitPricing(t *testing.T) {
+func TestOpenAIGatewayServiceRecordUsage_CNAndOpenCodeClaudeUnpricedFailsClosed(t *testing.T) {
 	for _, platform := range []string{PlatformKimi, PlatformZhipu, PlatformDeepseek, PlatformMiniMax, PlatformOpenCodeGo} {
 		t.Run(platform, func(t *testing.T) {
 			usageRepo := &openAIRecordUsageLogRepoStub{inserted: true}
 			userRepo := &openAIRecordUsageUserRepoStub{}
-			svc := newOpenAIRecordUsageServiceForTest(usageRepo, userRepo, &openAIRecordUsageSubRepoStub{}, nil)
+			billingRepo := &openAIRecordUsageBillingRepoStub{result: &UsageBillingApplyResult{Applied: true}}
+			svc := newOpenAIRecordUsageServiceWithBillingRepoForTest(usageRepo, billingRepo, userRepo, &openAIRecordUsageSubRepoStub{}, nil)
 			svc.resolver = NewModelPricingResolver(nil, svc.billingService)
 			group := &Group{ID: 1, Platform: platform, RateMultiplier: 1.1}
 			usage := OpenAIUsage{InputTokens: 1000, OutputTokens: 200}
 
 			err := svc.RecordUsage(context.Background(), providerClaudeRecordUsageInput(platform, "claude-sonnet-4-6", group, usage))
 
-			require.NoError(t, err)
-			require.Equal(t, 1, usageRepo.calls)
-			require.NotNil(t, usageRepo.lastLog)
-			require.Equal(t, usage.InputTokens, usageRepo.lastLog.InputTokens)
-			require.Equal(t, usage.OutputTokens, usageRepo.lastLog.OutputTokens)
-			require.Zero(t, usageRepo.lastLog.TotalCost)
-			require.Zero(t, usageRepo.lastLog.ActualCost)
+			require.ErrorIs(t, err, ErrModelPricingUnavailable,
+				"CN/OpenCode 的 claude-* 没有显式价时必须失败关闭，不能再按 $0 成交")
+			require.Equal(t, 1, billingRepo.failureCalls)
+			require.Zero(t, usageRepo.calls, "无价不得写 actual_cost=0 的 usage_log")
 			require.Zero(t, userRepo.deductCalls)
 		})
 	}
