@@ -33,15 +33,39 @@ export SUB2API_ENV_FILE="${ENV_FILE}"
 
 mkdir -p "${STATE_DIR}"
 
-# stat 在 macOS 是 BSD 版本（-f），在 Linux 是 GNU 版本（-c）。这个测试跑在
-# Linux 的 CI runner 上，两种都要认。
+# stat 在 macOS 是 BSD 版本（-f），在 Linux 是 GNU 版本（-c）。按平台分派，
+# 不能"先试一个、失败再回退"：GNU stat 遇到 -f 会把文件系统信息打印到 stdout
+# 之后才退出非零，回退拿到的输出里混进多行垃圾，mode_of 永远判错，跟着它的
+# 断言就静默失效了。
 mode_of() {
-    stat -f '%Lp' "$1" 2>/dev/null || stat -c '%a' "$1"
+    case "$(uname -s)" in
+        Darwin|FreeBSD|OpenBSD|NetBSD) stat -f '%Lp' "$1" ;;
+        *) stat -c '%a' "$1" ;;
+    esac
 }
+
+# 证明 mode_of 在当前平台上真的判对，避免上面那种假绿。
+probe_mode="${TEST_ROOT}/mode-probe"
+printf 'probe\n' >"${probe_mode}"
+chmod 644 "${probe_mode}"
+[[ "$(mode_of "${probe_mode}")" == "644" ]] || \
+    fail "mode_of misreported a 0644 file as '$(mode_of "${probe_mode}")'"
+chmod 600 "${probe_mode}"
+[[ "$(mode_of "${probe_mode}")" == "600" ]] || \
+    fail "mode_of misreported a 0600 file as '$(mode_of "${probe_mode}")'"
+rm -f "${probe_mode}"
 
 "${SCRIPT}" init
 [[ "$(mode_of "${ENV_FILE}")" == "600" ]] || fail "init did not create a mode-600 env file"
 grep -q '^POSTGRES_PASSWORD=change_this_secure_password$' "${ENV_FILE}" && fail "init retained the placeholder password"
+
+# Apple container 的生命周期用例需要 macOS 的 plutil 与真实 container 行为；
+# CI 的 shell job 跑在 macos-15，Linux 本地只验证与平台无关的部分：mode_of 的
+# 判定和 init 写出的文件权限。
+if [[ "$(uname -s)" != "Darwin" ]]; then
+    printf 'SKIP: Apple container lifecycle needs macOS; mode_of and init permissions passed\n'
+    exit 0
+fi
 
 chmod 644 "${ENV_FILE}"
 if "${SCRIPT}" up >/dev/null 2>&1; then
