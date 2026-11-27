@@ -64,6 +64,19 @@ export function setSetupToken(token: string): void {
   }
 }
 
+/**
+ * Drops a token the server rejected so the wizard asks for it again instead of
+ * keeping a value that can never work (a typo, or a token from a previous run).
+ * Returns true when the request failed because of the token.
+ */
+export function clearRejectedSetupToken(error: unknown): boolean {
+  const status = (error as { response?: { status?: number } } | null)?.response?.status
+  if (status !== 401) return false
+
+  setSetupToken('')
+  return true
+}
+
 // Create a separate client for setup endpoints (not under /api/v1)
 const setupClient = axios.create({
   baseURL: buildGatewayUrl('/').replace(/\/+$/, ''),

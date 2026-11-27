@@ -37,6 +37,26 @@ describe('setup api token', () => {
     expect(setupApi.getSetupToken()).toBe('')
   })
 
+  it('drops a token the server rejected so the wizard can ask again', async () => {
+    const setupApi = await loadSetupApi()
+    setupApi.setSetupToken('typo-token')
+
+    const cleared = setupApi.clearRejectedSetupToken({ response: { status: 401 } })
+
+    expect(cleared).toBe(true)
+    expect(setupApi.hasSetupToken()).toBe(false)
+    expect(window.sessionStorage.getItem('zhijing_setup_token')).toBeNull()
+  })
+
+  it('keeps the token when the request failed for another reason', async () => {
+    const setupApi = await loadSetupApi()
+    setupApi.setSetupToken('good-token')
+
+    expect(setupApi.clearRejectedSetupToken({ response: { status: 500 } })).toBe(false)
+    expect(setupApi.clearRejectedSetupToken(new Error('network'))).toBe(false)
+    expect(setupApi.getSetupToken()).toBe('good-token')
+  })
+
   it('trims a pasted token and clears it when set to an empty value', async () => {
     const setupApi = await loadSetupApi()
 

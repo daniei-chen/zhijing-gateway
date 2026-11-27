@@ -45,6 +45,10 @@ must be set to `0.0.0.0` to expose the port. A deployment that relied on the
 previous `0.0.0.0` default keeps direct access only after setting it
 explicitly.
 
+This example runs the first-run setup wizard (it does not set `AUTO_SETUP`), so
+it needs `SERVER_HOST=0.0.0.0` for the published port to reach the wizard, and it
+publishes that port on the host's loopback only.
+
 ```yaml
 version: '3.8'
 
@@ -54,6 +58,7 @@ services:
     ports:
       - "127.0.0.1:8080:8080"
     environment:
+      - SERVER_HOST=0.0.0.0
       - DATABASE_URL=postgres://postgres:postgres@db:5432/sub2api?sslmode=disable
       - REDIS_URL=redis://redis:6379
     depends_on:

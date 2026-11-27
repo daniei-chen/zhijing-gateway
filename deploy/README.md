@@ -440,14 +440,18 @@ curl -sSL https://raw.githubusercontent.com/daniei-chen/zhijing-gateway/main/dep
    log:
 
    ```bash
-   sudo journalctl -u zhijing-gateway -n 50 | grep -E "Setup token|Open the wizard"
+   # the unit you installed above is sub2api; use zhijing-gateway for the
+   # canonical unit shipped as deploy/zhijing-gateway.service
+   sudo journalctl -u sub2api -n 50 | grep -E "Setup token|Open the wizard"
    ```
 
    The bundled unit files set `Environment=SERVER_HOST=0.0.0.0`, which makes the
    wizard reachable on every interface. To keep it private, set
-   `Environment=SERVER_HOST=127.0.0.1` in `/etc/systemd/system/zhijing-gateway.service`
-   before the first start, forward the port from your own machine, and open the
-   token link it logged:
+   `Environment=SERVER_HOST=127.0.0.1` in the unit you installed
+   (`/etc/systemd/system/sub2api.service` for the steps above,
+   `/etc/systemd/system/zhijing-gateway.service` for the canonical unit) before
+   the first start, forward the port from your own machine, and open the token
+   link it logged:
 
    ```bash
    ssh -L 8080:127.0.0.1:8080 <user>@<server>

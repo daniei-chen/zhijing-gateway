@@ -515,7 +515,15 @@
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { testDatabase, testRedis, install, hasSetupToken, setSetupToken, type InstallRequest } from '@/api/setup'
+import {
+  testDatabase,
+  testRedis,
+  install,
+  hasSetupToken,
+  setSetupToken,
+  clearRejectedSetupToken,
+  type InstallRequest
+} from '@/api/setup'
 import { buildGatewayUrl } from '@/api/client'
 import Select from '@/components/common/Select.vue'
 import Toggle from '@/components/common/Toggle.vue'
@@ -553,6 +561,17 @@ function applyTokenInput() {
   if (!token) return
   setSetupToken(token)
   hasToken.value = hasSetupToken()
+}
+
+// A rejected token is dropped and the input comes back, so a typo or a token
+// from a previous run does not leave the wizard stuck on a dead credential.
+function handleSetupError(error: unknown, fallback: string) {
+  if (clearRejectedSetupToken(error)) {
+    hasToken.value = hasSetupToken()
+  }
+  const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
+  errorMessage.value =
+    err.response?.data?.detail || err.response?.data?.message || err.message || fallback
 }
 
 // Default server port
@@ -620,9 +639,7 @@ async function testDatabaseConnection() {
     await testDatabase(formData.database)
     dbConnected.value = true
   } catch (error: unknown) {
-    const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
-    errorMessage.value =
-      err.response?.data?.detail || err.response?.data?.message || err.message || 'Connection failed'
+    handleSetupError(error, 'Connection failed')
   } finally {
     testingDb.value = false
   }
@@ -638,9 +655,7 @@ async function testRedisConnection() {
     await testRedis(formData.redis)
     redisConnected.value = true
   } catch (error: unknown) {
-    const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
-    errorMessage.value =
-      err.response?.data?.detail || err.response?.data?.message || err.message || 'Connection failed'
+    handleSetupError(error, 'Connection failed')
   } finally {
     testingRedis.value = false
   }
@@ -664,9 +679,7 @@ async function performInstall() {
     // Start polling for service restart
     waitForServiceRestart()
   } catch (error: unknown) {
-    const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
-    errorMessage.value =
-      err.response?.data?.detail || err.response?.data?.message || err.message || 'Installation failed'
+    handleSetupError(error, 'Installation failed')
   } finally {
     installing.value = false
   }
