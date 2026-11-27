@@ -25,3 +25,21 @@ deploy/zhijing/zero-downtime-deploy.sh
 ```
 
 脚本不会自动删除旧实例或镜像，便于在观察窗口内回滚。稳定后再按审计记录清理退出实例，并保留当前版本和至少一个可启动回滚版本。
+
+## 敏感端点拒绝清单自证（可选）
+
+`/api/v1/admin/system/{update,rollback,restart}`、备份下载与导出类接口目前唯一的拦截是源站 nginx 的 403，而源站站点配置不入仓（见 `README.md` 的 `nginx/` 一节）。拒绝清单模板在 `nginx/zhijing.origin.deny.conf`，校验脚本是 `verify-sensitive-endpoints.sh`。
+
+发布时可以顺手验一遍：`VERIFY_SENSITIVE_ENDPOINTS=1` 时，公网 `/api/release` 自证之后会跑一次敏感端点探测，任何一条不是 403 就判发布失败并回滚。
+
+```sh
+IMAGE=ghcr.io/daniei-chen/zhijing-gateway:0.1.44 \
+VERIFY_SENSITIVE_ENDPOINTS=1 \
+deploy/zhijing/zero-downtime-deploy.sh
+```
+
+默认关闭：这一步的前提是源站 nginx 已经 `include` 了模板，否则每次发布都会红。单独验证不做发布时：
+
+```sh
+deploy/zhijing/verify-sensitive-endpoints.sh --base-url https://154-36-187-147.sslip.io
+```
