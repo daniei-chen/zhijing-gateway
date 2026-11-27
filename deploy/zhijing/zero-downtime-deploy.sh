@@ -51,6 +51,17 @@ rollback() {
     | sed -n 's/.*"version":"\([^"]*\)".*/\1/p' || true)
   printf 'ROLLBACK: public /api/release now reports %s\n' "${back:-unknown}" >&2
 }
+# 切流量之后才发现的问题（观察窗口越界、安全检查不通过）：恢复上一版 upstream，
+# 候选实例保留供排查，然后退出。与 ERR trap 里的 rollback() 不同，这里不删候选。
+restore_previous_upstream() {
+  cp --preserve=mode,ownership,timestamps "$nginx_backup" "$NGINX_SITE"
+  nginx -t && systemctl reload nginx || true
+  trap - ERR
+  printf 'ROLLED BACK: %s; upstream restored to port %s\n' "$1" "${old_port:-unknown}"
+  printf 'candidate kept for inspection: %s (port %s)\n' "$NEW_CONTAINER" "$NEW_PORT"
+  exit 1
+}
+
 trap cleanup EXIT
 trap rollback ERR
 
@@ -326,14 +337,19 @@ printf 'public: /api/release reports %s @ %s (http %s)\n' \
 # /api/v1/admin/system/update 目前唯一的拦截是源站 nginx 的 403，而那份站点
 # 配置不入仓（deploy/zhijing/README.md）。拒绝清单模板在
 # deploy/zhijing/nginx/zhijing.origin.deny.conf。打开这个开关，发布时会逐条探测，
-# 任何一条不是 403 就判这次发布失败（触发回滚）——否则「清单没同步」看起来和
-# 发布成功一模一样。默认关闭：这一步依赖源站 nginx 已经带上模板。
+# 任何一条不是 403 就判这次发布失败并回切 upstream —— 否则「清单没同步」看起来和
+# 发布成功一模一样。这里不能用 `|| die`：切换已完成，直接退出会把新 upstream 留在
+# 生产上（rollback 只挂在 ERR 上，显式 exit 不触发它）。
+# 默认关闭：这一步依赖源站 nginx 已经带上模板。
 if [[ "${VERIFY_SENSITIVE_ENDPOINTS:-0}" == "1" ]]; then
   verify_script="${VERIFY_SENSITIVE_ENDPOINTS_SCRIPT:-$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)/verify-sensitive-endpoints.sh}"
-  [[ -f "$verify_script" ]] || die "sensitive endpoint verifier not found: $verify_script"
-  bash "$verify_script" --base-url "https://${PUBLIC_HOST}" \
-    --resolve "${PUBLIC_HOST}:443:127.0.0.1" \
-    || die "sensitive endpoints must answer 403; the origin nginx deny list is missing or stale"
+  if [[ ! -f "$verify_script" ]]; then
+    restore_previous_upstream "sensitive endpoint verifier not found: $verify_script"
+  fi
+  if ! bash "$verify_script" --base-url "https://${PUBLIC_HOST}" \
+      --resolve "${PUBLIC_HOST}:443:127.0.0.1"; then
+    restore_previous_upstream "sensitive endpoints did not answer 403; the origin nginx deny list is missing or stale"
+  fi
   printf 'sensitive endpoints: origin returns 403 on every deny-list path\n'
 fi
 

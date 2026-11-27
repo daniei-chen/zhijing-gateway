@@ -53,6 +53,53 @@ do
   grep -Fq "${required}" "${TEMPLATE}" || fail "nginx deny template must cover ${required}"
 done
 
+# 2) curl 参数：默认必须校验 TLS 证书，只有 -k/--insecure 时才带 --insecure。
+#    用一个假 curl 记录参数，不依赖网络。
+curl_args_dir="$(mktemp -d "${TMPDIR:-/tmp}/zhijing-verify-curl.XXXXXX")"
+mkdir -p "${curl_args_dir}/bin"
+curl_log="${curl_args_dir}/args.log"
+cat >"${curl_args_dir}/bin/curl" <<'FAKE_CURL'
+#!/bin/sh
+printf '%s\n' "$*" >>"${CURL_ARGS_LOG}"
+printf '403'
+FAKE_CURL
+chmod +x "${curl_args_dir}/bin/curl"
+
+run_with_fake_curl() {
+  : >"${curl_log}"
+  CURL_ARGS_LOG="${curl_log}" PATH="${curl_args_dir}/bin:${PATH}" \
+    bash "${SCRIPT}" --base-url https://example.test "$@" >/dev/null 2>&1 || true
+}
+
+run_with_fake_curl
+if grep -q -- '--insecure' "${curl_log}"; then
+  printf '%s\n' "$(cat "${curl_log}")" >&2
+  fail "curl must verify TLS by default; --insecure appeared without -k"
+fi
+run_with_fake_curl -k
+grep -q -- '--insecure' "${curl_log}" || {
+  printf '%s\n' "$(cat "${curl_log}")" >&2
+  fail "-k/--insecure must reach curl"
+}
+rm -rf "${curl_args_dir}"
+
+# 3) 发布脚本里的安全检查失败必须回切 upstream，不能直接 die：切换后再 die 会把
+#    新 upstream 留在生产上（rollback 只挂在 ERR 上，显式 exit 不触发它）。
+zd_script="${REPO_ROOT}/deploy/zhijing/zero-downtime-deploy.sh"
+[[ -f "${zd_script}" ]] || fail "missing ${zd_script}"
+verify_block=$(awk '/VERIFY_SENSITIVE_ENDPOINTS:-0/,/^fi$/' "${zd_script}")
+[[ -n "${verify_block}" ]] || fail "zero-downtime-deploy.sh has no VERIFY_SENSITIVE_ENDPOINTS block"
+grep -q 'restore_previous_upstream' <<<"${verify_block}" || {
+  printf '%s\n' "${verify_block}" >&2
+  fail "a failed sensitive-endpoint check must restore the previous upstream"
+}
+if grep -q '|| die' <<<"${verify_block}"; then
+  printf '%s\n' "${verify_block}" >&2
+  fail "a failed sensitive-endpoint check must not just die after the upstream switch"
+fi
+grep -q '^restore_previous_upstream() {' "${zd_script}" || \
+  fail "zero-downtime-deploy.sh must define restore_previous_upstream"
+
 command -v python3 >/dev/null 2>&1 || {
   printf 'SKIP: python3 unavailable; stub server checks skipped\n'
   exit 0

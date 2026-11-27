@@ -58,9 +58,9 @@ expect=403
 method_override=""
 host_header=""
 timeout=10
-insecure=false
 list_only=false
 resolve_args=()
+insecure_args=()
 
 while (($#)); do
   case "$1" in
@@ -70,7 +70,7 @@ while (($#)); do
     --host) host_header=${2:?'--host 需要一个值'}; shift 2 ;;
     --resolve) resolve_args+=(--resolve "${2:?'--resolve 需要一个值'}"); shift 2 ;;
     --timeout) timeout=${2:?'--timeout 需要一个值'}; shift 2 ;;
-    -k|--insecure) insecure=true; shift ;;
+    -k|--insecure) insecure_args=(--insecure); shift ;;
     --list) list_only=true; shift ;;
     -h|--help) usage; exit 0 ;;
     *) die_usage "未知参数: $1" ;;
@@ -102,8 +102,8 @@ while IFS='|' read -r probe label; do
   code=$(curl --silent --output /dev/null --write-out '%{http_code}' \
     --request "$method" --max-time "$timeout" \
     ${host_header:+--header "Host: ${host_header}"} \
-    ${insecure:+--insecure} \
     ${resolve_args[@]+"${resolve_args[@]}"} \
+    ${insecure_args[@]+"${insecure_args[@]}"} \
     "${base_url}${path}" 2>/dev/null || true)
   code=${code:-000}
 
