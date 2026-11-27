@@ -1007,6 +1007,35 @@ describe("admin SettingsView payment visible method controls", () => {
     expect(status.text()).toContain("然后重启服务");
   });
 
+  it("submits forwarded-IP trust as false when the settings response omits it", async () => {
+    // 后端默认已改为 false。接口没带回该字段时（字段缺失或旧后端），表单初值
+    // 必须是安全值，否则管理员保存一次就会把 true 写回库。
+    const settingsWithoutTrust: Record<string, unknown> = {
+      ...baseSettingsResponse,
+    };
+    delete settingsWithoutTrust.api_key_acl_trust_forwarded_ip;
+    getSettings.mockResolvedValueOnce(settingsWithoutTrust);
+    const wrapper = mountView();
+
+    await flushPromises();
+    await openSecurityTab(wrapper);
+
+    const card = wrapper
+      .findAll(".card")
+      .find((node) => node.text().includes("admin.settings.apiKeyAcl.title"));
+    expect(card).toBeDefined();
+    expect(
+      (card!.get('input[type="checkbox"]').element as HTMLInputElement).checked,
+    ).toBe(false);
+
+    await wrapper.find("form").trigger("submit.prevent");
+    await flushPromises();
+
+    expect(updateSettings).toHaveBeenCalledWith(
+      expect.objectContaining({ api_key_acl_trust_forwarded_ip: false }),
+    );
+  });
+
   it("loads, edits, validates, and saves forwarded client-IP headers", async () => {
     getSettings.mockResolvedValueOnce({
       ...baseSettingsResponse,
