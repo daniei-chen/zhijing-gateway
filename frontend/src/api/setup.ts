@@ -11,10 +11,6 @@ const SETUP_TOKEN_HEADER = 'X-Setup-Token'
 
 let setupToken = ''
 
-// A token the server rejected, so the address-bar copy of it is not read again
-// when the browser cannot persist the cleared state.
-let rejectedToken = ''
-
 function readTokenFromQuery(): string {
   if (typeof window === 'undefined') return ''
   try {
@@ -33,9 +29,9 @@ function readStoredToken(): string {
   }
 }
 
-// Taking the token out of the address bar keeps the link from resurrecting a
-// token the server rejected, and keeps the secret out of browser history. It
-// only runs once the token is stored somewhere a reload can find it.
+// Taking the stored token out of the address bar keeps the secret out of
+// browser history. It only runs once a reload can find the token in session
+// storage, so a browser that blocks site data keeps the link intact.
 function stripTokenFromQuery(): void {
   if (typeof window === 'undefined') return
   try {
@@ -56,7 +52,7 @@ export function getSetupToken(): string {
   if (setupToken) return setupToken
 
   const fromQuery = readTokenFromQuery()
-  if (fromQuery && fromQuery !== rejectedToken) {
+  if (fromQuery) {
     // Without session storage the address bar is the only copy a reload can
     // read, so leave the link intact in that case.
     if (setSetupToken(fromQuery)) {
@@ -67,10 +63,6 @@ export function getSetupToken(): string {
 
   setupToken = readStoredToken()
   return setupToken
-}
-
-export function hasSetupToken(): boolean {
-  return getSetupToken() !== ''
 }
 
 /**
@@ -92,20 +84,6 @@ export function setSetupToken(token: string): boolean {
     // Storage can be unavailable (private mode, blocked site data).
     return false
   }
-}
-
-/**
- * Drops a token the server rejected so the wizard asks for it again instead of
- * keeping a value that can never work (a typo, or a token from a previous run).
- * Returns true when the request failed because of the token.
- */
-export function clearRejectedSetupToken(error: unknown): boolean {
-  const status = (error as { response?: { status?: number } } | null)?.response?.status
-  if (status !== 401) return false
-
-  rejectedToken = setupToken || readTokenFromQuery()
-  setSetupToken('')
-  return true
 }
 
 // Create a separate client for setup endpoints (not under /api/v1)

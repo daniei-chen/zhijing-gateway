@@ -70,7 +70,7 @@
             </p>
           </div>
 
-          <div v-if="!hasToken" class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/20">
+          <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-800/50 dark:bg-amber-900/20">
             <label class="input-label">{{ t('setup.token.label') }}</label>
             <input
               v-model="tokenInput"
@@ -519,9 +519,8 @@ import {
   testDatabase,
   testRedis,
   install,
-  hasSetupToken,
+  getSetupToken,
   setSetupToken,
-  clearRejectedSetupToken,
   type InstallRequest
 } from '@/api/setup'
 import { buildGatewayUrl } from '@/api/client'
@@ -551,24 +550,19 @@ const installing = ref(false)
 const confirmPassword = ref('')
 const serviceReady = ref(false)
 
-// The first-run server prints a one-time setup token; every setup write must
-// carry it, so the wizard asks for it until it has one.
-const hasToken = ref(hasSetupToken())
-const tokenInput = ref('')
+// Every setup write must carry the one-time token the first-run server prints.
+// The field stays editable and pre-filled from the link, so a typo or a token
+// from a previous run is always one edit away instead of a dead end.
+const tokenInput = ref(getSetupToken())
 
 function applyTokenInput() {
   const token = tokenInput.value.trim()
-  if (!token) return
-  setSetupToken(token)
-  hasToken.value = hasSetupToken()
+  if (token) {
+    setSetupToken(token)
+  }
 }
 
-// A rejected token is dropped and the input comes back, so a typo or a token
-// from a previous run does not leave the wizard stuck on a dead credential.
 function handleSetupError(error: unknown, fallback: string) {
-  if (clearRejectedSetupToken(error)) {
-    hasToken.value = hasSetupToken()
-  }
   const err = error as { response?: { data?: { detail?: string; message?: string } }; message?: string }
   errorMessage.value =
     err.response?.data?.detail || err.response?.data?.message || err.message || fallback
@@ -615,7 +609,7 @@ const formData = reactive<InstallRequest>({
 const canProceed = computed(() => {
   switch (currentStep.value) {
     case 0:
-      return hasToken.value && dbConnected.value
+      return dbConnected.value
     case 1:
       return redisConnected.value
     case 2:
