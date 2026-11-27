@@ -207,6 +207,32 @@ func TestAdminSystemUpdateGateRejectsUntrustedClientBehindTrustedProxy(t *testin
 	require.False(t, probe.called)
 }
 
+// 可信代理保留调用方自带字段、再追加真实调用方时，重复的 XFF 字段不能让
+// 客户端伪造的白名单地址通过 CIDR 判定。
+func TestAdminSystemUpdateGateRejectsSpoofedRepeatedXFFFields(t *testing.T) {
+	policy := AdminSystemUpdatePolicy{
+		Enabled:        true,
+		AllowCIDRs:     []string{"175.27.132.225/32"},
+		TrustedProxies: []string{"127.0.0.1/32"},
+	}
+	router, probe := newSystemUpdateGateRouter(t, systemUpdateGateOptions{
+		policy:      policy,
+		granted:     true,
+		totpEnabled: true,
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/admin/system/update", nil)
+	req.RemoteAddr = "127.0.0.1:41234"
+	req.Header.Add("X-Forwarded-For", "175.27.132.225")
+	req.Header.Add("X-Forwarded-For", "203.0.113.50")
+	rec := httptest.NewRecorder()
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusForbidden, rec.Code)
+	require.False(t, probe.called)
+	require.Equal(t, "203.0.113.50", probe.auditExtra["system_update_peer_ip"])
+}
+
 // 未启用 TOTP 的账号无法完成 step-up，硬门必须拒绝而不是放行。
 func TestAdminSystemUpdateGateRequiresTotpEnrollment(t *testing.T) {
 	policy := defaultAdminSystemUpdatePolicy()

@@ -308,16 +308,20 @@ func ResolvePeerClientIP(c *gin.Context, trustedProxies *CompiledIPRules) string
 		return peer
 	}
 
+	// 把多个 X-Forwarded-For 字段按出现顺序拼成一条链再自右向左走：
+	// 保留客户端自带字段、另外追加真实调用方的代理会让 Header.Values 返回多个
+	// 字段，只从第一个字段的右侧找会采信客户端伪造的最左值。
+	var hops []string
 	for _, value := range c.Request.Header.Values("X-Forwarded-For") {
-		items := strings.Split(value, ",")
-		for i := len(items) - 1; i >= 0; i-- {
-			candidate := normalizeValidIP(items[i])
-			if candidate == "" {
-				break
-			}
-			if !matchesCompiledRules(net.ParseIP(candidate), trustedProxies) {
-				return candidate
-			}
+		hops = append(hops, strings.Split(value, ",")...)
+	}
+	for i := len(hops) - 1; i >= 0; i-- {
+		candidate := normalizeValidIP(hops[i])
+		if candidate == "" {
+			break
+		}
+		if !matchesCompiledRules(net.ParseIP(candidate), trustedProxies) {
+			return candidate
 		}
 	}
 	if realIP := normalizeValidIP(c.GetHeader("X-Real-IP")); realIP != "" {

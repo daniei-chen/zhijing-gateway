@@ -61,6 +61,24 @@ func TestResolvePeerClientIPWalksTrustedProxyChain(t *testing.T) {
 	require.Equal(t, "175.27.132.225", got)
 }
 
+// 可信代理保留调用方自带字段、再把真实调用方作为另一个字段追加时，
+// 必须走完整个链的右侧，不能被最左侧（可伪造）的字段骗过。
+func TestResolvePeerClientIPCombinesRepeatedXFFFields(t *testing.T) {
+	got := resolvePeerForTest(t, "127.0.0.1:41234", map[string]string{
+		"X-Forwarded-For": "175.27.132.225",
+	}, []string{"127.0.0.1/32"})
+	require.Equal(t, "175.27.132.225", got)
+
+	gin.SetMode(gin.TestMode)
+	c, _ := gin.CreateTestContext(httptest.NewRecorder())
+	c.Request = httptest.NewRequest(http.MethodPost, "/admin/system/update", nil)
+	c.Request.RemoteAddr = "127.0.0.1:41234"
+	c.Request.Header.Add("X-Forwarded-For", "175.27.132.225")
+	c.Request.Header.Add("X-Forwarded-For", "203.0.113.50")
+
+	require.Equal(t, "203.0.113.50", ResolvePeerClientIP(c, CompileIPRules([]string{"127.0.0.1/32"})))
+}
+
 func TestResolvePeerClientIPStopsAtMalformedHop(t *testing.T) {
 	got := resolvePeerForTest(t, "127.0.0.1:41234", map[string]string{
 		"X-Forwarded-For": "203.0.113.9, unknown",
