@@ -25,6 +25,8 @@ var (
 	class3xx atomic.Int64
 	class4xx atomic.Int64
 	class5xx atomic.Int64
+
+	duplicateBillingKeyRejected atomic.Int64
 )
 
 // ObserveRequest 记录一次 HTTP 响应。status 取的是最终写出的状态码
@@ -45,6 +47,13 @@ func ObserveRequest(status int) {
 		class1xx.Add(1)
 	}
 }
+
+// ObserveDuplicateBillingKeyRejected 记录一次因重复计费/路由键被拒绝的请求。
+// 拒绝必须是可数的：只写日志的话，没人知道有人在试探解析差异。
+func ObserveDuplicateBillingKeyRejected() { duplicateBillingKeyRejected.Add(1) }
+
+// DuplicateBillingKeyRejectedTotal 返回重复键拒绝计数（供测试与内部使用）。
+func DuplicateBillingKeyRejectedTotal() int64 { return duplicateBillingKeyRejected.Load() }
 
 // RequestsTotal 返回自进程启动以来的请求总数（供测试与内部使用）。
 func RequestsTotal() int64 { return requestsTotal.Load() }
@@ -76,6 +85,10 @@ func Render() string {
 		writeString(&b, strconv.FormatInt(row.value.Load(), 10))
 		writeString(&b, "\n")
 	}
+
+	writeSample(&b, "zhijing_gateway_duplicate_billing_key_rejected_total",
+		"requests rejected for duplicate billing/routing JSON keys",
+		strconv.FormatInt(duplicateBillingKeyRejected.Load(), 10))
 
 	writeSample(&b, "zhijing_go_goroutines", "number of goroutines",
 		strconv.Itoa(runtime.NumGoroutine()))
