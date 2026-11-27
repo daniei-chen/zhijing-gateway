@@ -931,10 +931,16 @@ func (s *GatewayService) recordUsageCore(ctx context.Context, input *recordUsage
 	// 计算费用。算价失败必须失败关闭：没有价格就不能编一个 $0 出来成交。
 	cost, costErr := s.calculateRecordUsageCost(ctx, result, apiKey, billingModel, multiplier, imageMultiplier, pricingAt)
 	if costErr != nil {
-		recordUsagePricingFailure(ctx, s.usageBillingRepo, resolveUsageBillingRequestID(ctx, result.RequestID),
-			apiKey, user, account, billingModel,
-			result.Usage.InputTokens, result.Usage.OutputTokens, result.Usage.CacheReadInputTokens, costErr)
-		return costErr
+		if s.cfg != nil && s.cfg.RunMode == config.RunModeSimple {
+			// 简易模式只记 usage、从不扣费：$0 是设计语义，不是漏收。这里失败
+			// 关闭只会把用量记录一起丢掉，所以保持零成本继续落账。
+			cost = &CostBreakdown{}
+		} else {
+			recordUsagePricingFailure(ctx, s.usageBillingRepo, resolveUsageBillingRequestID(ctx, result.RequestID),
+				apiKey, user, account, billingModel,
+				result.Usage.InputTokens, result.Usage.OutputTokens, result.Usage.CacheReadInputTokens, costErr)
+			return costErr
+		}
 	}
 	// response_model：按上游成功响应自报的模型计费（渠道显式开启才生效）。
 	// 采纳条件见 responseModelBillingDeclaration + hasIdentifiedResponseModelPricing

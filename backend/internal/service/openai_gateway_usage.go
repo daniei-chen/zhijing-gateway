@@ -256,6 +256,14 @@ func (s *OpenAIGatewayService) RecordUsage(ctx context.Context, input *OpenAIRec
 		pricingAt,
 	)
 	if err != nil {
+		if s.cfg != nil && s.cfg.RunMode == config.RunModeSimple && isUsagePricingUnavailableError(err) {
+			// 简易模式只记 usage、从不扣费：保持零成本继续落账，不能让无价模型
+			// 把用量记录一起丢掉。
+			cost = &CostBreakdown{BillingMode: string(BillingModeToken)}
+			err = nil
+		}
+	}
+	if err != nil {
 		if !isUsagePricingUnavailableError(err) {
 			return err
 		}
