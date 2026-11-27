@@ -79,6 +79,22 @@ describe('setup api token', () => {
     expect(window.location.search).not.toContain('setup_token')
   })
 
+  it('keeps the token in the link when the browser cannot persist it', async () => {
+    window.history.replaceState({}, '', '/setup?setup_token=only-copy')
+    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new Error('storage blocked')
+    })
+
+    try {
+      const setupApi = await loadSetupApi()
+
+      expect(setupApi.getSetupToken()).toBe('only-copy')
+      expect(window.location.search).toContain('setup_token=only-copy')
+    } finally {
+      setItem.mockRestore()
+    }
+  })
+
   it('trims a pasted token and clears it when set to an empty value', async () => {
     const setupApi = await loadSetupApi()
 

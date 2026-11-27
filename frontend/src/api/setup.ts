@@ -30,7 +30,8 @@ function readStoredToken(): string {
 }
 
 // Taking the token out of the address bar keeps the link from resurrecting a
-// token the server rejected, and keeps the secret out of browser history.
+// token the server rejected, and keeps the secret out of browser history. It
+// only runs once the token is stored somewhere a reload can find it.
 function stripTokenFromQuery(): void {
   if (typeof window === 'undefined') return
   try {
@@ -39,8 +40,7 @@ function stripTokenFromQuery(): void {
     url.searchParams.delete('setup_token')
     window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash)
   } catch {
-    // The token is already stored for this session, so a URL we cannot rewrite
-    // is not a reason to fail.
+    // A URL we cannot rewrite still leaves the token in the session.
   }
 }
 
@@ -53,8 +53,11 @@ export function getSetupToken(): string {
 
   const fromQuery = readTokenFromQuery()
   if (fromQuery) {
-    setSetupToken(fromQuery)
-    stripTokenFromQuery()
+    // Without session storage the address bar is the only copy a reload can
+    // read, so leave the link intact in that case.
+    if (setSetupToken(fromQuery)) {
+      stripTokenFromQuery()
+    }
     return setupToken
   }
 
@@ -66,17 +69,24 @@ export function hasSetupToken(): boolean {
   return getSetupToken() !== ''
 }
 
-export function setSetupToken(token: string): void {
+/**
+ * Stores the active setup token and reports whether this browser session could
+ * keep it. The in-memory value works either way, but a reload only survives
+ * when the write lands.
+ */
+export function setSetupToken(token: string): boolean {
   setupToken = token.trim()
-  if (typeof window === 'undefined') return
+  if (typeof window === 'undefined') return false
   try {
     if (setupToken) {
       window.sessionStorage.setItem(SETUP_TOKEN_STORAGE_KEY, setupToken)
     } else {
       window.sessionStorage.removeItem(SETUP_TOKEN_STORAGE_KEY)
     }
+    return true
   } catch {
-    // Storage can be unavailable (private mode); the in-memory value still works.
+    // Storage can be unavailable (private mode, blocked site data).
+    return false
   }
 }
 
