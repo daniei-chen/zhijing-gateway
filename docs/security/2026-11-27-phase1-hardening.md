@@ -43,9 +43,11 @@
 - 迁移不再回翻：`backend/internal/service/setting_service.go` 以库里的值为准，只在检测到「关闭且未配置 `server.trusted_proxies`」时写一条 warn 日志并给出修复建议，不再改写用户设置（代码注释里写明了旧行为为什么被删掉）。
 - 设置页初值同步为关闭：`frontend/src/views/admin/SettingsView.vue` 的 `api_key_acl_trust_forwarded_ip: false`。
 
-**升级后会发生什么**：没有显式配置的部署按 TCP 对端（配合 `server.trusted_proxies`）判定客户端 IP。依赖转发头识别真实客户端的部署必须显式开启该开关并配置 `server.trusted_proxies` 或自定义头列表；顺序反了会先把所有请求认成反代 IP —— IP 白名单误放或误拦、限流从按用户退化成按反代聚合。`deploy/EDGE_SECURITY.md` 的 "Trusted client IPs" 一节是配置说明。
+**升级后会发生什么**：没有显式配置的部署按 TCP 对端（配合 `server.trusted_proxies`）判定客户端 IP；配了反代却没写 `server.trusted_proxies` 的，客户端 IP 会变成反代地址本身 —— IP 白名单误放或误拦、限流从按用户退化成按反代聚合。正确做法是**保持这个开关为 `false`**，把反代地址写进 `server.trusted_proxies`。`deploy/EDGE_SECURITY.md` 的 "Trusted client IPs" 一节是配置说明。
 
-**怎么继续收紧**：先把 `server.trusted_proxies` 收敛到反代地址（`127.0.0.1/32`、`::1/128` 或入口机地址），再考虑打开转发头信任，最后才在 API Key 上依赖 IP 白名单。
+**它不是「配好代理就能打开」的开关**：一旦为 `true`，`GetSecurityClientIP` 走 `GetClientIP` 直接采信原始转发头，**完全不校验 `server.trusted_proxies`**。其中 `CF-Connecting-IP` 的优先级最高，而 `deploy/EDGE_SECURITY.md` 的 nginx 基线只覆盖 `X-Real-IP` 与 `X-Forwarded-For` —— 客户端自带一个 `CF-Connecting-IP: <白名单里的公网 IP>` 就能绕过 API Key 的 IP 白名单。旧式接管是例外模式：只有在代理地址无法列举（例如 CDN 出口随时变化）时才用，而且必须同时满足源站不可直连、每一个被采信的头都在边缘被覆盖。
+
+**怎么继续收紧**：把 `server.trusted_proxies` 收敛到反代地址（`127.0.0.1/32`、`::1/128` 或入口机地址）并保持开关为 `false` —— 这是唯一不需要额外条件的配置。只有代理地址确实无法列举时才切旧式接管，且必须同时做到源站不可直连、边缘覆盖每一个被采信的头（`CF-Connecting-IP`、`X-Real-IP`、`X-Forwarded-For` 与自定义头列表）。
 
 ## 3. 首启 setup 只绑回环 + 一次性 token（DAN-7）
 
@@ -77,14 +79,21 @@
 **改法**：`security.admin_system_update` 默认关死（`enabled=false`，`allow_cidrs=["127.0.0.1/32","::1/128"]`），由 `backend/internal/server/middleware/admin_system_update_gate.go` 执行三重判定：
 
 1. `enabled=false` 一律拒绝（默认状态）；
-2. 调用方地址只按 **TCP 对端**判定（`ip.ResolvePeerClientIP`），对端必须命中 `allow_cidrs`；
+2. 调用方地址按 `ip.ResolvePeerClientIP` 解析，解析结果必须命中 `allow_cidrs`：默认取 **TCP 对端**；只有该对端本身在 `server.trusted_proxies` 里时才沿可信代理链取真实客户端地址（链上出现无法解析的跳数就整条作废、返回空地址，判为不允许）；
 3. 即使前两步通过，仍强制要求会话完成过 TOTP step-up，且**不读取** `settings.step_up_enabled` —— 全局开关被误关也照样拦。
 
 三种失败共用错误码 `ADMIN_SYSTEM_UPDATE_FORBIDDEN`，精确原因写进审计（对端地址、命中的规则、step-up 状态、结果）。挂载点：`backend/internal/server/routes/admin.go` 的 `registerSystemRoutes`（`UpdateGate()` 在 `stepUpAuth` 之前），策略在 `backend/internal/handler/wire.go` 装配。
 
-**升级后会发生什么**：公网调用 `POST /api/v1/admin/system/update` 一律 403，即使是管理员带 step-up。要在线更新必须显式 `enabled=true` 且调用方对端命中 `allow_cidrs`（默认只允许回环）—— 也就是说必须在源站本机或隧道里操作。`rollback` / `restart` 仍然只靠 `stepUpAuth` 与源站 nginx 的 403。
+**升级后会发生什么**：公网调用 `POST /api/v1/admin/system/update` 一律 403，即使是管理员带 step-up。只有显式 `enabled=true` 且解析出的对端命中 `allow_cidrs`（默认只允许回环）才放行。
 
-**怎么继续收紧**：保持默认关闭；把 `enabled=true` 当成高危变更对待，`allow_cidrs` 永远不要写成 `0.0.0.0/0`。
+`enabled=true` 加默认白名单，本意是「只允许本机或隧道」，但它的实际强度取决于入口装配，两种分支都要认清：
+
+- 后端前面有本机反代、而反代地址**没**写进 `server.trusted_proxies`：`ResolvePeerClientIP` 看到的是反代自己的回环地址，命中默认白名单 —— 任何能经过这个反代、拿到管理员登录并完成 step-up 的人都过得去，这道门退化成「管理员 + step-up」。
+- 反代地址**写进**了 `server.trusted_proxies`：门校验的是反代解出的真实客户端地址，「只允许回环」才真正成立。
+
+所以打开 `enabled=true` 时必须同时确认 `server.trusted_proxies` 或入口层的来源限制。`rollback` / `restart` 仍然只靠 `stepUpAuth` 与源站 nginx 的 403。
+
+**怎么继续收紧**：保持默认关闭；把 `enabled=true` 当成高危变更对待 —— 打开时确认 `server.trusted_proxies` 已列出反代（或入口层已限源），并且 `allow_cidrs` 永远不要写成 `0.0.0.0/0`。
 
 ## 6. 源站 403 清单与部署校验（DAN-30）
 
@@ -134,9 +143,9 @@ bash deploy/zhijing/verify-sensitive-endpoints.sh --base-url https://<host>
 
 1. 源站 `include` 拒绝模板，`nginx -t` 通过后 reload，用校验脚本确认 403（只增加拒绝，不改既有流量路径）。
 2. 发布端口回环，确认反代仍然连通。
-3. 转发头信任：先配好 `trusted_proxies` / 自定义头，再打开（现在默认已是关闭）。
+3. 转发头信任：保持 `false`，把反代地址写进 `server.trusted_proxies`。旧式接管只在代理地址无法列举时使用，且要求源站不可直连、每个被采信的头都在边缘被覆盖。
 4. setup 首启改成本机或隧道完成（`AUTO_SETUP` 部署无需动作）。
-5. 应用层硬门保持默认关闭，需要在线更新时再显式打开并限制 `allow_cidrs`。
+5. 应用层硬门保持默认关闭；确需打开时，先让 `server.trusted_proxies` 或入口限制把 `allow_cidrs` 变成真的来源限制。
 6. CI race 已在跑，后续扩大覆盖面。
 
 每一步都能单独回退：1、2、6 是配置与 CI，3、4、5 是开关与监听地址。

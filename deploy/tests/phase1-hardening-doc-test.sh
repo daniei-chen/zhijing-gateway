@@ -75,6 +75,21 @@ fi
 grep -Fq '## 上游回灌' "$doc" || fail "${doc} has no upstream backport section"
 grep -Fq '本地扩展' "$doc" || fail "${doc} does not mark the deny template as local-only"
 
+# 转发头与硬门两段的指导必须带机制约束，别退回"配好代理就能打开"和"默认白名单等于只能本机"：
+#   - trust=true 时 GetSecurityClientIP 走 GetClientIP，原始转发头不再校验 trusted_proxies，
+#     CF-Connecting-IP 优先级最高，而 nginx 基线不覆盖它；
+#   - 本机反代未列入 server.trusted_proxies 时，ResolvePeerClientIP 得到的是反代回环地址，
+#     默认 allow_cidrs 因此对"经反代过来的任何人"都成立。
+for unsafe in '再考虑打开转发头信任' '必须在源站本机或隧道里操作'; do
+  if grep -Fq "$unsafe" "$doc"; then
+    fail "${doc} contains unsafe guidance: ${unsafe}"
+  fi
+done
+grep -Fq 'CF-Connecting-IP' "$doc" || \
+  fail "${doc} must name the header that legacy forwarded-header trust accepts unchecked"
+grep -Fq 'server.trusted_proxies' "$doc" || \
+  fail "${doc} must reference server.trusted_proxies as the trust boundary"
+
 # 本仓库的提交必须给完整 40 位: 7-39 位且含字母的十六进制串会让 --match-head-commit 匹配失败。
 # 提到上游的段落除外 —— 上游 sha 只能按 docs/UPSTREAM.md 记录的短形态引用，我们没有完整值。
 short_shas=$(grep -v '上游' "$doc" \
