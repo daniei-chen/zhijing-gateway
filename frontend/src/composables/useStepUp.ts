@@ -20,6 +20,13 @@ const STEP_UP_TOTP_NOT_ENABLED = 'STEP_UP_TOTP_NOT_ENABLED'
 const STEP_UP_ADMIN_API_KEY_FORBIDDEN = 'STEP_UP_ADMIN_API_KEY_FORBIDDEN'
 
 /**
+ * Set by `api/client.ts` on a STEP_UP_REQUIRED rejection once the shared global
+ * dialog has already run for that request. `run()` uses it to avoid opening a
+ * second dialog — most importantly after the user explicitly cancelled.
+ */
+export type StepUpHandled = 'verified' | 'cancelled'
+
+/**
  * Thrown by run() when the user dismisses the TOTP dialog.
  * Callers should treat it as a silent no-op, not an error to toast.
  */
@@ -40,6 +47,7 @@ interface ApiError {
   code?: string | number
   reason?: string
   message?: string
+  step_up_handled?: StepUpHandled
 }
 
 /** Extract the semantic error marker from either envelope shape (code or reason). */
@@ -60,6 +68,27 @@ export function isStepUpBlocked(err: unknown): boolean {
 
 export function stepUpBlockReason(err: unknown): string {
   return markerOf(err)
+}
+
+/**
+ * 把 step-up 相关失败翻译成「该给用户看什么」：
+ *   - `null`    用户主动取消了对话框，调用方应当静默，不要报错；
+ *   - 字符串    需要提示的具体原因，是 i18n key，交给调用方的 t()；
+ *   - `undefined` 与 step-up 无关，调用方用自己的兜底文案。
+ *
+ * 取消之所以要静默：全局拦截器已经弹过对话框，用户明确点了取消；
+ * 再补一句「分配失败」等于把用户的选择报成事故。
+ */
+export function stepUpFailureKey(err: unknown): string | null | undefined {
+  if (isStepUpCancelled(err)) return null
+  switch (stepUpBlockReason(err)) {
+    case STEP_UP_TOTP_NOT_ENABLED:
+      return 'stepUp.notEnabled'
+    case STEP_UP_ADMIN_API_KEY_FORBIDDEN:
+      return 'stepUp.adminApiKeyForbidden'
+    default:
+      return undefined
+  }
 }
 
 export type StepUpController = ReturnType<typeof useStepUp>
@@ -112,6 +141,15 @@ export function useStepUp() {
       if (!isStepUpRequired(err)) {
         throw err
       }
+      const handled = (err as ApiError).step_up_handled
+      if (handled === 'cancelled') {
+        // apiClient 的全局对话框已经问过，用户当场取消：静默结束，不能再弹第二个。
+        throw new StepUpCancelledError()
+      }
+      if (handled === 'verified') {
+        // 全局对话框已验证并重试过一次，仍被拒：再弹一次只会重复同一个失败动作。
+        throw err
+      }
       const ok = await prompt()
       if (!ok) {
         throw new StepUpCancelledError()
@@ -130,3 +168,12 @@ export function useStepUp() {
     run
   }
 }
+
+/**
+ * 全局 step-up 控制器。
+ *
+ * 由 `App.vue` 挂一个 `TotpStepUpDialog`，供 `api/client.ts` 在收到 `STEP_UP_REQUIRED`
+ * 时弹窗。管理面的 sudo 窗口是会话级的（`StepUpSessionKey` 绑当前会话），验证一次即覆盖
+ * 整段会话，所以单个全局控制器就够，不必让每个页面各自接线。
+ */
+export const globalStepUp = useStepUp()

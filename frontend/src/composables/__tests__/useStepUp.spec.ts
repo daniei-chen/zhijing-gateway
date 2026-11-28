@@ -5,6 +5,7 @@ import {
   isStepUpBlocked,
   isStepUpCancelled,
   stepUpBlockReason,
+  stepUpFailureKey,
   StepUpCancelledError
 } from '../useStepUp'
 
@@ -14,6 +15,16 @@ describe('useStepUp error classification', () => {
     expect(isStepUpRequired({ status: 403, reason: 'STEP_UP_REQUIRED' })).toBe(true)
     expect(isStepUpRequired({ status: 500, code: 'INTERNAL' })).toBe(false)
     expect(isStepUpRequired(null)).toBe(false)
+  })
+
+  it('maps step-up failures to what the caller should show the user', () => {
+    // 取消 → null：全局对话框已问过，页面必须静默，不能报「分配失败」。
+    expect(stepUpFailureKey(new StepUpCancelledError())).toBeNull()
+    expect(stepUpFailureKey({ code: 'STEP_UP_TOTP_NOT_ENABLED' })).toBe('stepUp.notEnabled')
+    expect(stepUpFailureKey({ reason: 'STEP_UP_ADMIN_API_KEY_FORBIDDEN' })).toBe('stepUp.adminApiKeyForbidden')
+    // 与 step-up 无关的错误交给调用方自己的兜底文案。
+    expect(stepUpFailureKey({ status: 500, code: 'INTERNAL' })).toBeUndefined()
+    expect(stepUpFailureKey(null)).toBeUndefined()
   })
 
   it('detects blocked (non-retryable) step-up errors', () => {
@@ -95,6 +106,20 @@ describe('useStepUp.run', () => {
     await vi.waitFor(() => expect(stepUp.visible.value).toBe(true))
     stepUp.onCancel()
     await expect(promise).rejects.toBeInstanceOf(StepUpCancelledError)
+    expect(stepUp.visible.value).toBe(false)
+  })
+
+  it('does not open a second dialog when the global dialog was already cancelled', async () => {
+    const stepUp = useStepUp()
+    const err = { status: 403, code: 'STEP_UP_REQUIRED', step_up_handled: 'cancelled' }
+    await expect(stepUp.run(async () => { throw err })).rejects.toBeInstanceOf(StepUpCancelledError)
+    expect(stepUp.visible.value).toBe(false)
+  })
+
+  it('re-throws without prompting when the global dialog verified and already retried', async () => {
+    const stepUp = useStepUp()
+    const err = { status: 403, code: 'STEP_UP_REQUIRED', step_up_handled: 'verified' }
+    await expect(stepUp.run(async () => { throw err })).rejects.toBe(err)
     expect(stepUp.visible.value).toBe(false)
   })
 

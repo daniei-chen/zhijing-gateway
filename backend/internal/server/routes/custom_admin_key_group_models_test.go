@@ -72,7 +72,7 @@ func TestScopedAdminRegisteredGroupModelInterfaces(t *testing.T) {
 			auth := middleware.NewAdminAuthMiddleware(nil, users, settings, nil)
 			api := &scopedRouteGroupModels{}
 			r := gin.New()
-			RegisterAdminRoutes(r.Group("/api/v1"), &handler.Handlers{Admin: &handler.AdminHandlers{Group: adminhandler.NewGroupHandler(api, nil, nil)}}, auth, middleware.AuditLogMiddleware(func(c *gin.Context) { c.Next() }), middleware.StepUpAuthMiddleware(func(c *gin.Context) { c.Next() }), nil, nil)
+			RegisterAdminRoutes(r.Group("/api/v1"), &handler.Handlers{Admin: &handler.AdminHandlers{Group: adminhandler.NewGroupHandler(api, nil, nil)}}, auth, middleware.AuditLogMiddleware(func(c *gin.Context) { c.Next() }), middleware.StepUpAuthMiddleware(func(c *gin.Context) { c.Next() }), middleware.ForcedStepUpAuthMiddleware(func(c *gin.Context) { c.Next() }), nil, nil)
 			for _, tc := range []struct {
 				method, path, body, allowed string
 			}{
@@ -176,7 +176,7 @@ func TestScopedAdminRegisteredGroupModelsUseUpstreamAllowlistSemantics(t *testin
 	require.NoError(t, err)
 	auth := middleware.NewAdminAuthMiddleware(nil, service.NewUserService(&scopedRouteUsers{}, nil, nil, nil), settings, nil)
 	r := gin.New()
-	RegisterAdminRoutes(r.Group("/api/v1"), &handler.Handlers{Admin: &handler.AdminHandlers{Group: adminhandler.NewGroupHandler(api, nil, nil)}}, auth, middleware.AuditLogMiddleware(func(c *gin.Context) { c.Next() }), middleware.StepUpAuthMiddleware(func(c *gin.Context) { c.Next() }), nil, nil)
+	RegisterAdminRoutes(r.Group("/api/v1"), &handler.Handlers{Admin: &handler.AdminHandlers{Group: adminhandler.NewGroupHandler(api, nil, nil)}}, auth, middleware.AuditLogMiddleware(func(c *gin.Context) { c.Next() }), middleware.StepUpAuthMiddleware(func(c *gin.Context) { c.Next() }), middleware.ForcedStepUpAuthMiddleware(func(c *gin.Context) { c.Next() }), nil, nil)
 	call := func(body string) *httptest.ResponseRecorder {
 		req := httptest.NewRequest("PUT", "/api/v1/admin/groups/2", strings.NewReader(body))
 		req.Header.Set("x-api-key", key)
