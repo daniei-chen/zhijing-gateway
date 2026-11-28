@@ -4,7 +4,8 @@ on:
   # 只有 main 的 push 触发 CI；PR 分支靠 pull_request（opened/synchronize/reopened）。
   # 这是行为变化：往没有 PR 的分支推 commit 不再有任何 CI，要验要先开 PR。
   # 收窄的原因：一次 push 会同时挤进 7 个 job，多分支并行时把 CI 队列饿死。
-  # main 的 push 必须保留——e2e job 靠 if 里的 refs/heads/main 这一条。
+  # main 的 push 必须保留——e2e 现在在 PR 上真跑（#52 去掉了它 job 级的 refs/heads/main
+  # 条件），但 full 档仍只在 main 的 push 与 dispatch 上跑，那是分支保护的「合并后」那一半。
   #
   # ci/e2e-* 这个 push 例外已删除（2026-11-28）：它是 e2e 从没绿过时的临时验证
   # 通道，代价是任何推 ci/ 前缀分支的人都会凭空触发一次 12 分钟的起栈。它要解决
@@ -13,8 +14,8 @@ on:
   push:
     branches: [main]
   pull_request:
-  # e2e 在 PR 上不跑（起栈 12 分钟 + 需要真实上游 key），改 e2e 本身时用
-  # workflow_dispatch 在指定 ref 上直接起一次。
+  # e2e 在 PR 上跑 pr 档（起栈约 12 分钟，用例本身只占十几秒），full 档留给 main 的 push
+  # 与 workflow_dispatch；改 e2e 本身时用 workflow_dispatch 在指定 ref 上直接起一次。
   #
   # 限制（GitHub 的行为，不是我们的配置）：只有默认分支上的 workflow 文件
   # 带 workflow_dispatch，这个 workflow 才接受 dispatch。
@@ -37,7 +38,6 @@ jobs:
           /bin/sh deploy/tests/docker-compose-gateway-env-test.sh
           /bin/sh deploy/tests/docker-runtime-resources-test.sh
           /bin/sh deploy/tests/ci-race-job-test.sh
-          /bin/sh deploy/tests/ci-workflow-guards-test.sh
           /bin/bash deploy/tests/verify-sensitive-endpoints-test.sh
           /bin/sh deploy/tests/security-invariants-test.sh
           /bin/sh deploy/tests/redis-auth-store-durability-test.sh
@@ -422,4 +422,7 @@ jobs:
       # 这个必检会静默变绿。说明见 .github/release-tools/run-tests.sh。
       - run: bash .github/release-tools/run-tests.sh
       - run: python tools/check-pnpm-audit-exceptions-test.py -v
+      # 必检守卫用 yaml.safe_load 解析 workflow 再断言键（正则挡不住 `needs :` 这类
+      # 等价写法）。PyYAML==6.0.3 就在上面那条 requirements 里钉死，零网络。
+      - run: sh deploy/tests/ci-workflow-guards-test.sh
       - run: bash -n .github/release-tools/release-images.sh
