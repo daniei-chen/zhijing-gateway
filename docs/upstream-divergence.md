@@ -70,7 +70,7 @@ git rev-parse 4233cc3d8018bf2f399c4c366d94067c42eb697e:backend/internal/pkg/open
 
 ## 六、已确认的缺口（不是差异，是待修的洞）
 
-当前没有已确认待修的缺口。
+**截至 2026-11-28**，没有已确认待修的缺口。
 
 图片算价这条缺口没有「回灌时听谁的」可判，所以从来没进上面的动作表。留在这里要说清的是：§四 的 fail-closed 四条覆盖的是 token / audio 的后扣链路，图片算价**不在那四条里**。图片算价的 fail-open（`calculateImageCost` 算价失败仍按 `$0` + `err=nil` 成交）已经单独修掉：`#50` 把两处吞错改成 `return nil, err`，`#55` 补上矩阵测试 `TestRecordUsage_CostFailureMatrix` 钉住「非简易模式返回 err、简易模式保持 $0」。读清单的人该按「§四 不覆盖图片，但图片那条已经修了」理解，不要再当成待修缺口。
 
