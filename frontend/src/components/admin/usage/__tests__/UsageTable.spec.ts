@@ -35,6 +35,7 @@ const localizedMessages: Record<'en' | 'zh', Record<string, string>> = {
 const messages: Record<string, string> = {
   'usage.outputTps': 'Output TPS',
   'admin.usage.userDeletedBadge': 'Deleted',
+  'admin.usage.imagePriceDefaulted': 'Default price',
   'usage.costDetails': 'Cost Breakdown',
   'admin.usage.inputCost': 'Input Cost',
   'admin.usage.outputCost': 'Output Cost',
@@ -932,5 +933,26 @@ describe('admin UsageTable deleted-user badge', () => {
 
     expect(wrapper.text()).not.toContain('Deleted')
     expect(wrapper.text()).toContain('active@test.com')
+  })
+})
+
+describe('admin UsageTable defaulted image price marker', () => {
+  beforeEach(() => {
+    locale = 'en'
+  })
+
+  it('shows the marker only on rows billed at the default image price', () => {
+    const defaulted = { ...baseImageRow, billing_tier: 'image_price_defaulted' }
+    const priced = { ...baseImageRow, request_id: 'req-admin-image-priced', billing_tier: null }
+    const wrapper = mount(UsageTable, {
+      props: { data: [defaulted, priced], loading: false, columns: [] },
+      global: { stubs: { DataTable: DataTableStub, EmptyState: true, Icon: true, Teleport: true } },
+    })
+
+    const badges = wrapper.findAll('[data-testid="image-price-defaulted-badge"]')
+    expect(badges).toHaveLength(1)
+    expect(badges[0].text()).toBe('Default price')
+    expect(wrapper.find('[data-request-id="req-admin-image-priced"] [data-testid="image-price-defaulted-badge"]').exists()).toBe(false)
+    wrapper.unmount()
   })
 })

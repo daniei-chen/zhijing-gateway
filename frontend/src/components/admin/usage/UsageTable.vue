@@ -140,9 +140,19 @@
         </template>
 
         <template #cell-billing_mode="{ row }">
-          <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium" :class="getBillingModeBadgeClass(getDisplayBillingMode(row))">
-            {{ getBillingModeLabel(getDisplayBillingMode(row), t) }}
-          </span>
+          <div class="flex flex-wrap items-center gap-1">
+            <span class="inline-flex items-center rounded px-2 py-0.5 text-xs font-medium" :class="getBillingModeBadgeClass(getDisplayBillingMode(row))">
+              {{ getBillingModeLabel(getDisplayBillingMode(row), t) }}
+            </span>
+            <span
+              v-if="row.billing_tier === BILLING_TIER_IMAGE_PRICE_DEFAULTED"
+              data-testid="image-price-defaulted-badge"
+              class="inline-flex items-center rounded bg-orange-100 px-2 py-0.5 text-xs font-medium text-orange-700 dark:bg-orange-900/30 dark:text-orange-300"
+              :title="t('admin.usage.imagePriceDefaultedHint')"
+            >
+              {{ t('admin.usage.imagePriceDefaulted') }}
+            </span>
+          </div>
         </template>
 
         <template #cell-tokens="{ row }">
@@ -564,6 +574,7 @@ import {
 } from '@/utils/latencyHealth'
 import {
   BILLING_MODE_TOKEN,
+  BILLING_TIER_IMAGE_PRICE_DEFAULTED,
   getBillingModeLabel,
   getBillingModeBadgeClass,
   isImageUsage,

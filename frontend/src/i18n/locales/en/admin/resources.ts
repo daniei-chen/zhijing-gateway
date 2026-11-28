@@ -550,6 +550,8 @@ export default {
       billingModePerRequest: 'Per Request',
       billingModeImage: 'Image',
       billingModeVideo: 'Video',
+      imagePriceDefaulted: 'Default price',
+      imagePriceDefaultedHint: 'This pricing row has no usable unit price; the request was billed at the default image price.',
       allBillingModes: 'All Billing Modes',
 	  upstreamModelAudit: 'Upstream model audit',
 	  allUpstreamModelAudit: 'All response model states',
