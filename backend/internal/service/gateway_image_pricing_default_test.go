@@ -38,10 +38,11 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 	type imagePricingCase struct {
 		name        string
 		billingMode BillingMode
-		withPrices  bool // 渠道行填了非零 token 单价
-		imageAPI    bool // 专用图片端点（分组按张开关只对它生效）
-		switchOn    bool // 分组按实际出图张数计费
-		priced      bool // 该行配置了非零可用单价
+		withPrices  bool   // 渠道行填了非零 token 单价
+		imageAPI    bool   // 专用图片端点（分组按张开关只对它生效）
+		switchOn    bool   // 分组按实际出图张数计费
+		priced      bool   // 该行配置了非零可用单价
+		imageSize   string // 请求尺寸，空即 1K
 		// configure 把该行改造成「显式填了价格」，含显式 0（免费）。
 		configure func(pricing *ChannelModelPricing, group *Group)
 	}
@@ -51,6 +52,8 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 		{name: "channel token unpriced", billingMode: BillingModeToken},
 		{name: "channel token unpriced with count billing", billingMode: BillingModeToken, imageAPI: true, switchOn: true},
 		{name: "channel per_request unpriced", billingMode: BillingModePerRequest},
+		{name: "channel token unpriced 2K", billingMode: BillingModeToken, imageSize: "2K"},
+		{name: "channel token unpriced 4K", billingMode: BillingModeToken, imageSize: "4K"},
 		{
 			// 免费渠道：token 单价显式填 0。ModelPricing 里这些字段是 float64，
 			// 只有渠道原始行还留着「填过」的信息。
@@ -92,6 +95,18 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 	}
 
 	explicitZeroPrice := func(tc imagePricingCase) bool { return tc.configure != nil }
+
+	// 内置默认图价按尺寸放大：2K 1.5 倍、4K 2 倍（docs/IMAGE_PRICE_DEFAULTED.md）。
+	defaultPriceFor := func(imageSize string) float64 {
+		switch imageSize {
+		case "2K":
+			return defaultImagePrice * 1.5
+		case "4K":
+			return defaultImagePrice * 2
+		default:
+			return defaultImagePrice
+		}
+	}
 
 	for _, failClosed := range []bool{false, true} {
 		switchLabel := "false"
@@ -135,7 +150,7 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 						RequestID:     "image-pricing-table",
 						Model:         model,
 						ImageCount:    imageCount,
-						ImageSize:     "1K",
+						ImageSize:     imageSizeOrDefault(tc.imageSize),
 						ImageEndpoint: tc.imageAPI,
 						Usage:         ClaudeUsage{InputTokens: 1_000_000, OutputTokens: 1000},
 						Duration:      time.Second,
@@ -181,8 +196,8 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, 1, usageRepo.calls)
 				require.NotNil(t, usageRepo.lastLog)
-				require.InDelta(t, defaultImagePrice*imageCount, usageRepo.lastLog.ActualCost, 1e-9,
-					"漏配的图片渠道必须按默认图价成交，不能是 $0")
+				require.InDelta(t, defaultPriceFor(tc.imageSize)*imageCount, usageRepo.lastLog.ActualCost, 1e-9,
+					"漏配的图片渠道必须按默认图价成交（2K 1.5 倍、4K 2 倍），不能是 $0")
 				require.NotNil(t, usageRepo.lastLog.BillingTier)
 				require.Equal(t, marker, *usageRepo.lastLog.BillingTier,
 					"默认价成交必须留下可查标记")
@@ -253,4 +268,11 @@ func TestRecordUsage_ImagePricingUnpricedSimpleModeStaysNonFailing(t *testing.T)
 	require.Equal(t, 1, usageRepo.calls)
 	require.NotNil(t, usageRepo.lastLog)
 	require.Zero(t, billingRepo.failureCalls)
+}
+
+func imageSizeOrDefault(imageSize string) string {
+	if imageSize == "" {
+		return "1K"
+	}
+	return imageSize
 }

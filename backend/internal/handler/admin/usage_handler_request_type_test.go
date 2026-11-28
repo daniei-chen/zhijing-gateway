@@ -18,13 +18,19 @@ type adminUsageRepoCapture struct {
 	listParams   pagination.PaginationParams
 	listFilters  usagestats.UsageLogFilters
 	statsFilters usagestats.UsageLogFilters
+	// rows 让用例决定 ListWithFilters 返回哪些行（零值为空列表）。
+	rows []service.UsageLog
 }
 
 func (s *adminUsageRepoCapture) ListWithFilters(ctx context.Context, params pagination.PaginationParams, filters usagestats.UsageLogFilters) ([]service.UsageLog, *pagination.PaginationResult, error) {
 	s.listParams = params
 	s.listFilters = filters
-	return []service.UsageLog{}, &pagination.PaginationResult{
-		Total:    0,
+	rows := s.rows
+	if rows == nil {
+		rows = []service.UsageLog{}
+	}
+	return rows, &pagination.PaginationResult{
+		Total:    int64(len(rows)),
 		Page:     params.Page,
 		PageSize: params.PageSize,
 		Pages:    0,
