@@ -80,7 +80,7 @@ func imageRequestHasUsablePrice(resolved *ResolvedPricing, apiKey *APIKey, image
 	if apiKeyHasConfiguredImagePrice(apiKey, NormalizeImageBillingTierOrDefault(imageSize)) {
 		return true
 	}
-	if resolved.channelPricing != nil && resolved.channelPricing.PerRequestPrice != nil {
+	if channelPricingHasConfiguredImagePrice(resolved.channelPricing) {
 		return true
 	}
 	if len(resolved.RequestTiers) > 0 || resolved.DefaultPerRequestPrice > 0 {
@@ -90,6 +90,25 @@ func imageRequestHasUsablePrice(resolved *ResolvedPricing, apiKey *APIKey, image
 		return true
 	}
 	return modelPricingHasConfiguredPrice(resolved.BasePricing)
+}
+
+// channelPricingHasConfiguredImagePrice 判断渠道定价行是否填过任何能定价图片请求的单价。
+//
+// 渠道行的价格字段是 *float64：nil 是「没填」，非 nil 是「运营者填了」，填 0 就是
+// 显式选择的免费。ModelPricing 上的 InputPricePerToken/OutputPricePerToken 是 float64，
+// 丢掉这个区别，所以「显式 0」只能在渠道原始行上判断——否则一个故意配 0 的免费渠道
+// 会被当成漏配，按默认图价 0.134/张计费（开关打开时还会 400）。
+// 只认图片请求真正会消费的字段：缓存价单独配置并不能给图片定价。
+func channelPricingHasConfiguredImagePrice(pricing *ChannelModelPricing) bool {
+	if pricing == nil {
+		return false
+	}
+	return pricing.InputPrice != nil ||
+		pricing.OutputPrice != nil ||
+		pricing.ImageInputPrice != nil ||
+		pricing.ImageOutputPrice != nil ||
+		pricing.PerRequestPrice != nil ||
+		len(pricing.Intervals) > 0
 }
 
 // modelPricingHasConfiguredPrice 判断价格条目是否填写过任何单价字段。
