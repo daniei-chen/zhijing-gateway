@@ -358,7 +358,80 @@ func TestMediaTierMissSimpleModeStaysNonFailing(t *testing.T) {
 			require.NoError(t, out.err, "简易模式不收费，开关对它不生效，不能报错")
 			require.Equal(t, 1, out.usageCalls, "简易模式仍要写 usage_log")
 			require.NotNil(t, out.usageLog)
-			require.Zero(t, out.usageLog.ActualCost)
+			// 与 #55 的「简易模式未配价 → 默认图价成交 + 标记」同一口径：简易模式不扣费，
+			// 记账值记的是「本该收多少」，不是 0。开关在简易模式下恒为 fail-open。
+			require.InDelta(t, 0.134*2, out.usageLog.ActualCost, 1e-9)
+			require.NotNil(t, out.usageLog.BillingTier)
+			require.Equal(t, BillingTierImagePriceDefaulted, *out.usageLog.BillingTier)
+			require.Zero(t, out.failureCalls, "简易模式不登记 billing_failures")
+		})
+	}
+}
+
+// 简易模式 + `fail_closed_on_unpriced=false` 的记账值：运营者在用量页上直接看到这个数字，
+// 所以单独钉一条并打出实际值。档位未命中按默认图价记账（0.268），与 #55 的
+// 「简易模式 + 完全未配价 → 默认图价 + 标记」同一口径；简易模式本身从不扣费。
+func TestMediaTierMissSimpleModeRecordsDefaultPriceWhenFailOpen(t *testing.T) {
+	const model = "swo76-simple-fail-open"
+	price4K := 0.20
+
+	for _, engine := range []struct {
+		name   string
+		record tierMissRecorder
+	}{
+		{name: "gateway", record: recordGatewayImage},
+		{name: "openai", record: recordOpenAIImage},
+	} {
+		t.Run(engine.name+"/simple-mode/fail_closed=false", func(t *testing.T) {
+			groupID := int64(7690)
+			group := &Group{ID: groupID, Status: StatusActive, Hydrated: true, RateMultiplier: 1, AllowImageGeneration: true}
+			resolver := tierMissResolver(t, groupID, model, &ChannelModelPricing{
+				BillingMode: BillingModeImage,
+				Intervals: []PricingInterval{
+					{TierLabel: "4K", PerRequestPrice: &price4K},
+				},
+			})
+
+			var out tierMissOutcome
+			if engine.name == "gateway" {
+				svc, usageRepo, billingRepo := newTierMissGatewayService(resolver, false)
+				svc.cfg.RunMode = config.RunModeSimple
+				svc.billingCacheService.cfg = svc.cfg
+				err := svc.RecordUsage(context.Background(), &RecordUsageInput{
+					Result: &ForwardResult{
+						RequestID: "swo76-simple-open", Model: model, ImageCount: 2, ImageSize: "1K",
+						ImageEndpoint: true, Duration: time.Second,
+					},
+					APIKey:  &APIKey{ID: 7691, GroupID: &groupID, Group: group},
+					User:    &User{ID: 7692},
+					Account: &Account{ID: 7693},
+				})
+				out = tierMissOutcome{err: err, usageCalls: usageRepo.calls, usageLog: usageRepo.lastLog, failureCalls: billingRepo.failureCalls}
+			} else {
+				svc, usageRepo, billingRepo := newTierMissOpenAIService(resolver, false)
+				svc.cfg.RunMode = config.RunModeSimple
+				svc.billingCacheService.cfg = svc.cfg
+				err := svc.RecordUsage(context.Background(), &OpenAIRecordUsageInput{
+					Result: &OpenAIForwardResult{
+						RequestID: "swo76-simple-open", Model: model, ImageCount: 2, ImageSize: "1K",
+						Duration: time.Second,
+					},
+					APIKey:  &APIKey{ID: 7691, GroupID: &groupID, Group: group},
+					User:    &User{ID: 7692},
+					Account: &Account{ID: 7693},
+				})
+				out = tierMissOutcome{err: err, usageCalls: usageRepo.calls, usageLog: usageRepo.lastLog, failureCalls: billingRepo.failureCalls}
+			}
+
+			require.NoError(t, out.err)
+			require.Equal(t, 1, out.usageCalls)
+			require.NotNil(t, out.usageLog)
+			cost := out.usageLog.ActualCost
+			t.Logf("simple mode fail_closed=false actual_cost = %.6f, billing_tier = %v", cost, out.usageLog.BillingTier)
+			require.InDelta(t, 0.134*2, cost, 1e-9,
+				"简易模式按默认图价记账（与完全未配价的 #55 契约一致），不是 $0")
+			require.NotNil(t, out.usageLog.BillingTier)
+			require.Equal(t, BillingTierImagePriceDefaulted, *out.usageLog.BillingTier)
 		})
 	}
 }

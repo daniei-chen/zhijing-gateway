@@ -1,10 +1,6 @@
 package service
 
-import (
-	"fmt"
-
-	"github.com/daniei-chen/zhijing-gateway/internal/config"
-)
+import "fmt"
 
 // mediaUnpricedKind 区分走默认媒体价兜底的请求种类。
 type mediaUnpricedKind int
@@ -19,12 +15,6 @@ func (k mediaUnpricedKind) label() string {
 		return "video"
 	}
 	return "image"
-}
-
-// simpleModeRecordOnly 简易模式只记 usage、从不扣费：档位未命中时按既有语义落 $0，
-// 不走「默认价成交 + 标记」——那条路会把一个从未收取的价格写进统计。
-func simpleModeRecordOnly(cfg *config.Config) bool {
-	return cfg != nil && cfg.RunMode == config.RunModeSimple
 }
 
 // failClosedOnUnpriced 复用既有开关 billing.inflight_reservation.fail_closed_on_unpriced：

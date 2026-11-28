@@ -412,5 +412,10 @@ func (r *ModelPricingResolver) RequestUnitPrice(resolved *ResolvedPricing, tierL
 	if resolved.channelPricing != nil && resolved.channelPricing.PerRequestPrice != nil {
 		return *resolved.channelPricing.PerRequestPrice, true
 	}
+	// 没有原始定价行时（手工构造或缓存的 ResolvedPricing）按已解析值兜底：> 0 一定
+	// 是配过的价；显式 0 已经在上面用指针判过，走到这里只能是「没配」。
+	if resolved.DefaultPerRequestPrice > 0 {
+		return resolved.DefaultPerRequestPrice, true
+	}
 	return 0, false
 }
