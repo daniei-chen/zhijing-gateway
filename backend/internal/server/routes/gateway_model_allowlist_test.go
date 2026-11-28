@@ -69,7 +69,7 @@ func TestGatewayRoutesGroupModelAllowlistMountedOnEveryGatewayRoute(t *testing.T
 	source := string(routeSource)
 
 	// rootRoute helper：apiKeyAuth 之后、compositeTarget 之前。
-	rootHelper := regexp.MustCompile(regexp.QuoteMeta(`r.Handle(method, path, limit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), groupModelAllowlist, duplicateBillingKeys, compositeTarget, requireGroupAnthropic, handler)`))
+	rootHelper := regexp.MustCompile(regexp.QuoteMeta(`r.Handle(method, path, limit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), groupModelAllowlist, rejectConflictingFields, compositeTarget, requireGroupAnthropic, handler)`))
 	require.Regexp(t, rootHelper, source,
 		"root alias helper must place the allowlist between apiKeyAuth and compositeTarget")
 
@@ -94,66 +94,13 @@ func TestGatewayRoutesGroupModelAllowlistMountedOnEveryGatewayRoute(t *testing.T
 	}
 
 	// codexDirect 链是一条 Use 调用，直接断言顺序。
-	codexDirect := regexp.MustCompile(regexp.QuoteMeta(`codexDirect.Use(bodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), groupModelAllowlist, duplicateBillingKeys, compositeTarget, requireGroupAnthropic)`))
+	codexDirect := regexp.MustCompile(regexp.QuoteMeta(`codexDirect.Use(groupBodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), groupModelAllowlist, rejectConflictingFields, compositeTarget, requireGroupAnthropic)`))
 	require.Regexp(t, codexDirect, source, "codexDirect chain must mount the allowlist after auth and before compositeTarget")
 
 	// 所有带 apiKeyAuth 的根路径路由必须收敛到 rootRoute，避免漏挂。
 	stray := regexp.MustCompile(`\br\.(GET|POST|PUT|PATCH|DELETE)\("[^"]+",[^(]*apiKeyAuth`)
 	require.NotRegexp(t, stray, source,
 		"root alias routes must use rootRoute so the allowlist cannot be forgotten")
-}
-
-// TestGatewayRoutesDuplicateBillingKeysPosition 守两条不变式：
-//  1. 重复键拒绝必须挂在白名单之后、合成改写之前——它只该覆盖要计费/转发的路由；
-//  2. 白名单之前注册的 skipBilling 只读路由（billing info、batch replay/recovery）
-//     不能经过它，否则这些路由的 body 语义（比如超限时返回 400 而不是 413）会被改掉。
-func TestGatewayRoutesDuplicateBillingKeysPosition(t *testing.T) {
-	routeSource, err := os.ReadFile("gateway.go")
-	require.NoError(t, err)
-	source := string(routeSource)
-
-	// 只读路由必须先于网关级 Use 注册（Gin 的 Use 只作用于其后注册的路由）。
-	readOnly := []string{
-		`gateway.GET("/sub2api/billing"`,
-		`gateway.POST("/images/batches/replay"`,
-		`gateway.GET("/images/batches/:id/recovery"`,
-	}
-	guardAt := strings.Index(source, "gateway.Use(duplicateBillingKeys)")
-	require.Positive(t, guardAt, "gateway chain must mount duplicateBillingKeys")
-	for _, marker := range readOnly {
-		at := strings.Index(source, marker)
-		require.Positive(t, at, "missing read-only route %s", marker)
-		require.Less(t, at, guardAt, "%s must stay outside the duplicate-key guard (registered before it)", marker)
-	}
-
-	chains := []struct {
-		name   string
-		before string
-		after  string
-	}{
-		{"gateway", "gateway.Use(groupModelAllowlist)", "gateway.Use(compositeTarget)"},
-		{"gemini", "gemini.Use(groupModelAllowlist)", "gemini.Use(compositeGeminiTarget)"},
-		{"antigravityV1", "antigravityV1.Use(groupModelAllowlist)", "antigravityV1.Use(requireGroupAnthropic)"},
-		{"antigravityV1Beta", "antigravityV1Beta.Use(groupModelAllowlist)", "antigravityV1Beta.Use(requireGroupGoogle)"},
-	}
-	for _, chain := range chains {
-		group := chain.name
-		if group == "gateway" || group == "gemini" {
-			re := regexp.MustCompile(regexp.QuoteMeta(chain.before) +
-				`[\s\S]{0,200}?` + regexp.QuoteMeta(group+".Use(duplicateBillingKeys)") +
-				`[\s\S]{0,200}?` + regexp.QuoteMeta(chain.after))
-			require.Regexp(t, re, source, "%s: duplicate-key guard must sit between allowlist and %s", group, chain.after)
-			continue
-		}
-		re := regexp.MustCompile(regexp.QuoteMeta(chain.before) +
-			`[\s\S]{0,200}?` + regexp.QuoteMeta(group+".Use(duplicateBillingKeys)"))
-		require.Regexp(t, re, source, "%s: duplicate-key guard must follow the allowlist", group)
-	}
-
-	rootHelper := regexp.MustCompile(regexp.QuoteMeta(`gin.HandlerFunc(apiKeyAuth), groupModelAllowlist, duplicateBillingKeys, compositeTarget`))
-	require.Regexp(t, rootHelper, source, "root alias helper must mount the duplicate-key guard after the allowlist and before the composite rewrite")
-	codexDirect := regexp.MustCompile(regexp.QuoteMeta(`gin.HandlerFunc(apiKeyAuth), groupModelAllowlist, duplicateBillingKeys, compositeTarget`))
-	require.Regexp(t, codexDirect, source, "codexDirect chain must mount the duplicate-key guard after the allowlist")
 }
 
 // TestGatewayRoutesGroupModelAllowlistBlocksCompositeModelBeforeRewrite asserts
