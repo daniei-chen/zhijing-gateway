@@ -283,6 +283,8 @@ type UsageLogFilters struct {
 	NativeCompactionV2    *bool
 	BillingType           *int8
 	BillingMode           string
+	// BillingTier filters by usage_logs.billing_tier (e.g. image_price_defaulted).
+	BillingTier           string
 	UpstreamModelMismatch *bool
 	StartTime             *time.Time
 	EndTime               *time.Time

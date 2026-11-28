@@ -944,8 +944,9 @@ describe('admin UsageTable defaulted image price marker', () => {
   it('shows the marker only on rows billed at the default image price', () => {
     const defaulted = { ...baseImageRow, billing_tier: 'image_price_defaulted' }
     const priced = { ...baseImageRow, request_id: 'req-admin-image-priced', billing_tier: null }
+    const otherTier = { ...baseImageRow, request_id: 'req-admin-image-other-tier', billing_tier: 'other_tier' }
     const wrapper = mount(UsageTable, {
-      props: { data: [defaulted, priced], loading: false, columns: [] },
+      props: { data: [defaulted, priced, otherTier], loading: false, columns: [] },
       global: { stubs: { DataTable: DataTableStub, EmptyState: true, Icon: true, Teleport: true } },
     })
 
@@ -953,6 +954,7 @@ describe('admin UsageTable defaulted image price marker', () => {
     expect(badges).toHaveLength(1)
     expect(badges[0].text()).toBe('Default price')
     expect(wrapper.find('[data-request-id="req-admin-image-priced"] [data-testid="image-price-defaulted-badge"]').exists()).toBe(false)
+    expect(wrapper.find('[data-request-id="req-admin-image-other-tier"] [data-testid="image-price-defaulted-badge"]').exists()).toBe(false)
     wrapper.unmount()
   })
 })

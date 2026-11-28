@@ -36,6 +36,15 @@ func (m BillingMode) IsValidUsageFilter() bool {
 	return false
 }
 
+// BillingTierImagePriceDefaulted 是 usage_log.billing_tier 上的标记：图片定价行
+// 没有可用单价，请求已按默认图价成交（账面有价、可能少收，需要运维核对）。
+const BillingTierImagePriceDefaulted = "image_price_defaulted"
+
+// IsValidUsageTierFilter 检查 billing_tier 是否可用于使用记录筛选。
+func IsValidUsageTierFilter(tier string) bool {
+	return tier == "" || tier == BillingTierImagePriceDefaulted
+}
+
 const (
 	BillingModelSourceRequested     = "requested"
 	BillingModelSourceUpstream      = "upstream"

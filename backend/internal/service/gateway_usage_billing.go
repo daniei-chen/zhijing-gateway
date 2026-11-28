@@ -1401,7 +1401,7 @@ func (s *GatewayService) calculateImageCost(
 
 // imagePriceDefaultedMarker 是「定价行缺价、按默认图价成交」在 usage_log.billing_tier
 // 上的标记值，管理页据此核对漏配的渠道。
-const imagePriceDefaultedMarker = "image_price_defaulted"
+const imagePriceDefaultedMarker = BillingTierImagePriceDefaulted
 
 // unpricedImageCost 处理「定价行在、但没有任何可用单价」的图片请求。
 // 开关 billing.inflight_reservation.fail_closed_on_unpriced 打开时失败关闭；
