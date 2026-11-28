@@ -102,6 +102,34 @@ func appendUsageLogBillingModeQueryFilter(query string, args []any, billingMode 
 	return query + " AND " + conditions[0], args
 }
 
+// appendUsageLogBillingTierWhereCondition 按 usage_logs.billing_tier 过滤。
+// 空值不过滤；NULL 行（历史数据）不命中任何具体 tier。
+func appendUsageLogBillingTierWhereCondition(conditions []string, args []any, billingTier string) ([]string, []any) {
+	return appendUsageLogBillingTierWhereConditionWithAlias(conditions, args, billingTier, "")
+}
+
+func appendUsageLogBillingTierWhereConditionWithAlias(conditions []string, args []any, billingTier string, alias string) ([]string, []any) {
+	tier := strings.TrimSpace(billingTier)
+	if tier == "" {
+		return conditions, args
+	}
+	column := "billing_tier"
+	if alias != "" {
+		column = alias + ".billing_tier"
+	}
+	conditions = append(conditions, fmt.Sprintf("%s = $%d", column, len(args)+1))
+	args = append(args, tier)
+	return conditions, args
+}
+
+func appendUsageLogBillingTierQueryFilter(query string, args []any, billingTier string, alias string) (string, []any) {
+	conditions, args := appendUsageLogBillingTierWhereConditionWithAlias(nil, args, billingTier, alias)
+	if len(conditions) == 0 {
+		return query, args
+	}
+	return query + " AND " + conditions[0], args
+}
+
 func appendUsageLogModelWhereCondition(conditions []string, args []any, model string, source string) ([]string, []any) {
 	if strings.TrimSpace(source) == "" {
 		return appendRawUsageLogModelWhereCondition(conditions, args, model)
