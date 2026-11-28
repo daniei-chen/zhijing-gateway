@@ -1,3 +1,20 @@
 {
-  "signedContributors": []
+  "signedContributors": [
+    {
+      "name": "daniei-chen",
+      "id": 328942951,
+      "comment_id": 7231657368,
+      "created_at": "2026-11-28T01:25:35Z",
+      "repoId": 1440040023,
+      "pullRequestNo": 37
+    },
+    {
+      "name": "daniei-chen",
+      "id": 328942951,
+      "comment_id": 7231667677,
+      "created_at": "2026-11-28T01:26:28Z",
+      "repoId": 1440040023,
+      "pullRequestNo": 37
+    }
+  ]
 }
