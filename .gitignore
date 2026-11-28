@@ -77,3 +77,4 @@ build/
 !docs/AUDIT-2026-11-28.md
 !docs/audit/
 !docs/audit/**
+!docs/upstream-divergence.md
