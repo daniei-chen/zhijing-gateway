@@ -6,17 +6,18 @@ on:
   # 收窄的原因：一次 push 会同时挤进 7 个 job，多分支并行时把 CI 队列饿死。
   # main 的 push 必须保留——e2e job 靠 if 里的 refs/heads/main 这一条。
   #
-  # ci/e2e-* 是唯一的 push 例外：e2e 这个 job 的验证对象是「整个栈跑起来」，
-  # 本地没有 docker 就验不了，所以它必须能在分支上单独起一次。
+  # ci/e2e-* 这个 push 例外已删除（2026-11-28）：它是 e2e 从没绿过时的临时验证
+  # 通道，代价是任何推 ci/ 前缀分支的人都会凭空触发一次 12 分钟的起栈。它要解决
+  # 的场景——「改 e2e 自己时怎么验」——由下面的 workflow_dispatch 覆盖，e2e 也已经
+  # 在这条通道上连绿两次（run 46129909080，见 docs/ci/branch-protection.md §3）。
   push:
-    branches: [main, 'ci/e2e-*']
+    branches: [main]
   pull_request:
-  # e2e 只在 main 上跑，改 e2e 本身时手上没有任何验证手段——改一次就得合一次。
-  # workflow_dispatch 让人在指定 ref 上直接起一次。
+  # e2e 在 PR 上不跑（起栈 12 分钟 + 需要真实上游 key），改 e2e 本身时用
+  # workflow_dispatch 在指定 ref 上直接起一次。
   #
   # 限制（GitHub 的行为，不是我们的配置）：只有默认分支上的 workflow 文件
-  # 带 workflow_dispatch，这个 workflow 才接受 dispatch。所以在 main 拿到
-  # 这一行之前，从 PR 分支 dispatch 会 422；那之前用 ci/e2e-* 分支 push 兜底。
+  # 带 workflow_dispatch，这个 workflow 才接受 dispatch。
   workflow_dispatch:
 
 permissions:
@@ -99,10 +100,15 @@ jobs:
   # 账号），只有 2 条用户流程能真验。所以后面有一步断言：那 2 条必须是 PASS，
   # 不许靠"全跳过"混成绿色。
   #
-  # 三种触发：main 的 push 是常规路径；workflow_dispatch 和 ci/e2e-* 分支是
-  # 「改 e2e 自己」时的验证通道，见文件头 on: 的注释。
+  # 两种触发：main 的 push 是常规路径；workflow_dispatch 是「改 e2e 自己」时的
+  # 验证通道，见文件头 on: 的注释。
+  #
+  # 已验证会真跑通，不是「配了但没跑过」：run 46129909080（2026-11-28，
+  # head 50bc5e392）同一 run 连跑两轮均绿，注册 → 登录 → 建 API Key → 用 Key 调
+  # 网关 → 查用量五步全 PASS。凭据与路径的实测记录见
+  # docs/ci/branch-protection.md §3 和 docs/ci/test-tiers.md §4.2。
   e2e:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/ci/e2e-') }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
