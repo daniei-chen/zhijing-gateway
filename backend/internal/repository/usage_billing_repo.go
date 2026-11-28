@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"strings"
 
 	dbent "github.com/daniei-chen/zhijing-gateway/ent"
@@ -179,7 +180,7 @@ func (r *usageBillingRepository) applyUsageBillingEffects(ctx context.Context, t
 	}
 
 	if cmd.BalanceCost > 0 {
-		newBalance, sufficient, err := deductUsageBillingBalance(ctx, tx, cmd.UserID, cmd.BalanceCost)
+		newBalance, sufficient, err := deductUsageBillingBalance(ctx, tx, cmd, cmd.BalanceCost)
 		if err != nil {
 			return err
 		}
@@ -242,36 +243,74 @@ func incrementUsageBillingSubscription(ctx context.Context, tx *sql.Tx, subscrip
 	return service.ErrSubscriptionNotFound
 }
 
-func deductUsageBillingBalance(ctx context.Context, tx *sql.Tx, userID int64, amount float64) (float64, bool, error) {
-	var newBalance float64
+// deductUsageBillingBalance 从用户余额扣款，余额永不为负。
+//
+// 金额够则整笔扣；不够则把可用余额扣到 0，差额在同一事务内登记到
+// billing_failures（status=pending）作为欠款/漏收凭据，并把 overdrafted 报给调用方。
+// 旧的实现守卫落空后会再跑一条无守卫的 UPDATE，余额可被打成负数，且只在内存里
+// 留一个标记——欠款金额无法对账。子查询里的 FOR UPDATE 会把同一用户的并发扣款
+// 串行化，GREATEST 再兜底钳到 0。
+func deductUsageBillingBalance(ctx context.Context, tx *sql.Tx, cmd *service.UsageBillingCommand, amount float64) (float64, bool, error) {
+	if cmd == nil {
+		return 0, false, service.ErrUserNotFound
+	}
+	var previous, newBalance float64
 	err := tx.QueryRowContext(ctx, `
-		UPDATE users
-		SET balance = balance - $1,
+		WITH prev AS (
+			SELECT id, balance
+			FROM users
+			WHERE id = $2 AND deleted_at IS NULL
+			FOR UPDATE
+		)
+		UPDATE users u
+		SET balance = GREATEST(prev.balance - $1, 0),
 			updated_at = NOW()
-		WHERE id = $2 AND deleted_at IS NULL AND balance >= $1
-		RETURNING balance
-	`, amount, userID).Scan(&newBalance)
-	if err == nil {
-		return newBalance, true, nil
-	}
-	if !errors.Is(err, sql.ErrNoRows) {
-		return 0, false, err
-	}
-
-	err = tx.QueryRowContext(ctx, `
-		UPDATE users
-		SET balance = balance - $1,
-			updated_at = NOW()
-		WHERE id = $2 AND deleted_at IS NULL
-		RETURNING balance
-	`, amount, userID).Scan(&newBalance)
+		FROM prev
+		WHERE u.id = prev.id
+		RETURNING prev.balance, u.balance
+	`, amount, cmd.UserID).Scan(&previous, &newBalance)
 	if errors.Is(err, sql.ErrNoRows) {
 		return 0, false, service.ErrUserNotFound
 	}
 	if err != nil {
 		return 0, false, err
 	}
+	if previous >= amount {
+		return newBalance, true, nil
+	}
+	if err := recordUsageBillingBalanceShortfall(ctx, tx, cmd, previous, newBalance, amount-previous); err != nil {
+		return 0, false, err
+	}
 	return newBalance, false, nil
+}
+
+// recordUsageBillingBalanceShortfall 把余额不足的差额写进 billing_failures。
+// 不改 schema：status 走既有的 pending，error_message 记录前余额/实扣/差额与
+// 原始 request id；request_id 加固定后缀，避免与同请求的普通计费失败行互相覆盖。
+func recordUsageBillingBalanceShortfall(ctx context.Context, tx *sql.Tx, cmd *service.UsageBillingCommand, previous, newBalance, shortfall float64) error {
+	const suffix = "#balance-shortfall"
+	requestID := strings.TrimSpace(cmd.RequestID)
+	if requestID == "" {
+		requestID = "unknown"
+	}
+	if len(requestID) > 64-len(suffix) {
+		requestID = requestID[:64-len(suffix)]
+	}
+	message := fmt.Sprintf(
+		"balance shortfall: previous_balance=%.8f deducted=%.8f shortfall=%.8f original_request_id=%s",
+		previous, previous-newBalance, shortfall, cmd.RequestID,
+	)
+	_, err := tx.ExecContext(ctx, `
+INSERT INTO billing_failures (
+	request_id, api_key_id, user_id, account_id, model,
+	input_tokens, output_tokens, cache_read_tokens,
+	total_cost, actual_cost, error_message, status, created_at
+) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,'pending',now())
+ON CONFLICT DO NOTHING`,
+		requestID+suffix, cmd.APIKeyID, cmd.UserID, cmd.AccountID, cmd.Model,
+		cmd.InputTokens, cmd.OutputTokens, cmd.CacheReadTokens,
+		shortfall, previous-newBalance, message)
+	return err
 }
 
 func reserveUsageBillingBatchImageBalance(ctx context.Context, tx *sql.Tx, cmd *service.BatchImageBalanceHoldCommand) (*service.BatchImageBalanceHoldResult, error) {

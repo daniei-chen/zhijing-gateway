@@ -32,11 +32,13 @@ func (s *openAIRecordUsageLogRepoStub) Create(ctx context.Context, log *UsageLog
 type openAIRecordUsageBillingRepoStub struct {
 	UsageBillingRepository
 
-	result     *UsageBillingApplyResult
-	err        error
-	calls      int
-	lastCmd    *UsageBillingCommand
-	lastCtxErr error
+	result       *UsageBillingApplyResult
+	err          error
+	failTimes    int
+	calls        int
+	failureCalls int
+	lastCmd      *UsageBillingCommand
+	lastCtxErr   error
 }
 
 type openAIRecordUsageAccountRepoStub struct {
@@ -54,7 +56,7 @@ func (s *openAIRecordUsageBillingRepoStub) Apply(ctx context.Context, cmd *Usage
 	s.calls++
 	s.lastCmd = cmd
 	s.lastCtxErr = ctx.Err()
-	if s.err != nil {
+	if s.err != nil && (s.failTimes == 0 || s.calls <= s.failTimes) {
 		return nil, s.err
 	}
 	if s.result != nil {
@@ -64,6 +66,7 @@ func (s *openAIRecordUsageBillingRepoStub) Apply(ctx context.Context, cmd *Usage
 }
 
 func (s *openAIRecordUsageBillingRepoStub) RecordFailure(context.Context, *UsageBillingCommand, error) error {
+	s.failureCalls++
 	return nil
 }
 
@@ -347,7 +350,7 @@ func TestOpenAIGatewayServiceRecordUsage_ZeroUsageStillWritesUsageLog(t *testing
 	require.Zero(t, billingRepo.lastCmd.AccountQuotaCost)
 }
 
-func TestOpenAIGatewayServiceRecordUsage_MissingPricingRecordsZeroCostUsageLog(t *testing.T) {
+func TestOpenAIGatewayServiceRecordUsage_MissingPricingFailsClosed(t *testing.T) {
 	usageRepo := &openAIRecordUsageLogRepoStub{inserted: true}
 	billingRepo := &openAIRecordUsageBillingRepoStub{result: &UsageBillingApplyResult{Applied: true}}
 	userRepo := &openAIRecordUsageUserRepoStub{}
@@ -371,31 +374,14 @@ func TestOpenAIGatewayServiceRecordUsage_MissingPricingRecordsZeroCostUsageLog(t
 		APIKeyService: quotaSvc,
 	})
 
-	require.NoError(t, err)
-	require.Equal(t, 1, billingRepo.calls)
-	require.Equal(t, 1, usageRepo.calls)
-	require.Equal(t, 0, userRepo.deductCalls)
-	require.Equal(t, 0, subRepo.incrementCalls)
-	require.Equal(t, 0, quotaSvc.quotaCalls)
-	require.Equal(t, 0, quotaSvc.rateLimitCalls)
-
-	require.NotNil(t, usageRepo.lastLog)
-	require.Equal(t, "resp_missing_pricing", usageRepo.lastLog.RequestID)
-	require.Equal(t, "pricing-missing-test-model", usageRepo.lastLog.Model)
-	require.Equal(t, "pricing-missing-test-model", usageRepo.lastLog.RequestedModel)
-	require.Equal(t, 1200, usageRepo.lastLog.InputTokens)
-	require.Equal(t, 300, usageRepo.lastLog.OutputTokens)
-	require.Zero(t, usageRepo.lastLog.TotalCost)
-	require.Zero(t, usageRepo.lastLog.ActualCost)
-	require.NotNil(t, usageRepo.lastLog.BillingMode)
-	require.Equal(t, string(BillingModeToken), *usageRepo.lastLog.BillingMode)
-
-	require.NotNil(t, billingRepo.lastCmd)
-	require.Zero(t, billingRepo.lastCmd.BalanceCost)
-	require.Zero(t, billingRepo.lastCmd.SubscriptionCost)
-	require.Zero(t, billingRepo.lastCmd.APIKeyQuotaCost)
-	require.Zero(t, billingRepo.lastCmd.APIKeyRateLimitCost)
-	require.Zero(t, billingRepo.lastCmd.AccountQuotaCost)
+	require.ErrorIs(t, err, ErrModelPricingUnavailable)
+	require.Equal(t, 1, billingRepo.failureCalls, "无价必须登记 billing_failures")
+	require.Zero(t, billingRepo.calls, "无价不应进入扣费事务")
+	require.Zero(t, usageRepo.calls, "无价不得写出 actual_cost=0 的 usage_log")
+	require.Zero(t, userRepo.deductCalls)
+	require.Zero(t, subRepo.incrementCalls)
+	require.Zero(t, quotaSvc.quotaCalls)
+	require.Zero(t, quotaSvc.rateLimitCalls)
 }
 
 func TestOpenAIGatewayServiceRecordUsage_UsesUserSpecificGroupRate(t *testing.T) {
@@ -1085,7 +1071,7 @@ func TestOpenAIGatewayServiceRecordUsage_GeneratesRequestIDWhenAllSourcesMissing
 	require.Equal(t, billingRepo.lastCmd.RequestID, usageRepo.lastLog.RequestID)
 }
 
-func TestOpenAIGatewayServiceRecordUsage_BillingErrorWritesUnsettledUsageLog(t *testing.T) {
+func TestOpenAIGatewayServiceRecordUsage_BillingErrorWritesNoZeroCostUsageLog(t *testing.T) {
 	usageRepo := &openAIRecordUsageLogRepoStub{}
 	billingErr := errors.New("billing tx failed")
 	billingRepo := &openAIRecordUsageBillingRepoStub{err: billingErr}
@@ -1109,15 +1095,34 @@ func TestOpenAIGatewayServiceRecordUsage_BillingErrorWritesUnsettledUsageLog(t *
 	})
 
 	require.ErrorIs(t, err, billingErr)
-	require.Equal(t, 1, billingRepo.calls)
+	require.Equal(t, usageBillingApplyAttempts, billingRepo.calls, "事务失败必须做有界重试")
+	require.Equal(t, 1, billingRepo.failureCalls, "最终失败必须登记 billing_failures")
+	require.Zero(t, usageRepo.calls, "失败时不得写出 actual_cost=0 的 usage_log")
+}
+
+func TestOpenAIGatewayServiceRecordUsage_BillingRetryRecoversAndWritesUsageLog(t *testing.T) {
+	usageRepo := &openAIRecordUsageLogRepoStub{inserted: true}
+	billingRepo := &openAIRecordUsageBillingRepoStub{err: errors.New("deadlock detected"), failTimes: 1}
+	svc := newOpenAIRecordUsageServiceWithBillingRepoForTest(usageRepo, billingRepo, &openAIRecordUsageUserRepoStub{}, &openAIRecordUsageSubRepoStub{}, nil)
+
+	err := svc.RecordUsage(context.Background(), &OpenAIRecordUsageInput{
+		Result: &OpenAIForwardResult{
+			RequestID: "resp_billing_retry_ok",
+			Usage:     OpenAIUsage{InputTokens: 8, OutputTokens: 4},
+			Model:     "gpt-5.1",
+			Duration:  time.Second,
+		},
+		APIKey:  &APIKey{ID: 10049},
+		User:    &User{ID: 20049},
+		Account: &Account{ID: 30049},
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, 2, billingRepo.calls)
+	require.Zero(t, billingRepo.failureCalls)
 	require.Equal(t, 1, usageRepo.calls)
 	require.NotNil(t, usageRepo.lastLog)
-	require.Equal(t, 8, usageRepo.lastLog.InputTokens)
-	require.Equal(t, 4, usageRepo.lastLog.OutputTokens)
-	require.Greater(t, usageRepo.lastLog.InputCost, 0.0)
-	require.Greater(t, usageRepo.lastLog.OutputCost, 0.0)
-	require.Greater(t, usageRepo.lastLog.TotalCost, 0.0)
-	require.Zero(t, usageRepo.lastLog.ActualCost)
+	require.Greater(t, usageRepo.lastLog.ActualCost, 0.0)
 }
 
 func TestOpenAIGatewayServiceRecordUsage_UpdatesAPIKeyQuotaWhenConfigured(t *testing.T) {
@@ -1972,11 +1977,12 @@ func TestOpenAIGatewayServiceRecordUsage_FallsBackToUpstreamModelWhenPrimaryUnpr
 	require.InDelta(t, expectedCost.ActualCost, userRepo.lastAmount, 1e-12)
 }
 
-func TestOpenAIGatewayServiceRecordUsage_UnpricedTokenModelFallsBackToZeroCostUsageLog(t *testing.T) {
+func TestOpenAIGatewayServiceRecordUsage_UnpricedTokenModelFailsClosed(t *testing.T) {
 	usageRepo := &openAIRecordUsageLogRepoStub{inserted: true}
 	userRepo := &openAIRecordUsageUserRepoStub{}
 	subRepo := &openAIRecordUsageSubRepoStub{}
-	svc := newOpenAIRecordUsageServiceForTest(usageRepo, userRepo, subRepo, nil)
+	billingRepo := &openAIRecordUsageBillingRepoStub{result: &UsageBillingApplyResult{Applied: true}}
+	svc := newOpenAIRecordUsageServiceWithBillingRepoForTest(usageRepo, billingRepo, userRepo, subRepo, nil)
 
 	err := svc.RecordUsage(context.Background(), &OpenAIRecordUsageInput{
 		Result: &OpenAIForwardResult{
@@ -1990,14 +1996,9 @@ func TestOpenAIGatewayServiceRecordUsage_UnpricedTokenModelFallsBackToZeroCostUs
 		Account: &Account{ID: 30},
 	})
 
-	require.NoError(t, err)
-	require.Equal(t, 1, usageRepo.calls)
-	require.NotNil(t, usageRepo.lastLog)
-	require.Equal(t, "not-priceable-alias", usageRepo.lastLog.Model)
-	require.Equal(t, 20, usageRepo.lastLog.InputTokens)
-	require.Equal(t, 10, usageRepo.lastLog.OutputTokens)
-	require.Zero(t, usageRepo.lastLog.TotalCost)
-	require.Zero(t, usageRepo.lastLog.ActualCost)
+	require.ErrorIs(t, err, ErrModelPricingUnavailable)
+	require.Equal(t, 1, billingRepo.failureCalls, "无价必须登记 billing_failures")
+	require.Zero(t, usageRepo.calls, "无价不得写 actual_cost=0 的 usage_log")
 	require.Equal(t, 0, userRepo.deductCalls)
 	require.Equal(t, 0, subRepo.incrementCalls)
 }
@@ -2867,7 +2868,7 @@ func TestGatewayServiceCalculateRecordUsageCost_ChannelImageBillingUsesImageCoun
 		resolver:       newOpenAIImageChannelPricingResolverForTest(t, groupID, "gemini-image", 0.25),
 	}
 
-	cost := svc.calculateRecordUsageCost(
+	cost, costErr := svc.calculateRecordUsageCost(
 		context.Background(),
 		&ForwardResult{Model: "gemini-image", ImageCount: 2, ImageSize: "1K"},
 		&APIKey{GroupID: i64p(groupID), Group: &Group{ID: groupID}},
@@ -2876,6 +2877,7 @@ func TestGatewayServiceCalculateRecordUsageCost_ChannelImageBillingUsesImageCoun
 		1.0,
 		time.Time{},
 	)
+	require.NoError(t, costErr)
 
 	require.NotNil(t, cost)
 	require.Equal(t, string(BillingModeImage), cost.BillingMode)
@@ -2906,7 +2908,7 @@ func TestGatewayServiceCalculateRecordUsageCost_ChannelImageBillingUsesSizeTier(
 		resolver:       NewModelPricingResolver(channelService, NewBillingService(&config.Config{}, nil)),
 	}
 
-	cost := svc.calculateRecordUsageCost(
+	cost, costErr := svc.calculateRecordUsageCost(
 		context.Background(),
 		&ForwardResult{Model: "gemini-image", ImageCount: 2, ImageSize: "4K"},
 		&APIKey{GroupID: i64p(groupID), Group: &Group{ID: groupID}},
@@ -2915,6 +2917,7 @@ func TestGatewayServiceCalculateRecordUsageCost_ChannelImageBillingUsesSizeTier(
 		1.0,
 		time.Time{},
 	)
+	require.NoError(t, costErr)
 
 	require.NotNil(t, cost)
 	require.Equal(t, string(BillingModeImage), cost.BillingMode)
@@ -2932,7 +2935,7 @@ func TestGatewayServiceCalculateRecordUsageCost_GroupImagePriceOverridesChannelI
 		resolver:       newOpenAIImageChannelPricingResolverForTest(t, groupID, "gemini-image", channelPrice),
 	}
 
-	cost := svc.calculateRecordUsageCost(
+	cost, costErr := svc.calculateRecordUsageCost(
 		context.Background(),
 		&ForwardResult{Model: "gemini-image", ImageCount: 2, ImageSize: ImageBillingSize2K},
 		&APIKey{
@@ -2947,6 +2950,7 @@ func TestGatewayServiceCalculateRecordUsageCost_GroupImagePriceOverridesChannelI
 		1.0,
 		time.Time{},
 	)
+	require.NoError(t, costErr)
 
 	require.NotNil(t, cost)
 	require.Equal(t, string(BillingModeImage), cost.BillingMode)
@@ -3027,7 +3031,7 @@ func TestGatewayServiceCalculateRecordUsageCost_ChannelImageBillingNormalizesMis
 		resolver:       NewModelPricingResolver(channelService, NewBillingService(&config.Config{}, nil)),
 	}
 
-	cost := svc.calculateRecordUsageCost(
+	cost, costErr := svc.calculateRecordUsageCost(
 		context.Background(),
 		&ForwardResult{Model: "gemini-image", ImageCount: 2, ImageSize: ""},
 		&APIKey{GroupID: i64p(groupID), Group: &Group{ID: groupID}},
@@ -3036,6 +3040,7 @@ func TestGatewayServiceCalculateRecordUsageCost_ChannelImageBillingNormalizesMis
 		1.0,
 		time.Time{},
 	)
+	require.NoError(t, costErr)
 
 	require.NotNil(t, cost)
 	require.Equal(t, string(BillingModeImage), cost.BillingMode)
@@ -3214,10 +3219,12 @@ func TestOpenAIGatewayServiceRecordUsage_FreeOpenAIFastChargesStandard(t *testin
 	require.InDelta(t, standardTotal*0.5, usageRepo.lastLog.ActualCost, 1e-10)
 }
 
-func TestOpenAIGatewayServiceRecordUsage_FreeOpenAIFastMissingPricingRecordsZeroCostUsageLog(t *testing.T) {
+func TestOpenAIGatewayServiceRecordUsage_FreeOpenAIFastMissingPricingFailsClosed(t *testing.T) {
 	usageRepo := &openAIRecordUsageLogRepoStub{inserted: true}
-	svc := newOpenAIRecordUsageServiceForTest(
+	billingRepo := &openAIRecordUsageBillingRepoStub{result: &UsageBillingApplyResult{Applied: true}}
+	svc := newOpenAIRecordUsageServiceWithBillingRepoForTest(
 		usageRepo,
+		billingRepo,
 		&openAIRecordUsageUserRepoStub{},
 		&openAIRecordUsageSubRepoStub{},
 		nil,
@@ -3247,16 +3254,9 @@ func TestOpenAIGatewayServiceRecordUsage_FreeOpenAIFastMissingPricingRecordsZero
 		Account: &Account{ID: 3021, Platform: PlatformOpenAI, Type: AccountTypeAPIKey},
 	})
 
-	require.NoError(t, err)
-	require.Equal(t, 1, usageRepo.calls)
-	require.NotNil(t, usageRepo.lastLog)
-	require.Equal(t, "resp_free_fast_missing_pricing", usageRepo.lastLog.RequestID)
-	require.Equal(t, 1200, usageRepo.lastLog.InputTokens)
-	require.Equal(t, 300, usageRepo.lastLog.OutputTokens)
-	require.NotNil(t, usageRepo.lastLog.ServiceTier)
-	require.Equal(t, "priority", *usageRepo.lastLog.ServiceTier)
-	require.Zero(t, usageRepo.lastLog.TotalCost)
-	require.Zero(t, usageRepo.lastLog.ActualCost)
+	require.ErrorIs(t, err, ErrModelPricingUnavailable)
+	require.Equal(t, 1, billingRepo.failureCalls)
+	require.Zero(t, usageRepo.calls, "无价不得写出 actual_cost=0 的 usage_log")
 }
 
 func TestGroupBillsOpenAIFastAtStandardRequiresOpenAIAccount(t *testing.T) {

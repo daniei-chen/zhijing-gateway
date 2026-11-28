@@ -60,7 +60,26 @@ func TestReserveInflightBalance_SkipsWhenDisabledOrSubscription(t *testing.T) {
 	done, err = reserveInflightBalance(newInflightTestGinContext(), billing, est, apiKey, &service.UserSubscription{}, tokenInflightEstimate("m", []byte(`{}`)))
 	require.NoError(t, err)
 	done()
-	require.Equal(t, 0, est.calls, "subscription mode must be unaffected")
+	require.Equal(t, 1, est.calls, "订阅模式也要做一次定价检查（不再预留）")
+}
+
+func TestReserveInflightBalance_UnpricedSubscriptionGroupFailsClosed(t *testing.T) {
+	cfg := &config.Config{}
+	cfg.Billing.InflightReservation = config.InflightReservationConfig{
+		Enabled: true, TTLSeconds: 60, FailClosedOnUnpriced: true,
+	}
+	billing := service.NewBillingCacheService(newHandlerInflightCache(10), nil, nil, nil, nil, nil, cfg, nil)
+	t.Cleanup(billing.Stop)
+	apiKey := &service.APIKey{
+		User:  &service.User{ID: 1},
+		Group: &service.Group{SubscriptionType: service.SubscriptionTypeSubscription},
+	}
+
+	_, err := reserveInflightBalance(newInflightTestGinContext(), billing,
+		&countingEstimator{priced: false}, apiKey, &service.UserSubscription{},
+		tokenInflightEstimate("unpriced", nil))
+	require.ErrorIs(t, err, service.ErrModelPricingUnavailable,
+		"订阅模式按 $0 记一笔同样不消耗额度，必须与余额模式一致地拒绝")
 }
 
 func TestReserveInflightBalance_UnpricedFailOpenByDefaultFailClosedOptIn(t *testing.T) {
@@ -78,7 +97,7 @@ func TestReserveInflightBalance_UnpricedFailOpenByDefaultFailClosedOptIn(t *test
 
 	cfg.Billing.InflightReservation.FailClosedOnUnpriced = true
 	_, err = reserveInflightBalance(newInflightTestGinContext(), billing, est, apiKey, nil, tokenInflightEstimate("unknown", nil))
-	require.ErrorIs(t, err, service.ErrInsufficientBalance)
+	require.ErrorIs(t, err, service.ErrModelPricingUnavailable)
 }
 
 // handlerInflightCache 内存版余额缓存 + 在途预留（语义同 Redis Lua）。

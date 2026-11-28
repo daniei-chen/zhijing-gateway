@@ -669,7 +669,7 @@ func TestGatewayServiceRecordUsage_DroppedUsageLogFallsBackToSyncCreate(t *testi
 	require.NoError(t, usageRepo.lastCtxErr)
 }
 
-func TestGatewayServiceRecordUsage_BillingErrorWritesUnsettledUsageLog(t *testing.T) {
+func TestGatewayServiceRecordUsage_BillingErrorWritesNoZeroCostUsageLog(t *testing.T) {
 	usageRepo := &openAIRecordUsageLogRepoStub{}
 	billingErr := errors.New("billing tx failed")
 	billingRepo := &openAIRecordUsageBillingRepoStub{err: billingErr}
@@ -693,15 +693,34 @@ func TestGatewayServiceRecordUsage_BillingErrorWritesUnsettledUsageLog(t *testin
 	})
 
 	require.ErrorIs(t, err, billingErr)
-	require.Equal(t, 1, billingRepo.calls)
+	require.Equal(t, usageBillingApplyAttempts, billingRepo.calls, "事务失败必须做有界重试")
+	require.Equal(t, 1, billingRepo.failureCalls, "最终失败必须登记 billing_failures")
+	require.Zero(t, usageRepo.calls, "失败时不得写出 actual_cost=0 的 usage_log")
+}
+
+func TestGatewayServiceRecordUsage_BillingRetryRecoversAndWritesUsageLog(t *testing.T) {
+	usageRepo := &openAIRecordUsageLogRepoStub{inserted: true}
+	billingRepo := &openAIRecordUsageBillingRepoStub{err: errors.New("deadlock detected"), failTimes: 1}
+	svc := newGatewayRecordUsageServiceWithBillingRepoForTest(usageRepo, billingRepo, &openAIRecordUsageUserRepoStub{}, &openAIRecordUsageSubRepoStub{})
+
+	err := svc.RecordUsage(context.Background(), &RecordUsageInput{
+		Result: &ForwardResult{
+			RequestID: "gateway_billing_retry_ok",
+			Usage:     ClaudeUsage{InputTokens: 10, OutputTokens: 6},
+			Model:     "claude-sonnet-4",
+			Duration:  time.Second,
+		},
+		APIKey:  &APIKey{ID: 506},
+		User:    &User{ID: 606},
+		Account: &Account{ID: 706},
+	})
+
+	require.NoError(t, err)
+	require.Equal(t, 2, billingRepo.calls, "第二次尝试成功即停止重试")
+	require.Zero(t, billingRepo.failureCalls)
 	require.Equal(t, 1, usageRepo.calls)
 	require.NotNil(t, usageRepo.lastLog)
-	require.Equal(t, 10, usageRepo.lastLog.InputTokens)
-	require.Equal(t, 6, usageRepo.lastLog.OutputTokens)
-	require.Greater(t, usageRepo.lastLog.InputCost, 0.0)
-	require.Greater(t, usageRepo.lastLog.OutputCost, 0.0)
-	require.Greater(t, usageRepo.lastLog.TotalCost, 0.0)
-	require.Zero(t, usageRepo.lastLog.ActualCost)
+	require.Greater(t, usageRepo.lastLog.ActualCost, 0.0)
 }
 
 func TestGatewayServiceRecordUsage_ReasoningEffortPersisted(t *testing.T) {

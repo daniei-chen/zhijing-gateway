@@ -1046,7 +1046,8 @@ type BillingConfig struct {
 // InflightReservationConfig 余额模式在途预留配置。
 // 准入时按 输入估算 + 输出单价 × max_tokens 估算单请求费用，在 Redis 中原子地
 // 校验 缓存余额 - 在途预留合计 >= 估算 后登记预留，请求结束（任意路径）释放。
-// 估算失败或 Redis 不可用时 fail-open，退回旧的仅余额 > 阈值检查。
+// Redis 不可用时 fail-open，退回旧的仅余额 > 阈值检查；无法定价时默认
+// fail-closed（见 FailClosedOnUnpriced），因为按 $0 成交就是永久漏收。
 type InflightReservationConfig struct {
 	Enabled bool `mapstructure:"enabled"`
 	// TTLSeconds 单条预留的最长存活时间；进程崩溃等泄漏的预留到期自动失效。
@@ -1060,7 +1061,8 @@ type InflightReservationConfig struct {
 	// MaxReservationUSD 单请求预留金额上限；0 表示不设上限。
 	MaxReservationUSD float64 `mapstructure:"max_reservation_usd"`
 	// FailClosedOnUnpriced 无法为请求估算费用（模型/分组/渠道均无定价）时是否拒绝请求。
-	// 默认 false：放行且不预留（fail-open，节流告警日志）。
+	// 默认 true（fail-closed）：无价模型一律在转发前拒绝，避免按 $0 成交；
+	// 只有显式配置 false 才恢复旧的放行行为（仍不预留，并打告警日志）。
 	FailClosedOnUnpriced bool `mapstructure:"fail_closed_on_unpriced"`
 }
 
@@ -2316,7 +2318,7 @@ func setDefaults() {
 	viper.SetDefault("billing.inflight_reservation.max_output_tokens", 128000)
 	viper.SetDefault("billing.inflight_reservation.max_input_tokens", 200000)
 	viper.SetDefault("billing.inflight_reservation.max_reservation_usd", 0)
-	viper.SetDefault("billing.inflight_reservation.fail_closed_on_unpriced", false)
+	viper.SetDefault("billing.inflight_reservation.fail_closed_on_unpriced", true)
 
 	// Turnstile
 	viper.SetDefault("turnstile.required", false)

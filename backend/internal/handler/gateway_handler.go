@@ -2495,6 +2495,12 @@ func extractQuotaResetSeconds(err error) int {
 }
 
 func billingErrorDetails(err error) (status int, code, message string, retryAfter int) {
+	if errors.Is(err, service.ErrModelPricingUnavailable) {
+		// 无价模型是请求侧配置缺口，不是服务故障：400 让调用方停止重试并报给
+		// 管理员补价；刻意不用 429（并发/限速）或 503（服务不可用）。
+		return http.StatusBadRequest, "model_pricing_unavailable",
+			"Model pricing is not configured for this request. Ask an administrator to add pricing before retrying.", 0
+	}
 	if errors.Is(err, service.ErrBillingServiceUnavailable) {
 		msg := pkgerrors.Message(err)
 		if msg == "" {

@@ -41,6 +41,16 @@ func TestBillingErrorDetails_APIKeyRateLimitStillMaps(t *testing.T) {
 	}
 }
 
+func TestBillingErrorDetails_ModelPricingUnavailableMapsTo400(t *testing.T) {
+	status, code, msg, retryAfter := billingErrorDetails(service.ErrModelPricingUnavailable)
+	require.Equal(t, http.StatusBadRequest, status)
+	require.Equal(t, "model_pricing_unavailable", code)
+	require.NotEmpty(t, msg)
+	require.Zero(t, retryAfter, "unpriced is a configuration gap, not a rate limit")
+	require.NotEqual(t, "rate_limit_exceeded", code)
+	require.NotEqual(t, "billing_service_error", code)
+}
+
 func TestBillingErrorDetails_BillingServiceUnavailableMapsTo503(t *testing.T) {
 	status, code, _, retryAfter := billingErrorDetails(service.ErrBillingServiceUnavailable)
 	require.Equal(t, http.StatusServiceUnavailable, status)

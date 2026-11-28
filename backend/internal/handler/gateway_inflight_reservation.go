@@ -40,8 +40,9 @@ func inflightNoop() {}
 // 成功时把预留句柄挂到 c.Request 的 context 上：之后通过 submit*UsageRecordTask 提交的
 // 计费任务会接管一个引用，直到余额缓存实际扣减后才释放。返回的 done 必须 defer 调用
 // （停止续期并归还 handler 引用；没有提交计费任务时即刻释放）。
-// 开关关闭、订阅模式、Redis 故障时返回 no-op（fail-open）；无法定价时默认 fail-open，
-// 配置 fail_closed_on_unpriced=true 时返回 ErrInsufficientBalance。
+// 开关关闭、订阅模式、Redis 故障时返回 no-op（fail-open）；无法定价时默认
+// fail-closed（billing.inflight_reservation.fail_closed_on_unpriced 默认 true），
+// 返回 ErrModelPricingUnavailable → 400 model_pricing_unavailable。
 func reserveInflightBalance(
 	c *gin.Context,
 	billing *service.BillingCacheService,
@@ -74,12 +75,15 @@ func reserveInflightBalanceCtx(
 	if billing == nil || estimator == nil || apiKey == nil || apiKey.User == nil || !billing.InflightReservationEnabled() {
 		return ctx, inflightNoop, nil
 	}
-	if apiKey.Group != nil && apiKey.Group.IsSubscriptionType() && subscription != nil {
-		return ctx, inflightNoop, nil
-	}
+	// 定价准入与计费模式无关：订阅模式下按 $0 记一笔同样不消耗额度，是同一类
+	// 永久漏收。无价时按配置拒绝（默认 fail-closed）；错误码刻意不复用
+	// ErrInsufficientBalance，客户端/运维要能区分「模型没配价」与「余额不够」。
 	estimate, priced := estimator.EstimateInflightReservation(ctx, apiKey, req)
 	if !priced && billing.InflightReservationFailClosedOnUnpriced() {
-		return ctx, inflightNoop, service.ErrInsufficientBalance
+		return ctx, inflightNoop, service.ErrModelPricingUnavailable
+	}
+	if apiKey.Group != nil && apiKey.Group.IsSubscriptionType() && subscription != nil {
+		return ctx, inflightNoop, nil
 	}
 	if estimate <= 0 {
 		return ctx, inflightNoop, nil
