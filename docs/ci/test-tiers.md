@@ -24,7 +24,7 @@
 
 补充两点口径：
 
-- `backend-ci.yml` 里还有一个 `race` job，用 `-tags=unit` 只跑并发相关子集（`make test-race`）。它是同一批标签的抽样，不改变上表的标签覆盖面。
+- `backend-ci.yml` 里还有一个 `race` job，用 `-tags=unit` 只跑并发相关子集（`make test-race` → `backend/scripts/race-gate.sh`）。它是同一批标签的抽样，不改变上表的标签覆盖面；它今天的命中数与它为什么不会再静默空跑，见 §8。
 - "今天谁跑"只看 `.github/workflows/`。发布流水线（`.goreleaser*.yaml`、`Dockerfile`）会用 `-tags embed` **构建**，但那里没有测试步骤。
 
 
@@ -268,3 +268,53 @@ FAIL
 3. **`make test-e2e` 死链未修**：`backend/Makefile:27` 指向不存在的 `scripts/e2e-test.sh`。要么补脚本（起栈+灌数据），要么把这行删掉指向 `test-e2e-local`。本文档不动它。
 4. **`integration` 步依赖 unit 步**：`backend-ci.yml:43-48` 是顺序 step，unit 红则 integration 一起跳过（历史上发生过）。要不要拆成并行 job 是另一个决定。
 5. **`E2E_MOCK` 的实现与注释不符**：`e2e_helpers_test.go:14` 说 mock 上游，实际只解除跳过。要么实现 mock，要么把注释改对。本文档不动测试代码。
+
+## 8. 必检不许"命令退 0 但什么都没跑"（2026-11-28，基于 `a5176cb4d`）
+
+9 个必检（含 `embed`）今天都真跑、没有 job 级条件跳过。但"今天真跑"不是机制：下面三条通路
+都能让某条必检在没人察觉的情况下变绿，现在每条都补了断言，并且都验过"改之前绿、改之后红"。
+
+| 位置 | 原来的静默绿 | 现在 | 红的样子（实测） |
+|---|---|---|---|
+| `race` job | `-run` 零命中时 `go test` 退 0，只打 `[no tests to run]`。改名一个测试、把并发用例挪出 `internal/service`/`internal/handler`、或改坏正则，都会变成什么都没验。 | `backend/scripts/race-gate.sh` 数 `-v` 输出里的 `^=== RUN`（不含子测试），低于 **1300** 就红。今天的真实命中数是 **1431**，余量 9%。 | `race gate: only 0 tests ran, floor is 1300.` |
+| `release-helpers` job | `python -m unittest discover -s .github/release-tools -p 'test_release_matrix.py'` 匹配不到文件时退 0，打 `Ran 0 tests`。 | `.github/release-tools/run-tests.sh`：显式模块路径（模块不存在时 unittest 自己报错）+ `Ran N tests` 下限 **10**（今天的真实用例数）。 | `release matrix tests: ran 0 tests, floor is 10` |
+| `shell` job → `deploy/tests/docker-runtime-resources-test.sh` | 找不到能跑的解释器时打 `skip: no runnable python interpreter found` 仍退 0，`py_compile` 断言静默消失。macos-15 镜像自带 python3，所以这个分支只会因为环境坏掉而出现——写成 skip 正好吃掉唯一一次告警。 | skip 分支改成 `fail`。 | `docker runtime resources test failed: no runnable python interpreter...` |
+
+另外两条同一性质的修补：
+
+- **`frontend-security` 的豁免通道以前永远用不上**：`pnpm audit --audit-level=high` 命中 high 时命令自己退非零，那一步先红，`tools/check_pnpm_audit_exceptions.py` 根本没机会跑，`.github/audit-exceptions.yml` 对 high/critical 是死配置。现在只有那条命令带 `|| true`，紧跟一步 `tools/assert_pnpm_audit_report.py` 断言报告可解析且含 `metadata.vulnerabilities`（`{}` 在豁免脚本眼里等于"没有漏洞"，所以这一步是承重的），判定权仍归豁免脚本。`tools/check-pnpm-audit-exceptions-test.py` 喂真实形状的报告验五种情形：未豁免 high 红、已豁免绿、过期红、干净绿、只有 low 绿。
+- **`govulncheck` 版本钉死**：`@latest` 换成 `@v1.10.0`（2026-11-28 `@latest` 实际解析到的版本），不让上游发坏版本把必检无缘无故变红。
+
+下限是粗粒度闸，说清它挡不住什么：它挡的是「整批消失」（race 少 131 条以上）、
+「过滤器指向空集合」和「job 被条件跳过」；**挡不住单个并发用例改名后悄悄退出抽样**——
+那需要一份用例名清单，代价是每次合法改名/新增都要同步，本轮不做。这条残余缺口写在这里，
+不要当成已经挡住了。
+
+**还有一条防复发**：`deploy/tests/ci-workflow-guards-test.sh`（在 `shell` job 里跑）断言这 9 个
+必检 job 块里不出现五样东西——`if:` / `paths:` / `paths-ignore:` / `continue-on-error:` / `needs:`；
+承载它们的 workflow 的 `on:` 触发块里也不出现 `paths:` / `paths-ignore:`；并且 `race` 的 `-run`
+正则今天仍命中 ≥ 下限条测试（静态模型，今天 1431，与运行时逐条对齐）。全仓 workflow 现在确实
+没有任何 `paths:` 过滤，但那是今天的事实；这个测试把它变成机制——以后谁加过滤让某个必检在
+部分 PR 上消失，这里立刻红。
+
+`needs:` 在这张清单里是因为**依赖失败的 job 会被 skip，而 GitHub 把 skip 报告成 Success**——
+一条 `needs: [frontend]` 就足以让某个必检在某些 PR 上"绿着不跑"。唯一豁免是 `needs:` 配
+`if: always()`（`always()` 让 job 无论如何都跑，skip 这条路被堵死）；`if:` 的其他写法一律红，
+`if: always() && ...` 这种组合也红——豁免只认逐字的 `if: always()`。这条豁免规则本身由脚本里的
+7 条自测钉住（`needs:` 单独 → 红、`needs:`+`if: always()` → 绿、`if: always()` 单独 → 绿、
+`if:` 带条件 → 红、`continue-on-error:` → 红、`paths:` → 红、干净块 → 绿），守卫自己坏了会先红。
+
+同一个脚本还钉住另一个更隐蔽的东西：**每个 `| tee` 之后必须读 `PIPESTATUS`**。`cmd | tee log`
+的 `$?` 是 `tee` 的退出码，只靠 `set -o pipefail` 才能拿到左边那条命令的——而 pipefail 一旦被
+去掉（把头部改成 `set -eu` 是最常见的改法），`|| status=$?` 就永远不触发：一条失败的测试会打印
+出 `FAILED (failures=1)` 或 `ok` 之后照样退 0。2026-11-28 的审查就是靠 `set +o pipefail` 对照
+把这个问题抓出来的，两个脚本改成取 `${PIPESTATUS[0]}` 之后对 pipefail 存不存在都不再敏感。
+
+本地复跑：
+
+```bash
+sh deploy/tests/ci-workflow-guards-test.sh        # 9 个 job + race 正则命中数
+sh deploy/tests/ci-race-job-test.sh               # race job 的形状（含 race-gate.sh 的断言）
+bash .github/release-tools/run-tests.sh           # 发布矩阵：显式模块 + 下限 10
+python tools/check-pnpm-audit-exceptions-test.py -v
+```
