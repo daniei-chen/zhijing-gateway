@@ -49,11 +49,13 @@
 | 本地新增 CI job：`.github/workflows/backend-ci.yml` 的 `race` job、shell 门禁步骤 | race 检测单独成 job（`make test-race`）；shell 门禁在 `shell` job 里逐个跑 | 并发回归和部署门禁必须在 CI 上跑，不能靠人记得 | **取并集**。注意 workflow 改动本机推不上去（OAuth App 缺 `workflow` scope，整条 push 会被拒），需要人网页改 |
 | `backend/internal/service/content_moderation.go`（S1b 回灌） | 取上游两个修复：Anthropic `{"type":"url"}` 图片来源参与审核（上游 `959d36532`）、异步审核队列惰性分配（上游 `fe72ddf1a`）；保留本地 `LocalPolicyProfile` / `matchGatewayLocalPolicy` / `isContentAuditExempt` / `riskControlLogOnly` | 本地合规策略与上游的通用审核不冲突；本地那套是业务方要求的判定 | **取并集**（提交 `a9d624dcc` 的做法可复用：逐个 `git apply -3`，不 merge） |
 
-## 五、本轮没有决定的事（别顺手替人拍板）
+## 五、已确认的缺口（不是差异，是待修的洞）
 
-| 位置 | 现状 | 为什么要单独判 |
+| 位置 | 现状 | 处置 |
 |---|---|---|
-| `backend/internal/service/gateway_usage_billing.go:1359-1362`、`:1380-1383`（`calculateImageCost` 内两处 `CalculateCostUnified` 错误分支） | 出错时只打日志、返回 `&CostBreakdown{ActualCost: 0}` 且 `err == nil`，因此**不会**触发 `:933` 的 fail-closed 分支；图片请求的算价失败仍是一笔 $0 单 | 可能与「图片没配价=免费」的设计语义有关，也可能是 fail-closed 漏的一角。需要人判断这是不是同一类漏收，再决定改不改；本表不把它写成「取上游」或「保留本地」 |
+| `backend/internal/service/gateway_usage_billing.go:1359-1362`、`:1380-1383` | `calculateImageCost` 把 `CalculateCostUnified` 的错误打了日志就返回 `&CostBreakdown{ActualCost: 0}` 且 `err == nil`，因此图片请求在无价或算价失败时按 $0 成功结算，不进入 `:933` 的 fail-closed | 2026-11-28 定为一类漏收：与 #34 立的「没有价格不许编一个 $0 出来成交」直接冲突。**单独一片修**（非简易模式返回 err、简易模式保持 $0、补能证伪的测试），本清单只留记录，修好后删掉本行 |
+
+这一条没有「回灌时听谁的」可判，所以不进上面三张动作表。留在这里是因为 §四 的 fail-closed 四条覆盖的是 token / audio 的后扣链路——图片算价这条**已知不在覆盖内**，读清单的人不该把它当成已修。
 
 ## 六、维护契约
 
