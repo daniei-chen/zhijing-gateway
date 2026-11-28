@@ -444,6 +444,9 @@ func (s *OpenAIGatewayService) RecordUsage(ctx context.Context, input *OpenAIRec
 		usageLog.ActualCost = cost.ActualCost
 		usageLog.LongContextBillingApplied = cost.LongContextBillingApplied
 	}
+	if marker := cost.DefaultedMediaTierMarker(); marker != "" {
+		usageLog.BillingTier = &marker
+	}
 	if isVideoUsage && (cost == nil || cost.BillingMode != string(BillingModeToken)) {
 		usageLog.RateMultiplier = videoMultiplier
 	} else if result.ImageCount > 0 && (cost == nil || cost.BillingMode != string(BillingModeToken)) {
@@ -615,7 +618,7 @@ func (s *OpenAIGatewayService) calculateOpenAIRecordUsageCost(
 	}
 	if isGrokVideoUsageResult(result, billingModels) {
 		if resolved := s.resolveOpenAIChannelPricing(ctx, billingModel, apiKey); resolved == nil || resolved.Mode != BillingModeToken {
-			return s.calculateOpenAIVideoCost(ctx, billingModel, apiKey, result, videoMultiplier), nil
+			return s.calculateOpenAIVideoCost(ctx, billingModel, apiKey, result, videoMultiplier)
 		}
 	}
 	if result != nil && result.AudioUsage != nil {
@@ -637,10 +640,10 @@ func (s *OpenAIGatewayService) calculateOpenAIRecordUsageCost(
 		// 分组显式开启按张计费且来自图片端点时强制走图片计费；否则渠道 token 定价优先。
 		// 混合的 Responses/Chat/WS 请求即使产出了图片，也不能因开关丢失文本 token 费用。
 		if imageCountBillingApplies(apiKey, result.ImageEndpoint) {
-			return s.calculateOpenAIImageCost(ctx, billingModel, apiKey, result, imageMultiplier), nil
+			return s.calculateOpenAIImageCost(ctx, billingModel, apiKey, result, imageMultiplier)
 		}
 		if resolved := s.resolveOpenAIChannelPricing(ctx, billingModel, apiKey); resolved == nil || resolved.Mode != BillingModeToken {
-			return s.calculateOpenAIImageCost(ctx, billingModel, apiKey, result, imageMultiplier), nil
+			return s.calculateOpenAIImageCost(ctx, billingModel, apiKey, result, imageMultiplier)
 		}
 	}
 
@@ -785,9 +788,25 @@ func (s *OpenAIGatewayService) calculateOpenAIImageCost(
 	apiKey *APIKey,
 	result *OpenAIForwardResult,
 	multiplier float64,
-) *CostBreakdown {
+) (*CostBreakdown, error) {
 	sizeTier := NormalizeImageBillingTierOrDefault(result.ImageSize)
 	resolved := s.resolveOpenAIChannelPricing(ctx, billingModel, apiKey)
+	if refreshed := s.apiKeyWithFreshGroupMediaPricing(ctx, apiKey); refreshed != apiKey {
+		apiKey = refreshed
+	}
+	// 定价行在、但没有任何单价覆盖本次请求时不能按 $0 成交：开关
+	// billing.inflight_reservation.fail_closed_on_unpriced 打开则失败关闭，关闭则按默认
+	// 图价成交并打 image_price_defaulted 标记（见 settleUnpricedMedia）。这条判定与
+	// GatewayService 的图片分支共用，别再各写一份。
+	if !apiKeyHasConfiguredImagePrice(apiKey, sizeTier) &&
+		!resolvedRequestHasUsablePrice(s.resolver, resolved, sizeTier, UsageTokens{
+			InputTokens:       result.Usage.InputTokens,
+			OutputTokens:      result.Usage.OutputTokens,
+			ImageOutputTokens: result.Usage.ImageOutputTokens,
+		}) {
+		return settleUnpricedMedia(s.billingService, failClosedOnUnpriced(s.billingCacheService), mediaUnpricedImage,
+			apiKey, billingModel, sizeTier, result.ImageCount, 0, multiplier)
+	}
 	if resolved != nil && resolved.Source == PricingSourceGroup &&
 		(resolved.Mode == BillingModePerRequest || resolved.Mode == BillingModeImage) {
 		gid := apiKey.Group.ID
@@ -798,19 +817,12 @@ func (s *OpenAIGatewayService) calculateOpenAIImageCost(
 			ReasoningEffort: optionalStringValue(result.ReasoningEffort),
 		})
 		if err == nil {
-			return cost
+			return cost, nil
 		}
 	}
 	groupConfig := imagePriceConfigFromAPIKey(apiKey)
 	if apiKeyHasConfiguredImagePrice(apiKey, sizeTier) {
-		return s.billingService.CalculateImageCost(billingModel, sizeTier, result.ImageCount, groupConfig, multiplier)
-	}
-	if refreshed := s.apiKeyWithFreshGroupMediaPricing(ctx, apiKey); refreshed != apiKey {
-		apiKey = refreshed
-		groupConfig = imagePriceConfigFromAPIKey(apiKey)
-		if apiKeyHasConfiguredImagePrice(apiKey, sizeTier) {
-			return s.billingService.CalculateImageCost(billingModel, sizeTier, result.ImageCount, groupConfig, multiplier)
-		}
+		return s.billingService.CalculateImageCost(billingModel, sizeTier, result.ImageCount, groupConfig, multiplier), nil
 	}
 	if resolved != nil && resolved.Source == PricingSourceChannel &&
 		(resolved.Mode == BillingModePerRequest || resolved.Mode == BillingModeImage) {
@@ -828,12 +840,12 @@ func (s *OpenAIGatewayService) calculateOpenAIImageCost(
 			Resolved:        resolved,
 		})
 		if err == nil {
-			return cost
+			return cost, nil
 		}
 		logger.LegacyPrintf("service.openai_gateway", "Calculate image channel cost failed: %v", err)
 	}
 
-	return s.billingService.CalculateImageCost(billingModel, sizeTier, result.ImageCount, groupConfig, multiplier)
+	return s.billingService.CalculateImageCost(billingModel, sizeTier, result.ImageCount, groupConfig, multiplier), nil
 }
 
 func (s *OpenAIGatewayService) calculateOpenAIVideoCost(
@@ -842,7 +854,7 @@ func (s *OpenAIGatewayService) calculateOpenAIVideoCost(
 	apiKey *APIKey,
 	result *OpenAIForwardResult,
 	multiplier float64,
-) *CostBreakdown {
+) (*CostBreakdown, error) {
 	videoCount := result.VideoCount
 	if videoCount <= 0 {
 		videoCount = 1
@@ -850,6 +862,19 @@ func (s *OpenAIGatewayService) calculateOpenAIVideoCost(
 	resolution := NormalizeVideoBillingResolutionOrDefault(result.VideoResolution)
 	durationSeconds := NormalizeVideoBillingDurationSecondsOrDefault(result.VideoDurationSeconds)
 	resolved := s.resolveOpenAIChannelPricing(ctx, billingModel, apiKey)
+	if refreshed := s.apiKeyWithFreshGroupMediaPricing(ctx, apiKey); refreshed != apiKey {
+		apiKey = refreshed
+	}
+	// 与图片分支同一条判定：定价行在、但没有任何单价覆盖本次请求时不能按 $0 成交。
+	// 开关打开则失败关闭，关闭则按默认视频价成交并打 video_price_defaulted 标记。
+	if !apiKeyHasConfiguredVideoPrice(apiKey, billingModel, resolution) &&
+		!resolvedRequestHasUsablePrice(s.resolver, resolved, resolution, UsageTokens{
+			InputTokens:  result.Usage.InputTokens,
+			OutputTokens: result.Usage.OutputTokens,
+		}) {
+		return settleUnpricedMedia(s.billingService, failClosedOnUnpriced(s.billingCacheService), mediaUnpricedVideo,
+			apiKey, billingModel, resolution, videoCount, durationSeconds, multiplier)
+	}
 	if resolved != nil && resolved.Source == PricingSourceGroup && resolved.Mode == BillingModeVideo {
 		gid := apiKey.Group.ID
 		cost, err := s.billingService.CalculateCostUnified(CostInput{
@@ -859,19 +884,12 @@ func (s *OpenAIGatewayService) calculateOpenAIVideoCost(
 			ReasoningEffort: optionalStringValue(result.ReasoningEffort),
 		})
 		if err == nil {
-			return cost
+			return cost, nil
 		}
 	}
 	groupConfig := videoPriceConfigFromAPIKey(apiKey)
 	if apiKeyHasConfiguredVideoPrice(apiKey, billingModel, resolution) {
-		return s.billingService.CalculateVideoCost(billingModel, resolution, videoCount, durationSeconds, groupConfig, multiplier)
-	}
-	if refreshed := s.apiKeyWithFreshGroupMediaPricing(ctx, apiKey); refreshed != apiKey {
-		apiKey = refreshed
-		groupConfig = videoPriceConfigFromAPIKey(apiKey)
-		if apiKeyHasConfiguredVideoPrice(apiKey, billingModel, resolution) {
-			return s.billingService.CalculateVideoCost(billingModel, resolution, videoCount, durationSeconds, groupConfig, multiplier)
-		}
+		return s.billingService.CalculateVideoCost(billingModel, resolution, videoCount, durationSeconds, groupConfig, multiplier), nil
 	}
 	if resolved != nil && resolved.Source == PricingSourceChannel &&
 		(resolved.Mode == BillingModePerRequest || resolved.Mode == BillingModeImage || resolved.Mode == BillingModeVideo) {
@@ -896,12 +914,12 @@ func (s *OpenAIGatewayService) calculateOpenAIVideoCost(
 		})
 		if err == nil {
 			cost.BillingMode = string(BillingModeVideo)
-			return cost
+			return cost, nil
 		}
 		logger.LegacyPrintf("service.openai_gateway", "Calculate video channel cost failed: %v", err)
 	}
 
-	return s.billingService.CalculateVideoCost(billingModel, resolution, videoCount, durationSeconds, groupConfig, multiplier)
+	return s.billingService.CalculateVideoCost(billingModel, resolution, videoCount, durationSeconds, groupConfig, multiplier), nil
 }
 
 func (s *OpenAIGatewayService) apiKeyWithFreshGroupMediaPricing(ctx context.Context, apiKey *APIKey) *APIKey {

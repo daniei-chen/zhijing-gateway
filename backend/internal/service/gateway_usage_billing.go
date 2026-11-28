@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"errors"
-	"fmt"
 	"log/slog"
 	"strings"
 	"time"
@@ -1161,11 +1160,18 @@ func (s *GatewayService) calculateRecordUsageCost(
 	// 分组按张计费开关只对专用图片端点生效，混合请求仍按 token 计费。
 	if result.ImageCount > 0 {
 		resolved := s.resolveChannelPricing(ctx, billingModel, apiKey)
-		// 定价行在、但没有任何可用单价：按 $0 成交就是永久漏收。失败关闭由既有
-		// 开关 billing.inflight_reservation.fail_closed_on_unpriced 决定；关闭时
-		// 按默认图价成交并打 image_price_defaulted 标记（见 unpricedImageCost）。
-		if !imageRequestHasUsablePrice(resolved, apiKey, result.ImageSize) {
-			return s.unpricedImageCost(result, apiKey, billingModel, imageMultiplier)
+		sizeTier := NormalizeImageBillingTierOrDefault(result.ImageSize)
+		// 定价行在、但没有任何单价覆盖本次请求时不能按 $0 成交：开关
+		// billing.inflight_reservation.fail_closed_on_unpriced 打开则失败关闭，关闭则
+		// 按默认图价成交并打 image_price_defaulted 标记（见 settleUnpricedMedia）。
+		if !apiKeyHasConfiguredImagePrice(apiKey, sizeTier) &&
+			!resolvedRequestHasUsablePrice(s.resolver, resolved, sizeTier, UsageTokens{
+				InputTokens:       result.Usage.InputTokens,
+				OutputTokens:      result.Usage.OutputTokens,
+				ImageOutputTokens: result.Usage.ImageOutputTokens,
+			}) {
+			return settleUnpricedMedia(s.billingService, s.failClosedOnUnpriced(), mediaUnpricedImage,
+				apiKey, billingModel, sizeTier, result.ImageCount, 0, imageMultiplier)
 		}
 		if !imageCountBillingApplies(apiKey, result.ImageEndpoint) {
 			if resolved != nil && resolved.Mode == BillingModeToken {
@@ -1399,37 +1405,9 @@ func (s *GatewayService) calculateImageCost(
 	return s.billingService.CalculateImageCost(billingModel, sizeTier, result.ImageCount, groupConfig, multiplier), nil
 }
 
-// imagePriceDefaultedMarker 是「定价行缺价、按默认图价成交」在 usage_log.billing_tier
-// 上的标记值，管理页据此核对漏配的渠道。
-const imagePriceDefaultedMarker = BillingTierImagePriceDefaulted
-
-// unpricedImageCost 处理「定价行在、但没有任何可用单价」的图片请求。
-// 开关 billing.inflight_reservation.fail_closed_on_unpriced 打开时失败关闭；
-// 否则按默认图价（分组图价 → 目录价 → 内置默认价）成交并打标记：账面有价但可能
-// 少收，必须让管理页看得到漏配，不能静默按 $0 成交。
-func (s *GatewayService) unpricedImageCost(
-	result *ForwardResult,
-	apiKey *APIKey,
-	billingModel string,
-	multiplier float64,
-) (*CostBreakdown, error) {
-	if s.failClosedOnUnpriced() {
-		return nil, fmt.Errorf("image pricing unavailable for model %s: %w", billingModel, ErrModelPricingUnavailable)
-	}
-	cost := s.billingService.CalculateImageCost(
-		billingModel, NormalizeImageBillingTierOrDefault(result.ImageSize),
-		result.ImageCount, imagePriceConfigFromAPIKey(apiKey), multiplier,
-	)
-	if cost == nil {
-		cost = &CostBreakdown{}
-	}
-	cost.ImagePriceDefaulted = true
-	return cost, nil
-}
-
-// failClosedOnUnpriced 复用既有开关：运维打开它即让漏配的图片渠道变成硬错。
+// failClosedOnUnpriced 复用既有开关：运维打开它即让漏配的媒体渠道变成硬错。
 func (s *GatewayService) failClosedOnUnpriced() bool {
-	return s.billingCacheService != nil && s.billingCacheService.InflightReservationFailClosedOnUnpriced()
+	return failClosedOnUnpriced(s.billingCacheService)
 }
 
 // calculateTokenCost 计算 Token 计费：路径选择（分组/渠道定价 → 内置定价）
@@ -1553,8 +1531,7 @@ func (s *GatewayService) buildRecordUsageLog(
 		SubscriptionID:           optionalSubscriptionID(subscription),
 		CreatedAt:                time.Now(),
 	}
-	if cost != nil && cost.ImagePriceDefaulted {
-		marker := imagePriceDefaultedMarker
+	if marker := cost.DefaultedMediaTierMarker(); marker != "" {
 		usageLog.BillingTier = &marker
 	}
 	if result.ImageCount > 0 && (cost == nil || cost.BillingMode != string(BillingModeToken)) {
