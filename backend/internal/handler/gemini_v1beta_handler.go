@@ -831,25 +831,26 @@ func (h *GatewayHandler) GeminiV1BetaModels(c *gin.Context) {
 		sessionID := service.ExtractClientSessionID(c)
 		// 长上下文阶梯由目录数据驱动，统一在计费路径内生效，入口无需声明。
 		channelUsageFields := clientRequestedUsageFields(c, channelMapping, reqModel, result.UpstreamModel)
-		h.submitUsageRecordTask(c.Request.Context(), func(ctx context.Context) {
-			if err := h.gatewayService.RecordUsage(ctx, &service.RecordUsageInput{
-				Result:             result,
-				QuotaPlatform:      quotaPlatform,
-				APIKey:             apiKey,
-				User:               apiKey.User,
-				Account:            account,
-				Subscription:       subscription,
-				PricingAt:          pricingAt,
-				InboundEndpoint:    inboundEndpoint,
-				UpstreamEndpoint:   upstreamEndpoint,
-				UserAgent:          userAgent,
-				IPAddress:          clientIP,
-				RequestPayloadHash: requestPayloadHash,
-				ForceCacheBilling:  forceCacheBilling,
-				APIKeyService:      h.apiKeyService,
-				SessionID:          sessionID,
-				ChannelUsageFields: channelUsageFields,
-			}); err != nil {
+		usageInput := &service.RecordUsageInput{
+			Result:             result,
+			QuotaPlatform:      quotaPlatform,
+			APIKey:             apiKey,
+			User:               apiKey.User,
+			Account:            account,
+			Subscription:       subscription,
+			PricingAt:          pricingAt,
+			InboundEndpoint:    inboundEndpoint,
+			UpstreamEndpoint:   upstreamEndpoint,
+			UserAgent:          userAgent,
+			IPAddress:          clientIP,
+			RequestPayloadHash: requestPayloadHash,
+			ForceCacheBilling:  forceCacheBilling,
+			APIKeyService:      h.apiKeyService,
+			SessionID:          sessionID,
+			ChannelUsageFields: channelUsageFields,
+		}
+		h.submitUsageRecordTask(c.Request.Context(), usageInput, func(ctx context.Context) {
+			if err := h.gatewayService.RecordUsage(ctx, usageInput); err != nil {
 				logger.L().With(
 					zap.String("component", "handler.gemini_v1beta.models"),
 					zap.Int64("user_id", authSubject.UserID),

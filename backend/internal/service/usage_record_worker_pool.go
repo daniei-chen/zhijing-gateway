@@ -42,7 +42,10 @@ type UsageRecordSubmitMode string
 
 const (
 	UsageRecordSubmitModeEnqueued UsageRecordSubmitMode = "enqueued"
-	UsageRecordSubmitModeDropped  UsageRecordSubmitMode = "dropped"
+	// UsageRecordSubmitModeDropped 表示任务未被入队、池不会再执行它（显式 drop/sample
+	// 溢出策略下队列已满）。计费调用方不能把它当成「已记录」：计费任务必须在调用侧
+	// 内联执行，不能跟着池一起丢；内联执行也失败时落 billing_failures 占位。
+	UsageRecordSubmitModeDropped UsageRecordSubmitMode = "dropped"
 	// UsageRecordSubmitModeDroppedStopped 表示任务因池已停止（进程关停窗口）被丢弃。
 	// 与显式 drop/sample 溢出策略的丢弃区分开：溢出丢弃是运维显式配置的取舍，
 	// 而关停窗口丢弃不是，计费关键任务应在调用侧降级为同步执行兜底。
@@ -147,11 +150,23 @@ func NewUsageRecordWorkerPoolWithOptions(opts UsageRecordWorkerPoolOptions) *Usa
 	if p.autoScaleEnabled {
 		p.startAutoScaler()
 	}
+	if p.overflowPolicy != config.UsageRecordOverflowPolicySync {
+		// 计费任务不允许被丢弃：handler 收到 DROPPED 后会内联执行。
+		// 启动时说清楚，避免运维以为配了 drop/sample 就真的省下了计费开销。
+		logger.L().With(
+			zap.String("component", "service.usage_record_worker_pool"),
+			zap.String("overflow_policy", p.overflowPolicy),
+			zap.Int("queue_size", opts.QueueSize),
+			zap.Int("worker_count", opts.WorkerCount),
+		).Warn("usage_record.overflow_policy_does_not_apply_to_billing")
+	}
 	return p
 }
 
 // Submit 提交一个使用量记录任务。
 // 提交失败（队列满）时按 overflowPolicy 执行降级策略：drop/sample/sync。
+// 返回 UsageRecordSubmitModeDropped 意味着池不会再执行该任务；计费调用方必须在
+// 调用侧内联执行（见 GatewayHandler.submitUsageRecordTask），不能让计费跟着丢。
 func (p *UsageRecordWorkerPool) Submit(task UsageRecordTask) UsageRecordSubmitMode {
 	if p == nil || task == nil {
 		return UsageRecordSubmitModeDropped
@@ -360,7 +375,7 @@ func (p *UsageRecordWorkerPool) logDrop(reason string) {
 		zap.Uint64("dropped_queue_full", stats.DroppedQueueFull),
 		zap.Uint64("dropped_pool_stopped", stats.DroppedPoolStopped),
 		zap.Uint64("sync_fallback_tasks", stats.SyncFallbackTasks),
-	).Warn("usage_record.task_dropped")
+	).Error("usage_record.task_dropped")
 }
 
 func usageRecordPoolOptionsFromConfig(cfg *config.Config) UsageRecordWorkerPoolOptions {
