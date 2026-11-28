@@ -105,6 +105,7 @@ Changes must be made through a pull request. 8 of 8 required status checks are e
 - **不要取消当前 head 的 run。** 被取消的必需检查结论是 `cancelled`，而 required 检查只认 success，`cancelled` 会让 PR 停在未通过。清队只能取消同一分支上已被新 commit 取代的旧 run（按 head sha 判断）。万一取消了当前 head，补救办法是在该 head 上 re-run 那个 workflow。
 - **同一个 head 上同名检查可能出现两条。** `security-scan.yml` 同时监听 `push` 和 `pull_request`（`security-scan.yml:4-5`），所以 `backend-security`、`frontend-security` 在同一个 head 上各会出两条。PR #44 head `914ded94d` 实测 14 条 check run，其中这两条各 2 条、其余各 1 条。判断「8 条绿了没有」要按 `(head_sha, name)` 去重并优先取 `pull_request` 那条，否则会把清队造成的 `cancelled` 误读成失败，或者把 8 条数成 14 条。
 - **`strict=false` 是有意关的，代价要认。** 它不要求 PR 与 main 同步，所以 main 前进后旧 PR 的绿仍然有效、不用全员重跑；代价是那个「绿」只对 PR 的 head 成立，不对合并后的结果成立。合并前看一眼 `git log origin/main` 有没有动到你改的文件。
+- **`git push --dry-run` 验不了分支保护。** 2026-11-28T03:40Z 在本仓库执行 `git push --dry-run origin HEAD:main`（源 `465d500fe`），退出码 0，输出 `89bf20ea7..465d500fe  HEAD -> main`，**没有报错**——ruleset 的拒绝发生在真正的 ref 更新时，dry-run 看不到。要验就用一次会真写的调用（例如 Contents API 写文件），看返回 409。
 - **规则集不在仓库里，review 看不见它。** 改规则集不产生 commit、不走 PR、没人 review。所以每次改都必须同步改本文档，否则下一轮没人知道门在哪。
 
 ## 7. 变更记录
@@ -112,7 +113,7 @@ Changes must be made through a pull request. 8 of 8 required status checks are e
 | 时间（UTC） | 变更 | 依据 / 验证 |
 |---|---|---|
 | 2026-11-28T03:24:00Z | 建立 ruleset `28278717`：`deletion`、`non_fast_forward`、`pull_request`（0 审批）、`required_status_checks`（8 条，strict 关）；`bypass_actors` 空 | `GET /repos/daniei-chen/zhijing-gateway/rulesets/28278717` |
-| 2026-11-28T03:24Z 起 | 直推 `main` 被拒（409 `Changes must be made through a pull request. 8 of 8 required status checks are expected.`） | 实测 |
+| 2026-11-28T03:24Z 起 | 直推 `main` 被拒：Contents API 写文件返回 409 `Changes must be made through a pull request. 8 of 8 required status checks are expected.` | 实测（Contents API） |
 | 2026-11-28 | 本文档入库 | 同期 PR，见 PR 描述 |
 
 摘除 / 恢复必需检查也追加到这张表。
