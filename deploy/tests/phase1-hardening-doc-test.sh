@@ -15,8 +15,6 @@ fail() {
 
 [ -f "$doc" ] || fail "missing ${doc}"
 
-fail "HOME-49 CI self-proof: intentional failure, reverted in the next commit"
-
 # 1. 发布端口默认回环
 for compose_file in \
   deploy/docker-compose.yml \
