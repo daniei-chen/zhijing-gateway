@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/ctxkey"
 	"github.com/stretchr/testify/require"
 )
 
@@ -70,6 +71,35 @@ func TestRecordDroppedUsageUsesUpstreamModelFallback(t *testing.T) {
 	require.Equal(t, "claude-opus-4-5", repo.failures[0].Model)
 }
 
+// 没有上游 request id 时，request context 里的本地 id 必须被用来留痕：
+// 否则真实的丢弃就一条都记不下来。
+func TestRecordDroppedUsageFallsBackToContextRequestID(t *testing.T) {
+	repo := &droppedUsageBillingRepoStub{}
+	svc := &GatewayService{usageBillingRepo: repo}
+	ctx := context.WithValue(context.Background(), ctxkey.RequestID, "local-abc")
+
+	svc.RecordDroppedUsage(ctx, &RecordUsageInput{
+		Result: &ForwardResult{Model: "claude-sonnet-4-5"},
+	}, UsageRecordDropReasonQueueFull)
+
+	require.Len(t, repo.failures, 1, "context 里有 request id 时必须留痕")
+	require.Equal(t, "local:local-abc", repo.failures[0].RequestID)
+}
+
+func TestRecordDroppedUsageFallsBackToClientRequestID(t *testing.T) {
+	repo := &droppedUsageBillingRepoStub{}
+	svc := &GatewayService{usageBillingRepo: repo}
+	ctx := context.WithValue(context.Background(), ctxkey.ClientRequestID, "client-xyz")
+
+	svc.RecordDroppedUsage(ctx, &RecordUsageInput{
+		Result: &ForwardResult{Model: "claude-sonnet-4-5"},
+	}, UsageRecordDropReasonQueueFull)
+
+	require.Len(t, repo.failures, 1)
+	require.Equal(t, "client:client-xyz", repo.failures[0].RequestID)
+}
+
+// 什么都取不到时不能捏造 request id：对账捞出来对不上任何真实请求，纯噪声。
 func TestRecordDroppedUsageNilInputsDoNotPanic(t *testing.T) {
 	repo := &droppedUsageBillingRepoStub{}
 	var nilSvc *GatewayService
@@ -83,7 +113,7 @@ func TestRecordDroppedUsageNilInputsDoNotPanic(t *testing.T) {
 		svc.RecordDroppedUsage(context.Background(), &RecordUsageInput{}, UsageRecordDropReasonQueueFull)
 		svc.RecordDroppedUsage(context.Background(), &RecordUsageInput{Result: &ForwardResult{}}, UsageRecordDropReasonQueueFull)
 	})
-	require.Empty(t, repo.failures)
+	require.Empty(t, repo.failures, "没有可对账的 request id 时不应该写一条捏造的失败记录")
 }
 
 func TestOpenAIRecordDroppedUsageWritesBillingFailure(t *testing.T) {
@@ -117,6 +147,19 @@ func TestOpenAIRecordDroppedUsageWritesBillingFailure(t *testing.T) {
 	require.Zero(t, cmd.BalanceCost)
 	require.Len(t, repo.causes, 1)
 	require.True(t, strings.Contains(repo.causes[0].Error(), UsageRecordDropReasonQueueFull))
+}
+
+func TestOpenAIRecordDroppedUsageFallsBackToContextRequestID(t *testing.T) {
+	repo := &droppedUsageBillingRepoStub{}
+	svc := &OpenAIGatewayService{usageBillingRepo: repo}
+	ctx := context.WithValue(context.Background(), ctxkey.RequestID, "local-oa")
+
+	svc.RecordDroppedUsage(ctx, &OpenAIRecordUsageInput{
+		Result: &OpenAIForwardResult{Model: "gpt-5"},
+	}, UsageRecordDropReasonQueueFull)
+
+	require.Len(t, repo.failures, 1)
+	require.Equal(t, "local:local-oa", repo.failures[0].RequestID)
 }
 
 func TestOpenAIRecordDroppedUsageNilInputsDoNotPanic(t *testing.T) {
