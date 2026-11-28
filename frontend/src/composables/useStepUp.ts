@@ -20,6 +20,13 @@ const STEP_UP_TOTP_NOT_ENABLED = 'STEP_UP_TOTP_NOT_ENABLED'
 const STEP_UP_ADMIN_API_KEY_FORBIDDEN = 'STEP_UP_ADMIN_API_KEY_FORBIDDEN'
 
 /**
+ * Set by `api/client.ts` on a STEP_UP_REQUIRED rejection once the shared global
+ * dialog has already run for that request. `run()` uses it to avoid opening a
+ * second dialog — most importantly after the user explicitly cancelled.
+ */
+export type StepUpHandled = 'verified' | 'cancelled'
+
+/**
  * Thrown by run() when the user dismisses the TOTP dialog.
  * Callers should treat it as a silent no-op, not an error to toast.
  */
@@ -40,6 +47,7 @@ interface ApiError {
   code?: string | number
   reason?: string
   message?: string
+  step_up_handled?: StepUpHandled
 }
 
 /** Extract the semantic error marker from either envelope shape (code or reason). */
@@ -110,6 +118,15 @@ export function useStepUp() {
         throw err
       }
       if (!isStepUpRequired(err)) {
+        throw err
+      }
+      const handled = (err as ApiError).step_up_handled
+      if (handled === 'cancelled') {
+        // apiClient 的全局对话框已经问过，用户当场取消：静默结束，不能再弹第二个。
+        throw new StepUpCancelledError()
+      }
+      if (handled === 'verified') {
+        // 全局对话框已验证并重试过一次，仍被拒：再弹一次只会重复同一个失败动作。
         throw err
       }
       const ok = await prompt()

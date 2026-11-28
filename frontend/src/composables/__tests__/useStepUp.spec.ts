@@ -98,6 +98,20 @@ describe('useStepUp.run', () => {
     expect(stepUp.visible.value).toBe(false)
   })
 
+  it('does not open a second dialog when the global dialog was already cancelled', async () => {
+    const stepUp = useStepUp()
+    const err = { status: 403, code: 'STEP_UP_REQUIRED', step_up_handled: 'cancelled' }
+    await expect(stepUp.run(async () => { throw err })).rejects.toBeInstanceOf(StepUpCancelledError)
+    expect(stepUp.visible.value).toBe(false)
+  })
+
+  it('re-throws without prompting when the global dialog verified and already retried', async () => {
+    const stepUp = useStepUp()
+    const err = { status: 403, code: 'STEP_UP_REQUIRED', step_up_handled: 'verified' }
+    await expect(stepUp.run(async () => { throw err })).rejects.toBe(err)
+    expect(stepUp.visible.value).toBe(false)
+  })
+
   it('classifies the cancellation sentinel distinctly from step-up errors', () => {
     const cancelled = new StepUpCancelledError()
     expect(isStepUpCancelled(cancelled)).toBe(true)

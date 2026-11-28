@@ -12,7 +12,7 @@ import {
   shouldMarkAdminUIRequest,
   shouldMarkUserUIRequest,
 } from './adminUIRequest'
-import { globalStepUp } from '@/composables/useStepUp'
+import { globalStepUp, type StepUpHandled } from '@/composables/useStepUp'
 import { refreshAuthTokens } from './tokenRefresh'
 import { getAPIBaseURL } from './url'
 export { buildApiUrl, buildGatewayUrl } from './url'
@@ -115,7 +115,11 @@ apiClient.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean; _stepUpRetried?: boolean }
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean
+      _stepUpRetried?: boolean
+      _stepUpHandled?: StepUpHandled
+    }
 
     // Handle common errors
     if (error.response) {
@@ -266,11 +270,15 @@ apiClient.interceptors.response.use(
       // STEP_UP_REQUIRED 弹一次全局 TOTP 对话框，成功后重试一次；_stepUpRetried 保证只重试一次。
       // STEP_UP_TOTP_NOT_ENABLED 是「本人还没绑定 TOTP」，输码解决不了，原样抛给调用方。
       // 用户取消时不重试，走下面的结构化错误，页面按后端文案提示。
+      // step_up_handled 随 rejection 交给 useStepUp().run()：全局对话框已经问过一次，
+      // 页面自己的对话框不能再弹第二次（取消尤其不能）。
       if (status === 403 && apiData.code === 'STEP_UP_REQUIRED' && !originalRequest._stepUpRetried) {
         originalRequest._stepUpRetried = true
         if (await globalStepUp.prompt()) {
+          originalRequest._stepUpHandled = 'verified'
           return apiClient(originalRequest)
         }
+        originalRequest._stepUpHandled = 'cancelled'
       }
 
       // Return structured error
@@ -282,6 +290,7 @@ apiClient.interceptors.response.use(
         message: apiData.message || apiData.detail || error.message,
         metadata: apiData.metadata,
         retry_after_seconds: parseRetryAfterSeconds(error.response.headers),
+        step_up_handled: originalRequest._stepUpHandled,
       })
     }
 
