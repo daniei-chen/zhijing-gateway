@@ -70,11 +70,9 @@ git rev-parse 4233cc3d8018bf2f399c4c366d94067c42eb697e:backend/internal/pkg/open
 
 ## 六、已确认的缺口（不是差异，是待修的洞）
 
-| 位置 | 现状 | 处置 |
-|---|---|---|
-| `backend/internal/service/gateway_usage_billing.go:1359-1362`、`:1380-1383` | `calculateImageCost` 把 `CalculateCostUnified` 的错误打了日志就返回 `&CostBreakdown{ActualCost: 0}` 且 `err == nil`，因此图片请求在无价或算价失败时按 $0 成功结算，不进入 `:933` 的 fail-closed | 2026-11-28 定为一类漏收：与 #34 立的「没有价格不许编一个 $0 出来成交」直接冲突。**单独一片修**（非简易模式返回 err、简易模式保持 $0、补能证伪的测试），本清单只留记录，修好后删掉本行 |
+**截至 2026-11-28**，没有已确认待修的缺口。
 
-这一条没有「回灌时听谁的」可判，所以不进上面的动作表。留在这里是因为 §四 的 fail-closed 四条覆盖的是 token / audio 的后扣链路——图片算价这条**已知不在覆盖内**，读清单的人不该把它当成已修。
+图片算价这条缺口没有「回灌时听谁的」可判，所以从来没进上面的动作表。留在这里要说清的是：§四 的 fail-closed 四条覆盖的是 token / audio 的后扣链路，图片算价**不在那四条里**。图片算价的 fail-open（`calculateImageCost` 算价失败仍按 `$0` + `err=nil` 成交）已经单独修掉：`#50` 把两处吞错改成 `return nil, err`，`#55` 补上矩阵测试 `TestRecordUsage_CostFailureMatrix` 钉住「非简易模式返回 err、简易模式保持 $0」。读清单的人该按「§四 不覆盖图片，但图片那条已经修了」理解，不要再当成待修缺口。
 
 ## 七、维护契约
 

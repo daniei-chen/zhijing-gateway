@@ -22,6 +22,11 @@ import (
 // 同一个表在 billing.inflight_reservation.fail_closed_on_unpriced=true 下再跑一遍：
 // 无价的三行走失败关闭（4xx + billing_failures），有价的对照组不受影响。
 // 将来新增定价模式只加一行，不加新测试。
+//
+// 另有「显式 0 价」三行（explicitZeroPrice）：运营者故意配 0 的免费渠道属于
+// 「配过价」，必须按 0 成交、不打漏配标记、开关打开也不失败关闭。渠道价格字段是
+// *float64，nil 与 0 的区别就是在这里断言的——把任何一处 `!= nil` 收紧成 `> 0`，
+// 这三行会立刻变红。
 func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 	const (
 		marker            = imagePriceDefaultedMarker
@@ -33,10 +38,13 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 	type imagePricingCase struct {
 		name        string
 		billingMode BillingMode
-		withPrices  bool
-		imageAPI    bool // 专用图片端点（分组按张开关只对它生效）
-		switchOn    bool // 分组按实际出图张数计费
-		priced      bool // 该行配置了可用单价
+		withPrices  bool   // 渠道行填了非零 token 单价
+		imageAPI    bool   // 专用图片端点（分组按张开关只对它生效）
+		switchOn    bool   // 分组按实际出图张数计费
+		priced      bool   // 该行配置了非零可用单价
+		imageSize   string // 请求尺寸，空即 1K
+		// configure 把该行改造成「显式填了价格」，含显式 0（免费）。
+		configure func(pricing *ChannelModelPricing, group *Group)
 	}
 
 	cases := []imagePricingCase{
@@ -44,6 +52,60 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 		{name: "channel token unpriced", billingMode: BillingModeToken},
 		{name: "channel token unpriced with count billing", billingMode: BillingModeToken, imageAPI: true, switchOn: true},
 		{name: "channel per_request unpriced", billingMode: BillingModePerRequest},
+		{name: "channel token unpriced 2K", billingMode: BillingModeToken, imageSize: "2K"},
+		{name: "channel token unpriced 4K", billingMode: BillingModeToken, imageSize: "4K"},
+		{
+			// 免费渠道：token 单价显式填 0。ModelPricing 里这些字段是 float64，
+			// 只有渠道原始行还留着「填过」的信息。
+			name:        "channel token explicit zero price",
+			billingMode: BillingModeToken,
+			configure: func(pricing *ChannelModelPricing, _ *Group) {
+				zero := 0.0
+				pricing.InputPrice = &zero
+				pricing.OutputPrice = &zero
+				pricing.ImageOutputPrice = nil
+			},
+		},
+		{
+			// 分组图价显式填 0，渠道行本身一个价都没填。
+			name:        "group image price explicit zero",
+			billingMode: BillingModeToken,
+			imageAPI:    true,
+			switchOn:    true,
+			configure: func(pricing *ChannelModelPricing, group *Group) {
+				zero := 0.0
+				pricing.InputPrice = nil
+				pricing.OutputPrice = nil
+				pricing.ImageOutputPrice = nil
+				group.ImagePrice1K = &zero
+			},
+		},
+		{
+			// 按次价显式填 0。
+			name:        "channel per_request explicit zero price",
+			billingMode: BillingModePerRequest,
+			configure: func(pricing *ChannelModelPricing, _ *Group) {
+				zero := 0.0
+				pricing.InputPrice = nil
+				pricing.OutputPrice = nil
+				pricing.ImageOutputPrice = nil
+				pricing.PerRequestPrice = &zero
+			},
+		},
+	}
+
+	explicitZeroPrice := func(tc imagePricingCase) bool { return tc.configure != nil }
+
+	// 内置默认图价按尺寸放大：2K 1.5 倍、4K 2 倍（docs/IMAGE_PRICE_DEFAULTED.md）。
+	defaultPriceFor := func(imageSize string) float64 {
+		switch imageSize {
+		case "2K":
+			return defaultImagePrice * 1.5
+		case "4K":
+			return defaultImagePrice * 2
+		default:
+			return defaultImagePrice
+		}
 	}
 
 	for _, failClosed := range []bool{false, true} {
@@ -59,11 +121,18 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 				resolver := newOpenAITokenImageChannelPricingResolverForTest(t, groupID, model)
 				cached, ok := resolver.channelService.cache.Load().(*channelCache)
 				require.True(t, ok)
+				group := &Group{
+					ID: groupID, Status: StatusActive, Hydrated: true, RateMultiplier: 1,
+					AllowImageGeneration: true, ImageCountBilling: tc.switchOn,
+				}
 				pricing := &ChannelModelPricing{BillingMode: tc.billingMode}
 				if tc.withPrices {
 					inputPrice, outputPrice := 3e-6, 15e-6
 					pricing.InputPrice = &inputPrice
 					pricing.OutputPrice = &outputPrice
+				}
+				if tc.configure != nil {
+					tc.configure(pricing, group)
 				}
 				cached.pricingByGroupModel[channelModelKey{groupID: groupID, model: model}] = pricing
 
@@ -76,16 +145,12 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 				svc.cfg.Billing.InflightReservation.FailClosedOnUnpriced = failClosed
 				svc.billingCacheService.cfg = svc.cfg
 
-				group := &Group{
-					ID: groupID, Status: StatusActive, Hydrated: true, RateMultiplier: 1,
-					AllowImageGeneration: true, ImageCountBilling: tc.switchOn,
-				}
 				err := svc.RecordUsage(context.Background(), &RecordUsageInput{
 					Result: &ForwardResult{
 						RequestID:     "image-pricing-table",
 						Model:         model,
 						ImageCount:    imageCount,
-						ImageSize:     "1K",
+						ImageSize:     imageSizeOrDefault(tc.imageSize),
 						ImageEndpoint: tc.imageAPI,
 						Usage:         ClaudeUsage{InputTokens: 1_000_000, OutputTokens: 1000},
 						Duration:      time.Second,
@@ -94,6 +159,20 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 					User:    &User{ID: 607},
 					Account: &Account{ID: 707},
 				})
+
+				if explicitZeroPrice(tc) {
+					require.NoError(t, err,
+						"显式 0 价算配过，开关打开也不能失败关闭")
+					require.Equal(t, 1, usageRepo.calls)
+					require.NotNil(t, usageRepo.lastLog)
+					require.Zero(t, usageRepo.lastLog.ActualCost,
+						"显式 0 价是运营者选的免费，不能按默认图价 0.134/张成交")
+					require.Nil(t, usageRepo.lastLog.BillingTier,
+						"显式 0 价算配过，不能打 image_price_defaulted 标记")
+					require.Zero(t, billingRepo.failureCalls,
+						"显式 0 价不算漏配，不能登记 billing_failures")
+					return
+				}
 
 				if tc.priced {
 					require.NoError(t, err)
@@ -117,8 +196,8 @@ func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 				require.NoError(t, err)
 				require.Equal(t, 1, usageRepo.calls)
 				require.NotNil(t, usageRepo.lastLog)
-				require.InDelta(t, defaultImagePrice*imageCount, usageRepo.lastLog.ActualCost, 1e-9,
-					"漏配的图片渠道必须按默认图价成交，不能是 $0")
+				require.InDelta(t, defaultPriceFor(tc.imageSize)*imageCount, usageRepo.lastLog.ActualCost, 1e-9,
+					"漏配的图片渠道必须按默认图价成交（2K 1.5 倍、4K 2 倍），不能是 $0")
 				require.NotNil(t, usageRepo.lastLog.BillingTier)
 				require.Equal(t, marker, *usageRepo.lastLog.BillingTier,
 					"默认价成交必须留下可查标记")
@@ -189,4 +268,47 @@ func TestRecordUsage_ImagePricingUnpricedSimpleModeStaysNonFailing(t *testing.T)
 	require.Equal(t, 1, usageRepo.calls)
 	require.NotNil(t, usageRepo.lastLog)
 	require.Zero(t, billingRepo.failureCalls)
+}
+
+func imageSizeOrDefault(imageSize string) string {
+	if imageSize == "" {
+		return "1K"
+	}
+	return imageSize
+}
+
+// 简易模式：算价失败也不许把 usage 记录丢掉。
+// 这条打的是 gateway_usage_billing.go 里「简易模式吸收 costErr、按 $0 落账」那个分支——
+// 之前的简易模式用例走的是「无价但算价成功」，碰不到它。
+func TestRecordUsage_SimpleModeAbsorbsPricingFailure(t *testing.T) {
+	const model = "simple-mode-no-pricing-model"
+
+	usageRepo := &openAIRecordUsageLogRepoStub{}
+	billingRepo := &openAIRecordUsageBillingRepoStub{}
+	svc := newGatewayRecordUsageServiceWithBillingRepoForTest(usageRepo, billingRepo,
+		&openAIRecordUsageUserRepoStub{}, &openAIRecordUsageSubRepoStub{})
+	svc.cfg.RunMode = config.RunModeSimple
+	svc.cfg.Billing.InflightReservation.Enabled = true
+	svc.cfg.Billing.InflightReservation.FailClosedOnUnpriced = true
+	svc.billingCacheService.cfg = svc.cfg
+
+	groupID := int64(961)
+	group := &Group{ID: groupID, Status: StatusActive, Hydrated: true, RateMultiplier: 1}
+	err := svc.RecordUsage(context.Background(), &RecordUsageInput{
+		Result: &ForwardResult{
+			RequestID: "simple-unpriced-text",
+			Model:     model,
+			Usage:     ClaudeUsage{InputTokens: 1000, OutputTokens: 100},
+			Duration:  time.Second,
+		},
+		APIKey:  &APIKey{ID: 51, GroupID: &groupID, Group: group},
+		User:    &User{ID: 610},
+		Account: &Account{ID: 710},
+	})
+
+	require.NoError(t, err, "简易模式算价失败不能把错误抛给调用方，也不能丢用量")
+	require.Equal(t, 1, usageRepo.calls, "简易模式必须仍然写 usage")
+	require.NotNil(t, usageRepo.lastLog)
+	require.Zero(t, usageRepo.lastLog.ActualCost, "简易模式不扣费，按 $0 落账")
+	require.Zero(t, billingRepo.failureCalls, "简易模式不记 billing_failures")
 }
