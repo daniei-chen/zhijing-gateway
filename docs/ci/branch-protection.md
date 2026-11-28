@@ -66,6 +66,22 @@ Changes must be made through a pull request. 8 of 8 required status checks are e
 | `e2e` | `backend-ci.yml:102` | 只在 `main` 的 push 和 `workflow_dispatch` 上跑（`if: github.event_name == 'workflow_dispatch' \|\| github.ref == 'refs/heads/main'`；`ci/e2e-*` 这个 push 例外 2026-11-28 已删除）。PR head 上它以 `completed/skipped` 出现在检查列表里（PR #44 head `914ded94d` 实测），而按 GitHub 文档「被 skip 的 job 报告状态为 Success」，所以挂成 required 只是一条永远不阻止合并的空门。**它已经真跑通过，不是「靠 main 兜底」而是「跑过、绿过、连绿两次」**：run `46129909080`，2026-11-28，head `50bc5e392`，两轮分别 job `140932574046` 与 `140936895340`（同一个 run 的两次 attempt，同一个 head sha），注册 → 登录 → 建 API Key → 用 Key 调网关 → 查用量五步全部 PASS；「全跳过混成绿」这条路被 job 里的断言步堵死（`backend-ci.yml:190-197` 要求两条用例各有一行 `--- PASS:`，出现 `--- SKIP:` 就判红）。**代价：PR 阶段仍然看不见 e2e 回归。** 要让它成为真门，先把 e2e 改成 PR 可跑（起栈成本与上游 key 是真问题，见 `docs/ci/test-tiers.md` §4），再按第 4 节的顺序加进 required。 |
 | `embed` | `backend-ci.yml:66` | 跑的是发布形态（`-tags=embed`）的 15 条测试，是发布路径上唯一的自动化保险。2026-11-28 才接进 CI，先观察几轮稳定性再挂；它现在在 PR 上是绿的，但「绿过几次」还不足以下结论。 |
 
+### 3.1 e2e 的两轮实测（2026-11-28，run `46129909080`，head `50bc5e392`）
+
+同一个 run 跑了两次（attempt 1 / attempt 2），逐条结果完全一致——这一致本身就是证据：它不是抖动出来的绿。
+
+| | attempt 1（job `140932574046`） | attempt 2（job `140936895340`） |
+|---|---|---|
+| `=== RUN` 行数（含子测试） | 18 | 18 |
+| 顶层用例（不重复） | 11 | 11 |
+| `--- PASS:` 顶层 | 2 | 2 |
+| `--- SKIP:` 顶层 | 9 | 9 |
+| 子测试 `    --- PASS:` | 7 | 7 |
+
+2 条 PASS 是 `TestUserRegistrationAndLogin`、`TestAPIKeyLifecycle`；9 条 SKIP 全是 Claude/Gemini 那批（`TestClaudeMessages*`、`TestClaudeModelsList`、`TestGemini*`），因为栈里没有 `CLAUDE_API_KEY` / `GEMINI_API_KEY`。
+
+**这 9 条 SKIP 是「2 条太薄」的硬证据**：无密钥条件下 11 条里 9 条什么都不验。要抬下限，得先把上游换成栈内可用的假 OpenAI 兼容服务，让代理链路（转发、计费扣费、配额、模型列表、上游错误映射）在没有真实上游账号时也能被验——只加「打本地 admin 接口」的用例不会让这个数字变厚。
+
 ## 4. 改 job 名 / 增删 job 的操作规程（最重要）
 
 机制：required check 按 **context 字符串**匹配 check run 的 `name`。job 没写 `name:` 时，`name` 就等于 job id——本仓库 `.github/workflows/*.yml` 里没有任何 job 级 `name:`（`grep -nE '^    name:' .github/workflows/*.yml` 无输出），所以今天 8 个 context 全部是 job id。
