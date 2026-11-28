@@ -68,9 +68,10 @@ const CodexUsageProbeModel = "codex-auto-review"
 //go:embed instructions.txt
 var DefaultInstructions string
 
-// instructionsGPT51 / instructionsGPT52 / instructionsGPT55 / instructionsGPT6Astra
-// 为对应非 codex 模型的真实 Codex 编码 agent base prompt，用于模型感知的 instructions 选择。
-// GPT-5.5 同时作为 GPT-5 系列的 fallback（覆盖 5.3 / 5.4 等未单独维护 prompt 的版本）。
+// instructionsGPT51 / instructionsGPT52 / instructionsGPT55 / instructionsGPT6Astra /
+// instructionsGPT56 / instructionsGPT6Sol / instructionsGPT6Luna
+// 为对应模型的真实 Codex 编码 agent base prompt，用于模型感知的 instructions 选择。
+// GPT-5.5 同时作为没有专属 prompt 的 GPT-5 系列的 fallback（覆盖 5.3 / 5.4 等）。
 //
 //go:embed instructions_gpt5_1.txt
 var instructionsGPT51 string
@@ -85,6 +86,18 @@ var instructionsGPT55 string
 //
 //go:embed instructions_gpt6_astra.txt
 var instructionsGPT6Astra string
+
+// instructionsGPT56 / instructionsGPT6Sol / instructionsGPT6Luna 三份文件逐字节取自
+// 上游 c5622ce6c（Codex v0.172.0 内置提示词同步），未做任何改动。
+//
+//go:embed instructions_gpt5_6.txt
+var instructionsGPT56 string
+
+//go:embed instructions_gpt6_sol.txt
+var instructionsGPT6Sol string
+
+//go:embed instructions_gpt6_luna.txt
+var instructionsGPT6Luna string
 
 // GPT-6.2 descriptors from the 2026-11-17 Codex models response, client 0.169.0.
 //
@@ -233,16 +246,24 @@ var codexInstructionsTable = []codexInstructionsRow{
 	{
 		Model:    "gpt-5.6",
 		Matches:  func(canonical string) bool { return strings.HasPrefix(canonical, "gpt-5.6") },
-		Template: "instructions_gpt5_5.txt",
-		Source:   "main 无 5.6 分支，回落 latestCodexInstructions()（GPT-5.5）；上游 c5622ce6c:218-221 有专属模板，未移植",
+		Template: "instructions_gpt5_6.txt",
+		Source:   "c5622ce6c:218-221：5.6 系（含 sol/terra/luna）用 instructions_gpt5_6.txt",
 	},
 	{
-		Model: "gpt-6-sol / gpt-6-luna",
+		Model: "gpt-6-luna",
 		Matches: func(canonical string) bool {
-			return strings.HasPrefix(canonical, "gpt-6-sol") || strings.HasPrefix(canonical, "gpt-6-luna")
+			return strings.HasPrefix(canonical, "gpt-6-luna") && IsGPT6SolOrLunaModelSpelling(canonical)
 		},
-		Template: "instructions_gpt5_5.txt",
-		Source:   "main 无 6 Sol/Luna 分支，回落 latestCodexInstructions()（GPT-5.5）；上游 c5622ce6c:201-210 有专属模板，未移植",
+		Template: "instructions_gpt6_luna.txt",
+		Source:   "c5622ce6c:201-210：6 Luna 用 instructions_gpt6_luna.txt",
+	},
+	{
+		Model: "gpt-6-sol",
+		Matches: func(canonical string) bool {
+			return !strings.HasPrefix(canonical, "gpt-6-luna") && IsGPT6SolOrLunaModelSpelling(canonical)
+		},
+		Template: "instructions_gpt6_sol.txt",
+		Source:   "c5622ce6c:201-210：6 Sol 用 instructions_gpt6_sol.txt",
 	},
 	{
 		Model:    "gpt-5.5",
@@ -295,8 +316,14 @@ func codexInstructionFile(name string) string {
 		return instructionsGPT52
 	case "instructions_gpt5_5.txt":
 		return instructionsGPT55
+	case "instructions_gpt5_6.txt":
+		return instructionsGPT56
 	case "instructions_gpt6_astra.txt":
 		return instructionsGPT6Astra
+	case "instructions_gpt6_sol.txt":
+		return instructionsGPT6Sol
+	case "instructions_gpt6_luna.txt":
+		return instructionsGPT6Luna
 	case "codex_gpt61_sol.json":
 		return codexInstructionsTemplate(CodexGPT61SolMetadata)
 	case "codex_gpt61_terra.json":
