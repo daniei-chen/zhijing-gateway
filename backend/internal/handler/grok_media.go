@@ -758,23 +758,24 @@ func recordGrokMediaUsage(
 		}
 	}
 	requestPayloadHash := service.HashUsageRequestPayload(payloadForHash)
-	h.submitOpenAIUsageRecordTask(c.Request.Context(), result, func(ctx context.Context) {
-		if err := h.gatewayService.RecordUsage(ctx, &service.OpenAIRecordUsageInput{
-			Result:             result,
-			APIKey:             apiKey,
-			User:               apiKey.User,
-			Account:            account,
-			Subscription:       subscription,
-			InboundEndpoint:    inboundEndpoint,
-			UpstreamEndpoint:   upstreamEndpoint,
-			UserAgent:          userAgent,
-			IPAddress:          clientIP,
-			RequestPayloadHash: requestPayloadHash,
-			APIKeyService:      h.apiKeyService,
-			QuotaPlatform:      quotaPlatform,
-			SessionID:          sessionID,
-			ChannelUsageFields: channelUsageFields,
-		}); err != nil {
+	usageInput := &service.OpenAIRecordUsageInput{
+		Result:             result,
+		APIKey:             apiKey,
+		User:               apiKey.User,
+		Account:            account,
+		Subscription:       subscription,
+		InboundEndpoint:    inboundEndpoint,
+		UpstreamEndpoint:   upstreamEndpoint,
+		UserAgent:          userAgent,
+		IPAddress:          clientIP,
+		RequestPayloadHash: requestPayloadHash,
+		APIKeyService:      h.apiKeyService,
+		QuotaPlatform:      quotaPlatform,
+		SessionID:          sessionID,
+		ChannelUsageFields: channelUsageFields,
+	}
+	h.submitOpenAIUsageRecordTask(c.Request.Context(), result, usageInput, func(ctx context.Context) {
+		if err := h.gatewayService.RecordUsage(ctx, usageInput); err != nil {
 			if videoTaskID != "" {
 				if releaseErr := h.gatewayService.ReleaseGrokVideoBilling(ctx, videoTaskID, subject.UserID, apiKey.ID); releaseErr != nil {
 					reqLog.Warn("grok_media.video_billing_claim_release_failed",

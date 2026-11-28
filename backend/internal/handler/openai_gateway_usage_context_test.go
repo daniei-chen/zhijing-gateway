@@ -15,7 +15,7 @@ func TestSubmitUsageRecordTaskCopiesRequestContext(t *testing.T) {
 	var gotClientRequestID string
 	var gotRequestID string
 	h := &GatewayHandler{}
-	h.submitUsageRecordTask(parent, func(ctx context.Context) {
+	h.submitUsageRecordTask(parent, nil, func(ctx context.Context) {
 		gotClientRequestID, _ = ctx.Value(ctxkey.ClientRequestID).(string)
 		gotRequestID, _ = ctx.Value(ctxkey.RequestID).(string)
 	})
@@ -31,7 +31,7 @@ func TestOpenAISubmitUsageRecordTaskCopiesRequestContext(t *testing.T) {
 	var gotClientRequestID string
 	var gotRequestID string
 	h := &OpenAIGatewayHandler{}
-	h.submitUsageRecordTask(parent, func(ctx context.Context) {
+	h.submitUsageRecordTask(parent, nil, func(ctx context.Context) {
 		gotClientRequestID, _ = ctx.Value(ctxkey.ClientRequestID).(string)
 		gotRequestID, _ = ctx.Value(ctxkey.RequestID).(string)
 	})

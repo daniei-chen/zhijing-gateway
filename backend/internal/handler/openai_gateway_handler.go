@@ -43,6 +43,7 @@ type OpenAIGatewayHandler struct {
 	billingCacheService        *service.BillingCacheService
 	apiKeyService              *service.APIKeyService
 	usageRecordWorkerPool      *service.UsageRecordWorkerPool
+	usageDropRecorder          openAIUsageRecordDropRecorder
 	errorPassthroughService    *service.ErrorPassthroughService
 	contentModerationService   *service.ContentModerationService
 	securityAuditCoordinator   *securityaudit.Coordinator
@@ -52,6 +53,12 @@ type OpenAIGatewayHandler struct {
 	imageLimiter               *imageConcurrencyLimiter
 	maxAccountSwitches         int
 	cfg                        *config.Config
+}
+
+// openAIUsageRecordDropRecorder 把被 worker 池丢弃的 OpenAI 计费任务落成可查的失败记录。
+// OpenAIGatewayService 实现该接口；测试用桩替代以断言丢弃路径确实留痕。
+type openAIUsageRecordDropRecorder interface {
+	RecordDroppedUsage(ctx context.Context, input *service.OpenAIRecordUsageInput, reason string)
 }
 
 type openAIWSTurnChannelMappingSnapshot struct {
@@ -382,6 +389,7 @@ func NewOpenAIGatewayHandler(
 		billingCacheService:      billingCacheService,
 		apiKeyService:            apiKeyService,
 		usageRecordWorkerPool:    usageRecordWorkerPool,
+		usageDropRecorder:        gatewayService,
 		errorPassthroughService:  errorPassthroughService,
 		contentModerationService: contentModerationService,
 		opsService:               opsService,
@@ -870,26 +878,27 @@ func (h *OpenAIGatewayHandler) Responses(c *gin.Context) {
 			sessionID := service.ExtractClientSessionID(c)
 			cyberBlocked := service.GetOpsCyberPolicy(c) != nil
 			channelUsageFields := clientRequestedUsageFields(c, channelMapping, reqModel, res.UpstreamModel)
-			h.submitOpenAIUsageRecordTask(c.Request.Context(), res, func(ctx context.Context) {
-				if err := h.gatewayService.RecordUsage(ctx, &service.OpenAIRecordUsageInput{
-					Result:             res,
-					APIKey:             apiKey,
-					User:               apiKey.User,
-					Account:            account,
-					Subscription:       subscription,
-					InboundEndpoint:    inboundEndpoint,
-					UpstreamEndpoint:   upstreamEndpoint,
-					UserAgent:          userAgent,
-					IPAddress:          clientIP,
-					RequestPayloadHash: requestPayloadHash,
-					APIKeyService:      h.apiKeyService,
-					QuotaPlatform:      quotaPlatform,
-					SessionID:          sessionID,
-					ChannelUsageFields: channelUsageFields,
-					PricingAt:          pricingAt,
-					CyberBlocked:       cyberBlocked,
-					NativeCompactionV2: nativeV2,
-				}); err != nil {
+			usageInput := &service.OpenAIRecordUsageInput{
+				Result:             res,
+				APIKey:             apiKey,
+				User:               apiKey.User,
+				Account:            account,
+				Subscription:       subscription,
+				InboundEndpoint:    inboundEndpoint,
+				UpstreamEndpoint:   upstreamEndpoint,
+				UserAgent:          userAgent,
+				IPAddress:          clientIP,
+				RequestPayloadHash: requestPayloadHash,
+				APIKeyService:      h.apiKeyService,
+				QuotaPlatform:      quotaPlatform,
+				SessionID:          sessionID,
+				ChannelUsageFields: channelUsageFields,
+				PricingAt:          pricingAt,
+				CyberBlocked:       cyberBlocked,
+				NativeCompactionV2: nativeV2,
+			}
+			h.submitOpenAIUsageRecordTask(c.Request.Context(), res, usageInput, func(ctx context.Context) {
+				if err := h.gatewayService.RecordUsage(ctx, usageInput); err != nil {
 					logger.L().With(
 						zap.String("component", "handler.openai_gateway.responses"),
 						zap.Int64("user_id", subject.UserID),
@@ -1471,25 +1480,26 @@ func (h *OpenAIGatewayHandler) Messages(c *gin.Context) {
 			sessionID := service.ExtractClientSessionID(c)
 			cyberBlocked := service.GetOpsCyberPolicy(c) != nil
 			channelUsageFields := clientRequestedUsageFields(c, channelMappingMsg, reqModel, res.UpstreamModel)
-			h.submitOpenAIUsageRecordTask(c.Request.Context(), res, func(ctx context.Context) {
-				if err := h.gatewayService.RecordUsage(ctx, &service.OpenAIRecordUsageInput{
-					Result:             res,
-					APIKey:             apiKey,
-					User:               apiKey.User,
-					Account:            account,
-					Subscription:       subscription,
-					InboundEndpoint:    inboundEndpoint,
-					UpstreamEndpoint:   upstreamEndpoint,
-					UserAgent:          userAgent,
-					IPAddress:          clientIP,
-					RequestPayloadHash: requestPayloadHash,
-					APIKeyService:      h.apiKeyService,
-					QuotaPlatform:      quotaPlatform,
-					SessionID:          sessionID,
-					ChannelUsageFields: channelUsageFields,
-					PricingAt:          pricingAt,
-					CyberBlocked:       cyberBlocked,
-				}); err != nil {
+			usageInput := &service.OpenAIRecordUsageInput{
+				Result:             res,
+				APIKey:             apiKey,
+				User:               apiKey.User,
+				Account:            account,
+				Subscription:       subscription,
+				InboundEndpoint:    inboundEndpoint,
+				UpstreamEndpoint:   upstreamEndpoint,
+				UserAgent:          userAgent,
+				IPAddress:          clientIP,
+				RequestPayloadHash: requestPayloadHash,
+				APIKeyService:      h.apiKeyService,
+				QuotaPlatform:      quotaPlatform,
+				SessionID:          sessionID,
+				ChannelUsageFields: channelUsageFields,
+				PricingAt:          pricingAt,
+				CyberBlocked:       cyberBlocked,
+			}
+			h.submitOpenAIUsageRecordTask(c.Request.Context(), res, usageInput, func(ctx context.Context) {
+				if err := h.gatewayService.RecordUsage(ctx, usageInput); err != nil {
 					logger.L().With(
 						zap.String("component", "handler.openai_gateway.messages"),
 						zap.Int64("user_id", subject.UserID),
@@ -3262,25 +3272,26 @@ func (h *OpenAIGatewayHandler) ResponsesWebSocket(c *gin.Context) {
 				turnRecordPricingAt := turnPricing.currentOr(turnStart)
 				turnBillingAPIKey := turnBillingAPIKeys.forTurn(turn, apiKey)
 				cyberBlocked := service.GetOpsCyberPolicy(c) != nil
-				h.submitOpenAIUsageRecordTask(ctx, result, func(taskCtx context.Context) {
-					if err := h.gatewayService.RecordUsage(taskCtx, &service.OpenAIRecordUsageInput{
-						Result:             result,
-						APIKey:             turnBillingAPIKey,
-						User:               apiKey.User,
-						Account:            account,
-						Subscription:       subscription,
-						InboundEndpoint:    inboundEndpoint,
-						UpstreamEndpoint:   upstreamEndpoint,
-						UserAgent:          userAgent,
-						IPAddress:          clientIP,
-						RequestPayloadHash: requestPayloadHash,
-						APIKeyService:      h.apiKeyService,
-						QuotaPlatform:      quotaPlatform,
-						SessionID:          sessionID,
-						ChannelUsageFields: turnUsageFields,
-						PricingAt:          turnRecordPricingAt,
-						CyberBlocked:       cyberBlocked,
-					}); err != nil {
+				usageInput := &service.OpenAIRecordUsageInput{
+					Result:             result,
+					APIKey:             turnBillingAPIKey,
+					User:               apiKey.User,
+					Account:            account,
+					Subscription:       subscription,
+					InboundEndpoint:    inboundEndpoint,
+					UpstreamEndpoint:   upstreamEndpoint,
+					UserAgent:          userAgent,
+					IPAddress:          clientIP,
+					RequestPayloadHash: requestPayloadHash,
+					APIKeyService:      h.apiKeyService,
+					QuotaPlatform:      quotaPlatform,
+					SessionID:          sessionID,
+					ChannelUsageFields: turnUsageFields,
+					PricingAt:          turnRecordPricingAt,
+					CyberBlocked:       cyberBlocked,
+				}
+				h.submitOpenAIUsageRecordTask(ctx, result, usageInput, func(taskCtx context.Context) {
+					if err := h.gatewayService.RecordUsage(taskCtx, usageInput); err != nil {
 						reqLog.Error("openai.websocket_record_usage_failed",
 							zap.Int64("account_id", account.ID),
 							zap.String("request_id", result.RequestID),
@@ -3532,25 +3543,34 @@ func getContextInt64(c *gin.Context, key string) (int64, bool) {
 	}
 }
 
-func (h *OpenAIGatewayHandler) submitUsageRecordTask(parent context.Context, task service.UsageRecordTask) {
+// submitUsageRecordTask 是 OpenAI 侧计费 usage 记录的唯一漏斗：任何 DROPPED 都在
+// 这里内联执行，计费任务不允许跟着池一起丢。内联执行也失败（panic）时才落
+// billing_failures 占位，保证事后能对账。
+func (h *OpenAIGatewayHandler) submitUsageRecordTask(parent context.Context, input *service.OpenAIRecordUsageInput, task service.UsageRecordTask) {
 	if task == nil {
 		return
 	}
-	task, abandon := wrapUsageRecordTaskContext(parent, task)
+	task, _ = wrapUsageRecordTaskContext(parent, task)
+	inlineReason := service.UsageRecordDropReasonNoPool
 	if h.usageRecordWorkerPool != nil {
-		if mode := h.usageRecordWorkerPool.Submit(task); mode != service.UsageRecordSubmitModeDroppedStopped {
-			if mode.Dropped() {
-				abandon()
-			}
+		switch mode := h.usageRecordWorkerPool.Submit(task); mode {
+		case service.UsageRecordSubmitModeDroppedStopped:
+			// 池已停止（进程关停窗口）：计费任务不能静默丢失，降级为内联同步执行。
+			inlineReason = service.UsageRecordDropReasonPoolStopped
+			logger.L().With(
+				zap.String("component", "handler.openai_gateway.responses"),
+			).Warn("openai.usage_record_task_stopped_sync_fallback")
+		case service.UsageRecordSubmitModeDropped:
+			// 计费任务不允许被丢弃：drop/sample 溢出时也内联执行，只保留可见性。
+			inlineReason = service.UsageRecordDropReasonQueueFull
+			logger.L().With(
+				zap.String("component", "handler.openai_gateway.responses"),
+			).Error("openai.usage_record_task_drop_inline_fallback")
+		default:
 			return
 		}
-		// 池已停止（进程关停窗口）：计费任务不能静默丢失，降级为内联同步执行。
-		// 显式配置的 drop/sample 溢出丢弃仍按配置语义保留。
-		logger.L().With(
-			zap.String("component", "handler.openai_gateway.responses"),
-		).Warn("openai.usage_record_task_stopped_sync_fallback")
 	}
-	// 回退路径：worker 池未注入或已停止时同步执行，避免退回到无界 goroutine 模式。
+	// 内联执行（无池 / 池停止 / 溢出丢弃）：计费任务不允许无声消失。
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer func() {
@@ -3559,19 +3579,35 @@ func (h *OpenAIGatewayHandler) submitUsageRecordTask(parent context.Context, tas
 				zap.String("component", "handler.openai_gateway.responses"),
 				zap.Any("panic", recovered),
 			).Error("openai.usage_record_task_panic_recovered")
+			// 内联执行也失败：落一条 billing_failures 占位，保证事后能对账。
+			h.recordDroppedUsage(parent, input, inlineReason)
 		}
 	}()
 	task(ctx)
 }
 
-func (h *OpenAIGatewayHandler) submitOpenAIUsageRecordTask(parent context.Context, result *service.OpenAIForwardResult, task service.UsageRecordTask) {
+func (h *OpenAIGatewayHandler) recordDroppedUsage(parent context.Context, input *service.OpenAIRecordUsageInput, reason string) {
+	recorder := h.usageDropRecorder
+	if recorder == nil {
+		recorder = h.gatewayService
+	}
+	if recorder == nil {
+		logger.L().With(
+			zap.String("component", "handler.openai_gateway.responses"),
+		).Error("openai.usage_record_dropped_without_recorder")
+		return
+	}
+	recorder.RecordDroppedUsage(parent, input, reason)
+}
+
+func (h *OpenAIGatewayHandler) submitOpenAIUsageRecordTask(parent context.Context, result *service.OpenAIForwardResult, input *service.OpenAIRecordUsageInput, task service.UsageRecordTask) {
 	// Money-critical bills never drop on pool overflow: media, search surcharge, voice.
 	if result != nil && (result.ImageCount > 0 || result.VideoCount > 0 ||
 		result.SearchCount > 0 || result.WebSearchCalls > 0 || result.AudioUsage != nil) {
 		h.submitMandatoryUsageRecordTask(parent, task)
 		return
 	}
-	h.submitUsageRecordTask(parent, task)
+	h.submitUsageRecordTask(parent, input, task)
 }
 
 func (h *OpenAIGatewayHandler) submitMandatoryUsageRecordTask(parent context.Context, task service.UsageRecordTask) {

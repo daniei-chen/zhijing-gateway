@@ -49,6 +49,7 @@ type GatewayHandler struct {
 	usageService              *service.UsageService
 	apiKeyService             *service.APIKeyService
 	usageRecordWorkerPool     *service.UsageRecordWorkerPool
+	usageDropRecorder         usageRecordDropRecorder
 	errorPassthroughService   *service.ErrorPassthroughService
 	contentModerationService  *service.ContentModerationService
 	securityAuditCoordinator  *securityaudit.Coordinator
@@ -109,6 +110,7 @@ func NewGatewayHandler(
 		usageService:              usageService,
 		apiKeyService:             apiKeyService,
 		usageRecordWorkerPool:     usageRecordWorkerPool,
+		usageDropRecorder:         gatewayService,
 		errorPassthroughService:   errorPassthroughService,
 		contentModerationService:  contentModerationService,
 		concurrencyHelper:         NewConcurrencyHelper(concurrencyService, SSEPingFormatClaude, pingInterval),
@@ -600,25 +602,26 @@ func (h *GatewayHandler) Messages(c *gin.Context) {
 			quotaPlatform := service.QuotaPlatform(c.Request.Context(), apiKey)
 			sessionID := service.ExtractClientSessionID(c)
 			channelUsageFields := clientRequestedUsageFields(c, channelMapping, reqModel, result.UpstreamModel)
-			h.submitUsageRecordTask(c.Request.Context(), func(ctx context.Context) {
-				if err := h.gatewayService.RecordUsage(ctx, &service.RecordUsageInput{
-					Result:             result,
-					QuotaPlatform:      quotaPlatform,
-					APIKey:             apiKey,
-					User:               apiKey.User,
-					Account:            account,
-					Subscription:       subscription,
-					PricingAt:          pricingAt,
-					InboundEndpoint:    inboundEndpoint,
-					UpstreamEndpoint:   upstreamEndpoint,
-					UserAgent:          userAgent,
-					IPAddress:          clientIP,
-					SessionID:          sessionID,
-					RequestPayloadHash: requestPayloadHash,
-					ForceCacheBilling:  forceCacheBilling,
-					APIKeyService:      h.apiKeyService,
-					ChannelUsageFields: channelUsageFields,
-				}); err != nil {
+			usageInput := &service.RecordUsageInput{
+				Result:             result,
+				QuotaPlatform:      quotaPlatform,
+				APIKey:             apiKey,
+				User:               apiKey.User,
+				Account:            account,
+				Subscription:       subscription,
+				PricingAt:          pricingAt,
+				InboundEndpoint:    inboundEndpoint,
+				UpstreamEndpoint:   upstreamEndpoint,
+				UserAgent:          userAgent,
+				IPAddress:          clientIP,
+				SessionID:          sessionID,
+				RequestPayloadHash: requestPayloadHash,
+				ForceCacheBilling:  forceCacheBilling,
+				APIKeyService:      h.apiKeyService,
+				ChannelUsageFields: channelUsageFields,
+			}
+			h.submitUsageRecordTask(c.Request.Context(), usageInput, func(ctx context.Context) {
+				if err := h.gatewayService.RecordUsage(ctx, usageInput); err != nil {
 					logger.L().With(
 						zap.String("component", "handler.gateway.messages"),
 						zap.Int64("user_id", subject.UserID),
@@ -964,25 +967,26 @@ func (h *GatewayHandler) Messages(c *gin.Context) {
 				quotaPlatform := service.QuotaPlatform(c.Request.Context(), currentAPIKey)
 				sessionID := service.ExtractClientSessionID(c)
 				channelUsageFields := clientRequestedUsageFields(c, channelMapping, reqModel, result.UpstreamModel)
-				h.submitUsageRecordTask(c.Request.Context(), func(ctx context.Context) {
-					if err := h.gatewayService.RecordUsage(ctx, &service.RecordUsageInput{
-						Result:             result,
-						QuotaPlatform:      quotaPlatform,
-						APIKey:             currentAPIKey,
-						User:               currentAPIKey.User,
-						Account:            account,
-						Subscription:       currentSubscription,
-						PricingAt:          pricingAt,
-						InboundEndpoint:    inboundEndpoint,
-						UpstreamEndpoint:   upstreamEndpoint,
-						UserAgent:          userAgent,
-						IPAddress:          clientIP,
-						SessionID:          sessionID,
-						RequestPayloadHash: requestPayloadHash,
-						ForceCacheBilling:  forceCacheBilling,
-						APIKeyService:      h.apiKeyService,
-						ChannelUsageFields: channelUsageFields,
-					}); err != nil {
+				usageInput := &service.RecordUsageInput{
+					Result:             result,
+					QuotaPlatform:      quotaPlatform,
+					APIKey:             currentAPIKey,
+					User:               currentAPIKey.User,
+					Account:            account,
+					Subscription:       currentSubscription,
+					PricingAt:          pricingAt,
+					InboundEndpoint:    inboundEndpoint,
+					UpstreamEndpoint:   upstreamEndpoint,
+					UserAgent:          userAgent,
+					IPAddress:          clientIP,
+					SessionID:          sessionID,
+					RequestPayloadHash: requestPayloadHash,
+					ForceCacheBilling:  forceCacheBilling,
+					APIKeyService:      h.apiKeyService,
+					ChannelUsageFields: channelUsageFields,
+				}
+				h.submitUsageRecordTask(c.Request.Context(), usageInput, func(ctx context.Context) {
+					if err := h.gatewayService.RecordUsage(ctx, usageInput); err != nil {
 						logger.L().With(
 							zap.String("component", "handler.gateway.messages"),
 							zap.Int64("user_id", subject.UserID),
@@ -2570,25 +2574,40 @@ func (h *GatewayHandler) maybeLogCompatibilityFallbackMetrics(reqLog *zap.Logger
 	)
 }
 
-func (h *GatewayHandler) submitUsageRecordTask(parent context.Context, task service.UsageRecordTask) {
+// usageRecordDropRecorder 把「内联执行也失败」的计费任务落成可查的失败记录。
+// GatewayService 实现该接口；测试用桩替代以断言兜底路径确实留痕。
+type usageRecordDropRecorder interface {
+	RecordDroppedUsage(ctx context.Context, input *service.RecordUsageInput, reason string)
+}
+
+// submitUsageRecordTask 是所有计费 usage 记录的唯一漏斗：任何 DROPPED 都在这里
+// 内联执行，计费任务不允许跟着池一起丢。内联执行也失败（panic）时才落
+// billing_failures 占位，保证事后能对账。
+func (h *GatewayHandler) submitUsageRecordTask(parent context.Context, input *service.RecordUsageInput, task service.UsageRecordTask) {
 	if task == nil {
 		return
 	}
-	task, abandon := wrapUsageRecordTaskContext(parent, task)
+	task, _ = wrapUsageRecordTaskContext(parent, task)
+	inlineReason := service.UsageRecordDropReasonNoPool
 	if h.usageRecordWorkerPool != nil {
-		if mode := h.usageRecordWorkerPool.Submit(task); mode != service.UsageRecordSubmitModeDroppedStopped {
-			if mode.Dropped() {
-				abandon()
-			}
+		switch mode := h.usageRecordWorkerPool.Submit(task); mode {
+		case service.UsageRecordSubmitModeDroppedStopped:
+			// 池已停止（进程关停窗口）：计费任务不能静默丢失，降级为内联同步执行。
+			inlineReason = service.UsageRecordDropReasonPoolStopped
+			logger.L().With(
+				zap.String("component", "handler.gateway.messages"),
+			).Warn("gateway.usage_record_task_stopped_sync_fallback")
+		case service.UsageRecordSubmitModeDropped:
+			// 计费任务不允许被丢弃：drop/sample 溢出时也内联执行，只保留可见性。
+			inlineReason = service.UsageRecordDropReasonQueueFull
+			logger.L().With(
+				zap.String("component", "handler.gateway.messages"),
+			).Error("gateway.usage_record_task_drop_inline_fallback")
+		default:
 			return
 		}
-		// 池已停止（进程关停窗口）：计费任务不能静默丢失，降级为内联同步执行。
-		// 显式配置的 drop/sample 溢出丢弃仍按配置语义保留。
-		logger.L().With(
-			zap.String("component", "handler.gateway.messages"),
-		).Warn("gateway.usage_record_task_stopped_sync_fallback")
 	}
-	// 回退路径：worker 池未注入或已停止时同步执行，避免退回到无界 goroutine 模式。
+	// 内联执行（无池 / 池停止 / 溢出丢弃）：计费任务不允许无声消失。
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	defer func() {
@@ -2597,9 +2616,25 @@ func (h *GatewayHandler) submitUsageRecordTask(parent context.Context, task serv
 				zap.String("component", "handler.gateway.messages"),
 				zap.Any("panic", recovered),
 			).Error("gateway.usage_record_task_panic_recovered")
+			// 内联执行也失败：落一条 billing_failures 占位，保证事后能对账。
+			h.recordDroppedUsage(parent, input, inlineReason)
 		}
 	}()
 	task(ctx)
+}
+
+func (h *GatewayHandler) recordDroppedUsage(parent context.Context, input *service.RecordUsageInput, reason string) {
+	recorder := h.usageDropRecorder
+	if recorder == nil {
+		recorder = h.gatewayService
+	}
+	if recorder == nil {
+		logger.L().With(
+			zap.String("component", "handler.gateway.messages"),
+		).Error("gateway.usage_record_dropped_without_recorder")
+		return
+	}
+	recorder.RecordDroppedUsage(parent, input, reason)
 }
 
 // submitMandatoryUsageRecordTask never silently drops billing work on pool overflow.
