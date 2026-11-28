@@ -1,19 +1,22 @@
 #!/bin/sh
-# 必检 job 的"不许被过滤掉"守护。
+# 必检 job 的"不许被过滤掉 / 不许被 skip 成自由通过"守护。
 #
 # 今天（a5176cb4d）全仓 workflow 里没有任何 paths: / paths-ignore: 过滤，也没有
-# 哪个必检 job 带 if: 或 continue-on-error——但那是今天的事实，不是什么机制。
-# 谁哪天加一句
+# 哪个必检 job 带 if:、continue-on-error 或 needs:——但那是今天的事实，不是什么
+# 机制。谁哪天加一句
 #     pull_request:
 #       paths: ['backend/**']
-# 或者给 job 加一行 if:，某个必检就会在部分 PR 上彻底不出现：分支保护会一直等
-# 那条永远不来的检查，或者更糟——一个只改前端的 PR 静默不跑后端门禁却被判绿。
+# 或者给 job 加一行 if: / needs:，某个必检就会在部分 PR 上彻底不出现、或者被 skip：
+# 分支保护会一直等那条永远不来的检查，而 skip 的 job 会被 GitHub 报告成 Success。
 # 这个测试把那句事实变成机制：以后再加过滤，这里先红。
 #
-# 守两件事：
-#   1) 9 个必检 job 块里不出现 if: / paths: / paths-ignore: / continue-on-error，
-#      承载它们的 workflow 的 on: 触发块里也不出现 paths: / paths-ignore:；
-#   2) race 的 -run 正则今天仍命中非零条测试（改名/挪目录后零命中，go test 退 0）。
+# 守三件事：
+#   1) 9 个必检 job 块里不出现 if: / paths: / paths-ignore: / continue-on-error /
+#      needs:，承载它们的 workflow 的 on: 触发块里也不出现 paths: / paths-ignore:；
+#      唯一豁免是 needs: 配 if: always()（见 block_verdict 的注释）；
+#   2) 断言下限的两个脚本里，每个 `| tee` 之后都读 PIPESTATUS——否则退出码来自
+#      tee，一条红色的测试会被报成绿；
+#   3) race 的 -run 正则今天仍命中非零条测试（改名/挪目录后零命中，go test 退 0）。
 set -eu
 
 repo_root=$(CDPATH= cd -- "$(dirname -- "$0")/../.." && pwd)
@@ -43,6 +46,103 @@ trigger_block() {
   ' "$1"
 }
 
+# job 块判定：stdin 是块内容，stdout 是 "ok" 或逐条违规说明。
+#
+# 合法只有两种形态：
+#   1) 完全没有 if: / paths: / paths-ignore: / continue-on-error: / needs:；
+#   2) needs: 与 if: always() 同时出现（if: 那一行必须逐字是 always()）。
+# 为什么 needs: 单独出现要红：依赖 red/skip 时这个 job 被 skip，而 GitHub 把 skip
+# 报告成 Success——必检就是空门。为什么 needs: + if: always() 可以：always() 让 job
+# 无论如何都跑，skip 这条路被堵死。
+# 为什么单独的 if: always() 也放行：它不能跳过 job，只会强制它跑；真正危险的是
+# `if:` 的其他写法（事件名、分支、表达式），那些仍然红。这条规则用自测钉住。
+block_verdict() {
+  awk '
+    /^[[:space:]]*needs:/ { needs = 1; needs_line = FNR ": " $0; next }
+    /^[[:space:]]*if:[[:space:]]*always\(\)[[:space:]]*$/ { always = 1; next }
+    /^[[:space:]]*(if|paths|paths-ignore|continue-on-error):/ { bad++; bad_line[bad] = FNR ": " $0 }
+    END {
+      if (needs && !always) {
+        print "needs: without if: always() -> " needs_line
+        exit
+      }
+      if (bad == 0) { print "ok"; exit }
+      for (i = 1; i <= bad; i++) print bad_line[i]
+    }'
+}
+
+verdict_of() {
+  printf '%s\n' "$1" | block_verdict
+}
+
+# 守卫自己坏了要先红，不能拿一个坏守卫去证明别人没问题。
+self_test() {
+  failures=0
+  expect() { # want(ok|bad) label text
+    want=$1
+    label=$2
+    text=$3
+    got=$(verdict_of "$text")
+    case "$want:$got" in
+      ok:ok) ;;
+      bad:ok)
+        printf 'self-test FAIL: %s should have been rejected\n' "$label" >&2
+        failures=$((failures + 1))
+        ;;
+      ok:*)
+        printf 'self-test FAIL: %s should have passed, got: %s\n' "$label" "$got" >&2
+        failures=$((failures + 1))
+        ;;
+      bad:*) ;;
+    esac
+  }
+
+  expect bad "needs: alone" "    needs: [frontend]
+    runs-on: ubuntu-latest"
+  expect ok "needs: with if: always()" "    needs: [frontend]
+    if: always()
+    runs-on: ubuntu-latest"
+  expect ok "if: always() alone" "    if: always()
+    runs-on: ubuntu-latest"
+  expect bad "if: on a branch" "    if: github.ref == 'refs/heads/main'"
+  expect bad "continue-on-error" "    continue-on-error: true"
+  expect bad "paths:" "    paths:
+      - 'backend/**'"
+  expect ok "plain block" "    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6"
+
+  [ "$failures" -eq 0 ] || fail "the job-block guard's own self-test failed ($failures case(s))"
+  printf 'ci workflow guards test: self-test passed (7 cases)\n'
+}
+
+# 每个 `| tee` 后面必须读 PIPESTATUS，否则脚本的退出码来自 tee：
+# 一条失败的测试会被报成绿（这会比没有门禁更糟）。`/bin/sh` 没有 PIPESTATUS，
+# 所以那两个脚本必须是 bash，这里连 shebang 一起钉住。
+check_pipe_status() {
+  file=$1
+  head -1 "$file" | grep -Fq '/usr/bin/env bash' || \
+    fail "$file is not a bash script; PIPESTATUS needs bash"
+  tee_lines=$(grep -n '| tee ' "$file" | cut -d: -f1 || true)
+  [ -n "$tee_lines" ] || \
+    fail "$file pipes no test output through tee, so the count assertion cannot work"
+  for line in $tee_lines; do
+    found=0
+    probe=$((line + 1))
+    while [ "$probe" -le "$((line + 3))" ]; do
+      if sed -n "${probe}p" "$file" | grep -Fq 'PIPESTATUS'; then
+        found=1
+        break
+      fi
+      probe=$((probe + 1))
+    done
+    [ "$found" -eq 1 ] || \
+      fail "$file:$line pipes through tee but never reads PIPESTATUS; the exit code would come from tee, so a failing suite would be reported as success"
+  done
+}
+
+self_test
+
 # 9 个必检：shell  test  race  frontend  golangci-lint  release-helpers
 #             backend-security  frontend-security  embed
 checked_triggers=""
@@ -51,10 +151,10 @@ while read -r workflow job; do
   block=$(job_block "$workflow" "$job")
   [ -n "$block" ] || fail "$workflow has no job '$job'; a required check would never report"
 
-  offending=$(printf '%s\n' "$block" | grep -nE '^[[:space:]]*(if|paths|paths-ignore|continue-on-error):' || true)
-  if [ -n "$offending" ]; then
-    fail "$workflow job '$job' can be filtered out of a PR:
-$offending"
+  verdict=$(printf '%s\n' "$block" | block_verdict)
+  if [ "$verdict" != "ok" ]; then
+    fail "$workflow job '$job' can be filtered out of a PR or skipped into a free pass:
+$verdict"
   fi
 
   case "$checked_triggers" in
@@ -80,6 +180,9 @@ done <<'EOF'
 .github/workflows/security-scan.yml backend-security
 .github/workflows/security-scan.yml frontend-security
 EOF
+
+check_pipe_status backend/scripts/race-gate.sh
+check_pipe_status .github/release-tools/run-tests.sh
 
 # race 的 -run 正则必须今天还命中测试。零命中时 go test 退 0：
 # 运行时那一侧由 backend/scripts/race-gate.sh 的条数下限兜，这里兜"正则本身已经

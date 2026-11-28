@@ -5,6 +5,12 @@
 # 改一个测试名、把并发测试挪出这两个目录、或者把 -run 正则改坏，这个 job 都会
 # 静默变绿，看上去和"并发都验过了"一模一样。所以这里断言 -v 输出里真跑过的
 # 测试条数不低于下限，低于下限就是红。
+#
+# 退出码必须从管道首命令取：`cmd | tee log` 的 $? 是 tee 的。靠 `set -o pipefail`
+# 能把 go test 的失败带出来，但那只在 pipefail 被打开时成立——头部一被改成
+# `set -eu`（复制脚本时最常见的改法），`|| status=$?` 就永远不触发，一条红色
+# 的测试会打印 "1431 tests ran" 然后退 0。所以用 PIPESTATUS[0]，让 pipefail
+# 在不在对结果完全没有影响。
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
@@ -18,11 +24,13 @@ readonly MIN_TESTS=1300
 log=$(mktemp)
 trap 'rm -f "$log"' EXIT
 
-status=0
+set +e
 CGO_ENABLED=1 go test -race -tags=unit -timeout 600s -v \
   ./internal/service/ ./internal/handler/ \
   -run 'Concurren|Limiter|Limit|Cache|Schedul|Pool|Slot|Race|Parallel|Atomic' \
-  2>&1 | tee "$log" || status=$?
+  2>&1 | tee "$log"
+status=${PIPESTATUS[0]}
+set -e
 
 if [ "$status" -ne 0 ]; then
   printf 'race gate: go test failed with exit %d\n' "$status" >&2

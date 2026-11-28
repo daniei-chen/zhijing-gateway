@@ -291,11 +291,24 @@ FAIL
 不要当成已经挡住了。
 
 **还有一条防复发**：`deploy/tests/ci-workflow-guards-test.sh`（在 `shell` job 里跑）断言这 9 个
-必检 job 块里不出现 `if:` / `paths:` / `paths-ignore:` / `continue-on-error`，承载它们的
-workflow 的 `on:` 触发块里也不出现 `paths:` / `paths-ignore:`，并且 `race` 的 `-run` 正则今天仍
-命中 ≥ 下限条测试（静态模型，今天 1431，与运行时逐条对齐）。全仓 workflow 现在确实没有任何
-`paths:` 过滤，但那是今天的事实；这个测试把它变成机制——以后谁加过滤让某个必检在部分 PR 上
-消失，这里立刻红。
+必检 job 块里不出现五样东西——`if:` / `paths:` / `paths-ignore:` / `continue-on-error:` / `needs:`；
+承载它们的 workflow 的 `on:` 触发块里也不出现 `paths:` / `paths-ignore:`；并且 `race` 的 `-run`
+正则今天仍命中 ≥ 下限条测试（静态模型，今天 1431，与运行时逐条对齐）。全仓 workflow 现在确实
+没有任何 `paths:` 过滤，但那是今天的事实；这个测试把它变成机制——以后谁加过滤让某个必检在
+部分 PR 上消失，这里立刻红。
+
+`needs:` 在这张清单里是因为**依赖失败的 job 会被 skip，而 GitHub 把 skip 报告成 Success**——
+一条 `needs: [frontend]` 就足以让某个必检在某些 PR 上"绿着不跑"。唯一豁免是 `needs:` 配
+`if: always()`（`always()` 让 job 无论如何都跑，skip 这条路被堵死）；`if:` 的其他写法一律红，
+`if: always() && ...` 这种组合也红——豁免只认逐字的 `if: always()`。这条豁免规则本身由脚本里的
+7 条自测钉住（`needs:` 单独 → 红、`needs:`+`if: always()` → 绿、`if: always()` 单独 → 绿、
+`if:` 带条件 → 红、`continue-on-error:` → 红、`paths:` → 红、干净块 → 绿），守卫自己坏了会先红。
+
+同一个脚本还钉住另一个更隐蔽的东西：**每个 `| tee` 之后必须读 `PIPESTATUS`**。`cmd | tee log`
+的 `$?` 是 `tee` 的退出码，只靠 `set -o pipefail` 才能拿到左边那条命令的——而 pipefail 一旦被
+去掉（把头部改成 `set -eu` 是最常见的改法），`|| status=$?` 就永远不触发：一条失败的测试会打印
+出 `FAILED (failures=1)` 或 `ok` 之后照样退 0。2026-11-28 的审查就是靠 `set +o pipefail` 对照
+把这个问题抓出来的，两个脚本改成取 `${PIPESTATUS[0]}` 之后对 pipefail 存不存在都不再敏感。
 
 本地复跑：
 
