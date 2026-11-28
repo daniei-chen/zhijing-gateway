@@ -276,3 +276,39 @@ func imageSizeOrDefault(imageSize string) string {
 	}
 	return imageSize
 }
+
+// 简易模式：算价失败也不许把 usage 记录丢掉。
+// 这条打的是 gateway_usage_billing.go 里「简易模式吸收 costErr、按 $0 落账」那个分支——
+// 之前的简易模式用例走的是「无价但算价成功」，碰不到它。
+func TestRecordUsage_SimpleModeAbsorbsPricingFailure(t *testing.T) {
+	const model = "simple-mode-no-pricing-model"
+
+	usageRepo := &openAIRecordUsageLogRepoStub{}
+	billingRepo := &openAIRecordUsageBillingRepoStub{}
+	svc := newGatewayRecordUsageServiceWithBillingRepoForTest(usageRepo, billingRepo,
+		&openAIRecordUsageUserRepoStub{}, &openAIRecordUsageSubRepoStub{})
+	svc.cfg.RunMode = config.RunModeSimple
+	svc.cfg.Billing.InflightReservation.Enabled = true
+	svc.cfg.Billing.InflightReservation.FailClosedOnUnpriced = true
+	svc.billingCacheService.cfg = svc.cfg
+
+	groupID := int64(961)
+	group := &Group{ID: groupID, Status: StatusActive, Hydrated: true, RateMultiplier: 1}
+	err := svc.RecordUsage(context.Background(), &RecordUsageInput{
+		Result: &ForwardResult{
+			RequestID: "simple-unpriced-text",
+			Model:     model,
+			Usage:     ClaudeUsage{InputTokens: 1000, OutputTokens: 100},
+			Duration:  time.Second,
+		},
+		APIKey:  &APIKey{ID: 51, GroupID: &groupID, Group: group},
+		User:    &User{ID: 610},
+		Account: &Account{ID: 710},
+	})
+
+	require.NoError(t, err, "简易模式算价失败不能把错误抛给调用方，也不能丢用量")
+	require.Equal(t, 1, usageRepo.calls, "简易模式必须仍然写 usage")
+	require.NotNil(t, usageRepo.lastLog)
+	require.Zero(t, usageRepo.lastLog.ActualCost, "简易模式不扣费，按 $0 落账")
+	require.Zero(t, billingRepo.failureCalls, "简易模式不记 billing_failures")
+}
