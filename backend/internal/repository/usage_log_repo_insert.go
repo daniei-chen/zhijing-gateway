@@ -1300,7 +1300,7 @@ func prepareUsageLogInsert(log *service.UsageLog) usageLogInsertPrepared {
 	upstreamEndpoint := nullString(log.UpstreamEndpoint)
 	channelID := nullInt64(log.ChannelID)
 	modelMappingChain := nullString(log.ModelMappingChain)
-	billingTier := nullString(log.BillingTier)
+	billingTier := nullString(nil)
 	billingMode := nullString(log.BillingMode)
 	upstreamRequestID := nullString(log.UpstreamRequestID)
 	sessionID := nullString(log.SessionID)
