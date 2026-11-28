@@ -79,10 +79,12 @@ TestGo: [embed_test.go] | Go: [embed_on.go html_cache.go spa_fallback.go static_
 
 | 档 | 触发 | 跑什么 | 条数下限 |
 |---|---|---|---|
-| `pr` | `pull_request` | `-run '^(TestUserRegistrationAndLogin\|TestAPIKeyLifecycle)$'` | `E2E_MIN_TOP_LEVEL_PASS: 2` |
-| `full` | `main` push、`workflow_dispatch` | 全包（11 条） | `E2E_MIN_TOP_LEVEL_PASS: 2` |
+| `pr` | `pull_request` | `-run '^(TestUserRegistrationAndLogin\|TestAPIKeyLifecycle\|TestAPIKeyRevocationIsImmediate\|TestRegistrationSwitchIsEnforcedBothWays)$'` | `E2E_MIN_TOP_LEVEL_PASS: 4` |
+| `full` | `main` push、`workflow_dispatch` | 全包（11 条顶层） | `E2E_MIN_TOP_LEVEL_PASS: 4` |
 
-下限写在 workflow 的 job env 里，是一个脚本要核的数字，不是注释：断言步数行首的 `--- PASS: `，低于下限直接红。**2 是今天的真实数字，不是目标**——要抬它，必须先有栈内的假 OpenAI 兼容上游（见 §4.4），否则下限只是把「跑 2 条也算过」写得更正式。
+下限写在 workflow 的 job env 里，是一个脚本要核的数字，不是注释：断言步数行首的 `--- PASS: `，低于下限直接红。**4 是实测出来的数字，不是目标也不是整数拍脑袋**：pr 档跑 4 条、4 条全 PASS；full 档多跑的 9 条是 SKIP（缺上游密钥），不计入 PASS。要再抬，得先让那 9 条能被真跑（见 §4.4），否则下限只是把「跑 4 条也算过」写得更正式。
+
+2026-11-28 实测（#56 第一轮，run `46135841927`）：`stack_ready=292s`、`tests_done=304s`、`top_level_pass=2 top_level_fail=0`。也就是说 **一整轮的成本 96% 在起栈，跑用例只占 12 秒**——加用例的边际成本是秒级，成本在镜像构建与起栈上，所以缓存打在构建上（`docker/build-push-action` + `cache-from/to: type=gha`，compose 里显式 `image: zhijing-gateway:dev`）。
 
 ### 3.3 windows：不接，给命令
 

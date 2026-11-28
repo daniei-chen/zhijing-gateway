@@ -97,8 +97,9 @@ jobs:
   # 前置条件逐条核过源码，写在 docs/ci/test-tiers.md §4。
   #
   # 两档，按事件区分（E2E_TIER）：
-  # - pr   档：pull_request 上跑，只跑不依赖上游密钥的子集（两条用户流程），
-  #          目标是每个 PR 都能挡住「栈起不来 / 用户流程断了」这两类回归。
+  # - pr   档：pull_request 上跑，只跑不依赖上游密钥的子集（4 条：注册登录、
+  #          API Key 生命周期、Key 吊销即时失效、注册开关双向生效），
+  #          目标是每个 PR 都能挡住「栈起不来 / 钱算错 / Key 吊销了还能用」这三类回归。
   # - full 档：main 的 push 与 workflow_dispatch 上跑，跑全部 11 条（其中 9 条
   #          要真实上游密钥，没有就 SKIP——所以断言步只认「真跑过的条数」）。
   #
@@ -124,10 +125,37 @@ jobs:
     timeout-minutes: 40
     env:
       E2E_TIER: ${{ github.event_name == 'pull_request' && 'pr' || 'full' }}
-      # 真跑过的顶层用例条数下限。见上面的注释：2 是今天的真实数字，不是目标。
-      E2E_MIN_TOP_LEVEL_PASS: 2
+      # 真跑过的顶层用例条数下限 = 这一档实际会跑、且应当 PASS 的顶层用例数（实测 4）：
+      # TestUserRegistrationAndLogin / TestAPIKeyLifecycle /
+      # TestAPIKeyRevocationIsImmediate / TestRegistrationSwitchIsEnforcedBothWays。
+      # 两档都是 4：full 档多跑的 9 条是 SKIP（缺上游密钥），不计入 PASS。
+      # 这个数字按实测写，不写整数，也不写「目标值」。
+      E2E_MIN_TOP_LEVEL_PASS: 4
     steps:
       - uses: actions/checkout@v6
+      - name: Start the clock
+        run: |
+          # 计时在这里开始：后面每一步都打 E2E_TIMING <marker>=Ns。放在构建之前，
+          # 才能把「镜像构建」和「起栈+等健康」分开看——上一轮实测 stack_ready=292s、
+          # 跑测试只占 12s，需要知道那 292 秒里构建占多少，才谈得上决定缓存够不够。
+          echo "E2E_T0=$(date +%s)" >> "$GITHUB_ENV"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build the gateway image (GHA layer cache)
+        uses: docker/build-push-action@v6
+        with:
+          # 镜像名与 deploy/docker-compose.dev.yml 里 zhijing-gateway 的 image 一致，
+          # 下面 compose up 就不再自己构建（compose 里已去掉 --build）。
+          # 实测依据：PR 档整轮 304s 里有 292s 在起栈，而 run 只占 12s——
+          # 用例几乎免费，构建才是成本，所以缓存打在构建上。
+          context: .
+          file: Dockerfile
+          tags: zhijing-gateway:dev
+          load: true
+          build-args: |
+            NPM_CONFIG_REGISTRY=https://registry.npmjs.org
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Start the stack from this commit
         working-directory: deploy
         env:
@@ -144,12 +172,12 @@ jobs:
           TOTP_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org
         run: |
-          # 计时起点：后面每一步都打 E2E_TIMING <marker>=Ns，从这个时间点开始算。
-          echo "E2E_T0=$(date +%s)" >> "$GITHUB_ENV"
+          echo "E2E_TIMING image_built=$(( $(date +%s) - E2E_T0 ))s (tier=$E2E_TIER)"
           # 容器以 1000:1000 跑且 rootfs 只读，挂载的 data/ 得先可写。
           mkdir -p data
           sudo chown -R 1000:1000 data
-          docker compose -f docker-compose.dev.yml up -d --build
+          # 不带 --build：镜像上一步已经用 GHA 层缓存构建好了（compose 里设了 image 名）。
+          docker compose -f docker-compose.dev.yml up -d
       - name: Wait for the gateway
         run: |
           # 失败时把网关日志的尾巴打进 job log：artifact 要 token 才能下载，
@@ -206,7 +234,7 @@ jobs:
           case "$E2E_TIER" in
             pr)
               echo "E2E_TIER=pr: 只跑不依赖上游密钥的子集"
-              RUN_FILTER='^(TestUserRegistrationAndLogin|TestAPIKeyLifecycle)$'
+              RUN_FILTER='^(TestUserRegistrationAndLogin|TestAPIKeyLifecycle|TestAPIKeyRevocationIsImmediate|TestRegistrationSwitchIsEnforcedBothWays)$'
               ;;
             *)
               echo "E2E_TIER=full: 跑全部"
@@ -232,11 +260,27 @@ jobs:
             echo "::error::用户流程测试被 skip 了，这个 job 等于没跑"
             exit 1
           fi
+          # 下限不兜底：${E2E_MIN_TOP_LEVEL_PASS:-0} 会把「没有下限」静默变成
+          # 「下限是 0」，等于没有下限。缺这个变量就是配置坏了，直接红。
+          if [ -z "${E2E_MIN_TOP_LEVEL_PASS:-}" ]; then
+            echo "::error::E2E_MIN_TOP_LEVEL_PASS 没有设置——没有下限的档等于没有档"
+            exit 1
+          fi
+          # e2e.log 不存在 ≠ 0 条通过。grep 打不开文件时不给标准输出，下面
+          # `[ "$top_pass" -lt N ]` 就会拿到空串：`[ "" -lt 2 ]` 是用法错误（返回 2），
+          # 而它出现在 if 的条件位置，-e 不会退出，条件被判为假——脚本继续往下走
+          # 并打印成功。这是「出错路径上仍然绿」，必须显式挡住。
+          if [ ! -r e2e.log ]; then
+            echo "::error::e2e.log 不存在或不可读，无法统计用例条数"
+            exit 1
+          fi
           # 条数下限。逐条点名「某两条必须 PASS」挡不住「用一个更窄的 -run 让
           # 整个包秒过」——那种情况下上面两条断言照样全绿，而 e2e 什么都没验。
           # 只数顶层的 `--- PASS: `（行首），子测试的 PASS 行是缩进的。
           top_pass=$(grep -cE '^--- PASS: ' e2e.log || true)
           top_fail=$(grep -cE '^--- FAIL: ' e2e.log || true)
+          top_pass=${top_pass:-0}
+          top_fail=${top_fail:-0}
           echo "E2E_TIER=$E2E_TIER top_level_pass=$top_pass top_level_fail=$top_fail min=$E2E_MIN_TOP_LEVEL_PASS"
           if [ "$top_fail" -ne 0 ]; then
             echo "::error::$top_fail 条顶层用例失败"

@@ -229,6 +229,94 @@ func TestAPIKeyLifecycle(t *testing.T) {
 	})
 }
 
+// TestAPIKeyRevocationIsImmediate 吊销一条 Key 之后，同一个 Key 必须立刻失效。
+//
+// 挡的回归：删除 Key 只写了 DB、没清鉴权缓存（`apiKeyService.Delete` 里那句
+// `InvalidateAuthCacheByKey`）。那天要是被删掉或被挪到事务外面，用户以为已经
+// 吊销的 Key 还能继续按秒计费——这是**直接漏钱**，不是接口不好看。
+//
+// 回退哪一行会红：把 `internal/service/api_key_service.go:967` 的
+// `s.InvalidateAuthCacheByKey(ctx, key)` 删掉（或让缓存 TTL 生效再断言），
+// 这条用例就会红在「吊销后仍被放过」。
+func TestAPIKeyRevocationIsImmediate(t *testing.T) {
+	accessToken := loginTestUser(t)
+	keyID, apiKey := createAPIKey(t, accessToken, "e2e-revoke-"+fmt.Sprintf("%d", time.Now().UnixMilli()))
+
+	// 先证明这条 Key 在吊销前确实能过鉴权层，否则「吊销后 401」什么也证明不了。
+	before := requireKeyAccepted(t, apiKey)
+
+	resp, err := doRequest(t, http.MethodDelete, fmt.Sprintf("%s/keys/%d", apiPrefix, keyID), nil, accessToken)
+	if err != nil {
+		t.Fatalf("吊销 API Key 请求失败: %v", err)
+	}
+	respBody, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("吊销 API Key 返回 HTTP %d: %s（DELETE %s/keys/%d）",
+			resp.StatusCode, string(respBody), apiPrefix, keyID)
+	}
+
+	// 连续两次：第一次抓「缓存没清」，第二次抓「第一次恰好被清了但后续没清」。
+	for i := 1; i <= 2; i++ {
+		requireKeyRejected(t, apiKey, fmt.Sprintf("第 %d 次（吊销前它是 HTTP %d）", i, before))
+	}
+	t.Logf("✅ 吊销后立刻失效：吊销前 HTTP %d，吊销后两次都是 401", before)
+}
+
+// TestRegistrationSwitchIsEnforcedBothWays 公开注册开关必须**两个方向**都真的生效。
+//
+// 挡的回归：DB 里的 `registration_enabled` 写进去了但读路径缓存住了旧值，或者
+// 关闭方向根本没被检查。单向测（只测「打开后能注册」）看不出这两种——注册用例
+// 自己就是靠打开开关才跑起来的，它永远不会去验「关掉之后确实不能注册」。
+//
+// 回退哪一行会红：把 `RegisterWithVerification` 开头那句
+// `if s.settingService == nil || !s.settingService.IsRegistrationEnabled(ctx)`
+// （`internal/service/auth_service.go:176`）去掉，这条用例会红在「关掉注册后仍然
+// 注册成功」。反方向：把 PUT 的设置改成不落库（缓存/写路径任意一处），会红在
+// 「打开后仍然 403」。
+func TestRegistrationSwitchIsEnforcedBothWays(t *testing.T) {
+	token := adminToken(t)
+	acceptAdminCompliance(t, token)
+
+	// 栈是一次性的，但这条用例会临时关掉注册：无论如何都要开回来，
+	// 否则同一次运行里后面任何依赖注册的用例都会莫名其妙 403。
+	disableRegistration(t, token)
+	t.Cleanup(func() { restoreRegistrationEnabled(t, token) })
+
+	disabledEmail := uniqueTestEmail("e2e-reg-off")
+	resp, err := doRequest(t, http.MethodPost, apiPrefix+"/auth/register", registerPayload(t, disabledEmail), "")
+	if err != nil {
+		t.Fatalf("注册请求失败: %v", err)
+	}
+	respBody, _ := io.ReadAll(resp.Body)
+	resp.Body.Close()
+	if resp.StatusCode != http.StatusForbidden {
+		t.Fatalf("注册开关关闭时注册返回 HTTP %d: %s\n期望 403 REGISTRATION_DISABLED"+
+			"（internal/service/auth_service.go:176）。200 说明开关没生效——这正是「设置写进去了但不生效」的样子",
+			resp.StatusCode, string(respBody))
+	}
+	if !strings.Contains(string(respBody), "REGISTRATION_DISABLED") {
+		t.Fatalf("注册开关关闭时返回了 403，但原因不是 REGISTRATION_DISABLED: %s——"+
+			"别的 403（比如邀请码、邮箱后缀、风控）会让这条用例假装通过", string(respBody))
+	}
+	t.Logf("✅ 关闭注册后注册被拒（403 REGISTRATION_DISABLED）")
+
+	enableRegistration(t, token)
+
+	openEmail := uniqueTestEmail("e2e-reg-on")
+	resp2, err := doRequest(t, http.MethodPost, apiPrefix+"/auth/register", registerPayload(t, openEmail), "")
+	if err != nil {
+		t.Fatalf("注册请求失败: %v", err)
+	}
+	respBody2, _ := io.ReadAll(resp2.Body)
+	resp2.Body.Close()
+	if resp2.StatusCode != http.StatusOK {
+		t.Fatalf("重新打开注册后注册返回 HTTP %d: %s（邮箱 %s）——开关写回之后仍然注册不了，说明读写不是同一份设置",
+			resp2.StatusCode, string(respBody2), openEmail)
+	}
+	t.Logf("✅ 重新打开注册后注册成功: %s", openEmail)
+}
+
 // =============================================================================
 // 辅助函数
 // =============================================================================
@@ -523,4 +611,143 @@ func redactAPIKey(key string) string {
 		return "***"
 	}
 	return key[:8] + "..."
+}
+
+// uniqueTestEmail 生成不重复的测试邮箱。包级 testUserEmail 只算一次，多个用例
+// 共用它就会互相踩（第二个用例注册同一个邮箱拿到 409 EMAIL_EXISTS）。
+func uniqueTestEmail(prefix string) string {
+	return fmt.Sprintf("%s-%d@test.local", prefix, time.Now().UnixNano())
+}
+
+func registerPayload(t *testing.T, email string) []byte {
+	t.Helper()
+	body, err := json.Marshal(map[string]string{
+		"email":    email,
+		"password": testUserPassword,
+		"username": testUserName,
+	})
+	if err != nil {
+		t.Fatalf("序列化注册请求失败: %v", err)
+	}
+	return body
+}
+
+// createAPIKey 建一条 Key 并返回 (id, key)。id 用来吊销，缺了就没法验吊销。
+func createAPIKey(t *testing.T, accessToken, name string) (int64, string) {
+	t.Helper()
+
+	payload, _ := json.Marshal(map[string]string{"name": name})
+	resp, err := doRequest(t, http.MethodPost, apiPrefix+"/keys", payload, accessToken)
+	if err != nil {
+		t.Fatalf("创建 API Key 请求失败: %v", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("创建 API Key 返回 HTTP %d: %s（POST %s/keys）", resp.StatusCode, string(respBody), apiPrefix)
+	}
+
+	var view struct {
+		ID  int64  `json:"id"`
+		Key string `json:"key"`
+	}
+	decodeData(t, respBody, &view, "POST "+apiPrefix+"/keys")
+	if view.ID == 0 {
+		t.Fatalf("创建 API Key 的响应里没有 id（body: %s）——没有 id 就无法验吊销", string(respBody))
+	}
+	if view.Key == "" {
+		t.Fatalf("创建 API Key 的响应里没有 key（body: %s）", string(respBody))
+	}
+	return view.ID, view.Key
+}
+
+// requireKeyAccepted 断言这条 Key 能过网关鉴权层（200 / 402 / 403），返回状态码。
+// 401 是「Key 不认」，其余说明鉴权过了（栈里没有上游账号，所以业务层会给 402/403）。
+func requireKeyAccepted(t *testing.T, key string) int {
+	t.Helper()
+
+	resp, err := doRequest(t, http.MethodGet, "/v1/models", nil, key)
+	if err != nil {
+		t.Fatalf("网关请求失败: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	switch resp.StatusCode {
+	case http.StatusOK, http.StatusPaymentRequired, http.StatusForbidden:
+		return resp.StatusCode
+	default:
+		t.Fatalf("这条 Key 本应通过鉴权层，实际 HTTP %d: %s（401 = Key 不被认，404 = 路径不存在）",
+			resp.StatusCode, string(body))
+		return 0
+	}
+}
+
+// requireKeyRejected 断言网关把这条 Key 拒成 401（api_key_auth.go:50 / :82）。
+func requireKeyRejected(t *testing.T, key, why string) {
+	t.Helper()
+
+	resp, err := doRequest(t, http.MethodGet, "/v1/models", nil, key)
+	if err != nil {
+		t.Fatalf("网关请求失败: %v", err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusUnauthorized {
+		t.Fatalf("这条 Key 本应被拒成 401，实际 HTTP %d: %s（%s）——"+
+			"Key 已经吊销/禁用却还能过鉴权，意味着它还能继续计费",
+			resp.StatusCode, string(body), why)
+	}
+}
+
+// setRegistrationEnabled 写开关并读回确认，两个方向都可用。
+func setRegistrationEnabled(t *testing.T, token string, want bool) {
+	t.Helper()
+
+	payload, _ := json.Marshal(map[string]any{"registration_enabled": want})
+	resp, err := doRequest(t, http.MethodPut, apiPrefix+"/admin/settings", payload, token)
+	if err != nil {
+		t.Fatalf("写 registration_enabled=%v 请求失败: %v", want, err)
+	}
+	defer resp.Body.Close()
+
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("写 registration_enabled=%v 返回 HTTP %d: %s（PUT %s/admin/settings）",
+			want, resp.StatusCode, string(body), apiPrefix)
+	}
+	if got := readRegistrationEnabled(t, token); got != want {
+		t.Fatalf("写入 registration_enabled=%v 之后读回是 %v——写入和读取不是同一份设置", want, got)
+	}
+}
+
+func enableRegistration(t *testing.T, token string) {
+	t.Helper()
+	setRegistrationEnabled(t, token, true)
+}
+
+func disableRegistration(t *testing.T, token string) {
+	t.Helper()
+	setRegistrationEnabled(t, token, false)
+}
+
+// restoreRegistrationEnabled 给 t.Cleanup 用的「尽力而为」版本：栈是一次性的，
+// 但一条用例失败不该把同一次运行里后面依赖注册的用例一起带红，所以这里只记日志、
+// 不再 Fatalf（在 cleanup 里 Fatalf 会把失败原因搅在一起）。
+func restoreRegistrationEnabled(t *testing.T, token string) {
+	payload, _ := json.Marshal(map[string]any{"registration_enabled": true})
+	resp, err := doRequest(t, http.MethodPut, apiPrefix+"/admin/settings", payload, token)
+	if err != nil {
+		t.Logf("警告：恢复 registration_enabled 请求失败: %v", err)
+		return
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		t.Logf("警告：恢复 registration_enabled 返回 HTTP %d: %s", resp.StatusCode, string(body))
+		return
+	}
+	t.Logf("已把 registration_enabled 恢复为 true")
 }

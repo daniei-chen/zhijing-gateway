@@ -10,6 +10,10 @@
 
 services:
   zhijing-gateway:
+    # 显式镜像名：CI 用 docker/build-push-action 带 GHA 层缓存预构建这个 tag，
+    # 然后 `docker compose up -d`（不带 --build）直接用它，省掉重复构建。
+    # 本地照旧 `docker compose ... up --build` 也能用，只是会打上同一个 tag。
+    image: zhijing-gateway:dev
     build:
       context: ..
       dockerfile: Dockerfile
