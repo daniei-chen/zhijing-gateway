@@ -117,7 +117,7 @@ func appendUsageLogBillingTierWhereConditionWithAlias(conditions []string, args 
 	if alias != "" {
 		column = alias + ".billing_tier"
 	}
-	conditions = append(conditions, fmt.Sprintf("%s = $%d", column, len(args)+1))
+	conditions = append(conditions, fmt.Sprintf("(%s = $%d OR %s IS NULL)", column, len(args)+1, column))
 	args = append(args, tier)
 	return conditions, args
 }
