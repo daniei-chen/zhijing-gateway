@@ -291,7 +291,7 @@ FAIL
 
 ## 8. 必检不许"命令退 0 但什么都没跑"（2026-11-28，基于 `a5176cb4d`）
 
-9 个必检（含 `embed`）今天都真跑、没有 job 级条件跳过。但"今天真跑"不是机制：下面三条通路
+10 个必检（含 `embed`、`e2e`）今天都真跑、没有 job 级条件跳过。但"今天真跑"不是机制：下面三条通路
 都能让某条必检在没人察觉的情况下变绿，现在每条都补了断言，并且都验过"改之前绿、改之后红"。
 
 | 位置 | 原来的静默绿 | 现在 | 红的样子（实测） |
@@ -313,12 +313,15 @@ FAIL
 **还有一条防复发**：`deploy/tests/ci-workflow-guards-test.sh`（入口在 `release-helpers` job 里跑，
 断言本体是 `deploy/tests/ci_workflow_guards_test.py`）守四件事：
 
-1. **9 个必检 job 块里不出现 `if` / `paths` / `paths-ignore` / `continue-on-error` / `needs`。**
+1. **10 个必检 job 块里不出现 `if` / `paths` / `paths-ignore` / `continue-on-error` / `needs`。**
    `needs` 在这张清单里是因为**依赖失败的 job 会被 skip，而 GitHub 把 skip 报告成 Success**——
    一条 `needs: [frontend]` 就足以让某个必检在某些 PR 上"绿着不跑"。唯一豁免是 `needs` 与
    `if: always()` 同时出现（`always()` 让 job 无论如何都跑，skip 这条路被堵死）；`if` 的其他写法
-   一律红，`if: always() && ...` 这种组合也红。`if: always()    ` 的尾随空格、`if: 'always()'` 的
-   引用形式都先 strip 再比——YAML 里它们是同一个值。
+   一律红，`if: always() && ...` 这种组合也红。豁免认两种等价写法：裸 `always()` 与
+   `${{ always() }}`；判定前先 strip，所以 `if: ' always() '` 这种引号内的空白也当同一个值
+   （行尾空格是 YAML 自己吃掉的，测不到 strip，改成引号形式才是在测它）。
+   必检清单本身与 `docs/ci/branch-protection.md` 的 context 清单**集合相等**由测试钉住：
+   规则集不在仓库里，文档是它唯一的仓内锚点，靠两边各自维护迟早会分叉。
 2. **触发面**：承载必检的 workflow 必须仍由 `pull_request` 触发，且它下面不得有
    `branches` / `branches-ignore`（按 base 过滤，stacked PR 的 base 不是 main 就一条检查都不排队）
    或 `paths` / `paths-ignore`（只改文档的 PR 同样一条检查都没有）。`types` **有意不在禁列**：
@@ -346,10 +349,12 @@ FAIL
 `shell` job 要多装一套 python 才有同一个解析器。HOME-3 的要求是只留一个解析器、不许运行时
 回退（回退分支在 CI 里永远跑不到，是一段没人验的代码），所以放在那个已经保证有它的 job 里。
 
+**守卫自己也有 `Ran N` 下限**（`deploy/tests/ci-workflow-guards-test.sh`，下限是当前真实条数）。整篇在堵「命令退 0 但什么都没跑」，守卫自己没有条数下限说不过去：测试文件被改成空壳、或者 unittest 一个用例都没收集到，`Ran 0 tests` 同样退 0。
+
 本地复跑：
 
 ```bash
-sh deploy/tests/ci-workflow-guards-test.sh        # 9 个 job + race 正则命中数
+sh deploy/tests/ci-workflow-guards-test.sh        # 10 个 job + 触发面 + race 正则命中数（含 Ran N 下限）
 sh deploy/tests/ci-race-job-test.sh               # race job 的形状（含 race-gate.sh 的断言）
 bash .github/release-tools/run-tests.sh           # 发布矩阵：显式模块 + 下限 10
 python tools/check-pnpm-audit-exceptions-test.py -v

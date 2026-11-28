@@ -7,11 +7,14 @@ YAML 的等价写法，所以这里 `yaml.safe_load` 解析文档再断言键。
 
 守四件事：
 
-1. 9 个必检 job 块里不出现 if / paths / paths-ignore / continue-on-error / needs。
+1. 必检 job 块里不出现 if / paths / paths-ignore / continue-on-error / needs。
    唯一豁免是 needs 与 `if: always()` 同时出现：always() 让 job 无论如何都跑，skip
    这条路被堵死。单独一个 `if: always()` 也放行——它不能跳过 job，只会强制它跑；
-   `if:` 的其他写法一律红（见 job_offenders）。`if: always()    ` 的尾随空格先
-   strip 再比，那是 YAML 里的同一个值。
+   `if:` 的其他写法一律红（见 job_offenders）。豁免认两种等价写法：裸 `always()` 与
+   `${{ always() }}`，判定前先 strip，`if: ' always() '` 这类引号内空白也算同一个值；
+   `always() && 某条件` 不在豁免内。
+   必检清单本身要和 `docs/ci/branch-protection.md` 里那份 context 清单**集合相等**：
+   规则集不在仓库里，文档是它在仓内的唯一锚点，两边不可能靠各自维护保持一致。
 2. 触发面：承载必检的 workflow 必须仍由 `pull_request` 触发，且 `pull_request` 下
    不得按 base（branches / branches-ignore）或路径（paths / paths-ignore）过滤——
    stacked PR 的 base 不是 main，只改文档的 PR 不命中路径，这些 PR 上检查一条都
@@ -38,8 +41,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 
-# 必检清单的来源是规则集 28278717（`GET /repos/{o}/{r}/rules/branches/main`），
-# 文档在 docs/ci/branch-protection.md。改这里必须同时改那份文档。
+# 必检清单的来源是规则集 28278717（`GET /repos/{o}/{r}/rulesets/28278717`），
+# 文档在 docs/ci/branch-protection.md。改这里必须同时改那份文档——
+# DocumentedContextsTests 会把两份集合钉在一起，只改一边就红。
 REQUIRED_JOBS = {
     ".github/workflows/backend-ci.yml": (
         "shell",
@@ -49,12 +53,15 @@ REQUIRED_JOBS = {
         "golangci-lint",
         "release-helpers",
         "embed",
+        "e2e",
     ),
     ".github/workflows/security-scan.yml": (
         "backend-security",
         "frontend-security",
     ),
 }
+
+CONTEXT_DOC = "docs/ci/branch-protection.md"
 
 FORBIDDEN_JOB_KEYS = ("if", "paths", "paths-ignore", "continue-on-error", "needs")
 FORBIDDEN_TRIGGER_KEYS = ("paths", "paths-ignore", "branches", "branches-ignore")
@@ -85,7 +92,41 @@ def load_workflow(path: Path) -> dict:
 def triggers(document: dict) -> dict:
     # `on` 在 YAML 1.1 里是布尔真，PyYAML 会把它解析成 True。
     value = document.get("on", document.get(True))
-    return value if isinstance(value, dict) else {}
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, list):
+        # `on: [push, pull_request]` 与 `on: {push: ..., pull_request: ...}` 是同一个
+        # 触发面，归一成同样形状。不归一就会把列表形式误报成"没有 pull_request"。
+        return {str(event): None for event in value}
+    return {}
+
+
+def is_always(value: object) -> bool:
+    """整个条件就是 always()：裸值或 `${{ always() }}` 表达式。
+
+    `always() && 某条件` 不是豁免——它仍可能在依赖失败时被 skip。
+    """
+    text = str(value).strip()
+    if text.startswith("${{") and text.endswith("}}"):
+        text = text[3:-2].strip()
+    return text == ALWAYS
+
+
+def documented_contexts(path: Path) -> set[str]:
+    """从分支保护文档的 context 代码块里读出必检集合。
+
+    规则集不在仓库里，这份文档是它在仓内的唯一锚点。读不到代码块或代码块为空
+    都要硬失败：返回空集合的话，有的写法会让"两边相等"永远不成立（天天红），
+    有的写法又会让它永远成立（永远绿），两种都比没有断言更糟。
+    """
+    text = path.read_text(encoding="utf-8")
+    match = re.search(r"必需检查的 context.*?\n+\s*```[^\n]*\n(.*?)```", text, re.DOTALL)
+    if match is None:
+        raise AssertionError(f"{path} 里找不到必需检查的 context 代码块")
+    contexts = set(match.group(1).split())
+    if not contexts:
+        raise AssertionError(f"{path} 的 context 代码块是空的")
+    return contexts
 
 
 def job_offenders(job: dict) -> list[str]:
@@ -93,7 +134,7 @@ def job_offenders(job: dict) -> list[str]:
     if not isinstance(job, dict):
         raise AssertionError("job 块不是 mapping")
 
-    always = str(job.get("if", "")).strip() == ALWAYS
+    always = is_always(job.get("if", ""))
     offenders = []
     for key in FORBIDDEN_JOB_KEYS:
         if key not in job:
@@ -198,15 +239,25 @@ class GuardRuleTests(unittest.TestCase):
     def test_needs_with_always_is_allowed(self) -> None:
         for label, text in (
             ("plain", "    needs: [frontend]\n    if: always()\n"),
-            ("trailing spaces", "    needs: [frontend]\n    if: always()    \n"),
+            # 行尾空格是 YAML 自己吃掉的，所以这里测的必须是引号内的空白——
+            # 只有它会走到 is_always 的 strip。
+            ("spaces inside the quotes", "    needs: [frontend]\n    if: ' always() '\n"),
             ("quoted value", "    needs: [frontend]\n    if: 'always()'\n"),
+            ("expression form", "    needs: [frontend]\n    if: ${{ always() }}\n"),
         ):
             with self.subTest(normalisation=label):
                 self.assertEqual(job_offenders(self.job(text)), [])
 
     def test_needs_with_a_conditional_if_is_rejected(self) -> None:
-        text = "    needs: [frontend]\n    if: always() && github.ref == 'refs/heads/main'\n"
-        self.assertEqual(job_offenders(self.job(text)), ["if", "needs"])
+        for label, text in (
+            ("conjunction", "    needs: [frontend]\n    if: always() && github.ref == 'refs/heads/main'\n"),
+            (
+                "expression conjunction",
+                "    needs: [frontend]\n    if: ${{ always() && github.ref == 'refs/heads/main' }}\n",
+            ),
+        ):
+            with self.subTest(case=label):
+                self.assertEqual(job_offenders(self.job(text)), ["if", "needs"])
 
     def test_always_alone_is_allowed(self) -> None:
         self.assertEqual(job_offenders(self.job("    if: always()\n")), [])
@@ -223,6 +274,9 @@ class GuardRuleTests(unittest.TestCase):
             ("pull_request alone", "on:\n  pull_request:\n", []),
             ("pull_request empty mapping", "on:\n  pull_request: {}\n", []),
             ("types is allowed", "on:\n  pull_request:\n    types: [opened, synchronize]\n", []),
+            # 列表写法与 mapping 写法是同一个触发面，不许判成"没有 pull_request"。
+            ("event list form", "on: [push, pull_request]\n", []),
+            ("event list form without pull_request", "on: [push]\n", ["pull_request"]),
             ("no pull_request", "on:\n  push:\n    branches: [main]\n", ["pull_request"]),
             ("branches", "on:\n  pull_request:\n    branches: [main]\n", ["branches"]),
             ("branches-ignore", "on:\n  pull_request:\n    branches-ignore: [release/*]\n", ["branches-ignore"]),
@@ -236,6 +290,39 @@ class GuardRuleTests(unittest.TestCase):
         for label, text, expected in cases:
             with self.subTest(case=label):
                 self.assertEqual(trigger_offenders(document(text)), expected)
+
+
+class DocumentedContextsTests(unittest.TestCase):
+    """守卫盯的必检清单必须和文档里那份 context 清单集合相等。
+
+    规则集不在仓库里、review 看不见它，所以「规则集加了第 10 条，守卫还只盯 9 条」
+    这种偏差只能靠仓库内两份文本互钉。断言写成集合相等而不是 `== 10`：条数会变，
+    两边一致这件事不会。
+    """
+
+    def test_required_jobs_match_the_documented_context_set(self) -> None:
+        documented = documented_contexts(ROOT / CONTEXT_DOC)
+        guarded = {job for jobs in REQUIRED_JOBS.values() for job in jobs}
+        self.assertEqual(
+            guarded,
+            documented,
+            f"守卫清单与 {CONTEXT_DOC} 的 context 清单不一致："
+            f"只在守卫里 {sorted(guarded - documented)}，只在文档里 {sorted(documented - guarded)}",
+        )
+
+    def test_document_without_the_block_fails(self) -> None:
+        # 解析不到代码块必须硬失败：返回空集合的话，有的写法会让这条断言永绿。
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "doc.md"
+            for label, text in (
+                ("no block", "# 只有正文\n\n没有任何 fenced block\n"),
+                ("empty block", "必需检查的 context：\n\n```\n```\n"),
+                ("block but not the contexts one", "别的段落：\n\n```\nshell\n```\n"),
+            ):
+                with self.subTest(case=label):
+                    path.write_text(text, encoding="utf-8")
+                    with self.assertRaises(AssertionError):
+                        documented_contexts(path)
 
 
 class RequiredWorkflowTests(unittest.TestCase):
