@@ -20,8 +20,10 @@ test-unit:
 test-integration:
 	go test -tags=integration ./...
 
+# -race 必须证明它真跑了测试：-run 零命中时 go test 退 0，门禁会静默变绿。
+# 断言与下限在 scripts/race-gate.sh 里。
 test-race:
-	CGO_ENABLED=1 go test -race -tags=unit -timeout 600s ./internal/service/ ./internal/handler/ -run 'Concurren|Limiter|Limit|Cache|Schedul|Pool|Slot|Race|Parallel|Atomic'
+	bash ./scripts/race-gate.sh
 
 test-e2e:
 	./scripts/e2e-test.sh

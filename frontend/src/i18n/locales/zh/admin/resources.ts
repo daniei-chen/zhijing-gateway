@@ -547,6 +547,8 @@ export default {
       billingModePerRequest: '按次',
       billingModeImage: '按次(图片)',
       billingModeVideo: '按次(视频)',
+      imagePriceDefaulted: '默认价',
+      imagePriceDefaultedHint: '该定价行没有可用单价，已按默认图价计费。',
       allBillingModes: '全部计费模式',
 	  upstreamModelAudit: '上游模型审计',
 	  allUpstreamModelAudit: '全部响应模型状态',

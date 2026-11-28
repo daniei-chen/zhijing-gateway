@@ -112,6 +112,11 @@ func (h *UsageHandler) List(c *gin.Context) {
 	model := c.Query("model")
 	requestID := strings.TrimSpace(c.Query("request_id"))
 	billingMode := strings.TrimSpace(c.Query("billing_mode"))
+	billingTier := strings.TrimSpace(c.Query("billing_tier"))
+	if !service.IsValidUsageTierFilter(billingTier) {
+		response.BadRequest(c, "Invalid billing_tier")
+		return
+	}
 
 	var requestType *int16
 	var stream *bool
@@ -201,6 +206,7 @@ func (h *UsageHandler) List(c *gin.Context) {
 		NativeCompactionV2:    nativeCompactionV2,
 		BillingType:           billingType,
 		BillingMode:           billingMode,
+		BillingTier:           billingTier,
 		UpstreamModelMismatch: upstreamModelMismatch,
 		StartTime:             startTime,
 		EndTime:               endTime,
