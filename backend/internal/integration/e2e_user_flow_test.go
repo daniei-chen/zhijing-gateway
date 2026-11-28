@@ -164,7 +164,10 @@ func TestAPIKeyLifecycle(t *testing.T) {
 		respBody, _ := io.ReadAll(resp.Body)
 
 		// 402/403 在这套测试栈里是正常结果：没有上游账号，所以没有余额/没有可用
-		// 账户，但走到这两步说明 API Key 已经通过鉴权。除此之外一律是故障。
+		// 账户。但不能光凭这个状态码就认定「鉴权过了」——万一鉴权 middleware
+		// 本身坏了、对谁都回 403，这条测试照样绿。所以加一条对照：同一个请求
+		// 换成一个伪造的 Key，必须被拒成 401（中间件对无效 Key 的固定回答，
+		// internal/server/middleware/api_key_auth.go:50、:82）。
 		switch resp.StatusCode {
 		case http.StatusOK:
 			t.Logf("✅ API Key 网关调用成功")
@@ -176,6 +179,23 @@ func TestAPIKeyLifecycle(t *testing.T) {
 			t.Fatalf("网关返回 HTTP %d: %s（带 API Key 请求 /v1/models，401 说明 Key 无效，404 说明路径不存在）",
 				resp.StatusCode, string(respBody))
 		}
+
+		bogus, err := doRequest(t, http.MethodGet, "/v1/models", nil, "sk-definitely-not-a-real-key")
+		if err != nil {
+			t.Fatalf("伪造 Key 的对照请求失败: %v", err)
+		}
+		defer bogus.Body.Close()
+		bogusBody, _ := io.ReadAll(bogus.Body)
+
+		if bogus.StatusCode != http.StatusUnauthorized {
+			t.Fatalf("伪造 Key 期望 401（api_key_auth.go:50 的 INVALID_API_KEY），实际 HTTP %d: %s——"+
+				"鉴权 middleware 的行为变了，这条用例就不能再拿 %d 当成「鉴权通过」的证据",
+				bogus.StatusCode, string(bogusBody), resp.StatusCode)
+		}
+		if bogus.StatusCode == resp.StatusCode {
+			t.Fatalf("伪造 Key 与真 Key 返回同一个状态码 %d，这个响应证明不了鉴权生效", resp.StatusCode)
+		}
+		t.Logf("✅ 只有真 Key 被放过：伪造 Key 得到 401，真 Key 得到 %d", resp.StatusCode)
 	})
 
 	// 步骤 3: 查询用量记录

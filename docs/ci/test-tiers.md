@@ -137,7 +137,7 @@ test-e2e:
 | `TestGeminiModelsList`、`TestGeminiGenerateContent` | `GEMINI_API_KEY` 非空 | `t.Skip` |
 | `TestClaudeMessagesWithGeminiModel`、`TestGeminiEndpointWithClaudeModel` | `ENDPOINT_PREFIX=/antigravity` | `t.Skip("仅在 Antigravity 模式下运行")` |
 | `TestUserRegistrationAndLogin` | 栈在跑且 `/api/v1/auth/register`、`/api/v1/auth/login`、`/api/v1/user/profile` 存在 | **任何非 200 都 `t.Fatalf`**（2026-11-28 起）。此前 404 被当成「继续尝试」，整条测试降级成 skip，所以它自接入起从未绿过也没人发现 |
-| `TestAPIKeyLifecycle` | 栈在跑 + 能登录（`ADMIN_EMAIL`/`ADMIN_PASSWORD`，否则用测试用户） | **登录失败即 `t.Fatalf`**（2026-11-28 起）。`/v1/models` 返回 402/403 仍算通过（栈里没有上游账号，鉴权已过），其它状态码硬失败 |
+| `TestAPIKeyLifecycle` | 栈在跑 + 能登录（`ADMIN_EMAIL`/`ADMIN_PASSWORD`，否则用测试用户） | **登录失败即 `t.Fatalf`**（2026-11-28 起）。`/v1/models` 返回 402/403 仍算通过（栈里没有上游账号），其它状态码硬失败；**并用一个伪造 Key 做对照，要求它被拒成 401**，这样 402/403 才是「鉴权过了但没有账户」的证据，而不是鉴权坏了对谁都回同一个码 |
 
 注意 `CLAUDE_API_KEY` / `GEMINI_API_KEY` 是**网关自己签发的 API Key**（`Authorization: Bearer` 打 `baseURL`，`e2e_gateway_test.go:113`），不是上游厂商的 key。
 
