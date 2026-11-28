@@ -285,6 +285,11 @@ FAIL
 - **`frontend-security` 的豁免通道以前永远用不上**：`pnpm audit --audit-level=high` 命中 high 时命令自己退非零，那一步先红，`tools/check_pnpm_audit_exceptions.py` 根本没机会跑，`.github/audit-exceptions.yml` 对 high/critical 是死配置。现在只有那条命令带 `|| true`，紧跟一步 `tools/assert_pnpm_audit_report.py` 断言报告可解析且含 `metadata.vulnerabilities`（`{}` 在豁免脚本眼里等于"没有漏洞"，所以这一步是承重的），判定权仍归豁免脚本。`tools/check-pnpm-audit-exceptions-test.py` 喂真实形状的报告验五种情形：未豁免 high 红、已豁免绿、过期红、干净绿、只有 low 绿。
 - **`govulncheck` 版本钉死**：`@latest` 换成 `@v1.10.0`（2026-11-28 `@latest` 实际解析到的版本），不让上游发坏版本把必检无缘无故变红。
 
+下限是粗粒度闸，说清它挡不住什么：它挡的是「整批消失」（race 少 131 条以上）、
+「过滤器指向空集合」和「job 被条件跳过」；**挡不住单个并发用例改名后悄悄退出抽样**——
+那需要一份用例名清单，代价是每次合法改名/新增都要同步，本轮不做。这条残余缺口写在这里，
+不要当成已经挡住了。
+
 **还有一条防复发**：`deploy/tests/ci-workflow-guards-test.sh`（在 `shell` job 里跑）断言这 9 个
 必检 job 块里不出现 `if:` / `paths:` / `paths-ignore:` / `continue-on-error`，承载它们的
 workflow 的 `on:` 触发块里也不出现 `paths:` / `paths-ignore:`，并且 `race` 的 `-run` 正则今天仍
