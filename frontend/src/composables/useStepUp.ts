@@ -70,6 +70,27 @@ export function stepUpBlockReason(err: unknown): string {
   return markerOf(err)
 }
 
+/**
+ * 把 step-up 相关失败翻译成「该给用户看什么」：
+ *   - `null`    用户主动取消了对话框，调用方应当静默，不要报错；
+ *   - 字符串    需要提示的具体原因，是 i18n key，交给调用方的 t()；
+ *   - `undefined` 与 step-up 无关，调用方用自己的兜底文案。
+ *
+ * 取消之所以要静默：全局拦截器已经弹过对话框，用户明确点了取消；
+ * 再补一句「分配失败」等于把用户的选择报成事故。
+ */
+export function stepUpFailureKey(err: unknown): string | null | undefined {
+  if (isStepUpCancelled(err)) return null
+  switch (stepUpBlockReason(err)) {
+    case STEP_UP_TOTP_NOT_ENABLED:
+      return 'stepUp.notEnabled'
+    case STEP_UP_ADMIN_API_KEY_FORBIDDEN:
+      return 'stepUp.adminApiKeyForbidden'
+    default:
+      return undefined
+  }
+}
+
 export type StepUpController = ReturnType<typeof useStepUp>
 
 export function useStepUp() {

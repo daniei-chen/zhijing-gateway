@@ -4,6 +4,7 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -580,6 +581,28 @@ func TestEveryAdminRouteHasStepUpClassification(t *testing.T) {
 	}
 	sort.Strings(stale)
 	require.Empty(t, stale, "分类表里的路由已不在注册处，删除或改正")
+}
+
+// TestAdminStepUpRegistrationIsNotDuplicated 看守同一路由上不许挂多份 step-up 门。
+// 每多一份就多跑一次 GetByID + HasStepUpGrant，并且审计字段会被覆盖一次；
+// 授权若改成单次消费，重复注册会让第二次调用直接失败。
+func TestAdminStepUpRegistrationIsNotDuplicated(t *testing.T) {
+	dupes := make([]string, 0)
+	for _, src := range adminRouteSources {
+		raw, err := os.ReadFile(src.file)
+		require.NoError(t, err)
+		for i, line := range strings.Split(string(raw), "\n") {
+			if !adminRouteDecl.MatchString(strings.TrimSpace(line)) {
+				continue
+			}
+			forced := strings.Count(line, "gin.HandlerFunc(forcedStepUpAuth)")
+			soft := strings.Count(line, "gin.HandlerFunc(stepUpAuth)")
+			if forced > 1 || soft > 1 || (forced > 0 && soft > 0) {
+				dupes = append(dupes, fmt.Sprintf("%s:%d forced=%d soft=%d", src.file, i+1, forced, soft))
+			}
+		}
+	}
+	require.Empty(t, dupes, "同一条路由只能挂一份 step-up 门：%s", strings.Join(dupes, ", "))
 }
 
 func TestAdminStepUpClassificationUsesDeclaredClasses(t *testing.T) {

@@ -848,6 +848,7 @@ import type { AdminUser, UserSubscription, Group, GroupPlatform, SubscriptionTyp
 import type { SimpleUser } from '@/api/admin/usage'
 import type { SubscriptionBulkAction, SubscriptionBulkActionResult, BulkAssignSubscriptionResult } from '@/api/admin/subscriptions'
 import { useTableSelection } from '@/composables/useTableSelection'
+import { stepUpFailureKey } from '@/composables/useStepUp'
 import BulkSubscriptionActionDialog from '@/components/admin/subscription/BulkSubscriptionActionDialog.vue'
 import type { Column } from '@/components/common/types'
 import { formatDateTimeToMinute } from '@/utils/format'
@@ -873,6 +874,15 @@ import { GROUP_PLATFORM_OPTIONS } from '@/constants/platforms'
 
 const { t } = useI18n()
 const appStore = useAppStore()
+
+// 这些操作都挂在强制 step-up 门上（见 deploy/ADMIN_STEP_UP.md）。
+// 取消验证不是失败，不能报错；TOTP 未启用/机器凭证要给出能照做的原因，
+// 否则用户只能看到「分配失败」这种什么也没说的兜底文案。
+const showActionError = (error: unknown, fallback: string) => {
+  const key = stepUpFailureKey(error)
+  if (key === null) return
+  appStore.showError(key ? t(key) : fallback)
+}
 
 interface GroupOption {
   value: number
@@ -1382,7 +1392,7 @@ const handleAssignSubscription = async () => {
     closeAssignModal()
     loadSubscriptions()
   } catch (error: any) {
-    appStore.showError(error.response?.data?.detail || t('admin.subscriptions.failedToAssign'))
+    showActionError(error, t('admin.subscriptions.failedToAssign'))
     console.error('Error assigning subscription:', error)
   } finally {
     submitting.value = false
@@ -1422,7 +1432,7 @@ const handleExtendSubscription = async () => {
     closeExtendModal()
     loadSubscriptions()
   } catch (error: any) {
-    appStore.showError(error.response?.data?.detail || t('admin.subscriptions.failedToAdjust'))
+    showActionError(error, t('admin.subscriptions.failedToAdjust'))
     console.error('Error adjusting subscription:', error)
   } finally {
     submitting.value = false
@@ -1444,7 +1454,7 @@ const confirmRevoke = async () => {
     revokingSubscription.value = null
     loadSubscriptions()
   } catch (error: any) {
-    appStore.showError(error.response?.data?.detail || t('admin.subscriptions.failedToRevoke'))
+    showActionError(error, t('admin.subscriptions.failedToRevoke'))
     console.error('Error revoking subscription:', error)
   }
 }
@@ -1464,7 +1474,7 @@ const confirmRestore = async () => {
     restoringSubscription.value = null
     loadSubscriptions()
   } catch (error: any) {
-    appStore.showError(error.response?.data?.detail || t('admin.subscriptions.failedToRestore'))
+    showActionError(error, t('admin.subscriptions.failedToRestore'))
     console.error('Error restoring subscription:', error)
   }
 }
@@ -1485,7 +1495,7 @@ const confirmResetQuota = async () => {
     resettingSubscription.value = null
     await loadSubscriptions()
   } catch (error: any) {
-    appStore.showError(error.response?.data?.detail || t('admin.subscriptions.failedToResetQuota'))
+    showActionError(error, t('admin.subscriptions.failedToResetQuota'))
     console.error('Error resetting quota:', error)
   } finally {
     resettingQuota.value = false
