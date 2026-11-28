@@ -93,24 +93,39 @@ jobs:
         working-directory: backend
         run: go test -tags=embed ./internal/web/ -count=1 -v
 
-  # 11 条 HTTP 黑盒测试，要一整套跑起来的栈（postgres + redis + 网关），
-  # 慢，所以只在 main 上跑。前置条件逐条核过源码，写在 docs/ci/test-tiers.md §4。
+  # 11 条 HTTP 黑盒测试，要一整套跑起来的栈（postgres + redis + 网关）。
+  # 前置条件逐条核过源码，写在 docs/ci/test-tiers.md §4。
   #
-  # 没有 CLAUDE_API_KEY / GEMINI_API_KEY 时其中 9 条会 skip（它们要真实上游
-  # 账号），只有 2 条用户流程能真验。所以后面有一步断言：那 2 条必须是 PASS，
-  # 不许靠"全跳过"混成绿色。
+  # 两档，按事件区分（E2E_TIER）：
+  # - pr   档：pull_request 上跑，只跑不依赖上游密钥的子集（两条用户流程），
+  #          目标是每个 PR 都能挡住「栈起不来 / 用户流程断了」这两类回归。
+  # - full 档：main 的 push 与 workflow_dispatch 上跑，跑全部 11 条（其中 9 条
+  #          要真实上游密钥，没有就 SKIP——所以断言步只认「真跑过的条数」）。
   #
-  # 两种触发：main 的 push 是常规路径；workflow_dispatch 是「改 e2e 自己」时的
-  # 验证通道，见文件头 on: 的注释。
+  # 两档都有**条数下限**，写在 E2E_MIN_TOP_LEVEL_PASS 里，低于下限直接红：
+  # 光断言「这两条用例 PASS」不够，还要断言「真跑的条数没缩水」，否则哪天有人
+  # 用一个更窄的 -run 让它秒过，前面的断言照样全绿。
+  #
+  # 下限今天是 2：无上游密钥的条件下真能跑的顶层用例就只有 2 条（
+  # docs/ci/branch-protection.md §3.1 的两轮实测：11 条顶层 = 2 PASS + 9 SKIP）。
+  # **2 不代表够，只是今天的真实数字。** 把它写大之前，必须先让栈里有一个假的
+  # OpenAI 兼容上游，把那 9 条 SKIP 变成真断言——先写大再补用例，下限立刻变成
+  # 新的假绿来源。
   #
   # 已验证会真跑通，不是「配了但没跑过」：run 46129909080（2026-11-28，
   # head 50bc5e392）同一 run 连跑两轮均绿，注册 → 登录 → 建 API Key → 用 Key 调
   # 网关 → 查用量五步全 PASS。凭据与路径的实测记录见
   # docs/ci/branch-protection.md §3 和 docs/ci/test-tiers.md §4.2。
+  #
+  # 计时：每一步都打 `E2E_TIMING <marker>=Ns`（从起栈开始算），可 grep。要这个
+  # 数字是为了决定「PR 档是否必须上镜像 cache」，不是给人看的概数。
   e2e:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      E2E_TIER: ${{ github.event_name == 'pull_request' && 'pr' || 'full' }}
+      # 真跑过的顶层用例条数下限。见上面的注释：2 是今天的真实数字，不是目标。
+      E2E_MIN_TOP_LEVEL_PASS: 2
     steps:
       - uses: actions/checkout@v6
       - name: Start the stack from this commit
@@ -129,6 +144,8 @@ jobs:
           TOTP_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org
         run: |
+          # 计时起点：后面每一步都打 E2E_TIMING <marker>=Ns，从这个时间点开始算。
+          echo "E2E_T0=$(date +%s)" >> "$GITHUB_ENV"
           # 容器以 1000:1000 跑且 rootfs 只读，挂载的 data/ 得先可写。
           mkdir -p data
           sudo chown -R 1000:1000 data
@@ -148,6 +165,7 @@ jobs:
           for i in $(seq 1 60); do
             if curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1; then
               echo "gateway healthy after $((i * 10))s"
+              echo "E2E_TIMING stack_ready=$(( $(date +%s) - E2E_T0 ))s (tier=$E2E_TIER)"
               exit 0
             fi
             state=$(docker inspect -f '{{.State.Status}} restarts={{.RestartCount}} exit={{.State.ExitCode}}' zhijing-gateway-dev 2>&1 | head -1 || true)
@@ -182,7 +200,25 @@ jobs:
           ADMIN_PASSWORD: CiE2eAdmin12345
         run: |
           set -o pipefail
-          go test -tags=e2e -v -count=1 -timeout=300s ./internal/integration/... | tee e2e.log
+          # 两档靠 -run 分隔，不靠 build tag：跑的是同一批用例，差别只在「跑
+          # 多少」。pr 档只跑不依赖上游密钥的子集，full 档不加过滤器。下面断言
+          # 步会核对真跑过的条数，别指望少跑几条能蒙过去。
+          case "$E2E_TIER" in
+            pr)
+              echo "E2E_TIER=pr: 只跑不依赖上游密钥的子集"
+              RUN_FILTER='^(TestUserRegistrationAndLogin|TestAPIKeyLifecycle)$'
+              ;;
+            *)
+              echo "E2E_TIER=full: 跑全部"
+              RUN_FILTER=''
+              ;;
+          esac
+          if [ -n "$RUN_FILTER" ]; then
+            go test -tags=e2e -v -count=1 -timeout=300s -run "$RUN_FILTER" ./internal/integration/... | tee e2e.log
+          else
+            go test -tags=e2e -v -count=1 -timeout=300s ./internal/integration/... | tee e2e.log
+          fi
+          echo "E2E_TIMING tests_done=$(( $(date +%s) - E2E_T0 ))s (tier=$E2E_TIER)"
       - name: Assert the stack-backed tests actually ran
         working-directory: backend
         run: |
@@ -194,6 +230,20 @@ jobs:
           done
           if grep -E -- '--- SKIP: (TestUserRegistrationAndLogin|TestAPIKeyLifecycle)' e2e.log; then
             echo "::error::用户流程测试被 skip 了，这个 job 等于没跑"
+            exit 1
+          fi
+          # 条数下限。逐条点名「某两条必须 PASS」挡不住「用一个更窄的 -run 让
+          # 整个包秒过」——那种情况下上面两条断言照样全绿，而 e2e 什么都没验。
+          # 只数顶层的 `--- PASS: `（行首），子测试的 PASS 行是缩进的。
+          top_pass=$(grep -cE '^--- PASS: ' e2e.log || true)
+          top_fail=$(grep -cE '^--- FAIL: ' e2e.log || true)
+          echo "E2E_TIER=$E2E_TIER top_level_pass=$top_pass top_level_fail=$top_fail min=$E2E_MIN_TOP_LEVEL_PASS"
+          if [ "$top_fail" -ne 0 ]; then
+            echo "::error::$top_fail 条顶层用例失败"
+            exit 1
+          fi
+          if [ "$top_pass" -lt "$E2E_MIN_TOP_LEVEL_PASS" ]; then
+            echo "::error::真跑过的顶层用例只有 $top_pass 条，低于下限 $E2E_MIN_TOP_LEVEL_PASS——这个 job 没证明该证明的东西"
             exit 1
           fi
       # 失败时把现场落成 artifact。只把日志滚进 job log 不够：job log 会随 run
