@@ -170,43 +170,160 @@ func CanonicalizeOpenAIModelAliasSpelling(model string) string {
 	return normalized
 }
 
-// CodexBaseInstructionsForModel 按模型返回最匹配的真实 Codex base instructions：
-//   - gpt-6.1-sol / gpt-6.1-terra → 各自官方 Codex 描述中的 instructions_template
-//   - gpt-6 / gpt-6-astra（含供应商前缀与日期变体）→ GPT-6 Astra prompt
-//   - 含 "codex" 的模型（gpt-5-codex / gpt-5.x-codex / codex-max / spark 等）→ GPT-5-Codex prompt
-//   - gpt-5.5 系非 codex 模型 → GPT-5.5 prompt
-//   - gpt-5.2 系非 codex 模型 → GPT-5.2 prompt
-//   - gpt-5.1 系非 codex 模型 → GPT-5.1 prompt
-//   - 其它（含 gpt-5.3 / gpt-5.4 / 裸 gpt-5 / 未知模型）→ 回退到最新版本（当前 GPT-5.5）
+// codexInstructionsRow 是「模型 → 模板文件」的一行：Matches 命中时，该模型拿
+// Template 指向的内置模板。
+type codexInstructionsRow struct {
+	// Model 是这一行负责的模型族，用于阅读与测试报错。
+	Model string
+	// Matches 判断规范化后的模型 id 是否属于这一行。
+	Matches func(canonical string) bool
+	// Template 是内置模板文件名，由 codexInstructionFile 解析。
+	Template string
+	// Source 记这一行映射的依据：上游提交 + 行号，或 main 上的现行为。
+	Source string
+}
+
+// codexInstructionsTable 是模型 → base instructions 模板的显式映射表，按顺序
+// 首个命中生效。表里没有的模型回退到 latestCodexInstructions()。
 //
-// 任一专用 prompt 意外为空时回退链最终落到 DefaultInstructions，保证返回非空。
+// 这张表只登记既有行为，不引入新模板：
+//   - gpt-5.6 / gpt-6-sol / gpt-6-luna 在 main 上没有任何专属分支，走默认回退
+//     （GPT-5.5 模板）。表里把它们显式写出来，避免「回退」看起来像漏配；
+//     上游 c5622ce6c 有这三份专属模板，移植在单独 PR 里做。
+//   - gpt-5.4 / gpt-5.3 / 裸 gpt-5 / 未知模型同样回退到 GPT-5.5 模板。
+var codexInstructionsTable = []codexInstructionsRow{
+	{
+		Model:    "gpt-6.2-sol",
+		Matches:  func(canonical string) bool { return GPT62ModelID(canonical) == "gpt-6.2-sol" },
+		Template: "codex_gpt62_sol.json",
+		Source:   "c5622ce6c:193-194（上游 Wei-Shaw/sub2api）；描述符见 6107cf174",
+	},
+	{
+		Model:    "gpt-6.2-astra",
+		Matches:  func(canonical string) bool { return GPT62ModelID(canonical) == "gpt-6.2-astra" },
+		Template: "codex_gpt62_astra.json",
+		Source:   "c5622ce6c:195-196（上游 Wei-Shaw/sub2api）；描述符见 6107cf174",
+	},
+	{
+		Model:    "gpt-6.1-sol",
+		Matches:  IsGPT61SolModelSpelling,
+		Template: "codex_gpt61_sol.json",
+		Source:   "c5622ce6c:197-198：6.1 Sol 取官方描述符的 instructions_template",
+	},
+	{
+		Model:    "gpt-6.1-terra",
+		Matches:  IsGPT61TerraModelSpelling,
+		Template: "codex_gpt61_terra.json",
+		Source:   "c5622ce6c:199-200：6.1 Terra 取官方描述符的 instructions_template",
+	},
+	{
+		Model: "gpt-6 / gpt-6-astra",
+		Matches: func(canonical string) bool {
+			return canonical == "gpt-6" || canonical == "gpt-6-astra" || strings.HasPrefix(canonical, "gpt-6-astra-")
+		},
+		Template: "instructions_gpt6_astra.txt",
+		Source:   "c5622ce6c:212-215：gpt-6 是 Astra 的公开别名，含日期变体",
+	},
+	{
+		Model:    "codex",
+		Matches:  func(canonical string) bool { return strings.Contains(canonical, "codex") },
+		Template: "instructions.txt",
+		Source:   "c5622ce6c:216-217：codex 系模型用 GPT-5-Codex base prompt",
+	},
+	{
+		Model:    "gpt-5.6",
+		Matches:  func(canonical string) bool { return strings.HasPrefix(canonical, "gpt-5.6") },
+		Template: "instructions_gpt5_5.txt",
+		Source:   "main 无 5.6 分支，回落 latestCodexInstructions()（GPT-5.5）；上游 c5622ce6c:218-221 有专属模板，未移植",
+	},
+	{
+		Model: "gpt-6-sol / gpt-6-luna",
+		Matches: func(canonical string) bool {
+			return strings.HasPrefix(canonical, "gpt-6-sol") || strings.HasPrefix(canonical, "gpt-6-luna")
+		},
+		Template: "instructions_gpt5_5.txt",
+		Source:   "main 无 6 Sol/Luna 分支，回落 latestCodexInstructions()（GPT-5.5）；上游 c5622ce6c:201-210 有专属模板，未移植",
+	},
+	{
+		Model:    "gpt-5.5",
+		Matches:  func(canonical string) bool { return strings.HasPrefix(canonical, "gpt-5.5") },
+		Template: "instructions_gpt5_5.txt",
+		Source:   "c5622ce6c:222-223：5.5 系用 instructions_gpt5_5.txt",
+	},
+	{
+		Model:    "gpt-5.2",
+		Matches:  func(canonical string) bool { return strings.HasPrefix(canonical, "gpt-5.2") },
+		Template: "instructions_gpt5_2.txt",
+		Source:   "c5622ce6c:224-227：5.2 系用 instructions_gpt5_2.txt",
+	},
+	{
+		Model:    "gpt-5.1",
+		Matches:  func(canonical string) bool { return strings.HasPrefix(canonical, "gpt-5.1") },
+		Template: "instructions_gpt5_1.txt",
+		Source:   "c5622ce6c:228-231：5.1 系用 instructions_gpt5_1.txt",
+	},
+	{
+		Model:    "gpt-5.4",
+		Matches:  func(canonical string) bool { return strings.HasPrefix(canonical, "gpt-5.4") },
+		Template: "instructions_gpt5_5.txt",
+		Source:   "c5622ce6c:233：5.4 无专用模板，上游同样回落到 GPT-5.5",
+	},
+	{
+		Model:    "gpt-5.3",
+		Matches:  func(canonical string) bool { return strings.HasPrefix(canonical, "gpt-5.3") },
+		Template: "instructions_gpt5_5.txt",
+		Source:   "c5622ce6c:233：5.3 无专用模板，上游同样回落到 GPT-5.5",
+	},
+	{
+		Model: "gpt-5",
+		Matches: func(canonical string) bool {
+			return canonical == "gpt-5" || strings.HasPrefix(canonical, "gpt-5-")
+		},
+		Template: "instructions_gpt5_5.txt",
+		Source:   "c5622ce6c:233：裸 gpt-5 / gpt-5-mini / gpt-5-nano 无专用模板，回落 GPT-5.5",
+	},
+}
+
+// codexInstructionFile 把模板文件名解析成内置模板全文；未注册的名字返回空串。
+func codexInstructionFile(name string) string {
+	switch name {
+	case "instructions.txt":
+		return DefaultInstructions
+	case "instructions_gpt5_1.txt":
+		return instructionsGPT51
+	case "instructions_gpt5_2.txt":
+		return instructionsGPT52
+	case "instructions_gpt5_5.txt":
+		return instructionsGPT55
+	case "instructions_gpt6_astra.txt":
+		return instructionsGPT6Astra
+	case "codex_gpt61_sol.json":
+		return codexInstructionsTemplate(CodexGPT61SolMetadata)
+	case "codex_gpt61_terra.json":
+		return codexInstructionsTemplate(CodexGPT61TerraMetadata)
+	case "codex_gpt62_sol.json":
+		return codexInstructionsTemplate(CodexGPT62SolMetadata)
+	case "codex_gpt62_astra.json":
+		return codexInstructionsTemplate(CodexGPT62AstraMetadata)
+	}
+	return ""
+}
+
+// CodexBaseInstructionsForModel 按模型返回最匹配的真实 Codex base instructions。
+// 映射关系见 codexInstructionsTable：表里首个命中的行决定模板，表里没有的模型
+// 回退到 latestCodexInstructions()。返回值是模板原文，不裁剪首尾空白；只有空值
+// 检查用 TrimSpace，避免把模板末尾的换行（如 CRLF）削掉。
 func CodexBaseInstructionsForModel(model string) string {
 	canonical := CanonicalizeOpenAIModelAliasSpelling(model)
-	switch {
-	case GPT62ModelID(canonical) == "gpt-6.2-sol":
-		return codexInstructionsTemplate(CodexGPT62SolMetadata)
-	case GPT62ModelID(canonical) == "gpt-6.2-astra":
-		return codexInstructionsTemplate(CodexGPT62AstraMetadata)
-	case IsGPT61SolModelSpelling(canonical):
-		return codexInstructionsTemplate(CodexGPT61SolMetadata)
-	case IsGPT61TerraModelSpelling(canonical):
-		return codexInstructionsTemplate(CodexGPT61TerraMetadata)
-	case canonical == "gpt-6" || canonical == "gpt-6-astra" || strings.HasPrefix(canonical, "gpt-6-astra-"):
-		if v := strings.TrimSpace(instructionsGPT6Astra); v != "" {
-			return instructionsGPT6Astra
+	for _, row := range codexInstructionsTable {
+		if !row.Matches(canonical) {
+			continue
 		}
-	case strings.Contains(canonical, "codex"):
-		return DefaultInstructions
-	case strings.HasPrefix(canonical, "gpt-5.5"):
-		return latestCodexInstructions()
-	case strings.HasPrefix(canonical, "gpt-5.2"):
-		if v := strings.TrimSpace(instructionsGPT52); v != "" {
-			return instructionsGPT52
+		instructions := codexInstructionFile(row.Template)
+		if strings.TrimSpace(instructions) != "" {
+			return instructions
 		}
-	case strings.HasPrefix(canonical, "gpt-5.1"):
-		if v := strings.TrimSpace(instructionsGPT51); v != "" {
-			return instructionsGPT51
-		}
+		break
 	}
 	return latestCodexInstructions()
 }
