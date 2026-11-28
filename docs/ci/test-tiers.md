@@ -97,7 +97,7 @@ go test -tags=mcp_go_client_oauth ./internal/server/routes/ -run TestMCPOAuthOff
 
 **本机实测通过**（§6.3），依赖已在 `go.mod`，不需要额外 `go get`。
 
-### 3.5 deploy 的两个脚本：接进 `shell` job
+### 3.5 deploy 的两个脚本：接进 CI
 
 两个都是纯文件系统检查（`grep -Fq` 核仓库文件），不联网、不起容器：
 
@@ -107,6 +107,8 @@ go test -tags=mcp_go_client_oauth ./internal/server/routes/ -run TestMCPOAuthOff
 | `deploy/tests/install-github-token-test.sh` | `deploy/install.sh` 的 `UPDATE_GITHUB_TOKEN` 只进 API 请求头，不泄漏到 argv、`.curlrc`、环境；token 缺失时回落到 `GITHUB_TOKEN`/`GH_TOKEN` | `/bin/bash`（用了 `set -euo pipefail` 和 `source <(...)`） | 4.1s |
 
 两者在 main 上都是绿的（§6.4、§6.5），所以接线只是把它们纳入门禁，不是"接线顺手修红"。
+
+**放哪个 job 有讲究**：`install-github-token-test.sh` 用了 GNU 的 `head -n -1`（`deploy/tests/install-github-token-test.sh:26`），而 macOS 的 BSD `head` 对负行数直接报 `head: illegal line count -- -1`。所以这两个检查要放在 **ubuntu** 的 `test` job，不能跟着其他 `deploy/tests/*` 进 `shell` job（那是 `macos-15`）——放进去第一天就是假红。
 
 ### 3.6 顺带发现：`make test-e2e` 是死链
 
