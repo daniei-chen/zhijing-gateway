@@ -1,7 +1,13 @@
 name: Security Scan
 
 on:
+  # 只有 main 的 push 触发安全扫描；PR 分支靠 pull_request，外加每周一 03:00 UTC 定时。
+  # 与 backend-ci.yml 同口径（PR #43）：一次 push 会同时挤进多个 run，多分支并行
+  # 时把 CI 队列饿死。行为变化：非 PR 分支的推送不再产生任何 Security Scan run。
+  # 注意 backend-security / frontend-security 这两个必需检查就出自本文件，它们由
+  # pull_request 与 main push 保证，收窄不影响 PR 门禁。
   push:
+    branches: [main]
   pull_request:
   schedule:
     - cron: '0 3 * * 1'
