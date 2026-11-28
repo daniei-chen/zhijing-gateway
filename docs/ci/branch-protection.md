@@ -67,7 +67,6 @@ Changes must be made through a pull request. 8 of 8 required status checks are e
 | `cla-check` | `cla.yml:20-25` | 条件 job：只在 `issue_comment` 或「非 closed 的 `pull_request_target`」上跑。它的红绿取决于贡献者签没签 CLA，与代码质量无关；挂成必需等于让一次性的签名状态卡住所有合并。CLA 由流程保证：`cla-signatures` 分支的 `cla.json` 已有 `daniei-chen`（id 328942951）的签名记录（2026-11-28T01:25:35Z，PR #37）。它红了仍然要人看，只是不当合并门。 |
 | `cla-lock` | `cla.yml:54-58` | 只在 PR **已合并**后跑（`action == 'closed' && merged == true`）。PR 阶段它永远是 skipped，挂进 required 不提供任何覆盖。 |
 | `e2e` | `backend-ci.yml:111` | 不在必检内。本 PR 合入后它仍只在 `main` 的 push 与 `workflow_dispatch` 上跑（`if: github.event_name == 'workflow_dispatch' \|\| github.ref == 'refs/heads/main'`），PR head 上以 `completed/skipped` 出现；按 GitHub 文档「被 skip 的 job 报告状态为 Success」，在这种形态下挂成 required 只是一条永远不阻止合并的空门。**它已经真跑通过，不是「靠 main 兜底」**：run `46129909080`（2026-11-28，head `50bc5e392`）同一个 run 两轮 attempt 均绿，job `140932574046` / `140936895340`，逐条数字见本文件 §3.1；「全跳过混成绿」这条路被断言步堵死（`backend-ci.yml:193`、`:197` 要求两条用例各有一行 `--- PASS:`，出现 `--- SKIP:` 即红）。**进必检的顺序**：`zhijing-gateway#56` 已去掉这条 `if:`，让它在 PR 上真跑（实测 `stack_ready=292s`，跑用例只占 12s）；等它在 PR 上跑稳、并由 HOME-3 改规则集加进必需名单，它才算门。`ci/e2e-*` 这个临时 push 通道本 PR 已删。 |
-| `embed` | `backend-ci.yml:66` | 跑的是发布形态（`-tags=embed`）的 15 条测试，是发布路径上唯一的自动化保险。2026-11-28 才接进 CI，先观察几轮稳定性再挂；它现在在 PR 上是绿的，但「绿过几次」还不足以下结论。 |
 
 ### 3.1 e2e 的两轮实测（2026-11-28，run `46129909080`，head `50bc5e392`）
 
@@ -83,7 +82,7 @@ Changes must be made through a pull request. 8 of 8 required status checks are e
 
 2 条 PASS 是 `TestUserRegistrationAndLogin`、`TestAPIKeyLifecycle`；9 条 SKIP 全是 Claude/Gemini 那批（`TestClaudeMessages*`、`TestClaudeModelsList`、`TestGemini*`），因为栈里没有 `CLAUDE_API_KEY` / `GEMINI_API_KEY`。
 
-**这 9 条 SKIP 是「2 条太薄」的硬证据**：无密钥条件下 11 条里 9 条什么都不验。要抬下限，得先把上游换成栈内可用的假 OpenAI 兼容服务，让代理链路（转发、计费扣费、配额、模型列表、上游错误映射）在没有真实上游账号时也能被验——只加「打本地 admin 接口」的用例不会让这个数字变厚。
+**这 9 条 SKIP 是「2 条太薄」的硬证据**：无密钥条件下 11 条里 9 条什么都不验。但抬下限的办法不是「加一个 OpenAI 兼容的假上游」——这 9 条打的是 `/v1/messages`（Claude 形状 5 条）与 `/v1beta/*`（Gemini 形状 2 条），另有 2 条只在该栈未启用的 Antigravity 模式下才不 skip，**一个 OpenAI 形状的假上游对这 9 条一条都救不了**（它只对将来新写的 OpenAI 形状转发用例有用，而这种用例现在一条都没有）。真正的标的是 Anthropic 适配器（下一步），Gemini 更远；而且即使两套假协议都做到位，天花板也是 **9 条顶层 PASS（2+7），不是 11**。在那之前，PR 档的下限靠「不依赖上游的真实路径」抬：密钥吊销即时失效、注册开关双向生效这类，见 `docs/ci/test-tiers.md` §3.2。列表、上游错误映射）在没有真实上游账号时也能被验——只加「打本地 admin 接口」的用例不会让这个数字变厚。
 
 ## 4. 改 job 名 / 增删 job 的操作规程（最重要）
 
