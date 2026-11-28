@@ -26,6 +26,12 @@ import (
 // 每一轮都是 404；而 404 又被当成「继续尝试」，最后整条测试降级成 skip。
 // 这正是它自接入 CI 起从未绿过、却始终没人发现的原因：它一直在把自己跳过。
 // 现在起，路径不对、认证过不去、响应里没有 token，一律 t.Fatalf。
+//
+// 公开注册的开关也不是 env，是 settings 表里的 registration_enabled
+// （service.SettingKeyRegistrationEnabled），默认关，关着时注册固定回
+// 403 REGISTRATION_DISABLED（internal/service/auth_service.go:176）。compose
+// 里没有任何地方能打开它，所以注册用例的第一步是用管理员会话走产品自己的
+// 管理端接口把它打开、再读回确认，见 openPublicRegistration。
 const apiPrefix = "/api/v1"
 
 var (
@@ -36,6 +42,11 @@ var (
 
 // TestUserRegistrationAndLogin 测试用户注册和登录流程
 func TestUserRegistrationAndLogin(t *testing.T) {
+	// 步骤 0: 打开公开注册开关
+	t.Run("管理员打开公开注册", func(t *testing.T) {
+		openPublicRegistration(t)
+	})
+
 	// 步骤 1: 注册新用户
 	t.Run("注册新用户", func(t *testing.T) {
 		payload := map[string]string{
@@ -54,8 +65,10 @@ func TestUserRegistrationAndLogin(t *testing.T) {
 		respBody, _ := io.ReadAll(resp.Body)
 		if resp.StatusCode != http.StatusOK {
 			t.Fatalf("注册返回 HTTP %d: %s\n路由是 %s/auth/register（internal/server/routes/auth.go:35）。"+
-				"404 说明这个路径不存在或 v1 前缀变了；403 通常是 registration_enabled 被关；"+
-				"400 是请求本身不合法。", resp.StatusCode, string(respBody), apiPrefix)
+				"404 说明这个路径不存在或 v1 前缀变了；400 是请求本身不合法（邮箱/密码/验证码）。"+
+				"如果这里是 403 REGISTRATION_DISABLED，那和上一步的读回结果矛盾——开关读回是 true，"+
+				"注册仍然被拒，说明写入和读取不是同一份设置，别再重试同一条路。",
+				resp.StatusCode, string(respBody), apiPrefix)
 		}
 
 		t.Logf("✅ 用户注册成功: %s", testUserEmail)
@@ -268,6 +281,49 @@ func extractAccessToken(t *testing.T, respBody []byte) string {
 	return ""
 }
 
+// decodeData 从 {"code":0,"message":"success","data":{...}} 这层信封里取出 data。
+// 少了 data 就直接失败：管理面接口的响应结构一变，静默解析出零值会让
+// 「设置是 false」和「响应里根本没有这个字段」长得一模一样。
+func decodeData(t *testing.T, respBody []byte, out any, what string) {
+	t.Helper()
+
+	var envelope struct {
+		Code    int             `json:"code"`
+		Message string          `json:"message"`
+		Data    json.RawMessage `json:"data"`
+	}
+	if err := json.Unmarshal(respBody, &envelope); err != nil {
+		t.Fatalf("解析 %s 响应失败: %v（body: %s）", what, err, string(respBody))
+	}
+	if len(envelope.Data) == 0 || string(envelope.Data) == "null" {
+		t.Fatalf("%s 响应里没有 data（body: %s）", what, string(respBody))
+	}
+	if err := json.Unmarshal(envelope.Data, out); err != nil {
+		t.Fatalf("解析 %s 的 data 失败: %v（body: %s）", what, err, string(respBody))
+	}
+}
+
+// loginToken 用给定凭据登录并取出 access_token。
+func loginToken(t *testing.T, email, password string) string {
+	t.Helper()
+
+	payload, _ := json.Marshal(map[string]string{"email": email, "password": password})
+
+	resp, err := doRequest(t, http.MethodPost, apiPrefix+"/auth/login", payload, "")
+	if err != nil {
+		t.Fatalf("登录请求失败: %v", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("登录返回 HTTP %d: %s（邮箱 %s，路由 %s/auth/login，internal/server/routes/auth.go:38）",
+			resp.StatusCode, string(respBody), email, apiPrefix)
+	}
+
+	return extractAccessToken(t, respBody)
+}
+
 func loginTestUser(t *testing.T) string {
 	t.Helper()
 
@@ -283,25 +339,181 @@ func loginTestUser(t *testing.T) string {
 		adminPassword = testUserPassword
 	}
 
-	payload := map[string]string{
-		"email":    adminEmail,
-		"password": adminPassword,
-	}
-	body, _ := json.Marshal(payload)
+	return loginToken(t, adminEmail, adminPassword)
+}
 
-	resp, err := doRequest(t, http.MethodPost, apiPrefix+"/auth/login", body, "")
+// =============================================================================
+// 管理面：把公开注册开关打开（注册用例的前置条件）
+// =============================================================================
+
+// adminToken 登录管理员账号，拿一个能进 /api/v1/admin/* 的会话。
+//
+// 这里故意不像 loginTestUser 那样回落到普通测试用户：改系统设置需要管理员角色，
+// 回落到普通用户只会拿到 403，看日志的人分不清是「凭据没配」还是「接口坏了」。
+func adminToken(t *testing.T) string {
+	t.Helper()
+
+	adminEmail := getEnv("ADMIN_EMAIL", "")
+	adminPassword := getEnv("ADMIN_PASSWORD", "")
+	if adminEmail == "" || adminPassword == "" {
+		t.Fatalf("打开公开注册要用管理员会话（管理面在 internal/server/routes/admin.go:34 的 " +
+			"adminAuth 之后），CI 必须传 ADMIN_EMAIL / ADMIN_PASSWORD——backend-ci.yml 的 " +
+			"E2E against the running stack 步骤里有这两个变量")
+	}
+
+	return loginToken(t, adminEmail, adminPassword)
+}
+
+// adminComplianceView 只取签署部署合规承诺需要的字段。
+type adminComplianceView struct {
+	Required    bool   `json:"required"`
+	Version     string `json:"version"`
+	AckPhraseEN string `json:"ack_phrase_en"`
+}
+
+// readAdminCompliance 读管理面合规状态。
+//
+// 这一步不能省：/admin/* 上挂着 AdminComplianceGuard
+// （internal/server/middleware/admin_compliance.go:12），管理员没签部署合规承诺时
+// 所有管理端点一律 423，唯一放行的是 /admin/compliance 自己。
+func readAdminCompliance(t *testing.T, token string) adminComplianceView {
+	t.Helper()
+
+	resp, err := doRequest(t, http.MethodGet, apiPrefix+"/admin/compliance", nil, token)
 	if err != nil {
-		t.Fatalf("登录请求失败: %v", err)
+		t.Fatalf("读取管理面合规状态失败: %v", err)
 	}
 	defer resp.Body.Close()
 
 	respBody, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("登录返回 HTTP %d: %s（邮箱 %s，路由 %s/auth/login）",
-			resp.StatusCode, string(respBody), adminEmail, apiPrefix)
+		t.Fatalf("读取管理面合规状态返回 HTTP %d: %s（GET %s/admin/compliance，这是 AdminComplianceGuard "+
+			"唯一放行的路径，423 说明连这里也被锁了）", resp.StatusCode, string(respBody), apiPrefix)
 	}
 
-	return extractAccessToken(t, respBody)
+	var view adminComplianceView
+	decodeData(t, respBody, &view, "GET "+apiPrefix+"/admin/compliance")
+	return view
+}
+
+// acceptAdminCompliance 让管理员签下部署合规承诺（一次性 CI 栈，签完就不动它）。
+//
+// 确认短语从接口返回的 ack_phrase_en 里取，不把服务端常量抄进测试：抄一份就等于
+// 硬编码了一个会漂的值，常量一改，失败信息只会变成莫名其妙的
+// ADMIN_COMPLIANCE_INVALID_PHRASE。
+func acceptAdminCompliance(t *testing.T, token string) {
+	t.Helper()
+
+	status := readAdminCompliance(t, token)
+	if !status.Required {
+		t.Logf("✅ 管理员已签过部署合规承诺（%s），管理面未锁", status.Version)
+		return
+	}
+
+	phrase := strings.TrimSpace(status.AckPhraseEN)
+	if phrase == "" {
+		t.Fatalf("GET %s/admin/compliance 没返回 ack_phrase_en，没法签", apiPrefix)
+	}
+
+	payload, _ := json.Marshal(map[string]string{"phrase": phrase, "language": "en"})
+	resp, err := doRequest(t, http.MethodPost, apiPrefix+"/admin/compliance/accept", payload, token)
+	if err != nil {
+		t.Fatalf("签署部署合规承诺请求失败: %v", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("签署部署合规承诺返回 HTTP %d: %s（POST %s/admin/compliance/accept）",
+			resp.StatusCode, string(respBody), apiPrefix)
+	}
+
+	if after := readAdminCompliance(t, token); after.Required {
+		t.Fatalf("签署后 GET %s/admin/compliance 仍报 required=true，管理面还锁着，后面的设置写一定 423", apiPrefix)
+	}
+	t.Logf("✅ 用管理员会话签下部署合规承诺（%s）", status.Version)
+}
+
+// readRegistrationEnabled 从管理端读回公开注册开关。
+func readRegistrationEnabled(t *testing.T, token string) bool {
+	t.Helper()
+
+	resp, err := doRequest(t, http.MethodGet, apiPrefix+"/admin/settings", nil, token)
+	if err != nil {
+		t.Fatalf("读取系统设置失败: %v", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("读取系统设置返回 HTTP %d: %s（GET %s/admin/settings；428/423 是管理面合规锁，"+
+			"401/403 是管理员会话不可用）", resp.StatusCode, string(respBody), apiPrefix)
+	}
+
+	var view struct {
+		RegistrationEnabled bool `json:"registration_enabled"`
+	}
+	decodeData(t, respBody, &view, "GET "+apiPrefix+"/admin/settings")
+	return view.RegistrationEnabled
+}
+
+// openPublicRegistration 用管理员会话打开公开注册，读回确认，再验一次这个写接口
+// 确实只对管理员开放。
+//
+// PUT /admin/settings 请求体里没出现的字段保持原值（服务端的
+// omittedSettingKeys / UpdateSettingsWithAuthSourceDefaultsOmitting，
+// internal/handler/admin/setting_handler_update.go:489），所以只发
+// registration_enabled 不会把别的设置一起重置。副作用只有一个：管理面每次写入
+// 落一条审计日志（admin 组的 auditLog 中间件），这个栈是一次性的，不还原。
+func openPublicRegistration(t *testing.T) {
+	t.Helper()
+
+	token := adminToken(t)
+	acceptAdminCompliance(t, token)
+
+	if !readRegistrationEnabled(t, token) {
+		payload, _ := json.Marshal(map[string]any{"registration_enabled": true})
+		resp, err := doRequest(t, http.MethodPut, apiPrefix+"/admin/settings", payload, token)
+		if err != nil {
+			t.Fatalf("打开公开注册请求失败: %v", err)
+		}
+		defer resp.Body.Close()
+
+		respBody, _ := io.ReadAll(resp.Body)
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("打开公开注册返回 HTTP %d: %s（PUT %s/admin/settings，body %s）",
+				resp.StatusCode, string(respBody), apiPrefix, string(payload))
+		}
+	}
+
+	// 读回一次才算数：PUT 的返回体只能证明它算过 true，读回才证明值落进了库、
+	// 并且下一次请求真的读到了它。
+	if !readRegistrationEnabled(t, token) {
+		t.Fatalf("设置写入后读回 registration_enabled 仍是 false（GET %s/admin/settings），"+
+			"注册一定还会是 403 REGISTRATION_DISABLED", apiPrefix)
+	}
+
+	// 对照：同一个写接口不带任何凭据必须被拒，拒完再读回还是 true。没有这条，
+	// 「读回是 true」也可能只是因为这个接口对谁都放行。
+	payload, _ := json.Marshal(map[string]any{"registration_enabled": false})
+	resp, err := doRequest(t, http.MethodPut, apiPrefix+"/admin/settings", payload, "")
+	if err != nil {
+		t.Fatalf("无凭据写设置的对照请求失败: %v", err)
+	}
+	defer resp.Body.Close()
+	respBody, _ := io.ReadAll(resp.Body)
+
+	if resp.StatusCode == http.StatusOK {
+		t.Fatalf("不带凭据的 PUT %s/admin/settings 竟然返回 200——管理面没设防，"+
+			"这条用例读回来的 registration_enabled 也就证明不了任何事", apiPrefix)
+	}
+	if !readRegistrationEnabled(t, token) {
+		t.Fatalf("无凭据的写请求返回 HTTP %d 之后，registration_enabled 变了（读回 false）——"+
+			"说明那次写入真的落库了，管理面的鉴权被绕过去了", resp.StatusCode)
+	}
+
+	t.Logf("✅ 公开注册已打开并读回确认；无凭据的同一写入被拒（HTTP %d，%s）",
+		resp.StatusCode, strings.TrimSpace(string(respBody)))
 }
 
 // redactAPIKey API Key 脱敏，只显示前 8 位
