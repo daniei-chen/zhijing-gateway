@@ -82,7 +82,7 @@ Changes must be made through a pull request. 8 of 8 required status checks are e
 
 2 条 PASS 是 `TestUserRegistrationAndLogin`、`TestAPIKeyLifecycle`；9 条 SKIP 全是 Claude/Gemini 那批（`TestClaudeMessages*`、`TestClaudeModelsList`、`TestGemini*`），因为栈里没有 `CLAUDE_API_KEY` / `GEMINI_API_KEY`。
 
-**这 9 条 SKIP 是「2 条太薄」的硬证据**：无密钥条件下 11 条里 9 条什么都不验。但抬下限的办法不是「加一个 OpenAI 兼容的假上游」——这 9 条打的是 `/v1/messages`（Claude 形状 5 条）与 `/v1beta/*`（Gemini 形状 2 条），另有 2 条只在该栈未启用的 Antigravity 模式下才不 skip，**一个 OpenAI 形状的假上游对这 9 条一条都救不了**（它只对将来新写的 OpenAI 形状转发用例有用，而这种用例现在一条都没有）。真正的标的是 Anthropic 适配器（下一步），Gemini 更远；而且即使两套假协议都做到位，天花板也是 **9 条顶层 PASS（2+7），不是 11**。在那之前，PR 档的下限靠「不依赖上游的真实路径」抬：密钥吊销即时失效、注册开关双向生效这类，见 `docs/ci/test-tiers.md` §3.2。列表、上游错误映射）在没有真实上游账号时也能被验——只加「打本地 admin 接口」的用例不会让这个数字变厚。
+**这 9 条 SKIP 是「2 条太薄」的硬证据**：无密钥条件下 11 条里 9 条什么都不验。但抬下限的办法不是「加一个 OpenAI 兼容的假上游」——这 9 条打的是 `/v1/messages`（Claude 形状 5 条）与 `/v1beta/*`（Gemini 形状 2 条），另有 2 条只在该栈未启用的 Antigravity 模式下才不 skip，**一个 OpenAI 形状的假上游对这 9 条一条都救不了**（它只对将来新写的 OpenAI 形状转发用例有用，而这种用例现在一条都没有）。真正的标的是 Anthropic 适配器（下一步），Gemini 更远；而且即使两套假协议都做到位，天花板也是 **9 条顶层 PASS（2+7），不是 11**。在那之前，PR 档的下限靠「不依赖上游的真实路径」抬：密钥吊销即时失效、注册开关双向生效这类，见 `docs/ci/test-tiers.md` §3.2。
 
 ## 4. 改 job 名 / 增删 job 的操作规程（最重要）
 
