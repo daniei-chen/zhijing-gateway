@@ -52,6 +52,9 @@ func RegisterGatewayRoutes(
 	endpointNorm := handler.InboundEndpointMiddleware()
 	compositeTarget := compositeTargetPlatformMiddleware(compositeResolver)
 	compositeGeminiTarget := compositeGeminiTargetPlatformMiddleware(compositeResolver)
+	// Live 默认关闭：闸门挂在每一条 Live/LiveSideband 路由的最前面，关闭时
+	// 直接 404，不产生 lease、不建立上游会话（见 docs/live-billing.md）。
+	liveGuard := middleware.LiveEnabledGuard(cfg.Gateway.Live.Enabled)
 
 	// 未分组 Key 拦截中间件（按协议格式区分错误响应）
 	requireGroupAnthropic := middleware.RequireGroupAssignment(settingService, middleware.AnthropicErrorWriter)
@@ -233,8 +236,8 @@ func RegisterGatewayRoutes(
 		// Single-model discovery never selects the Codex client_version manifest.
 		gateway.GET("/models/:model", h.Gateway.Models)
 		gateway.GET("/usage", h.Gateway.Usage)
-		gateway.POST("/live", h.OpenAIGateway.Live)
-		gateway.GET("/live/:call_id", h.OpenAIGateway.LiveSideband)
+		gateway.POST("/live", liveGuard, h.OpenAIGateway.Live)
+		gateway.GET("/live/:call_id", liveGuard, h.OpenAIGateway.LiveSideband)
 		// OpenAI Responses API: auto-route based on group platform
 		gateway.POST("/responses", func(c *gin.Context) {
 			if isOpenAIResponsesCompatibleGatewayPlatform(c) {
@@ -413,8 +416,8 @@ func RegisterGatewayRoutes(
 	codexDirect := r.Group("/backend-api/codex")
 	codexDirect.Use(groupBodyLimit, clientRequestID, opsErrorLogger, endpointNorm, gin.HandlerFunc(apiKeyAuth), groupModelAllowlist, rejectConflictingFields, compositeTarget, requireGroupAnthropic)
 	{
-		codexDirect.POST("/realtime/calls", h.OpenAIGateway.Live)
-		codexDirect.GET("/:call_id", h.OpenAIGateway.LiveSideband)
+		codexDirect.POST("/realtime/calls", liveGuard, h.OpenAIGateway.Live)
+		codexDirect.GET("/:call_id", liveGuard, h.OpenAIGateway.LiveSideband)
 		codexDirect.POST("/responses", responsesHandler)
 		codexDirect.POST("/responses/*subpath", guardResponsesSubpath(responsesHandler))
 		codexDirect.POST("/alpha/search", h.OpenAIGateway.AlphaSearch)
