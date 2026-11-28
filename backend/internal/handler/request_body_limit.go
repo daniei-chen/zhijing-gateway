@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -26,18 +25,6 @@ func handleRequestBodyReadError(c *gin.Context, reqLog *zap.Logger, err error) b
 		return true
 	}
 	return middleware2.RejectRequestBodyMemoryOverload(c, err)
-}
-
-func formatBodyLimit(limit int64) string {
-	const mb = 1024 * 1024
-	if limit >= mb {
-		return fmt.Sprintf("%dMB", limit/mb)
-	}
-	return fmt.Sprintf("%dB", limit)
-}
-
-func buildBodyTooLargeMessage(limit int64) string {
-	return fmt.Sprintf("Request body too large, limit is %s", formatBodyLimit(limit))
 }
 
 // readLenientJSONRequestBodyWithPrealloc keeps the local call-site name but
