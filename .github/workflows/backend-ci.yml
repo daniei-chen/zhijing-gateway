@@ -1,7 +1,12 @@
 name: CI
 
 on:
+  # 只有 main 的 push 触发 CI；PR 分支靠 pull_request（opened/synchronize/reopened）。
+  # 这是行为变化：往没有 PR 的分支推 commit 不再有任何 CI，要验要先开 PR。
+  # 收窄的原因：一次 push 会同时挤进 7 个 job，多分支并行时把 CI 队列饿死。
+  # main 的 push 必须保留——新增的 e2e job 靠 if: github.ref == 'refs/heads/main'。
   push:
+    branches: [main]
   pull_request:
 
 permissions:
