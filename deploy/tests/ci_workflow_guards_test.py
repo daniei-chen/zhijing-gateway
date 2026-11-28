@@ -143,13 +143,22 @@ class WorkflowDocumentTests(unittest.TestCase):
         )
 
     def test_invalid_yaml_fails_instead_of_returning_empty(self) -> None:
-        with self.assertRaises(yaml.YAMLError):
-            yaml.safe_load("jobs: [unclosed\n")
+        # 关键在 load_workflow 这一层：如果守卫把 YAMLError 吞掉返回 {}，
+        # 下面所有"键不在里面"的断言都会空过——那比正则漏词更彻底。
+        # 所以这里断言的是 load_workflow 抛，而不是 yaml.safe_load 会抛。
         with tempfile.TemporaryDirectory() as directory:
-            empty = Path(directory) / "empty.yml"
-            empty.write_text("", encoding="utf-8")
-            with self.assertRaises(AssertionError, msg="空文档必须硬失败，不能当成空字典"):
-                load_workflow(empty)
+            root = Path(directory)
+            cases = (
+                ("syntax error", "jobs: [unclosed\n"),
+                ("empty document", ""),
+                ("not a mapping", "- shell\n- test\n"),
+            )
+            for label, text in cases:
+                with self.subTest(case=label):
+                    path = root / "probe.yml"
+                    path.write_text(text, encoding="utf-8")
+                    with self.assertRaises((yaml.YAMLError, AssertionError)):
+                        load_workflow(path)
 
 
 class GuardRuleTests(unittest.TestCase):
