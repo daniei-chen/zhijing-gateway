@@ -84,7 +84,21 @@ TestGo: [embed_test.go] | Go: [embed_on.go html_cache.go spa_fallback.go static_
 
 下限写在 workflow 的 job env 里，是一个脚本要核的数字，不是注释：断言步数行首的 `--- PASS: `，低于下限直接红。**4 是实测出来的数字，不是目标也不是整数拍脑袋**：pr 档跑 4 条、4 条全 PASS；full 档多跑的 9 条是 SKIP（缺上游密钥），不计入 PASS。要再抬，得先让那 9 条能被真跑（见 §4.4），否则下限只是把「跑 4 条也算过」写得更正式。
 
-2026-11-28 实测（#56 第一轮，run `46135841927`）：`stack_ready=292s`、`tests_done=304s`、`top_level_pass=2 top_level_fail=0`。也就是说 **一整轮的成本 96% 在起栈，跑用例只占 12 秒**——加用例的边际成本是秒级，成本在镜像构建与起栈上，所以缓存打在构建上（`docker/build-push-action` + `cache-from/to: type=gha`，compose 里显式 `image: zhijing-gateway:dev`）。
+2026-11-28 实测三轮 PR 事件（数字来自 workflow 自己打的 `E2E_TIMING` / `E2E_TIER` 标记，job log 逐轮读过）：
+
+| 轮 | head | 分支 | run / job | `image_built` | `stack_ready` | `tests_done` | 条数 | cache 行 |
+|---|---|---|---|---|---|---|---|---|
+| 1 | `9dd7a9132`（#56） | `capy/e2e-required` | `46142424995` / `140971106522` | 238s | 257s | 265s | `top_level_pass=4 fail=0 min=4` | 无 |
+| 2 | `642f85f0d`（#52） | `capy/e2e-diagnostics` | `46144346703` / `140976979838` | 274s | 294s | 306s | 同上 | 无 |
+| 3 | `4290ecc6b`（#52） | `capy/e2e-diagnostics`（与第 2 轮同分支） | `46147227120` / `140985843170` | **20s** | 41s | 56s | 同上 | `#19 importing cache manifest from gha:12394621957837104361` |
+
+**三层结论，不要合成一句「加了缓存所以快了」**：
+
+1. **跨分支不命中。** 第 1、2 轮在不同分支，两份 log 里没有任何 cache import/export 行，238s / 274s 都是完整构建。GHA cache 的 scope 按分支隔离，所以「第二次」根本不看第一次的缓存——把这两轮读成「缓存没接上」同样是错的。
+2. **同分支第二轮起命中。** 第 3 轮与第 2 轮同在 `capy/e2e-diagnostics`，log 里出现 `importing cache manifest from gha`，镜像构建 238s/274s → **20s**。
+3. **所以 PR 档的墙钟分两种**：**新分支首轮 ≈5 分钟**（完整构建 240–275 秒 + 起栈 + 跑用例 8–12 秒）；**同分支后续轮次 ≈1 分钟**。成本始终在构建与起栈上，跑用例只占 8–12 秒，所以加用例的边际成本是秒级。
+
+缓存怎么接的：`docker/build-push-action` + `cache-from/to: type=gha,mode=max`，同时 compose 里显式写 `image: zhijing-gateway:dev`——否则 `compose up` 会自己再 build 一遍，缓存等于白接。
 
 ### 3.3 windows：不接，给命令
 
