@@ -47,13 +47,13 @@ Changes must be made through a pull request. 8 of 8 required status checks are e
 | 检查 | 定义 | 挡什么 |
 |---|---|---|
 | `shell` | `backend-ci.yml:16`（macos-15） | 部署脚本：`/bin/bash -n` 语法检查 `deploy/apple-container.sh`，然后真跑 `deploy/tests/` 下 10 个脚本。跑在 macOS 上是为了顺带覆盖 BSD 与 GNU 的 shell 差异。 |
-| `test` | `backend-ci.yml:33`（ubuntu） | 后端单元测试（`make test-unit`）+ 集成测试（`make test-integration`）+ 三条 deploy 一致性测试（compose 简单模式、install 脚本 token 处理、阶段一加固文档）。 |
-| `race` | `backend-ci.yml:158` | 并发关键路径的 `-race` 数据竞争检测（`make test-race`，只挑并发相关用例）。`go vet` 和 golangci-lint 都看不出数据竞争，只有它能。 |
-| `frontend` | `backend-ci.yml:178` | 前端 `lint:check`、`typecheck`、`test:run`（vitest 全量）、生产 `build`。 |
-| `golangci-lint` | `backend-ci.yml:208` | Go 静态检查（golangci-lint v2.14.0，`--timeout=30m`）。 |
-| `release-helpers` | `backend-ci.yml:228` | 发布辅助工具的单元测试（`.github/release-tools` 发布矩阵）+ `bash -n release-images.sh`。 |
-| `backend-security` | `security-scan.yml:13` | `govulncheck ./...`：Go 依赖与标准库的已知漏洞。 |
-| `frontend-security` | `security-scan.yml:33` | `pnpm audit --prod --audit-level=high` + `tools/check_pnpm_audit_exceptions.py` 核例外清单，挡「高危依赖漏洞」与「例外过期没清理」。 |
+| `test` | `backend-ci.yml:34`（ubuntu） | 后端单元测试（`make test-unit`）+ 集成测试（`make test-integration`）+ 三条 deploy 一致性测试（compose 简单模式、install 脚本 token 处理、阶段一加固文档）。 |
+| `race` | `backend-ci.yml:159` | 并发关键路径的 `-race` 数据竞争检测（`make test-race` → `backend/scripts/race-gate.sh`，只挑并发相关用例）。`go vet` 和 golangci-lint 都看不出数据竞争，只有它能。门禁会断言 `-v` 输出里真跑过的测试条数 ≥ 1300：`-run` 零命中时 `go test` 退 0，没有这条断言，改名或挪目录就能让它静默变绿。 |
+| `frontend` | `backend-ci.yml:179` | 前端 `lint:check`、`typecheck`、`test:run`（vitest 全量）、生产 `build`。 |
+| `golangci-lint` | `backend-ci.yml:209` | Go 静态检查（golangci-lint v2.14.0，`--timeout=30m`）。 |
+| `release-helpers` | `backend-ci.yml:229` | 发布辅助工具的单元测试（`.github/release-tools` 发布矩阵，走 `.github/release-tools/run-tests.sh`：显式模块路径 + `Ran N tests` 下限 10）+ `tools/check-pnpm-audit-exceptions-test.py` + `bash -n release-images.sh`。`discover -p` 匹配不到文件时退 0，所以不再用它。 |
+| `backend-security` | `security-scan.yml:19` | `govulncheck ./...`：Go 依赖与标准库的已知漏洞。工具版本钉死（`@v1.10.0`，2026-11-28 时 `@latest` 解析到的版本），不让上游发坏版本把必检变红。 |
+| `frontend-security` | `security-scan.yml:45` | `pnpm audit --prod --audit-level=high`（**只有这一条命令**带 `|| true`，否则命中 high 时它自己先红、豁免清单永远用不上）+ `tools/assert_pnpm_audit_report.py` 断言报告可解析且含 `metadata.vulnerabilities`（否则网络失败会装成「没有漏洞」）+ `tools/check_pnpm_audit_exceptions.py` 核例外清单，挡「高危依赖漏洞」与「例外过期没清理」。 |
 
 每条检查背后跑到哪些测试、哪些测试至今没进 CI，见 `docs/ci/test-tiers.md`。
 
