@@ -175,6 +175,7 @@ cd backend && go test -tags=e2e -v -timeout=300s ./internal/integration/
 - 容器以 `user: "1000:1000"` 跑且 `read_only: true`，挂载 `./data:/app/data`，所以宿主要先建好 `data/` 并给 uid 1000 写权限
 - `ADMIN_EMAIL` / `ADMIN_PASSWORD` 用来让首次启动创建管理员——这既是 `TestAPIKeyLifecycle` 的登录凭据，也要 export 到跑测试的那个进程里
 - 端口默认 `${BIND_HOST:-127.0.0.1}:${SERVER_PORT:-8080}:8080`，正好对上测试的 `BASE_URL` 默认值
+- **redis 必须以 `--appendfsync always` 运行**：网关启动时检查 `maxmemory-policy=noeviction`、`appendonly=yes`、`appendfsync=always`、`no-appendfsync-on-rewrite=no` 和 AOF 可写状态（`INFO persistence` 的 `loading`/`aof_enabled`/`aof_last_write_status`），任一条不满足就拒绝启动，容器退出并被 `restart: unless-stopped` 反复拉起（日志：`Failed to initialize application: auth store policy: appendfsync must be always`）。改 `deploy/docker-compose*.yml` 里 redis 的 `command:` 之前先看 `backend/internal/repository/auth_store_policy.go`；`deploy/tests/redis-auth-store-durability-test.sh` 在 CI 里守这条，取值直接从那边的表里读。走 `docker-compose.standalone.yml`（外接 redis）的部署要自己在那个 redis 上设这四项。
 
 **本机没有 docker**（`docker: command not found`），§4.5 的每一步都没有在真机上跑过。**这是 e2e job 唯一未经实测的部分，合并后首次 main push 是它的第一次真跑。**
 

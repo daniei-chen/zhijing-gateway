@@ -38,6 +38,7 @@ jobs:
           /bin/sh deploy/tests/ci-race-job-test.sh
           /bin/bash deploy/tests/verify-sensitive-endpoints-test.sh
           /bin/sh deploy/tests/security-invariants-test.sh
+          /bin/sh deploy/tests/redis-auth-store-durability-test.sh
           /bin/sh deploy/test-caddyfile-cache.sh
 
   test:
@@ -123,6 +124,14 @@ jobs:
           docker compose -f docker-compose.dev.yml up -d --build
       - name: Wait for the gateway
         run: |
+          # 失败时把网关日志的尾巴打进 job log：artifact 要 token 才能下载，
+          # 没有 token 的人只能看 job log。上一次 e2e 就是靠 artifact 才拿到根因
+          # （auth store policy: appendfsync must be always），别让下一个人重走一遍。
+          show_gateway_tail() {
+            echo "--- last 60 lines of zhijing-gateway-dev ---"
+            docker logs --tail 60 zhijing-gateway-dev 2>&1 || true
+            echo "--- end of gateway log tail ---"
+          }
           # 每轮把容器状态打进 job log：网关 600 秒没监听时，必须能一眼分出
           # 「没启动」「起了又退」「在跑但没监听」，否则只能靠猜。
           for i in $(seq 1 60); do
@@ -136,11 +145,13 @@ jobs:
             restarts=$(printf '%s' "$state" | sed -n 's/.*restarts=\([0-9][0-9]*\).*/\1/p')
             if [ -n "$restarts" ] && [ "$restarts" -ge 5 ]; then
               echo "::error::gateway restarted ${restarts} times without listening"
+              show_gateway_tail
               exit 1
             fi
             sleep 10
           done
           echo "gateway did not become healthy in 600s" >&2
+          show_gateway_tail
           exit 1
       - uses: actions/setup-go@v6
         with:
