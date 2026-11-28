@@ -1164,7 +1164,8 @@ func (s *GatewayService) calculateRecordUsageCost(
 		// 定价行在、但没有任何单价覆盖本次请求时不能按 $0 成交：开关
 		// billing.inflight_reservation.fail_closed_on_unpriced 打开则失败关闭，关闭则
 		// 按默认图价成交并打 image_price_defaulted 标记（见 settleUnpricedMedia）。
-		if !apiKeyHasConfiguredImagePrice(apiKey, sizeTier) &&
+		if !simpleModeRecordOnly(s.cfg) &&
+			!apiKeyHasConfiguredImagePrice(apiKey, sizeTier) &&
 			!resolvedRequestHasUsablePrice(s.resolver, resolved, sizeTier, UsageTokens{
 				InputTokens:       result.Usage.InputTokens,
 				OutputTokens:      result.Usage.OutputTokens,

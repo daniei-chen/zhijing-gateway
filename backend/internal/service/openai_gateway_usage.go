@@ -798,7 +798,8 @@ func (s *OpenAIGatewayService) calculateOpenAIImageCost(
 	// billing.inflight_reservation.fail_closed_on_unpriced 打开则失败关闭，关闭则按默认
 	// 图价成交并打 image_price_defaulted 标记（见 settleUnpricedMedia）。这条判定与
 	// GatewayService 的图片分支共用，别再各写一份。
-	if !apiKeyHasConfiguredImagePrice(apiKey, sizeTier) &&
+	if !simpleModeRecordOnly(s.cfg) &&
+		!apiKeyHasConfiguredImagePrice(apiKey, sizeTier) &&
 		!resolvedRequestHasUsablePrice(s.resolver, resolved, sizeTier, UsageTokens{
 			InputTokens:       result.Usage.InputTokens,
 			OutputTokens:      result.Usage.OutputTokens,
@@ -867,7 +868,8 @@ func (s *OpenAIGatewayService) calculateOpenAIVideoCost(
 	}
 	// 与图片分支同一条判定：定价行在、但没有任何单价覆盖本次请求时不能按 $0 成交。
 	// 开关打开则失败关闭，关闭则按默认视频价成交并打 video_price_defaulted 标记。
-	if !apiKeyHasConfiguredVideoPrice(apiKey, billingModel, resolution) &&
+	if !simpleModeRecordOnly(s.cfg) &&
+		!apiKeyHasConfiguredVideoPrice(apiKey, billingModel, resolution) &&
 		!resolvedRequestHasUsablePrice(s.resolver, resolved, resolution, UsageTokens{
 			InputTokens:  result.Usage.InputTokens,
 			OutputTokens: result.Usage.OutputTokens,

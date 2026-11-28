@@ -160,7 +160,25 @@ func TestGPT56ExplicitZeroCacheWritePriceIsPreserved(t *testing.T) {
 	})
 }
 
-func TestGetRequestTierPrice(t *testing.T) {
+// requireRequestUnitPrice 断言本次请求命中单价并返回它。命中语义是新契约的一部分：
+// 旧 GetRequestTierPrice 把「没配价」和「配了 0」都返回 0，断言不出区别。
+func requireRequestUnitPrice(t *testing.T, r *ModelPricingResolver, resolved *ResolvedPricing, tier string, ctxTokens int, want float64) {
+	t.Helper()
+	price, ok := r.RequestUnitPrice(resolved, tier, ctxTokens)
+	require.True(t, ok, "expected a unit price for tier %q (ctx=%d)", tier, ctxTokens)
+	require.InDelta(t, want, price, 1e-12)
+}
+
+// requireNoRequestUnitPrice 断言本次请求没有任何单价覆盖——必须自报未命中，
+// 调用方据此失败关闭或按默认价成交，而不是当 0 元。
+func requireNoRequestUnitPrice(t *testing.T, r *ModelPricingResolver, resolved *ResolvedPricing, tier string, ctxTokens int) {
+	t.Helper()
+	price, ok := r.RequestUnitPrice(resolved, tier, ctxTokens)
+	require.False(t, ok, "expected no unit price for tier %q (ctx=%d)", tier, ctxTokens)
+	require.Zero(t, price)
+}
+
+func TestRequestUnitPrice_ByTierLabel(t *testing.T) {
 	bs := newTestBillingServiceForResolver()
 	r := NewModelPricingResolver(&ChannelService{}, bs)
 
@@ -172,12 +190,12 @@ func TestGetRequestTierPrice(t *testing.T) {
 		},
 	}
 
-	require.InDelta(t, 0.04, r.GetRequestTierPrice(resolved, "1K"), 1e-12)
-	require.InDelta(t, 0.08, r.GetRequestTierPrice(resolved, "2K"), 1e-12)
-	require.InDelta(t, 0.0, r.GetRequestTierPrice(resolved, "4K"), 1e-12)
+	requireRequestUnitPrice(t, r, resolved, "1K", 0, 0.04)
+	requireRequestUnitPrice(t, r, resolved, "2K", 0, 0.08)
+	requireNoRequestUnitPrice(t, r, resolved, "4K", 0)
 }
 
-func TestGetRequestTierPriceByContext(t *testing.T) {
+func TestRequestUnitPrice_ByContext(t *testing.T) {
 	bs := newTestBillingServiceForResolver()
 	r := NewModelPricingResolver(&ChannelService{}, bs)
 
@@ -189,11 +207,11 @@ func TestGetRequestTierPriceByContext(t *testing.T) {
 		},
 	}
 
-	require.InDelta(t, 0.05, r.GetRequestTierPriceByContext(resolved, 50000), 1e-12)
-	require.InDelta(t, 0.10, r.GetRequestTierPriceByContext(resolved, 200000), 1e-12)
+	requireRequestUnitPrice(t, r, resolved, "", 50000, 0.05)
+	requireRequestUnitPrice(t, r, resolved, "", 200000, 0.10)
 }
 
-func TestGetRequestTierPrice_NilPerRequestPrice(t *testing.T) {
+func TestRequestUnitPrice_NilPerRequestPriceNotConfigured(t *testing.T) {
 	bs := newTestBillingServiceForResolver()
 	r := NewModelPricingResolver(&ChannelService{}, bs)
 
@@ -204,7 +222,7 @@ func TestGetRequestTierPrice_NilPerRequestPrice(t *testing.T) {
 		},
 	}
 
-	require.InDelta(t, 0.0, r.GetRequestTierPrice(resolved, "1K"), 1e-12)
+	requireNoRequestUnitPrice(t, r, resolved, "1K", 0)
 }
 
 // ===========================================================================
@@ -375,8 +393,8 @@ func TestResolve_WithChannelOverride_PerRequest(t *testing.T) {
 	require.Len(t, resolved.RequestTiers, 2)
 
 	// Verify tier lookups
-	require.InDelta(t, 0.03, r.GetRequestTierPriceByContext(resolved, 50000), 1e-12)
-	require.InDelta(t, 0.10, r.GetRequestTierPriceByContext(resolved, 200000), 1e-12)
+	requireRequestUnitPrice(t, r, resolved, "", 50000, 0.03)
+	requireRequestUnitPrice(t, r, resolved, "", 200000, 0.10)
 }
 
 func TestResolve_WithChannelOverride_PerRequestNilPrice(t *testing.T) {
@@ -448,10 +466,10 @@ func TestResolve_WithChannelOverride_ImageTierLabels(t *testing.T) {
 		GroupID: groupIDPtr(),
 	})
 
-	require.InDelta(t, 0.04, r.GetRequestTierPrice(resolved, "1K"), 1e-12)
-	require.InDelta(t, 0.08, r.GetRequestTierPrice(resolved, "2K"), 1e-12)
-	require.InDelta(t, 0.16, r.GetRequestTierPrice(resolved, "4K"), 1e-12)
-	require.InDelta(t, 0.0, r.GetRequestTierPrice(resolved, "8K"), 1e-12) // not found
+	requireRequestUnitPrice(t, r, resolved, "1K", 0, 0.04)
+	requireRequestUnitPrice(t, r, resolved, "2K", 0, 0.08)
+	requireRequestUnitPrice(t, r, resolved, "4K", 0, 0.16)
+	requireNoRequestUnitPrice(t, r, resolved, "8K", 0)
 }
 
 // ---------------------------------------------------------------------------
@@ -585,10 +603,10 @@ func TestResolve_WithChannelOverride_CacheError(t *testing.T) {
 }
 
 // ===========================================================================
-// 7. GetRequestTierPriceByContext boundary tests
+// 7. RequestUnitPrice context-boundary tests
 // ===========================================================================
 
-func TestGetRequestTierPriceByContext_EmptyTiers(t *testing.T) {
+func TestRequestUnitPrice_NoTiersIsNotConfigured(t *testing.T) {
 	bs := newTestBillingServiceForResolver()
 	r := NewModelPricingResolver(&ChannelService{}, bs)
 
@@ -597,8 +615,7 @@ func TestGetRequestTierPriceByContext_EmptyTiers(t *testing.T) {
 		RequestTiers: nil, // empty
 	}
 
-	price := r.GetRequestTierPriceByContext(resolved, 50000)
-	require.InDelta(t, 0.0, price, 1e-12)
+	requireNoRequestUnitPrice(t, r, resolved, "", 50000)
 
 	// Also test with explicit empty slice
 	resolved2 := &ResolvedPricing{
@@ -606,11 +623,10 @@ func TestGetRequestTierPriceByContext_EmptyTiers(t *testing.T) {
 		RequestTiers: []PricingInterval{},
 	}
 
-	price2 := r.GetRequestTierPriceByContext(resolved2, 50000)
-	require.InDelta(t, 0.0, price2, 1e-12)
+	requireNoRequestUnitPrice(t, r, resolved2, "", 50000)
 }
 
-func TestGetRequestTierPriceByContext_ExactBoundary(t *testing.T) {
+func TestRequestUnitPrice_ExactBoundary(t *testing.T) {
 	bs := newTestBillingServiceForResolver()
 	r := NewModelPricingResolver(&ChannelService{}, bs)
 
@@ -625,14 +641,12 @@ func TestGetRequestTierPriceByContext_ExactBoundary(t *testing.T) {
 	// totalContextTokens = 128000 exactly:
 	// FindMatchingInterval checks: totalTokens > MinTokens && totalTokens <= MaxTokens
 	// For first interval: 128000 > 0 (true) && 128000 <= 128000 (true) → matches first interval
-	price := r.GetRequestTierPriceByContext(resolved, 128000)
-	require.InDelta(t, 0.05, price, 1e-12)
+	requireRequestUnitPrice(t, r, resolved, "", 128000, 0.05)
 
 	// totalContextTokens = 128001 should match second interval
 	// For first interval: 128001 > 0 (true) && 128001 <= 128000 (false) → no match
 	// For second interval: 128001 > 128000 (true) && MaxTokens == nil → matches
-	price2 := r.GetRequestTierPriceByContext(resolved, 128001)
-	require.InDelta(t, 0.10, price2, 1e-12)
+	requireRequestUnitPrice(t, r, resolved, "", 128001, 0.10)
 }
 
 // ===========================================================================

@@ -124,11 +124,11 @@ func TestRecordUsage_CostFailureMatrix(t *testing.T) {
 				// 简易模式：未配价仍按默认图价记账；算价出错则吸收为 $0。
 				if tc.source == "unpriced" {
 					want.wantCost = defaultUnit * imageCount
-					want.wantMarker = imagePriceDefaultedMarker
+					want.wantMarker = BillingTierImagePriceDefaulted
 				}
 			case tc.source == "unpriced" && !tc.failClosed:
 				want.wantCost = defaultUnit * imageCount
-				want.wantMarker = imagePriceDefaultedMarker
+				want.wantMarker = BillingTierImagePriceDefaulted
 			default:
 				// 非简易模式的失败关闭两格：未配价 + 开关开、以及算价出错（两态）。
 				want = expectation{wantErr: true, wantFailure: 1}

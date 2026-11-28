@@ -29,7 +29,7 @@ import (
 // 这三行会立刻变红。
 func TestRecordUsage_ImagePricingConvergesOnUnpricedRows(t *testing.T) {
 	const (
-		marker            = imagePriceDefaultedMarker
+		marker            = BillingTierImagePriceDefaulted
 		defaultImagePrice = 0.134
 		imageCount        = 2
 		tokenCostForUsage = 3.015 // 1M 输入 × 3e-6 + 1000 输出 × 15e-6
