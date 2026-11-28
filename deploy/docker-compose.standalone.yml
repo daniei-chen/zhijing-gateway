@@ -72,6 +72,14 @@ services:
       # =======================================================================
       # Redis Configuration - Required
       # =======================================================================
+      # 这个文件不起 redis，用的是你提供的那个（外接／托管）。那个 redis 必须
+      # 满足网关的启动门禁，否则网关起来就退出（见
+      # backend/internal/repository/auth_store_policy.go）：
+      #   CONFIG SET maxmemory-policy noeviction
+      #   CONFIG SET appendonly yes
+      #   CONFIG SET appendfsync always
+      #   CONFIG SET no-appendfsync-on-rewrite no
+      # 会话代际与吊销墓碑是安全状态，不能有「已确认写入但 AOF 没落盘」的窗口。
       - REDIS_HOST=${REDIS_HOST:?REDIS_HOST is required}
       - REDIS_PORT=${REDIS_PORT:-6379}
       - REDIS_USERNAME=${REDIS_USERNAME:-}

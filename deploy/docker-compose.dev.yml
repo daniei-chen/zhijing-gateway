@@ -10,6 +10,10 @@
 
 services:
   zhijing-gateway:
+    # 显式镜像名：CI 用 docker/build-push-action 带 GHA 层缓存预构建这个 tag，
+    # 然后 `docker compose up -d`（不带 --build）直接用它，省掉重复构建。
+    # 本地照旧 `docker compose ... up --build` 也能用，只是会打上同一个 tag。
+    image: zhijing-gateway:dev
     build:
       context: ..
       dockerfile: Dockerfile
@@ -165,8 +169,17 @@ services:
       - "1"
       - --appendonly
       - "yes"
+      # 会话代际与吊销墓碑是安全状态，不能存在「已确认写入但 AOF 还没落盘」的窗口：
+      # 后端启动时校验 maxmemory-policy=noeviction、appendonly=yes、
+      # appendfsync=always、no-appendfsync-on-rewrite=no 与 AOF 可写，任一条不满足
+      # 就拒绝启动（backend/internal/repository/auth_store_policy.go）。
+      # everysec 允许最多丢 1 秒的安全状态，所以这里必须是 always。
       - --appendfsync
-      - everysec
+      - always
+      - --no-appendfsync-on-rewrite
+      - "no"
+      - --maxmemory-policy
+      - noeviction
       - --requirepass
       - ${REDIS_PASSWORD:-}
     environment:

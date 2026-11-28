@@ -4,10 +4,21 @@ on:
   # 只有 main 的 push 触发 CI；PR 分支靠 pull_request（opened/synchronize/reopened）。
   # 这是行为变化：往没有 PR 的分支推 commit 不再有任何 CI，要验要先开 PR。
   # 收窄的原因：一次 push 会同时挤进 7 个 job，多分支并行时把 CI 队列饿死。
-  # main 的 push 必须保留——新增的 e2e job 靠 if: github.ref == 'refs/heads/main'。
+  # main 的 push 必须保留——e2e job 靠 if 里的 refs/heads/main 这一条。
+  #
+  # ci/e2e-* 这个 push 例外已删除（2026-11-28）：它是 e2e 从没绿过时的临时验证
+  # 通道，代价是任何推 ci/ 前缀分支的人都会凭空触发一次 12 分钟的起栈。它要解决
+  # 的场景——「改 e2e 自己时怎么验」——由下面的 workflow_dispatch 覆盖，e2e 也已经
+  # 在这条通道上连绿两次（run 46129909080，见 docs/ci/branch-protection.md §3）。
   push:
     branches: [main]
   pull_request:
+  # e2e 在 PR 上不跑（起栈 12 分钟 + 需要真实上游 key），改 e2e 本身时用
+  # workflow_dispatch 在指定 ref 上直接起一次。
+  #
+  # 限制（GitHub 的行为，不是我们的配置）：只有默认分支上的 workflow 文件
+  # 带 workflow_dispatch，这个 workflow 才接受 dispatch。
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -29,6 +40,8 @@ jobs:
           /bin/sh deploy/tests/ci-workflow-guards-test.sh
           /bin/bash deploy/tests/verify-sensitive-endpoints-test.sh
           /bin/sh deploy/tests/security-invariants-test.sh
+          /bin/sh deploy/tests/redis-auth-store-durability-test.sh
+          /bin/sh deploy/tests/e2e-ci-secrets-test.sh
           /bin/sh deploy/test-caddyfile-cache.sh
 
   test:
@@ -81,18 +94,69 @@ jobs:
         working-directory: backend
         run: go test -tags=embed ./internal/web/ -count=1 -v
 
-  # 11 条 HTTP 黑盒测试，要一整套跑起来的栈（postgres + redis + 网关），
-  # 慢，所以只在 main 上跑。前置条件逐条核过源码，写在 docs/ci/test-tiers.md §4。
+  # 11 条 HTTP 黑盒测试，要一整套跑起来的栈（postgres + redis + 网关）。
+  # 前置条件逐条核过源码，写在 docs/ci/test-tiers.md §4。
   #
-  # 没有 CLAUDE_API_KEY / GEMINI_API_KEY 时其中 9 条会 skip（它们要真实上游
-  # 账号），只有 2 条用户流程能真验。所以后面有一步断言：那 2 条必须是 PASS，
-  # 不许靠"全跳过"混成绿色。
+  # 两档，按事件区分（E2E_TIER）：
+  # - pr   档：pull_request 上跑，只跑不依赖上游密钥的子集（4 条：注册登录、
+  #          API Key 生命周期、Key 吊销即时失效、注册开关双向生效），
+  #          目标是每个 PR 都能挡住「栈起不来 / 钱算错 / Key 吊销了还能用」这三类回归。
+  # - full 档：main 的 push 与 workflow_dispatch 上跑，跑全部 11 条（其中 9 条
+  #          要真实上游密钥，没有就 SKIP——所以断言步只认「真跑过的条数」）。
+  #
+  # 两档都有**条数下限**，写在 E2E_MIN_TOP_LEVEL_PASS 里，低于下限直接红：
+  # 光断言「这两条用例 PASS」不够，还要断言「真跑的条数没缩水」，否则哪天有人
+  # 用一个更窄的 -run 让它秒过，前面的断言照样全绿。
+  #
+  # 下限今天是 2：无上游密钥的条件下真能跑的顶层用例就只有 2 条（
+  # docs/ci/branch-protection.md §3.1 的两轮实测：11 条顶层 = 2 PASS + 9 SKIP）。
+  # **2 不代表够，只是今天的真实数字。** 把它写大之前，必须先让栈里有一个假的
+  # OpenAI 兼容上游，把那 9 条 SKIP 变成真断言——先写大再补用例，下限立刻变成
+  # 新的假绿来源。
+  #
+  # 已验证会真跑通，不是「配了但没跑过」：run 46129909080（2026-11-28，
+  # head 50bc5e392）同一 run 连跑两轮均绿，注册 → 登录 → 建 API Key → 用 Key 调
+  # 网关 → 查用量五步全 PASS。凭据与路径的实测记录见
+  # docs/ci/branch-protection.md §3 和 docs/ci/test-tiers.md §4.2。
+  #
+  # 计时：每一步都打 `E2E_TIMING <marker>=Ns`（从起栈开始算），可 grep。要这个
+  # 数字是为了决定「PR 档是否必须上镜像 cache」，不是给人看的概数。
   e2e:
-    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      E2E_TIER: ${{ github.event_name == 'pull_request' && 'pr' || 'full' }}
+      # 真跑过的顶层用例条数下限 = 这一档实际会跑、且应当 PASS 的顶层用例数（实测 4）：
+      # TestUserRegistrationAndLogin / TestAPIKeyLifecycle /
+      # TestAPIKeyRevocationIsImmediate / TestRegistrationSwitchIsEnforcedBothWays。
+      # 两档都是 4：full 档多跑的 9 条是 SKIP（缺上游密钥），不计入 PASS。
+      # 这个数字按实测写，不写整数，也不写「目标值」。
+      E2E_MIN_TOP_LEVEL_PASS: 4
     steps:
       - uses: actions/checkout@v6
+      - name: Start the clock
+        run: |
+          # 计时在这里开始：后面每一步都打 E2E_TIMING <marker>=Ns。放在构建之前，
+          # 才能把「镜像构建」和「起栈+等健康」分开看——上一轮实测 stack_ready=292s、
+          # 跑测试只占 12s，需要知道那 292 秒里构建占多少，才谈得上决定缓存够不够。
+          echo "E2E_T0=$(date +%s)" >> "$GITHUB_ENV"
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build the gateway image (GHA layer cache)
+        uses: docker/build-push-action@v6
+        with:
+          # 镜像名与 deploy/docker-compose.dev.yml 里 zhijing-gateway 的 image 一致，
+          # 下面 compose up 就不再自己构建（compose 里已去掉 --build）。
+          # 实测依据：PR 档整轮 304s 里有 292s 在起栈，而 run 只占 12s——
+          # 用例几乎免费，构建才是成本，所以缓存打在构建上。
+          context: .
+          file: Dockerfile
+          tags: zhijing-gateway:dev
+          load: true
+          build-args: |
+            NPM_CONFIG_REGISTRY=https://registry.npmjs.org
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: Start the stack from this commit
         working-directory: deploy
         env:
@@ -102,23 +166,50 @@ jobs:
           ADMIN_EMAIL: ci-e2e@test.local
           ADMIN_PASSWORD: CiE2eAdmin12345
           JWT_SECRET: ci-e2e-jwt-secret-not-a-production-secret
-          TOTP_ENCRYPTION_KEY: ci-e2e-totp-key-not-a-production-secret
+          # CI 专用的固定假密钥：AES-256 要 hex 解码后正好 32 字节（64 个 hex
+          # 字符），backend/internal/repository/aes_encryptor.go:23-30 校验，不符合
+          # 就拒绝启动（payment 的加密钥也来自这里）。不是生产密钥，也不进任何
+          # 部署路径，只为让 e2e 栈起得来。
+          TOTP_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org
         run: |
+          echo "E2E_TIMING image_built=$(( $(date +%s) - E2E_T0 ))s (tier=$E2E_TIER)"
           # 容器以 1000:1000 跑且 rootfs 只读，挂载的 data/ 得先可写。
           mkdir -p data
           sudo chown -R 1000:1000 data
-          docker compose -f docker-compose.dev.yml up -d --build
+          # 不带 --build：镜像上一步已经用 GHA 层缓存构建好了（compose 里设了 image 名）。
+          docker compose -f docker-compose.dev.yml up -d
       - name: Wait for the gateway
         run: |
+          # 失败时把网关日志的尾巴打进 job log：artifact 要 token 才能下载，
+          # 没有 token 的人只能看 job log。上一次 e2e 就是靠 artifact 才拿到根因
+          # （auth store policy: appendfsync must be always），别让下一个人重走一遍。
+          show_gateway_tail() {
+            echo "--- last 60 lines of zhijing-gateway-dev ---"
+            docker logs --tail 60 zhijing-gateway-dev 2>&1 || true
+            echo "--- end of gateway log tail ---"
+          }
+          # 每轮把容器状态打进 job log：网关 600 秒没监听时，必须能一眼分出
+          # 「没启动」「起了又退」「在跑但没监听」，否则只能靠猜。
           for i in $(seq 1 60); do
             if curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1; then
               echo "gateway healthy after $((i * 10))s"
+              echo "E2E_TIMING stack_ready=$(( $(date +%s) - E2E_T0 ))s (tier=$E2E_TIER)"
               exit 0
+            fi
+            state=$(docker inspect -f '{{.State.Status}} restarts={{.RestartCount}} exit={{.State.ExitCode}}' zhijing-gateway-dev 2>&1 | head -1 || true)
+            echo "attempt $i/60: gateway not healthy yet (container: $state)"
+            # 崩满 5 次还没监听，再等 10 分钟也不会好：早点失败，日志也更早拿到。
+            restarts=$(printf '%s' "$state" | sed -n 's/.*restarts=\([0-9][0-9]*\).*/\1/p')
+            if [ -n "$restarts" ] && [ "$restarts" -ge 5 ]; then
+              echo "::error::gateway restarted ${restarts} times without listening"
+              show_gateway_tail
+              exit 1
             fi
             sleep 10
           done
           echo "gateway did not become healthy in 600s" >&2
+          show_gateway_tail
           exit 1
       - uses: actions/setup-go@v6
         with:
@@ -138,7 +229,25 @@ jobs:
           ADMIN_PASSWORD: CiE2eAdmin12345
         run: |
           set -o pipefail
-          go test -tags=e2e -v -count=1 -timeout=300s ./internal/integration/... | tee e2e.log
+          # 两档靠 -run 分隔，不靠 build tag：跑的是同一批用例，差别只在「跑
+          # 多少」。pr 档只跑不依赖上游密钥的子集，full 档不加过滤器。下面断言
+          # 步会核对真跑过的条数，别指望少跑几条能蒙过去。
+          case "$E2E_TIER" in
+            pr)
+              echo "E2E_TIER=pr: 只跑不依赖上游密钥的子集"
+              RUN_FILTER='^(TestUserRegistrationAndLogin|TestAPIKeyLifecycle|TestAPIKeyRevocationIsImmediate|TestRegistrationSwitchIsEnforcedBothWays)$'
+              ;;
+            *)
+              echo "E2E_TIER=full: 跑全部"
+              RUN_FILTER=''
+              ;;
+          esac
+          if [ -n "$RUN_FILTER" ]; then
+            go test -tags=e2e -v -count=1 -timeout=300s -run "$RUN_FILTER" ./internal/integration/... | tee e2e.log
+          else
+            go test -tags=e2e -v -count=1 -timeout=300s ./internal/integration/... | tee e2e.log
+          fi
+          echo "E2E_TIMING tests_done=$(( $(date +%s) - E2E_T0 ))s (tier=$E2E_TIER)"
       - name: Assert the stack-backed tests actually ran
         working-directory: backend
         run: |
@@ -152,9 +261,84 @@ jobs:
             echo "::error::用户流程测试被 skip 了，这个 job 等于没跑"
             exit 1
           fi
-      - name: Dump container logs
+          # 下限不兜底：${E2E_MIN_TOP_LEVEL_PASS:-0} 会把「没有下限」静默变成
+          # 「下限是 0」，等于没有下限。缺这个变量就是配置坏了，直接红。
+          if [ -z "${E2E_MIN_TOP_LEVEL_PASS:-}" ]; then
+            echo "::error::E2E_MIN_TOP_LEVEL_PASS 没有设置——没有下限的档等于没有档"
+            exit 1
+          fi
+          # e2e.log 不存在 ≠ 0 条通过。grep 打不开文件时不给标准输出，下面
+          # `[ "$top_pass" -lt N ]` 就会拿到空串：`[ "" -lt 2 ]` 是用法错误（返回 2），
+          # 而它出现在 if 的条件位置，-e 不会退出，条件被判为假——脚本继续往下走
+          # 并打印成功。这是「出错路径上仍然绿」，必须显式挡住。
+          if [ ! -r e2e.log ]; then
+            echo "::error::e2e.log 不存在或不可读，无法统计用例条数"
+            exit 1
+          fi
+          # 条数下限。逐条点名「某两条必须 PASS」挡不住「用一个更窄的 -run 让
+          # 整个包秒过」——那种情况下上面两条断言照样全绿，而 e2e 什么都没验。
+          # 只数顶层的 `--- PASS: `（行首），子测试的 PASS 行是缩进的。
+          top_pass=$(grep -cE '^--- PASS: ' e2e.log || true)
+          top_fail=$(grep -cE '^--- FAIL: ' e2e.log || true)
+          top_pass=${top_pass:-0}
+          top_fail=${top_fail:-0}
+          echo "E2E_TIER=$E2E_TIER top_level_pass=$top_pass top_level_fail=$top_fail min=$E2E_MIN_TOP_LEVEL_PASS"
+          if [ "$top_fail" -ne 0 ]; then
+            echo "::error::$top_fail 条顶层用例失败"
+            exit 1
+          fi
+          if [ "$top_pass" -lt "$E2E_MIN_TOP_LEVEL_PASS" ]; then
+            echo "::error::真跑过的顶层用例只有 $top_pass 条，低于下限 $E2E_MIN_TOP_LEVEL_PASS——这个 job 没证明该证明的东西"
+            exit 1
+          fi
+      # 失败时把现场落成 artifact。只把日志滚进 job log 不够：job log 会随 run
+      # 过期，而且「没启动」和「起了又退」在日志里长得一样，必须同时有 ps（状态）
+      # 和 inspect（退出码 / 重启次数 / 健康检查）。
+      #
+      # 这里必须带 env + working-directory：compose 对任何子命令都会先解析插值，
+      # 缺一个 ${X:?} 时 `logs` 也照样死在插值错误上，一行容器日志都拿不到——
+      # 之前正是这样，这个 job 四次全红却一次没留下网关日志。
+      # dev compose 里只有一个必填插值：deploy/docker-compose.dev.yml 的
+      # ${POSTGRES_PASSWORD:?}（网关 :48、postgres :142）。
+      - name: Dump container state and logs
         if: failure()
-        run: docker compose -f deploy/docker-compose.dev.yml logs --tail=200
+        continue-on-error: true
+        working-directory: deploy
+        env:
+          POSTGRES_PASSWORD: ci-e2e-postgres
+        run: |
+          out="$GITHUB_WORKSPACE/e2e-diagnostics"
+          mkdir -p "$out"
+          # 不经过 compose 的兜底：docker CLI 只认固定的 container_name
+          # （deploy/docker-compose.dev.yml:18/:136/:157），不做变量插值，
+          # 所以下面这两条不管 compose 的 env 出什么岔子都拿得到东西。
+          docker ps -a --no-trunc > "$out/docker-ps.txt" 2>&1 || true
+          docker logs --tail 2000 zhijing-gateway-dev > "$out/gateway-logs.txt" 2>&1 || true
+          # 谁活着、谁退了、端口有没有映射
+          docker compose -f docker-compose.dev.yml ps -a > "$out/ps.txt" 2>&1 || true
+          # 三个服务（postgres / redis / gateway）的日志，一次不带服务名就是全部
+          docker compose -f docker-compose.dev.yml logs --no-color --tail=2000 > "$out/compose-logs.txt" 2>&1 || true
+          # 容器里的进程：区分「进程在跑但没监听」和「进程已经没了」
+          docker compose -f docker-compose.dev.yml top > "$out/top.txt" 2>&1 || true
+          for c in zhijing-gateway-dev zhijing-gateway-postgres-dev zhijing-gateway-redis-dev; do
+            printf '=== %s ===\n' "$c" >> "$out/inspect.txt"
+            docker inspect -f 'status={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} restarts={{.RestartCount}} started={{.State.StartedAt}} finished={{.State.FinishedAt}} error={{.State.Error}} health={{if .State.Health}}{{.State.Health.Status}}/fails={{.State.Health.FailingStreak}}{{else}}none{{end}}' "$c" >> "$out/inspect.txt" 2>&1 || true
+            # 只取代理相关变量：启动期卡外发请求时，取值就是证据（不落其它凭据）
+            docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$c" 2>/dev/null \
+              | grep -E '^(HTTP_PROXY|HTTPS_PROXY|ALL_PROXY|NO_PROXY)=' >> "$out/proxy-env.txt" || true
+          done
+          # 探针侧：端口到底有没有人听，curl 到底报什么
+          curl -sv --max-time 10 http://127.0.0.1:8080/health > "$out/curl-health.txt" 2>&1 || true
+          (ss -ltnp || netstat -ltn) > "$out/listening-ports.txt" 2>&1 || true
+          cp ../backend/e2e.log "$out/e2e.log" 2>/dev/null || true
+          ls -l "$out"
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-diagnostics
+          path: e2e-diagnostics/
+          if-no-files-found: warn
+          retention-days: 14
 
   race:
     runs-on: ubuntu-latest

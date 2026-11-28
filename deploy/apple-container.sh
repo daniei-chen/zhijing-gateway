@@ -528,7 +528,7 @@ create_redis_container() {
         --env-file "${REDIS_ENV_FILE}" \
         --volume "${REDIS_VOLUME}:/var/lib/redis" \
         "${REDIS_IMAGE}" \
-        sh -c 'set -e; mkdir -p /var/lib/redis/data; chown redis:redis /var/lib/redis/data; exec /usr/local/bin/docker-entrypoint.sh redis-server --dir /var/lib/redis/data --save 60 1 --appendonly yes --appendfsync everysec ${REDIS_PASSWORD:+--requirepass "$REDIS_PASSWORD"}' \
+        sh -c 'set -e; mkdir -p /var/lib/redis/data; chown redis:redis /var/lib/redis/data; exec /usr/local/bin/docker-entrypoint.sh redis-server --dir /var/lib/redis/data --save 60 1 --appendonly yes --appendfsync always --no-appendfsync-on-rewrite no --maxmemory-policy noeviction ${REDIS_PASSWORD:+--requirepass "$REDIS_PASSWORD"}' \
         >/dev/null
 }
 

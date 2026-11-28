@@ -71,9 +71,20 @@ TestGo: [embed_test.go] | Go: [embed_on.go html_cache.go spa_fallback.go static_
 
 本机实测（§6.1）：`ok github.com/daniei-chen/zhijing-gateway/internal/web 1.498s`。CI 冷缓存要加编译时间，但仍然是个位数分钟以内的事。
 
-### 3.2 e2e：接进 CI，只在 main 跑
+### 3.2 e2e：接进 CI，PR 与 main 两档
 
 见 §4 的前置条件。要点：11 条测试是 HTTP 黑盒，需要一整套跑起来的栈；其中只有 2 条（用户注册/登录 + API Key 生命周期）能在没有上游账号的情况下真正验证东西，另外 9 条需要真实 API Key 和上游账号。
+
+2026-11-28 起它不再只在 main 上跑（`pull_request` 也会真跑），并分成两档：
+
+| 档 | 触发 | 跑什么 | 条数下限 |
+|---|---|---|---|
+| `pr` | `pull_request` | `-run '^(TestUserRegistrationAndLogin\|TestAPIKeyLifecycle\|TestAPIKeyRevocationIsImmediate\|TestRegistrationSwitchIsEnforcedBothWays)$'` | `E2E_MIN_TOP_LEVEL_PASS: 4` |
+| `full` | `main` push、`workflow_dispatch` | 全包（11 条顶层） | `E2E_MIN_TOP_LEVEL_PASS: 4` |
+
+下限写在 workflow 的 job env 里，是一个脚本要核的数字，不是注释：断言步数行首的 `--- PASS: `，低于下限直接红。**4 是实测出来的数字，不是目标也不是整数拍脑袋**：pr 档跑 4 条、4 条全 PASS；full 档多跑的 9 条是 SKIP（缺上游密钥），不计入 PASS。要再抬，得先让那 9 条能被真跑（见 §4.4），否则下限只是把「跑 4 条也算过」写得更正式。
+
+2026-11-28 实测（#56 第一轮，run `46135841927`）：`stack_ready=292s`、`tests_done=304s`、`top_level_pass=2 top_level_fail=0`。也就是说 **一整轮的成本 96% 在起栈，跑用例只占 12 秒**——加用例的边际成本是秒级，成本在镜像构建与起栈上，所以缓存打在构建上（`docker/build-push-action` + `cache-from/to: type=gha`，compose 里显式 `image: zhijing-gateway:dev`）。
 
 ### 3.3 windows：不接，给命令
 
@@ -136,10 +147,16 @@ test-e2e:
 | `TestClaudeModelsList`、`TestClaudeMessages`、`TestClaudeMessagesWithComplexTools`、`TestClaudeMessagesWithThinkingAndTools`、`TestClaudeMessagesWithNoSignature` | `CLAUDE_API_KEY` 非空 | `t.Skip` |
 | `TestGeminiModelsList`、`TestGeminiGenerateContent` | `GEMINI_API_KEY` 非空 | `t.Skip` |
 | `TestClaudeMessagesWithGeminiModel`、`TestGeminiEndpointWithClaudeModel` | `ENDPOINT_PREFIX=/antigravity` | `t.Skip("仅在 Antigravity 模式下运行")` |
-| `TestUserRegistrationAndLogin` | 栈在跑；注册接口可达（关闭则 skip） | 注册不可达时 skip 该子测试，但**下一步登录会 `t.Fatalf`** |
-| `TestAPIKeyLifecycle` | 栈在跑 + 能登录（`ADMIN_EMAIL`/`ADMIN_PASSWORD`，否则用测试用户） | `t.Skip("无法登录…")` |
+| `TestUserRegistrationAndLogin` | 栈在跑且 `/api/v1/auth/register`、`/api/v1/auth/login`、`/api/v1/user/profile` 存在 | **任何非 200 都 `t.Fatalf`**（2026-11-28 起）。此前 404 被当成「继续尝试」，整条测试降级成 skip，所以它自接入起从未绿过也没人发现 |
+| `TestAPIKeyLifecycle` | 栈在跑 + 能登录（`ADMIN_EMAIL`/`ADMIN_PASSWORD`，否则用测试用户） | **登录失败即 `t.Fatalf`**（2026-11-28 起）。`/v1/models` 返回 402/403 仍算通过（栈里没有上游账号），其它状态码硬失败；**并用一个伪造 Key 做对照，要求它被拒成 401**，这样 402/403 才是「鉴权过了但没有账户」的证据，而不是鉴权坏了对谁都回同一个码 |
 
 注意 `CLAUDE_API_KEY` / `GEMINI_API_KEY` 是**网关自己签发的 API Key**（`Authorization: Bearer` 打 `baseURL`，`e2e_gateway_test.go:113`），不是上游厂商的 key。
+
+### 4.2.1 面板路径必须带 `/api/v1`
+
+`e2e_user_flow_test.go` 打的是 `internal/server/routes/` 里真实注册的路径：注册/登录在 `auth.go:35`/`:38`（`v1.Group("/auth")`），当前用户是 `user.GET("/profile")`（`user.go:31`，**不是** `/user/me`），API Key 是 `keys.POST("")`（`user.go:87`），用量看板是 `usage.GET("/dashboard/stats")`（`user.go:115`）。这一组此前写成了不带 `v1` 的 `/api/auth/...`、`/api/user/me`、`/api/usage/dashboard`，路由根本不存在。
+
+**这一层的教训不是"改路径"，是"测试不许靠 skip 自己通过"**：非 200 一律 `t.Fatalf`，并让 `Assert the stack-backed tests actually ran` 继续兜底（父测试 PASS 但子测试全 skip 时它会红）。
 
 ### 4.3 `E2E_MOCK` 不能救场
 
@@ -154,9 +171,11 @@ $ grep -rn "E2E_MOCK" backend --include=*.go | grep -v _test.go
 
 ### 4.4 所以 e2e job 能诚实地跑什么
 
-在没有上游账号的 CI 里，**只有 2 条能真正验证**：`TestUserRegistrationAndLogin`（注册→登录→JWT→`/api/user/me`）和 `TestAPIKeyLifecycle`（建 Key → 用 Key 打 `/v1/models` → 查用量）。这 2 条覆盖的是真实的 HTTP 路由、鉴权、DB 写入，价值不低。
+在没有上游账号的 CI 里，**只有 2 条能真正验证**：`TestUserRegistrationAndLogin`（管理员打开注册开关 → 注册 → 登录 → JWT → `/api/v1/user/profile`）和 `TestAPIKeyLifecycle`（建 Key → 用 Key 打 `/v1/models` → 查用量）。这 2 条覆盖的是真实的 HTTP 路由、鉴权、DB 写入，价值不低。
 
-另外 9 条会在没有 key 时跳过——这正是"绿得没有意义"的风险点，所以 job 里必须有断言：**这 2 条必须是 `PASS` 而不是 `SKIP`**。见 §5 的 `--` 断言步骤。
+另外 9 条会在没有 key 时跳过——这正是「绿得没有意义」的风险点，所以 job 里有两层断言：**这 2 条必须是 `PASS` 而不是 `SKIP`**，且**顶层 `--- PASS:` 的条数不得低于下限**（`E2E_MIN_TOP_LEVEL_PASS`）。只有第一层不够：拿一个更窄的 `-run` 就能让整个包秒过，而那 2 条断言照样全绿。
+
+把 9 条 SKIP 变成真断言的办法不是再加几条打本地 admin 接口的用例，而是**在栈里放一个假的 OpenAI 兼容上游**：那样转发、计费扣费、配额、模型列表、上游错误映射（4xx 与超时各一条）才真正被走过。在这条到位之前，下限就停在 2——写大了只是换一种假绿。
 
 要真跑那 9 条，需要一个配好真实上游账号的 staging 环境（不是 CI 里临时起的栈）：
 
@@ -175,6 +194,7 @@ cd backend && go test -tags=e2e -v -timeout=300s ./internal/integration/
 - 容器以 `user: "1000:1000"` 跑且 `read_only: true`，挂载 `./data:/app/data`，所以宿主要先建好 `data/` 并给 uid 1000 写权限
 - `ADMIN_EMAIL` / `ADMIN_PASSWORD` 用来让首次启动创建管理员——这既是 `TestAPIKeyLifecycle` 的登录凭据，也要 export 到跑测试的那个进程里
 - 端口默认 `${BIND_HOST:-127.0.0.1}:${SERVER_PORT:-8080}:8080`，正好对上测试的 `BASE_URL` 默认值
+- **redis 必须以 `--appendfsync always` 运行**：网关启动时检查 `maxmemory-policy=noeviction`、`appendonly=yes`、`appendfsync=always`、`no-appendfsync-on-rewrite=no` 和 AOF 可写状态（`INFO persistence` 的 `loading`/`aof_enabled`/`aof_last_write_status`），任一条不满足就拒绝启动，容器退出并被 `restart: unless-stopped` 反复拉起（日志：`Failed to initialize application: auth store policy: appendfsync must be always`）。改 `deploy/docker-compose*.yml` 里 redis 的 `command:` 之前先看 `backend/internal/repository/auth_store_policy.go`；`deploy/tests/redis-auth-store-durability-test.sh` 在 CI 里守这条，取值直接从那边的表里读。走 `docker-compose.standalone.yml`（外接 redis）的部署要自己在那个 redis 上设这四项。
 
 **本机没有 docker**（`docker: command not found`），§4.5 的每一步都没有在真机上跑过。**这是 e2e job 唯一未经实测的部分，合并后首次 main push 是它的第一次真跑。**
 

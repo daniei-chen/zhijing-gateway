@@ -4,9 +4,10 @@
 
 **改 CI 里任何 job 的名字之前，先读第 4 节。** 顺序错了会让所有 PR 永久卡住。
 
-- 核对时间：2026-11-28T09:27Z（北京时间 17:27）
-- 核对对象：`main` = `a5176cb4d`（`git fetch && git rev-parse --short origin/main`）
+- 核对时间：2026-11-28T09:27Z（北京时间 17:27）。**本次（同日合入 e2e 那批时）没有重新抓 `/rules/branches/main`，规则集部分沿用 09:27Z 的返回**——规则集这几天没人动过，但读者要知道这一节的时效。
+- 核对对象：`main` = `c8e16f07f`（2026-11-28 合入本文档那次 `git fetch && git rev-parse --short origin/main`）。`a5176cb4d` 是 09:27Z 那次核对的 head，已过期。
 - 证据来源：`GET /repos/daniei-chen/zhijing-gateway/rules/branches/main`（返回 9 个 context 的实时清单）；`GET /repos/daniei-chen/zhijing-gateway/rulesets/28278717`；`.github/workflows/*.yml`
+- **job 一律用 job id 引用，不用行号。** job id 就是 required check 的 `context`，改名要走第 4 节的五步流程；行号不是——加一个 `if:` 或一个 step 就能把整张表推偏（本文档自己就撞过：e2e 那批改动把 `shell`/`test`/`race` 各行整体下移，表里的 `:16`/`:34`/`:159` 全部失效）。
 
 ## 1. 规则集现状
 
@@ -48,15 +49,15 @@ Changes must be made through a pull request. 8 of 8 required status checks are e
 
 | 检查 | 定义 | 挡什么 |
 |---|---|---|
-| `shell` | `backend-ci.yml:16`（macos-15） | 部署脚本：`/bin/bash -n` 语法检查 `deploy/apple-container.sh`，然后真跑 `deploy/tests/` 下 11 个脚本（含 `ci-workflow-guards-test.sh`：9 个必检 job 不许出现 `if:`/`paths:`/`paths-ignore:`/`continue-on-error:`/`needs:`，唯一豁免是 `needs:` 配 `if: always()`）。跑在 macOS 上是为了顺带覆盖 BSD 与 GNU 的 shell 差异。 |
-| `test` | `backend-ci.yml:34`（ubuntu） | 后端单元测试（`make test-unit`）+ 集成测试（`make test-integration`）+ 三条 deploy 一致性测试（compose 简单模式、install 脚本 token 处理、阶段一加固文档）。 |
-| `race` | `backend-ci.yml:159` | 并发关键路径的 `-race` 数据竞争检测（`make test-race` → `backend/scripts/race-gate.sh`，只挑并发相关用例）。`go vet` 和 golangci-lint 都看不出数据竞争，只有它能。门禁会断言 `-v` 输出里真跑过的测试条数 ≥ 1300：`-run` 零命中时 `go test` 退 0，没有这条断言，改名或挪目录就能让它静默变绿。退出码取 `${PIPESTATUS[0]}`，所以 pipefail 被去掉也不会把失败的 `go test` 报成绿。 |
-| `frontend` | `backend-ci.yml:179` | 前端 `lint:check`、`typecheck`、`test:run`（vitest 全量）、生产 `build`。 |
-| `golangci-lint` | `backend-ci.yml:209` | Go 静态检查（golangci-lint v2.14.0，`--timeout=30m`）。 |
-| `release-helpers` | `backend-ci.yml:229` | 发布辅助工具的单元测试（`.github/release-tools` 发布矩阵，走 `.github/release-tools/run-tests.sh`：显式模块路径 + `Ran N tests` 下限 10，退出码取 `${PIPESTATUS[0]}`）+ `tools/check-pnpm-audit-exceptions-test.py` + `bash -n release-images.sh`。`discover -p` 匹配不到文件时退 0，所以不再用它。 |
-| `backend-security` | `security-scan.yml:19` | `govulncheck ./...`：Go 依赖与标准库的已知漏洞。工具版本钉死（`@v1.10.0`，2026-11-28 时 `@latest` 解析到的版本），不让上游发坏版本把必检变红。 |
-| `frontend-security` | `security-scan.yml:45` | `pnpm audit --prod --audit-level=high`（**只有这一条命令**带 `|| true`，否则命中 high 时它自己先红、豁免清单永远用不上）+ `tools/assert_pnpm_audit_report.py` 断言报告可解析且含 `metadata.vulnerabilities`（否则网络失败会装成「没有漏洞」）+ `tools/check_pnpm_audit_exceptions.py` 核例外清单，挡「高危依赖漏洞」与「例外过期没清理」。 |
-| `embed` | `backend-ci.yml:67` | `go test -tags=embed ./internal/web/ -count=1 -v`：发布形态（前端资源嵌进二进制）的 15 条测试，发布路径上唯一的自动化保险。2026-11-28 接进 CI 并当天挂进 required。 |
+| `shell` | `backend-ci.yml` 的 `shell` job（macos-15） | 部署脚本：`/bin/bash -n` 语法检查 `deploy/apple-container.sh`，然后 **12 条真跑 + 1 条 `-n` 语法检查**（`deploy/tests/` 下 11 个脚本 + `deploy/test-caddyfile-cache.sh`；含 `ci-workflow-guards-test.sh`：9 个必检 job 不许出现 `if:`/`paths:`/`paths-ignore:`/`continue-on-error:`/`needs:`，唯一豁免是 `needs:` 配 `if: always()`）。跑在 macOS 上是为了顺带覆盖 BSD 与 GNU 的 shell 差异。 |
+| `test` | `backend-ci.yml` 的 `test` job（ubuntu） | 后端单元测试（`make test-unit`）+ 集成测试（`make test-integration`）+ 三条 deploy 一致性测试（compose 简单模式、install 脚本 token 处理、阶段一加固文档）。 |
+| `race` | `backend-ci.yml` 的 `race` job | 并发关键路径的 `-race` 数据竞争检测（`make test-race` → `backend/scripts/race-gate.sh`，只挑并发相关用例）。`go vet` 和 golangci-lint 都看不出数据竞争，只有它能。门禁会断言 `-v` 输出里真跑过的测试条数 ≥ 1300：`-run` 零命中时 `go test` 退 0，没有这条断言，改名或挪目录就能让它静默变绿。退出码取 `${PIPESTATUS[0]}`，所以 pipefail 被去掉也不会把失败的 `go test` 报成绿。 |
+| `frontend` | `backend-ci.yml` 的 `frontend` job | 前端 `lint:check`、`typecheck`、`test:run`（vitest 全量）、生产 `build`。 |
+| `golangci-lint` | `backend-ci.yml` 的 `golangci-lint` job | Go 静态检查（golangci-lint v2.14.0，`--timeout=30m`）。 |
+| `release-helpers` | `backend-ci.yml` 的 `release-helpers` job | 发布辅助工具的单元测试（`.github/release-tools` 发布矩阵，走 `.github/release-tools/run-tests.sh`：显式模块路径 + `Ran N tests` 下限 10，退出码取 `${PIPESTATUS[0]}`）+ `tools/check-pnpm-audit-exceptions-test.py` + `bash -n release-images.sh`。`discover -p` 匹配不到文件时退 0，所以不再用它。 |
+| `backend-security` | `security-scan.yml` 的 `backend-security` job | `govulncheck ./...`：Go 依赖与标准库的已知漏洞。工具版本钉死（`@v1.10.0`，2026-11-28 时 `@latest` 解析到的版本），不让上游发坏版本把必检变红。 |
+| `frontend-security` | `security-scan.yml` 的 `frontend-security` job | `pnpm audit --prod --audit-level=high`（**只有这一条命令**带 `|| true`，否则命中 high 时它自己先红、豁免清单永远用不上）+ `tools/assert_pnpm_audit_report.py` 断言报告可解析且含 `metadata.vulnerabilities`（否则网络失败会装成「没有漏洞」）+ `tools/check_pnpm_audit_exceptions.py` 核例外清单，挡「高危依赖漏洞」与「例外过期没清理」。 |
+| `embed` | `backend-ci.yml` 的 `embed` job | `go test -tags=embed ./internal/web/ -count=1 -v`：发布形态（前端资源嵌进二进制）的 15 条顶层测试（出处：2026-11-28 本地跑同一条命令，`--- PASS:` 行首计数 15，0 SKIP，go1.27.4），发布路径上唯一的自动化保险。2026-11-28 接进 CI 并当天挂进 required。 |
 
 每条检查背后跑到哪些测试、哪些测试至今没进 CI，见 `docs/ci/test-tiers.md`。
 
@@ -64,9 +65,25 @@ Changes must be made through a pull request. 8 of 8 required status checks are e
 
 | 检查 | 位置 | 不挂的理由 |
 |---|---|---|
-| `cla-check` | `cla.yml:20-25` | 条件 job：只在 `issue_comment` 或「非 closed 的 `pull_request_target`」上跑。它的红绿取决于贡献者签没签 CLA，与代码质量无关；挂成必需等于让一次性的签名状态卡住所有合并。CLA 由流程保证：`cla-signatures` 分支的 `cla.json` 已有 `daniei-chen`（id 328942951）的签名记录（2026-11-28T01:25:35Z，PR #37）。它红了仍然要人看，只是不当合并门。 |
-| `cla-lock` | `cla.yml:54-58` | 只在 PR **已合并**后跑（`action == 'closed' && merged == true`）。PR 阶段它永远是 skipped，挂进 required 不提供任何覆盖。 |
-| `e2e` | `backend-ci.yml:90` | 只在 `main` 上跑（`if: github.ref == 'refs/heads/main'`）。PR head 上它以 `completed/skipped` 出现在检查列表里（PR #44 head `914ded94d` 实测），而按 GitHub 文档「被 skip 的 job 报告状态为 Success」，所以挂成 required 只是一条永远不阻止合并的空门。**代价：PR 阶段看不见 e2e 回归，只能靠合并后 main 上那次 run 兜底。这是已知盲区，不是遗漏。** 要让它成为真门，先把 e2e 改成 PR 可跑（起栈成本与上游 key 是真问题，见 `docs/ci/test-tiers.md` §4），再按第 4 节的顺序加进 required。 |
+| `cla-check` | `cla.yml` 的 `cla-check` job | 条件 job：只在 `issue_comment` 或「非 closed 的 `pull_request_target`」上跑。它的红绿取决于贡献者签没签 CLA，与代码质量无关；挂成必需等于让一次性的签名状态卡住所有合并。CLA 由流程保证：`cla-signatures` 分支的 `cla.json` 已有 `daniei-chen`（id 328942951）的签名记录（2026-11-28T01:25:35Z，PR #37）。它红了仍然要人看，只是不当合并门。 |
+| `cla-lock` | `cla.yml` 的 `cla-lock` job | 只在 PR **已合并**后跑（`action == 'closed' && merged == true`）。PR 阶段它永远是 skipped，挂进 required 不提供任何覆盖。 |
+| `e2e` | `backend-ci.yml` 的 `e2e` job | 不在必检内。本 PR 合入后它仍只在 `main` 的 push 与 `workflow_dispatch` 上跑（`if: github.event_name == 'workflow_dispatch' \|\| github.ref == 'refs/heads/main'`），PR head 上以 `completed/skipped` 出现；按 GitHub 文档「被 skip 的 job 报告状态为 Success」，在这种形态下挂成 required 只是一条永远不阻止合并的空门。**它已经真跑通过，不是「靠 main 兜底」**：run `46129909080`（2026-11-28，head `50bc5e392`）同一个 run 两轮 attempt 均绿，job `140932574046` / `140936895340`，逐条数字见本文件 §3.1；「全跳过混成绿」这条路被断言步堵死（`e2e` job 的 `Assert the stack-backed tests actually ran` 步要求两条用例各有一行 `--- PASS:`，出现 `--- SKIP:` 即红）。**进必检的顺序**：`zhijing-gateway#56` 已去掉这条 `if:`，让它在 PR 上真跑（实测 `stack_ready=292s`，跑用例只占 12s）；等它在 PR 上跑稳、并由 HOME-3 改规则集加进必需名单，它才算门。`ci/e2e-*` 这个临时 push 通道本 PR 已删。 |
+
+### 3.1 e2e 的两轮实测（2026-11-28，run `46129909080`，head `50bc5e392`）
+
+同一个 run 跑了两次（attempt 1 / attempt 2），逐条结果完全一致——这一致本身就是证据：它不是抖动出来的绿。
+
+| | attempt 1（job `140932574046`） | attempt 2（job `140936895340`） |
+|---|---|---|
+| `=== RUN` 行数（含子测试） | 18 | 18 |
+| 顶层用例（不重复） | 11 | 11 |
+| `--- PASS:` 顶层 | 2 | 2 |
+| `--- SKIP:` 顶层 | 9 | 9 |
+| 子测试 `    --- PASS:` | 7 | 7 |
+
+2 条 PASS 是 `TestUserRegistrationAndLogin`、`TestAPIKeyLifecycle`；9 条 SKIP 全是 Claude/Gemini 那批（`TestClaudeMessages*`、`TestClaudeModelsList`、`TestGemini*`），因为栈里没有 `CLAUDE_API_KEY` / `GEMINI_API_KEY`。
+
+**这 9 条 SKIP 是「2 条太薄」的硬证据**：无密钥条件下 11 条里 9 条什么都不验。但抬下限的办法不是「加一个 OpenAI 兼容的假上游」——这 9 条打的是 `/v1/messages`（Claude 形状 5 条）与 `/v1beta/*`（Gemini 形状 2 条），另有 2 条只在该栈未启用的 Antigravity 模式下才不 skip，**一个 OpenAI 形状的假上游对这 9 条一条都救不了**（它只对将来新写的 OpenAI 形状转发用例有用，而这种用例现在一条都没有）。真正的标的是 Anthropic 适配器（下一步），Gemini 更远；而且即使两套假协议都做到位，天花板也是 **9 条顶层 PASS（2+7），不是 11**。在那之前，PR 档的下限靠「不依赖上游的真实路径」抬：密钥吊销即时失效、注册开关双向生效这类，见 `docs/ci/test-tiers.md` §3.2。
 
 ## 4. 改 job 名 / 增删 job 的操作规程（最重要）
 
@@ -105,7 +122,7 @@ Changes must be made through a pull request. 8 of 8 required status checks are e
 ## 6. 会踩的坑
 
 - **不要取消当前 head 的 run。** 被取消的必需检查结论是 `cancelled`，而 required 检查只认 success，`cancelled` 会让 PR 停在未通过。清队只能取消同一分支上已被新 commit 取代的旧 run（按 head sha 判断）。万一取消了当前 head，补救办法是在该 head 上 re-run 那个 workflow。
-- **同一个 head 上同名检查可能出现两条。** `security-scan.yml` 同时监听 `push` 和 `pull_request`（`security-scan.yml:4-5`），所以 `backend-security`、`frontend-security` 在同一个 head 上各会出两条。PR #44 head `914ded94d` 实测 14 条 check run，其中这两条各 2 条、其余各 1 条。判断「必需检查绿了没有」要按 `(head_sha, name)` 去重并优先取 `pull_request` 那条，否则会把清队造成的 `cancelled` 误读成失败，也会把条数数重。
+- **同一个 head 上同名检查可能出现两条。** `security-scan.yml` 的 `on:` 同时监听 `push` 和 `pull_request`，所以 `backend-security`、`frontend-security` 在同一个 head 上各会出两条。PR #44 head `914ded94d` 实测 14 条 check run，其中这两条各 2 条、其余各 1 条。判断「必需检查绿了没有」要按 `(head_sha, name)` 去重并优先取 `pull_request` 那条，否则会把清队造成的 `cancelled` 误读成失败，也会把条数数重。
 - **`strict=false` 是有意关的，代价要认。** 它不要求 PR 与 main 同步，所以 main 前进后旧 PR 的绿仍然有效、不用全员重跑；代价是那个「绿」只对 PR 的 head 成立，不对合并后的结果成立。合并前看一眼 `git log origin/main` 有没有动到你改的文件。
 - **`git push --dry-run` 验不了分支保护。** 2026-11-28T03:40Z 在本仓库执行 `git push --dry-run origin HEAD:main`（源 `465d500fe`），退出码 0，输出 `89bf20ea7..465d500fe  HEAD -> main`，**没有报错**——ruleset 的拒绝发生在真正的 ref 更新时，dry-run 看不到。要验就用一次会真写的调用（例如 Contents API 写文件），看返回 409。
 - **规则集不在仓库里，review 看不见它。** 改规则集不产生 commit、不走 PR、没人 review。所以每次改都必须同步改本文档，否则下一轮没人知道门在哪。

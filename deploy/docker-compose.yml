@@ -304,8 +304,17 @@ services:
       - "1"
       - --appendonly
       - "yes"
+      # 会话代际与吊销墓碑是安全状态，不能存在「已确认写入但 AOF 还没落盘」的窗口：
+      # 后端启动时校验 maxmemory-policy=noeviction、appendonly=yes、
+      # appendfsync=always、no-appendfsync-on-rewrite=no 与 AOF 可写，任一条不满足
+      # 就拒绝启动（backend/internal/repository/auth_store_policy.go）。
+      # everysec 允许最多丢 1 秒的安全状态，所以这里必须是 always。
       - --appendfsync
-      - everysec
+      - always
+      - --no-appendfsync-on-rewrite
+      - "no"
+      - --maxmemory-policy
+      - noeviction
       - --requirepass
       - ${REDIS_PASSWORD:-}
     environment:
