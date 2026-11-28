@@ -47,6 +47,7 @@
 | 文档 | 讲什么 |
 |---|---|
 | [并发与资源安全规则](agent-resource-safety.md) | 自动化改动的并发与资源使用边界 |
+| [测试分层与 CI 覆盖](ci/test-tiers.md) | 1809 个测试文件里哪些没进 CI：embed / e2e / windows / 可选依赖 tag 的逐条判断、前置条件与可复制命令 |
 
 ---
 
