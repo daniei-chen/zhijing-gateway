@@ -843,6 +843,10 @@ func (s *OpenAIGatewayService) calculateOpenAIImageCost(
 		if err == nil {
 			return cost, nil
 		}
+		if simpleModeRecordOnly(s.cfg) && isUsagePricingUnavailableError(err) {
+			// 简易模式：交给上层按 $0 落账，不能把一个从未收取的默认价写进统计。
+			return nil, err
+		}
 		logger.LegacyPrintf("service.openai_gateway", "Calculate image channel cost failed: %v", err)
 	}
 
@@ -917,6 +921,9 @@ func (s *OpenAIGatewayService) calculateOpenAIVideoCost(
 		if err == nil {
 			cost.BillingMode = string(BillingModeVideo)
 			return cost, nil
+		}
+		if simpleModeRecordOnly(s.cfg) && isUsagePricingUnavailableError(err) {
+			return nil, err
 		}
 		logger.LegacyPrintf("service.openai_gateway", "Calculate video channel cost failed: %v", err)
 	}
