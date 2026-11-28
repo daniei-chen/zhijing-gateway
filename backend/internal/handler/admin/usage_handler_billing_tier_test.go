@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/daniei-chen/zhijing-gateway/internal/pkg/usagestats"
 	"github.com/daniei-chen/zhijing-gateway/internal/service"
 
 	"github.com/stretchr/testify/require"
@@ -65,4 +66,17 @@ func TestAdminUsageListResponseCarriesBillingTier(t *testing.T) {
 		"按默认图价成交的行必须把 billing_tier 带进响应")
 	_, present := envelope.Data.Items[1]["billing_tier"]
 	require.False(t, present, "没有标记的行不应出现 billing_tier 字段")
+}
+
+// billing_tier 必须进 stats 缓存键：否则两个只差这个过滤条件的请求会互相命中
+// 对方的缓存，管理端会把「按默认价成交的笔数」当成普通统计返回。
+func TestUsageStatsCacheKeyIncludesBillingTier(t *testing.T) {
+	base := usagestats.UsageLogFilters{Model: "image-model"}
+	withTier := base
+	withTier.BillingTier = service.BillingTierImagePriceDefaulted
+
+	require.NotEqual(t, usageStatsCacheKey(base), usageStatsCacheKey(withTier),
+		"只差 billing_tier 的两个查询不能共用缓存键")
+	require.Equal(t, usageStatsCacheKey(withTier), usageStatsCacheKey(withTier),
+		"同条件必须稳定映射到同一个键")
 }
