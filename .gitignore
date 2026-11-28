@@ -80,3 +80,4 @@ build/
 !docs/audit/
 !docs/audit/**
 !docs/upstream-divergence.md
+!docs/upstream-prompt-templates-proposal.md

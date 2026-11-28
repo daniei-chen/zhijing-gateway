@@ -49,22 +49,41 @@
 | 本地新增 CI job：`.github/workflows/backend-ci.yml` 的 `race` job、shell 门禁步骤 | race 检测单独成 job（`make test-race`）；shell 门禁在 `shell` job 里逐个跑 | 并发回归和部署门禁必须在 CI 上跑，不能靠人记得 | **取并集**。注意 workflow 改动本机推不上去（OAuth App 缺 `workflow` scope，整条 push 会被拒），需要人网页改 |
 | `backend/internal/service/content_moderation.go`（S1b 回灌） | 取上游两个修复：Anthropic `{"type":"url"}` 图片来源参与审核（上游 `959d36532`）、异步审核队列惰性分配（上游 `fe72ddf1a`）；保留本地 `LocalPolicyProfile` / `matchGatewayLocalPolicy` / `isContentAuditExempt` / `riskControlLogOnly` | 本地合规策略与上游的通用审核不冲突；本地那套是业务方要求的判定 | **取并集**（提交 `a9d624dcc` 的做法可复用：逐个 `git apply -3`，不 merge） |
 
-## 五、已确认的缺口（不是差异，是待修的洞）
+## 五、有意保留的中间态（不是结论，是指针）
+
+| 文件 / 目录 | 我们的处理 | 为什么 | 回灌时的动作 |
+|---|---|---|---|
+| `backend/internal/pkg/openai/constants.go` | 内容**等于** `6107cf17487fe5cb0bd179457ede6b1fe8f7271e`（GPT-6.2 模型支持那一版，337 行），**不是**上游终点 `4233cc3d8018bf2f399c4c366d94067c42eb697e` 的版本（359 行，多三处 `//go:embed` 与按模型取模板的分支）；同批的三个新模板文件与 `instructions_test.go` 改动也停在同一层 | 那批模板里有一份是 `instructions_gpt5_5.txt` 的**人格重写**，没有任何指标能判断好坏，模板提案（[`docs/upstream-prompt-templates-proposal.md`](upstream-prompt-templates-proposal.md)）还没批。先停在可编译的中间态，不在回灌 PR 里顺手带 | **取上游**，但只在模板提案被采纳时做：第一步就是用 `4233cc3` 的版本覆盖此文件（连同一批模板与 `instructions_test.go`）。采纳之前保留本行，别把中间态读成「上游就这样」 |
+
+为什么这一行要单独列：中间态和「本地有意改动」在 `git diff` 里长得一样，但处置相反——本地改动是**保留**，中间态是**等着被上游覆盖**。少了这一行，下一个人会把 337 行那版当成我们的产品决定，回灌时按「保留本地」处理，模板就永远停在 GPT-5.5 时代。
+
+判据（`main` = `ecde2370e74bdac7970cbbd874f861b2d062d334` 上核过，三个 sha 都能 `git cat-file -e`）：
+
+```sh
+git rev-parse origin/main:backend/internal/pkg/openai/constants.go
+# 397dba3ea3da2cc487231f9fcc0a82f331a511c5
+git rev-parse 6107cf17487fe5cb0bd179457ede6b1fe8f7271e:backend/internal/pkg/openai/constants.go
+# 397dba3ea3da2cc487231f9fcc0a82f331a511c5   ← 与 main 相同
+git rev-parse 4233cc3d8018bf2f399c4c366d94067c42eb697e:backend/internal/pkg/openai/constants.go
+# 6bfc005c3f9f062cc9f45ee996d44bb940b19c89   ← 与 main 不同
+```
+
+## 六、已确认的缺口（不是差异，是待修的洞）
 
 | 位置 | 现状 | 处置 |
 |---|---|---|
 | `backend/internal/service/gateway_usage_billing.go:1359-1362`、`:1380-1383` | `calculateImageCost` 把 `CalculateCostUnified` 的错误打了日志就返回 `&CostBreakdown{ActualCost: 0}` 且 `err == nil`，因此图片请求在无价或算价失败时按 $0 成功结算，不进入 `:933` 的 fail-closed | 2026-11-28 定为一类漏收：与 #34 立的「没有价格不许编一个 $0 出来成交」直接冲突。**单独一片修**（非简易模式返回 err、简易模式保持 $0、补能证伪的测试），本清单只留记录，修好后删掉本行 |
 
-这一条没有「回灌时听谁的」可判，所以不进上面三张动作表。留在这里是因为 §四 的 fail-closed 四条覆盖的是 token / audio 的后扣链路——图片算价这条**已知不在覆盖内**，读清单的人不该把它当成已修。
+这一条没有「回灌时听谁的」可判，所以不进上面的动作表。留在这里是因为 §四 的 fail-closed 四条覆盖的是 token / audio 的后扣链路——图片算价这条**已知不在覆盖内**，读清单的人不该把它当成已修。
 
-## 六、维护契约
+## 七、维护契约
 
 1. **改任何一条本地决策，同一个 PR 里改这张表。** 判断变了而表没改，下一个人会按旧结论回灌。
 2. **回灌 PR 的「fork mechanisms preserved」一节直接引用本表的行名**（例如「迁移完整性门禁：保留本地，未触碰 `migrations_runner.go`」），不要另起说法。
 3. **改判必须单开一个 PR**，写明上游对应提交与为什么本地改动可以放弃。默认永远是保留。
 4. 本文件本身是**本地扩展**（上游没有），回灌时永远保留；它的行数不是指标，能让人做对决定才是。
 
-## 七、复核这份表用的命令
+## 八、复核这份表用的命令
 
 ```sh
 grep -rn 'go version | grep -q' .github/workflows/
