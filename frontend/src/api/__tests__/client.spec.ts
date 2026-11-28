@@ -532,6 +532,81 @@ describe('API Client', () => {
     })
   })
 
+  // --- 强制 step-up 挑战 ---
+
+  describe('强制 step-up 挑战', () => {
+    // adapter 必须把 axios 传进来的 config 原样带回 rejection：
+    // 拦截器在这份 config 上写 _stepUpRetried / _stepUpHandled，重试会带上同一个对象。
+    const stepUpError = (config: unknown) => ({
+      response: {
+        status: 403,
+        data: { code: 'STEP_UP_REQUIRED', message: 'This operation requires recent two-factor verification' },
+        headers: {},
+      },
+      config,
+      code: 'ERR_BAD_REQUEST',
+    })
+    const okResponse = {
+      status: 200,
+      data: { code: 0, data: { ok: true } },
+      headers: {},
+      config: {},
+      statusText: 'OK',
+    }
+
+    it('弹一次全局 TOTP 对话框，验证后重试原请求', async () => {
+      const { globalStepUp } = await import('@/composables/useStepUp')
+      const adapter = vi.fn()
+        .mockImplementationOnce(async (config: unknown) => { throw stepUpError(config) })
+        .mockResolvedValueOnce(okResponse)
+      apiClient.defaults.adapter = adapter
+
+      const request = apiClient.post('/admin/subscriptions/assign', { user_id: 1 })
+      await vi.waitFor(() => expect(globalStepUp.visible.value).toBe(true))
+      globalStepUp.onVerified()
+
+      await expect(request).resolves.toMatchObject({ status: 200 })
+      expect(adapter).toHaveBeenCalledTimes(2)
+      expect(adapter.mock.calls[1][0].url).toBe('/admin/subscriptions/assign')
+    })
+
+    it('用户取消后不重试，rejection 标记为已处理过，页面不会再弹第二个对话框', async () => {
+      const { globalStepUp } = await import('@/composables/useStepUp')
+      const adapter = vi.fn().mockImplementation(async (config: unknown) => { throw stepUpError(config) })
+      apiClient.defaults.adapter = adapter
+
+      const request = apiClient.post('/admin/subscriptions/assign', { user_id: 1 })
+      await vi.waitFor(() => expect(globalStepUp.visible.value).toBe(true))
+      globalStepUp.onCancel()
+
+      await expect(request).rejects.toMatchObject({
+        status: 403,
+        code: 'STEP_UP_REQUIRED',
+        step_up_handled: 'cancelled',
+      })
+      expect(adapter).toHaveBeenCalledTimes(1)
+      expect(globalStepUp.visible.value).toBe(false)
+    })
+
+    it('只重试一次：重试后仍被拒时不再弹对话框', async () => {
+      const { globalStepUp } = await import('@/composables/useStepUp')
+      const adapter = vi.fn().mockImplementation(async (config: unknown) => { throw stepUpError(config) })
+      apiClient.defaults.adapter = adapter
+
+      const request = apiClient.post('/admin/subscriptions/assign', { user_id: 1 })
+      await vi.waitFor(() => expect(globalStepUp.visible.value).toBe(true))
+      globalStepUp.onVerified()
+
+      await expect(request).rejects.toMatchObject({
+        status: 403,
+        code: 'STEP_UP_REQUIRED',
+        step_up_handled: 'verified',
+      })
+      expect(adapter).toHaveBeenCalledTimes(2)
+      expect(globalStepUp.visible.value).toBe(false)
+    })
+  })
+
   // --- 请求取消 ---
 
   describe('请求取消', () => {

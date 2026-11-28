@@ -35,7 +35,7 @@ func TestMCPToolCatalogTargetsRegisteredManagementRoutes(t *testing.T) {
 	h := mcpRouteHandlers()
 	require.NotPanics(t, func() {
 		RegisterUserRoutes(v1, h, middleware.JWTAuthMiddleware(mcpRouteNext), middleware.AuditLogMiddleware(mcpRouteNext), nil, nil)
-		RegisterAdminRoutes(v1, h, middleware.AdminAuthMiddleware(mcpRouteNext), middleware.AuditLogMiddleware(mcpRouteNext), middleware.StepUpAuthMiddleware(mcpRouteNext), nil, nil)
+		RegisterAdminRoutes(v1, h, middleware.AdminAuthMiddleware(mcpRouteNext), middleware.AuditLogMiddleware(mcpRouteNext), middleware.StepUpAuthMiddleware(mcpRouteNext), middleware.ForcedStepUpAuthMiddleware(mcpRouteNext), nil, nil)
 	})
 	registered := map[string]bool{}
 	for _, route := range router.Routes() {
@@ -51,7 +51,7 @@ func TestMCPToolCatalogTargetsRegisteredManagementRoutes(t *testing.T) {
 	// duplicate Gin paths or panic while building its permission-filtered servers.
 	mcpRouter := gin.New()
 	require.NotPanics(t, func() {
-		RegisterMCPRoutes(mcpRouter.Group("/api/v1"), h, middleware.AuditLogMiddleware(mcpRouteNext), middleware.StepUpAuthMiddleware(mcpRouteNext), nil, nil, nil, nil)
+		RegisterMCPRoutes(mcpRouter.Group("/api/v1"), h, middleware.AuditLogMiddleware(mcpRouteNext), middleware.StepUpAuthMiddleware(mcpRouteNext), middleware.ForcedStepUpAuthMiddleware(mcpRouteNext), nil, nil, nil, nil)
 	})
 	for _, method := range []string{http.MethodGet, http.MethodPost, http.MethodDelete} {
 		w := httptest.NewRecorder()
@@ -72,7 +72,7 @@ func newMCPRouteTestEndpoint(h *handler.Handlers, principal *service.MCPPrincipa
 	inner := gin.New()
 	v1 := inner.Group("/api/v1")
 	RegisterUserRoutes(v1, h, middleware.JWTAuthMiddleware(managementmcp.DispatchAuth(false)), audit, settings, nil)
-	RegisterAdminRoutes(v1, h, middleware.AdminAuthMiddleware(managementmcp.DispatchAuth(true)), audit, middleware.StepUpAuthMiddleware(mcpRouteNext), settings, nil)
+	RegisterAdminRoutes(v1, h, middleware.AdminAuthMiddleware(managementmcp.DispatchAuth(true)), audit, middleware.StepUpAuthMiddleware(mcpRouteNext), middleware.ForcedStepUpAuthMiddleware(mcpRouteNext), settings, nil)
 	outer := gin.New()
 	outer.POST("/api/v1/mcp", managementmcp.Authenticate(mcpRouteTokenAuth{principal: principal}, nil, h.MCPOAuth.ResourceURL), gin.WrapH(managementmcp.NewHandler(inner, nil)))
 	return outer

@@ -32,17 +32,17 @@ func TestCodexBaseInstructionsForModel(t *testing.T) {
 		template string
 	}{
 		// DefaultModels 里的对外文本模型。
-		{"gpt-5.6-sol", "instructions_gpt5_5.txt"},
+		{"gpt-5.6-sol", "instructions_gpt5_6.txt"},
 		{"gpt-6", "instructions_gpt6_astra.txt"},
-		{"gpt-5.6", "instructions_gpt5_5.txt"},
-		{"gpt-5.6-terra", "instructions_gpt5_5.txt"},
-		{"gpt-5.6-luna", "instructions_gpt5_5.txt"},
+		{"gpt-5.6", "instructions_gpt5_6.txt"},
+		{"gpt-5.6-terra", "instructions_gpt5_6.txt"},
+		{"gpt-5.6-luna", "instructions_gpt5_6.txt"},
 		{"gpt-6.2-sol", "codex_gpt62_sol.json"},
 		{"gpt-6.2-astra", "codex_gpt62_astra.json"},
 		{"gpt-6.1-terra", "codex_gpt61_terra.json"},
 		{"gpt-6.1-sol", "codex_gpt61_sol.json"},
-		{"gpt-6-sol", "instructions_gpt5_5.txt"},
-		{"gpt-6-luna", "instructions_gpt5_5.txt"},
+		{"gpt-6-sol", "instructions_gpt6_sol.txt"},
+		{"gpt-6-luna", "instructions_gpt6_luna.txt"},
 		{"gpt-6-astra", "instructions_gpt6_astra.txt"},
 		{"gpt-5.5", "instructions_gpt5_5.txt"},
 		{"gpt-5.4", "instructions_gpt5_5.txt"},
@@ -62,8 +62,8 @@ func TestCodexBaseInstructionsForModel(t *testing.T) {
 		{" GPT-5.5 ", "instructions_gpt5_5.txt"},
 		{"gpt-6.2-sol-high", "codex_gpt62_sol.json"},
 		{"gpt-6.1-sol-high", "codex_gpt61_sol.json"},
-		{"gpt-6-sol-none", "instructions_gpt5_5.txt"},
-		{"gpt-5.6-sol-openai-compact", "instructions_gpt5_5.txt"},
+		{"gpt-6-sol-none", "instructions_gpt6_sol.txt"},
+		{"gpt-5.6-sol-openai-compact", "instructions_gpt5_6.txt"},
 		// 无专用模板的旧模型与未知模型走默认行。
 		{"gpt-5.1", "instructions_gpt5_1.txt"},
 		{"gpt-5.3", "instructions_gpt5_5.txt"},
@@ -120,6 +120,25 @@ func TestCodexInstructionsTableEntriesResolve(t *testing.T) {
 		}
 		if strings.TrimSpace(codexInstructionFile(row.Template)) == "" {
 			t.Errorf("映射行 %q 指向未注册或为空的模板 %q", row.Model, row.Template)
+		}
+	}
+}
+
+// TestCodexInstructionsKeepGPT56AndGPT6OffGPT55 是回退护栏：把 5.6 / 6 Sol / 6 Luna
+// 任一行指回 GPT-5.5 模板，这条会红。
+func TestCodexInstructionsKeepGPT56AndGPT6OffGPT55(t *testing.T) {
+	gpt55 := codexInstructionFileForTest(t, "instructions_gpt5_5.txt")
+	for _, model := range []string{
+		"gpt-5.6", "gpt-5.6-sol", "gpt-5.6-terra", "gpt-5.6-luna",
+		"gpt-6-sol", "gpt-6-luna",
+	} {
+		if got := CodexBaseInstructionsForModel(model); got == gpt55 {
+			t.Errorf("模型 %q 拿到了 GPT-5.5 模板，应拿到它自己的专用模板", model)
+		}
+	}
+	for _, name := range []string{"instructions_gpt5_6.txt", "instructions_gpt6_sol.txt", "instructions_gpt6_luna.txt"} {
+		if codexInstructionFileForTest(t, name) == gpt55 {
+			t.Errorf("模板 %s 与 GPT-5.5 模板内容相同，无法区分", name)
 		}
 	}
 }
