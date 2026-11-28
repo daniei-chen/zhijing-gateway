@@ -22,6 +22,12 @@
 
 `TestMain` 说明：`internal/integration` 里有 1 个 `TestMain`，所以 `grep -c '^func Test'` 数出来是 12，`go test -list '.*'` 数出来是 11 条真用例。本表用后者。
 
+补充两点口径：
+
+- `backend-ci.yml` 里还有一个 `race` job，用 `-tags=unit` 只跑并发相关子集（`make test-race`）。它是同一批标签的抽样，不改变上表的标签覆盖面。
+- "今天谁跑"只看 `.github/workflows/`。发布流水线（`.goreleaser*.yaml`、`Dockerfile`）会用 `-tags embed` **构建**，但那里没有测试步骤。
+
+
 ## 2. 普查怎么做的
 
 ```bash
