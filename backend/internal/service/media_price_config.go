@@ -69,24 +69,29 @@ func groupAudioPriceConfigFromAPIKey(apiKey *APIKey) *audioPriceConfig {
 	}
 }
 
-// imageRequestHasUsablePrice 判断本次图片请求是否配置了可用单价。
-// resolved 为 nil 表示没有渠道/分组定价行，这类请求走目录价或内置默认图价，
-// 是既有语义，不属于漏配，按「有价」处理。
-// 判定只看价格字段是否配置过，不看金额：显式配 0 是运营者选择的免费。
-func imageRequestHasUsablePrice(resolved *ResolvedPricing, apiKey *APIKey, imageSize string) bool {
+// resolvedRequestHasUsablePrice 判断渠道/分组定价行是否覆盖本次请求的单价。
+//
+// resolved 为 nil 表示没有定价行，请求走目录价或内置默认价，是既有语义、不属于漏配，
+// 按「有价」处理。其余情况必须真的有一个单价覆盖本次请求：档位标签命中、context
+// 区间命中、或显式默认按次价。**只看「有没有 tiers」不算有价**——那正是「只配了 4K、
+// 请求 1K」按 $0 成交的来源。判定看字段是否配置过、不看金额：显式配 0 是运营者选择的免费。
+//
+// tierLabel 由调用方归一化（图片 1K/2K/4K，视频 480p/720p/1080p）。
+func resolvedRequestHasUsablePrice(
+	resolver *ModelPricingResolver,
+	resolved *ResolvedPricing,
+	tierLabel string,
+	tokens UsageTokens,
+) bool {
 	if resolved == nil {
 		return true
 	}
-	if apiKeyHasConfiguredImagePrice(apiKey, NormalizeImageBillingTierOrDefault(imageSize)) {
+	totalContext := tokens.InputTokens + tokens.CacheCreationTokens + tokens.CacheReadTokens
+	if _, ok := resolver.RequestUnitPrice(resolved, tierLabel, totalContext); ok {
 		return true
 	}
-	if channelPricingHasConfiguredImagePrice(resolved.channelPricing) {
-		return true
-	}
-	if len(resolved.RequestTiers) > 0 || resolved.DefaultPerRequestPrice > 0 {
-		return true
-	}
-	if len(resolved.Intervals) > 0 {
+	// token 模式的行由 token 单价定价（混合请求的文本部分也走这条路），按次档位无关。
+	if resolved.Mode == BillingModeToken && channelPricingHasConfiguredImagePrice(resolved.channelPricing) {
 		return true
 	}
 	return modelPricingHasConfiguredPrice(resolved.BasePricing)

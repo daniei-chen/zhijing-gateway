@@ -384,21 +384,38 @@ func intervalToModelPricing(iv *PricingInterval, base *ModelPricing, chPricing *
 	return pricing
 }
 
-// GetRequestTierPrice 根据层级标签获取按次价格
-func (r *ModelPricingResolver) GetRequestTierPrice(resolved *ResolvedPricing, tierLabel string) float64 {
-	for _, tier := range resolved.RequestTiers {
-		if tier.TierLabel == tierLabel && tier.PerRequestPrice != nil {
-			return *tier.PerRequestPrice
+// RequestUnitPrice 返回本次请求在按次/图片/视频模式下命中的单价。
+// 查找顺序：档位标签 → context token 区间 → 默认按次价。
+//
+// ok=false 表示没有任何配置覆盖本次请求（档位没命中且没有显式默认价）。
+// 调用方必须据此失败关闭或回退到目录价；把 ok=false 当 0 元成交就是永久漏收。
+//
+// 判定只看「价格字段配过没」，不看金额：显式配 0 是运营者选择的免费，ok 仍为 true。
+// 默认档因此必须读 channelPricing.PerRequestPrice 指针，不能用
+// DefaultPerRequestPrice > 0 判断——那个 float64 分不清「没配」和「配了免费」，
+// 会把免费渠道判成未配价（开关打开时直接 400）。
+func (r *ModelPricingResolver) RequestUnitPrice(resolved *ResolvedPricing, tierLabel string, totalContextTokens int) (float64, bool) {
+	if resolved == nil {
+		return 0, false
+	}
+	if tierLabel != "" {
+		for i := range resolved.RequestTiers {
+			tier := &resolved.RequestTiers[i]
+			if tier.TierLabel == tierLabel && tier.PerRequestPrice != nil {
+				return *tier.PerRequestPrice, true
+			}
 		}
 	}
-	return 0
-}
-
-// GetRequestTierPriceByContext 根据 context token 数获取按次价格
-func (r *ModelPricingResolver) GetRequestTierPriceByContext(resolved *ResolvedPricing, totalContextTokens int) float64 {
-	iv := FindMatchingInterval(resolved.RequestTiers, totalContextTokens)
-	if iv != nil && iv.PerRequestPrice != nil {
-		return *iv.PerRequestPrice
+	if iv := FindMatchingInterval(resolved.RequestTiers, totalContextTokens); iv != nil && iv.PerRequestPrice != nil {
+		return *iv.PerRequestPrice, true
 	}
-	return 0
+	if resolved.channelPricing != nil && resolved.channelPricing.PerRequestPrice != nil {
+		return *resolved.channelPricing.PerRequestPrice, true
+	}
+	// 没有原始定价行时（手工构造或缓存的 ResolvedPricing）按已解析值兜底：> 0 一定
+	// 是配过的价；显式 0 已经在上面用指针判过，走到这里只能是「没配」。
+	if resolved.DefaultPerRequestPrice > 0 {
+		return resolved.DefaultPerRequestPrice, true
+	}
+	return 0, false
 }

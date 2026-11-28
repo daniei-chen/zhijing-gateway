@@ -216,6 +216,24 @@ type CostBreakdown struct {
 	// ImagePriceDefaulted 表示本次图片请求的定价行里没有可用单价，成交价来自默认图价
 	// （分组图价 → 目录价 → 内置默认价）。落 usage_log 时写成 image_price_defaulted 标记。
 	ImagePriceDefaulted bool
+	// VideoPriceDefaulted 表示本次视频请求的定价行里没有可用单价，成交价来自默认视频价。
+	// 落 usage_log 时写成 video_price_defaulted 标记。
+	VideoPriceDefaulted bool
+}
+
+// DefaultedMediaTierMarker 返回「按默认媒体价兜底成交」应写入 usage_log.billing_tier 的
+// 标记，没有兜底时返回空串。两个引擎都调用它，标记值只在 channel.go 定义一份。
+func (c *CostBreakdown) DefaultedMediaTierMarker() string {
+	if c == nil {
+		return ""
+	}
+	if c.ImagePriceDefaulted {
+		return BillingTierImagePriceDefaulted
+	}
+	if c.VideoPriceDefaulted {
+		return BillingTierVideoPriceDefaulted
+	}
+	return ""
 }
 
 func applyCostBreakdownMultiplier(cost *CostBreakdown, multiplier float64) {
@@ -1903,18 +1921,15 @@ func (s *BillingService) calculatePerRequestCost(resolved *ResolvedPricing, inpu
 
 	var unitPrice float64
 
-	if input.SizeTier != "" {
-		unitPrice = input.Resolver.GetRequestTierPrice(resolved, input.SizeTier)
-	}
-
-	if unitPrice == 0 {
-		totalContext := input.Tokens.InputTokens + input.Tokens.CacheCreationTokens + input.Tokens.CacheReadTokens
-		unitPrice = input.Resolver.GetRequestTierPriceByContext(resolved, totalContext)
-	}
-
-	// 回退到默认按次价格
-	if unitPrice == 0 {
-		unitPrice = resolved.DefaultPerRequestPrice
+	totalContext := input.Tokens.InputTokens + input.Tokens.CacheCreationTokens + input.Tokens.CacheReadTokens
+	unitPrice, ok := input.Resolver.RequestUnitPrice(resolved, input.SizeTier, totalContext)
+	if !ok {
+		// 定价行在、但没有任何单价覆盖本次请求。按 $0 成交就是永久漏收，所以这里
+		// 失败关闭：上层按 billing.inflight_reservation.fail_closed_on_unpriced 决定
+		// 拒绝请求还是按目录价成交并打 defaulted 标记，简易模式则依赖
+		// ErrModelPricingUnavailable 走既有的零成本落账分支。
+		return nil, fmt.Errorf("%w: no per-request unit price for %s tier %q",
+			ErrModelPricingUnavailable, resolved.Mode, input.SizeTier)
 	}
 
 	totalCost := unitPrice * units

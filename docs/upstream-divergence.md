@@ -70,9 +70,17 @@ git rev-parse 4233cc3d8018bf2f399c4c366d94067c42eb697e:backend/internal/pkg/open
 
 ## 六、已确认的缺口（不是差异，是待修的洞）
 
-**截至 2026-11-28**，没有已确认待修的缺口。
+**截至 2026-11-28 有一条已记录的缺口，正在修（见下）**；此前这里写的是「没有已确认待修的缺口」，那句话写早了。
 
 图片算价这条缺口没有「回灌时听谁的」可判，所以从来没进上面的动作表。留在这里要说清的是：§四 的 fail-closed 四条覆盖的是 token / audio 的后扣链路，图片算价**不在那四条里**。图片算价的 fail-open（`calculateImageCost` 算价失败仍按 `$0` + `err=nil` 成交）已经单独修掉：`#50` 把两处吞错改成 `return nil, err`，`#55` 补上矩阵测试 `TestRecordUsage_CostFailureMatrix` 钉住「非简易模式返回 err、简易模式保持 $0」。读清单的人该按「§四 不覆盖图片，但图片那条已经修了」理解，不要再当成待修缺口。
+
+### 已记录、正在修的缺口：按次档位未命中仍按 `$0` 成交（SWO-76）
+
+`#50`/`#55` 修的是「算价返回错误被吞」，没有覆盖「算价成功但成交价是 0」。后者是另一条路：渠道/分组行只配了某个档位（例如只有 4K），请求落在别的档位（1K）时，`ModelPricingResolver.GetRequestTierPrice` 返回 0，`calculatePerRequestCost` 又用 `DefaultPerRequestPrice > 0` 判默认档——渠道只配档位时它是 0——于是算出一笔 `$0` 且 `err=nil` 的成交价。`fail_closed_on_unpriced` 对它无效，`billing_failures` 也不记。
+
+范围（`82214fba1` 实测）：渠道图片、分组图片、渠道视频三个面。且 `#50` 的闸只装在 `GatewayService`（Anthropic/composite 引擎），**`/v1/images` 真正走的 `OpenAIGatewayService` 里 `unpriced`/`price_defaulted` 的 grep 计数为 0**，所以那条路一直没有闸。
+
+回灌注意：**upstream `f53641e53`（v0.2.26）有同一个缺陷**——`model_pricing_resolver.go:388/398` 两个 `GetRequestTierPrice*` 与我们的逐字相同，`billing_service.go:2028-2060` 的 `calculatePerRequestCost` 也逐字相同；我们 `media_price_config.go` 比 upstream 多的 59 行（`imageRequestHasUsablePrice` 等）是 `#50` 自己加的一层，**不是与 upstream 重复造层**。本项修复不是回灌差异，而是两边都缺的洞；修好后回灌按「本地新增能力，保留」处理。
 
 ## 七、维护契约
 
