@@ -1,7 +1,12 @@
 name: CI
 
 on:
+  # 只有 main 的 push 触发 CI；PR 分支靠 pull_request（opened/synchronize/reopened）。
+  # 这是行为变化：往没有 PR 的分支推 commit 不再有任何 CI，要验要先开 PR。
+  # 收窄的原因：一次 push 会同时挤进 7 个 job，多分支并行时把 CI 队列饿死。
+  # main 的 push 必须保留——新增的 e2e job 靠 if: github.ref == 'refs/heads/main'。
   push:
+    branches: [main]
   pull_request:
 
 permissions:
@@ -31,6 +36,13 @@ jobs:
       - uses: actions/checkout@v6
       - name: Check Docker Compose simple mode environment
         run: /bin/sh deploy/tests/docker-compose-simple-mode-env-test.sh
+      # 这两条也放在 ubuntu 上：install-github-token-test.sh 用了 GNU 的
+      # `head -n -1`，macOS 的 BSD head 会报 illegal line count，放进 macos
+      # 的 shell job 会假红。
+      - name: Check deploy install script token handling
+        run: /bin/bash deploy/tests/install-github-token-test.sh
+      - name: Check phase 1 hardening doc matches the repo
+        run: /bin/sh deploy/tests/phase1-hardening-doc-test.sh
       - uses: actions/setup-go@v6
         with:
           go-version-file: backend/go.mod
@@ -46,6 +58,102 @@ jobs:
       - name: Integration tests
         working-directory: backend
         run: make test-integration
+
+  # 发布镜像用 -tags embed 构建（Dockerfile:100、deploy/Dockerfile:76、
+  # .goreleaser*.yaml），而 test job 跑的是 embed_off.go 那条路径。两者互补、
+  # 不重叠：这 15 条覆盖的是"前端资源嵌进二进制"的发布形态，是发布路径上
+  # 唯一的自动化保险。依据见 docs/ci/test-tiers.md §3.1。
+  embed:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/go.mod
+          check-latest: false
+          cache: true
+          cache-dependency-path: backend/go.sum
+      - name: Verify Go version
+        run: |
+          go version | grep -q 'go1.27.4'
+      - name: Embed build tests (release shape)
+        working-directory: backend
+        run: go test -tags=embed ./internal/web/ -count=1 -v
+
+  # 11 条 HTTP 黑盒测试，要一整套跑起来的栈（postgres + redis + 网关），
+  # 慢，所以只在 main 上跑。前置条件逐条核过源码，写在 docs/ci/test-tiers.md §4。
+  #
+  # 没有 CLAUDE_API_KEY / GEMINI_API_KEY 时其中 9 条会 skip（它们要真实上游
+  # 账号），只有 2 条用户流程能真验。所以后面有一步断言：那 2 条必须是 PASS，
+  # 不许靠"全跳过"混成绿色。
+  e2e:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v6
+      - name: Start the stack from this commit
+        working-directory: deploy
+        env:
+          # 一次性 CI 凭据，不是生产密钥。
+          POSTGRES_PASSWORD: ci-e2e-postgres
+          REDIS_PASSWORD: ci-e2e-redis
+          ADMIN_EMAIL: ci-e2e@test.local
+          ADMIN_PASSWORD: CiE2eAdmin12345
+          JWT_SECRET: ci-e2e-jwt-secret-not-a-production-secret
+          TOTP_ENCRYPTION_KEY: ci-e2e-totp-key-not-a-production-secret
+          NPM_CONFIG_REGISTRY: https://registry.npmjs.org
+        run: |
+          # 容器以 1000:1000 跑且 rootfs 只读，挂载的 data/ 得先可写。
+          mkdir -p data
+          sudo chown -R 1000:1000 data
+          docker compose -f docker-compose.dev.yml up -d --build
+      - name: Wait for the gateway
+        run: |
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1; then
+              echo "gateway healthy after $((i * 10))s"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "gateway did not become healthy in 600s" >&2
+          exit 1
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: backend/go.mod
+          check-latest: false
+          cache: true
+          cache-dependency-path: backend/go.sum
+      - name: Verify Go version
+        run: |
+          go version | grep -q 'go1.27.4'
+      - name: E2E against the running stack
+        working-directory: backend
+        env:
+          BASE_URL: http://127.0.0.1:8080
+          # TestAPIKeyLifecycle 按字母序先跑，它靠这组凭据登录。
+          ADMIN_EMAIL: ci-e2e@test.local
+          ADMIN_PASSWORD: CiE2eAdmin12345
+        run: |
+          set -o pipefail
+          go test -tags=e2e -v -count=1 -timeout=300s ./internal/integration/... | tee e2e.log
+      - name: Assert the stack-backed tests actually ran
+        working-directory: backend
+        run: |
+          # 父测试在子测试全 skip 时仍然报 PASS，所以只认真实的子测试结果：
+          # 这两条里出现任何 SKIP，说明这个 job 什么也没证明。
+          for t in TestUserRegistrationAndLogin TestAPIKeyLifecycle; do
+            grep -q -- "--- PASS: $t " e2e.log \
+              || { echo "::error::$t 没有 PASS"; exit 1; }
+          done
+          if grep -E -- '--- SKIP: (TestUserRegistrationAndLogin|TestAPIKeyLifecycle)' e2e.log; then
+            echo "::error::用户流程测试被 skip 了，这个 job 等于没跑"
+            exit 1
+          fi
+      - name: Dump container logs
+        if: failure()
+        run: docker compose -f deploy/docker-compose.dev.yml logs --tail=200
 
   race:
     runs-on: ubuntu-latest
