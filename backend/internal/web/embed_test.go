@@ -30,7 +30,7 @@ func TestInjectSiteTitle(t *testing.T) {
 
 		result := injectSiteTitle(html, settingsJSON)
 
-		assert.Contains(t, string(result), "<title>MyCustomSite - AI API Gateway</title>")
+		assert.Contains(t, string(result), "<title>HOME49-CI-SELFPROOF - AI API Gateway</title>")
 		assert.NotContains(t, string(result), "智境网关")
 	})
 
