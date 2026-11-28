@@ -39,8 +39,10 @@ WHERE ul.created_at >= $1
   AND ul.created_at <  $2
   AND ul.request_id IS NOT NULL
   AND ul.request_id <> ''
-  -- Live 会话（/v1/live）绕过计费管道直接写 usage_log，本就不落 dedup 键，
-  -- 不排除会让该指标在开启 Live 的分组上 100% 误报（见 v0.0.7 复核 billing P1）。
+  -- TODO(billing): Live 会话（/v1/live）绕过计费管道直接写 usage_log，本就不落
+  -- dedup 键，不排除会让该指标在开启 Live 的分组上 100% 误报（见 v0.0.7 复核
+  -- billing P1）。Live 接上计费管道后必须删掉这个排除，否则
+  -- billing_dedup_gap_count 会漏算 /v1/live 的行，指标长期失真。
   AND COALESCE(ul.inbound_endpoint, '') NOT LIKE '/v1/live%'
   AND d.id IS NULL`
 	if err := r.db.QueryRowContext(ctx, dedupGapSQL, start, end).Scan(&out.DedupGapCount); err != nil {

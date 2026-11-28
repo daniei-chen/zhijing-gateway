@@ -1331,6 +1331,10 @@ type GatewayCNProvidersConfig struct {
 }
 
 type GatewayLiveConfig struct {
+	// Enabled 是 Live 会话的部署级总开关。默认 false：Live 尚未接入计费管道
+	// （见 openai_live.go 的 TODO(billing)），关闭时 /v1/live 与
+	// /backend-api/codex/realtime/calls 在 handler 之前返回 404，不建立上游会话。
+	Enabled bool `mapstructure:"enabled"`
 	// MaxSessionDurationSeconds 是 Live 会话的硬上限。
 	MaxSessionDurationSeconds int `mapstructure:"max_session_duration_seconds"`
 }
@@ -2622,6 +2626,7 @@ func setDefaults() {
 	viper.SetDefault("gateway.codex_image_generation_bridge_enabled", false)
 	viper.SetDefault("gateway.openai_passthrough_allow_timeout_headers", false)
 	viper.SetDefault("gateway.openai_compact_model", "gpt-5.5")
+	viper.SetDefault("gateway.live.enabled", false)
 	viper.SetDefault("gateway.live.max_session_duration_seconds", 3600)
 	// OpenAI Responses WebSocket（默认开启；可通过 force_http 紧急回滚）
 	viper.SetDefault("gateway.openai_ws.enabled", true)

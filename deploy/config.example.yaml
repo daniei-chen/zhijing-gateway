@@ -388,6 +388,11 @@ gateway:
   openai_compact_model: "gpt-5.5"
   # ChatGPT Frameless Live 单会话硬上限（秒）。
   live:
+    # Live 会话部署级总开关（默认 false）。关闭时 /v1/live 与
+    # /backend-api/codex/realtime/calls 返回 404 "Live is not enabled"。
+    # Live 尚未接入计费，打开即自行承担未计费的上游成本（见 docs/live-billing.md）。
+    # 环境变量：GATEWAY_LIVE_ENABLED=true
+    enabled: false
     max_session_duration_seconds: 3600
   # OpenAI Responses WebSocket 配置（默认开启，可按需回滚到 HTTP）
   openai_ws:
