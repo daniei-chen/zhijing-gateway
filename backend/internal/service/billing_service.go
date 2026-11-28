@@ -213,6 +213,9 @@ type CostBreakdown struct {
 	ActualCost                float64 // 应用倍率后的实际费用
 	BillingMode               string  // 计费模式（"token"/"per_request"/"image"），由 CalculateCostUnified 填充
 	LongContextBillingApplied bool
+	// ImagePriceDefaulted 表示本次图片请求的定价行里没有可用单价，成交价来自默认图价
+	// （分组图价 → 目录价 → 内置默认价）。落 usage_log 时写成 image_price_defaulted 标记。
+	ImagePriceDefaulted bool
 }
 
 func applyCostBreakdownMultiplier(cost *CostBreakdown, multiplier float64) {

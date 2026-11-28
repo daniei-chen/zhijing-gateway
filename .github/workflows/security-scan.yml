@@ -33,7 +33,13 @@ jobs:
       - name: Run govulncheck
         working-directory: backend
         run: |
-          go install golang.org/x/vuln/cmd/govulncheck@latest
+          # 钉版本而不是 @latest：上游发一个坏版本会把这条必检无缘无故变红，
+          # 而必检变红的成本是一次真实的排查。v1.10.0 是 2026-11-28 时
+          # `@latest` 解析到的版本（proxy.golang.org/golang.org/x/vuln/@latest
+          # 返回 v1.10.0，2026-11-17T20:25:28Z）。
+          # 升级时改下面这一行，并在 PR 里贴一次 `govulncheck -version` 的输出。
+          go install golang.org/x/vuln/cmd/govulncheck@v1.10.0
+          govulncheck -version
           govulncheck ./...
 
   frontend-security:
@@ -56,7 +62,14 @@ jobs:
       - name: Run pnpm audit
         working-directory: frontend
         run: |
-          pnpm audit --registry=https://registry.npmjs.org --prod --audit-level=high --json > audit.json
+          # pnpm audit 命中 high 时自己就退非零，那一步一红，下面的豁免脚本就
+          # 永远没有机会跑——.github/audit-exceptions.yml 对 high/critical 等于
+          # 死配置。所以只对这一条命令放行（不是整步），判定权留给豁免脚本；
+          # 放行之后的"审计没产出一份报告"由下一步断言，否则网络失败会装成
+          # "没有漏洞"。
+          pnpm audit --registry=https://registry.npmjs.org --prod --audit-level=high --json > audit.json || true
+      - name: Assert the audit report is a real report
+        run: python tools/assert_pnpm_audit_report.py frontend/audit.json
       - name: Check audit exceptions
         run: |
           python tools/check_pnpm_audit_exceptions.py \

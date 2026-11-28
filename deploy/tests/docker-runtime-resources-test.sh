@@ -40,7 +40,7 @@ if [ -f deploy/zhijing/zero-downtime-deploy.sh ]; then
 fi
 if [ -f deploy/zhijing/japan_maintenance.py ]; then
   # 注意：有的 Windows 环境里 python3 是应用商店的空壳（能 which 到但一跑就退出），
-  # 所以必须先验证解释器真的能执行，再回退到 python，最后才跳过。
+  # 所以必须先验证解释器真的能执行，再回退到 python。
   py=""
   for candidate in python3 python; do
     if command -v "$candidate" >/dev/null 2>&1 && "$candidate" -c 'pass' >/dev/null 2>&1; then
@@ -48,12 +48,15 @@ if [ -f deploy/zhijing/japan_maintenance.py ]; then
       break
     fi
   done
-  if [ -n "$py" ]; then
-    "$py" -m py_compile deploy/zhijing/japan_maintenance.py || \
-      fail 'deploy/zhijing/japan_maintenance.py has a python syntax error'
-  else
-    printf 'skip: no runnable python interpreter found\n'
+  if [ -z "$py" ]; then
+    # 这里以前是 `skip:` + 退 0，那条 py_compile 断言就静默消失了。
+    # macos-15 的 runner 镜像自带 python3，所以这个分支在 CI 上从来不会正常走到；
+    # 它只会在"环境坏了"时亮起来，而把它写成 skip 正好把唯一一次告警吃掉。
+    # 要改的是环境（装 python），不是把断言关掉。
+    fail 'no runnable python interpreter: cannot syntax-check deploy/zhijing/japan_maintenance.py'
   fi
+  "$py" -m py_compile deploy/zhijing/japan_maintenance.py || \
+    fail 'deploy/zhijing/japan_maintenance.py has a python syntax error'
 fi
 
 printf 'docker runtime resources test passed\n'

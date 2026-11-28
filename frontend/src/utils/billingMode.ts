@@ -3,6 +3,9 @@ export const BILLING_MODE_PER_REQUEST = 'per_request'
 export const BILLING_MODE_IMAGE = 'image'
 export const BILLING_MODE_VIDEO = 'video'
 
+// usage_log.billing_tier 上的标记：图片定价行没有可用单价，已按默认图价成交。
+export const BILLING_TIER_IMAGE_PRICE_DEFAULTED = 'image_price_defaulted'
+
 export function getBillingModeLabel(mode: string | null | undefined, t: (key: string) => string): string {
   switch (mode) {
     case BILLING_MODE_PER_REQUEST: return t('admin.usage.billingModePerRequest')

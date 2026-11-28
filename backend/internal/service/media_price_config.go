@@ -68,3 +68,43 @@ func groupAudioPriceConfigFromAPIKey(apiKey *APIKey) *audioPriceConfig {
 		STTPerHour:     g.AudioSTTPricePerHour,
 	}
 }
+
+// imageRequestHasUsablePrice 判断本次图片请求是否配置了可用单价。
+// resolved 为 nil 表示没有渠道/分组定价行，这类请求走目录价或内置默认图价，
+// 是既有语义，不属于漏配，按「有价」处理。
+// 判定只看价格字段是否配置过，不看金额：显式配 0 是运营者选择的免费。
+func imageRequestHasUsablePrice(resolved *ResolvedPricing, apiKey *APIKey, imageSize string) bool {
+	if resolved == nil {
+		return true
+	}
+	if apiKeyHasConfiguredImagePrice(apiKey, NormalizeImageBillingTierOrDefault(imageSize)) {
+		return true
+	}
+	if resolved.channelPricing != nil && resolved.channelPricing.PerRequestPrice != nil {
+		return true
+	}
+	if len(resolved.RequestTiers) > 0 || resolved.DefaultPerRequestPrice > 0 {
+		return true
+	}
+	if len(resolved.Intervals) > 0 {
+		return true
+	}
+	return modelPricingHasConfiguredPrice(resolved.BasePricing)
+}
+
+// modelPricingHasConfiguredPrice 判断价格条目是否填写过任何单价字段。
+func modelPricingHasConfiguredPrice(pricing *ModelPricing) bool {
+	if pricing == nil {
+		return false
+	}
+	return pricing.InputPricePerToken != 0 ||
+		pricing.OutputPricePerToken != 0 ||
+		pricing.CacheCreationPricePerToken != 0 ||
+		pricing.CacheReadPricePerToken != 0 ||
+		pricing.ImageInputPricePerToken != 0 ||
+		pricing.ImageOutputPricePerToken != 0 ||
+		pricing.CacheCreation5mPrice != 0 ||
+		pricing.CacheCreation1hPrice != 0 ||
+		pricing.ImageOutputPriceExplicit ||
+		pricing.CacheCreationPriceExplicit
+}
