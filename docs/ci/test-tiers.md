@@ -71,9 +71,18 @@ TestGo: [embed_test.go] | Go: [embed_on.go html_cache.go spa_fallback.go static_
 
 本机实测（§6.1）：`ok github.com/daniei-chen/zhijing-gateway/internal/web 1.498s`。CI 冷缓存要加编译时间，但仍然是个位数分钟以内的事。
 
-### 3.2 e2e：接进 CI，只在 main 跑
+### 3.2 e2e：接进 CI，PR 与 main 两档
 
 见 §4 的前置条件。要点：11 条测试是 HTTP 黑盒，需要一整套跑起来的栈；其中只有 2 条（用户注册/登录 + API Key 生命周期）能在没有上游账号的情况下真正验证东西，另外 9 条需要真实 API Key 和上游账号。
+
+2026-11-28 起它不再只在 main 上跑（`pull_request` 也会真跑），并分成两档：
+
+| 档 | 触发 | 跑什么 | 条数下限 |
+|---|---|---|---|
+| `pr` | `pull_request` | `-run '^(TestUserRegistrationAndLogin\|TestAPIKeyLifecycle)$'` | `E2E_MIN_TOP_LEVEL_PASS: 2` |
+| `full` | `main` push、`workflow_dispatch` | 全包（11 条） | `E2E_MIN_TOP_LEVEL_PASS: 2` |
+
+下限写在 workflow 的 job env 里，是一个脚本要核的数字，不是注释：断言步数行首的 `--- PASS: `，低于下限直接红。**2 是今天的真实数字，不是目标**——要抬它，必须先有栈内的假 OpenAI 兼容上游（见 §4.4），否则下限只是把「跑 2 条也算过」写得更正式。
 
 ### 3.3 windows：不接，给命令
 
@@ -160,9 +169,11 @@ $ grep -rn "E2E_MOCK" backend --include=*.go | grep -v _test.go
 
 ### 4.4 所以 e2e job 能诚实地跑什么
 
-在没有上游账号的 CI 里，**只有 2 条能真正验证**：`TestUserRegistrationAndLogin`（注册→登录→JWT→`/api/user/me`）和 `TestAPIKeyLifecycle`（建 Key → 用 Key 打 `/v1/models` → 查用量）。这 2 条覆盖的是真实的 HTTP 路由、鉴权、DB 写入，价值不低。
+在没有上游账号的 CI 里，**只有 2 条能真正验证**：`TestUserRegistrationAndLogin`（管理员打开注册开关 → 注册 → 登录 → JWT → `/api/v1/user/profile`）和 `TestAPIKeyLifecycle`（建 Key → 用 Key 打 `/v1/models` → 查用量）。这 2 条覆盖的是真实的 HTTP 路由、鉴权、DB 写入，价值不低。
 
-另外 9 条会在没有 key 时跳过——这正是"绿得没有意义"的风险点，所以 job 里必须有断言：**这 2 条必须是 `PASS` 而不是 `SKIP`**。见 §5 的 `--` 断言步骤。
+另外 9 条会在没有 key 时跳过——这正是「绿得没有意义」的风险点，所以 job 里有两层断言：**这 2 条必须是 `PASS` 而不是 `SKIP`**，且**顶层 `--- PASS:` 的条数不得低于下限**（`E2E_MIN_TOP_LEVEL_PASS`）。只有第一层不够：拿一个更窄的 `-run` 就能让整个包秒过，而那 2 条断言照样全绿。
+
+把 9 条 SKIP 变成真断言的办法不是再加几条打本地 admin 接口的用例，而是**在栈里放一个假的 OpenAI 兼容上游**：那样转发、计费扣费、配额、模型列表、上游错误映射（4xx 与超时各一条）才真正被走过。在这条到位之前，下限就停在 2——写大了只是换一种假绿。
 
 要真跑那 9 条，需要一个配好真实上游账号的 staging 环境（不是 CI 里临时起的栈）：
 
