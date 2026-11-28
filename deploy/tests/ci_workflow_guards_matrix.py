@@ -90,6 +90,13 @@ VARIANTS = (
 )
 
 
+def newline_of(line: str) -> str:
+    """跟进原文件的换行符：CRLF 检出（Windows/core.autocrlf）下注入行也得是 CRLF。"""
+    if line.endswith("\r\n"):
+        return "\r\n"
+    return "\n" if line.endswith("\n") else ""
+
+
 def fail(message: str) -> None:
     sys.stderr.write(f"matrix: {message}\n")
     raise SystemExit(2)
@@ -97,14 +104,14 @@ def fail(message: str) -> None:
 
 def job_header_index(lines: list[str], job: str) -> int:
     for index, line in enumerate(lines):
-        if line.rstrip("\n") == f"  {job}:":
+        if line.rstrip("\r\n") == f"  {job}:":
             return index
     fail(f"workflow 里找不到 job '{job}'（矩阵的 --job 必须是必检 job 名）")
 
 
 def pull_request_index(lines: list[str]) -> int:
     for index, line in enumerate(lines):
-        if line.rstrip("\n").rstrip() == "  pull_request:":
+        if line.rstrip("\r\n") == "  pull_request:":
             return index
     fail("workflow 的 on: 块里找不到 `  pull_request:`，触发面变体无从注入")
 
@@ -117,11 +124,11 @@ def mutate(original: str, variant: Variant, job: str) -> str:
         del lines[pull_request_index(lines)]
     elif variant.trigger == "branches":
         index = pull_request_index(lines)
-        newline = "\n" if lines[index].endswith("\n") else ""
+        newline = newline_of(lines[index])
         lines[index] = f"  pull_request:{newline}    branches: [main]{newline}"
     elif variant.job_lines:
         index = job_header_index(lines, job)
-        newline = "\n" if lines[index].endswith("\n") else ""
+        newline = newline_of(lines[index])
         injected = "".join(f"{line}{newline}" for line in variant.job_lines)
         lines.insert(index + 1, injected)
     return "".join(lines)
