@@ -136,10 +136,16 @@ test-e2e:
 | `TestClaudeModelsList`、`TestClaudeMessages`、`TestClaudeMessagesWithComplexTools`、`TestClaudeMessagesWithThinkingAndTools`、`TestClaudeMessagesWithNoSignature` | `CLAUDE_API_KEY` 非空 | `t.Skip` |
 | `TestGeminiModelsList`、`TestGeminiGenerateContent` | `GEMINI_API_KEY` 非空 | `t.Skip` |
 | `TestClaudeMessagesWithGeminiModel`、`TestGeminiEndpointWithClaudeModel` | `ENDPOINT_PREFIX=/antigravity` | `t.Skip("仅在 Antigravity 模式下运行")` |
-| `TestUserRegistrationAndLogin` | 栈在跑；注册接口可达（关闭则 skip） | 注册不可达时 skip 该子测试，但**下一步登录会 `t.Fatalf`** |
-| `TestAPIKeyLifecycle` | 栈在跑 + 能登录（`ADMIN_EMAIL`/`ADMIN_PASSWORD`，否则用测试用户） | `t.Skip("无法登录…")` |
+| `TestUserRegistrationAndLogin` | 栈在跑且 `/api/v1/auth/register`、`/api/v1/auth/login`、`/api/v1/user/profile` 存在 | **任何非 200 都 `t.Fatalf`**（2026-11-28 起）。此前 404 被当成「继续尝试」，整条测试降级成 skip，所以它自接入起从未绿过也没人发现 |
+| `TestAPIKeyLifecycle` | 栈在跑 + 能登录（`ADMIN_EMAIL`/`ADMIN_PASSWORD`，否则用测试用户） | **登录失败即 `t.Fatalf`**（2026-11-28 起）。`/v1/models` 返回 402/403 仍算通过（栈里没有上游账号，鉴权已过），其它状态码硬失败 |
 
 注意 `CLAUDE_API_KEY` / `GEMINI_API_KEY` 是**网关自己签发的 API Key**（`Authorization: Bearer` 打 `baseURL`，`e2e_gateway_test.go:113`），不是上游厂商的 key。
+
+### 4.2.1 面板路径必须带 `/api/v1`
+
+`e2e_user_flow_test.go` 打的是 `internal/server/routes/` 里真实注册的路径：注册/登录在 `auth.go:35`/`:38`（`v1.Group("/auth")`），当前用户是 `user.GET("/profile")`（`user.go:31`，**不是** `/user/me`），API Key 是 `keys.POST("")`（`user.go:87`），用量看板是 `usage.GET("/dashboard/stats")`（`user.go:115`）。这一组此前写成了不带 `v1` 的 `/api/auth/...`、`/api/user/me`、`/api/usage/dashboard`，路由根本不存在。
+
+**这一层的教训不是"改路径"，是"测试不许靠 skip 自己通过"**：非 200 一律 `t.Fatalf`，并让 `Assert the stack-backed tests actually ran` 继续兜底（父测试 PASS 但子测试全 skip 时它会红）。
 
 ### 4.3 `E2E_MOCK` 不能救场
 
