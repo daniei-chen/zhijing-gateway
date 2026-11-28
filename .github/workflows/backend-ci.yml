@@ -39,6 +39,7 @@ jobs:
           /bin/bash deploy/tests/verify-sensitive-endpoints-test.sh
           /bin/sh deploy/tests/security-invariants-test.sh
           /bin/sh deploy/tests/redis-auth-store-durability-test.sh
+          /bin/sh deploy/tests/e2e-ci-secrets-test.sh
           /bin/sh deploy/test-caddyfile-cache.sh
 
   test:
@@ -115,7 +116,11 @@ jobs:
           ADMIN_EMAIL: ci-e2e@test.local
           ADMIN_PASSWORD: CiE2eAdmin12345
           JWT_SECRET: ci-e2e-jwt-secret-not-a-production-secret
-          TOTP_ENCRYPTION_KEY: ci-e2e-totp-key-not-a-production-secret
+          # CI 专用的固定假密钥：AES-256 要 hex 解码后正好 32 字节（64 个 hex
+          # 字符），backend/internal/repository/aes_encryptor.go:23-30 校验，不符合
+          # 就拒绝启动（payment 的加密钥也来自这里）。不是生产密钥，也不进任何
+          # 部署路径，只为让 e2e 栈起得来。
+          TOTP_ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org
         run: |
           # 容器以 1000:1000 跑且 rootfs 只读，挂载的 data/ 得先可写。
