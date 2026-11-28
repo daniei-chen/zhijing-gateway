@@ -4,10 +4,20 @@ on:
   # 只有 main 的 push 触发 CI；PR 分支靠 pull_request（opened/synchronize/reopened）。
   # 这是行为变化：往没有 PR 的分支推 commit 不再有任何 CI，要验要先开 PR。
   # 收窄的原因：一次 push 会同时挤进 7 个 job，多分支并行时把 CI 队列饿死。
-  # main 的 push 必须保留——新增的 e2e job 靠 if: github.ref == 'refs/heads/main'。
+  # main 的 push 必须保留——e2e job 靠 if 里的 refs/heads/main 这一条。
+  #
+  # ci/e2e-* 是唯一的 push 例外：e2e 这个 job 的验证对象是「整个栈跑起来」，
+  # 本地没有 docker 就验不了，所以它必须能在分支上单独起一次。
   push:
-    branches: [main]
+    branches: [main, 'ci/e2e-*']
   pull_request:
+  # e2e 只在 main 上跑，改 e2e 本身时手上没有任何验证手段——改一次就得合一次。
+  # workflow_dispatch 让人在指定 ref 上直接起一次。
+  #
+  # 限制（GitHub 的行为，不是我们的配置）：只有默认分支上的 workflow 文件
+  # 带 workflow_dispatch，这个 workflow 才接受 dispatch。所以在 main 拿到
+  # 这一行之前，从 PR 分支 dispatch 会 422；那之前用 ci/e2e-* 分支 push 兜底。
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -86,8 +96,11 @@ jobs:
   # 没有 CLAUDE_API_KEY / GEMINI_API_KEY 时其中 9 条会 skip（它们要真实上游
   # 账号），只有 2 条用户流程能真验。所以后面有一步断言：那 2 条必须是 PASS，
   # 不许靠"全跳过"混成绿色。
+  #
+  # 三种触发：main 的 push 是常规路径；workflow_dispatch 和 ci/e2e-* 分支是
+  # 「改 e2e 自己」时的验证通道，见文件头 on: 的注释。
   e2e:
-    if: github.ref == 'refs/heads/main'
+    if: ${{ github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/ci/e2e-') }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
@@ -110,10 +123,20 @@ jobs:
           docker compose -f docker-compose.dev.yml up -d --build
       - name: Wait for the gateway
         run: |
+          # 每轮把容器状态打进 job log：网关 600 秒没监听时，必须能一眼分出
+          # 「没启动」「起了又退」「在跑但没监听」，否则只能靠猜。
           for i in $(seq 1 60); do
             if curl -fsS http://127.0.0.1:8080/health >/dev/null 2>&1; then
               echo "gateway healthy after $((i * 10))s"
               exit 0
+            fi
+            state=$(docker inspect -f '{{.State.Status}} restarts={{.RestartCount}} exit={{.State.ExitCode}}' zhijing-gateway-dev 2>&1 | head -1 || true)
+            echo "attempt $i/60: gateway not healthy yet (container: $state)"
+            # 崩满 5 次还没监听，再等 10 分钟也不会好：早点失败，日志也更早拿到。
+            restarts=$(printf '%s' "$state" | sed -n 's/.*restarts=\([0-9][0-9]*\).*/\1/p')
+            if [ -n "$restarts" ] && [ "$restarts" -ge 5 ]; then
+              echo "::error::gateway restarted ${restarts} times without listening"
+              exit 1
             fi
             sleep 10
           done
@@ -151,9 +174,54 @@ jobs:
             echo "::error::用户流程测试被 skip 了，这个 job 等于没跑"
             exit 1
           fi
-      - name: Dump container logs
+      # 失败时把现场落成 artifact。只把日志滚进 job log 不够：job log 会随 run
+      # 过期，而且「没启动」和「起了又退」在日志里长得一样，必须同时有 ps（状态）
+      # 和 inspect（退出码 / 重启次数 / 健康检查）。
+      #
+      # 这里必须带 env + working-directory：compose 对任何子命令都会先解析插值，
+      # 缺一个 ${X:?} 时 `logs` 也照样死在插值错误上，一行容器日志都拿不到——
+      # 之前正是这样，这个 job 四次全红却一次没留下网关日志。
+      # dev compose 里只有一个必填插值：deploy/docker-compose.dev.yml 的
+      # ${POSTGRES_PASSWORD:?}（网关 :48、postgres :142）。
+      - name: Dump container state and logs
         if: failure()
-        run: docker compose -f deploy/docker-compose.dev.yml logs --tail=200
+        continue-on-error: true
+        working-directory: deploy
+        env:
+          POSTGRES_PASSWORD: ci-e2e-postgres
+        run: |
+          out="$GITHUB_WORKSPACE/e2e-diagnostics"
+          mkdir -p "$out"
+          # 不经过 compose 的兜底：docker CLI 只认固定的 container_name
+          # （deploy/docker-compose.dev.yml:18/:136/:157），不做变量插值，
+          # 所以下面这两条不管 compose 的 env 出什么岔子都拿得到东西。
+          docker ps -a --no-trunc > "$out/docker-ps.txt" 2>&1 || true
+          docker logs --tail 2000 zhijing-gateway-dev > "$out/gateway-logs.txt" 2>&1 || true
+          # 谁活着、谁退了、端口有没有映射
+          docker compose -f docker-compose.dev.yml ps -a > "$out/ps.txt" 2>&1 || true
+          # 三个服务（postgres / redis / gateway）的日志，一次不带服务名就是全部
+          docker compose -f docker-compose.dev.yml logs --no-color --tail=2000 > "$out/compose-logs.txt" 2>&1 || true
+          # 容器里的进程：区分「进程在跑但没监听」和「进程已经没了」
+          docker compose -f docker-compose.dev.yml top > "$out/top.txt" 2>&1 || true
+          for c in zhijing-gateway-dev zhijing-gateway-postgres-dev zhijing-gateway-redis-dev; do
+            printf '=== %s ===\n' "$c" >> "$out/inspect.txt"
+            docker inspect -f 'status={{.State.Status}} exit={{.State.ExitCode}} oom={{.State.OOMKilled}} restarts={{.RestartCount}} started={{.State.StartedAt}} finished={{.State.FinishedAt}} error={{.State.Error}} health={{if .State.Health}}{{.State.Health.Status}}/fails={{.State.Health.FailingStreak}}{{else}}none{{end}}' "$c" >> "$out/inspect.txt" 2>&1 || true
+            # 只取代理相关变量：启动期卡外发请求时，取值就是证据（不落其它凭据）
+            docker inspect -f '{{range .Config.Env}}{{println .}}{{end}}' "$c" 2>/dev/null \
+              | grep -E '^(HTTP_PROXY|HTTPS_PROXY|ALL_PROXY|NO_PROXY)=' >> "$out/proxy-env.txt" || true
+          done
+          # 探针侧：端口到底有没有人听，curl 到底报什么
+          curl -sv --max-time 10 http://127.0.0.1:8080/health > "$out/curl-health.txt" 2>&1 || true
+          (ss -ltnp || netstat -ltn) > "$out/listening-ports.txt" 2>&1 || true
+          cp ../backend/e2e.log "$out/e2e.log" 2>/dev/null || true
+          ls -l "$out"
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: e2e-diagnostics
+          path: e2e-diagnostics/
+          if-no-files-found: warn
+          retention-days: 14
 
   race:
     runs-on: ubuntu-latest
